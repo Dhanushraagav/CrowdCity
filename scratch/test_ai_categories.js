@@ -56,7 +56,7 @@ async function testAutoCategorization() {
 
   for (const ex of examples) {
     try {
-      const res = await fetch('http://localhost:5000/api/ai/analyze', {
+      const res = await fetch('https://crowdcity-api.onrender.com/api/ai/analyze', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

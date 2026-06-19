@@ -934,7 +934,7 @@ export const requestPasswordRecovery = async (req, res) => {
       return res.status(200).json({ message: 'Mock recovery email process simulated.' });
     }
     const token = otpService.generateResetToken(emailLower);
-    const appUrl = process.env.APP_URL || 'http://localhost:5000';
+    const appUrl = process.env.APP_URL || 'https://crowdcity-api.onrender.com';
     const mockResetLink = `${appUrl}/reset-password.html?token=${token}&email=${encodeURIComponent(emailLower)}`;
     logger.info(`[Dev Recovery Helper] Password reset link for ${emailLower} is: ${mockResetLink}`);
     return res.status(200).json({ 
