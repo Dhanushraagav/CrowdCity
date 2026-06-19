@@ -1,141 +1,204 @@
-# CrowdCity - AI-Powered Civic Issue Reporting Platform
+# CrowdCity AI
 
-CrowdCity is a production-ready full-stack web application that allows citizens to report public issues such as potholes, garbage accumulation, water leaks, broken streetlights, road damage, and drainage problems. It features a modern interactive dashboard with map locations and status updates to bridge the gap between citizens and local municipalities.
+CrowdCity AI is an AI-powered civic issue reporting and management platform that helps citizens report public issues and enables authorities to manage them efficiently. The platform is designed to improve communication between citizens and local government by providing a simple and transparent reporting system.
 
----
+## Project Overview
 
-## 🚀 Key Features
+Citizens can report problems such as:
 
-* **Interactive Mapping**: Fully responsive Leaflet.js map with OpenStreetMap tiles displaying reported issues and enabling click-to-pin location selection.
-* **Modern Design**: Premium dark-accented style, glassmorphism filters, loading skeletons, responsive grid layouts, and custom state status badges.
-* **MVC Backend Architecture**: Organized Express.js backend using controllers, routers, and middlewares.
-* **Supabase Integration**:
-  * **Database**: PostgreSQL tables for issues, comments, upvotes, and profiles.
-  * **Authentication**: Session synchronization with Supabase Auth (JWT Bearer verification).
-  * **Automation Triggers**: Auto-generates public user profiles on registration and handles upvote increments/decrements in SQL.
-* **AI Analysis Placeholder**: Ready-to-go Groq API assistant routes suggesting issue categories and severity ratings based on keyword patterns.
-* **Mock Fail-safe Mode**: Automatically switches to frontend-only memory database emulation if Supabase keys are not set up, making it instantly reviewable.
+- Potholes
+- Garbage accumulation
+- Water leakage
+- Broken streetlights
+- Road damage
+- Drainage issues
+- Public property damage
+- Other civic issues
 
----
+Authorities can receive reports, verify them, assign work, monitor progress, and update the status until the issue is resolved.
 
-## 🛠️ Tech Stack
+The project focuses on improving public services using Artificial Intelligence and modern web technologies.
 
-* **Frontend**: HTML5, CSS3 (Vanilla Custom Properties & Grid), JavaScript (Vanilla ES6 modules)
-* **Map Engine**: Leaflet.js + OpenStreetMap API
-* **Backend**: Node.js + Express.js
-* **Database & Auth**: Supabase (PostgreSQL & GoTrue Auth)
-* **AI Engine**: Groq API (Integration points defined)
+## Features
 
----
+### Citizen Portal
 
-## 📂 Project Structure
+- Secure Email and Google Authentication
+- AI-powered issue reporting
+- Image upload
+- Location-based reporting
+- Live issue tracking
+- Complaint history
+- Interactive map
+- Notifications
+- User profile
+- English and Tamil language support
+
+### Authority Portal
+
+- Secure login
+- Case management dashboard
+- Assign reports
+- Update report status
+- Analytics dashboard
+- Notification system
+- Performance monitoring
+
+### Admin Portal
+
+- User management
+- Authority management
+- System analytics
+- Category management
+- Application settings
+
+## AI Features
+
+- AI-assisted civic issue reporting
+- Smart response generation
+- Intelligent report assistance
+- Future-ready AI integration
+
+## Technologies Used
+
+### Frontend
+
+- HTML5
+- CSS3
+- JavaScript
+
+### Backend
+
+- Node.js
+- Express.js
+
+### Database
+
+- Supabase
+
+### Authentication
+
+- Supabase Authentication
+- Google Sign-In
+- Email OTP Authentication
+
+### APIs
+
+- Google Maps API
+- Groq API
+
+## Project Structure
 
 ```
 CrowdCity/
-├── client/                     # Frontend Static Files
+│
+├── client/
 │   ├── css/
-│   │   ├── style.css           # Core theme variables, layouts, and typography
-│   │   └── components.css      # Reusable UI component designs (cards, forms, maps)
+│   ├── images/
 │   ├── js/
-│   │   ├── api.js              # Server REST API request wrapper
-│   │   ├── auth.js             # Authentication controllers (Supabase & Mock switch)
-│   │   ├── app.js              # Dashboard feed and main map manager
-│   │   ├── report.js           # New report form and coordinate picker logic
-│   │   └── details.js          # Detailed overview, upvote toggle, and comments thread
-│   ├── index.html              # Main dashboard page
-│   ├── auth.html               # Sign In / Sign Up portal
-│   ├── report.html             # New issue filing form
-│   └── issue-details.html      # Detail view card
-├── server/                     # Backend MVC Server
+│   ├── locales/
+│   └── *.html
+│
+├── server/
 │   ├── config/
-│   │   └── supabase.js         # Supabase client setup
 │   ├── controllers/
-│   │   ├── authController.js   # Synchronize user profile sessions
-│   │   ├── issueController.js  # CRUD actions for reported issues
-│   │   └── aiController.js     # AI analysis helpers
-│   ├── middlewares/
-│   │   └── authMiddleware.js   # JWT authentication validation middleware
 │   ├── routes/
-│   │   ├── authRoutes.js       # Mapping auth endpoints
-│   │   ├── issueRoutes.js      # Mapping issues CRUD
-│   │   └── aiRoutes.js         # Mapping Groq analysis endpoints
-│   ├── app.js                  # App configuration and static file binds
-│   └── server.js               # App server entry point
+│   ├── services/
+│   └── app.js
+│
 ├── supabase/
-│   └── schema.sql              # Database creation scripts and RLS settings
-├── .env.example                # Template configuration settings
-├── .gitignore                  # Git excluded folders
-├── package.json                # Project dependencies
-└── README.md                   # Setup guide
+├── package.json
+└── README.md
 ```
 
----
+## Installation
 
-## ⚙️ Installation & Setup
+Clone the repository.
 
-Follow these steps to set up and run CrowdCity locally:
+```bash
+git clone https://github.com/Dhanushraagav/CrowdCity.git
+```
 
-### 1. Clone & Install Dependencies
-Navigate into your project directory and install the necessary Node.js packages:
+Move into the project folder.
+
+```bash
+cd CrowdCity
+```
+
+Install dependencies.
+
 ```bash
 npm install
 ```
 
-### 2. Configure Environment Variables
-Copy `.env.example` to a new file named `.env`:
-```bash
-cp .env.example .env
+Create a `.env` file and add your environment variables.
+
+Example:
+
+```env
+PORT=5000
+
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_publishable_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+GROQ_API_KEY=your_groq_api_key
+
+APP_URL=http://localhost:5000
 ```
-Open `.env` and fill in your Supabase connection parameters:
-* `SUPABASE_URL`: Your project URL (e.g. `https://xxx.supabase.co`).
-* `SUPABASE_ANON_KEY`: Your client-side public key.
-* `SUPABASE_SERVICE_ROLE_KEY`: Your service role key (required to bypass RLS for admin sync operations).
 
-*(If you skip this step, CrowdCity will automatically launch in **Demo Emulation Mode** using local memory mocks!)*
+Start the development server.
 
-### 3. Initialize the Database
-1. Open your project on the [Supabase Dashboard](https://supabase.com).
-2. Go to the **SQL Editor** tab from the left sidebar.
-3. Click **New Query**, paste the contents of `supabase/schema.sql`, and click **Run**.
-4. This script sets up:
-   * Tables: `profiles`, `issues`, `votes`, `comments`.
-   * Triggers: Automatically duplicates users registering in Supabase Auth into the public `profiles` table.
-   * Row Level Security (RLS) policies allowing public viewing but restricting report creation to signed-in users.
-
----
-
-## 💻 Running the Application
-
-### Development Mode (with hot-reloading)
-Runs the server utilizing `nodemon`:
 ```bash
 npm run dev
 ```
 
-### Production Mode
-Runs the server utilizing standard Node.js:
-```bash
-npm start
+Open your browser.
+
+```
+http://localhost:5000
 ```
 
-Once running, browse to:
-👉 **[http://localhost:5000](http://localhost:5000)**
+## Screens
+
+- Authentication
+- Citizen Dashboard
+- Authority Dashboard
+- Admin Dashboard
+- Analytics
+- Map View
+- Report Management
+- Notifications
+- Profile
+- Settings
+
+## Future Improvements
+
+- Mobile application
+- Push notifications
+- AI image verification
+- Predictive analytics
+- Live emergency alerts
+- Voice-based reporting
+- Offline reporting support
+
+## License
+
+This project was developed for educational and academic purposes.
+
+## Author
+
+**Dhanush Raagav S**
+
+B.E. Computer Science and Engineering
+
+Kalaignar Karunanidhi Institute of Technology
+
+Coimbatore, Tamil Nadu
+
+GitHub:
+https://github.com/Dhanushraagav
 
 ---
 
-## 📡 Backend REST API Specification
-
-All API endpoints are prefixed with `/api`.
-
-| Route | Method | Authentication | Description |
-| :--- | :--- | :---: | :--- |
-| `/auth/sync` | `POST` | Required | Sync user details into `profiles` table |
-| `/auth/profile` | `GET` | Required | Retrieve current user profile |
-| `/issues` | `GET` | Public | Fetch list of all reported issues (supports `?category=` and `?status=`) |
-| `/issues/:id` | `GET` | Public | Get full details of an issue including comments |
-| `/issues` | `POST` | Required | File a new civic issue report |
-| `/issues/:id/upvote` | `POST` | Required | Toggle upvote count for an issue |
-| `/issues/:id/comments` | `POST` | Required | Post a comment on an issue |
-| `/ai/analyze` | `POST` | Required | Simulate smart AI category and severity prediction |
-| `/config` | `GET` | Public | Share public credentials with frontend client |
-| `/health` | `GET` | Public | Verify server health status |
+Building Smarter Communities Across Tamil Nadu.
