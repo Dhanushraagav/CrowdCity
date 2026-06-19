@@ -2143,6 +2143,175 @@
   .weather-widget { display: none; }
 }
 
+/* ==========================================================================
+   Mobile Responsiveness Overrides (320px–768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Prevent horizontal overflow on entire viewport */
+  html, body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Compress App Content Body padding to save space on mobile */
+  .app-content-body {
+    padding: 1rem 0.75rem !important;
+  }
+
+  /* Minimize header padding */
+  .app-header-main {
+    padding: 0 0.75rem !important;
+    gap: 0.5rem;
+  }
+
+  /* Dynamic Header Clock & Avatar username labels */
+  .header-datetime-widget {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .header-datetime-widget {
+    display: none !important;
+  }
+  
+  /* Also hide full name next to user menu avatar on mobile */
+  .user-menu span {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Ensure Hero card actions stack vertically to fit any screen */
+  .stitch-hero-actions {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  .stitch-hero-actions .btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* Force 1-column layout for small stats grids on narrow mobile */
+  .stats-grid,
+  .stitch-stats-grid,
+  .profile-stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Reduce general layout padding on cards and panels */
+  .issue-card,
+  .stitch-item-card,
+  .comment-card,
+  .glass-panel {
+    padding: 1rem !important;
+  }
+
+  /* Stack action items vertically on mobile inside cards */
+  .issue-card-meta {
+    flex-wrap: wrap !important;
+    gap: 0.5rem;
+  }
+
+  .issue-card-header {
+    flex-wrap: wrap !important;
+    gap: 0.25rem;
+  }
+
+  /* Ensure all forms elements fill mobile widths */
+  .form-group {
+    width: 100% !important;
+  }
+  
+  /* Make lists of filter pills wrap cleanly */
+  .filter-pills {
+    flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+  }
+}
+
+/* ==========================================================================
+   Advanced Audited Responsiveness Helpers (Screens <= 576px)
+   ========================================================================== */
+@media (max-width: 576px) {
+  /* Dynamic Flex Header & Space-between Row Stacking */
+  .app-content-body div[style*="display: flex"][style*="justify-content: space-between"],
+  .app-content-body div[style*="display:flex"][style*="justify-content:space-between"],
+  .app-content-body section[style*="display: flex"][style*="justify-content: space-between"],
+  .app-content-body section[style*="display:flex"][style*="justify-content:space-between"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  /* Dynamic Stacking for Inline Styled 2-Column & 3-Column Grids */
+  div[style*="grid-template-columns: 1fr 1fr"],
+  div[style*="grid-template-columns:1fr 1fr"],
+  div[style*="grid-template-columns: repeat(2, 1fr)"],
+  div[style*="grid-template-columns:repeat(2,1fr)"],
+  div[style*="grid-template-columns: repeat(3, 1fr)"],
+  div[style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Premium Swipeable Dashboard Feed Tabs */
+  #feed-tabs-container {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+  }
+  
+  #feed-tabs-container::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  #feed-tabs-container .btn {
+    flex-shrink: 0 !important;
+  }
+
+  /* Premium Mobile Modal Layouts */
+  .modal-card {
+    width: calc(100% - 24px) !important;
+    padding: 1.25rem !important;
+    margin: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Stacking Notification History Header */
+  .history-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+  
+  .history-header button {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* Stack select inputs inside filter bars */
+  .analytics-filters {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .analytics-filters select {
+    width: 100% !important;
+  }
+
+  .chart-card {
+    padding: 1rem !important;
+  }
+}
+
 
 
 

@@ -87,7 +87,14 @@
       border-bottom: 2px solid var(--border-color);
       margin-bottom: 2rem;
       padding-bottom: 0.1rem;
-      flex-wrap: wrap;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .tabs-nav::-webkit-scrollbar {
+      display: none;
     }
     
     .tab-btn {
@@ -102,6 +109,8 @@
       border-radius: var(--radius-sm) var(--radius-sm) 0 0;
       transition: var(--transition-fast);
       position: relative;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     
     .tab-btn:hover {

@@ -652,14 +652,29 @@
     @media (max-width: 900px) {
       .auth-wrapper {
         flex-direction: column;
+        max-width: 100%;
+        overflow-x: hidden;
       }
       .auth-brand-panel {
         display: none;
       }
       .auth-form-panel {
         min-height: 100vh;
-        width: 100vw;
+        width: 100%;
+        max-width: 100%;
         padding: 1.5rem;
+        box-sizing: border-box;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 2rem 1.25rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .auth-tabs {
+        margin-bottom: 1.5rem !important;
       }
     }
 

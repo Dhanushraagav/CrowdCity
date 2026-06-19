@@ -154,40 +154,42 @@
           <div class="glass-panel" style="padding: 2rem;">
 
             <!-- Stepper Progress Bar -->
-            <div class="stepper-wrapper" style="display: flex; justify-content: space-between; align-items: center; position: relative; margin-bottom: 2rem; padding: 0.5rem 0;">
-              <!-- Line Connector -->
-              <div class="stepper-line" style="position: absolute; top: 50%; left: 0; right: 0; height: 3px; background-color: var(--border-color); transform: translateY(-50%); z-index: 1;">
-                <div id="stepper-progress-line" style="width: 0%; height: 100%; background-color: var(--primary); transition: width 0.4s ease;"></div>
-              </div>
-              
-              <!-- Step 1: Reported -->
-              <div class="step-node active" id="step-reported" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
-                <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-file-invoice"></i></div>
-                <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="reported">Reported</span>
-              </div>
-              
-              <!-- Step 2: Assigned -->
-              <div class="step-node" id="step-assigned" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
-                <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-user-check"></i></div>
-                <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="assigned">Assigned</span>
-              </div>
+            <div class="stepper-container" style="overflow-x: auto; width: 100%; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin-bottom: 2rem;">
+              <div class="stepper-wrapper" style="display: flex; justify-content: space-between; align-items: center; position: relative; padding: 0.5rem 0; min-width: 600px; width: 100%;">
+                <!-- Line Connector -->
+                <div class="stepper-line" style="position: absolute; top: 50%; left: 0; right: 0; height: 3px; background-color: var(--border-color); transform: translateY(-50%); z-index: 1;">
+                  <div id="stepper-progress-line" style="width: 0%; height: 100%; background-color: var(--primary); transition: width 0.4s ease;"></div>
+                </div>
+                
+                <!-- Step 1: Reported -->
+                <div class="step-node active" id="step-reported" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
+                  <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-file-invoice"></i></div>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="reported">Reported</span>
+                </div>
+                
+                <!-- Step 2: Assigned -->
+                <div class="step-node" id="step-assigned" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
+                  <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-user-check"></i></div>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="assigned">Assigned</span>
+                </div>
 
-              <!-- Step 3: In Progress -->
-              <div class="step-node" id="step-in_progress" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
-                <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="in_progress">In Progress</span>
-              </div>
+                <!-- Step 3: In Progress -->
+                <div class="step-node" id="step-in_progress" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
+                  <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="in_progress">In Progress</span>
+                </div>
 
-              <!-- Step 4: Resolved -->
-              <div class="step-node" id="step-resolved" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
-                <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-circle-check"></i></div>
-                <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="resolved">Resolved</span>
-              </div>
+                <!-- Step 4: Resolved -->
+                <div class="step-node" id="step-resolved" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
+                  <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-circle-check"></i></div>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="resolved">Resolved</span>
+                </div>
 
-              <!-- Step 5: Verified -->
-              <div class="step-node" id="step-verified" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
-                <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-check-double"></i></div>
-                <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="verified">Verified</span>
+                <!-- Step 5: Verified -->
+                <div class="step-node" id="step-verified" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
+                  <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-check-double"></i></div>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="verified">Verified</span>
+                </div>
               </div>
             </div>
             
