@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Municipal authority operations console for CrowdCity AI. Manage, track, and resolve citizen reported civic issues.">
+  <title>CrowdCity AI Authority Dashboard</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Synchronous Redirect Script to prevent flash of content -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('ready');
+      });
+    })();
+  </script>
+
+  <style>
+    /* Premium Stats Dashboard Layout */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-normal);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: white;
+    }
+
+    .stat-number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-family: var(--font-heading);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(20px);
+      transition: transform var(--transition-normal);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="logo-container" onclick="window.location.href='index.html'" style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer;">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 30px; height: 30px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></div>
+      <span class="logo-text">CrowdCity AI</span>
+    </div>
+
+    <!-- Live Date and Time Widget -->
+    <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+      <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+      <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2; transition: opacity 0.15s ease-in-out;"></span>
+    </div>
+
+    <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="nav-links" id="nav-menu">
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">Dashboard</span></a>
+      <a href="report.html" class="nav-link"><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="report_an_issue">AI-Assisted Report</span></a>
+      <a href="analytics.html" class="nav-link"><i class="fa-solid fa-chart-simple"></i> <span data-i18n="analytics">Analytics</span></a>
+      <a href="authority.html" class="nav-link active" id="nav-authority-link"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="inspector_panel">Inspector Panel</span></a>
+      <div id="auth-nav-container">
+        <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="sign_in">Sign In</span></a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+    <div class="content-wrapper">
+      
+      <!-- Page Header -->
+      <section style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.25rem;" data-i18n="authority_operations_center">Authority Operations Center</h1>
+        <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="authority_operations_desc">View assigned cases, provide dispatch status updates, and upload completion proofs.</p>
+      </section>
+
+      <!-- KPI Statistics Grid -->
+      <section class="stats-grid">
+        <!-- Metric 1 -->
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: var(--slate-600);"><i class="fa-solid fa-briefcase"></i></div>
+          <div>
+            <div class="stat-number" id="stats-total">0</div>
+            <div class="stat-label" data-i18n="total_cases">Total Cases</div>
+          </div>
+        </div>
+        <!-- Metric 2 -->
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #f59e0b;"><i class="fa-solid fa-spinner fa-spin"></i></div>
+          <div>
+            <div class="stat-number" id="stats-assigned">0</div>
+            <div class="stat-label" data-i18n="status_assigned">Assigned</div>
+          </div>
+        </div>
+        <!-- Metric 3 -->
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #8b5cf6;"><i class="fa-solid fa-person-digging"></i></div>
+          <div>
+            <div class="stat-number" id="stats-progress">0</div>
+            <div class="stat-label" data-i18n="status_in_progress">In Progress</div>
+          </div>
+        </div>
+        <!-- Metric 4 -->
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
+          <div>
+            <div class="stat-number" id="stats-resolved">0</div>
+            <div class="stat-label" data-i18n="status_resolved">Resolved</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Split layout: Assigned list and instruction panels -->
+      <div class="details-grid">
+        
+        <!-- Left Column: Case Feed List -->
+        <section style="display: flex; flex-direction: column; gap: 1.5rem;">
+          
+          <!-- Filters Area -->
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+            <h3 style="font-size: 1.1rem; font-family: var(--font-heading);"><i class="fa-solid fa-list-check"></i> <span data-i18n="assigned_cases_queue">Assigned Cases Queue</span></h3>
+            
+            <!-- Filter Pills -->
+            <div class="filter-pills" id="authority-status-filters" style="margin: 0;">
+              <button class="filter-pill active" data-status="" data-i18n="all_cases">All Cases</button>
+              <button class="filter-pill" data-status="assigned" data-i18n="status_assigned">Assigned</button>
+              <button class="filter-pill" data-status="in_progress" data-i18n="status_in_progress">In Progress</button>
+              <button class="filter-pill" data-status="resolved" data-i18n="status_resolved">Resolved</button>
+              <button class="filter-pill" data-status="rejected" data-i18n="status_rejected">Rejected</button>
+            </div>
+          </div>
+
+          <!-- Queue List Container -->
+          <div id="authority-queue-list" style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Skeletons -->
+            <div class="issue-card skeleton-pulse skeleton-card"></div>
+            <div class="issue-card skeleton-pulse skeleton-card"></div>
+          </div>
+
+        </section>
+
+        <!-- Right Column: Operations Guide -->
+        <aside style="height: fit-content;">
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+            <h3 style="font-size: 1.1rem; font-family: var(--font-heading); color: var(--primary);"><i class="fa-solid fa-circle-info"></i> <span data-i18n="operations_guide">Operations Guide</span></h3>
+            
+            <ol style="margin-left: 1.25rem; font-size: 0.88rem; color: var(--slate-600); display: flex; flex-direction: column; gap: 0.75rem;">
+              <li data-i18n="ops_guide_step1"><strong>Review Cases</strong>: Select assigned complaint reports from your feed queue on the left.</li>
+              <li data-i18n="ops_guide_step2"><strong>Inspect Location</strong>: Browse coordinates or address notes and deploy to inspect.</li>
+              <li data-i18n="ops_guide_step3"><strong>Update Dispatch</strong>: Click the <strong>Update Status</strong> button to transition status to "In Progress" to inform citizens.</li>
+              <li data-i18n="ops_guide_step4"><strong>Resolve & Prove</strong>: Once repairs are completed, set the status to <strong>Resolved</strong>, fill in resolution remarks, and upload a completion photo proof.</li>
+            </ol>
+            
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; font-size: 0.8rem; color: var(--text-muted); display:flex; align-items:center; gap:0.5rem;">
+              <i class="fa-solid fa-circle-exclamation" style="color:var(--primary);"></i>
+              <span>All updates dynamically notify citizens via their complaint tracking feeds.</span>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Interactive Status Modification Modal Dialog -->
+  <div class="modal-overlay" id="status-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 style="font-size: 1.35rem; font-family: var(--font-heading);"><span data-i18n="update_case_dispatch">Update Case Dispatch</span>: <span id="modal-issue-title"></span></h2>
+        <button class="modal-close-btn" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="modal-alert" class="hidden" style="padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;"></div>
+
+      <form id="modal-status-form">
+        <!-- Hidden Issue ID -->
+        <input type="hidden" id="modal-issue-id">
+
+        <!-- Status selection -->
+        <div class="form-group">
+          <label for="modal-status-select" class="form-label" data-i18n="update_status_required">Update Status *</label>
+          <select id="modal-status-select" class="form-select" required>
+            <option value="assigned" data-i18n="status_assigned">Assigned</option>
+            <option value="in_progress" data-i18n="status_in_progress">In Progress</option>
+            <option value="resolved" data-i18n="status_resolved">Resolved</option>
+            <option value="rejected" data-i18n="status_rejected">Rejected</option>
+          </select>
+        </div>
+
+        <!-- Remarks/Notes -->
+        <div class="form-group">
+          <label for="modal-remarks" class="form-label" data-i18n="remarks_notes_required">Remarks / Dispatch Notes *</label>
+          <textarea id="modal-remarks" class="form-textarea" data-i18n-placeholder="remarks_placeholder" placeholder="Provide description updates (e.g. Inspector deployed to site, repairs underway...)" required style="min-height: 80px;"></textarea>
+        </div>
+
+        <!-- Completion Proof upload (Visible only on Resolved Status selection) -->
+        <div class="form-group hidden" id="modal-proof-group">
+          <label class="form-label" data-i18n="upload_completion_proof">Upload Completion Photo Proof *</label>
+          <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; cursor: pointer; transition: var(--transition-fast);" id="proof-upload-zone">
+            <i class="fa-solid fa-camera" style="font-size: 2rem; color: var(--slate-400); margin-bottom: 0.5rem;"></i>
+            <p style="font-size: 0.85rem; font-weight: 500;" data-i18n="click_upload_proof">Click to upload proof photo</p>
+            <input type="file" id="modal-proof-input" class="hidden" accept="image/*">
+          </div>
+          
+          <!-- Image preview -->
+          <div id="proof-preview-container" class="hidden" style="margin-top: 1rem; position: relative;">
+            <img id="proof-preview" src="#" alt="Proof preview" style="max-height: 150px; border-radius: var(--radius-md); object-fit: cover; box-shadow: var(--shadow-sm);">
+            <button type="button" id="btn-remove-proof" class="btn btn-secondary" style="position: absolute; top: 5px; left: 5px; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: var(--radius-sm);">
+              <i class="fa-solid fa-trash"></i> <span data-i18n="clear">Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit btn -->
+        <button type="submit" id="btn-modal-submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
+          <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="save_changes">Save Changes</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/authority.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+</body>
+</html>

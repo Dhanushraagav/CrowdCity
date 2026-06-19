@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View and track all civic issues you have reported to CrowdCity AI. Monitor live progress, inspector assignments, and resolution proofs.">
+  <title>My Complaints - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Clean, non-blocking page rendering */
+    body {
+      opacity: 1;
+    }
+
+    .my-complaints-container {
+      max-width: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 1.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+    })();
+  </script>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+      
+      <!-- New Report Button -->
+      <a href="report.html" class="app-sidebar-btn">
+        <i class="fa-solid fa-plus"></i> <span data-i18n="new_report">New Report</span>
+      </a>
+      
+      <div class="app-sidebar-footer">
+        <a href="settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body">
+        <div class="my-complaints-container" style="max-width: 1000px; width: 100%; margin: 0 auto; padding: 1rem 0 3rem 0; display: flex; flex-direction: column; gap: 1.5rem;">
+          
+          <!-- Back Arrow -->
+          <a href="citizen-dashboard.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-weight: 500; font-size: 0.9rem;" data-i18n="back_to_dashboard">
+            Back to Dashboard
+          </a>
+
+      <!-- Page Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main);" data-i18n="my_tracked_cases">My Tracked Cases</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;" data-i18n="my_tracked_cases_desc">Monitor the lifecycles, statuses, and details of all issues you submitted.</p>
+        </div>
+        <a href="report.html" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.6rem 1.2rem;" data-i18n="file_another">
+          File Another
+        </a>
+      </div>
+
+      <!-- Filters Bar -->
+      <div class="glass-panel" style="padding: 1rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm);">
+        <!-- Category & Status row -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 150px;">
+            <select id="my-cat-filter" class="form-select" style="margin: 0; font-size: 0.85rem; height: 38px;">
+              <option value="" data-i18n="all_categories">All Categories</option>
+              <option value="roads" data-i18n="cat_roads">Roads</option>
+              <option value="streetlights" data-i18n="cat_streetlights">Streetlights</option>
+              <option value="water_supply" data-i18n="cat_water_supply">Water Supply</option>
+              <option value="drainage" data-i18n="cat_drainage">Drainage</option>
+              <option value="garbage" data-i18n="cat_garbage">Garbage</option>
+              <option value="traffic" data-i18n="cat_traffic">Traffic</option>
+              <option value="public_property" data-i18n="cat_public_property">Public Property</option>
+              <option value="parks" data-i18n="cat_parks">Parks</option>
+              <option value="sanitation" data-i18n="cat_sanitation">Sanitation</option>
+              <option value="safety_hazard" data-i18n="cat_safety_hazard">Safety Hazard</option>
+              <option value="environment" data-i18n="cat_environment">Environment</option>
+              <option value="other" data-i18n="cat_other">Other</option>
+            </select>
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <select id="my-status-filter" class="form-select" style="margin: 0; font-size: 0.85rem; height: 38px;">
+              <option value="" data-i18n="all_statuses">All Statuses</option>
+              <option value="pending" data-i18n="pending">Pending</option>
+              <option value="assigned" data-i18n="assigned">Assigned</option>
+              <option value="in_progress" data-i18n="in_progress">In Progress</option>
+              <option value="resolved" data-i18n="resolved">Resolved</option>
+              <option value="rejected" data-i18n="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Feed List -->
+      <div style="display:flex; flex-direction:column; gap:1.25rem; margin-top: 0.5rem;" id="my-issues-list">
+        <!-- Loading skeletons -->
+        <div class="issue-card" style="cursor: default; pointer-events: none; display: flex; flex-direction: column; gap: 12px; padding: 1.25rem; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="skeleton" style="width: 80px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
+            <div class="skeleton" style="width: 70px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
+          </div>
+          <div class="skeleton" style="width: 50%; height: 1.2rem; border-radius: var(--radius-sm); margin-top: 4px;"></div>
+          <div class="skeleton" style="width: 90%; height: 0.8rem; border-radius: var(--radius-sm);"></div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="skeleton" style="width: 12px; height: 12px; border-radius: var(--radius-round);"></div>
+            <div class="skeleton" style="width: 150px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+            <div class="skeleton" style="width: 100px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
+            <div style="display: flex; gap: 8px;">
+              <div class="skeleton" style="width: 50px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
+              <div class="skeleton" style="width: 110px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
+            </div>
+          </div>
+        </div>
+        <div class="issue-card" style="cursor: default; pointer-events: none; display: flex; flex-direction: column; gap: 12px; padding: 1.25rem; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="skeleton" style="width: 90px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
+            <div class="skeleton" style="width: 60px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
+          </div>
+          <div class="skeleton" style="width: 45%; height: 1.2rem; border-radius: var(--radius-sm); margin-top: 4px;"></div>
+          <div class="skeleton" style="width: 85%; height: 0.8rem; border-radius: var(--radius-sm);"></div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="skeleton" style="width: 12px; height: 12px; border-radius: var(--radius-round);"></div>
+            <div class="skeleton" style="width: 130px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+            <div class="skeleton" style="width: 90px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
+            <div style="display: flex; gap: 8px;">
+              <div class="skeleton" style="width: 50px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
+              <div class="skeleton" style="width: 110px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/my-complaints.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+</body>
+</html>

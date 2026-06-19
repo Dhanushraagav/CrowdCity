@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Municipal complaints and reports database management interface for CrowdCity AI.">
+  <title>Manage Reports - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Synchronous Redirect Script to prevent flash of content -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('ready');
+      });
+    })();
+  </script>
+
+  <style>
+    /* Table layout styles */
+    .reports-table-container {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .reports-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .reports-table th,
+    .reports-table td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .reports-table th {
+      background-color: var(--bg-app);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+
+    .reports-table tbody tr {
+      transition: background-color var(--transition-fast);
+    }
+
+    .reports-table tbody tr:hover {
+      background-color: var(--bg-surface-hover);
+    }
+
+    .filters-bar {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .filters-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="authority-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="authority-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="authority-reports.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="cases">CASES</span>
+        </a>
+        <a href="authority-notifications.html" class="app-sidebar-link">
+          <i class="fa-regular fa-bell"></i> <span data-i18n="notifications">NOTIFICATIONS</span>
+        </a>
+      </nav>
+      
+      <div class="app-sidebar-footer">
+        <a href="authority-settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="authority-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body">
+        <div class="content-wrapper" style="max-width: 1200px; width: 100%; margin: 0 auto; padding: 1rem 0 3rem 0;">
+      
+      <!-- Page Header -->
+      <section style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.35rem;" data-i18n="manage_reports_database">Manage Reports & Database</h1>
+        <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="manage_reports_desc">Browse the complete register of community reports, delegate cases to inspectors, and audit operations logs.</p>
+      </section>
+
+      <!-- Advanced Filters Bar -->
+      <section class="filters-bar">
+        <!-- Search bar -->
+        <div class="search-input-wrapper" style="margin: 0; position: relative;">
+          <i class="fa-solid fa-magnifying-glass search-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+          <input type="text" id="search-input" class="form-input search-input" data-i18n-placeholder="search_description_address" placeholder="Search by description or address..." style="padding-left: 2.3rem;">
+        </div>
+
+        <!-- Category Filter -->
+        <div>
+          <select id="category-filter" class="form-select" style="width: 100%;">
+            <option value="" data-i18n="all_categories">All Categories</option>
+            <option value="roads">Roads</option>
+            <option value="streetlights">Streetlights</option>
+            <option value="water_supply">Water Supply</option>
+            <option value="drainage">Drainage</option>
+            <option value="garbage">Garbage</option>
+            <option value="traffic">Traffic</option>
+            <option value="public_property">Public Property</option>
+            <option value="parks">Parks</option>
+            <option value="sanitation">Sanitation</option>
+            <option value="safety_hazard">Safety Hazard</option>
+            <option value="environment">Environment</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <select id="status-filter" class="form-select" style="width: 100%;">
+            <option value="" data-i18n="all_statuses">All Statuses</option>
+            <option value="pending" data-i18n="pending_review">Pending Review</option>
+            <option value="assigned" data-i18n="assigned">Assigned</option>
+            <option value="in_progress" data-i18n="in_progress">In Progress</option>
+            <option value="resolved" data-i18n="resolved">Resolved</option>
+            <option value="verified" data-i18n="verified_closed">Verified Closed</option>
+            <option value="rejected" data-i18n="rejected">Rejected</option>
+          </select>
+        </div>
+
+        <!-- Assignee Filter -->
+        <div>
+          <select id="assignee-filter" class="form-select" style="width: 100%;">
+            <option value="" data-i18n="all_assignments">All Assignments</option>
+            <option value="me" data-i18n="assigned_to_me">Assigned to Me</option>
+            <option value="unassigned" data-i18n="unassigned_cases">Unassigned Cases</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Reports List Table -->
+      <section class="reports-table-container">
+        <table class="reports-table">
+          <thead>
+            <tr>
+              <th data-i18n="category">Category</th>
+              <th data-i18n="report_title">Report Title</th>
+              <th data-i18n="reported_date">Reported Date</th>
+              <th data-i18n="address_location">Address / Location</th>
+              <th data-i18n="status">Status</th>
+              <th data-i18n="assignee">Assignee</th>
+              <th style="text-align: center;" data-i18n="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reports-list-body">
+            <!-- Loading Row -->
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                <p>Retrieving case records from database...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/authority-reports.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+</body>
+</html>

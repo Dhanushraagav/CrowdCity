@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CrowdCity AI is an AI-powered civic issue reporting platform helping citizens report potholes, garbage, water leaks, and streetlights.">
+  <title>CrowdCity AI - Improve Your City</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Clean, non-blocking page rendering */
+    body {
+      opacity: 1;
+    }
+
+    #stat-community-rank {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.8;
+    }
+
+    /* Dashboard Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2.1fr 0.9fr;
+      gap: 1.5rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 992px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+    })();
+  </script>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+      
+      <!-- New Report Button -->
+      <a href="report.html" class="app-sidebar-btn">
+        <i class="fa-solid fa-plus"></i> <span data-i18n="new_report">New Report</span>
+      </a>
+      
+      <div class="app-sidebar-footer">
+        <a href="settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Weather Widget -->
+        <div class="weather-widget loading" id="weather-widget" title="Auto-detected from your location">
+          <div class="weather-icon" id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+          <div class="weather-info">
+            <span class="weather-city" id="weather-city">Detecting...</span>
+            <span class="weather-temp" id="weather-temp">--°C</span>
+          </div>
+        </div>
+
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 0.75rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Body -->
+      <div class="app-content-body">
+        
+        <!-- Live Ticker -->
+        <div class="ticker-banner" style="margin-bottom: 2rem;">
+          <div class="status-dot-pulse active ticker-pulse"></div>
+          <span class="ticker-text" id="civic-intelligence-feed-text">All municipal services are operational. Check the feed below for community reports.</span>
+        </div>
+
+        <!-- Stitch Hero card -->
+        <div class="stitch-hero">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; width: 100%;">
+            <div style="flex: 1.2; min-width: 280px; display: flex; flex-direction: column; gap: 0.5rem;">
+              <h1 id="hero-greeting" class="stitch-hero-title" style="min-height: 2.5rem;"></h1>
+              <p class="stitch-hero-desc" id="hero-desc"></p>
+              <div class="stitch-hero-actions">
+                <a href="report.html" class="btn btn-primary" style="padding: 0.65rem 1.35rem; font-size: 0.88rem; font-weight: 700; background-color: var(--primary); color: var(--text-inverse); border: none;">
+                  <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">Report Issue</span>
+                </a>
+                <a href="my-complaints.html" class="btn btn-secondary" style="padding: 0.65rem 1.35rem; font-size: 0.88rem; font-weight: 700; border: 1px solid var(--border-color); background: transparent; color: var(--text-main);">
+                  <i class="fa-solid fa-list-check"></i> <span data-i18n="view_complaints">View Complaints</span>
+                </a>
+              </div>
+            </div>
+            
+            <!-- User level progression bar -->
+            <div style="flex: 0.8; min-width: 280px; max-width: 380px; display: flex; flex-direction: column; gap: 0.75rem; background: rgba(11, 15, 25, 0.95); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid rgba(255, 255, 255, 0.12);">
+              <h3 style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;" data-i18n="your_progress">Your Progress</h3>
+              <div class="progression-container">
+                <div class="progression-header">
+                  <span class="progression-level" id="progression-level-name" style="font-weight: 700; color: var(--text-main);"></span>
+                  <span class="progression-xp-text" id="progression-xp-text" style="color: var(--primary); font-weight: 700;"></span>
+                </div>
+                <div class="progression-bar-track" style="height: 6px; background-color: var(--border-color);">
+                  <div class="progression-bar-fill" id="progression-xp-bar" style="width: 0%; background-color: var(--primary);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stitch Stats Grid -->
+        <div class="stitch-stats-grid">
+          <div class="stitch-stat-card">
+            <span class="stitch-stat-label" data-i18n="reports_submitted">Reports Submitted</span>
+            <div class="stitch-stat-value-row">
+              <span class="stitch-stat-value" id="stat-total-reports">0</span>
+              <span class="stitch-stat-change" id="stat-total-reports-change"></span>
+            </div>
+          </div>
+          <div class="stitch-stat-card">
+            <span class="stitch-stat-label" data-i18n="resolved_reports">Resolved Issues</span>
+            <div class="stitch-stat-value-row">
+              <span class="stitch-stat-value" id="stat-resolved-issues">0</span>
+              <span class="stitch-stat-change" id="stat-resolved-rate"></span>
+            </div>
+          </div>
+          <div class="stitch-stat-card">
+            <span class="stitch-stat-label" data-i18n="current_points">Current Points</span>
+            <div class="stitch-stat-value-row">
+              <span class="stitch-stat-value" id="stat-user-points">0</span>
+            </div>
+          </div>
+          <div class="stitch-stat-card">
+            <span class="stitch-stat-label" data-i18n="community_rank">Community Rank</span>
+            <div class="stitch-stat-value-row">
+              <span class="stitch-stat-value" id="stat-community-rank"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feed Filtering Section (Retained for search & sorting functionality) -->
+        <div class="stitch-hero" style="padding: 1.5rem; margin-bottom: 2rem; gap: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; gap: 0.25rem;" id="feed-tabs-container">
+              <button class="btn feed-tab active" data-feed="recent" style="padding: 0.45rem 1rem; font-size: 0.82rem; border-radius: var(--radius-sm); background: var(--primary-light-alpha); color: var(--primary); font-weight: 700; border: none; cursor: pointer;">
+                <i class="fa-solid fa-clock"></i> <span data-i18n="recent">Recent</span>
+              </button>
+              <button class="btn feed-tab" data-feed="trending" style="padding: 0.45rem 1rem; font-size: 0.82rem; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); font-weight: 600; border: none; cursor: pointer;">
+                <i class="fa-solid fa-fire"></i> <span data-i18n="trending">Trending</span>
+              </button>
+              <button class="btn feed-tab" data-feed="nearby" style="padding: 0.45rem 1rem; font-size: 0.82rem; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); font-weight: 600; border: none; cursor: pointer;">
+                <i class="fa-solid fa-location-crosshairs"></i> <span data-i18n="nearby">Nearby</span>
+              </button>
+              <button class="btn feed-tab" data-feed="resolved" style="padding: 0.45rem 1rem; font-size: 0.82rem; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); font-weight: 600; border: none; cursor: pointer;">
+                <i class="fa-solid fa-circle-check"></i> <span data-i18n="resolved">Resolved</span>
+              </button>
+            <!-- Sort By section removed -->
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="search-input-wrapper" style="margin: 0;">
+              <i class="fa-solid fa-magnifying-glass search-icon" style="font-size: 0.85rem;"></i>
+              <input type="text" id="search-input" class="form-input search-input" style="padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.88rem; height: 36px;" data-i18n-placeholder="search_placeholder" placeholder="Search issues by title, category, or address...">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" data-i18n="filter_category">Filter Category</span>
+              <div class="filter-pills" id="category-filters" style="padding-bottom: 0.25rem;">
+                <button class="filter-pill active" data-category="" data-i18n="all_categories">All Categories</button>
+                <button class="filter-pill" data-category="roads" data-i18n="cat_roads">Roads</button>
+                <button class="filter-pill" data-category="streetlights" data-i18n="cat_streetlights">Streetlights</button>
+                <button class="filter-pill" data-category="water_supply" data-i18n="cat_water_supply">Water Supply</button>
+                <button class="filter-pill" data-category="drainage" data-i18n="cat_drainage">Drainage</button>
+                <button class="filter-pill" data-category="garbage" data-i18n="cat_garbage">Garbage</button>
+                <button class="filter-pill" data-category="traffic" data-i18n="cat_traffic">Traffic</button>
+                <button class="filter-pill" data-category="public_property" data-i18n="cat_public_property">Public Property</button>
+                <button class="filter-pill" data-category="parks" data-i18n="cat_parks">Parks</button>
+                <button class="filter-pill" data-category="sanitation" data-i18n="cat_sanitation">Sanitation</button>
+                <button class="filter-pill" data-category="safety_hazard" data-i18n="cat_safety_hazard">Safety Hazard</button>
+                <button class="filter-pill" data-category="environment" data-i18n="cat_environment">Environment</button>
+                <button class="filter-pill" data-category="other" data-i18n="cat_other">Other</button>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" data-i18n="filter_status">Filter Status</span>
+              <div class="filter-pills" id="status-filters" style="padding-bottom: 0.25rem;">
+                <button class="filter-pill active" data-status="" data-i18n="all_statuses">All Statuses</button>
+                <button class="filter-pill" data-status="pending" data-i18n="pending">Pending</button>
+                <button class="filter-pill" data-status="assigned" data-i18n="assigned">Assigned</button>
+                <button class="filter-pill" data-status="in_progress" data-i18n="in_progress">In Progress</button>
+                <button class="filter-pill" data-status="resolved" data-i18n="resolved">Resolved</button>
+                <button class="filter-pill" data-status="rejected" data-i18n="rejected">Rejected</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stitch Split Grid -->
+        <div class="stitch-split-grid">
+          <!-- Left side: Recent Complaints list -->
+          <div>
+            <div class="stitch-section-header">
+              <h2 class="stitch-section-title" data-i18n="reports_feed">Reports Feed</h2>
+            </div>
+            
+            <div class="stitch-list" id="issues-list">
+              <!-- Dynamically populated by app.js -->
+              <div class="stitch-item-card skeleton-pulse" style="height: 75px;"></div>
+              <div class="stitch-item-card skeleton-pulse" style="height: 75px;"></div>
+              <div class="stitch-item-card skeleton-pulse" style="height: 75px;"></div>
+            </div>
+          </div>
+
+          <!-- Right side: Notifications, Community Activity -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Notifications Card -->
+            <div class="stitch-guidelines-card">
+              <h2 class="stitch-guidelines-title" data-i18n="notifications">Notifications</h2>
+              <div class="stitch-guidelines-list" id="compact-notifications-list">
+                <div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0; text-align: center;" data-i18n="no_new_notifications">No new notifications</div>
+              </div>
+            </div>
+
+
+            <!-- Community Activity Timeline -->
+            <div class="stitch-guidelines-card">
+              <h2 class="stitch-guidelines-title" data-i18n="community_activity">Community Activity</h2>
+              <div class="stitch-guidelines-list" id="community-activity-timeline" style="position: relative; display: flex; flex-direction: column; gap: 1.25rem; padding-left: 1.25rem; border-left: 2px solid var(--border-color); margin-left: 6px;">
+                <div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">
+                  Loading city updates...
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+  <!-- Weather Widget Logic -->
+  <script>
+  (function initWeather() {
+    const cityEl = document.getElementById('weather-city');
+    const tempEl = document.getElementById('weather-temp');
+    const iconEl = document.getElementById('weather-icon');
+    const widget = document.getElementById('weather-widget');
+    if (!cityEl || !tempEl) return;
+
+    window.cc_initWeather = initWeather;
+    const currentLang = localStorage.getItem('cc_lang') || 'en';
+
+    // WMO weather code to icon mapping
+    function getWeatherIcon(code) {
+      if (code === 0) return 'fa-sun';
+      if (code <= 3) return 'fa-cloud-sun';
+      if (code <= 48) return 'fa-smog';
+      if (code <= 57) return 'fa-cloud-rain';
+      if (code <= 67) return 'fa-cloud-showers-heavy';
+      if (code <= 77) return 'fa-snowflake';
+      if (code <= 82) return 'fa-cloud-showers-heavy';
+      if (code <= 99) return 'fa-bolt';
+      return 'fa-cloud';
+    }
+
+    function getWeatherColor(code) {
+      if (code === 0) return '#f59e0b';      // sunny yellow
+      if (code <= 3) return '#fbbf24';        // partly cloudy
+      if (code <= 48) return '#94a3b8';       // fog/mist grey
+      if (code <= 67) return '#60a5fa';       // rain blue
+      if (code <= 77) return '#c4b5fd';       // snow purple
+      if (code <= 99) return '#f472b6';       // thunderstorm pink
+      return '#94a3b8';
+    }
+
+    async function fetchWeather(lat, lon) {
+      try {
+        // Reverse geocode to get district/city name
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`, {
+          headers: { 'Accept-Language': currentLang }
+        });
+        const geoData = await geoRes.json();
+        const addr = geoData.address || {};
+        const district = addr.state_district || addr.county || addr.city || addr.town || addr.village || addr.state || 'Your Location';
+        // Clean up district name
+        const cleanDistrict = district.replace(/ district$/i, '').replace(/ taluk$/i, '');
+
+        // Fetch weather from Open-Meteo
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const weatherData = await weatherRes.json();
+        const current = weatherData.current_weather;
+
+        const temp = Math.round(current.temperature);
+        const code = current.weathercode;
+
+        cityEl.textContent = cleanDistrict;
+        tempEl.textContent = `${temp}°C`;
+        iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code)}"></i>`;
+        iconEl.style.color = getWeatherColor(code);
+        widget.classList.remove('loading');
+        widget.title = `${cleanDistrict} — ${temp}°C`;
+
+        // Cache for 15 min with language key
+        localStorage.setItem(`cc_weather_cache_${currentLang}`, JSON.stringify({
+          district: cleanDistrict, temp, code, lang: currentLang, ts: Date.now()
+        }));
+      } catch (e) {
+        console.warn('Weather fetch failed:', e);
+        cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
+        tempEl.textContent = '--°C';
+        widget.classList.remove('loading');
+      }
+    }
+
+    // Check language-specific cache first (15 min TTL)
+    const cacheKey = `cc_weather_cache_${currentLang}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const c = JSON.parse(cached);
+        if (c.lang === currentLang && Date.now() - c.ts < 15 * 60 * 1000) {
+          cityEl.textContent = c.district;
+          tempEl.textContent = `${c.temp}°C`;
+          iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code)}"></i>`;
+          iconEl.style.color = getWeatherColor(c.code);
+          widget.classList.remove('loading');
+          widget.title = `${c.district} — ${c.temp}°C`;
+          return; // Use cached data
+        }
+      } catch (e) { /* ignore parse errors */ }
+    }
+
+    // Check if we have cached coordinates to avoid native geolocation delay
+    const cachedCoords = localStorage.getItem('cc_weather_coords');
+    if (cachedCoords) {
+      try {
+        const coords = JSON.parse(cachedCoords);
+        if (coords && coords.lat && coords.lon) {
+          fetchWeather(coords.lat, coords.lon);
+          return;
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    // Request geolocation if no cached coordinates
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          localStorage.setItem('cc_weather_coords', JSON.stringify({ lat, lon }));
+          fetchWeather(lat, lon);
+        },
+        () => {
+          // Fallback: default to Chennai
+          fetchWeather(13.0827, 80.2707);
+        },
+        { timeout: 8000, maximumAge: 600000 }
+      );
+    } else {
+      fetchWeather(13.0827, 80.2707);
+    }
+  })();
+
+  // Listen to language-change event to re-fetch/re-render weather in the correct language
+  window.addEventListener('language-change', () => {
+    if (typeof window.cc_initWeather === 'function') {
+      window.cc_initWeather();
+    }
+  });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore reported civic issues on the interactive CrowdCity AI map. Find potholes, streetlights, and leaks near you.">
+  <title>Interactive Map - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <!-- Leaflet Marker Cluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Clean, non-blocking page rendering */
+    body {
+      opacity: 1;
+    }
+
+    .map-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      height: calc(100vh - var(--header-height));
+      overflow: hidden;
+      position: relative;
+    }
+
+    @media (min-width: 900px) {
+      .map-layout {
+        grid-template-columns: 420px 1fr;
+      }
+    }
+
+    @media (max-width: 899px) {
+      .map-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 320px 1fr;
+      }
+      .map-viewport {
+        grid-row: 1;
+        height: 320px;
+      }
+      .map-sidebar {
+        grid-row: 2;
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        height: 100%;
+      }
+    }
+
+    .map-sidebar {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem;
+      gap: 1.5rem;
+    }
+
+    .map-viewport {
+      width: 100%;
+      height: 100%;
+      background-color: var(--slate-200);
+      z-index: 1;
+    }
+
+    /* Custom Leaflet overrides */
+    .leaflet-bar {
+      border: 1px solid var(--border-color) !important;
+      box-shadow: var(--shadow-md) !important;
+    }
+    .leaflet-bar a {
+      background-color: var(--bg-surface) !important;
+      color: var(--text-main) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+    .leaflet-bar a:hover {
+      background-color: var(--bg-surface-hover) !important;
+    }
+  </style>
+</head>
+<body>
+
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+    })();
+  </script>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+      
+      <!-- New Report Button -->
+      <a href="report.html" class="app-sidebar-btn">
+        <i class="fa-solid fa-plus"></i> <span data-i18n="new_report">New Report</span>
+      </a>
+      
+      <div class="app-sidebar-footer">
+        <a href="settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main" style="height: 100vh; overflow: hidden;">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 0; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+    <div class="map-layout">
+      
+      <!-- Side controls panel -->
+      <aside class="map-sidebar">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);" data-i18n="nearby_civic_map">Nearby Civic Map</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;" data-i18n="nearby_civic_map_description">Browse and locate civic complaints reported around the city.</p>
+        </div>
+
+        <!-- Filters Form -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Search field -->
+          <div class="search-input-wrapper" style="margin: 0;">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="map-search-input" class="form-input search-input" data-i18n-placeholder="search_by_description_or_address" placeholder="Search by description or address...">
+          </div>
+
+          <!-- Category filter -->
+          <div class="form-group" style="margin: 0;">
+            <label for="map-category-select" class="form-label" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;" data-i18n="category">Category</label>
+            <select id="map-category-select" class="form-select" style="margin: 0;">
+              <option value="" data-i18n="all_categories">All Categories</option>
+              <option value="roads" data-i18n="roads">Roads</option>
+              <option value="streetlights" data-i18n="streetlights">Streetlights</option>
+              <option value="water_supply" data-i18n="water_supply">Water Supply</option>
+              <option value="drainage" data-i18n="drainage">Drainage</option>
+              <option value="garbage" data-i18n="garbage">Garbage</option>
+              <option value="traffic" data-i18n="traffic">Traffic</option>
+              <option value="public_property" data-i18n="public_property">Public Property</option>
+              <option value="parks" data-i18n="parks">Parks</option>
+              <option value="sanitation" data-i18n="sanitation">Sanitation</option>
+              <option value="safety_hazard" data-i18n="safety_hazard">Safety Hazard</option>
+              <option value="environment" data-i18n="environment">Environment</option>
+              <option value="other" data-i18n="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Status filter -->
+          <div class="form-group" style="margin: 0;">
+            <label for="map-status-select" class="form-label" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;" data-i18n="status">Status</label>
+            <select id="map-status-select" class="form-select" style="margin: 0;">
+              <option value="" data-i18n="all_statuses">All Statuses</option>
+              <option value="pending" data-i18n="pending">Pending</option>
+              <option value="assigned" data-i18n="assigned">Assigned</option>
+              <option value="in_progress" data-i18n="in_progress">In Progress</option>
+              <option value="resolved" data-i18n="resolved">Resolved</option>
+              <option value="rejected" data-i18n="rejected">Rejected</option>
+            </select>
+          </div>
+
+          <!-- Map Layer filter -->
+          <div class="form-group" style="margin: 0;">
+            <label for="map-layer-select" class="form-label" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;" data-i18n="map_layer_type">Map Layer Type</label>
+            <select id="map-layer-select" class="form-select" style="margin: 0;">
+              <option value="markers" data-i18n="marker_clusters">Marker Clusters</option>
+              <option value="heatmap" data-i18n="hotspot_heatmap">Hotspot Heatmap</option>
+            </select>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.25rem 0;">
+
+        <!-- Selected marker summary details slot -->
+        <div id="map-issue-summary" style="display: flex; flex-direction: column; gap: 1rem; flex: 1;">
+          <div style="text-align: center; margin: auto 0; padding: 2rem 1rem; color: var(--text-muted);">
+            <i class="fa-solid fa-map-pin" style="font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--slate-400);"></i>
+            <p style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);" data-i18n="no_issue_selected">No issue selected</p>
+            <p style="font-size: 0.8rem; margin-top: 0.25rem;" data-i18n="click_map_marker_hint">Click any map marker to view detailed description and action steps.</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Map viewport -->
+      <section class="map-viewport" id="leaflet-map" aria-label="CrowdCity AI complaints map"></section>
+
+    </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Leaflet Marker Cluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <!-- Leaflet Heatmap density plugin -->
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/map-view.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+</body>
+</html>

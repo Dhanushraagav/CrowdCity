@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage your official profile details, theme preferences, and security settings.">
+  <title>Settings - CrowdCity AI Authority</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Synchronous guard to hide body until auth check completes */
+    body {
+      opacity: 1;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .settings-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .settings-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  </style>
+
+  <!-- Synchronous Redirect Script to prevent flash of content -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('ready');
+      });
+    })();
+  </script>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="authority-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="authority-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="authority-reports.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="cases">CASES</span>
+        </a>
+        <a href="authority-notifications.html" class="app-sidebar-link">
+          <i class="fa-regular fa-bell"></i> <span data-i18n="notifications">NOTIFICATIONS</span>
+        </a>
+      </nav>
+      
+      <div class="app-sidebar-footer">
+        <a href="authority-settings.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="authority-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body">
+        <div style="max-width: 1000px; width: 100%; margin: 0 auto; padding: 1rem 0 3rem 0;">
+    
+    <!-- Page Header -->
+    <section style="margin-bottom: 2.5rem;">
+      <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.35rem;" data-i18n="account_settings">Account Settings</h1>
+      <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="authority_settings_desc">Manage your official municipal credentials, profile information, and password preferences.</p>
+    </section>
+
+    <!-- Settings Grid -->
+    <section class="settings-grid">
+      
+      <!-- Card 1: Inspector Profile Details -->
+      <div class="settings-card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> <span data-i18n="inspector_credentials">Inspector Credentials</span>
+        </h3>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;" data-i18n="inspector_credentials_desc">Official credentials provided by administration. Values are read-only for verification purposes.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+          <div class="form-group">
+            <label class="form-label" data-i18n="full_name">Full Name</label>
+            <input type="text" id="settings-name" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="work_email">Work Email</label>
+            <input type="email" id="settings-email" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="assigned_role">Assigned Role</label>
+            <input type="text" id="settings-role" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85;">
+          </div>
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.85rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 0.75rem; font-size: 0.82rem; color: #10b981; font-weight: 600;">
+            <i class="fa-solid fa-circle-check"></i>
+            <span data-i18n="verified_officer_status">Verified Officer Account • Active status</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Security & Password Update -->
+      <div class="settings-card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-key" style="color: var(--primary);"></i> <span data-i18n="change_portal_password">Change Portal Password</span>
+        </h3>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;" data-i18n="change_portal_password_desc">Update your credentials to maintain portal security. Choose a strong alphanumeric password.</p>
+        
+        <form id="change-password-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+          <div class="form-group">
+            <label for="new-password" class="form-label" data-i18n="new_password">New Password</label>
+            <input type="password" id="new-password" class="form-input" data-i18n-placeholder="enter_new_password" placeholder="Enter new password" required minlength="6">
+          </div>
+          <div class="form-group">
+            <label for="confirm-password" class="form-label" data-i18n="confirm_password">Confirm New Password</label>
+            <input type="password" id="confirm-password" class="form-input" data-i18n-placeholder="confirm_new_password" placeholder="Confirm new password" required minlength="6">
+          </div>
+          
+          <button type="submit" id="btn-save-password" class="btn btn-primary" style="margin-top: 0.5rem; align-self: flex-start; padding: 0.65rem 1.5rem; font-size: 0.85rem; font-weight: 700;" data-i18n="update_password">
+            Update Password
+          </button>
+        </form>
+      </div>
+
+    </section>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.addEventListener('auth-change', () => {
+        populateInspectorDetails();
+      });
+
+      if (typeof getCurrentUser === 'function' && getCurrentUser()) {
+        populateInspectorDetails();
+      }
+
+      function populateInspectorDetails() {
+        const user = getCurrentUser();
+        if (!user) return;
+        const fullName = user.user_metadata?.full_name || 'Inspector';
+        
+        const nameEl = document.getElementById('settings-name');
+        const emailEl = document.getElementById('settings-email');
+        const roleEl = document.getElementById('settings-role');
+
+        if (nameEl) nameEl.value = fullName;
+        if (emailEl) emailEl.value = user.email;
+        if (roleEl) roleEl.value = (typeof getUserRole === 'function' ? getUserRole() : 'authority').toUpperCase();
+      }
+
+      const passwordForm = document.getElementById('change-password-form');
+      if (passwordForm) {
+        passwordForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const newPassword = document.getElementById('new-password').value;
+          const confirmPassword = document.getElementById('confirm-password').value;
+          
+          if (newPassword !== confirmPassword) {
+            alert("New passwords do not match.");
+            return;
+          }
+
+          const btn = document.getElementById('btn-save-password');
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+          const { error } = await updatePassword(newPassword);
+          btn.disabled = false;
+          btn.innerHTML = 'Update Password';
+
+          if (error) {
+            alert("Error updating password: " + error.message);
+          } else {
+            alert("Password updated successfully!");
+            passwordForm.reset();
+          }
+        });
+      }
+
+      // Trigger ready class
+      setTimeout(() => {
+        document.body.classList.add('ready');
+      }, 100);
+    });
+  </script>
+
+</body>
+</html>

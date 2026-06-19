@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View your CrowdCity AI notification history, assigned caseload, and status updates timeline.">
+  <title>Notification History - CrowdCity AI Authority</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Synchronous Redirect Script to prevent flash of content -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('ready');
+      });
+    })();
+  </script>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="authority-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="authority-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="authority-reports.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="cases">CASES</span>
+        </a>
+        <a href="authority-notifications.html" class="app-sidebar-link active">
+          <i class="fa-regular fa-bell"></i> <span data-i18n="notifications">NOTIFICATIONS</span>
+        </a>
+      </nav>
+      
+      <div class="app-sidebar-footer">
+        <a href="authority-settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="authority-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body">
+        <div style="max-width: 1000px; width: 100%; margin: 0 auto; padding: 1rem 0 3rem 0;">
+          
+          <!-- Back to Dashboard -->
+          <a href="authority-dashboard.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; margin-bottom: 1.5rem; text-decoration: none; transition: var(--transition-fast);">
+            <i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_to_dashboard">Back to Dashboard</span>
+          </a>
+
+    <!-- History list card wrapper -->
+    <div class="history-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm);">
+      <div class="history-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 800; font-family: var(--font-heading); margin: 0;" data-i18n="notification_history">Notification History</h2>
+          <span id="history-total-count" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">0 unread / 0 total</span>
+        </div>
+        <button id="mark-all-read-btn-history" class="btn btn-secondary" onclick="handleMarkAllRead(event)" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+          <i class="fa-solid fa-square-check"></i> <span data-i18n="mark_all_as_read">Mark all as read</span>
+        </button>
+      </div>
+
+      <div id="notifications-history-list">
+        <!-- Rendered dynamically by notifications.js -->
+        <div style="padding: 4rem 2rem; text-align: center; color: var(--text-muted);">
+          <div class="skeleton-pulse" style="height: 50px; border-radius: var(--radius-sm); margin-bottom: 1rem;"></div>
+          <div class="skeleton-pulse" style="height: 50px; border-radius: var(--radius-sm); margin-bottom: 1rem;"></div>
+          <div class="skeleton-pulse" style="height: 50px; border-radius: var(--radius-sm);"></div>
+        </div>
+      </div>
+    </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+</body>
+</html>

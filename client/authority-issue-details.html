@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Municipal inspector casework details and status updater for CrowdCity AI.">
+  <title>Inspect Case - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- Leaflet Map Assets -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Synchronous Redirect Script to prevent flash of content -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('ready');
+      });
+    })();
+  </script>
+
+  <style>
+    .details-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    #details-mini-map {
+      height: 220px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      z-index: 10;
+    }
+
+    .timeline-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: relative;
+      padding-left: 1.5rem;
+      border-left: 2px solid var(--border-color);
+      margin-left: 0.5rem;
+    }
+
+    .timeline-item {
+      position: relative;
+    }
+
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+      position: absolute;
+      left: calc(-1.5rem - 6px);
+      top: 4px;
+      border: 2px solid var(--bg-surface);
+    }
+
+    .timeline-item.active .timeline-dot {
+      background-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+    }
+
+    .timeline-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .timeline-content {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      margin-top: 0.25rem;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="authority-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="authority-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="authority-reports.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="cases">CASES</span>
+        </a>
+        <a href="authority-notifications.html" class="app-sidebar-link">
+          <i class="fa-regular fa-bell"></i> <span data-i18n="notifications">NOTIFICATIONS</span>
+        </a>
+      </nav>
+      
+      <div class="app-sidebar-footer">
+        <a href="authority-settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="authority-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body">
+        <div class="content-wrapper" style="max-width: 1200px; width: 100%; margin: 0 auto; padding: 1rem 0 3rem 0;">
+      
+      <!-- Back Button -->
+      <div style="margin-bottom: 1.5rem;">
+        <a href="authority-reports.html" class="btn btn-secondary" style="font-size: 0.82rem; font-weight: 700; padding: 0.5rem 1rem; border-radius: var(--radius-sm);">
+          <i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_to_cases_register">Back to Cases Register</span>
+        </a>
+      </div>
+
+      <!-- Loading State -->
+      <div id="details-loader" style="text-align: center; padding: 5rem 2rem; color: var(--text-muted);">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+        <p style="font-size: 1rem; font-weight: 600;" data-i18n="loading_case_details">Loading case details...</p>
+      </div>
+
+      <!-- Details Content (Hidden by default) -->
+      <div id="details-content" class="details-grid hidden">
+        
+        <!-- Left: Case Details Card, Image, History -->
+        <section style="display: flex; flex-direction: column; gap: 2rem;">
+          
+          <!-- Core Details Block -->
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <span id="issue-category-badge" class="badge badge-category">category</span>
+                <span id="issue-status-badge" class="badge badge-status" style="margin-left: 0.5rem;">status</span>
+              </div>
+              <span id="issue-date" style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;"></span>
+            </div>
+            
+            <h1 id="issue-title" style="font-size: 1.75rem; font-weight: 800; font-family: var(--font-heading); margin: 0;">Case Title</h1>
+            
+            <p id="issue-description" style="color: var(--text-main); font-size: 0.95rem; line-height: 1.6; white-space: pre-line; margin: 0;">Case Description</p>
+            
+            <!-- Issue image if exists -->
+            <div id="issue-image-container" class="hidden" style="margin-top: 0.5rem;">
+              <img id="issue-image" src="#" alt="Hazard image proof" style="max-height: 350px; border-radius: var(--radius-md); object-fit: cover; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+            </div>
+          </div>
+
+          <!-- AI Auto-Triage Insights -->
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+            <h3 style="font-size: 1.1rem; font-family: var(--font-heading); color: var(--primary); margin: 0;"><i class="fa-solid fa-robot"></i> <span data-i18n="ai_auto_triage_analysis">AI Auto-Triage Analysis</span></h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem;">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.25rem;" data-i18n="detected_category">DETECTED CATEGORY</span>
+                <span id="ai-category-badge" class="badge badge-category other">None</span>
+              </div>
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.25rem;" data-i18n="assigned_department">ASSIGNED DEPARTMENT</span>
+                <span id="ai-dept-text" style="font-size: 0.9rem; font-weight: 700; color: var(--text-main);">Unassigned</span>
+              </div>
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.25rem;" data-i18n="priority_classification">PRIORITY CLASSIFICATION</span>
+                <span id="ai-priority-badge" class="badge badge-status" style="text-transform: capitalize;">Low</span>
+              </div>
+            </div>
+
+            <div>
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.5rem;" data-i18n="ai_analysis_summary">AI ANALYSIS SUMMARY</span>
+              <p id="ai-summary-text" style="font-size: 0.88rem; line-height: 1.5; color: var(--text-main); margin: 0;">No automated summary available.</p>
+            </div>
+          </div>
+
+          <!-- Resolution Proof Showcase -->
+          <div id="resolution-proof-showcase" class="hidden" style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+            <h3 style="font-size: 1.1rem; font-family: var(--font-heading); color: #10b981; margin: 0;"><i class="fa-solid fa-circle-check"></i> <span data-i18n="resolution_proof_notes">Resolution Proof & Notes</span></h3>
+            <p id="showcase-proof-notes" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-main); margin: 0;"></p>
+            
+            <div id="showcase-proof-image-wrapper" class="hidden">
+              <div style="border-radius: var(--radius-md); overflow: hidden; max-height: 500px; background-color: var(--bg-app); display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-color);">
+                <img id="showcase-proof-image" src="#" alt="Resolution Proof" style="max-width: 100%; max-height: 500px; object-fit: contain;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Casework History Timeline -->
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+            <h3 style="font-size: 1.1rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="casework_log_timeline">Casework Log Timeline</span></h3>
+            
+            <div id="timeline-list" class="timeline-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Right: Dispatch Console, Map, Reporter info -->
+        <aside style="display: flex; flex-direction: column; gap: 2rem; height: fit-content;">
+          
+          <!-- Dispatch Control Center -->
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+            <h3 style="font-size: 1.15rem; font-family: var(--font-heading); color: var(--text-main); margin: 0;"><i class="fa-solid fa-screwdriver-wrench"></i> <span data-i18n="caseload_dispatch">Caseload Dispatch</span></h3>
+            
+            <!-- Assignment options -->
+            <div id="assignment-status-area" style="padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Status update Form -->
+            <form id="dispatch-form" style="display: flex; flex-direction: column; gap: 1.25rem;">
+              <div id="dispatch-alert" class="alert-banner error hidden"></div>
+
+              <div class="form-group">
+                <label for="dispatch-status-select" class="form-label" data-i18n="update_case_status">Update Case Status *</label>
+                <select id="dispatch-status-select" class="form-select" required>
+                  <option value="assigned" data-i18n="assigned">Assigned</option>
+                  <option value="in_progress" data-i18n="in_progress">In Progress</option>
+                  <option value="resolved" data-i18n="resolved">Resolved</option>
+                  <option value="rejected" data-i18n="rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="dispatch-notes" class="form-label" data-i18n="remarks_action_log_notes">Remarks / Action Log Notes *</label>
+                <textarea id="dispatch-notes" class="form-textarea" data-i18n-placeholder="update_progress_notes_placeholder" placeholder="Update progress notes for citizen view..." required style="min-height: 80px;"></textarea>
+              </div>
+
+              <!-- Proof upload panel (visible only if Resolved status is selected) -->
+              <div class="form-group hidden" id="proof-upload-panel">
+                <label class="form-label" data-i18n="upload_completion_photo_proof">Upload Completion Photo Proof *</label>
+                <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; cursor: pointer; transition: var(--transition-fast);" id="proof-dropzone">
+                  <i class="fa-solid fa-camera" style="font-size: 1.75rem; color: var(--slate-400); margin-bottom: 0.5rem;"></i>
+                  <p style="font-size: 0.8rem; font-weight: 600;" data-i18n="select_resolution_photo">Select resolution photo</p>
+                  <input type="file" id="proof-input" class="hidden" accept="image/*">
+                </div>
+                
+                <!-- Preview -->
+                <div id="proof-preview-wrapper" class="hidden" style="margin-top: 1rem; position: relative;">
+                  <img id="proof-preview" src="#" alt="Proof preview" style="max-height: 120px; border-radius: var(--radius-sm); object-fit: cover; border: 1px solid var(--border-color);">
+                  <button type="button" id="btn-clear-proof" class="btn btn-secondary" style="position: absolute; top: 5px; left: 5px; padding: 0.2rem 0.4rem; font-size: 0.7rem; border-radius: var(--radius-sm);">
+                    <i class="fa-solid fa-trash"></i> <span data-i18n="clear">Clear</span>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" id="btn-dispatch-submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="apply_status_update">Apply Status Update</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Location Map -->
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1rem;">
+            <h3 style="font-size: 1rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-map-pin"></i> <span data-i18n="coordinates_location">Coordinates Location</span></h3>
+            <div id="details-mini-map"></div>
+            
+            <div style="font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+              <div>
+                <span style="font-size: 0.72rem; color: var(--text-muted); font-weight:600; display:block;" data-i18n="geographic_coords">GEOGRAPHIC COORDS</span>
+                <span style="font-family: monospace; font-weight: 700;"><span id="issue-lat">0</span>, <span id="issue-lng">0</span></span>
+              </div>
+              <div>
+                <span style="font-size: 0.72rem; color: var(--text-muted); font-weight:600; display:block;" data-i18n="municipal_address">MUNICIPAL ADDRESS</span>
+                <span id="issue-address" style="font-weight: 600;">Location detected. Address unavailable.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Citizen Reporter metadata -->
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem;">
+            <div id="reporter-avatar" style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--border-color); color: var(--text-main); font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">C</div>
+            <div>
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight:600; display:block;" data-i18n="reporter_details">REPORTER DETAILS</span>
+              <span id="reporter-name" style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Anonymous Citizen</span>
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/authority-issue-details.js"></script>
+  <script src="js/chat-widget.js"></script>
+
+</body>
+</html>
