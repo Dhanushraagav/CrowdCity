@@ -6,6 +6,117 @@ import { otpService } from '../services/otpService.js';
 // In-memory safeguard to ensure welcome email is triggered at most once per user session/server run
 const SENT_WELCOME_ATTEMPTS = new Set();
 
+/**
+ * Helper to trigger welcome email exactly once per user lifetime
+ */
+async function triggerWelcomeEmail(userId, email, fullName, isMock = false) {
+  const emailLower = (email || '').toLowerCase().trim();
+  
+  if (isMock) {
+    let profile = MOCK_PROFILES.find(p => p.id === userId);
+    if (!profile) {
+      profile = {
+        id: userId,
+        full_name: fullName || 'Citizen',
+        email: emailLower,
+        avatar_url: '',
+        role: 'citizen',
+        welcome_email_sent: false,
+        created_at: new Date().toISOString()
+      };
+      MOCK_PROFILES.push(profile);
+    }
+
+    if (profile.welcome_email_sent === true || SENT_WELCOME_ATTEMPTS.has(userId)) {
+      logger.info('[Welcome] Existing user - skipping welcome email');
+      return { success: true, alreadySent: true };
+    }
+
+    logger.info('[Welcome] New account detected');
+    logger.info('[Welcome] Sending welcome email...');
+    const success = await sendWelcomeEmail(emailLower, fullName || 'Citizen', userId);
+    if (success) {
+      profile.welcome_email_sent = true;
+      SENT_WELCOME_ATTEMPTS.add(userId);
+      logger.info('[Welcome] Email sent successfully');
+      logger.info('[Welcome] welcome_email_sent updated');
+      return { success: true };
+    } else {
+      logger.error(`[Welcome] Failed to send mock welcome email for user: ${userId}`);
+      return { success: false };
+    }
+  }
+
+  // Real Supabase Mode
+  try {
+    let { data: profiles, error: selectError } = await supabaseAdmin
+      .from('profiles')
+      .select('welcome_email_sent, full_name')
+      .eq('id', userId);
+
+    if (selectError) {
+      logger.error(`[Welcome] Error fetching profile: ${selectError.message}`);
+      return { success: false, error: selectError.message };
+    }
+
+    let profile = profiles && profiles.length > 0 ? profiles[0] : null;
+
+    if (!profile) {
+      logger.warn(`[Welcome] Profile row not found for user: ${userId}`);
+      return { success: false, error: 'Profile not found' };
+    }
+
+    if (profile.welcome_email_sent === true || SENT_WELCOME_ATTEMPTS.has(userId)) {
+      logger.info('[Welcome] Existing user - skipping welcome email');
+      return { success: true, alreadySent: true };
+    }
+
+    let verifiedEmail = emailLower;
+    if (supabaseAdmin) {
+      try {
+        const { data, error: authError } = await supabaseAdmin.auth.admin.getUserById(userId);
+        if (!authError && data && data.user && data.user.email) {
+          verifiedEmail = data.user.email.toLowerCase().trim();
+        }
+      } catch (e) {
+        logger.warn(`[Welcome] Failed to verify email from auth: %O`, e);
+      }
+    }
+
+    if (!verifiedEmail) {
+      logger.error(`[Welcome] No valid email found for user: ${userId}`);
+      return { success: false, error: 'No email found' };
+    }
+
+    logger.info('[Welcome] New account detected');
+    logger.info('[Welcome] Sending welcome email...');
+    const success = await sendWelcomeEmail(verifiedEmail, fullName || profile.full_name || 'Citizen', userId);
+
+    if (success) {
+      const { error: updateError } = await supabaseAdmin
+        .from('profiles')
+        .update({ welcome_email_sent: true })
+        .eq('id', userId);
+
+      if (updateError) {
+        logger.warn(`[Welcome] Failed to update welcome_email_sent flag in database: ${updateError.message}`);
+      } else {
+        logger.info('[Welcome] welcome_email_sent updated');
+      }
+
+      SENT_WELCOME_ATTEMPTS.add(userId);
+      logger.info('[Welcome] Email sent successfully');
+      return { success: true };
+    } else {
+      logger.error(`[Welcome] Failed to send welcome email for user: ${userId}`);
+      return { success: false };
+    }
+  } catch (err) {
+    logger.error(`[Welcome] Exception in triggerWelcomeEmail: %O`, err);
+    return { success: false, error: err.message };
+  }
+}
+
 // Local cache for mock profile data
 export let MOCK_PROFILES = [
   {
@@ -50,7 +161,6 @@ export let MOCK_PROFILES = [
 export const getProfile = async (req, res) => {
   const userId = req.user.id;
   let profileToReturn = null;
-  let shouldSendEmail = false;
   let userEmail = req.user.email;
 
   // Fallback for Mock Mode
@@ -59,6 +169,7 @@ export const getProfile = async (req, res) => {
                                process.env.SUPABASE_URL !== '';
   if (!isSupabaseConfigured || userId.startsWith('mock-')) {
     let profile = MOCK_PROFILES.find(p => p.id === userId);
+    let justCreated = false;
     if (!profile) {
       const mockRole = req.user.role || 'citizen';
       profile = {
@@ -71,26 +182,17 @@ export const getProfile = async (req, res) => {
         created_at: new Date().toISOString()
       };
       MOCK_PROFILES.push(profile);
+      justCreated = true;
     }
     
     profileToReturn = profile;
     userEmail = profile.email;
-    if (profile.welcome_email_sent !== true && !SENT_WELCOME_ATTEMPTS.has(userId)) {
-      shouldSendEmail = true;
-      SENT_WELCOME_ATTEMPTS.add(userId);
-      profile.welcome_email_sent = true; // Set mock flag to true so we do not repeat
-    }
 
-    // Trigger welcome email asynchronously (non-blocking for the response)
-    if (shouldSendEmail && userEmail && !userEmail.includes('@crowdcity.mock')) {
-      const fullName = profileToReturn?.full_name || 'Citizen';
-      sendWelcomeEmail(userEmail, fullName)
-        .then(success => {
-          logger.info(`[getProfile] Welcome email send outcome for ${userEmail}: ${success ? 'SUCCESS' : 'FAILED'}`);
-        })
-        .catch(err => {
-          logger.error(`[getProfile] Welcome email send crashed for ${userEmail}: %O`, err);
-        });
+    // Trigger welcome email asynchronously ONLY if the profile was just created
+    if (justCreated && userEmail && !userEmail.includes('@crowdcity.mock')) {
+      triggerWelcomeEmail(userId, userEmail, profile.full_name, true);
+    } else if (profile && profile.welcome_email_sent !== true) {
+      logger.info('[Welcome] Existing user - skipping welcome email');
     }
 
     return res.status(200).json(profileToReturn);
@@ -113,6 +215,7 @@ export const getProfile = async (req, res) => {
     }
 
     let profile = null;
+    let justCreated = false;
     if (!profiles || profiles.length === 0) {
       // If profile is not found but authenticated, create it automatically
       console.log(`[getProfile] No profile found for user ${userId}. Automatically creating profile row...`);
@@ -132,6 +235,7 @@ export const getProfile = async (req, res) => {
       }
 
       profile = createdProfiles && createdProfiles.length > 0 ? createdProfiles[0] : null;
+      justCreated = true;
       console.log(`[getProfile] Created profile data:`, JSON.stringify(profile));
     } else {
       profile = profiles[0];
@@ -139,39 +243,11 @@ export const getProfile = async (req, res) => {
 
     profileToReturn = profile;
 
-    // Check if welcome email has been sent
-    if (profile && profile.welcome_email_sent !== true && !SENT_WELCOME_ATTEMPTS.has(userId)) {
-      shouldSendEmail = true;
-      SENT_WELCOME_ATTEMPTS.add(userId);
-
-      // Mark it as sent in Supabase using supabaseAdmin (bypassing RLS update check)
-      if (supabaseAdmin) {
-        try {
-          const { error: updateError } = await supabaseAdmin
-            .from('profiles')
-            .update({ welcome_email_sent: true })
-            .eq('id', userId);
-          if (updateError) {
-            logger.warn(`[getProfile] Could not update welcome_email_sent column: ${updateError.message}`);
-          } else {
-            profileToReturn.welcome_email_sent = true;
-          }
-        } catch (e) {
-          logger.warn(`[getProfile] Exception updating welcome_email_sent: %O`, e);
-        }
-      }
-    }
-
-    // Trigger welcome email asynchronously (non-blocking for the response)
-    if (shouldSendEmail && userEmail) {
-      const fullName = profileToReturn?.full_name || 'Citizen';
-      sendWelcomeEmail(userEmail, fullName)
-        .then(success => {
-          logger.info(`[getProfile] Welcome email send outcome for ${userEmail}: ${success ? 'SUCCESS' : 'FAILED'}`);
-        })
-        .catch(err => {
-          logger.error(`[getProfile] Welcome email send crashed for ${userEmail}: %O`, err);
-        });
+    // Trigger welcome email asynchronously ONLY if the profile was just created
+    if (justCreated && userEmail && profileToReturn) {
+      triggerWelcomeEmail(userId, userEmail, profileToReturn.full_name, false);
+    } else if (profileToReturn && profileToReturn.welcome_email_sent !== true) {
+      logger.info('[Welcome] Existing user - skipping welcome email');
     }
 
     return res.status(200).json(profileToReturn);
@@ -425,136 +501,21 @@ export const sendWelcomeEmailAfterSignup = async (req, res) => {
 
   logger.info(`[Welcome Email Audit] Received public send-welcome request for User ID: ${userId}, Email: ${email}`);
 
-  // Fallback for Mock Mode
   const isSupabaseConfigured = process.env.SUPABASE_URL && 
                                !process.env.SUPABASE_URL.includes('placeholder') &&
                                process.env.SUPABASE_URL !== '';
                                
   const isMock = !isSupabaseConfigured || userId.startsWith('mock-');
 
-  if (isMock) {
-    let profile = MOCK_PROFILES.find(p => p.id === userId);
-    if (!profile) {
-      profile = {
-        id: userId,
-        full_name: fullName || 'Citizen',
-        email: email,
-        avatar_url: '',
-        role: 'citizen',
-        welcome_email_sent: false,
-        created_at: new Date().toISOString()
-      };
-      MOCK_PROFILES.push(profile);
-    }
+  const result = await triggerWelcomeEmail(userId, email, fullName, isMock);
 
-    if (profile.welcome_email_sent === true) {
-      logger.info(`[Welcome Email Audit] Mock welcome email already sent for user ID: ${userId}`);
-      return res.status(200).json({ message: 'Welcome email already sent (Mock)', welcome_email_sent: true });
-    }
-
-    logger.info(`[Welcome Email Audit] Calling sendWelcomeEmail() for mock user ID: ${userId}, Email: ${email}`);
-    const success = await sendWelcomeEmail(email, fullName || 'Citizen', userId);
-    
-    if (success) {
-      profile.welcome_email_sent = true;
-      SENT_WELCOME_ATTEMPTS.add(userId);
-      return res.status(200).json({ message: 'Welcome email sent successfully (Mock)', welcome_email_sent: true });
-    } else {
-      return res.status(500).json({ error: 'Failed to send welcome email (Mock)' });
-    }
-  }
-
-  try {
-    // 1. Verify user exists in profiles table
-    let { data: profiles, error: selectError } = await supabaseAdmin
-      .from('profiles')
-      .select('*')
-      .eq('id', userId);
-
-    if (selectError) {
-      logger.error(`[Welcome Email Audit] Error checking profile for user ${userId}: %O`, selectError);
-      return res.status(400).json({ error: selectError.message });
-    }
-
-    let profile = profiles && profiles.length > 0 ? profiles[0] : null;
-
-    if (!profile) {
-      // Wait briefly for trigger/replication and retry
-      logger.warn(`[Welcome Email Audit] Profile row not found for ${userId} on first try. Waiting 1.5s to retry...`);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const { data: profilesRetry, error: retryError } = await supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('id', userId);
-        
-      if (retryError) {
-        logger.error(`[Welcome Email Audit] Error on profile fetch retry for ${userId}: %O`, retryError);
-        return res.status(400).json({ error: retryError.message });
-      }
-      
-      profile = profilesRetry && profilesRetry.length > 0 ? profilesRetry[0] : null;
-      if (!profile) {
-        logger.error(`[Welcome Email Audit] Profile row still missing for ${userId} after retry. Cannot send welcome email.`);
-        return res.status(404).json({ error: 'Profile not found' });
-      }
-    }
-
-    // 2. Prevent sending duplicate welcome emails
-    if (profile.welcome_email_sent === true || SENT_WELCOME_ATTEMPTS.has(userId)) {
-      logger.info(`[Welcome Email Audit] Welcome email already marked as sent for user: ${userId}`);
-      return res.status(200).json({ message: 'Welcome email already sent', welcome_email_sent: true });
-    }
-
-    // 3. Verify recipient email comes from the newly registered user (fetch from Supabase Auth)
-    let verifiedEmail = email;
-    let authUser = null;
-    if (supabaseAdmin) {
-      try {
-        const { data, error: authError } = await supabaseAdmin.auth.admin.getUserById(userId);
-        if (authError || !data || !data.user) {
-          logger.warn(`[Welcome Email Audit] Could not fetch auth user for ${userId} to verify email: ${authError?.message}`);
-        } else {
-          authUser = data.user;
-          verifiedEmail = authUser.email;
-          logger.info(`[Welcome Email Audit] Verified recipient email from Supabase Auth user payload: ${verifiedEmail}`);
-        }
-      } catch (authEx) {
-        logger.warn(`[Welcome Email Audit] Exception calling getUserById: %O`, authEx);
-      }
-    }
-
-    // Double check email sanity
-    if (!verifiedEmail) {
-      logger.error(`[Welcome Email Audit] No valid email found for user ID: ${userId}`);
-      return res.status(400).json({ error: 'No email address found for this user' });
-    }
-
-    // 4. Send the welcome email immediately
-    logger.info(`[Welcome Email Audit] Executing sendWelcomeEmail() for User ID: ${userId}, Email: ${verifiedEmail}`);
-    const success = await sendWelcomeEmail(verifiedEmail, fullName || profile.full_name || 'Citizen', userId);
-
-    if (success) {
-      // Mark it as sent in Supabase using supabaseAdmin
-      const { error: updateError } = await supabaseAdmin
-        .from('profiles')
-        .update({ welcome_email_sent: true })
-        .eq('id', userId);
-
-      if (updateError) {
-        logger.warn(`[Welcome Email Audit] Failed to update welcome_email_sent flag in database for ${userId}: ${updateError.message}`);
-      } else {
-        logger.info(`[Welcome Email Audit] Successfully updated welcome_email_sent to true in profiles for user: ${userId}`);
-      }
-      
-      SENT_WELCOME_ATTEMPTS.add(userId);
-      return res.status(200).json({ message: 'Welcome email delivered successfully', welcome_email_sent: true });
-    } else {
-      logger.error(`[Welcome Email Audit] Welcome email dispatch failed for User ID: ${userId}, Email: ${verifiedEmail}`);
-      return res.status(500).json({ error: 'Failed to deliver welcome email. See server logs for details.' });
-    }
-  } catch (err) {
-    logger.error(`[Welcome Email Audit] Exception in sendWelcomeEmailAfterSignup: %O`, err);
-    return res.status(500).json({ error: 'Internal server error sending welcome email' });
+  if (result.success) {
+    return res.status(200).json({ 
+      message: result.alreadySent ? 'Welcome email already sent' : 'Welcome email delivered successfully', 
+      welcome_email_sent: true 
+    });
+  } else {
+    return res.status(500).json({ error: result.error || 'Failed to send welcome email' });
   }
 };
 
@@ -804,14 +765,8 @@ export const registerVerifiedUser = async (req, res) => {
       const user = authData.user;
       logger.info(`[authController] Created user ${user.id} in Supabase auth.`);
 
-      // Send welcome email asynchronously
-      sendWelcomeEmail(emailLower, fullName, user.id)
-        .then(success => {
-          logger.info(`[authController] Welcome email send outcome for ${emailLower}: ${success ? 'SUCCESS' : 'FAILED'}`);
-        })
-        .catch(err => {
-          logger.error(`[authController] Welcome email send crashed for ${emailLower}: %O`, err);
-        });
+      // Send welcome email asynchronously using the helper
+      triggerWelcomeEmail(user.id, emailLower, fullName, false);
 
       // Generate magic link session tokens for immediate login
       const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
@@ -865,11 +820,8 @@ export const registerVerifiedUser = async (req, res) => {
     };
     MOCK_PROFILES.push(newMockProfile);
 
-    // Send simulated welcome email
-    sendWelcomeEmail(emailLower, fullName, mockUserId)
-      .then(success => {
-        logger.info(`[authController] Welcome email mock send outcome for ${emailLower}: ${success ? 'SUCCESS' : 'FAILED'}`);
-      });
+    // Send simulated welcome email using the helper
+    triggerWelcomeEmail(mockUserId, emailLower, fullName, true);
 
     return res.status(201).json({
       message: 'Mock account created and verified successfully.',
