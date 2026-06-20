@@ -33,7 +33,7 @@ app.use(helmet({
 // 2. CORS Whitelist Configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['https://crowdcity-api.onrender.com'];
+  : ['https://crowdcity.co.in', 'https://www.crowdcity.co.in'];
 
 const corsOptions = {
   origin: (origin, callback) => {

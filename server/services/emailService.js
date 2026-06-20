@@ -189,7 +189,7 @@ export const sendLoginOtpEmail = async (email, code) => {
  */
 export const sendResetPasswordEmail = async (email, token) => {
   const subject = 'Reset your password - CrowdCity';
-  const appUrl = process.env.APP_URL || 'https://crowdcity-api.onrender.com';
+  const appUrl = process.env.APP_URL || 'https://crowdcity.co.in';
   const resetLink = `${appUrl}/reset-password.html?token=${token}&email=${encodeURIComponent(email)}`;
   
   const contentHtml = `
@@ -230,7 +230,7 @@ export const sendResetPasswordEmail = async (email, token) => {
  */
 export const sendWelcomeEmail = async (email, fullName, userId = 'N/A') => {
   const subject = 'Welcome to CrowdCity';
-  const appUrl = process.env.APP_URL || 'https://crowdcity-api.onrender.com';
+  const appUrl = process.env.APP_URL || 'https://crowdcity.co.in';
 
   const contentHtml = `
     <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">

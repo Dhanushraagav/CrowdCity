@@ -11,7 +11,7 @@
                       window.location.hostname.startsWith('192.168.') ||
                       window.location.hostname.startsWith('10.');
       if (!isLocal) {
-        url = 'https://crowdcity-api.onrender.com' + url;
+        url = 'https://crowdcity.co.in' + url;
       }
     }
     return originalFetch.call(this, url, options);
@@ -26,7 +26,7 @@
                         window.location.hostname.startsWith('192.168.') ||
                         window.location.hostname.startsWith('10.');
         if (!isLocal) {
-          url = 'https://crowdcity-api.onrender.com' + url;
+          url = 'https://crowdcity.co.in' + url;
         }
       }
       return new OriginalEventSource(url, options);
