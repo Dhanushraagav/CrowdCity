@@ -42,6 +42,13 @@ window.authInitPromise = new Promise((resolve) => {
 let supabaseClient = null;
 let isMockAuth = false;
 
+// Fallback MOCK_PROFILES to prevent client-side reference errors in mock auth mode
+const MOCK_PROFILES = window.MOCK_PROFILES || [
+  { id: 'mock-user-citizen', email: 'citizen@example.com', role: 'citizen', full_name: 'Citizen User', avatar_url: '' },
+  { id: 'mock-user-authority', email: 'authority@example.com', role: 'authority', is_verified_authority: true, avatar_url: '' },
+  { id: 'mock-user-admin', email: 'admin@example.com', role: 'admin', is_verified_authority: true, avatar_url: '' }
+];
+
 // Initialize Supabase Client dynamically from server config
 async function initAuth() {
   try {
@@ -1241,6 +1248,11 @@ function updateAuthUI() {
     console.log(`[Debug Log] Dispatching auth-change event (loggedIn: ${loggedIn})`);
     window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn, user } }));
   }
+
+  // Initialize/update mobile responsive navigation drawer
+  if (typeof initResponsiveSidebar === 'function') {
+    initResponsiveSidebar();
+  }
 }
 
 // Toggle Dropdown Display
@@ -1573,4 +1585,166 @@ window.addEventListener('language-change', () => {
   updateAuthUI();
   // Force update the header clock immediately
   initHeaderClock();
+});
+
+// MD3 Responsive Side Drawer Helper Functions
+function initResponsiveSidebar() {
+  const isMobile = window.innerWidth < 768;
+  const sidebar = document.querySelector('.app-sidebar');
+  const topnavDrawer = document.getElementById('topnav-mobile-drawer');
+  
+  if (isMobile) {
+    // Cache original desktop sidebar markup
+    if (sidebar && !window._originalSidebarHtml) {
+      window._originalSidebarHtml = sidebar.innerHTML;
+    }
+    if (topnavDrawer && !window._originalTopnavDrawerHtml) {
+      window._originalTopnavDrawerHtml = topnavDrawer.innerHTML;
+    }
+    
+    // Render dynamic MD3 layout
+    const user = getCurrentUser();
+    const role = getUserRole();
+    let fullName = 'User';
+    let userEmail = '';
+    let avatarUrl = '';
+    if (user) {
+      let cachedProfile = null;
+      try {
+        const profileStr = localStorage.getItem('cc_user_profile');
+        if (profileStr) cachedProfile = JSON.parse(profileStr);
+      } catch (e) {}
+      fullName = cachedProfile?.full_name || user.user_metadata?.full_name || (role === 'admin' ? 'Admin' : (role === 'authority' ? 'Inspector' : 'User'));
+      userEmail = user.email || '';
+      avatarUrl = cachedProfile?.avatar_url || user.user_metadata?.avatar_url || '';
+    }
+    const avatarInitial = fullName.charAt(0).toUpperCase();
+    const avatarHtml = avatarUrl 
+      ? `<img src="${avatarUrl}" class="mobile-drawer-avatar-img" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+      : avatarInitial;
+    
+    const profileHref = (role === 'admin' ? 'admin.html' : (role === 'authority' ? 'authority-profile.html' : 'profile.html'));
+    
+    const path = window.location.pathname;
+    const isActive = (href) => path.includes(href) || (href === 'citizen-dashboard.html' && (path.endsWith('/') || path.endsWith('/index.html')));
+    
+    const isAuth = role === 'authority' || role === 'admin';
+    const links = isAuth ? [
+      { href: 'authority-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
+      { href: 'authority-reports.html', icon: 'fa-clipboard-list', label: 'Cases', key: 'nav_cases' },
+      { href: 'authority-notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
+      { href: 'authority-settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
+    ] : [
+      { href: 'citizen-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
+      { href: 'report.html', icon: 'fa-plus', label: 'Report Issue', key: 'nav_report' },
+      { href: 'my-complaints.html', icon: 'fa-clipboard-list', label: 'My Complaints', key: 'nav_my_complaints' },
+      { href: 'notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
+      { href: 'settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
+    ];
+    
+    let linksHtml = links.map(link => {
+      const tLabel = window.i18n ? window.i18n.t(link.key) : link.label;
+      return `
+        <a href="${link.href}" class="mobile-drawer-link ${isActive(link.href) ? 'active' : ''}">
+          <i class="fa-solid ${link.icon}"></i> <span>${tLabel}</span>
+        </a>
+      `;
+    }).join('');
+
+    const tLogout = window.i18n ? window.i18n.t('nav_logout') : 'Logout';
+    
+    const mobileHtml = `
+      <a href="${profileHref}" class="mobile-drawer-header-link" style="text-decoration: none; color: inherit; display: block; width: 100%;">
+        <div class="mobile-drawer-header" style="cursor: pointer;">
+          <div class="mobile-drawer-avatar">${avatarHtml}</div>
+          <div class="mobile-drawer-profile-info">
+            <div class="mobile-drawer-username">${fullName}</div>
+            <div class="mobile-drawer-useremail">${userEmail}</div>
+          </div>
+        </div>
+      </a>
+      <div class="mobile-drawer-divider"></div>
+      <nav class="mobile-drawer-nav">
+        ${linksHtml}
+        <button onclick="logoutUser()" class="mobile-drawer-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>${tLogout}</span>
+        </button>
+      </nav>
+      <div class="mobile-drawer-divider"></div>
+    `;
+    
+    if (sidebar) sidebar.innerHTML = mobileHtml;
+    if (topnavDrawer) {
+      topnavDrawer.innerHTML = mobileHtml;
+      topnavDrawer.classList.add('mobile-drawer-panel');
+    }
+    
+    // Inject and handle backdrop
+    let backdrop = document.getElementById('drawer-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'drawer-backdrop';
+      backdrop.className = 'drawer-backdrop';
+      document.body.appendChild(backdrop);
+      backdrop.addEventListener('click', () => {
+        if (sidebar) sidebar.classList.remove('active');
+        if (topnavDrawer) topnavDrawer.classList.remove('active');
+        backdrop.classList.remove('active');
+      });
+    }
+  } else {
+    // Restore original desktop markup
+    if (sidebar && window._originalSidebarHtml) {
+      sidebar.innerHTML = window._originalSidebarHtml;
+      window._originalSidebarHtml = null;
+    }
+    if (topnavDrawer && window._originalTopnavDrawerHtml) {
+      topnavDrawer.innerHTML = window._originalTopnavDrawerHtml;
+      topnavDrawer.classList.remove('mobile-drawer-panel');
+      window._originalTopnavDrawerHtml = null;
+    }
+    const backdrop = document.getElementById('drawer-backdrop');
+    if (backdrop) backdrop.classList.remove('active');
+    if (sidebar) sidebar.classList.remove('active');
+    if (topnavDrawer) topnavDrawer.classList.remove('active');
+  }
+}
+
+// Bind resize listener
+window.addEventListener('resize', initResponsiveSidebar);
+
+// Bind toggle action logic
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.querySelector('.app-sidebar');
+  const topnavDrawer = document.getElementById('topnav-mobile-drawer');
+  const setupToggleListeners = () => {
+    const toggles = document.querySelectorAll('#mobile-menu-btn, #topnav-hamburger, .mobile-menu-toggle, .topnav-hamburger');
+    toggles.forEach(btn => {
+      // Avoid duplicate event listener binding
+      if (btn.dataset.drawerBound) return;
+      btn.dataset.drawerBound = "true";
+      
+      btn.addEventListener('click', () => {
+        const backdrop = document.getElementById('drawer-backdrop');
+        if (backdrop) {
+          setTimeout(() => {
+            const activeSidebar = sidebar && sidebar.classList.contains('active');
+            const activeTopnav = topnavDrawer && topnavDrawer.classList.contains('active');
+            if (activeSidebar || activeTopnav) {
+              backdrop.classList.add('active');
+            } else {
+              backdrop.classList.remove('active');
+            }
+          }, 20);
+        }
+      });
+    });
+  };
+  
+  setupToggleListeners();
+  
+  // Also run setup whenever auth UI renders
+  window.addEventListener('auth-change', () => {
+    setTimeout(setupToggleListeners, 50);
+  });
 });

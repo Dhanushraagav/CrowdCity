@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js"></script>
   <script src="js/i18n.js"></script>
@@ -668,11 +675,16 @@
             </div>
 
             <!-- Detailed Description -->
-            <div>
+            <div class="description-group">
               <div class="desc-header">
                 <label for="report-description" class="field-label" style="margin-bottom: 0;" data-i18n="detailed_description">Detailed Description</label>
                 <button type="button" id="btn-ai-assist" class="btn-ai">
-                  <i class="fa-solid fa-wand-magic-sparkles ai-icon"></i> <span data-i18n="auto_categorize_ai">Auto-Categorize with AI</span>
+                  <i class="fa-solid fa-wand-magic-sparkles ai-icon"></i>
+                  <div class="ai-btn-content">
+                    <span class="ai-btn-title" data-i18n="auto_categorize_ai">Auto-Categorize with AI</span>
+                    <span class="ai-btn-subtitle mobile-only">AI will analyze text to set category and department</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right ai-btn-arrow mobile-only"></i>
                 </button>
               </div>
               <textarea
@@ -686,7 +698,7 @@
             </div>
 
             <!-- Location -->
-            <div>
+            <div class="location-group">
               <div class="location-header">
                 <label for="report-address" class="field-label" style="margin-bottom: 0;" data-i18n="location">Location</label>
                 <button type="button" id="btn-use-gps" class="btn-gps">
@@ -695,8 +707,8 @@
               </div>
 
               <!-- Address field -->
-              <div style="position: relative; margin-bottom: 0.65rem; display: flex; gap: 0.5rem; align-items: center;">
-                <div style="position: relative; flex: 1;">
+              <div class="address-field-wrapper" style="position: relative; margin-bottom: 0.65rem; display: flex; gap: 0.5rem; align-items: center;">
+                <div class="address-input-wrapper" style="position: relative; flex: 1;">
                   <i class="fa-solid fa-location-dot" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none;"></i>
                   <input
                     type="text"
@@ -794,6 +806,10 @@
       </div>
 
     </div>
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Designed and engineered by Dhanushraagav S</p>
+    </footer>
   </div>
 
   <!-- Supabase CDN Client -->

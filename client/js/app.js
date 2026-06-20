@@ -992,10 +992,11 @@ function updateHeroGreeting() {
     }
   }
 
+  const safeName = `<span class="user-greeting-name">${escapeHTML(fullName)}</span>`;
   if (window.i18n) {
-    heroGreeting.textContent = window.i18n.t(greetingKey, { name: fullName });
+    heroGreeting.innerHTML = window.i18n.t(greetingKey, { name: safeName });
   } else {
-    heroGreeting.textContent = `${greeting}, ${fullName}`;
+    heroGreeting.innerHTML = `${escapeHTML(greeting)}, ${safeName}`;
   }
 
   // Also set the hero description if it hasn't been populated yet by loadUserStats

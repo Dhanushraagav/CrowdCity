@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js"></script>
   <script src="js/i18n.js"></script>
@@ -144,9 +151,9 @@
 
         <!-- Stitch Hero card -->
         <div class="stitch-hero">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; width: 100%;">
-            <div style="flex: 1.2; min-width: 280px; display: flex; flex-direction: column; gap: 0.5rem;">
-              <h1 id="hero-greeting" class="stitch-hero-title" style="min-height: 2.5rem;"></h1>
+          <div class="stitch-hero-container">
+            <div class="stitch-hero-details-wrap">
+              <h1 id="hero-greeting" class="stitch-hero-title"></h1>
               <p class="stitch-hero-desc" id="hero-desc"></p>
               <div class="stitch-hero-actions">
                 <a href="report.html" class="btn btn-primary" style="padding: 0.65rem 1.35rem; font-size: 0.88rem; font-weight: 700; background-color: var(--primary); color: var(--text-inverse); border: none;">
@@ -159,7 +166,7 @@
             </div>
             
             <!-- User level progression bar -->
-            <div style="flex: 0.8; min-width: 280px; max-width: 380px; display: flex; flex-direction: column; gap: 0.75rem; background: rgba(11, 15, 25, 0.95); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid rgba(255, 255, 255, 0.12);">
+            <div class="stitch-hero-progress-card">
               <h3 style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;" data-i18n="your_progress">Your Progress</h3>
               <div class="progression-container">
                 <div class="progression-header">
@@ -201,6 +208,29 @@
             <div class="stitch-stat-value-row">
               <span class="stitch-stat-value" id="stat-community-rank"></span>
             </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions (Mobile Only) -->
+        <div class="quick-actions-section mobile-only">
+          <h2 class="quick-actions-title" data-i18n="quick_actions">Quick Actions</h2>
+          <div class="quick-actions-grid">
+            <a href="report.html" class="quick-action-card">
+              <div class="quick-action-icon bg-primary-alpha"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <span class="quick-action-label" data-i18n="report_issue">Report Issue</span>
+            </a>
+            <a href="my-complaints.html" class="quick-action-card">
+              <div class="quick-action-icon bg-secondary-alpha"><i class="fa-solid fa-clipboard-list"></i></div>
+              <span class="quick-action-label" data-i18n="my_complaints">My Complaints</span>
+            </a>
+            <a href="map.html" class="quick-action-card">
+              <div class="quick-action-icon bg-success-alpha"><i class="fa-solid fa-map-location-dot"></i></div>
+              <span class="quick-action-label" data-i18n="view_map">View Map</span>
+            </a>
+            <button onclick="openEmergencyModal()" class="quick-action-card">
+              <div class="quick-action-icon bg-danger-alpha"><i class="fa-solid fa-phone"></i></div>
+              <span class="quick-action-label" data-i18n="emergency_contacts">Emergency Contacts</span>
+            </button>
           </div>
         </div>
 
@@ -267,7 +297,8 @@
           <!-- Left side: Recent Complaints list -->
           <div>
             <div class="stitch-section-header">
-              <h2 class="stitch-section-title" data-i18n="reports_feed">Reports Feed</h2>
+              <h2 class="stitch-section-title desktop-only" data-i18n="reports_feed">Reports Feed</h2>
+              <h2 class="stitch-section-title mobile-only" data-i18n="recent_activity">Recent Activity</h2>
             </div>
             
             <div class="stitch-list" id="issues-list">
@@ -304,6 +335,10 @@
         </div>
 
       </div>
+      <!-- Footer -->
+      <footer class="app-footer">
+        <p>Designed and engineered by Dhanushraagav S</p>
+      </footer>
     </div>
   </div>
 
@@ -447,6 +482,62 @@
       window.cc_initWeather();
     }
   });
+  </script>
+
+  <!-- Emergency Contacts Modal (Mobile Only) -->
+  <div id="emergency-modal" class="custom-modal hidden">
+    <div class="custom-modal-backdrop" onclick="closeEmergencyModal()"></div>
+    <div class="custom-modal-content">
+      <div class="custom-modal-header">
+        <h3 data-i18n="emergency_contacts">Emergency Contacts</h3>
+        <button onclick="closeEmergencyModal()" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="custom-modal-body">
+        <div class="emergency-contact-item">
+          <div class="emergency-icon"><i class="fa-solid fa-building-shield"></i></div>
+          <div class="emergency-info">
+            <span class="emergency-name">Police Control</span>
+            <span class="emergency-number">100</span>
+          </div>
+          <a href="tel:100" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+        </div>
+        <div class="emergency-contact-item">
+          <div class="emergency-icon"><i class="fa-solid fa-truck-medical"></i></div>
+          <div class="emergency-info">
+            <span class="emergency-name">Ambulance Services</span>
+            <span class="emergency-number">108</span>
+          </div>
+          <a href="tel:108" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+        </div>
+        <div class="emergency-contact-item">
+          <div class="emergency-icon"><i class="fa-solid fa-fire-extinguisher"></i></div>
+          <div class="emergency-info">
+            <span class="emergency-name">Fire Department</span>
+            <span class="emergency-number">101</span>
+          </div>
+          <a href="tel:101" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+        </div>
+        <div class="emergency-contact-item">
+          <div class="emergency-icon"><i class="fa-solid fa-city"></i></div>
+          <div class="emergency-info">
+            <span class="emergency-name">Municipal Helpline</span>
+            <span class="emergency-number">1913</span>
+          </div>
+          <a href="tel:1913" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openEmergencyModal() {
+      const modal = document.getElementById('emergency-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+    function closeEmergencyModal() {
+      const modal = document.getElementById('emergency-modal');
+      if (modal) modal.classList.add('hidden');
+    }
   </script>
 
 </body>

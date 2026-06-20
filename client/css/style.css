@@ -818,8 +818,13 @@ body::after {
    Mobile Responsiveness Overrides (320px–768px)
    ========================================================================== */
 @media (max-width: 768px) {
-  /* Prevent horizontal overflow on entire viewport */
-  html, body {
+  /* Enforce box-sizing border-box everywhere on mobile */
+  *, *:before, *:after {
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent horizontal overflow on entire viewport and containers */
+  html, body, .app-layout, .app-main, .app-content-body, .content-wrapper, .details-grid, .app-header-main, footer, section, main, div:not(.filter-pills):not(#feed-tabs-container):not(.stepper-container) {
     max-width: 100% !important;
     overflow-x: hidden !important;
   }
@@ -841,6 +846,43 @@ body::after {
   input, select, textarea, button {
     max-width: 100% !important;
     box-sizing: border-box !important;
+  }
+
+  /* Redesign statistic cards into a clean 2-column grid on mobile */
+  .stats-grid,
+  .stitch-stats-grid,
+  .profile-stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+    height: auto !important;
+    width: 100% !important;
+  }
+  
+  .stat-card,
+  .stitch-stat-card,
+  .profile-stat-card {
+    padding: 0.85rem !important;
+    border-radius: var(--radius-md) !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+  }
+  
+  .stat-number,
+  .stitch-stat-value {
+    font-size: 1.35rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .stat-label,
+  .stitch-stat-label {
+    font-size: 0.7rem !important;
+  }
+
+  /* Enforce accessibility touch targets on mobile interactive elements */
+  input, select, textarea, .btn, .app-sidebar-link, .bell-btn, .mobile-menu-toggle, .user-menu {
+    min-height: 44px !important;
   }
 
   /* Scale reset-password container and cards properly */

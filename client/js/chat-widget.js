@@ -21,7 +21,7 @@
       cursor: pointer;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
       z-index: 9999;
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
     }
 
     #cc-chat-trigger:hover {
@@ -68,6 +68,27 @@
       display: none;
     }
 
+    /* Backdrop Blur Overlay */
+    #cc-chat-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 9997; /* Just below #cc-chat-window */
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #cc-chat-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     /* Chat Window Container Card */
     #cc-chat-window {
       position: fixed;
@@ -94,6 +115,11 @@
       transform: translateY(0) scale(1);
       opacity: 1;
       pointer-events: auto;
+    }
+
+    /* Drag Handle Bar for Mobile */
+    .cc-chat-drag-handle {
+      display: none;
     }
 
     /* Header Panel */
@@ -339,19 +365,81 @@
     }
 
     /* Mobile Adaptability */
-    @media (max-width: 500px) {
+    @media (max-width: 768px) {
       #cc-chat-window {
-        width: calc(100vw - 32px);
-        height: calc(100vh - 120px);
-        bottom: 80px;
-        right: 16px;
-        left: 16px;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        height: 70vh;
+        max-height: 70vh;
+        border-radius: 24px 24px 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+        transform: translateY(100%);
+        opacity: 1; /* Slide-only transition */
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       }
-      #cc-chat-trigger {
-        bottom: 16px;
-        right: 16px;
-        width: 44px;
-        height: 44px;
+
+      #cc-chat-window.open {
+        transform: translateY(0);
+      }
+
+      /* Hide floating trigger button when open to prevent blocking input container */
+      #cc-chat-trigger.open {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.8);
+      }
+
+      /* Drag Handle Bar at top of sheet */
+      .cc-chat-drag-handle {
+        display: block;
+        width: 36px;
+        height: 4px;
+        background-color: var(--border-color);
+        border-radius: 2px;
+        margin: 8px auto 4px auto;
+        flex-shrink: 0;
+        cursor: grab;
+        touch-action: none;
+      }
+      .cc-chat-drag-handle:active {
+        cursor: grabbing;
+      }
+
+      /* Reduce empty space & make messages occupy more area */
+      .cc-chat-messages {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+      }
+
+      .cc-msg {
+        max-width: 90%;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+
+      .cc-chat-footer {
+        padding: 0.75rem 1rem;
+        gap: 0.375rem;
+      }
+
+      .cc-chat-input-container {
+        padding: 4px 6px 4px 8px;
+      }
+
+      .cc-chat-input {
+        height: 28px;
+        font-size: 0.85rem;
+      }
+
+      .cc-chat-send-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
       }
     }
   `;
@@ -365,6 +453,12 @@
     const styleEl = document.createElement('style');
     styleEl.innerHTML = cssStyles;
     document.head.appendChild(styleEl);
+
+    // 1.5 Create Backdrop Overlay
+    const backdropEl = document.createElement('div');
+    backdropEl.id = 'cc-chat-backdrop';
+    backdropEl.addEventListener('click', toggleChatWindow);
+    document.body.appendChild(backdropEl);
 
     // 2. Create Trigger Button
     const triggerBtn = document.createElement('div');
@@ -393,6 +487,7 @@
     const chatWindow = document.createElement('div');
     chatWindow.id = 'cc-chat-window';
     chatWindow.innerHTML = `
+      <div class="cc-chat-drag-handle"></div>
       <div class="cc-chat-header">
         <div class="cc-chat-title-info">
           <h3>Civic Assistant</h3>
@@ -419,34 +514,167 @@
       </div>
     `;
     document.body.appendChild(chatWindow);
+
+    // 4. Bind Drag/Swipe down to close touch listeners for mobile
+    const dragHandle = chatWindow.querySelector('.cc-chat-drag-handle');
+    const chatHeader = chatWindow.querySelector('.cc-chat-header');
+    const msgBox = chatWindow.querySelector('#cc-chat-msg-box');
+
+    let touchStartY = 0;
+    let touchCurrentY = 0;
+    let isDragging = false;
+
+    function onTouchStart(e) {
+      if (window.innerWidth > 768) return;
+      touchStartY = e.touches[0].clientY;
+      touchCurrentY = touchStartY;
+      isDragging = true;
+      chatWindow.style.transition = 'none';
+    }
+
+    function onTouchMove(e) {
+      if (!isDragging) return;
+      touchCurrentY = e.touches[0].clientY;
+      const deltaY = touchCurrentY - touchStartY;
+      if (deltaY > 0) {
+        chatWindow.style.transform = `translateY(${deltaY}px)`;
+        if (e.cancelable) e.preventDefault();
+      } else {
+        // Cancel dragging if swiping up
+        isDragging = false;
+        chatWindow.style.transition = '';
+        chatWindow.style.transform = '';
+      }
+    }
+
+    function onTouchEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      const deltaY = touchCurrentY - touchStartY;
+      if (deltaY > 120) {
+        // Reset inline styles and close
+        chatWindow.style.transition = '';
+        chatWindow.style.transform = '';
+        toggleChatWindow();
+      } else {
+        // Animate back to open state
+        chatWindow.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+        chatWindow.style.transform = 'translateY(0)';
+      }
+    }
+
+    dragHandle.addEventListener('touchstart', onTouchStart, { passive: true });
+    dragHandle.addEventListener('touchmove', onTouchMove, { passive: false });
+    dragHandle.addEventListener('touchend', onTouchEnd);
+
+    chatHeader.addEventListener('touchstart', onTouchStart, { passive: true });
+    chatHeader.addEventListener('touchmove', onTouchMove, { passive: false });
+    chatHeader.addEventListener('touchend', onTouchEnd);
+
+    // Messages container swipe down (only when scrolled to top)
+    msgBox.addEventListener('touchstart', (e) => {
+      if (window.innerWidth > 768) return;
+      if (msgBox.scrollTop === 0) {
+        touchStartY = e.touches[0].clientY;
+        touchCurrentY = touchStartY;
+        isDragging = true;
+        chatWindow.style.transition = 'none';
+      }
+    }, { passive: true });
+
+    msgBox.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      touchCurrentY = e.touches[0].clientY;
+      const deltaY = touchCurrentY - touchStartY;
+      if (deltaY > 0) {
+        chatWindow.style.transform = `translateY(${deltaY}px)`;
+        if (e.cancelable) e.preventDefault();
+      } else {
+        isDragging = false;
+        chatWindow.style.transition = '';
+        chatWindow.style.transform = '';
+      }
+    }, { passive: false });
+
+    msgBox.addEventListener('touchend', onTouchEnd);
+
+    // 5. Visual Viewport / Software Keyboard handling for mobile
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        if (window.innerWidth > 768) return;
+        const chatWin = document.getElementById('cc-chat-window');
+        if (!chatWin || !chatWin.classList.contains('open')) return;
+
+        const keyboardHeight = window.innerHeight - window.visualViewport.height;
+        if (keyboardHeight > 50) {
+          chatWin.style.bottom = `${keyboardHeight}px`;
+          chatWin.style.height = `${window.visualViewport.height * 0.7}px`;
+        } else {
+          chatWin.style.bottom = '0px';
+          chatWin.style.height = '70vh';
+        }
+      });
+    }
   }
 
   // Toggle drawer open/close state
   function toggleChatWindow() {
     const chatWin = document.getElementById('cc-chat-window');
     const trigger = document.getElementById('cc-chat-trigger');
+    const backdrop = document.getElementById('cc-chat-backdrop');
     if (!chatWin || !trigger) return;
 
     chatWin.classList.toggle('open');
-    
+    if (backdrop) backdrop.classList.toggle('open');
+    trigger.classList.toggle('open');
+
     if (chatWin.classList.contains('open')) {
       trigger.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
-      // Auto-focus input box
+      // Auto-focus input box with slight timeout to let slide-up animate smoothly
       const input = document.getElementById('cc-chat-input-box');
-      if (input) input.focus();
+      if (input) {
+        setTimeout(() => input.focus(), 150);
+      }
 
       // Mark opened once
       localStorage.setItem('cc_chatbot_opened_once', 'true');
       const badge = document.getElementById('cc-chat-trigger-badge');
       if (badge) badge.style.display = 'none';
-      
+
       trigger.classList.remove('pulse');
     } else {
       trigger.innerHTML = '<i class="fa-regular fa-comment-dots"></i>';
+      // Reset inline styles for drag and keyboard layout when closed
+      chatWin.style.bottom = '';
+      chatWin.style.height = '';
+      chatWin.style.transform = '';
+      // Unfocus input to dismiss keyboard
+      const input = document.getElementById('cc-chat-input-box');
+      if (input) input.blur();
     }
   }
   // Expose toggle globally for inline header onclick support
   window.toggleChatWindow = toggleChatWindow;
+
+  // Window resize to clear mobile layout overrides when changing to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      const chatWin = document.getElementById('cc-chat-window');
+      const trigger = document.getElementById('cc-chat-trigger');
+      const backdrop = document.getElementById('cc-chat-backdrop');
+      if (chatWin) {
+        chatWin.style.bottom = '';
+        chatWin.style.height = '';
+        chatWin.style.transform = '';
+      }
+      if (trigger) {
+        trigger.classList.remove('open');
+      }
+      if (backdrop) {
+        backdrop.classList.remove('open');
+      }
+    }
+  });
 
   // Process sending user message
   async function handleSend(e) {

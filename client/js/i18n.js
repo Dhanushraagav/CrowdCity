@@ -236,6 +236,7 @@ class I18nService {
 
     if (headerActions) {
       headerActions.insertBefore(container, headerActions.firstChild);
+      headerActions.addEventListener('click', (e) => e.stopPropagation());
     } else if (topnavRight) {
       topnavRight.insertBefore(container, topnavRight.firstChild);
     } else {
