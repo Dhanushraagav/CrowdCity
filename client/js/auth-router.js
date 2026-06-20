@@ -1,41 +1,7 @@
 // CrowdCity - Central Authentication Router & Role Separator
 // Runs synchronously in `<head>` to prevent flashes of unauthorized/incorrect layouts
 
-// Global Fetch and EventSource Interceptor to route all relative API & SSE calls to the Render production API backend
-(function() {
-  const originalFetch = window.fetch;
-  window.fetch = function(url, options) {
-    if (typeof url === 'string' && url.startsWith('/api/')) {
-      const isLocal = window.location.hostname === 'localhost' || 
-                      window.location.hostname === '127.0.0.1' ||
-                      window.location.hostname.startsWith('192.168.') ||
-                      window.location.hostname.startsWith('10.');
-      if (!isLocal) {
-        url = 'https://crowdcity.co.in' + url;
-      }
-    }
-    return originalFetch.call(this, url, options);
-  };
 
-  const OriginalEventSource = window.EventSource;
-  if (OriginalEventSource) {
-    const CustomEventSource = function(url, options) {
-      if (typeof url === 'string' && url.startsWith('/api/')) {
-        const isLocal = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' ||
-                        window.location.hostname.startsWith('192.168.') ||
-                        window.location.hostname.startsWith('10.');
-        if (!isLocal) {
-          url = 'https://crowdcity.co.in' + url;
-        }
-      }
-      return new OriginalEventSource(url, options);
-    };
-    Object.setPrototypeOf(CustomEventSource, OriginalEventSource);
-    CustomEventSource.prototype = OriginalEventSource.prototype;
-    window.EventSource = CustomEventSource;
-  }
-})();
 
 // Expose exactly ONE source of truth for all redirects in the project
 window.authRouter = {
