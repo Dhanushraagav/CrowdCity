@@ -1,6 +1,132 @@
 // CrowdCity - Central Authentication Router & Role Separator
 // Runs synchronously in `<head>` to prevent flashes of unauthorized/incorrect layouts
 
+// Universal Page Loader Injection
+(function() {
+  // Avoid loader on simple redirection pages or offline
+  const path = window.location.pathname;
+  if (path.endsWith('/') || path.endsWith('/index') || path.endsWith('/index.html') || path.includes('offline')) {
+    return;
+  }
+
+  // Record start time to ensure minimum loader duration
+  window.authLoaderStartTime = Date.now();
+
+  // Inject loader CSS
+  const loaderStyle = document.createElement('style');
+  loaderStyle.id = 'global-page-loader-style';
+  loaderStyle.innerHTML = `
+    #global-page-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 7, 18, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+      opacity: 1;
+      visibility: visible;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    #global-page-loader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .loader-spinner-ring {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    .loader-spinner-ring div {
+      box-sizing: border-box;
+      display: block;
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      margin: 8px;
+      border: 4px solid transparent;
+      border-radius: 50%;
+      animation: spinner-ring-rotate 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      border-top-color: #0d9488;
+    }
+    .loader-spinner-ring div:nth-child(1) { animation-delay: -0.45s; }
+    .loader-spinner-ring div:nth-child(2) { animation-delay: -0.3s; }
+    .loader-spinner-ring div:nth-child(3) { animation-delay: -0.15s; }
+    @keyframes spinner-ring-rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loader-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+    }
+    .loader-logo i {
+      color: #0d9488;
+      font-size: 1.5rem;
+    }
+    .loader-text {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+  `;
+  (document.head || document.documentElement).appendChild(loaderStyle);
+
+  // Inject loader HTML as soon as body is available
+  function injectLoaderHTML() {
+    if (document.getElementById('global-page-loader')) return;
+    const loader = document.createElement('div');
+    loader.id = 'global-page-loader';
+    loader.innerHTML = `
+      <div class="loader-container">
+        <div class="loader-spinner-ring">
+          <div></div><div></div><div></div><div></div>
+        </div>
+        <div class="loader-logo">
+          <i class="fa-solid fa-city"></i>
+          <span>CrowdCity AI</span>
+        </div>
+        <div class="loader-text">Loading Portal...</div>
+      </div>
+    `;
+    document.body.insertBefore(loader, document.body.firstChild);
+  }
+
+  if (document.body) {
+    injectLoaderHTML();
+  } else {
+    const bodyObserver = new MutationObserver((mutations, observer) => {
+      if (document.body) {
+        injectLoaderHTML();
+        observer.disconnect();
+      }
+    });
+    bodyObserver.observe(document.documentElement, { childList: true });
+    
+    // Fallback
+    document.addEventListener('DOMContentLoaded', injectLoaderHTML);
+  }
+})();
 
 
 // Expose exactly ONE source of truth for all redirects in the project

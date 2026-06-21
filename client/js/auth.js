@@ -1796,3 +1796,43 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupToggleListeners, 50);
   });
 });
+
+// Dismiss Global Page Loader
+(function() {
+  const startTime = window.authLoaderStartTime || Date.now();
+  
+  function dismissLoader() {
+    const loader = document.getElementById('global-page-loader');
+    if (!loader || loader.classList.contains('fade-out')) return;
+
+    const elapsed = Date.now() - startTime;
+    const delay = Math.max(0, 800 - elapsed);
+
+    setTimeout(() => {
+      loader.classList.add('fade-out');
+      // Remove from DOM after transition completes
+      setTimeout(() => {
+        if (loader.parentNode) {
+          loader.parentNode.removeChild(loader);
+        }
+      }, 400);
+    }, delay);
+  }
+
+  // Safety fail-safe timeout (3.5s) to guarantee user access
+  setTimeout(dismissLoader, 3500);
+
+  // Wait for both authInitPromise and document load complete
+  const docLoaded = new Promise(resolve => {
+    if (document.readyState === 'complete') {
+      resolve();
+    } else {
+      window.addEventListener('load', resolve);
+    }
+  });
+
+  Promise.all([
+    window.authInitPromise || Promise.resolve(),
+    docLoaded
+  ]).then(dismissLoader);
+})();

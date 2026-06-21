@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let resolvedUserRole = 'citizen';
 
-  // Activate debug panel visible in development
-  debugPanel.style.display = 'block';
+  // Diagnostic logs panel remains hidden in production
 
   function logDebug(msg, obj = null) {
     const time = new Date().toLocaleTimeString();

@@ -35,29 +35,29 @@
 
   <style>
     :root {
-      --primary: #f97316;
-      --primary-hover: #ea580c;
-      --primary-light-alpha: rgba(249, 115, 22, 0.08);
-      --primary-glow: rgba(249, 115, 22, 0.15);
+      --primary: #0D9488;
+      --primary-hover: #0d9488e0;
+      --primary-light-alpha: rgba(13, 148, 136, 0.08);
+      --primary-glow: rgba(13, 148, 136, 0.15);
       
-      --btn-primary-bg: #f97316;
-      --btn-primary-hover: #ea580c;
+      --btn-primary-bg: #0D9488;
+      --btn-primary-hover: #0d9488;
       --btn-primary-text: #ffffff;
       
-      --input-focus-border: #f97316;
+      --input-focus-border: #0D9488;
     }
     
     :root.dark-theme {
-      --primary: #f97316;
-      --primary-hover: #ea580c;
-      --primary-light-alpha: rgba(249, 115, 22, 0.12);
-      --primary-glow: rgba(249, 115, 22, 0.2);
+      --primary: #14b8a6;
+      --primary-hover: #0d9488;
+      --primary-light-alpha: rgba(20, 184, 166, 0.12);
+      --primary-glow: rgba(20, 184, 166, 0.2);
       
-      --btn-primary-bg: #f97316;
-      --btn-primary-hover: #ea580c;
+      --btn-primary-bg: #14b8a6;
+      --btn-primary-hover: #0d9488;
       --btn-primary-text: #030712;
       
-      --input-focus-border: #f97316;
+      --input-focus-border: #14b8a6;
     }
 
     .fade-in {
@@ -687,7 +687,7 @@
 
     /* Premium right-side form panel overrides */
     .auth-form-panel {
-      background: radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.01) 0%, #030712 100%);
+      background: radial-gradient(circle at 80% 20%, rgba(13, 148, 136, 0.01) 0%, #030712 100%);
     }
 
     .auth-card {
@@ -766,21 +766,21 @@
     }
 
     .otp-promo-container {
-      background-color: rgba(249, 115, 22, 0.02) !important;
-      border: 1px dashed rgba(249, 115, 22, 0.2) !important;
+      background-color: rgba(13, 148, 136, 0.02) !important;
+      border: 1px dashed rgba(13, 148, 136, 0.2) !important;
       border-radius: 6px !important;
       padding: 1.25rem !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .otp-promo-container:hover {
-      background-color: rgba(249, 115, 22, 0.04) !important;
-      border-color: rgba(249, 115, 22, 0.3) !important;
+      background-color: rgba(13, 148, 136, 0.04) !important;
+      border-color: rgba(13, 148, 136, 0.3) !important;
       transform: translateY(-2px) !important;
     }
 
     .otp-promo-icon-wrapper {
-      background-color: rgba(249, 115, 22, 0.08) !important;
+      background-color: rgba(13, 148, 136, 0.08) !important;
       color: var(--primary) !important;
       border-radius: 4px !important;
       width: 40px !important;
@@ -830,11 +830,11 @@
     }
 
     .authority-icon {
-      color: #f97316 !important;
+      color: var(--primary) !important;
     }
 
     .authority-card-link {
-      color: #f97316 !important;
+      color: var(--primary) !important;
     }
 
     /* Page Entrance Animations */
@@ -906,20 +906,20 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Namakkal slides get a premium orange glow highlighting it as the target city */
+    /* Namakkal slides get a premium teal glow highlighting it as the target city */
     .slide-caption.namakkal-caption {
       border-color: var(--primary) !important;
       color: #ffffff !important;
       font-weight: 700;
-      background: rgba(249, 115, 22, 0.25) !important;
-      box-shadow: 0 0 15px rgba(249, 115, 22, 0.3), 0 4px 20px rgba(0, 0, 0, 0.4);
+      background: rgba(13, 148, 136, 0.25) !important;
+      box-shadow: 0 0 15px rgba(13, 148, 136, 0.3), 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     .namakkal-badge {
       position: absolute;
       top: 15px;
       right: 15px;
-      background: linear-gradient(135deg, var(--primary) 0%, #ea580c 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
       color: #ffffff;
       font-size: 0.65rem;
       font-weight: 800;
@@ -927,7 +927,7 @@
       letter-spacing: 0.05em;
       padding: 4px 10px;
       border-radius: var(--radius-sm);
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
       z-index: 5;
       pointer-events: none;
       opacity: 0;
