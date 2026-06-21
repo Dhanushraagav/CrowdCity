@@ -5,10 +5,6 @@
     {
       "source": "/api/:path*",
       "destination": "https://crowdcity-api.onrender.com/api/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/client/$1"
     }
   ]
 }
