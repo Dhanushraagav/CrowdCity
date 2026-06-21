@@ -478,7 +478,9 @@ function restoreSubmitButtons() {
   const loginBtn = document.getElementById('btn-login-submit');
   if (loginBtn) {
     loginBtn.disabled = false;
-    loginBtn.innerHTML = window.location.pathname.includes('authority-login.html')
+    const path = window.location.pathname;
+    const normalizedPath = path.replace(/\.html$/, '');
+    loginBtn.innerHTML = normalizedPath.includes('authority-login')
       ? '<i class="fa-solid fa-right-to-bracket"></i> Access Dashboard'
       : '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
   }
@@ -560,7 +562,8 @@ async function verifyProfileAndRoute(user, showAlert) {
 
   // Enforce strict portal-role boundaries
   const path = window.location.pathname;
-  const isAuthorityLoginPage = path.includes('authority-login.html');
+  const normalizedPath = path.replace(/\.html$/, '');
+  const isAuthorityLoginPage = normalizedPath.includes('authority-login');
 
   if (isAuthorityLoginPage) {
     if (role === 'citizen') {
