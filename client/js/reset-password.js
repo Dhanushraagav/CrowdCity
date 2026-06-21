@@ -179,21 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.body.classList.add('ready');
   } else {
-    // Poll for supabaseClient initialization (since it fetches config asynchronously from /api/config)
-    const checkInterval = setInterval(() => {
-      if (typeof supabaseClient !== 'undefined' && supabaseClient !== null) {
+    // Wait for the central auth initialization to complete (handles Render API cold start latencies safely)
+    if (window.authInitPromise) {
+      window.authInitPromise.then(() => {
+        initResetPage();
+      });
+    } else {
+      // Fallback if promise is not available
+      const checkInterval = setInterval(() => {
+        if (typeof supabaseClient !== 'undefined' && supabaseClient !== null) {
+          clearInterval(checkInterval);
+          initResetPage();
+        }
+      }, 50);
+      setTimeout(() => {
         clearInterval(checkInterval);
-        initResetPage();
-      }
-    }, 50);
-
-    // Fallback timeout
-    setTimeout(() => {
-      clearInterval(checkInterval);
-      if (!authListenerInitialized) {
-        initResetPage();
-      }
-    }, 3000);
+        if (!authListenerInitialized) {
+          initResetPage();
+        }
+      }, 5000);
+    }
   }
 
   // Form submission handler
