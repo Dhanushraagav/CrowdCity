@@ -54,7 +54,8 @@ self.addEventListener('fetch', (event) => {
     event.request.url.includes('mapbox.com') ||
     event.request.url.includes('cloudflare')
   ) {
-    return; // Pass-through directly to the network
+    event.respondWith(fetch(event.request));
+    return;
   }
 
   // Network-first approach with cache fallback for navigation requests

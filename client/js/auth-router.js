@@ -78,10 +78,6 @@
       color: #ffffff;
       letter-spacing: 0.05em;
     }
-    .loader-logo i {
-      color: #0d9488;
-      font-size: 1.5rem;
-    }
     .loader-text {
       font-size: 0.78rem;
       color: rgba(255, 255, 255, 0.5);
@@ -102,9 +98,14 @@
         <div class="loader-spinner-ring">
           <div></div><div></div><div></div><div></div>
         </div>
-        <div class="loader-logo">
-          <i class="fa-solid fa-city"></i>
-          <span>CrowdCity AI</span>
+        <div class="loader-logo" style="display: flex; align-items: center; gap: 0.75rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="height: 48px; object-fit: contain;" />
+          <div style="width: 1px; height: 32px; background: rgba(255, 255, 255, 0.2); margin: 0 0.1rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="height: 38px; object-fit: contain;" />
+          <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1; font-family: var(--font-heading, sans-serif);">
+            <span style="font-size: 1.25rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px;">CrowdCity AI</span>
+            <span style="font-size: 0.62rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px;">TN Government Partnership</span>
+          </div>
         </div>
         <div class="loader-text">Loading Portal...</div>
       </div>
@@ -176,7 +177,7 @@ window.authRouter = {
 
   // 1. Detect OAuth callback — Supabase returns access_token in the URL hash
   // after Google OAuth. auth.js must process these tokens; DO NOT redirect away.
-  const isCitizenLoginPage_early = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+  const isCitizenLoginPage_early = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
   const hasOAuthHash = hash.includes('access_token') ||
                        hash.includes('refresh_token') ||
                        hash.includes('type=signup') ||
@@ -288,7 +289,7 @@ window.authRouter = {
 
   // Page classifications
   const isIndexPage = normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
-  const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+  const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
   const isAuthorityLoginPage = normalizedPath.includes('authority-login');
 
   // Protect dashboard pages and sub-routes

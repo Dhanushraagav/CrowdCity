@@ -85,6 +85,21 @@ async function initAuth() {
       return;
     }
 
+    // Check if Supabase URL has changed to clear legacy local sessions
+    const oldConfigRaw = localStorage.getItem('cc_config_cache');
+    if (oldConfigRaw) {
+      try {
+        const oldConfig = JSON.parse(oldConfigRaw);
+        if (oldConfig && oldConfig.supabaseUrl !== config.supabaseUrl) {
+          console.warn("[Auth] Supabase URL changed. Clearing legacy session cache.");
+          localStorage.removeItem('cc_session');
+          localStorage.removeItem('cc_mock_session');
+          localStorage.removeItem('cc_user_role');
+          localStorage.removeItem('cc_user_profile');
+        }
+      } catch (e) {}
+    }
+
     // Persist config so we can recover from transient server errors later.
     try { localStorage.setItem('cc_config_cache', JSON.stringify(config)); } catch (e) {}
 
@@ -164,7 +179,7 @@ function _attachAuthStateListener() {
 
       const path = window.location.pathname;
       const normalizedPath = path.replace(/\.html$/, '');
-      const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+      const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
       const isAuthorityLoginPage = normalizedPath.includes('authority-login');
       const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
       const isResetPage = normalizedPath.includes('reset-password');
@@ -193,7 +208,7 @@ function _attachAuthStateListener() {
 
       const path = window.location.pathname;
       const normalizedPath = path.replace(/\.html$/, '');
-      const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+      const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
       const isAuthorityLoginPage = normalizedPath.includes('authority-login');
       const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
       const isResetPage = normalizedPath.includes('reset-password');
@@ -229,7 +244,7 @@ function _attachAuthStateListener() {
       if (session) {
         const path = window.location.pathname;
         const normalizedPath = path.replace(/\.html$/, '');
-        const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+        const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
         const isAuthorityLoginPage = normalizedPath.includes('authority-login');
         const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
         const isResetPage = normalizedPath.includes('reset-password');
@@ -265,7 +280,7 @@ function _attachAuthStateListener() {
 
           const path = window.location.pathname;
           const normalizedPath = path.replace(/\.html$/, '');
-          const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+          const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
           const isAuthorityLoginPage = normalizedPath.includes('authority-login');
           const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
           const isResetPage = normalizedPath.includes('reset-password');
@@ -465,9 +480,12 @@ async function clearSessionSilent() {
 
   if (!isMockAuth && supabaseClient) {
     try {
-      await supabaseClient.auth.signOut();
+      // Fire-and-forget: do not await so we don't block the offline recovery path
+      supabaseClient.auth.signOut().catch(err => {
+        console.warn('Supabase signOut failed (expected offline/blocked):', err.message || err);
+      });
     } catch (e) {
-      console.error('Supabase signOut error in clearSessionSilent:', e);
+      console.error('Supabase signOut exception in clearSessionSilent:', e);
     }
   }
   updateAuthUI();
@@ -518,11 +536,20 @@ async function verifyProfileAndRoute(user, showAlert) {
     try {
       const supabase = supabaseClient;
       console.log(`[Auth Client] Querying profiles table for user ID: ${user.id}...`);
-      const { data, error } = await supabase
+      
+      const queryPromise = supabase
         .from('profiles')
         .select('role,is_verified:is_verified_authority')
         .eq('id', user.id)
         .single();
+        
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 4000)
+      );
+
+      const result = await Promise.race([queryPromise, timeoutPromise]);
+      const data = result.data;
+      const error = result.error;
 
       if (error) {
         console.error("[Auth Client] Error fetching profile from Supabase:", error.message || error);
@@ -532,6 +559,13 @@ async function verifyProfileAndRoute(user, showAlert) {
       }
     } catch (err) {
       console.error("[Auth Client] Unexpected exception during profile fetch:", err);
+      if (err.message === 'Timeout') {
+        window.cc_routing_in_progress = false;
+        await clearSessionSilent();
+        showAlert("Profile query timed out. If you are using Brave, please try disabling Shields or checking your connection.");
+        restoreSubmitButtons();
+        return;
+      }
     }
   }
 
@@ -1021,6 +1055,193 @@ function updateAuthUI() {
     document.body.classList.add('ready');
     document.body.style.visibility = 'visible';
   }
+
+  // Inject Tamil Nadu Government & CrowdCity partnership branding globally
+  const injectGovtBranding = () => {
+    // 1. Sidebar Logos (Desktop Sidebar Layout)
+    const sidebarLogos = document.querySelectorAll('.app-sidebar-logo');
+    sidebarLogos.forEach(logo => {
+      if (logo.dataset.tnBranded) return;
+      logo.dataset.tnBranded = "true";
+      
+      const role = getUserRole();
+      const subtitleText = role === 'authority' || role === 'admin' ? 'Authority Portal' : 'Citizen Portal';
+      
+      logo.innerHTML = `
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" class="brand-emblem" style="width: 38px; height: 38px; flex-shrink: 0; object-fit: contain;" />
+        <div style="width: 1px; height: 26px; background: rgba(255, 255, 255, 0.15); margin: 0 0.1rem;"></div>
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 28px; height: 28px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; text-align: left; gap: 0.05rem;">
+          <span class="brand-title" style="font-size: 0.95rem; font-weight: 800; color: #ffffff; letter-spacing: 0.3px; font-family: var(--font-heading, inherit);">CrowdCity AI</span>
+          <span class="brand-subtitle" style="font-size: 0.58rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">${subtitleText}</span>
+        </div>
+      `;
+    });
+
+    // 2. Mobile Header Logos
+    const mobileLogos = document.querySelectorAll('.app-header-logo-mobile');
+    mobileLogos.forEach(logo => {
+      if (logo.dataset.tnBranded) return;
+      logo.dataset.tnBranded = "true";
+      
+      const role = getUserRole();
+      const subtitleText = role === 'authority' || role === 'admin' ? 'Govt. of Tamil Nadu' : 'Tamil Nadu Portal';
+      
+      logo.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 26px; height: 26px; object-fit: contain;" />
+          <div style="width: 1px; height: 18px; background: rgba(255, 255, 255, 0.15); margin: 0 0.05rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 20px; height: 20px; object-fit: contain;" />
+          <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
+            <span>CrowdCity AI</span>
+            <span style="font-size: 0.52rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.3px;">${subtitleText}</span>
+          </span>
+        </div>
+      `;
+    });
+
+    // 3. Topnav Logos (e.g. report.html)
+    const topnavLogos = document.querySelectorAll('.topnav-logo');
+    topnavLogos.forEach(logo => {
+      if (logo.dataset.tnBranded) return;
+      logo.dataset.tnBranded = "true";
+      
+      logo.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 30px; height: 30px; object-fit: contain;" />
+          <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 24px; height: 24px; object-fit: contain;" />
+          <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
+            <span>CrowdCity AI</span>
+            <span style="font-size: 0.55rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.3px;">Tamil Nadu Portal</span>
+          </span>
+        </div>
+      `;
+    });
+    
+    // 4. Logo Containers (e.g. admin.html, analytics.html)
+    const logoContainers = document.querySelectorAll('.logo-container');
+    logoContainers.forEach(container => {
+      if (container.closest('.auth-brand-panel') || container.dataset.tnBranded) return;
+      container.dataset.tnBranded = "true";
+      
+      const role = getUserRole();
+      const subtitleText = role === 'admin' ? 'Admin Control' : 'TN Initiative';
+      
+      container.innerHTML = `
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 32px; height: 32px; object-fit: contain;" />
+        <div style="width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;"></div>
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain;" />
+        <span style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
+          <span>CrowdCity AI</span>
+          <span style="font-size: 0.55rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.3px;">${subtitleText}</span>
+        </span>
+      `;
+    });
+  };
+
+  // Inject dynamic government bulletin card at the top of dashboards
+  const injectGovtBanner = () => {
+    const contentBody = document.querySelector('.app-content-body');
+    if (!contentBody || document.getElementById('tn-govt-bulletin')) return;
+    
+    const path = window.location.pathname;
+    const isDashboard = path.includes('citizen-dashboard.html') || path.includes('authority-dashboard.html');
+    if (!isDashboard) return;
+    
+    const role = getUserRole();
+    const banner = document.createElement('div');
+    banner.id = 'tn-govt-bulletin';
+    banner.className = 'tn-govt-announcement-banner';
+    
+    if (role === 'authority' || role === 'admin') {
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="background: rgba(13, 148, 136, 0.1); color: var(--primary); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0;">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div style="text-align: left;">
+            <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-main); letter-spacing: 0.3px;">TAMIL NADU MUNICIPAL ADMINISTRATION CONSOLE</h4>
+            <p style="margin: 0; font-size: 0.76rem; color: var(--text-muted); line-height: 1.35;">Official administrative dashboard. Monitor municipal complaints, dispatch crews, and update task status flags.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; color: var(--primary); font-weight: 700; white-space: nowrap;">
+          <span class="bulletin-pulse"></span>
+          <span>Official Session</span>
+        </div>
+      `;
+    } else {
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="background: rgba(13, 148, 136, 0.1); color: var(--primary); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0;">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          <div style="text-align: left;">
+            <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-main); letter-spacing: 0.3px;">TAMIL NADU CIVIC BULLETIN</h4>
+            <p style="margin: 0; font-size: 0.76rem; color: var(--text-muted); line-height: 1.35;">Integrated citizen grievance portal in partnership with local municipalities. All services operational.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; color: var(--primary); font-weight: 700; white-space: nowrap;">
+          <span class="bulletin-pulse"></span>
+          <span>Live Redressal Active</span>
+        </div>
+      `;
+    }
+    
+    contentBody.insertBefore(banner, contentBody.firstChild);
+  };
+
+  // Inject dynamic helpline widget to the sidebar footer
+  const injectHelplineWidget = () => {
+    const sidebarFooter = document.querySelector('.app-sidebar-footer');
+    if (!sidebarFooter || document.getElementById('sidebar-helpline')) return;
+    
+    const helplineCard = document.createElement('div');
+    helplineCard.id = 'sidebar-helpline';
+    helplineCard.className = 'sidebar-helpdesk-card';
+    helplineCard.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem; color: #fbbf24; font-weight: 700;">
+        <i class="fa-solid fa-phone"></i>
+        <span>TN STATE HELPLINE</span>
+      </div>
+      <div style="font-size: 0.88rem; font-weight: 800; color: #ffffff; margin-bottom: 0.15rem;">1913</div>
+      <div>Municipal Corporation Support</div>
+    `;
+    
+    sidebarFooter.insertBefore(helplineCard, sidebarFooter.firstChild);
+  };
+
+  // Run dynamic government news cycler inside the ticker banner
+  const initNewsTicker = () => {
+    const tickerText = document.getElementById('civic-intelligence-feed-text');
+    if (!tickerText || window.cc_ticker_initialized) return;
+    window.cc_ticker_initialized = true;
+    
+    const newsItems = [
+      "All municipal services are operational. Check the feed below for community reports.",
+      "State Government allocates ₹150 Crore for urban road repair and pothole filling.",
+      "Namakkal Municipal Corporation launches 24/7 civic helpline (1913).",
+      "Smart City project integrations completed for Chennai, Coimbatore, and Madurai.",
+      "Public satisfaction rating for resolved municipal grievances reaches 92.4%."
+    ];
+    
+    let currentIndex = 0;
+    tickerText.style.transition = 'opacity 0.3s ease';
+    setInterval(() => {
+      tickerText.style.opacity = 0;
+      setTimeout(() => {
+        currentIndex = (currentIndex + 1) % newsItems.length;
+        tickerText.textContent = newsItems[currentIndex];
+        tickerText.style.opacity = 1;
+      }, 300);
+    }, 6000);
+  };
+
+  // Run dynamic branding injections
+  injectGovtBranding();
+  injectGovtBanner();
+  injectHelplineWidget();
+  initNewsTicker();
 
   const container = document.getElementById('auth-nav-container');
   const navMenu = document.getElementById('nav-menu');
