@@ -269,6 +269,7 @@
   "push_notifications": "Push Notifications",
   "change_password": "Change Password",
   "current_password": "Current Password",
+  "enter_current_password": "Enter current password",
   "badges": "Badges",
   "achievements": "Achievements",
   "recent_activity": "Recent Activity",

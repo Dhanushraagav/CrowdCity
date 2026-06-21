@@ -800,7 +800,10 @@ async function loginWithGoogle() {
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectUrl
+        redirectTo: redirectUrl,
+        queryParams: {
+          prompt: 'select_account'
+        }
       }
     });
     if (error) {
@@ -839,6 +842,44 @@ async function updatePassword(newPassword) {
     password: newPassword
   });
   return { data, error };
+}
+
+// Verify current password and update password (used in settings page)
+async function verifyAndChangePassword(currentPassword, newPassword) {
+  if (isMockAuth) {
+    console.log(`Mock: Verifying current password and updating to new password.`);
+    if (!currentPassword) {
+      return { error: { message: "Current password is required." } };
+    }
+    return { data: {}, error: null };
+  }
+
+  const session = getSession();
+  if (!session || !session.user || !session.user.email) {
+    return { error: { message: "User session not found. Please sign in again." } };
+  }
+
+  const isGoogleUser = session.user.app_metadata && session.user.app_metadata.provider === 'google';
+
+  if (!isGoogleUser) {
+    // Re-authenticate by signing in with the current password
+    const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+      email: session.user.email,
+      password: currentPassword
+    });
+
+    if (signInError) {
+      console.error("[Auth] Current password verification failed:", signInError.message);
+      return { error: { message: "Incorrect current password." } };
+    }
+  }
+
+  // Update password
+  const { data, error: updateError } = await supabaseClient.auth.updateUser({
+    password: newPassword
+  });
+
+  return { data, error: updateError };
 }
 
 // Change mock role (Development Testing Utility)

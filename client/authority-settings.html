@@ -169,6 +169,10 @@
         
         <form id="change-password-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
           <div class="form-group">
+            <label for="current-password" class="form-label" data-i18n="current_password">Current Password</label>
+            <input type="password" id="current-password" class="form-input" data-i18n-placeholder="enter_current_password" placeholder="Enter current password" required minlength="6">
+          </div>
+          <div class="form-group">
             <label for="new-password" class="form-label" data-i18n="new_password">New Password</label>
             <input type="password" id="new-password" class="form-input" data-i18n-placeholder="enter_new_password" placeholder="Enter new password" required minlength="6">
           </div>
@@ -226,6 +230,7 @@
       if (passwordForm) {
         passwordForm.addEventListener('submit', async (e) => {
           e.preventDefault();
+          const currentPassword = document.getElementById('current-password').value;
           const newPassword = document.getElementById('new-password').value;
           const confirmPassword = document.getElementById('confirm-password').value;
           
@@ -238,7 +243,7 @@
           btn.disabled = true;
           btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
-          const { error } = await updatePassword(newPassword);
+          const { error } = await verifyAndChangePassword(currentPassword, newPassword);
           btn.disabled = false;
           btn.innerHTML = 'Update Password';
 
