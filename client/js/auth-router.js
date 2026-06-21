@@ -168,6 +168,21 @@ window.authRouter = {
   const normalizedPath = path.replace(/\.html$/, '');
 
   const isResetPasswordPage = normalizedPath.includes('reset-password');
+  const isIndexPage = normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+  const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
+  const isAuthorityLoginPage = normalizedPath.includes('authority-login');
+  const isOfflinePage = normalizedPath.includes('offline');
+
+  const isGuestPage = isIndexPage || isCitizenLoginPage || isAuthorityLoginPage || isResetPasswordPage || isOfflinePage;
+
+  if (!isGuestPage) {
+    // Hide the document on protected pages immediately to prevent EAR / Page Flash vulnerabilities
+    const style = document.createElement('style');
+    style.id = 'auth-protect-style';
+    style.innerHTML = '.auth-protected-hidden { display: none !important; }';
+    (document.head || document.documentElement).appendChild(style);
+    document.documentElement.classList.add('auth-protected-hidden');
+  }
 
   // If we are on the reset-password page, let reset-password.js manage it
   if (isResetPasswordPage) {
@@ -177,12 +192,11 @@ window.authRouter = {
 
   // 1. Detect OAuth callback — Supabase returns access_token in the URL hash
   // after Google OAuth. auth.js must process these tokens; DO NOT redirect away.
-  const isCitizenLoginPage_early = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
   const hasOAuthHash = hash.includes('access_token') ||
                        hash.includes('refresh_token') ||
                        hash.includes('type=signup') ||
                        search.includes('code=');   // PKCE flow
-  if (isCitizenLoginPage_early && hasOAuthHash) {
+  if (isCitizenLoginPage && hasOAuthHash) {
     console.log('[Auth Router] OAuth callback detected on auth.html. Delegating to auth.js.');
     return;
   }
@@ -288,9 +302,6 @@ window.authRouter = {
   }
 
   // Page classifications
-  const isIndexPage = normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
-  const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
-  const isAuthorityLoginPage = normalizedPath.includes('authority-login');
 
   // Protect dashboard pages and sub-routes
   const isAdminPage = normalizedPath.includes('admin');
@@ -372,5 +383,7 @@ window.authRouter = {
         return;
       }
     }
+    // Safe to display page: session exists and matches the role requirements
+    document.documentElement.classList.remove('auth-protected-hidden');
   }
 })();

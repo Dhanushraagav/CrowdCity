@@ -81,6 +81,7 @@ async function initAuth() {
       setupMockSessionListener();
       updateAuthUI();
       syncUserProfileBackground();
+      verifyRoleForCurrentPage(getUserRole());
       resolveAuthInit();
       return;
     }
@@ -125,6 +126,7 @@ async function initAuth() {
       setupMockSessionListener();
       updateAuthUI();
       syncUserProfileBackground();
+      verifyRoleForCurrentPage(getUserRole());
       resolveAuthInit();
     }
   }
@@ -312,10 +314,14 @@ async function fetchAndCacheRole(token) {
       if (profile && profile.role) {
         localStorage.setItem('cc_user_role', profile.role);
         localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+        verifyRoleForCurrentPage(profile.role);
+        return;
       }
     }
+    verifyRoleForCurrentPage(null);
   } catch (err) {
     console.error('Error fetching user role:', err);
+    verifyRoleForCurrentPage(null);
   }
 }
 
@@ -337,6 +343,7 @@ async function syncUserProfileBackground() {
       if (freshProfile && freshProfile.role) {
         // Update role cache
         localStorage.setItem('cc_user_role', freshProfile.role);
+        verifyRoleForCurrentPage(freshProfile.role);
 
         // Parse cached profile and compare key properties to determine if it has changed
         let hasChanged = true;
@@ -508,6 +515,53 @@ function restoreSubmitButtons() {
     signupBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
   }
 }
+
+// Strict client-side route role verification to prevent Page Flash/Execution After Redirect
+function verifyRoleForCurrentPage(role) {
+  const path = window.location.pathname;
+  const normalizedPath = path.replace(/\.html$/, '');
+  
+  const isIndexPage = normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+  const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
+  const isAuthorityLoginPage = normalizedPath.includes('authority-login');
+  const isResetPasswordPage = normalizedPath.includes('reset-password');
+  const isOfflinePage = normalizedPath.includes('offline');
+
+  const isGuestPage = isIndexPage || isCitizenLoginPage || isAuthorityLoginPage || isResetPasswordPage || isOfflinePage;
+  
+  if (isGuestPage) {
+    document.documentElement.classList.remove('auth-protected-hidden');
+    return;
+  }
+
+  const isAdminPage = normalizedPath.includes('admin');
+  const isAuthorityPage = (normalizedPath.includes('authority-') || normalizedPath.includes('authority')) && !isAuthorityLoginPage && !isResetPasswordPage;
+  const isCitizenPage = !isIndexPage && !isCitizenLoginPage && !isAuthorityLoginPage && !isResetPasswordPage && !isAuthorityPage && !isAdminPage;
+
+  if (!role) {
+    console.warn("[Auth Security] No role detected on protected page. Redirecting to login.");
+    window.authRouter.redirectToLogin(isAuthorityPage || isAdminPage ? 'authority' : 'citizen');
+    return;
+  }
+
+  let accessDenied = false;
+  if (role === 'citizen') {
+    if (isAuthorityPage || isAdminPage) accessDenied = true;
+  } else if (role === 'authority') {
+    if (isCitizenPage || isAdminPage) accessDenied = true;
+  } else if (role === 'admin') {
+    if (isCitizenPage || isAuthorityPage) accessDenied = true;
+  }
+
+  if (accessDenied) {
+    console.warn(`[Auth Security] Role "${role}" is unauthorized for page "${path}". Redirecting.`);
+    window.authRouter.redirectToDashboard(role);
+  } else {
+    // Reveal protected page layout
+    document.documentElement.classList.remove('auth-protected-hidden');
+  }
+}
+window.verifyRoleForCurrentPage = verifyRoleForCurrentPage;
 
 // Core routing verification function
 async function verifyProfileAndRoute(user, showAlert) {
