@@ -317,11 +317,29 @@ async function fetchAndCacheRole(token) {
         verifyRoleForCurrentPage(profile.role);
         return;
       }
+    } else if (response.status === 401 || response.status === 403) {
+      // Token is explicitly invalid/expired, log out immediately
+      verifyRoleForCurrentPage(null);
+      return;
     }
-    verifyRoleForCurrentPage(null);
+    
+    // For other transient status errors (e.g. 500, 502, 503, or rate limits)
+    // Fall back to cached role if it exists to allow offline support
+    const cachedRole = localStorage.getItem('cc_user_role');
+    if (cachedRole) {
+      verifyRoleForCurrentPage(cachedRole);
+    } else {
+      verifyRoleForCurrentPage(null);
+    }
   } catch (err) {
     console.error('Error fetching user role:', err);
-    verifyRoleForCurrentPage(null);
+    // Fall back to cached role on network exceptions/offline state
+    const cachedRole = localStorage.getItem('cc_user_role');
+    if (cachedRole) {
+      verifyRoleForCurrentPage(cachedRole);
+    } else {
+      verifyRoleForCurrentPage(null);
+    }
   }
 }
 
@@ -539,8 +557,10 @@ function verifyRoleForCurrentPage(role) {
   const isCitizenPage = !isIndexPage && !isCitizenLoginPage && !isAuthorityLoginPage && !isResetPasswordPage && !isAuthorityPage && !isAdminPage;
 
   if (!role) {
-    console.warn("[Auth Security] No role detected on protected page. Redirecting to login.");
-    window.authRouter.redirectToLogin(isAuthorityPage || isAdminPage ? 'authority' : 'citizen');
+    console.warn("[Auth Security] No role detected on protected page. Clearing session and redirecting to login.");
+    clearSessionSilent().then(() => {
+      window.authRouter.redirectToLogin(isAuthorityPage || isAdminPage ? 'authority' : 'citizen');
+    });
     return;
   }
 
