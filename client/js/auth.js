@@ -163,10 +163,11 @@ function _attachAuthStateListener() {
       localStorage.setItem('cc_session', JSON.stringify(session));
 
       const path = window.location.pathname;
-      const isCitizenLoginPage = path.includes('auth.html') && !path.includes('authority-login.html');
-      const isAuthorityLoginPage = path.includes('authority-login.html');
-      const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || path.endsWith('/') || path.endsWith('/index.html');
-      const isResetPage = path.includes('reset-password.html');
+      const normalizedPath = path.replace(/\.html$/, '');
+      const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+      const isAuthorityLoginPage = normalizedPath.includes('authority-login');
+      const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+      const isResetPage = normalizedPath.includes('reset-password');
 
       // Prevent automatic dashboard redirects if recovery is active (Goal 3 & 6)
       if (isLoginOrRoot && !isResetPage && !isRecoveryActive) {
@@ -191,14 +192,15 @@ function _attachAuthStateListener() {
       localStorage.removeItem('cc_user_profile');
 
       const path = window.location.pathname;
-      const isCitizenLoginPage = path.includes('auth.html') && !path.includes('authority-login.html');
-      const isAuthorityLoginPage = path.includes('authority-login.html');
-      const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || path.endsWith('/') || path.endsWith('/index.html');
-      const isResetPage = path.includes('reset-password.html');
+      const normalizedPath = path.replace(/\.html$/, '');
+      const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+      const isAuthorityLoginPage = normalizedPath.includes('authority-login');
+      const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+      const isResetPage = normalizedPath.includes('reset-password');
 
       if (!isLoginOrRoot && !isResetPage) {
         console.warn('[Auth] Session is inactive on a protected page. Redirecting to login.');
-        const isAuthorityPage = path.includes('authority-') || path.includes('authority.html') || path.includes('admin.html');
+        const isAuthorityPage = normalizedPath.includes('authority-') || normalizedPath.includes('authority') || normalizedPath.includes('admin');
         window.authRouter.redirectToLogin(isAuthorityPage ? 'authority' : 'citizen');
         return;
       }
@@ -226,10 +228,11 @@ function _attachAuthStateListener() {
       }
       if (session) {
         const path = window.location.pathname;
-        const isCitizenLoginPage = path.includes('auth.html') && !path.includes('authority-login.html');
-        const isAuthorityLoginPage = path.includes('authority-login.html');
-        const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || path.endsWith('/') || path.endsWith('/index.html');
-        const isResetPage = path.includes('reset-password.html');
+        const normalizedPath = path.replace(/\.html$/, '');
+        const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+        const isAuthorityLoginPage = normalizedPath.includes('authority-login');
+        const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+        const isResetPage = normalizedPath.includes('reset-password');
         const isRecoveryActive = localStorage.getItem('cc_password_recovery_active') === 'true';
 
         if (isLoginOrRoot && !isResetPage && !isRecoveryActive) {
@@ -261,14 +264,15 @@ function _attachAuthStateListener() {
           updateAuthUI();
 
           const path = window.location.pathname;
-          const isCitizenLoginPage = path.includes('auth.html') && !path.includes('authority-login.html');
-          const isAuthorityLoginPage = path.includes('authority-login.html');
-          const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || path.endsWith('/') || path.endsWith('/index.html');
-          const isResetPage = path.includes('reset-password.html');
+          const normalizedPath = path.replace(/\.html$/, '');
+          const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+          const isAuthorityLoginPage = normalizedPath.includes('authority-login');
+          const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+          const isResetPage = normalizedPath.includes('reset-password');
 
           if (!isLoginOrRoot && !isResetPage) {
             console.warn('[Auth] Session is inactive on a protected page. Redirecting to login.');
-            const isAuthorityPage = path.includes('authority-') || path.includes('authority.html') || path.includes('admin.html');
+            const isAuthorityPage = normalizedPath.includes('authority-') || normalizedPath.includes('authority') || normalizedPath.includes('admin');
             window.authRouter.redirectToLogin(isAuthorityPage ? 'authority' : 'citizen');
           }
         }

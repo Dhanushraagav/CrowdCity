@@ -37,7 +37,10 @@ window.authRouter = {
   const hash = window.location.hash;
   const search = window.location.search;
 
-  const isResetPasswordPage = path.includes('reset-password.html');
+  // Normalize path to ignore extension (.html) so clean URLs work
+  const normalizedPath = path.replace(/\.html$/, '');
+
+  const isResetPasswordPage = normalizedPath.includes('reset-password');
 
   // If we are on the reset-password page, let reset-password.js manage it
   if (isResetPasswordPage) {
@@ -47,7 +50,7 @@ window.authRouter = {
 
   // 1. Detect OAuth callback — Supabase returns access_token in the URL hash
   // after Google OAuth. auth.js must process these tokens; DO NOT redirect away.
-  const isCitizenLoginPage_early = path.includes('auth.html') && !path.includes('authority-login.html');
+  const isCitizenLoginPage_early = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
   const hasOAuthHash = hash.includes('access_token') ||
                        hash.includes('refresh_token') ||
                        hash.includes('type=signup') ||
@@ -158,13 +161,13 @@ window.authRouter = {
   }
 
   // Page classifications
-  const isIndexPage = path.endsWith('/') || path.endsWith('/index.html');
-  const isCitizenLoginPage = path.includes('auth.html') && !path.includes('authority-login.html');
-  const isAuthorityLoginPage = path.includes('authority-login.html');
+  const isIndexPage = normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+  const isCitizenLoginPage = (normalizedPath.includes('auth') || normalizedPath.includes('auth.html')) && !normalizedPath.includes('authority-login');
+  const isAuthorityLoginPage = normalizedPath.includes('authority-login');
 
   // Protect dashboard pages and sub-routes
-  const isAdminPage = path.includes('admin.html');
-  const isAuthorityPage = (path.includes('authority-') || path.includes('authority.html')) && !isAuthorityLoginPage && !isResetPasswordPage;
+  const isAdminPage = normalizedPath.includes('admin');
+  const isAuthorityPage = (normalizedPath.includes('authority-') || normalizedPath.includes('authority')) && !isAuthorityLoginPage && !isResetPasswordPage;
   const isCitizenPage = !isIndexPage && !isCitizenLoginPage && !isAuthorityLoginPage && !isResetPasswordPage && !isAuthorityPage && !isAdminPage;
 
   console.log(`[Auth Router] Path: "${path}", Active Session: ${sessionActive}, Role: "${role}"`);
