@@ -1,6 +1,49 @@
 // CrowdCity - Central Authentication Router & Role Separator
 // Runs synchronously in `<head>` to prevent flashes of unauthorized/incorrect layouts
 
+// Universal LocalStorage to SessionStorage Proxy for Auth Keys
+// This converts all auth session storage to sessionStorage so closing the browser logs the user out.
+(function() {
+  const originalGet = localStorage.getItem;
+  const originalSet = localStorage.setItem;
+  const originalRemove = localStorage.removeItem;
+
+  const authKeys = [
+    'cc_session',
+    'cc_mock_session',
+    'cc_user_role',
+    'cc_user_profile',
+    'cc_password_recovery_active',
+    'cc_unread_notifications_count',
+    'cc_user_stat_total',
+    'cc_user_stat_resolved',
+    'cc_user_stat_active'
+  ];
+
+  localStorage.getItem = function(key) {
+    if (authKeys.includes(key)) {
+      return sessionStorage.getItem(key);
+    }
+    return originalGet.call(localStorage, key);
+  };
+
+  localStorage.setItem = function(key, value) {
+    if (authKeys.includes(key)) {
+      sessionStorage.setItem(key, value);
+      return;
+    }
+    originalSet.call(localStorage, key, value);
+  };
+
+  localStorage.removeItem = function(key) {
+    if (authKeys.includes(key)) {
+      sessionStorage.removeItem(key);
+      return;
+    }
+    originalRemove.call(localStorage, key);
+  };
+})();
+
 // Universal Page Loader Injection
 (function() {
   // Avoid loader on simple redirection pages or offline
@@ -44,6 +87,8 @@
       flex-direction: column;
       align-items: center;
       gap: 1.5rem;
+      width: 90%;
+      max-width: 400px;
     }
     .loader-spinner-ring {
       position: relative;
@@ -85,6 +130,21 @@
       font-weight: 600;
       text-transform: uppercase;
     }
+    @media (max-width: 540px) {
+      .loader-logo {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 0.8rem !important;
+      }
+      .loader-logo-divider {
+        display: none !important;
+      }
+      .loader-logo div[style*="text-align: left"],
+      .loader-logo div[style*="line-height"] {
+        text-align: center !important;
+        align-items: center !important;
+      }
+    }
   `;
   (document.head || document.documentElement).appendChild(loaderStyle);
 
@@ -100,7 +160,7 @@
         </div>
         <div class="loader-logo" style="display: flex; align-items: center; gap: 0.75rem;">
           <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="height: 48px; object-fit: contain;" />
-          <div style="width: 1px; height: 32px; background: rgba(255, 255, 255, 0.2); margin: 0 0.1rem;"></div>
+          <div class="loader-logo-divider" style="width: 1px; height: 32px; background: rgba(255, 255, 255, 0.2); margin: 0 0.1rem;"></div>
           <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="height: 38px; object-fit: contain;" />
           <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1; font-family: var(--font-heading, sans-serif);">
             <span style="font-size: 1.25rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px;">CrowdCity AI</span>
