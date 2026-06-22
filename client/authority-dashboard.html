@@ -162,7 +162,7 @@
           <div class="weather-icon" id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
           <div class="weather-info">
             <span class="weather-city" id="weather-city">Detecting...</span>
-            <span class="weather-temp" id="weather-temp">--Â°C</span>
+            <span class="weather-temp" id="weather-temp">--&deg;C</span>
           </div>
         </div>
 
@@ -399,13 +399,12 @@
 
         const temp = Math.round(current.temperature);
         const code = current.weathercode;
-
         cityEl.textContent = cleanDistrict;
-        tempEl.textContent = `${temp}Â°C`;
+        tempEl.textContent = `${temp}\u00B0C`;
         iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code)}"></i>`;
         iconEl.style.color = getWeatherColor(code);
         widget.classList.remove('loading');
-        widget.title = `${cleanDistrict} â€” ${temp}Â°C`;
+        widget.title = `${cleanDistrict} — ${temp}\u00B0C`;
 
         // Cache for 15 min with language key
         localStorage.setItem(`cc_weather_cache_${currentLang}`, JSON.stringify({
@@ -413,8 +412,8 @@
         }));
       } catch (e) {
         console.warn('Weather fetch failed:', e);
-        cityEl.textContent = currentLang === 'ta' ? 'à®¤à®®à®¿à®´à¯à®¨à®¾à®Ÿà¯' : 'Tamil Nadu';
-        tempEl.textContent = '--Â°C';
+        cityEl.textContent = currentLang === 'ta' ? 'à®¤à®®à®¿à®´à¯ à®¨à®¾à®Ÿà¯ ' : 'Tamil Nadu';
+        tempEl.textContent = '--\u00B0C';
         widget.classList.remove('loading');
       }
     }
@@ -427,35 +426,35 @@
         const c = JSON.parse(cached);
         if (c.lang === currentLang && Date.now() - c.ts < 15 * 60 * 1000) {
           cityEl.textContent = c.district;
-          tempEl.textContent = `${c.temp}Â°C`;
+          tempEl.textContent = `${c.temp}\u00B0C`;
           iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code)}"></i>`;
           iconEl.style.color = getWeatherColor(c.code);
           widget.classList.remove('loading');
-          widget.title = `${c.district} â€” ${c.temp}Â°C`;
+          widget.title = `${c.district} — ${c.temp}\u00B0C`;
           return; // Use cached data
         }
       } catch (e) { /* ignore parse errors */ }
     }
 
-    // Check if we have cached coordinates to avoid native geolocation delay
+    // Check if we have cached coordinates to avoid native geolocation delay (30 min TTL)
     const cachedCoords = localStorage.getItem('cc_weather_coords');
     if (cachedCoords) {
       try {
         const coords = JSON.parse(cachedCoords);
-        if (coords && coords.lat && coords.lon) {
+        if (coords && coords.lat && coords.lon && coords.ts && Date.now() - coords.ts < 30 * 60 * 1000) {
           fetchWeather(coords.lat, coords.lon);
           return;
         }
       } catch (e) { /* ignore */ }
     }
 
-    // Request geolocation if no cached coordinates
+    // Request geolocation if no cached coordinates or they expired
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const lat = pos.coords.latitude;
           const lon = pos.coords.longitude;
-          localStorage.setItem('cc_weather_coords', JSON.stringify({ lat, lon }));
+          localStorage.setItem('cc_weather_coords', JSON.stringify({ lat, lon, ts: Date.now() }));
           fetchWeather(lat, lon);
         },
         () => {
