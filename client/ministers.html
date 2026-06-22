@@ -339,6 +339,17 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
+    .minister-avatar-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(13, 148, 136, 0.25);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      background-color: var(--bg-surface);
+    }
+
     .minister-identity {
       display: flex;
       flex-direction: column;
@@ -1565,10 +1576,7 @@
       if (m.id === 'joseph_vijay') {
         photoHtml = `<img src="images/ministers/joseph_vijay.jpg" class="modal-profile-img" alt="${name}" />`;
       } else {
-        const initials = getInitials(name);
-        const index = ministersData.findIndex(item => item.id === m.id);
-        const gIndex = index % 5;
-        photoHtml = `<div class="modal-avatar-circle avatar-g-${gIndex}">${initials}</div>`;
+        photoHtml = `<img src="images/ministers/placeholder_minister.png" class="modal-profile-img" alt="${name}" />`;
       }
 
       modalBody.innerHTML = `
@@ -1589,6 +1597,11 @@
             <span class="modal-detail-label" data-i18n="office_location_label">Office Room</span>
             <span class="modal-detail-value">${room}</span>
           </div>
+        </div>
+
+        <div class="modal-portfolio-section" style="display: flex; flex-direction: column; gap: 0.35rem;">
+          <span class="modal-bio-title" data-i18n="portfolio">Portfolio</span>
+          <p class="modal-bio-text" style="color: var(--text-main); font-weight: 500;">${portfolio}</p>
         </div>
 
         <div class="modal-bio-section">
@@ -1723,8 +1736,7 @@
         const mName = lang === 'ta' ? m.nameTa : m.nameEn;
         const mRole = lang === 'ta' ? m.roleTa : m.roleEn;
         const mPortfolio = lang === 'ta' ? m.portfolioTa : m.portfolioEn;
-        const initials = getInitials(mName);
-        const gIndex = index % 5;
+        const photoUrl = m.photo || 'images/ministers/placeholder_minister.png';
 
         const card = document.createElement('div');
         card.className = 'minister-card';
@@ -1732,9 +1744,7 @@
         card.style.animationDelay = `${index * 0.015}s`;
         card.innerHTML = `
           <div class="minister-avatar-wrap">
-            <div class="minister-avatar avatar-g-${gIndex}">
-              ${initials}
-            </div>
+            <img src="${photoUrl}" class="minister-avatar-img" alt="${mName}" />
             <div class="minister-identity">
               <span class="minister-name">${mName}</span>
               <span class="minister-role">${mRole}</span>
