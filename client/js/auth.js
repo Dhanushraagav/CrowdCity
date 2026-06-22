@@ -2090,6 +2090,31 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('auth-change', () => {
     setTimeout(setupToggleListeners, 50);
   });
+
+  // Dynamic password visibility toggle listener
+  document.addEventListener('click', (e) => {
+    const toggle = e.target.closest('.toggle-password-visibility');
+    if (!toggle) return;
+    
+    const targetId = toggle.getAttribute('data-target');
+    // Query within the same parent container or globally
+    const parentContainer = toggle.closest('.password-input-container');
+    const passwordInput = parentContainer 
+      ? parentContainer.querySelector('input') 
+      : document.getElementById(targetId);
+      
+    if (!passwordInput) return;
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      toggle.classList.remove('fa-eye');
+      toggle.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      toggle.classList.remove('fa-eye-slash');
+      toggle.classList.add('fa-eye');
+    }
+  });
 });
 
 // Dismiss Global Page Loader

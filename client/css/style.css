@@ -1077,3 +1077,34 @@ body::after {
   }
 }
 
+/* Password Visibility Toggle Eye Icon styles */
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+.password-input-container .form-input {
+  padding-right: 2.85rem !important;
+}
+.toggle-password-visibility {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.05rem;
+  transition: color 0.2s ease, transform 0.15s ease;
+  z-index: 10;
+}
+.toggle-password-visibility:hover {
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.1);
+}
+/* Light theme support */
+.light-theme .toggle-password-visibility {
+  color: rgba(0, 0, 0, 0.4);
+}
+.light-theme .toggle-password-visibility:hover {
+  color: #000000;
+}
+

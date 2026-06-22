@@ -176,7 +176,10 @@
         
         <div class="form-group">
           <label for="login-password" class="form-label" data-i18n="password">Password</label>
-          <input type="password" id="login-password" class="form-input" data-i18n-placeholder="enter_password" placeholder="Enter your password" required autocomplete="new-password">
+          <div class="password-input-container">
+            <input type="password" id="login-password" class="form-input" data-i18n-placeholder="enter_password" placeholder="Enter your password" required autocomplete="new-password" style="width: 100%; box-sizing: border-box;">
+            <i class="fa-regular fa-eye toggle-password-visibility" data-target="login-password"></i>
+          </div>
         </div>
 
         <button type="submit" id="btn-login-submit" class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">
