@@ -1937,7 +1937,14 @@
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span data-i18n="send_recovery_link">' + (window.i18n ? window.i18n.t('send_recovery_link') : 'Send Recovery Link') + '</span>';
           if (error) { showAlert(error.message); }
-          else { showAlert('Recovery link sent! Check your inbox for instructions.', true); document.getElementById('recovery-email').value = ''; }
+          else {
+            showAlert('Recovery link sent! Check your inbox for instructions.', true);
+            window.showToast('Recovery link sent! Check your inbox for instructions.', 'success');
+            document.getElementById('recovery-email').value = '';
+            setTimeout(() => {
+              showLoginForm();
+            }, 3000);
+          }
         });
       }
 
