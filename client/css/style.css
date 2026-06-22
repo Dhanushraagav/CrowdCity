@@ -912,6 +912,7 @@ body::after {
   }
 
   /* Responsive Stepper progress bar on mobile */
+  .app-content-body div.stepper-wrapper[style*="display: flex"][style*="justify-content: space-between"],
   .stepper-wrapper {
     display: flex !important;
     flex-direction: row !important;
