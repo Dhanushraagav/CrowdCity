@@ -9,14 +9,14 @@
   <meta name="apple-mobile-web-app-title" content="CrowdCity">
   <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
-  <script src="js/auth-router.js?v=1.0.3"></script>
+  <script src="js/auth-router.js?v=1.0.4"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Municipal authority dashboard console for CrowdCity AI. Monitor civic statistics, assigned workloads, and latest dispatch alerts.">
   <title>CrowdCity AI Authority Dashboard</title>
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=1.0.3">
+  <link rel="stylesheet" href="css/style.css?v=1.0.4">
   <link rel="stylesheet" href="css/components.css">
   
   <!-- FontAwesome Icons -->
@@ -162,7 +162,7 @@
           <div class="weather-icon" id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
           <div class="weather-info">
             <span class="weather-city" id="weather-city">Detecting...</span>
-            <span class="weather-temp" id="weather-temp">--°C</span>
+            <span class="weather-temp" id="weather-temp">--Â°C</span>
           </div>
         </div>
 
@@ -401,11 +401,11 @@
         const code = current.weathercode;
 
         cityEl.textContent = cleanDistrict;
-        tempEl.textContent = `${temp}°C`;
+        tempEl.textContent = `${temp}Â°C`;
         iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code)}"></i>`;
         iconEl.style.color = getWeatherColor(code);
         widget.classList.remove('loading');
-        widget.title = `${cleanDistrict} — ${temp}°C`;
+        widget.title = `${cleanDistrict} â€” ${temp}Â°C`;
 
         // Cache for 15 min with language key
         localStorage.setItem(`cc_weather_cache_${currentLang}`, JSON.stringify({
@@ -413,8 +413,8 @@
         }));
       } catch (e) {
         console.warn('Weather fetch failed:', e);
-        cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
-        tempEl.textContent = '--°C';
+        cityEl.textContent = currentLang === 'ta' ? 'à®¤à®®à®¿à®´à¯à®¨à®¾à®Ÿà¯' : 'Tamil Nadu';
+        tempEl.textContent = '--Â°C';
         widget.classList.remove('loading');
       }
     }
@@ -427,11 +427,11 @@
         const c = JSON.parse(cached);
         if (c.lang === currentLang && Date.now() - c.ts < 15 * 60 * 1000) {
           cityEl.textContent = c.district;
-          tempEl.textContent = `${c.temp}°C`;
+          tempEl.textContent = `${c.temp}Â°C`;
           iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code)}"></i>`;
           iconEl.style.color = getWeatherColor(c.code);
           widget.classList.remove('loading');
-          widget.title = `${c.district} — ${c.temp}°C`;
+          widget.title = `${c.district} â€” ${c.temp}Â°C`;
           return; // Use cached data
         }
       } catch (e) { /* ignore parse errors */ }

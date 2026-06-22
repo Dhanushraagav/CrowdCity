@@ -1056,3 +1056,24 @@ body::after {
   }
 }
 
+/* Force hide the loader divider line on mobile viewports */
+.loader-logo-divider,
+[class*="loader-logo-divider"],
+.loader-logo div[style*="width: 1px"],
+.loader-logo div[style*="width:1px"] {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  .loader-logo-divider,
+  [class*="loader-logo-divider"],
+  .loader-logo div[style*="width: 1px"],
+  .loader-logo div[style*="width:1px"] {
+    display: block !important;
+    width: 1px !important;
+    height: 32px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    margin: 0 0.1rem !important;
+  }
+}
+

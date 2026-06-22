@@ -125,7 +125,9 @@
       color: #ffffff;
       letter-spacing: 0.05em;
     }
-    .loader-logo-divider {
+    .loader-logo-divider,
+    .loader-logo div[style*="width: 1px"],
+    .loader-logo div[style*="width:1px"] {
       display: none !important;
     }
     .loader-logo div[style*="line-height"] {
@@ -145,12 +147,14 @@
         text-align: left !important;
         gap: 0.6rem !important;
       }
-      .loader-logo-divider {
+      .loader-logo-divider,
+      .loader-logo div[style*="width: 1px"],
+      .loader-logo div[style*="width:1px"] {
         display: block !important;
-        width: 1px;
-        height: 32px;
-        background: rgba(255, 255, 255, 0.2);
-        margin: 0 0.1rem;
+        width: 1px !important;
+        height: 32px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        margin: 0 0.1rem !important;
       }
       .loader-logo div[style*="line-height"] {
         text-align: left !important;

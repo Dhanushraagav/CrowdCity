@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="CrowdCity">
   <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
-  <script src="js/auth-router.js?v=1.0.3"></script>
+  <script src="js/auth-router.js?v=1.0.4"></script>
   <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +17,7 @@
   <title>Welcome to CrowdCity AI - Authentication</title>
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=1.0.3">
+  <link rel="stylesheet" href="css/style.css?v=1.0.4">
   <link rel="stylesheet" href="css/components.css">
   <script>
     (function() {
@@ -1058,7 +1058,7 @@
                 </div>
               </div>
               <a href="#" class="otp-promo-cta" id="otp-promo-cta-link" onclick="switchLoginMethod('otp', event)">
-                Continue with Email OTP <span class="cta-arrow">→</span>
+                Continue with Email OTP <span class="cta-arrow">â†’</span>
               </a>
             </div>
           </div>
@@ -1099,7 +1099,7 @@
             </button>
 
             <div style="text-align: center; margin: 0;">
-              <a href="#" id="link-use-password" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-decoration: none;" onclick="switchLoginMethod('password', event)" data-i18n="use_password_instead">← Use Password Instead</a>
+              <a href="#" id="link-use-password" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-decoration: none;" onclick="switchLoginMethod('password', event)" data-i18n="use_password_instead">â† Use Password Instead</a>
             </div>
           </div>
         </form>
@@ -1343,7 +1343,7 @@
 
     async function sendLoginOtp(email) {
       const promoCta = document.getElementById('otp-promo-cta-link');
-      const originalText = promoCta ? promoCta.innerHTML : 'Continue with Email OTP <span class="cta-arrow">→</span>';
+      const originalText = promoCta ? promoCta.innerHTML : 'Continue with Email OTP <span class="cta-arrow">â†’</span>';
       if (promoCta) {
         const sendingText = window.i18n ? window.i18n.t('sending') : 'Sending...';
         promoCta.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ' + sendingText;
@@ -1386,9 +1386,9 @@
         }
         
         if (sendData.mockOtp) {
-          window.showToast(`✓ OTP Sent (Mock: ${sendData.mockOtp})`, 'success');
+          window.showToast(`âœ“ OTP Sent (Mock: ${sendData.mockOtp})`, 'success');
         } else {
-          window.showToast('✓ OTP Sent successfully.', 'success');
+          window.showToast('âœ“ OTP Sent successfully.', 'success');
         }
       } catch (err) {
         window.showToast('An error occurred sending OTP.', 'error');
@@ -1639,7 +1639,7 @@
         updateOtpVisuals();
       }
 
-      // ─── Alert helper ───────────────────────────────────────────────────
+      // â”€â”€â”€ Alert helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       function showAlert(msg, isSuccess = false) {
         alertBanner.textContent = msg;
         if (isSuccess) {
@@ -1652,7 +1652,7 @@
         alertBanner.classList.remove('hidden');
       }
 
-      // ─── Sign In (Email + Password / Email OTP) ──────────────────────────
+      // â”€â”€â”€ Sign In (Email + Password / Email OTP) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -1797,7 +1797,7 @@
         });
       }
 
-      // ─── Sign Up Form ─────────────────────────────────────────────────────
+      // â”€â”€â”€ Sign Up Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const signupPasswordInput = document.getElementById('signup-password');
       const strengthLabel = document.getElementById('password-strength-label');
       const signupConfirmPassword = document.getElementById('signup-confirm-password');
@@ -1815,11 +1815,11 @@
         confirmFeedback.classList.remove('hidden');
         if (passVal !== confirmVal) {
           signupSubmitBtn.disabled = true;
-          confirmFeedback.textContent = '✕ Passwords do not match';
+          confirmFeedback.textContent = 'âœ• Passwords do not match';
           confirmFeedback.style.color = '#ef4444';
         } else {
           signupSubmitBtn.disabled = false;
-          confirmFeedback.textContent = '✓ Passwords match';
+          confirmFeedback.textContent = 'âœ“ Passwords match';
           confirmFeedback.style.color = '#22c55e';
         }
       }
@@ -1891,7 +1891,7 @@
         });
       }
 
-      // ─── Google OAuth ─────────────────────────────────────────────────────
+      // â”€â”€â”€ Google OAuth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (googleBtn) {
         googleBtn.addEventListener('click', async () => {
           googleBtn.disabled = true;
@@ -1916,7 +1916,7 @@
         });
       }
 
-      // ─── Password Recovery ─────────────────────────────────────────────────
+      // â”€â”€â”€ Password Recovery â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (recoveryForm) {
         recoveryForm.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -1932,7 +1932,7 @@
         });
       }
 
-      // ─── Email OTP Bindings (Sign Up / Independent Overlay Form) ───────────
+      // â”€â”€â”€ Email OTP Bindings (Sign Up / Independent Overlay Form) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const otpResendBtn = document.getElementById('btn-otp-resend');
       const otpVerifyBtn = document.getElementById('btn-otp-verify');
       const otpBackBtn = document.getElementById('btn-otp-back');
@@ -2092,7 +2092,7 @@
         });
       }
 
-      // ─── Inline Sign In OTP Bindings ─────────────────────────────────────
+      // â”€â”€â”€ Inline Sign In OTP Bindings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const loginOtpResendBtn = document.getElementById('btn-login-otp-resend');
 
       if (loginOtpResendBtn) {
@@ -2125,7 +2125,7 @@
               statusBanner.textContent = 'New OTP Sent';
             }
 
-            window.showToast('✓ New OTP Sent', 'success');
+            window.showToast('âœ“ New OTP Sent', 'success');
           } catch (err) {
             window.showToast('An error occurred resending OTP.', 'error');
             loginOtpResendBtn.disabled = false;
