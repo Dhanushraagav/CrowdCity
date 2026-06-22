@@ -323,7 +323,7 @@ async function handleSelfAssign() {
       console.error("[Inspector] Error retrieving Supabase auth state:", e);
     }
   } else {
-    console.log("[Inspector] Mock mode active: Supabase Client not initialized.");
+    console.error("[Inspector] Supabase Client is not initialized.");
   }
 
   if (!user) {

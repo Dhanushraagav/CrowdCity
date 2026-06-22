@@ -10,7 +10,6 @@
 
   const authKeys = [
     'cc_session',
-    'cc_mock_session',
     'cc_user_role',
     'cc_user_profile',
     'cc_password_recovery_active',
@@ -303,39 +302,11 @@ window.authRouter = {
   const AUTHORITY_LOGIN = 'authority-login.html';
 
   // 3. Read active session & role synchronously from localStorage
-  let isMock = localStorage.getItem('cc_mock_session');
   const realSessionStr = localStorage.getItem('cc_session');
   let sessionActive = false;
   let role = localStorage.getItem('cc_user_role');
 
-  // Verify if we have a valid cached configuration for real Supabase
-  try {
-    const cachedConfigRaw = localStorage.getItem('cc_config_cache');
-    if (cachedConfigRaw) {
-      const config = JSON.parse(cachedConfigRaw);
-      const isKeyPlaceholder = !config.supabaseAnonKey || 
-                               config.supabaseAnonKey.includes('placeholder') || 
-                               config.supabaseAnonKey === '' || 
-                               (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
-      const isUrlPlaceholder = !config.supabaseUrl || 
-                               config.supabaseUrl.includes('placeholder') || 
-                               config.supabaseUrl === '';
-      if (!isUrlPlaceholder && !isKeyPlaceholder) {
-        if (isMock) {
-          console.warn('[Auth Router] Real Supabase is configured. Discarding leftover mock session.');
-          localStorage.removeItem('cc_mock_session');
-          isMock = null;
-        }
-      }
-    }
-  } catch (e) {
-    console.error('[Auth Router] Error reading cached config:', e);
-  }
-
-
-  if (isMock) {
-    sessionActive = true;
-  } else if (realSessionStr) {
+  if (realSessionStr) {
     try {
       const session = JSON.parse(realSessionStr);
       if (session && session.access_token) {

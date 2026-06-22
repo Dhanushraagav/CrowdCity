@@ -526,56 +526,32 @@
 
             try {
               const user = getCurrentUser();
-              if (isMockAuth) {
-                // Update mock session in localStorage
-                const mockSessionStr = localStorage.getItem('cc_mock_session');
-                if (mockSessionStr) {
-                  const mockSession = JSON.parse(mockSessionStr);
-                  if (!mockSession.user.user_metadata) mockSession.user.user_metadata = {};
-                  mockSession.user.user_metadata.avatar_url = base64Url;
-                  localStorage.setItem('cc_mock_session', JSON.stringify(mockSession));
-                }
-                
-                // Update profile cache
-                const profileStr = localStorage.getItem('cc_user_profile');
-                if (profileStr) {
-                  const profile = JSON.parse(profileStr);
-                  profile.avatar_url = base64Url;
-                  localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-                }
+              // Update database
+              const { error: dbError } = await supabaseClient
+                .from('profiles')
+                .update({ avatar_url: base64Url })
+                .eq('id', user.id);
 
-                window.showToast("Profile photo updated successfully!", "success");
-                syncSettingsPhoto();
-                // Dispatch auth change to update drawer/headers immediately
-                window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
-              } else {
-                // Update database
-                const { error: dbError } = await supabaseClient
-                  .from('profiles')
-                  .update({ avatar_url: base64Url })
-                  .eq('id', user.id);
+              if (dbError) throw dbError;
 
-                if (dbError) throw dbError;
+              // Update auth metadata
+              const { error: authError } = await supabaseClient.auth.updateUser({
+                data: { avatar_url: base64Url }
+              });
 
-                // Update auth metadata
-                const { error: authError } = await supabaseClient.auth.updateUser({
-                  data: { avatar_url: base64Url }
-                });
+              if (authError) throw authError;
 
-                if (authError) throw authError;
-
-                // Update profile cache
-                const profileStr = localStorage.getItem('cc_user_profile');
-                if (profileStr) {
-                  const profile = JSON.parse(profileStr);
-                  profile.avatar_url = base64Url;
-                  localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-                }
-
-                window.showToast("Profile photo updated successfully!", "success");
-                syncSettingsPhoto();
-                window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
+              // Update profile cache
+              const profileStr = localStorage.getItem('cc_user_profile');
+              if (profileStr) {
+                const profile = JSON.parse(profileStr);
+                profile.avatar_url = base64Url;
+                localStorage.setItem('cc_user_profile', JSON.stringify(profile));
               }
+
+              window.showToast("Profile photo updated successfully!", "success");
+              syncSettingsPhoto();
+              window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
             } catch (err) {
               console.error("Error updating profile picture:", err);
               window.showToast("Failed to update profile picture: " + (err.message || err), "error");
@@ -597,51 +573,29 @@
 
           try {
             const user = getCurrentUser();
-            if (isMockAuth) {
-              const mockSessionStr = localStorage.getItem('cc_mock_session');
-              if (mockSessionStr) {
-                const mockSession = JSON.parse(mockSessionStr);
-                if (mockSession.user.user_metadata) {
-                  mockSession.user.user_metadata.avatar_url = '';
-                }
-                localStorage.setItem('cc_mock_session', JSON.stringify(mockSession));
-              }
+            const { error: dbError } = await supabaseClient
+              .from('profiles')
+              .update({ avatar_url: '' })
+              .eq('id', user.id);
 
-              const profileStr = localStorage.getItem('cc_user_profile');
-              if (profileStr) {
-                const profile = JSON.parse(profileStr);
-                profile.avatar_url = '';
-                localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-              }
+            if (dbError) throw dbError;
 
-              window.showToast("Profile photo removed successfully!", "success");
-              syncSettingsPhoto();
-              window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
-            } else {
-              const { error: dbError } = await supabaseClient
-                .from('profiles')
-                .update({ avatar_url: '' })
-                .eq('id', user.id);
+            const { error: authError } = await supabaseClient.auth.updateUser({
+              data: { avatar_url: '' }
+            });
 
-              if (dbError) throw dbError;
+            if (authError) throw authError;
 
-              const { error: authError } = await supabaseClient.auth.updateUser({
-                data: { avatar_url: '' }
-              });
-
-              if (authError) throw authError;
-
-              const profileStr = localStorage.getItem('cc_user_profile');
-              if (profileStr) {
-                const profile = JSON.parse(profileStr);
-                profile.avatar_url = '';
-                localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-              }
-
-              window.showToast("Profile photo removed successfully!", "success");
-              syncSettingsPhoto();
-              window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
+            const profileStr = localStorage.getItem('cc_user_profile');
+            if (profileStr) {
+              const profile = JSON.parse(profileStr);
+              profile.avatar_url = '';
+              localStorage.setItem('cc_user_profile', JSON.stringify(profile));
             }
+
+            window.showToast("Profile photo removed successfully!", "success");
+            syncSettingsPhoto();
+            window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
           } catch (err) {
             console.error("Error removing profile picture:", err);
             window.showToast("Failed to remove profile picture: " + (err.message || err), "error");

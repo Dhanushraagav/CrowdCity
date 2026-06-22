@@ -311,61 +311,31 @@ async function initNotifications() {
     console.error("Failed to fetch initial notifications:", error);
   }
 
-  // Setup Realtime connection
-  const mockSession = localStorage.getItem('cc_mock_session');
-  const isMock = !!mockSession || (typeof isMockAuth !== 'undefined' && isMockAuth);
+  // Setup Realtime connection (Supabase Realtime for Production Mode)
+  if (supabaseRealtimeChannel && typeof supabaseClient !== 'undefined' && supabaseClient) {
+    supabaseClient.removeChannel(supabaseRealtimeChannel);
+    supabaseRealtimeChannel = null;
+  }
 
-  if (isMock) {
-    // 1. SSE for Mock Mode
-    if (sseSource) {
-      sseSource.close();
-    }
-    const token = getAuthToken();
-    sseSource = new EventSource(`/api/notifications/realtime?token=${encodeURIComponent(token)}`);
-    
-    sseSource.onmessage = (event) => {
-      try {
-        const notif = JSON.parse(event.data);
-        if (!notificationsList.some(n => n.id === notif.id)) {
-          notificationsList.unshift(notif);
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    supabaseRealtimeChannel = supabaseClient
+      .channel(`public:notifications:${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        console.log('Supabase Realtime notification received:', payload.new);
+        if (!notificationsList.some(n => n.id === payload.new.id)) {
+          notificationsList.unshift(payload.new);
           renderNotifications();
           playNotificationSound();
         }
-      } catch (err) {
-        console.error("Error parsing realtime SSE payload:", err);
-      }
-    };
-    
-    sseSource.onerror = (err) => {
-      console.warn("SSE connection encountered error, EventSource will auto-reconnect.");
-    };
-  } else {
-    // 2. Supabase Realtime for Production Mode
-    if (supabaseRealtimeChannel && typeof supabaseClient !== 'undefined' && supabaseClient) {
-      supabaseClient.removeChannel(supabaseRealtimeChannel);
-      supabaseRealtimeChannel = null;
-    }
-
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-      supabaseRealtimeChannel = supabaseClient
-        .channel(`public:notifications:${user.id}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        }, (payload) => {
-          console.log('Supabase Realtime notification received:', payload.new);
-          if (!notificationsList.some(n => n.id === payload.new.id)) {
-            notificationsList.unshift(payload.new);
-            renderNotifications();
-            playNotificationSound();
-          }
-        })
-        .subscribe((status) => {
-          console.log(`Supabase Realtime subscription status: ${status}`);
-        });
-    }
+      })
+      .subscribe((status) => {
+        console.log(`Supabase Realtime subscription status: ${status}`);
+      });
   }
 }
 

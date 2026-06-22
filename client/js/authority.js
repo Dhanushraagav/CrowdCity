@@ -307,7 +307,7 @@ function escapeHTML(str) {
   );
 }
 
-// Listen for mock role switcher resets
+// Listen for auth-change custom events to refresh dashboard
 window.addEventListener('auth-change', async () => {
   await initAuthorityDashboard();
 });

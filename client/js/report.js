@@ -458,7 +458,7 @@ function setupImageUpload() {
   }
 }
 
-// AI Assistant Action triggers mockup API
+// AI Assistant Action triggers real Groq AI backend analysis API
 function setupAiAssistant() {
   const aiBtn = document.getElementById('btn-ai-assist');
   const alertBanner = document.getElementById('report-alert');

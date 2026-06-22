@@ -33,7 +33,7 @@ const PROFILE_BADGES_METADATA = [
 
 async function getActiveUser() {
   // Try Supabase Client first if real auth is enabled
-  if (typeof isMockAuth !== 'undefined' && !isMockAuth && typeof supabaseClient !== 'undefined' && supabaseClient) {
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
     try {
       const { data: { user: supabaseUser }, error } = await supabaseClient.auth.getUser();
       if (!error && supabaseUser) {

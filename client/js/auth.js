@@ -40,28 +40,96 @@ window.authInitPromise = new Promise((resolve) => {
 });
 
 let supabaseClient = null;
-let isMockAuth = false;
+const isMockAuth = false;
 
-// Fallback MOCK_PROFILES to prevent client-side reference errors in mock auth mode
-const MOCK_PROFILES = window.MOCK_PROFILES || [
-  { id: 'mock-user-citizen', email: 'citizen@example.com', role: 'citizen', full_name: 'Citizen User', avatar_url: '' },
-  { id: 'mock-user-authority', email: 'authority@example.com', role: 'authority', is_verified_authority: true, avatar_url: '' },
-  { id: 'mock-user-admin', email: 'admin@example.com', role: 'admin', is_verified_authority: true, avatar_url: '' }
-];
+// Fatal configuration error screen displaying a premium glassmorphic overlay
+function showFatalConfigError(details) {
+  // Create fatal overlay if not already present
+  if (document.getElementById('cc-fatal-config-overlay')) return;
+  
+  const overlay = document.createElement('div');
+  overlay.id = 'cc-fatal-config-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100vw';
+  overlay.style.height = '100vh';
+  overlay.style.background = 'radial-gradient(circle at top right, rgba(15, 23, 42, 0.95), rgba(8, 12, 21, 0.99))';
+  overlay.style.zIndex = '100000';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.backdropFilter = 'blur(12px)';
+  overlay.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  overlay.style.color = '#f8fafc';
+  overlay.style.padding = '2rem';
+  overlay.style.boxSizing = 'border-box';
+
+  const container = document.createElement('div');
+  container.style.maxWidth = '550px';
+  container.style.width = '100%';
+  container.style.background = 'rgba(30, 41, 59, 0.7)';
+  container.style.border = '1px solid rgba(255, 255, 255, 0.08)';
+  container.style.borderRadius = '24px';
+  container.style.padding = '3rem 2.5rem';
+  container.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)';
+  container.style.textAlign = 'center';
+  container.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+
+  // Inject a stylesheet for keyframes if not present
+  if (!document.getElementById('cc-fatal-style')) {
+    const style = document.createElement('style');
+    style.id = 'cc-fatal-style';
+    style.textContent = `
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .glow-icon {
+        animation: pulseGlow 3s infinite alternate;
+      }
+      @keyframes pulseGlow {
+        0% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
+        100% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.6); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  container.innerHTML = `
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 50%; margin-bottom: 2rem; color: #ef4444;" class="glow-icon">
+      <svg style="width: 40px; height: 40px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+    </div>
+    <h1 style="font-size: 1.8rem; font-weight: 700; letter-spacing: -0.025em; margin: 0 0 1rem 0; color: #ffffff;">Configuration Error</h1>
+    <p style="font-size: 1rem; line-height: 1.6; color: #94a3b8; margin: 0 0 2rem 0;">
+      CrowdCity AI environment configuration is invalid or incomplete. The application requires a valid connection to Supabase to run securely.
+    </p>
+    <div style="background: rgba(15, 23, 42, 0.4); border-radius: 12px; padding: 1.25rem; font-family: monospace; font-size: 0.875rem; color: #f1f5f9; text-align: left; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 2rem; word-break: break-all;">
+      <span style="color: #ef4444; font-weight: bold;">[Error Details]</span><br/>
+      ${details || 'Supabase URL/Anon Key is missing or invalid placeholders are detected.'}
+    </div>
+    <p style="font-size: 0.875rem; color: #64748b; margin: 0;">
+      Please check your server environment variables or contact system administrator.
+    </p>
+  `;
+
+  overlay.appendChild(container);
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+window.showFatalConfigError = showFatalConfigError;
 
 // Initialize Supabase Client dynamically from server config
 async function initAuth() {
   try {
     const response = await fetch('/api/config');
 
-    // A non-OK response (e.g. 429 Too Many Requests) must NOT trigger mock-auth.
-    // Doing so would clear the logged-in user's session and show the Sign-In button.
-    // Instead: attempt to recover from a locally cached config, then retry silently.
     if (!response.ok) {
       console.warn(`[Auth] /api/config returned HTTP ${response.status}. Attempting cached-config recovery...`);
       const recovered = _tryInitFromCache();
       if (!recovered) {
-        // No cache yet — retry after a short delay without touching the UI.
         console.warn('[Auth] No cached config. Will retry initAuth in 10 s.');
         setTimeout(initAuth, 10000);
       }
@@ -76,13 +144,8 @@ async function initAuth() {
                              (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
 
     if (!config.supabaseUrl || config.supabaseUrl.includes('placeholder') || config.supabaseUrl === '' || isKeyPlaceholder) {
-      console.warn("Using Mock Auth Mode: Supabase API variables are not configured or invalid.");
-      isMockAuth = true;
-      setupMockSessionListener();
-      updateAuthUI();
-      syncUserProfileBackground();
-      verifyRoleForCurrentPage(getUserRole());
-      resolveAuthInit();
+      console.error("Supabase API variables are not configured or invalid.");
+      showFatalConfigError("Supabase environment variables (SUPABASE_URL / SUPABASE_ANON_KEY) are missing or set to placeholder values on the server.");
       return;
     }
 
@@ -94,7 +157,6 @@ async function initAuth() {
         if (oldConfig && oldConfig.supabaseUrl !== config.supabaseUrl) {
           console.warn("[Auth] Supabase URL changed. Clearing legacy session cache.");
           localStorage.removeItem('cc_session');
-          localStorage.removeItem('cc_mock_session');
           localStorage.removeItem('cc_user_role');
           localStorage.removeItem('cc_user_profile');
         }
@@ -106,28 +168,18 @@ async function initAuth() {
 
     // Initialize real Supabase client
     console.log("[Auth] Connecting to Supabase at URL:", config.supabaseUrl);
-    console.log("[Auth] Supabase publishable key prefix detected:", config.supabaseAnonKey ? config.supabaseAnonKey.substring(0, 15) + '...' : 'none');
     supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-    isMockAuth = false;
-    localStorage.removeItem('cc_mock_session');
     console.log("Supabase Auth initialized successfully.");
     _attachAuthStateListener();
     updateAuthUI();
     resolveAuthInit();
 
   } catch (error) {
-    // True network failure (server is completely unreachable).
-    // Try cached config before giving up and going mock.
     console.error("[Auth] Network error fetching /api/config. Attempting cached-config recovery:", error);
     const recovered = _tryInitFromCache();
     if (!recovered) {
-      console.error("[Auth] No cached config. Falling back to mock mode.");
-      isMockAuth = true;
-      setupMockSessionListener();
-      updateAuthUI();
-      syncUserProfileBackground();
-      verifyRoleForCurrentPage(getUserRole());
-      resolveAuthInit();
+      console.error("[Auth] No cached config. Showing configuration error.");
+      showFatalConfigError("Network failure connecting to backend configuration endpoint: " + (error.message || error));
     }
   }
 }
@@ -144,8 +196,6 @@ function _tryInitFromCache() {
                              (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
     if (!config.supabaseUrl || config.supabaseUrl.includes('placeholder') || isKeyPlaceholder) return false;
     supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-    isMockAuth = false;
-    localStorage.removeItem('cc_mock_session');
     console.log('[Auth] Supabase initialised from cached config.');
     _attachAuthStateListener();
     updateAuthUI();
@@ -394,21 +444,8 @@ async function syncUserProfileBackground() {
   }
 }
 
-// Mock auth session setup
-function setupMockSessionListener() {
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'cc_mock_session') {
-      updateAuthUI();
-    }
-  });
-}
-
 // Helper to get active session
 function getSession() {
-  if (isMockAuth) {
-    const mock = localStorage.getItem('cc_mock_session');
-    return mock ? JSON.parse(mock) : null;
-  }
   const real = localStorage.getItem('cc_session');
   return real ? JSON.parse(real) : null;
 }
@@ -416,25 +453,13 @@ function getSession() {
 // Get JWT Token for API header injection
 function getAuthToken() {
   const session = getSession();
-  if (!session) return null;
-  
-  if (isMockAuth) {
-    const role = getUserRole();
-    return `mock-jwt-token-${role}`;
-  }
-  
-  return session.access_token;
+  return session ? session.access_token : null;
 }
 
 // Get or refresh JWT Token for API header injection
 async function getOrRefreshAccessToken() {
   if (window.authInitPromise) {
     await window.authInitPromise;
-  }
-
-  if (typeof isMockAuth !== 'undefined' && isMockAuth) {
-    const role = getUserRole();
-    return `mock-jwt-token-${role}`;
   }
 
   if (typeof supabaseClient !== 'undefined' && supabaseClient) {
@@ -462,10 +487,6 @@ function getCurrentUser() {
 
 // Get User Role (Citizen, Authority, Admin)
 function getUserRole() {
-  if (isMockAuth) {
-    const session = getSession();
-    return session && session.user ? session.user.role : null;
-  }
   return localStorage.getItem('cc_user_role');
 }
 
@@ -495,7 +516,6 @@ async function clearSessionSilent() {
   window.cc_routing_in_progress = false;
 
   localStorage.removeItem('cc_session');
-  localStorage.removeItem('cc_mock_session');
   localStorage.removeItem('cc_user_role');
   localStorage.removeItem('cc_user_profile');
   localStorage.removeItem('cc_unread_notifications_count');
@@ -503,7 +523,7 @@ async function clearSessionSilent() {
   localStorage.removeItem('cc_user_stat_resolved');
   localStorage.removeItem('cc_user_stat_active');
 
-  if (!isMockAuth && supabaseClient) {
+  if (supabaseClient) {
     try {
       // Fire-and-forget: do not await so we don't block the offline recovery path
       supabaseClient.auth.signOut().catch(err => {
@@ -596,50 +616,38 @@ async function verifyProfileAndRoute(user, showAlert) {
 
   let profile = null;
 
-  if (isMockAuth) {
-    console.log("[Mock Auth] Simulating profile fetch...");
-    const mockUserId = user.id;
-    const found = MOCK_PROFILES.find(p => p.id === mockUserId || p.email === user.email);
-    if (found) {
-      profile = {
-        role: found.role,
-        is_verified: found.is_verified_authority
-      };
-    }
-  } else {
-    try {
-      const supabase = supabaseClient;
-      console.log(`[Auth Client] Querying profiles table for user ID: ${user.id}...`);
+  try {
+    const supabase = supabaseClient;
+    console.log(`[Auth Client] Querying profiles table for user ID: ${user.id}...`);
+    
+    const queryPromise = supabase
+      .from('profiles')
+      .select('role,is_verified:is_verified_authority')
+      .eq('id', user.id)
+      .single();
       
-      const queryPromise = supabase
-        .from('profiles')
-        .select('role,is_verified:is_verified_authority')
-        .eq('id', user.id)
-        .single();
-        
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 4000)
-      );
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), 4000)
+    );
 
-      const result = await Promise.race([queryPromise, timeoutPromise]);
-      const data = result.data;
-      const error = result.error;
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+    const data = result.data;
+    const error = result.error;
 
-      if (error) {
-        console.error("[Auth Client] Error fetching profile from Supabase:", error.message || error);
-      } else {
-        console.log("[Auth Client] Profile queried successfully from Supabase:", data);
-        profile = data;
-      }
-    } catch (err) {
-      console.error("[Auth Client] Unexpected exception during profile fetch:", err);
-      if (err.message === 'Timeout') {
-        window.cc_routing_in_progress = false;
-        await clearSessionSilent();
-        showAlert("Profile query timed out. If you are using Brave, please try disabling Shields or checking your connection.");
-        restoreSubmitButtons();
-        return;
-      }
+    if (error) {
+      console.error("[Auth Client] Error fetching profile from Supabase:", error.message || error);
+    } else {
+      console.log("[Auth Client] Profile queried successfully from Supabase:", data);
+      profile = data;
+    }
+  } catch (err) {
+    console.error("[Auth Client] Unexpected exception during profile fetch:", err);
+    if (err.message === 'Timeout') {
+      window.cc_routing_in_progress = false;
+      await clearSessionSilent();
+      showAlert("Profile query timed out. If you are using Brave, please try disabling Shields or checking your connection.");
+      restoreSubmitButtons();
+      return;
     }
   }
 
@@ -776,35 +784,6 @@ window.verifyProfileAndRoute = verifyProfileAndRoute;
 
 // Register a new user
 async function registerUser(email, password, fullName) {
-  if (isMockAuth) {
-    const mockSession = {
-      access_token: 'mock-jwt-token-citizen',
-      user: {
-        id: 'mock-user-id-' + Date.now(),
-        email: email,
-        role: 'citizen',
-        user_metadata: { full_name: fullName }
-      }
-    };
-    localStorage.setItem('cc_mock_session', JSON.stringify(mockSession));
-    updateAuthUI();
-
-    // Trigger mock welcome email immediately
-    try {
-      fetch('/api/auth/send-welcome', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email,
-          userId: mockSession.user.id,
-          fullName: fullName
-        })
-      }).catch(e => console.warn('[Auth] Mock welcome email trigger failed:', e));
-    } catch (e) {}
-
-    return { data: mockSession, error: null };
-  }
-
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
@@ -844,24 +823,6 @@ async function registerUser(email, password, fullName) {
 // Sign in with email and password
 async function loginUser(email, password) {
   console.log(`[Auth Client] Attempting Email/Password login for: ${email}`);
-  if (isMockAuth) {
-    let mockRole = 'citizen';
-    if (email.includes('authority') || email.includes('inspector')) mockRole = 'authority';
-    else if (email.includes('admin')) mockRole = 'admin';
-    const mockSession = {
-      access_token: `mock-jwt-token-${mockRole}`,
-      user: {
-        id: `mock-user-${mockRole}`,
-        email,
-        role: mockRole,
-        user_metadata: { full_name: email.split('@')[0] }
-      }
-    };
-    console.log('[Auth Client] Mock Mode Active. Returning mock session:', mockSession);
-    localStorage.setItem('cc_mock_session', JSON.stringify(mockSession));
-    updateAuthUI();
-    return { data: mockSession, error: null };
-  }
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
@@ -879,24 +840,6 @@ async function loginUser(email, password) {
 // Sign in with Google OAuth
 async function loginWithGoogle() {
   console.log('[Auth Client] Attempting Google OAuth login...');
-  if (isMockAuth) {
-    const mockSession = {
-      access_token: 'mock-jwt-token-citizen',
-      user: {
-        id: 'mock-user-id-google-' + Date.now(),
-        email: 'googleuser@example.com',
-        role: 'citizen',
-        user_metadata: {
-          full_name: 'Google Citizen',
-          avatar_url: ''
-        }
-      }
-    };
-    console.log('[Auth Client] Mock Mode Active. Returning mock Google session:', mockSession);
-    localStorage.setItem('cc_mock_session', JSON.stringify(mockSession));
-    updateAuthUI();
-    return { data: mockSession, error: null };
-  }
 
   // redirectTo must point to auth.html (the page that loads the Supabase SDK).
   // Supabase appends the OAuth session tokens to the URL hash; auth.js then
@@ -931,11 +874,6 @@ async function loginWithGoogle() {
 
 // Send password reset email
 async function requestPasswordReset(email) {
-  if (isMockAuth) {
-    console.log(`Mock: Password reset email sent to ${email}`);
-    return { data: {}, error: null };
-  }
-  
   const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/reset-password.html'
   });
@@ -944,11 +882,6 @@ async function requestPasswordReset(email) {
 
 // Update password (used in recovery mode)
 async function updatePassword(newPassword) {
-  if (isMockAuth) {
-    console.log(`Mock: Password updated successfully.`);
-    return { data: {}, error: null };
-  }
-
   const { data, error } = await supabaseClient.auth.updateUser({
     password: newPassword
   });
@@ -957,14 +890,6 @@ async function updatePassword(newPassword) {
 
 // Verify current password and update password (used in settings page)
 async function verifyAndChangePassword(currentPassword, newPassword) {
-  if (isMockAuth) {
-    console.log(`Mock: Verifying current password and updating to new password.`);
-    if (!currentPassword) {
-      return { error: { message: "Current password is required." } };
-    }
-    return { data: {}, error: null };
-  }
-
   const session = getSession();
   if (!session || !session.user || !session.user.email) {
     return { error: { message: "User session not found. Please sign in again." } };
@@ -992,26 +917,6 @@ async function verifyAndChangePassword(currentPassword, newPassword) {
 
   return { data, error: updateError };
 }
-
-// Change mock role (Development Testing Utility)
-function changeMockRole(role) {
-  const session = getSession();
-  if (session && session.user) {
-    session.user.role = role;
-    localStorage.setItem('cc_mock_session', JSON.stringify(session));
-    console.log(`Mock role changed to: ${role}`);
-    updateAuthUI();
-    // Dispatch event to force update components on other pages if listening
-    window.dispatchEvent(new Event('auth-change'));
-    // Reload feed if on dashboard page
-    if (typeof loadAndRenderIssues === 'function') {
-       loadAndRenderIssues();
-    } else if (typeof loadIssueDetails === 'function') {
-       loadIssueDetails();
-    }
-  }
-}
-window.changeMockRole = changeMockRole;
 
 // Sign out user
 async function logoutUser() {
@@ -1051,7 +956,7 @@ async function logoutUser() {
   document.body.style.visibility = 'hidden';
 
   // 2. await supabaseClient.auth.signOut()
-  if (!isMockAuth && supabaseClient) {
+  if (supabaseClient) {
     try {
       console.log('[Auth Client] Calling supabaseClient.auth.signOut()...');
       await supabaseClient.auth.signOut();
@@ -1064,7 +969,6 @@ async function logoutUser() {
   // 3. clear local session state
   console.log('[Auth Client] Clearing all cached credentials and states from localStorage.');
   localStorage.removeItem('cc_session');
-  localStorage.removeItem('cc_mock_session');
   localStorage.removeItem('cc_user_role');
   localStorage.removeItem('cc_user_profile');
   localStorage.removeItem('cc_unread_notifications_count');
@@ -1425,16 +1329,6 @@ function updateAuthUI() {
       const tAdminOpt = window.i18n ? window.i18n.t('role_admin') : 'Admin';
       
       let roleSelectorHtml = `Role: <strong style="color: var(--primary); text-transform: capitalize;">${tRole}</strong>`;
-      
-      if (isMockAuth) {
-        roleSelectorHtml = `
-          Role: <select onchange="changeMockRole(this.value)" style="background:var(--bg-app); color:var(--text-main); border:1px solid var(--border-color); border-radius:4px; font-size:0.7rem; padding:1px; cursor:pointer;">
-            <option value="citizen" ${role === 'citizen' ? 'selected' : ''}>${tCitizenOpt}</option>
-            <option value="authority" ${role === 'authority' ? 'selected' : ''}>${tAuthorityOpt}</option>
-            <option value="admin" ${role === 'admin' ? 'selected' : ''}>${tAdminOpt}</option>
-          </select>
-        `;
-      }
 
       const tProfile = window.i18n ? window.i18n.t('nav_profile') : 'Profile';
       const tSettings = window.i18n ? window.i18n.t('nav_settings') : 'Settings';
@@ -1479,17 +1373,6 @@ function updateAuthUI() {
     const tAdminOpt = window.i18n ? window.i18n.t('role_admin') : 'Admin';
 
     let roleDisplayHtml = `Role: <span style="font-weight:700; color:var(--primary); text-transform:capitalize;">${tRole}</span>`;
-    
-    // Add selector for mock mode testing
-    if (isMockAuth) {
-      roleDisplayHtml = `
-        Role: <select onchange="changeMockRole(this.value)" onclick="event.stopPropagation()" style="background:var(--bg-app); color:var(--text-main); border:1px solid var(--border-color); border-radius:4px; font-size:0.75rem; padding:2px; font-weight:600; cursor:pointer;">
-          <option value="citizen" ${role === 'citizen' ? 'selected' : ''}>${tCitizenOpt}</option>
-          <option value="authority" ${role === 'authority' ? 'selected' : ''}>${tAuthorityOpt}</option>
-          <option value="admin" ${role === 'admin' ? 'selected' : ''}>${tAdminOpt}</option>
-        </select>
-      `;
-    }
 
     const isCitizen = role === 'citizen';
     const tViewAllNotifications = window.i18n ? window.i18n.t('view_all_notifications') : 'View All Notifications';
@@ -1747,35 +1630,7 @@ function initAuthModule() {
     document.documentElement.classList.remove('dark-theme');
   }
 
-  // Auto-detect mock mode synchronously if mock session exists and no real session exists
-  let checkMock = false;
-  try {
-    const cachedConfigRaw = localStorage.getItem('cc_config_cache');
-    if (cachedConfigRaw) {
-      const config = JSON.parse(cachedConfigRaw);
-      const isKeyPlaceholder = !config.supabaseAnonKey || 
-                               config.supabaseAnonKey.includes('placeholder') || 
-                               config.supabaseAnonKey === '' || 
-                               (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
-      const isUrlPlaceholder = !config.supabaseUrl || 
-                               config.supabaseUrl.includes('placeholder') || 
-                               config.supabaseUrl === '';
-      if (isUrlPlaceholder || isKeyPlaceholder) {
-        checkMock = true;
-      }
-    } else {
-      checkMock = true; // Default to check mock if no config cache is present yet
-    }
-  } catch (e) {
-    checkMock = true;
-  }
-
-  if (checkMock && localStorage.getItem('cc_mock_session') && !localStorage.getItem('cc_session')) {
-    isMockAuth = true;
-  } else {
-    isMockAuth = false;
-    localStorage.removeItem('cc_mock_session');
-  }
+  localStorage.removeItem('cc_mock_session');
 
 
   // Bootstrap clock and authentication

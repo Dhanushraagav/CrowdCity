@@ -2,8 +2,7 @@ import express from 'express';
 import { 
   getNotifications, 
   markAsRead, 
-  markAllAsRead, 
-  registerSseClient 
+  markAllAsRead
 } from '../controllers/notificationController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 
@@ -13,7 +12,6 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/', getNotifications);
-router.get('/realtime', registerSseClient);
 router.patch('/:id/read', markAsRead);
 router.patch('/read-all', markAllAsRead);
 

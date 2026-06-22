@@ -1394,11 +1394,7 @@
           statusBanner.classList.remove('hidden-field');
         }
         
-        if (sendData.mockOtp) {
-          window.showToast(`âœ“ OTP Sent (Mock: ${sendData.mockOtp})`, 'success');
-        } else {
-          window.showToast('âœ“ OTP Sent successfully.', 'success');
-        }
+        window.showToast('✓ OTP Sent successfully.', 'success');
       } catch (err) {
         window.showToast('An error occurred sending OTP.', 'error');
         if (promoCta) {
@@ -1771,26 +1767,20 @@
                 }
 
                 const session = verifyData.session;
-                if (isMockAuth) {
-                  localStorage.setItem('cc_mock_session', JSON.stringify(session));
-                  updateAuthUI();
-                  await verifyProfileAndRoute(session.user, showAlert);
-                } else {
-                  const { data, error } = await supabaseClient.auth.setSession({
-                    access_token: session.access_token,
-                    refresh_token: session.refresh_token
-                  });
-                  if (error) {
-                    if (otpHiddenInput) {
-                      otpHiddenInput.disabled = false;
-                      otpHiddenInput.focus();
-                    }
-                    window.showToast(`Session restoration failed: ${error.message}`, 'error');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = window.i18n ? window.i18n.t('verify_otp') : 'Verify OTP';
-                  } else {
-                    await verifyProfileAndRoute(session.user, showAlert);
+                const { data, error } = await supabaseClient.auth.setSession({
+                  access_token: session.access_token,
+                  refresh_token: session.refresh_token
+                });
+                if (error) {
+                  if (otpHiddenInput) {
+                    otpHiddenInput.disabled = false;
+                    otpHiddenInput.focus();
                   }
+                  window.showToast(`Session restoration failed: ${error.message}`, 'error');
+                  submitBtn.disabled = false;
+                  submitBtn.innerHTML = window.i18n ? window.i18n.t('verify_otp') : 'Verify OTP';
+                } else {
+                  await verifyProfileAndRoute(session.user, showAlert);
                 }
               } catch (err) {
                 if (otpHiddenInput) {
@@ -1887,11 +1877,7 @@
 
             // Transition to OTP verification screen
             showOtpScreen('signup', email);
-            if (sendData.mockOtp) {
-              window.showToast(`Verification code sent to your email. (Mock: ${sendData.mockOtp})`, 'success');
-            } else {
-              window.showToast('Verification code sent to your email.', 'success');
-            }
+            window.showToast('Verification code sent to your email.', 'success');
           } catch (err) {
             showAlert('An error occurred during verification setup.');
             submitBtn.disabled = false;
@@ -2006,22 +1992,16 @@
             if (otpFlowType === 'login') {
               window.showToast('OTP verified! Signing in...', 'success');
               const session = verifyData.session;
-              if (isMockAuth) {
-                localStorage.setItem('cc_mock_session', JSON.stringify(session));
-                updateAuthUI();
-                await verifyProfileAndRoute(session.user, showAlert);
+              const { data, error } = await supabaseClient.auth.setSession({
+                access_token: session.access_token,
+                refresh_token: session.refresh_token
+              });
+              if (error) {
+                window.showToast(`Session restoration failed: ${error.message}`, 'error');
+                otpVerifyBtn.disabled = false;
+                otpVerifyBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ' + (window.i18n ? window.i18n.t('verify_code') : 'Verify Code');
               } else {
-                const { data, error } = await supabaseClient.auth.setSession({
-                  access_token: session.access_token,
-                  refresh_token: session.refresh_token
-                });
-                if (error) {
-                  window.showToast(`Session restoration failed: ${error.message}`, 'error');
-                  otpVerifyBtn.disabled = false;
-                  otpVerifyBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ' + (window.i18n ? window.i18n.t('verify_code') : 'Verify Code');
-                } else {
-                  await verifyProfileAndRoute(session.user, showAlert);
-                }
+                await verifyProfileAndRoute(session.user, showAlert);
               }
             } else {
               // signup flow - complete account registration
@@ -2058,22 +2038,16 @@
               window.showToast('Account created successfully! Redirecting...', 'success');
 
               const session = regData.session;
-              if (isMockAuth) {
-                localStorage.setItem('cc_mock_session', JSON.stringify(session));
-                updateAuthUI();
-                await verifyProfileAndRoute(session.user, showAlert);
+              const { data, error } = await supabaseClient.auth.setSession({
+                access_token: session.access_token,
+                refresh_token: session.refresh_token
+              });
+              if (error) {
+                window.showToast(`Session login failed: ${error.message}`, 'error');
+                otpVerifyBtn.disabled = false;
+                otpVerifyBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ' + (window.i18n ? window.i18n.t('verify_code') : 'Verify Code');
               } else {
-                const { data, error } = await supabaseClient.auth.setSession({
-                  access_token: session.access_token,
-                  refresh_token: session.refresh_token
-                });
-                if (error) {
-                  window.showToast(`Session login failed: ${error.message}`, 'error');
-                  otpVerifyBtn.disabled = false;
-                  otpVerifyBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ' + (window.i18n ? window.i18n.t('verify_code') : 'Verify Code');
-                } else {
-                  await verifyProfileAndRoute(session.user, showAlert);
-                }
+                await verifyProfileAndRoute(session.user, showAlert);
               }
             }
           } catch (err) {

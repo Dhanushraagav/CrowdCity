@@ -5,15 +5,8 @@ import logger from '../config/logger.js';
 import { analyzeComplaint } from '../services/groqService.js';
 import { validateServiceArea } from '../services/serviceAreaService.js';
 
-// Predefined Mock Data with updated status taxonomy and assignments
-export const MOCK_ISSUES = [];
-export const MOCK_COMMENTS = {};
-const MOCK_STATUS_HISTORY = {};
-export let MOCK_VOTES = [];
-
 /**
  * Get all reported civic issues.
- * Supports filtering by category, status, reporter_id, and assigned_to.
  */
 export const getAllIssues = async (req, res) => {
   const { category, status, reporter_id, assigned_to, sort_by, limit } = req.query;
@@ -25,63 +18,10 @@ export const getAllIssues = async (req, res) => {
   let userId = null;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
-    if (token.startsWith('mock-jwt-token')) {
-      userId = token === 'mock-jwt-token' ? 'mock-user-id-123' : `mock-user-${token.includes('authority') ? 'authority' : token.includes('admin') ? 'admin' : 'citizen'}`;
-    } else {
-      try {
-        const { data: { user } } = await supabase.auth.getUser(token);
-        if (user) userId = user.id;
-      } catch (err) {}
-    }
-  }
-
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || (userId && userId.startsWith('mock-'));
-
-  if (isMock) {
-    let filtered = [...MOCK_ISSUES];
-    if (category) {
-      if (category === 'roads') {
-        filtered = filtered.filter(i => i.category === 'roads' || i.category === 'pothole');
-      } else if (category === 'streetlights') {
-        filtered = filtered.filter(i => i.category === 'streetlights' || i.category === 'streetlight');
-      } else {
-        filtered = filtered.filter(i => i.category === category);
-      }
-    }
-    if (status) {
-      if (status === 'resolved') {
-        filtered = filtered.filter(i => i.status === 'resolved' || i.status === 'verified');
-      } else {
-        filtered = filtered.filter(i => i.status === status);
-      }
-    }
-    if (reporter_id) filtered = filtered.filter(i => i.reporter_id === reporter_id);
-    if (assigned_to) filtered = filtered.filter(i => i.assigned_to === assigned_to);
-
-    logger.info(`[getAllIssues MOCK] After filtering: ${filtered.length} issues (from ${MOCK_ISSUES.length} total)`);
-    filtered.forEach((issue, idx) => {
-      logger.debug(`  [${idx}] ID: ${issue.id} | Category: "${issue.category}" | Status: "${issue.status}"`);
-    });
-
-    if (sort_by === 'popularity') {
-      filtered.sort((a, b) => (b.upvotes_count || 0) - (a.upvotes_count || 0));
-    } else {
-      filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    }
-
-    if (limit) {
-      filtered = filtered.slice(0, parseInt(limit, 10));
-    }
-
-    // Populate user_has_upvoted for Mock Mode
-    filtered.forEach(issue => {
-      issue.user_has_upvoted = userId ? MOCK_VOTES.some(v => v.user_id === userId && v.issue_id === issue.id) : false;
-    });
-
-    return res.status(200).json(filtered);
+    try {
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) userId = user.id;
+    } catch (err) {}
   }
 
   try {
@@ -128,21 +68,16 @@ export const getAllIssues = async (req, res) => {
 
     if (issuesRes.error) {
       logger.error('Failed to fetch issues from Supabase: %O', issuesRes.error);
-      return res.status(400).json({ error: `Supabase query failed: ${issuesRes.error.message}` });
+      return res.status(400).json({ error: `Database query failed: ${issuesRes.error.message}` });
     }
 
     const data = issuesRes.data;
     logger.info(`[getAllIssues SUPABASE] Query returned ${data ? data.length : 0} issues`);
-    if (data && data.length > 0) {
-      data.forEach((issue, idx) => {
-        logger.debug(`  [${idx}] ID: ${issue.id} | Category: "${issue.category}" | Status: "${issue.status}"`);
-      });
-    }
 
     const userVotes = votesRes.data;
     const votesError = votesRes.error;
 
-    // Populate user_has_upvoted for Production Mode
+    // Populate user_has_upvoted
     if (userId && data && data.length > 0 && !votesError && userVotes) {
       const votedIssueIds = new Set(userVotes.map(v => v.issue_id));
       data.forEach(issue => {
@@ -172,35 +107,10 @@ export const getIssueById = async (req, res) => {
   let userId = null;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
-    if (token.startsWith('mock-jwt-token')) {
-      userId = token === 'mock-jwt-token' ? 'mock-user-id-123' : `mock-user-${token.includes('authority') ? 'authority' : token.includes('admin') ? 'admin' : 'citizen'}`;
-    } else {
-      try {
-        const { data: { user } } = await supabase.auth.getUser(token);
-        if (user) userId = user.id;
-      } catch (err) {}
-    }
-  }
-
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-') || (userId && userId.startsWith('mock-'));
-
-  if (isMock) {
-    const mockIssue = MOCK_ISSUES.find(i => i.id === id);
-    if (mockIssue) {
-      const mockComments = MOCK_COMMENTS[id] || [];
-      const mockHistory = MOCK_STATUS_HISTORY[id] || [];
-      const userHasUpvoted = userId ? MOCK_VOTES.some(v => v.user_id === userId && v.issue_id === id) : false;
-      return res.status(200).json({ 
-        ...mockIssue, 
-        comments: mockComments, 
-        history: mockHistory,
-        user_has_upvoted: userHasUpvoted
-      });
-    }
-    return res.status(404).json({ error: 'Issue not found' });
+    try {
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) userId = user.id;
+    } catch (err) {}
   }
 
   try {
@@ -232,7 +142,7 @@ export const getIssueById = async (req, res) => {
       .eq('issue_id', id)
       .order('created_at', { ascending: true });
 
-    // Check if user has upvoted in production mode
+    // Check if user has upvoted
     let userHasUpvoted = false;
     if (userId) {
       const { data: vote, error: voteError } = await activeClient
@@ -259,89 +169,20 @@ export const getIssueById = async (req, res) => {
 };
 
 /**
- * Report a new issue.
- */
-/**
- * Analyze issue details via Groq API (OpenAI compatibility endpoint).
- * Falls back to local keyword-based mock analysis if Groq is unconfigured.
+ * Analyze issue details via Groq API.
  */
 async function performGroqAnalysis(title, description) {
   try {
     return await analyzeComplaint(title, description);
   } catch (err) {
-    logger.error('Groq analysis failed during issue creation, using default fallback: %O', err);
+    logger.error('Groq analysis failed during issue creation: %O', err);
     return {
-      summary: `Summarized report: ${title}`,
-      category: 'Other',
-      priority: 'Medium',
-      department: 'General Department'
+      summary: null,
+      category: null,
+      priority: null,
+      department: null
     };
   }
-}
-
-/**
- * Keyword-based AI analysis simulation fallback
- */
-function getMockAiAnalysis(title, description) {
-  const text = (title + ' ' + description).toLowerCase();
-  
-  let category = 'other';
-  if (text.includes('mosquito') || text.includes('breeding') || text.includes('pollution') || text.includes('environment') || text.includes('ecology') || text.includes('conservation')) {
-    category = 'environment';
-  } else if (text.includes('manhole') || text.includes('fallen tree') || text.includes('exposed wire') || text.includes('live wire')) {
-    category = 'safety_hazard';
-  } else if (text.includes('toilet') || text.includes('unclean') || text.includes('dirty') || text.includes('sanitation') || text.includes('hygiene')) {
-    category = 'sanitation';
-  } else if (text.includes('pothole') || text.includes('crater') || text.includes('asphalt') || text.includes('footpath') || text.includes('sidewalk') || text.includes('crack') || text.includes('road')) {
-    category = 'roads';
-  } else if (text.includes('streetlight') || text.includes('light pole') || text.includes('lamp') || text.includes('bulb') || text.includes('light')) {
-    category = 'streetlights';
-  } else if (text.includes('leak') || text.includes('water supply') || text.includes('burst') || text.includes('pipe') || text.includes('pressure') || text.includes('water')) {
-    category = 'water_supply';
-  } else if (text.includes('drain') || text.includes('sewer') || text.includes('gutter') || text.includes('flooded drainage')) {
-    category = 'drainage';
-  } else if (text.includes('garbage') || text.includes('trash') || text.includes('dump') || text.includes('litter') || text.includes('waste') || text.includes('refuse')) {
-    category = 'garbage';
-  } else if (text.includes('traffic') || text.includes('signal') || text.includes('sign') || text.includes('intersection')) {
-    category = 'traffic';
-  } else if (text.includes('bus stop') || text.includes('bench') || text.includes('public property') || text.includes('government property') || text.includes('damaging public')) {
-    category = 'public_property';
-  } else if (text.includes('park') || text.includes('playground') || text.includes('garden') || text.includes('fence')) {
-    category = 'parks';
-  } else if (text.includes('hazard') || text.includes('danger') || text.includes('accident') || text.includes('debris')) {
-    category = 'safety_hazard';
-  }
-
-  let department = 'General Department';
-  if (category === 'roads' || category === 'traffic' || category === 'public_property' || category === 'parks' || category === 'safety_hazard') {
-    department = 'Road Department';
-  } else if (category === 'garbage' || category === 'sanitation' || category === 'environment') {
-    department = 'Sanitation Department';
-  } else if (category === 'water_supply' || category === 'drainage') {
-    department = 'Water Department';
-  } else if (category === 'streetlights') {
-    department = 'Electrical Department';
-  }
-
-  let priority = 'low';
-  if (text.includes('danger') || text.includes('hazard') || text.includes('accident') || text.includes('injury') || text.includes('emergency') || text.includes('critical') || text.includes('manhole') || text.includes('exposed wire')) {
-    priority = 'critical';
-  } else if (text.includes('outage') || text.includes('dark') || text.includes('broken') || text.includes('large') || text.includes('block') || text.includes('overflow')) {
-    priority = 'high';
-  } else if (text.includes('leak') || text.includes('crack') || text.includes('dirty')) {
-    priority = 'medium';
-  } else {
-    priority = 'low';
-  }
-
-  const summary = `AI detected a ${category} issue: "${description.substring(0, 60)}..."`;
-
-  return {
-    summary,
-    category,
-    department,
-    priority
-  };
 }
 
 /**
@@ -397,16 +238,12 @@ export const createIssue = async (req, res) => {
     }
   } catch (err) {
     logger.error('Service Area Validation error in createIssue: %O', err);
-    // Continue in case of system error to be resilient
   }
 
   try {
     let imageUrl = '';
-    const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                                 !process.env.SUPABASE_URL.includes('placeholder') &&
-                                 process.env.SUPABASE_URL !== '';
 
-    if (req.file && isSupabaseConfigured) {
+    if (req.file) {
       const activeClient = supabaseAdmin || supabase;
       const fileExt = req.file.originalname.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -455,32 +292,6 @@ export const createIssue = async (req, res) => {
       ai_department: aiResult.department,
       ai_priority: aiResult.priority ? aiResult.priority.toLowerCase() : 'medium'
     };
-
-    const isMock = !isSupabaseConfigured || req.user.id.startsWith('mock-');
-
-    if (isMock) {
-      const mockSaved = {
-        ...newIssue,
-        id: `mock-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        reporter: { full_name: req.user.user_metadata?.full_name || 'You (Mock)', avatar_url: '' }
-      };
-      
-      MOCK_ISSUES.unshift(mockSaved);
-      MOCK_STATUS_HISTORY[mockSaved.id] = [
-        {
-          id: `mock-h-${Date.now()}`,
-          issue_id: mockSaved.id,
-          status: 'pending',
-          notes: 'Complaint submitted by citizen.',
-          created_at: mockSaved.created_at,
-          profiles: null
-        }
-      ];
-      
-      awardPointsAndCheckBadges(req.user.id, 10, 'report', req).catch(err => logger.error('Background gamification error:', err));
-      return res.status(201).json(mockSaved);
-    }
 
     // Production flow: insert to Supabase using request-scoped client
     const activeClient = getSupabaseClient(req);
@@ -532,30 +343,6 @@ export const upvoteIssue = async (req, res) => {
   const { id } = req.params;
   const user_id = req.user.id;
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-') || user_id.startsWith('mock-');
-
-  if (isMock) {
-    const mockIssue = MOCK_ISSUES.find(i => i.id === id);
-    if (mockIssue) {
-      const voteIndex = MOCK_VOTES.findIndex(v => v.user_id === user_id && v.issue_id === id);
-      if (voteIndex > -1) {
-        MOCK_VOTES.splice(voteIndex, 1);
-        mockIssue.upvotes_count = Math.max(0, mockIssue.upvotes_count - 1);
-        awardPointsAndCheckBadges(user_id, -2, 'upvote_retract', req).catch(err => logger.error('Background gamification error:', err));
-        return res.status(200).json({ upvoted: false, upvotes_count: mockIssue.upvotes_count });
-      } else {
-        MOCK_VOTES.push({ user_id, issue_id: id });
-        mockIssue.upvotes_count += 1;
-        awardPointsAndCheckBadges(user_id, 2, 'upvote', req).catch(err => logger.error('Background gamification error:', err));
-        return res.status(200).json({ upvoted: true, upvotes_count: mockIssue.upvotes_count });
-      }
-    }
-    return res.status(404).json({ error: 'Issue not found' });
-  }
-
   try {
     const activeClient = getSupabaseClient(req);
     const { data: existingVote, error: checkError } = await activeClient
@@ -605,31 +392,6 @@ export const addComment = async (req, res) => {
     return res.status(400).json({ error: 'Comment content cannot be empty' });
   }
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-') || user_id.startsWith('mock-');
-
-  if (isMock) {
-    const mockIssue = MOCK_ISSUES.find(i => i.id === id);
-    if (mockIssue) {
-      const mockSavedComment = {
-        id: `mock-c-${Date.now()}`,
-        issue_id: id,
-        user_id,
-        comment_text,
-        created_at: new Date().toISOString(),
-        profiles: { full_name: req.user.user_metadata?.full_name || 'You (Mock)', avatar_url: '' }
-      };
-      if (!MOCK_COMMENTS[id]) MOCK_COMMENTS[id] = [];
-      MOCK_COMMENTS[id].push(mockSavedComment);
-      
-      awardPointsAndCheckBadges(user_id, 5, 'comment', req).catch(err => logger.error('Background gamification error:', err));
-      return res.status(201).json(mockSavedComment);
-    }
-    return res.status(404).json({ error: 'Issue not found (Mock)' });
-  }
-
   try {
     const newComment = {
       issue_id: id,
@@ -664,58 +426,6 @@ export const updateIssueStatus = async (req, res) => {
   const validStatuses = ['pending', 'assigned', 'in_progress', 'resolved', 'rejected'];
   if (!status || !validStatuses.includes(status)) {
     return res.status(400).json({ error: 'Please provide a valid status.' });
-  }
-
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-') || req.user.id.startsWith('mock-');
-
-  if (isMock) {
-    if (status === 'resolved') {
-      const mockIssue = MOCK_ISSUES.find(i => i.id === id);
-      if (!mockIssue || !mockIssue.completion_proof_url) {
-        if (!req.file) {
-          return res.status(400).json({ error: 'Resolution proof image is strictly required to resolve a complaint.' });
-        }
-      }
-    }
-
-    const mockIssue = MOCK_ISSUES.find(i => i.id === id);
-    if (mockIssue) {
-      mockIssue.status = status;
-      if (status === 'resolved') {
-        if (req.file) {
-          mockIssue.completion_proof_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-        } else if (!mockIssue.completion_proof_url) {
-          mockIssue.completion_proof_url = 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=600&q=80';
-        }
-        mockIssue.completion_notes = notes || 'Complaint resolved successfully (Mock).';
-      }
-
-      const mockLog = {
-        id: `mock-h-${Date.now()}`,
-        issue_id: id,
-        status,
-        notes: notes || `Status updated to ${status.toUpperCase()} by authority dispatcher.`,
-        created_at: new Date().toISOString(),
-        profiles: { full_name: req.user.user_metadata?.full_name || 'Authority Dispatcher' }
-      };
-
-      if (!MOCK_STATUS_HISTORY[id]) MOCK_STATUS_HISTORY[id] = [];
-      MOCK_STATUS_HISTORY[id].push(mockLog);
-
-      createNotification(
-        mockIssue.reporter_id,
-        "Complaint Status Update",
-        `Your reported complaint '${mockIssue.title}' has been updated to ${status.toUpperCase()}.`,
-        "status_change",
-        id
-      );
-
-      return res.status(200).json({ message: 'Status updated successfully (Mock)', issue: mockIssue });
-    }
-    return res.status(404).json({ error: 'Issue not found' });
   }
 
   try {
@@ -840,61 +550,6 @@ export const assignIssue = async (req, res) => {
   console.log("ISSUE ID: " + id);
   console.log("AUTHORITY ID: " + authorityId);
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-') || authorityId.startsWith('mock-');
-
-  if (isMock) {
-    const mockIssue = MOCK_ISSUES.find(i => i.id === id);
-    if (mockIssue) {
-      mockIssue.assigned_to = authorityId;
-      mockIssue.status = 'assigned';
-
-      let inspectorName = 'Mock Inspector';
-      if (authorityId === 'mock-user-authority') inspectorName = 'Mock Authority';
-      else if (authorityId === 'mock-user-admin') inspectorName = 'Mock Admin';
-      else if (authorityId === 'mock-user-id-123') inspectorName = 'Alex Rivera';
-      else if (authorityId === 'mock-user-id-999') inspectorName = 'Sarah Chen';
-
-      const mockLog = {
-        id: `mock-h-${Date.now()}`,
-        issue_id: id,
-        status: 'assigned',
-        notes: `Complaint assigned to inspector ${inspectorName}.`,
-        created_at: new Date().toISOString(),
-        profiles: { full_name: req.user.user_metadata?.full_name || 'System Dispatcher' }
-      };
-
-      if (!MOCK_STATUS_HISTORY[id]) MOCK_STATUS_HISTORY[id] = [];
-      MOCK_STATUS_HISTORY[id].push(mockLog);
-
-      createNotification(
-        authorityId,
-        "New Case Assigned",
-        `A new complaint '${mockIssue.title}' has been assigned to you.`,
-        "assignment",
-        id
-      );
-
-      createNotification(
-        mockIssue.reporter_id,
-        "Complaint Assigned",
-        `Your complaint '${mockIssue.title}' has been assigned to inspector ${inspectorName}.`,
-        "status_change",
-        id
-      );
-
-      console.log("UPDATE PAYLOAD: " + JSON.stringify({ assigned_to: authorityId, status: 'assigned' }));
-      console.log("ROWS UPDATED: 1");
-
-      return res.status(200).json({ message: 'Issue assigned successfully (Mock)', issue: mockIssue });
-    }
-    console.log("UPDATE PAYLOAD: " + JSON.stringify({ assigned_to: authorityId, status: 'assigned' }));
-    console.log("ROWS UPDATED: 0");
-    return res.status(404).json({ error: 'Issue not found' });
-  }
-
   try {
     const activeClient = getSupabaseClient(req);
 
@@ -921,10 +576,6 @@ export const assignIssue = async (req, res) => {
       return res.status(404).json({ error: `Authority profile not found for user ID: ${authorityId}` });
     }
 
-    if (profiles.length > 1) {
-      console.warn(`[Assign] WARNING: Duplicate profiles found for ID ${authorityId}. Records:`, profiles);
-    }
-
     inspectorName = profiles[0].full_name;
 
     // Verify if the issue exists and check its record count
@@ -946,10 +597,6 @@ export const assignIssue = async (req, res) => {
       return res.status(404).json({ error: `Issue not found in database for ID: ${id}` });
     }
 
-    if (checkIssue.length > 1) {
-      console.warn(`[Assign] WARNING: Duplicate issues found with ID ${id}. Records:`, checkIssue);
-    }
-
     const updatePayload = { 
       assigned_to: authorityId, 
       status: 'assigned', 
@@ -967,9 +614,6 @@ export const assignIssue = async (req, res) => {
     console.log(`[Assign] assignment query result (raw update):`, updateData, `error:`, updateError);
 
     if (updateError) {
-      if (updateError.code === '42703' || (updateError.message && updateError.message.includes('column'))) {
-        console.log("Assignment failed reason: invalid column");
-      }
       throw updateError;
     }
 
@@ -977,43 +621,8 @@ export const assignIssue = async (req, res) => {
     console.log("ROWS UPDATED: " + rowsUpdated);
 
     if (!updateData || updateData.length === 0) {
-      // Run diagnostic query using admin client to find the exact reason
-      let reason = "RLS block";
-      try {
-        const { data: issueAdmin, error: issueAdminErr } = await supabaseAdmin
-          .from('issues')
-          .select('*')
-          .eq('id', id);
-
-        const { data: profileAdmin, error: profileAdminErr } = await supabaseAdmin
-          .from('profiles')
-          .select('*')
-          .eq('id', authorityId);
-
-        if (!issueAdmin || issueAdmin.length === 0) {
-          reason = "issue missing";
-        } else if (!profileAdmin || profileAdmin.length === 0) {
-          reason = "profile missing";
-        } else {
-          const profile = profileAdmin[0];
-          const issue = issueAdmin[0];
-
-          if (profile.role !== 'authority' && profile.role !== 'admin') {
-            reason = "role mismatch";
-          } else if (profile.role === 'authority' && !profile.is_verified_authority) {
-            reason = "verification failure";
-          } else if (issue.assigned_to && issue.assigned_to !== authorityId) {
-            reason = "WHERE clause mismatch"; // already assigned to someone else
-          }
-        }
-      } catch (diagErr) {
-        console.error("Diagnostic query failed:", diagErr);
-      }
-
-      console.log(`Assignment failed reason: ${reason}`);
-
       return res.status(400).json({ 
-        error: `Assignment failed: Zero rows updated. Reason: ${reason}. Please verify that your inspector account is verified and RLS policies allow you to update issues.` 
+        error: `Assignment failed: Zero rows updated. Please verify that your inspector account is verified and RLS policies allow you to update issues.` 
       });
     }
 
@@ -1064,70 +673,6 @@ export const assignIssue = async (req, res) => {
 export const verifyIssue = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
-
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-') || userId.startsWith('mock-');
-
-  if (isMock) {
-    const issue = MOCK_ISSUES.find(i => i.id === id);
-    if (!issue) {
-      return res.status(404).json({ error: 'Issue not found' });
-    }
-
-    const isReporter = userId === issue.reporter_id || 
-                       (issue.reporter_id && issue.reporter_id.startsWith('mock-') && userId.startsWith('mock-')) ||
-                       req.user.role === 'admin';
-
-    if (!isReporter) {
-      return res.status(403).json({ error: 'Only the original citizen reporter can approve and verify this complaint.' });
-    }
-
-    if (issue.status !== 'resolved') {
-      return res.status(400).json({ error: 'Complaint must be in RESOLVED status before it can be verified.' });
-    }
-
-    issue.status = 'verified';
-    issue.updated_at = new Date().toISOString();
-
-    const mockLog = {
-      id: `mock-h-${Date.now()}`,
-      issue_id: id,
-      status: 'verified',
-      notes: 'Resolution approved and verified by citizen reporter (Mock).',
-      created_at: new Date().toISOString(),
-      profiles: { full_name: req.user.user_metadata?.full_name || 'Citizen Reporter' }
-    };
-
-    if (!MOCK_STATUS_HISTORY[id]) MOCK_STATUS_HISTORY[id] = [];
-    MOCK_STATUS_HISTORY[id].push(mockLog);
-
-    awardPointsAndCheckBadges(issue.reporter_id, 50, 'report_verified', req).catch(err => logger.error('Background gamification error:', err));
-    if (issue.assigned_to) {
-      awardPointsAndCheckBadges(issue.assigned_to, 20, 'resolve_complaint', req).catch(err => logger.error('Background gamification error:', err));
-    }
-
-    createNotification(
-      issue.reporter_id,
-      "Complaint Resolution Approved",
-      `You have successfully approved and verified the resolution of '${issue.title}'. +50 XP awarded!`,
-      "status_change",
-      id
-    );
-
-    if (issue.assigned_to) {
-      createNotification(
-        issue.assigned_to,
-        "Complaint Resolution Verified",
-        `The citizen reporter has verified and approved your resolution for '${issue.title}'. +20 XP awarded!`,
-        "status_change",
-        id
-      );
-    }
-
-    return res.status(200).json({ message: 'Complaint successfully verified', issue });
-  }
 
   try {
     const activeClient = getSupabaseClient(req);
@@ -1214,66 +759,6 @@ export const reopenIssue = async (req, res) => {
   const { reason } = req.body;
   const userId = req.user.id;
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-') || userId.startsWith('mock-');
-
-  if (isMock) {
-    const issue = MOCK_ISSUES.find(i => i.id === id);
-    if (!issue) {
-      return res.status(404).json({ error: 'Issue not found' });
-    }
-
-    const isReporter = userId === issue.reporter_id || 
-                       (issue.reporter_id && issue.reporter_id.startsWith('mock-') && userId.startsWith('mock-')) ||
-                       req.user.role === 'admin';
-
-    if (!isReporter) {
-      return res.status(403).json({ error: 'Only the original citizen reporter can reopen this complaint.' });
-    }
-
-    if (issue.status !== 'resolved') {
-      return res.status(400).json({ error: 'Only complaints in RESOLVED status can be reopened.' });
-    }
-
-    const notes = reason ? `Complaint reopened by citizen. Reason: ${reason}` : 'Complaint reopened by citizen for further inspection.';
-    issue.status = 'in_progress';
-    issue.updated_at = new Date().toISOString();
-
-    const mockLog = {
-      id: `mock-h-${Date.now()}`,
-      issue_id: id,
-      status: 'in_progress',
-      notes: notes + ' (Mock)',
-      created_at: new Date().toISOString(),
-      profiles: { full_name: req.user.user_metadata?.full_name || 'Citizen Reporter' }
-    };
-
-    if (!MOCK_STATUS_HISTORY[id]) MOCK_STATUS_HISTORY[id] = [];
-    MOCK_STATUS_HISTORY[id].push(mockLog);
-
-    createNotification(
-      issue.reporter_id,
-      "Complaint Reopened",
-      `You have reopened the complaint '${issue.title}' for further work.`,
-      "status_change",
-      id
-    );
-
-    if (issue.assigned_to) {
-      createNotification(
-        issue.assigned_to,
-        "Complaint Reopened by Citizen",
-        `Your resolved complaint '${issue.title}' has been reopened by the citizen reporter. Reason: ${reason || 'Not specified'}.`,
-        "status_change",
-        id
-      );
-    }
-
-    return res.status(200).json({ message: 'Complaint successfully reopened', issue });
-  }
-
   try {
     const activeClient = getSupabaseClient(req);
     const { data: issue, error } = await activeClient
@@ -1350,31 +835,6 @@ export const reopenIssue = async (req, res) => {
  */
 export const getAuthorityStats = async (req, res) => {
   const authorityId = req.user.id;
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || authorityId.startsWith('mock-');
-
-  if (isMock) {
-    const allPending = MOCK_ISSUES.filter(i => i.status === 'pending').length;
-    const myAssigned = MOCK_ISSUES.filter(i => i.assigned_to === authorityId && i.status === 'assigned').length;
-    const myInProgress = MOCK_ISSUES.filter(i => i.assigned_to === authorityId && i.status === 'in_progress').length;
-    
-    const todayStart = new Date();
-    todayStart.setHours(0,0,0,0);
-    const myResolvedToday = MOCK_ISSUES.filter(i => 
-      i.assigned_to === authorityId && 
-      (i.status === 'resolved' || i.status === 'verified') && 
-      new Date(i.updated_at || i.created_at) >= todayStart
-    ).length;
-
-    return res.status(200).json({
-      pending: allPending,
-      assigned: myAssigned,
-      inProgress: myInProgress,
-      resolvedToday: myResolvedToday
-    });
-  }
 
   try {
     const activeClient = getSupabaseClient(req);
@@ -1442,47 +902,11 @@ export const getAuthorityStats = async (req, res) => {
   }
 };
 
-// Compute KPI counts from status list
-function calculateStats(issueList) {
-  let pending = 0;
-  let assigned = 0;
-  let in_progress = 0;
-  let resolved = 0;
-  let rejected = 0;
-
-  issueList.forEach(issue => {
-    if (issue.status === 'pending') pending++;
-    else if (issue.status === 'assigned') assigned++;
-    else if (issue.status === 'in_progress') in_progress++;
-    else if (issue.status === 'resolved') resolved++;
-    else if (issue.status === 'rejected') rejected++;
-  });
-
-  return {
-    totalAssigned: issueList.length,
-    pending,
-    assigned,
-    inProgress: in_progress,
-    resolved,
-    rejected
-  };
-}
-
 /**
  * Delete Issue (Admin Only)
  */
 export const deleteIssue = async (req, res) => {
   const { id } = req.params;
-  const isMock = id.startsWith('mock-');
-
-  if (isMock) {
-    const index = MOCK_ISSUES.findIndex(i => i.id === id);
-    if (index !== -1) {
-      MOCK_ISSUES.splice(index, 1);
-      return res.status(200).json({ message: 'Issue deleted successfully (Mock)' });
-    }
-    return res.status(404).json({ error: 'Issue not found (Mock)' });
-  }
 
   try {
     const activeClient = getSupabaseClient(req);
@@ -1504,44 +928,25 @@ export const deleteIssue = async (req, res) => {
  * Get system analytics (Admin Only)
  */
 export const getAdminAnalytics = async (req, res) => {
-  const userId = req.user ? req.user.id : '';
-
   try {
-    let issues = [];
-    let profiles = [];
+    const activeClient = getSupabaseClient(req);
+    
+    // Fetch issues
+    const { data: dbIssues, error: issuesError } = await activeClient
+      .from('issues')
+      .select('status, category, assigned_to');
+    
+    if (issuesError) throw issuesError;
+    const issues = dbIssues || [];
 
-    const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                                 !process.env.SUPABASE_URL.includes('placeholder') &&
-                                 !process.env.SUPABASE_URL.includes('your-project-ref') &&
-                                 process.env.SUPABASE_URL !== '';
+    // Fetch profiles that are authorities or admins
+    const { data: dbProfiles, error: profilesError } = await activeClient
+      .from('profiles')
+      .select('id, full_name')
+      .in('role', ['authority', 'admin']);
 
-    const isMock = !isSupabaseConfigured || userId.startsWith('mock-');
-
-    if (!isMock) {
-      const activeClient = getSupabaseClient(req);
-      // Fetch issues
-      const { data: dbIssues, error: issuesError } = await activeClient
-        .from('issues')
-        .select('status, category, assigned_to');
-      
-      if (issuesError) throw issuesError;
-      issues = dbIssues || [];
-
-      // Fetch profiles that are authorities or admins
-      const { data: dbProfiles, error: profilesError } = await activeClient
-        .from('profiles')
-        .select('id, full_name')
-        .in('role', ['authority', 'admin']);
-
-      if (profilesError) throw profilesError;
-      profiles = dbProfiles || [];
-    } else {
-      issues = MOCK_ISSUES;
-      profiles = [
-        { id: 'mock-user-authority', full_name: 'Mock Authority' },
-        { id: 'mock-user-admin', full_name: 'Mock Admin' }
-      ];
-    }
+    if (profilesError) throw profilesError;
+    const profiles = dbProfiles || [];
 
     // 1. Group by category
     const categories = ['roads', 'streetlights', 'water_supply', 'drainage', 'garbage', 'traffic', 'public_property', 'parks', 'sanitation', 'safety_hazard', 'environment', 'other'];
@@ -1606,29 +1011,14 @@ export const getAdminAnalytics = async (req, res) => {
  * Get advanced system analytics for dashboard visualization (accessible to all authenticated users)
  */
 export const getAdvancedAnalytics = async (req, res) => {
-  const userId = req.user ? req.user.id : '';
-
   try {
-    let issues = [];
-
-    const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                                 !process.env.SUPABASE_URL.includes('placeholder') &&
-                                 !process.env.SUPABASE_URL.includes('your-project-ref') &&
-                                 process.env.SUPABASE_URL !== '';
-
-    const isMock = !isSupabaseConfigured || userId.startsWith('mock-');
-
-    if (!isMock) {
-      const activeClient = getSupabaseClient(req);
-      const { data: dbIssues, error: issuesError } = await activeClient
-        .from('issues')
-        .select('id, title, category, status, latitude, longitude, address, upvotes_count, created_at, updated_at, ai_department');
-      
-      if (issuesError) throw issuesError;
-      issues = dbIssues || [];
-    } else {
-      issues = MOCK_ISSUES;
-    }
+    const activeClient = getSupabaseClient(req);
+    const { data: dbIssues, error: issuesError } = await activeClient
+      .from('issues')
+      .select('id, title, category, status, latitude, longitude, address, upvotes_count, created_at, updated_at, ai_department');
+    
+    if (issuesError) throw issuesError;
+    const issues = dbIssues || [];
 
     // 1. Group by category
     const categories = ['roads', 'streetlights', 'water_supply', 'drainage', 'garbage', 'traffic', 'public_property', 'parks', 'sanitation', 'safety_hazard', 'environment', 'other'];
@@ -1993,27 +1383,6 @@ export const editComment = async (req, res) => {
     return res.status(400).json({ error: 'Comment content cannot be empty' });
   }
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || commentId.startsWith('mock-') || userId.startsWith('mock-');
-
-  if (isMock) {
-    for (const issueId in MOCK_COMMENTS) {
-      const commentIndex = MOCK_COMMENTS[issueId].findIndex(c => c.id === commentId);
-      if (commentIndex !== -1) {
-        const comment = MOCK_COMMENTS[issueId][commentIndex];
-        if (comment.user_id !== userId) {
-          return res.status(403).json({ error: 'Forbidden: You can only edit your own comments' });
-        }
-        comment.comment_text = comment_text;
-        comment.updated_at = new Date().toISOString();
-        return res.status(200).json(comment);
-      }
-    }
-    return res.status(404).json({ error: 'Comment not found (Mock)' });
-  }
-
   try {
     const activeClient = getSupabaseClient(req);
     const { data: existingComment, error: fetchError } = await activeClient
@@ -2052,28 +1421,6 @@ export const deleteComment = async (req, res) => {
   const { commentId } = req.params;
   const userId = req.user.id;
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  const isMock = !isSupabaseConfigured || commentId.startsWith('mock-') || userId.startsWith('mock-');
-
-  if (isMock) {
-    for (const issueId in MOCK_COMMENTS) {
-      const commentIndex = MOCK_COMMENTS[issueId].findIndex(c => c.id === commentId);
-      if (commentIndex !== -1) {
-        const comment = MOCK_COMMENTS[issueId][commentIndex];
-        const isAdmin = req.user.role === 'admin';
-        if (comment.user_id !== userId && !isAdmin) {
-          return res.status(403).json({ error: 'Forbidden: You can only delete your own comments' });
-        }
-        MOCK_COMMENTS[issueId].splice(commentIndex, 1);
-        awardPointsAndCheckBadges(comment.user_id, -5, 'comment_delete', req).catch(err => logger.error('Background gamification error:', err));
-        return res.status(200).json({ message: 'Comment deleted successfully (Mock)' });
-      }
-    }
-    return res.status(404).json({ error: 'Comment not found (Mock)' });
-  }
-
   try {
     const activeClient = getSupabaseClient(req);
     const { data: existingComment, error: fetchError } = await activeClient
@@ -2111,21 +1458,6 @@ export const deleteComment = async (req, res) => {
  * Get all reported issues with AI analytics (Admin Only)
  */
 export const getAiDecisions = async (req, res) => {
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-  
-  if (!isSupabaseConfigured || req.user.id.startsWith('mock-')) {
-    // Return mock issues, but ensure they have AI columns populated for testing
-    const decoratedMock = MOCK_ISSUES.map(issue => ({
-      ...issue,
-      ai_category: issue.ai_category || issue.category,
-      ai_department: issue.ai_department || 'Road Department',
-      ai_priority: issue.ai_priority || 'medium'
-    }));
-    return res.status(200).json(decoratedMock);
-  }
-
   try {
     const activeClient = getSupabaseClient(req);
     const { data, error } = await activeClient
@@ -2149,36 +1481,8 @@ export const overrideAiDecision = async (req, res) => {
   const { id } = req.params;
   const { category, department, priority } = req.body;
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-
-  const isMock = !isSupabaseConfigured || id.startsWith('mock-');
-
   try {
     const notes = `AI prediction overridden by administrator. Category: ${category || 'N/A'}, Department: ${department || 'N/A'}, Priority: ${priority || 'N/A'}`;
-
-    if (isMock) {
-      const issue = MOCK_ISSUES.find(i => i.id === id);
-      if (!issue) return res.status(404).json({ error: 'Issue not found' });
-      if (category) issue.category = category;
-      if (department) issue.ai_department = department;
-      if (priority) issue.ai_priority = priority;
-      issue.updated_at = new Date().toISOString();
-
-      const mockLog = {
-        id: `mock-h-${Date.now()}`,
-        issue_id: id,
-        status: issue.status,
-        notes: notes,
-        created_at: new Date().toISOString(),
-        profiles: { full_name: req.user.user_metadata?.full_name || 'Super Admin' }
-      };
-      if (!MOCK_STATUS_HISTORY[id]) MOCK_STATUS_HISTORY[id] = [];
-      MOCK_STATUS_HISTORY[id].push(mockLog);
-
-      return res.status(200).json({ message: 'AI decisions overridden successfully (Mock)', issue });
-    }
 
     const updates = {};
     if (category) updates.category = category;
@@ -2230,26 +1534,16 @@ export const exportReport = async (req, res) => {
 
   const thresholdDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const isSupabaseConfigured = process.env.SUPABASE_URL && 
-                               !process.env.SUPABASE_URL.includes('placeholder') &&
-                               process.env.SUPABASE_URL !== '';
-
-  const isMock = !isSupabaseConfigured || (req.user && req.user.id.startsWith('mock-'));
-
   try {
     let issues = [];
-    if (isMock) {
-      issues = MOCK_ISSUES.filter(i => new Date(i.created_at) >= thresholdDate);
-    } else {
-      const activeClient = getSupabaseClient(req);
-      const { data, error } = await activeClient
-        .from('issues')
-        .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url)')
-        .gte('created_at', thresholdDate.toISOString())
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      issues = data || [];
-    }
+    const activeClient = getSupabaseClient(req);
+    const { data, error } = await activeClient
+      .from('issues')
+      .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url)')
+      .gte('created_at', thresholdDate.toISOString())
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    issues = data || [];
 
     if (format === 'csv') {
       // Generate Excel compatible CSV file
@@ -2277,8 +1571,6 @@ export const exportReport = async (req, res) => {
     } 
     
     if (format === 'pdf') {
-      // Return beautiful, printable HTML document representing the report
-      // When this HTML loads on the browser, it triggers a window.print() dialog to save as PDF.
       const totalCount = issues.length;
       const resolvedCount = issues.filter(i => i.status === 'resolved' || i.status === 'verified').length;
       const inProgressCount = issues.filter(i => i.status === 'in_progress').length;
@@ -2419,7 +1711,6 @@ export const exportReport = async (req, res) => {
           </div>
 
           <script>
-            // Auto-trigger print dialog after load completes
             window.addEventListener('DOMContentLoaded', () => {
               setTimeout(() => { window.print(); }, 800);
             });

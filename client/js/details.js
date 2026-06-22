@@ -89,7 +89,7 @@ async function loadIssueDetails() {
   // Toggle Citizen Verification and Resolution Proof Showcase
   const verifyPanel = document.getElementById('citizen-verification-panel');
   const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  const isReporter = currentUser && (currentUser.id === issue.reporter_id || (issue.reporter_id && issue.reporter_id.startsWith('mock-') && currentUser.id.startsWith('mock-')));
+  const isReporter = currentUser && currentUser.id === issue.reporter_id;
 
   if (verifyPanel) {
     if (issue.status === 'resolved' && isReporter) {
