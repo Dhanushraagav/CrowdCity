@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.5"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Official Council of Ministers and portfolios for the Government of Tamil Nadu, including contact details and portfolios.">
+  <title>Council of Ministers - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      opacity: 1;
+    }
+
+    /* Staggered card fade-in animation */
+    @keyframes minister-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Leader Card Styling */
+    .featured-leader-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+      border: 1px solid rgba(13, 148, 136, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 2rem;
+      align-items: center;
+      overflow: hidden;
+      transition: border-color var(--transition-normal), transform var(--transition-normal);
+    }
+
+    .featured-leader-card:hover {
+      border-color: rgba(13, 148, 136, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Background Floating Graphic Orbs */
+    .featured-leader-card::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -5%;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(13, 148, 136, 0.08) 0%, rgba(99, 102, 241, 0.01) 70%);
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+      animation: float-leader 12s ease-in-out infinite alternate;
+    }
+
+    .featured-leader-card::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: 15%;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, rgba(13, 148, 136, 0.01) 70%);
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+      animation: float-leader 15s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes float-leader {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-15px, 15px) scale(1.06); }
+    }
+
+    /* Chief Minister SVG Portrait/Seal Wrapper */
+    .leader-graphic-frame {
+      width: 200px;
+      height: 200px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 2px solid #fbbf24;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .leader-seal-bg {
+      position: absolute;
+      font-size: 8rem;
+      color: rgba(251, 191, 36, 0.03);
+      z-index: 0;
+    }
+
+    .leader-graphic-frame i.fa-user-tie {
+      font-size: 4.5rem;
+      color: #fbbf24;
+      z-index: 1;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+    }
+
+    .leader-graphic-frame .leader-emblem-badge {
+      position: absolute;
+      bottom: 0.75rem;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-top: 1px solid rgba(251, 191, 36, 0.3);
+      padding-top: 0.25rem;
+      width: 80%;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .leader-info-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 1;
+    }
+
+    .leader-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .leader-meta-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0;
+      font-family: var(--font-heading);
+    }
+
+    .leader-role-badge {
+      background: #fbbf24;
+      color: #0f172a;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+    }
+
+    .leader-portfolio-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .leader-actions-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .leader-contact-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .leader-contact-btn:hover {
+      border-color: #fbbf24;
+      color: #fbbf24;
+      transform: translateX(3px);
+    }
+
+    /* Page Grid & Filter Row */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+
+    .filters-container {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.45rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary);
+      color: var(--text-main);
+    }
+
+    .filter-btn.active {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: var(--text-inverse);
+    }
+
+    .search-wrapper {
+      position: relative;
+      width: 320px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.25rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      transition: border-color var(--transition-fast);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: none;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    /* Responsive Grid layout for remaining ministers */
+    .ministers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .minister-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: minister-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .minister-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Wiggle phone icon on hover */
+    @keyframes phone-wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(-8deg); }
+      40% { transform: rotate(6deg); }
+      60% { transform: rotate(-6deg); }
+      80% { transform: rotate(4deg); }
+    }
+
+    .minister-card:hover .fa-phone {
+      animation: phone-wiggle 0.4s ease-in-out;
+    }
+
+    /* Avatar badges */
+    .minister-avatar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .minister-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #ffffff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .minister-identity {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .minister-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: var(--font-heading);
+    }
+
+    .minister-role {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Departments expansion button & panel */
+    .portfolio-summary {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .details-toggle-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0;
+      align-self: flex-start;
+      transition: color var(--transition-fast);
+    }
+
+    .details-toggle-btn:hover {
+      color: var(--primary);
+    }
+
+    .details-toggle-btn i {
+      transition: transform var(--transition-fast);
+    }
+
+    .details-toggle-btn.expanded i {
+      transform: rotate(180deg);
+    }
+
+    .expandable-departments-panel {
+      display: none;
+      border-top: 1px dashed var(--border-color);
+      padding-top: 0.75rem;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .expandable-departments-panel.show {
+      display: flex;
+    }
+
+    .dept-title-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dept-pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .dept-pill {
+      font-size: 0.7rem;
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Call/Email quick rows */
+    .card-actions-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: auto;
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.75rem;
+    }
+
+    .card-action-link {
+      flex: 1;
+      padding: 0.45rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    .card-action-call {
+      background-color: var(--primary-light-alpha);
+      color: var(--primary);
+    }
+
+    .card-action-call:hover {
+      background-color: var(--primary);
+      color: var(--text-inverse);
+    }
+
+    .card-action-email {
+      background-color: var(--bg-app);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-action-email:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Avatar gradients */
+    .avatar-g-0 { background: linear-gradient(135deg, #10b981, #059669); }
+    .avatar-g-1 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .avatar-g-2 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .avatar-g-3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .avatar-g-4 { background: linear-gradient(135deg, #ec4899, #db2777); }
+
+    @media (max-width: 768px) {
+      .featured-leader-card {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 1.25rem;
+        justify-items: center;
+        text-align: center;
+      }
+      .leader-graphic-frame {
+        width: 150px;
+        height: 150px;
+      }
+      .leader-graphic-frame i.fa-user-tie {
+        font-size: 3rem;
+      }
+      .leader-header-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .leader-actions-row {
+        justify-content: center;
+        width: 100%;
+      }
+      .leader-contact-btn {
+        flex: 1;
+        justify-content: center;
+      }
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+    })();
+  </script>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link">
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <a href="ministers.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-users-gear"></i> <span data-i18n="nav_ministers">Council of Ministers</span>
+        </a>
+      </nav>
+      
+      <!-- New Report Button -->
+      <a href="report.html" class="app-sidebar-btn">
+        <i class="fa-solid fa-plus"></i> <span data-i18n="new_report">New Report</span>
+      </a>
+      
+      <div class="app-sidebar-footer">
+        <a href="settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body">
+        <div style="max-width: 1100px; width: 100%; margin: 0 auto; padding: 1rem 0 3rem 0;">
+          
+          <!-- Page Header -->
+          <section style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.35rem;" data-i18n="nav_ministers">Council of Ministers</h1>
+            <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="ministers_desc">Cabinet portfolios, official contact directories, and leadership roles in the Government of Tamil Nadu.</p>
+          </section>
+
+          <!-- Featured Chief Minister Section -->
+          <div id="cm-featured-container">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Directory Search & Filters -->
+          <div class="controls-bar">
+            <!-- Filter Categories -->
+            <div class="filters-container" id="filters-container">
+              <button class="filter-btn active" data-category="all" data-i18n="all_categories">All Categories</button>
+              <button class="filter-btn" data-category="infrastructure" data-i18n="filter_infrastructure">Infrastructure & Development</button>
+              <button class="filter-btn" data-category="welfare" data-i18n="filter_welfare">Social Welfare & Services</button>
+              <button class="filter-btn" data-category="finance" data-i18n="filter_finance">Finance & Governance</button>
+            </div>
+
+            <!-- Search wrapper -->
+            <div class="search-wrapper">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="directory-search" class="search-input" placeholder="Search ministers or portfolios..." data-i18n-placeholder="search_ministers">
+            </div>
+          </div>
+
+          <!-- dynamic load count line -->
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1.25rem; font-weight: 600;">
+            <span id="minister-count">35</span> <span data-i18n="ministers_loaded">ministers loaded</span>
+          </div>
+
+          <!-- Ministers Card Grid -->
+          <div class="ministers-grid" id="ministers-grid-container">
+            <!-- Rendered dynamically -->
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <p>Designed and engineered by Dhanushraagav S</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+
+  <script>
+    // Detailed dataset of Cabinet Ministers from https://www.tn.gov.in/minister_list.php
+    const ministersData = [
+      {
+        id: "joseph_vijay",
+        nameEn: "Thiru C. Joseph Vijay",
+        nameTa: "திரு சி. ஜோசப் விஜய்",
+        roleEn: "Honourable Chief Minister",
+        roleTa: "மாண்புமிகு முதலமைச்சர்",
+        category: "leadership",
+        phone: "044-25671100",
+        email: "cmcell@tn.gov.in",
+        portfolioEn: "Public, General Administration, Indian Administrative Service, Indian Police Service, Indian Forest Service, District Revenue Officers, Police, Home, Special Programme Implementation, Special Initiatives, Poverty Alleviation and Rural Indebtedness, Youth Welfare, Welfare of Children, Aged, Differently Abled Persons, Municipal Administration, Urban and Water Supply.",
+        portfolioTa: "பொது, பொது நிர்வாகம், இந்திய ஆட்சிப் பணி, இந்திய காவல் பணி, இந்திய வனப் பணி, மாவட்ட வருவாய் அலுவலர்கள், காவல், உள் துறை, சிறப்புத் திட்டச் செயலாக்கம், சிறப்பு முயற்சிகள், வறுமை ஒழிப்பு மற்றும் கிராமப்புறக் கடன் சுமை, இளைஞர் நலன், குழந்தைகள் நலன், முதியோர், மாற்றுத்திறனாளிகள் நலன், நகராட்சி நிர்வாகம், நகர்ப்புறம் மற்றும் குடிநீர் வழங்கல்.",
+        departmentsEn: ["Public Department", "General Administration", "Police & Home", "Municipal Administration", "Urban & Water Supply", "Youth Welfare & Sports", "Welfare of Differently Abled"],
+        departmentsTa: ["பொதுத் துறை", "பொது நிர்வாகம்", "காவல் மற்றும் உள் துறை", "நகராட்சி நிர்வாகம்", "நகர்ப்புற மற்றும் குடிநீர் வழங்கல்", "இளைஞர் நலன் மற்றும் விளையாட்டு", "மாற்றுத்திறனாளிகள் நலன்"]
+      },
+      {
+        id: "n_anand",
+        nameEn: "Thiru N. Anand",
+        nameTa: "திரு N. ஆனந்த்",
+        roleEn: "Minister for Rural Development and Water Resources",
+        roleTa: "அமைச்சர் - ஊரக வளர்ச்சி மற்றும் நீர்வளத்துறை",
+        category: "infrastructure",
+        phone: "044-25671501",
+        email: "min.rdev@tn.gov.in",
+        portfolioEn: "Rural Development, Panchayats and Panchayat Union, Irrigation, Irrigation Projects including Small Irrigation.",
+        portfolioTa: "ஊரக வளர்ச்சி, ஊராட்சிகள் மற்றும் ஊராட்சி ஒன்றியங்கள், பாசனம், சிறு பாசனம் உள்ளிட்ட பாசனத் திட்டங்கள்.",
+        departmentsEn: ["Rural Development", "Panchayats", "Irrigation Projects", "Water Resources"],
+        departmentsTa: ["ஊரக வளர்ச்சி", "ஊராட்சிகள்", "பாசனத் திட்டங்கள்", "நீர்வள ஆதாரங்கள்"]
+      },
+      {
+        id: "aadhav_arjuna",
+        nameEn: "Thiru Aadhav Arjuna",
+        nameTa: "திரு ஆதவ் அர்ஜுனா",
+        roleEn: "Minister for Public Works and Sports Development",
+        roleTa: "அமைச்சர் - பொதுப்பணி மற்றும் விளையாட்டு மேம்பாடு",
+        category: "infrastructure",
+        phone: "044-25671502",
+        email: "min.pworks@tn.gov.in",
+        portfolioEn: "Public Works (Buildings, Highways and Minor Ports), Sports Development.",
+        portfolioTa: "பொதுப்பணி (கட்டிடங்கள், நெடுஞ்சாலைகள் மற்றும் சிறு துறைமுகங்கள்), விளையாட்டு மேம்பாடு.",
+        departmentsEn: ["Public Works", "Highways", "Minor Ports", "Sports Development"],
+        departmentsTa: ["பொதுப்பணி", "நெடுஞ்சாலைகள்", "சிறு துறைமுகங்கள்", "விளையாட்டு மேம்பாடு"]
+      },
+      {
+        id: "kg_arunraj",
+        nameEn: "Dr. K.G. Arunraj",
+        nameTa: "டாக்டர் K.G. அருண்ராஜ்",
+        roleEn: "Minister for Health, Medical Education and Family Welfare",
+        roleTa: "அமைச்சர் - மக்கள் நல்வாழ்வு மற்றும் குடும்ப நலன்",
+        category: "welfare",
+        phone: "044-25671503",
+        email: "min.health@tn.gov.in",
+        portfolioEn: "Health, Medical Education and Family Welfare.",
+        portfolioTa: "சுகாதாரம், மருத்துவக் கல்வி மற்றும் குடும்ப நலன்.",
+        departmentsEn: ["Health & Family Welfare", "Medical Education", "Primary Health Centres"],
+        departmentsTa: ["மக்கள் நல்வாழ்வு", "மருத்துவக் கல்வி", "ஆரம்ப சுகாதார நிலையங்கள்"]
+      },
+      {
+        id: "ka_sengottaiyan",
+        nameEn: "Thiru K.A. Sengottaiyan",
+        nameTa: "திரு K.A. செங்கோட்டையன்",
+        roleEn: "Minister for Revenue and Disaster Management",
+        roleTa: "அமைச்சர் - வருவாய் மற்றும் பேரிடர் மேலாண்மை",
+        category: "finance",
+        phone: "044-25671504",
+        email: "min.revenue@tn.gov.in",
+        portfolioEn: "Revenue, District Revenue Establishment, Land Reforms, Registry, Disaster Management.",
+        portfolioTa: "வருவாய், மாவட்ட வருவாய் நிர்வாகம், நிலச் சீர்திருத்தம், பதிவுத்துறை, பேரிடர் மேலாண்மை.",
+        departmentsEn: ["Revenue Administration", "Land Reforms", "Disaster Management"],
+        departmentsTa: ["வருவாய் நிர்வாகம்", "நிலச் சீர்திருத்தம்", "பேரிடர் மேலாண்மை"]
+      },
+      {
+        id: "p_venkataramanan",
+        nameEn: "Thiru P. Venkataramanan",
+        nameTa: "திரு P. வெங்கடரமணன்",
+        roleEn: "Minister for Food and Civil Supplies",
+        roleTa: "அமைச்சா் - உணவு மற்றும் நுகர்வோர் பாதுகாப்பு",
+        category: "welfare",
+        phone: "044-25671505",
+        email: "min.food@tn.gov.in",
+        portfolioEn: "Food and Civil Supplies, Consumer Protection and Price Control.",
+        portfolioTa: "உணவு மற்றும் பொது விநியோகம், நுகர்வோர் பாதுகாப்பு மற்றும் விலைக்கட்டுப்பாடு.",
+        departmentsEn: ["Civil Supplies", "Consumer Protection", "Price Control"],
+        departmentsTa: ["உணவுப் பொருள் வழங்கல்", "நுகர்வோர் பாதுகாப்பு", "விலைக் கட்டுப்பாடு"]
+      },
+      {
+        id: "r_nirmalkumar",
+        nameEn: "Thiru R. Nirmalkumar",
+        nameTa: "திரு R. நிர்மல்குமார்",
+        roleEn: "Minister for Energy Resources and Law",
+        roleTa: "அமைச்சா் - மின்சாரம் மற்றும் சட்டத்துறை",
+        category: "infrastructure",
+        phone: "044-25671506",
+        email: "min.law@tn.gov.in",
+        portfolioEn: "Electricity & Non-Conventional Energy Development, Law, Courts, Prisons and Prevention of Corruption, Governor, Elections and Passports.",
+        portfolioTa: "மின்சாரம் மற்றும் மரபுசாரா எரிசக்தி வளர்ச்சி, சட்டம், நீதிமன்றங்கள், சிறைச்சாலைகள் மற்றும் ஊழல் தடுப்பு, ஆளுநர், தேர்தல்கள் மற்றும் கடவுச்சீட்டுக்கள்.",
+        departmentsEn: ["Energy Development", "TANGEDCO", "Law & Courts", "Prisons & Correction Services", "Elections"],
+        departmentsTa: ["எரிசக்தி வளர்ச்சி", "மின்வாரியம்", "சட்டம் மற்றும் நீதிமன்றங்கள்", "சிறைச்சாலைகள்", "தேர்தல்கள்"]
+      },
+      {
+        id: "rajmohan",
+        nameEn: "Thiru Rajmohan",
+        nameTa: "திரு ராஜ்மோகன்",
+        roleEn: "Minister for School Education, Tamil Development, Information and Publicity",
+        roleTa: "அமைச்சர் - பள்ளி கல்வி மற்றும் தமிழ் வளர்ச்சி",
+        category: "welfare",
+        phone: "044-25671507",
+        email: "min.se@tn.gov.in",
+        portfolioEn: "School Education, Archaeology, Tamil Official Language and Tamil Culture, Information & Publicity, Film Technology and Cinematograph Act, Newsprint Control, Stationery and Printing, Government Press.",
+        portfolioTa: "பள்ளிக்கல்வி, தொல்லியல், தமிழ் ஆட்சி மொழி மற்றும் தமிழ்ப் பண்பாடு, செய்தி மற்றும் விளம்பரம், திரைப்படத் தொழில்நுட்பம், செய்தித்தாள் கட்டுப்பாடு, எழுதுபொருள் மற்றும் அச்சுத்துறை.",
+        departmentsEn: ["School Education", "Archaeology", "Tamil Development", "Information & Publicity", "Stationery & Printing"],
+        departmentsTa: ["பள்ளிக் கல்வி", "தொல்லியல் துறை", "தமிழ் வளர்ச்சித் துறை", "செய்தி மற்றும் மக்கள் தொடர்பு", "எழுதுபொருள் மற்றும் அச்சு"]
+      },
+      {
+        id: "tk_prabhu",
+        nameEn: "Dr. T.K. Prabhu",
+        nameTa: "டாக்டர் T.K. பிரபு",
+        roleEn: "Minister for Natural Resources",
+        roleTa: "அமைச்சர் - இயற்கை வளங்கள் துறை",
+        category: "infrastructure",
+        phone: "044-25671508",
+        email: "min.natres@tn.gov.in",
+        portfolioEn: "Minerals and Mines.",
+        portfolioTa: "கனிமங்கள் மற்றும் சுரங்கங்கள்.",
+        departmentsEn: ["Geology & Mining", "Mineral Resources"],
+        departmentsTa: ["புவியியல் மற்றும் சுரங்கத்துறை", "கனிம வளங்கள்"]
+      },
+      {
+        id: "s_keerthana",
+        nameEn: "Selvi S. Keerthana",
+        nameTa: "செல்வி S. கீர்த்தனா",
+        roleEn: "Minister for Industries",
+        roleTa: "அமைச்சர் - தொழில் துறை",
+        category: "infrastructure",
+        phone: "044-25671509",
+        email: "min.ind@tn.gov.in",
+        portfolioEn: "Industries, Investment Promotion.",
+        portfolioTa: "தொழில்கள், முதலீட்டு ஊக்குவிப்பு.",
+        departmentsEn: ["Industries", "TIDCO", "SIPCOT", "Investment Promotion"],
+        departmentsTa: ["தொழில்துறை", "டிட்கோ", "சிப்காட்", "முதலீட்டு ஊக்குவிப்பு"]
+      },
+      {
+        id: "p_viswanathan",
+        nameEn: "Thiru P. Viswanathan",
+        nameTa: "திரு P. விஸ்வநாதன்",
+        roleEn: "Minister for Higher Education",
+        roleTa: "அமைச்சர் - உயர் கல்வித் துறை",
+        category: "infrastructure",
+        phone: "044-25671510",
+        email: "min.hedu@tn.gov.in",
+        portfolioEn: "Higher Education including Technical Education, Universities, Science and Technology.",
+        portfolioTa: "தொழில்நுட்பக் கல்வி உள்ளிட்ட உயர்கல்வி, பல்கலைக்கழகங்கள், அறிவியல் மற்றும் தொழில்நுட்பம்.",
+        departmentsEn: ["Higher Education", "Technical Education", "Science & Technology Council"],
+        departmentsTa: ["உயர் கல்வி", "தொழில்நுட்பக் கல்வி", "அறிவியல் மற்றும் தொழில்நுட்ப மன்றம்"]
+      },
+      {
+        id: "s_rajeshkumar",
+        nameEn: "Thiru S. Rajesh Kumar",
+        nameTa: "திரு S. ராஜேஷ் குமார்",
+        roleEn: "Minister for Tourism",
+        roleTa: "அமைச்சர் - சுற்றுலாத் துறை",
+        category: "infrastructure",
+        phone: "044-25671511",
+        email: "min.tourism@tn.gov.in",
+        portfolioEn: "Tourism and Tourism Development Corporation.",
+        portfolioTa: "சுற்றுலா மற்றும் சுற்றுலா வளர்ச்சிக் கழகம்.",
+        departmentsEn: ["Tourism Development", "TTDC", "Hotel & Travel Administration"],
+        departmentsTa: ["சுற்றுலா வளர்ச்சி", "தமிழ்நாடு சுற்றுலா வளர்ச்சிக் கழகம்"]
+      },
+      {
+        id: "am_shahjahan",
+        nameEn: "Thiru A.M. Shahjahan",
+        nameTa: "திரு A.M. ஷாஜகான்",
+        roleEn: "Minister for Minorities Welfare",
+        roleTa: "அமைச்சர் - சிறுபான்மையினர் நலன்",
+        category: "welfare",
+        phone: "044-25671512",
+        email: "min.minority@tn.gov.in",
+        portfolioEn: "Minorities Welfare and Wakf Board.",
+        portfolioTa: "சிறுபான்மையினர் நலன் மற்றும் வக்ஃப் வாரியம்.",
+        departmentsEn: ["Minorities Welfare", "Wakf Board", "Haj Committee"],
+        departmentsTa: ["சிறுபான்மையினர் நலன்", "வக்ஃப் வாரியம்", "ஹஜ் குழு"]
+      },
+      {
+        id: "vanni_arasu",
+        nameEn: "Thiru Vanni Arasu",
+        nameTa: "திரு வன்னி அரசு",
+        roleEn: "Minister for Social Justice",
+        roleTa: "அமைச்சர் - சமூக நீதித் துறை",
+        category: "welfare",
+        phone: "044-25671513",
+        email: "min.sjustice@tn.gov.in",
+        portfolioEn: "Adi Dravidar Welfare and Hill Tribes.",
+        portfolioTa: "ஆதிதிராவிடர் நலன் மற்றும் பழங்குடியினர் நலன்.",
+        departmentsEn: ["Adi Dravidar Welfare", "Tribal Welfare", "Hill Area Development"],
+        departmentsTa: ["ஆதிதிராவிடர் நலன்", "பழங்குடியினர் நலன்", "மலைப்பகுதி மேம்பாடு"]
+      },
+      {
+        id: "a_vijay_parthiban",
+        nameEn: "Thiru A. Vijay Tamilan Parthiban",
+        nameTa: "திரு ஏ. விஜய் தமிழன் பார்த்திபன்",
+        roleEn: "Minister for Transport",
+        roleTa: "அமைச்சர் - போக்குவரத்துத் துறை",
+        category: "infrastructure",
+        phone: "044-25671514",
+        email: "min.transport@tn.gov.in",
+        portfolioEn: "Motor Vehicle Acts – Administration, Transport, Nationalised Transport and Motor Vehicles Act.",
+        portfolioTa: "மோட்டார் வாகனச் சட்டங்கள் - நிர்வாகம், போக்குவரத்து, தேசியமயமாக்கப்பட்ட போக்குவரத்து.",
+        departmentsEn: ["State Transport Undertakings", "Motor Vehicles Department", "Metro Transport"],
+        departmentsTa: ["அரசு போக்குவரத்து கழகங்கள்", "வட்டார போக்குவரத்து", "மெட்ரோ போக்குவரத்து"]
+      },
+      {
+        id: "b_rajkumar",
+        nameEn: "Thiru B. Rajkumar",
+        nameTa: "திரு B. ராஜ்குமார்",
+        roleEn: "Minister for Housing and Urban Development",
+        roleTa: "அமைச்சர் - வீட்டுவசதி மற்றும் நகர்ப்புற வளர்ச்சி",
+        category: "infrastructure",
+        phone: "044-25671515",
+        email: "min.housing@tn.gov.in",
+        portfolioEn: "Housing, Rural Housing, Town Planning Projects and Housing Development, Accommodation Control, CMDA, Tamil Nadu Urban Habitat Development Board, Urban Planning and Urban Development.",
+        portfolioTa: "வீட்டுவசதி, ஊரக வீட்டுவசதி, நகரமைப்புத் திட்டங்கள், சிஎம்டிஏ, தமிழ்நாடு நகர்ப்புற வாழ்விட மேம்பாட்டு வாரியம், நகர்ப்புற திட்டமிடல்.",
+        departmentsEn: ["Housing Board (TNHB)", "CMDA", "Urban Habitat Development", "Town & Country Planning"],
+        departmentsTa: ["வீட்டுவசதி வாரியம்", "சிஎம்டிஏ", "நகர்ப்புற வாழ்விட மேம்பாடு", "நகர ஊரமைப்பு"]
+      },
+      {
+        id: "v_sampathkumar",
+        nameEn: "Thiru V. Sampath Kumar",
+        nameTa: "திரு V. சம்பத் குமார்",
+        roleEn: "Minister for Backward Classes Welfare",
+        roleTa: "அமைச்சர் - பிற்படுத்தப்பட்டோர் நலன்",
+        category: "welfare",
+        phone: "044-25671516",
+        email: "min.bcwelfare@tn.gov.in",
+        portfolioEn: "Backward Classes Welfare, Most Backward Classes Welfare and De-notified Communities Welfare.",
+        portfolioTa: "பிற்படுத்தப்பட்டோர் நலன், மிகவும் பிற்படுத்தப்பட்டோர் நலன் மற்றும் சீர்மரபினர் நலன்.",
+        departmentsEn: ["Backward Classes Welfare", "Most Backward Classes Welfare", "Denotified Communities"],
+        departmentsTa: ["பிற்படுத்தப்பட்டோர் நலன்", "மிகவும் பிற்படுத்தப்பட்டோர் நலன்", "சீர்மரபினர் நலன்"]
+      },
+      {
+        id: "m_vijaybalaji",
+        nameEn: "Thiru M. Vijay Balaji",
+        nameTa: "திரு M. விஜய் பாலாஜி",
+        roleEn: "Minister for Handlooms, Textiles and Khadi",
+        roleTa: "அமைச்சர் - கைத்தறி, துணிநூல் மற்றும் கதர்",
+        category: "infrastructure",
+        phone: "044-25671517",
+        email: "min.textiles@tn.gov.in",
+        portfolioEn: "Handlooms and Textiles, Khadi and Village Industries Board.",
+        portfolioTa: "கைத்தறி மற்றும் துணிநூல், கதர் கிராமத் தொழில்கள் வாரியம்.",
+        departmentsEn: ["Handlooms & Textiles", "Cooptex", "Khadi & Village Industries Board"],
+        departmentsTa: ["கைத்தறி மற்றும் துணிநூல்", "கோ-ஆப்டெக்ஸ்", "கதர் கிராமத் தொழில்கள் வாரியம்"]
+      },
+      {
+        id: "k_vignesh",
+        nameEn: "Thiru K. Vignesh",
+        nameTa: "திரு K. விக்னேஷ்",
+        roleEn: "Minister for Prohibition and Excise",
+        roleTa: "அமைச்சர் - மதுவிலக்கு மற்றும் ஆயத்தீர்வை",
+        category: "infrastructure",
+        phone: "044-25671518",
+        email: "min.prohib@tn.gov.in",
+        portfolioEn: "Prohibition and Excise.",
+        portfolioTa: "மதுவிலக்கு மற்றும் ஆயத்தீர்வை.",
+        departmentsEn: ["TASMAC Administration", "Prohibition Enforcement", "Excise Department"],
+        departmentsTa: ["டாஸ்மாக் நிர்வாகம்", "மதுவிலக்கு அமலாக்கப் பிரிவு", "ஆயத்தீர்வை துறை"]
+      },
+      {
+        id: "k_thennarasu",
+        nameEn: "Thiru K. Thennarasu",
+        nameTa: "திரு K. தென்னரசு",
+        roleEn: "Minister for Non-Resident Tamils Welfare",
+        roleTa: "அமைச்சர் - வெளிநாடு வாழ் தமிழர் நலன்",
+        category: "welfare",
+        phone: "044-25671519",
+        email: "min.nrtamil@tn.gov.in",
+        portfolioEn: "Non-Resident Tamils Welfare, Refugees & evacuees.",
+        portfolioTa: "வெளிநாடு வாழ் தமிழர் நலன், அகதிகள் மற்றும் வெளியேற்றப்பட்டவர்கள்.",
+        departmentsEn: ["Non-Resident Tamils Board", "Refugee Rehabilitation & Welfare"],
+        departmentsTa: ["வெளிநாடு வாழ் தமிழர் நல வாரியம்", "அகதிகள் மறுவாழ்வு"]
+      },
+      {
+        id: "j_farvas",
+        nameEn: "Thiru J. Mohamed Farvas",
+        nameTa: "திரு J. முகமது பர்வாஸ்",
+        roleEn: "Minister for Labour Welfare and Skill Development",
+        roleTa: "அமைச்சர் - தொழிலாளர் நலன் மற்றும் திறன் மேம்பாடு",
+        category: "welfare",
+        phone: "044-25671520",
+        email: "min.labour@tn.gov.in",
+        portfolioEn: "Labour Welfare, Population, Employment and Training, Census, Weights and Measures, Urban and Rural Employment and Bonded Labour Welfare.",
+        portfolioTa: "தொழிலாளர் நலன், மக்கள் தொகை, வேலைவாய்ப்பு மற்றும் பயிற்சி, மக்கள் தொகை கணக்கெடுப்பு, எடைகள் மற்றும் அளவைகள்.",
+        departmentsEn: ["Labour Welfare Board", "Employment & Training", "Skill Development Corporation", "Weights & Measures"],
+        departmentsTa: ["தொழிலாளர் நல வாரியம்", "வேலைவாய்ப்பு மற்றும் பயிற்சி", "திறன் மேம்பாட்டுக் கழகம்"]
+      },
+      {
+        id: "v_gandhiraj",
+        nameEn: "Thiru V. Gandhiraj",
+        nameTa: "திரு V. காந்திராஜ்",
+        roleEn: "Minister for Co-operation",
+        roleTa: "அமைச்சர் - கூட்டுறவுத் துறை",
+        category: "infrastructure",
+        phone: "044-25671521",
+        email: "min.coop@tn.gov.in",
+        portfolioEn: "Co-operation.",
+        portfolioTa: "கூட்டுறவுத்துறை மற்றும் சங்கங்கள்.",
+        departmentsEn: ["Cooperative Societies", "Consumer Cooperatives", "Registrar of Cooperatives"],
+        departmentsTa: ["கூட்டுறவுச் சங்கங்கள்", "நுகர்வோர் கூட்டுறவு", "கூட்டுறவு சங்கங்களின் பதிவாளர்"]
+      },
+      {
+        id: "k_jegadeshwari",
+        nameEn: "Tmt K. Jegadeshwari",
+        nameTa: "திருமதி K. ஜெகதீஸ்வரி",
+        roleEn: "Minister for Social Welfare and Women Empowerment",
+        roleTa: "அமைச்சர் - சமூக நலன் மற்றும் மகளிர் உரிமை",
+        category: "welfare",
+        phone: "044-25671522",
+        email: "min.swelfare@tn.gov.in",
+        portfolioEn: "Social Welfare including Women Welfare, Orphanages and Correctional Administration and Beggar Homes and Social Reforms & Nutritious Meal Programme.",
+        portfolioTa: "மகளிர் நல்வாழ்வு உள்ளிட்ட சமூக நலன், அனாதை இல்லங்கள், சீர்திருத்த நிர்வாகம், சத்துணவுத் திட்டம்.",
+        departmentsEn: ["Social Welfare", "Women Empowerment", "Integrated Child Development (ICDS)", "Nutritious Meal Scheme"],
+        departmentsTa: ["சமூக நலத்துறை", "மகளிர் உரிமை", "ஒருங்கிணைந்த குழந்தைகள் மேம்பாடு", "சத்துணவுத் திட்டம்"]
+      },
+      {
+        id: "vinoth",
+        nameEn: "Thiru Vinoth",
+        nameTa: "திரு வினோத்",
+        roleEn: "Minister for Agriculture - Farmers Welfare",
+        roleTa: "அமைச்சர் - வேளாண்மை - உழவர் நலன்",
+        category: "welfare",
+        phone: "044-25671523",
+        email: "min.agri@tn.gov.in",
+        portfolioEn: "Agriculture, Agricultural Engineering, Agro Service Co-operatives, Horticulture, Sugar, Sugarcane Excise, Sugarcane Development and Waste Land Development.",
+        portfolioTa: "வேளாண்மை, வேளாண்மைப் பொறியியல், தட்டக்கலை, சர்க்கரை மற்றும் கரும்பு மேம்பாடு, தரிசு நில மேம்பாடு.",
+        departmentsEn: ["Agriculture Department", "Agricultural Engineering", "Horticulture", "Sugarcane Development"],
+        departmentsTa: ["வேளாண்மைத் துறை", "வேளாண் பொறியியல்", "தோட்டக்கலைத் துறை", "கரும்பு மேம்பாடு"]
+      },
+      {
+        id: "c_vijayalakshmi",
+        nameEn: "Tmt C. Vijayalakshmi",
+        nameTa: "திருமதி C. விஜயலட்சுமி",
+        roleEn: "Minister for Milk and Dairy Development",
+        roleTa: "அமைச்சர் - பால்வள மேம்பாடு",
+        category: "infrastructure",
+        phone: "044-25671524",
+        email: "min.dairy@tn.gov.in",
+        portfolioEn: "Milk and Dairy Development.",
+        portfolioTa: "பால்வளம் மற்றும் பால் உற்பத்தி மேம்பாடு.",
+        departmentsEn: ["Dairy Development Department", "Aavin (TCMPF)"],
+        departmentsTa: ["பால்வளத் துறை", "ஆவின் கூட்டுறவு இணையம்"]
+      },
+      {
+        id: "d_sarathkumar",
+        nameEn: "Thiru D. Sarathkumar",
+        nameTa: "திரு D. சரத்குமார்",
+        roleEn: "Minister for Human Resources Management",
+        roleTa: "அமைச்சர் - மனிதவள மேலாண்மை",
+        category: "finance",
+        phone: "044-25671525",
+        email: "min.hrm@tn.gov.in",
+        portfolioEn: "Human Resources Management & Ex-Servicemen Welfare.",
+        portfolioTa: "மனிதவள மேலாண்மை மற்றும் முன்னாள் படைவீரர் நலன்.",
+        departmentsEn: ["Human Resources Management", "TNPSC Liaison", "Ex-Servicemen Welfare"],
+        departmentsTa: ["மனிதவள மேலாண்மை", "டி.என்.பி.எஸ்.சி தொடர்பு", "முன்னாள் படைவீரர் நலன்"]
+      },
+      {
+        id: "ramesh",
+        nameEn: "Thiru Ramesh",
+        nameTa: "திரு ரமேஷ்",
+        roleEn: "Minister for Hindu Religious and Charitable Endowments",
+        roleTa: "அமைச்சர் - இந்து சமய அறநிலையத் துறை",
+        category: "finance",
+        phone: "044-25671526",
+        email: "min.hrce@tn.gov.in",
+        portfolioEn: "Hindu Religious and Charitable Endowments.",
+        portfolioTa: "இந்து சமய மற்றும் அறக்கட்டளை நிறுவனங்கள்.",
+        departmentsEn: ["HR & CE Administration", "Temple Property Management"],
+        departmentsTa: ["அறநிலையத் துறை நிர்வாகம்", "கோயில் சொத்துக்கள் மேலாண்மை"]
+      },
+      {
+        id: "p_mathanraja",
+        nameEn: "Thiru P. Mathan Raja",
+        nameTa: "திரு P. மதன் ராஜா",
+        roleEn: "Minister for Micro, Small and Medium Enterprises",
+        roleTa: "அமைச்சர் - குறு, சிறு மற்றும் நடுத்தரத் தொழில்கள்",
+        category: "infrastructure",
+        phone: "044-25671527",
+        email: "min.msme@tn.gov.in",
+        portfolioEn: "Rural Industries including Cottage Industries, Small Industries.",
+        portfolioTa: "குடிசைத் தொழில்கள் மற்றும் சிறு தொழில்கள் உள்ளிட்ட ஊரகத் தொழில்கள்.",
+        departmentsEn: ["MSME Department", "Cottage Industries", "SIDCO", "TANSIDCO"],
+        departmentsTa: ["குறு, சிறு & நடுத்தரத் தொழில்கள்", "குடிசைத் தொழில்கள்", "சிட்கோ"]
+      },
+      {
+        id: "n_mariewilson",
+        nameEn: "Thiru N. Marie Wilson",
+        nameTa: "திரு N. மேரி வில்சன்",
+        roleEn: "Minister for Finance, Planning and Development",
+        roleTa: "அமைச்சர் - நிதி மற்றும் திட்டமிடல்",
+        category: "finance",
+        phone: "044-25671528",
+        email: "min.finance@tn.gov.in",
+        portfolioEn: "Finance, Pensions and Pensionary Benefits, Planning & Development.",
+        portfolioTa: "நிதித் துறை, ஓய்வூதியம் மற்றும் ஓய்வூதியப் பயன்கள், திட்டமிடல் மற்றும் வளர்ச்சி.",
+        departmentsEn: ["Finance & Budget", "Treasuries & Accounts", "State Planning Commission", "Pensions Department"],
+        departmentsTa: ["நிதி மற்றும் வரவு-செலவு", "கருவூல கணக்குத் துறை", "மாநில திட்டக்குழு", "ஓய்வூதியத் துறை"]
+      },
+      {
+        id: "srinath",
+        nameEn: "Thiru Srinath",
+        nameTa: "திரு ஸ்ரீநாத்",
+        roleEn: "Minister for Fisheries - Fishermen Welfare",
+        roleTa: "அமைச்சர் - மீன்வளம் - மீனவர் நலன்",
+        category: "infrastructure",
+        phone: "044-25671529",
+        email: "min.fisheries@tn.gov.in",
+        portfolioEn: "Fisheries, Fisheries Development Corporation.",
+        portfolioTa: "மீன்வளம் மற்றும் மீன்வள மேம்பாட்டுக் கழகம்.",
+        departmentsEn: ["Fisheries Department", "Fisheries Development Corporation (TNFDC)"],
+        departmentsTa: ["மீன்வளத் துறை", "மீன்வள மேம்பாட்டுக் கழகம்"]
+      },
+      {
+        id: "s_kamali",
+        nameEn: "Tmt S. Kamali",
+        nameTa: "திருமதி S. கமலி",
+        roleEn: "Minister for Animal Husbandry",
+        roleTa: "அமைச்சர் - கால்நடை பராமரிப்புத் துறை",
+        category: "welfare",
+        phone: "044-25671530",
+        email: "min.ahusbandry@tn.gov.in",
+        portfolioEn: "Animal Husbandry.",
+        portfolioTa: "கால்நடை பராமரிப்பு மற்றும் மருத்துவம்.",
+        departmentsEn: ["Animal Husbandry Department", "Veterinary Services"],
+        departmentsTa: ["கால்நடை பராமரிப்பு", "கால்நடை மருத்துவக் கல்வி"]
+      },
+      {
+        id: "r_kumar",
+        nameEn: "Thiru R. Kumar",
+        nameTa: "திரு R. குமார்",
+        roleEn: "Minister for Artificial Intelligence, IT and Digital Services",
+        roleTa: "அமைச்சர் - செயற்கை நுண்ணறிவு மற்றும் தகவல் தொழில்நுட்பம்",
+        category: "infrastructure",
+        phone: "044-25671531",
+        email: "min.it@tn.gov.in",
+        portfolioEn: "Artificial Intelligence, Information Technology and Digital Services.",
+        portfolioTa: "செயற்கை நுண்ணறிவு, தகவல் தொழில்நுட்பம் மற்றும் டிஜிட்டல் சேவைகள்.",
+        departmentsEn: ["Information Technology", "Digital Services", "ELCOT", "TNeGA (e-Governance)"],
+        departmentsTa: ["தகவல் தொழில்நுட்பத் துறை", "டிஜிட்டல் சேவைகள்", "எல்காட்", "தமிழ்நாடு மின்னளுமை முகமை"]
+      },
+      {
+        id: "rv_ranjithkumar",
+        nameEn: "Thiru R.V. Ranjithkumar",
+        nameTa: "திரு R.V. ரஞ்சித்குமார்",
+        roleEn: "Minister for Forests",
+        roleTa: "அமைச்சர் - வனத் துறை",
+        category: "infrastructure",
+        phone: "044-25671532",
+        email: "min.forest@tn.gov.in",
+        portfolioEn: "Forests.",
+        portfolioTa: "காடுகள் மற்றும் வனவிலங்கு பாதுகாப்பு.",
+        departmentsEn: ["Forest Department", "Forest Development Corporation (TAFCORN)", "Wildlife Board"],
+        departmentsTa: ["வனத்துறை", "தமிழ்நாடு வனத் தோட்டக் கழகம்", "வனவிலங்கு வாரியம்"]
+      },
+      {
+        id: "d_logesh_tamilselvan",
+        nameEn: "Thiru D. Logesh Tamilselvan",
+        nameTa: "திரு D. லோகேஷ் தமிழ்ச்செல்வன்",
+        roleEn: "Minister for Commercial Taxes and Registration",
+        roleTa: "அமைச்சர் - வணிகவரி மற்றும் பதிவுத் துறை",
+        category: "finance",
+        phone: "044-25671533",
+        email: "min.tax@tn.gov.in",
+        portfolioEn: "Commercial Taxes, Registration and Stamp Act, Debt Relief including legislation on Money lending, Chits and Registration of Companies.",
+        portfolioTa: "வணிகவரிகள், பதிவு மற்றும் முத்திரைச் சட்டம், கடனுதவி மற்றும் கம்பெனிகள் பதிவு.",
+        departmentsEn: ["Commercial Taxes", "Registration Department", "Stamps & Chit Funds"],
+        departmentsTa: ["வணிகவரித் துறை", "பதிவுத் துறை", "முத்திரை மற்றும் சிட்டு நிறுவனங்கள்"]
+      },
+      {
+        id: "rajeev",
+        nameEn: "Thiru Rajeev",
+        nameTa: "திரு ராஜீவ்",
+        roleEn: "Minister for Environment and Climate Change",
+        roleTa: "அமைச்சர் - சுற்றுச்சூழல் மற்றும் பருவநிலை மாற்றம்",
+        category: "welfare",
+        phone: "044-25671534",
+        email: "min.env@tn.gov.in",
+        portfolioEn: "Environment, Pollution Control Board, Climate Change.",
+        portfolioTa: "சுற்றுச்சூழல், மாசு கட்டுப்பாட்டு வாரியம், பருவநிலை மாற்றம்.",
+        departmentsEn: ["Environment Department", "Pollution Control Board (TNPCB)", "Climate Change Mission"],
+        departmentsTa: ["சுற்றுச்சூழல் துறை", "மாசு கட்டுப்பாட்டு வாரியம்", "பருவநிலை மாற்றக் குழு"]
+      }
+    ];
+
+    function getInitials(name) {
+      // Remove Thiru/Dr/Tmt/Selvi prefixes
+      const cleaned = name.replace(/^(Thiru|Dr\.|Tmt|Selvi)\s+/i, '').trim();
+      const parts = cleaned.split(/\s+/);
+      let initials = "";
+      if (parts.length > 0) {
+        // Handle initials like C. Joseph Vijay -> CJV
+        for (const part of parts) {
+          if (part.includes('.')) {
+            initials += part.replace('.', '').charAt(0);
+          } else {
+            initials += part.charAt(0);
+          }
+        }
+      }
+      if (initials.length > 3) initials = initials.substring(0, 3);
+      if (!initials) initials = "MIN";
+      return initials.toUpperCase();
+    }
+
+    function toggleDepartmentDetails(btn, id) {
+      const panel = document.getElementById(`dept-panel-${id}`);
+      if (!panel) return;
+      
+      const isExpanded = btn.classList.toggle('expanded');
+      panel.classList.toggle('show');
+      
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.className = isExpanded ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+      }
+    }
+
+    function renderMinisters(searchQuery = "", categoryFilter = "all") {
+      const cmContainer = document.getElementById('cm-featured-container');
+      const gridContainer = document.getElementById('ministers-grid-container');
+      const lang = localStorage.getItem('cc_lang') || 'en';
+      
+      cmContainer.innerHTML = '';
+      gridContainer.innerHTML = '';
+
+      const query = searchQuery.toLowerCase().trim();
+
+      // Separate CM from other ministers
+      const cmData = ministersData.find(m => m.id === "joseph_vijay");
+      const otherMinisters = ministersData.filter(m => m.id !== "joseph_vijay");
+
+      // Render CM if they match query and category
+      const cmMatchesQuery = !query || 
+        cmData.nameEn.toLowerCase().includes(query) || 
+        cmData.nameTa.toLowerCase().includes(query) || 
+        cmData.portfolioEn.toLowerCase().includes(query) || 
+        cmData.portfolioTa.toLowerCase().includes(query);
+
+      const cmMatchesCategory = categoryFilter === 'all' || categoryFilter === 'leadership';
+
+      if (cmData && cmMatchesQuery && cmMatchesCategory) {
+        const cmName = lang === 'ta' ? cmData.nameTa : cmData.nameEn;
+        const cmRole = lang === 'ta' ? cmData.roleTa : cmData.roleEn;
+        const cmPortfolio = lang === 'ta' ? cmData.portfolioTa : cmData.portfolioEn;
+        const cmDepts = lang === 'ta' ? cmData.departmentsTa : cmData.departmentsEn;
+
+        let deptChips = cmDepts.map(d => `<span class="dept-pill">${d}</span>`).join('');
+
+        cmContainer.innerHTML = `
+          <div class="featured-leader-card">
+            <div class="leader-graphic-frame">
+              <i class="fa-solid fa-crown leader-seal-bg"></i>
+              <i class="fa-solid fa-user-tie"></i>
+              <span class="leader-emblem-badge" data-i18n="cabinet_leadership">Cabinet Leadership</span>
+            </div>
+            <div class="leader-info-content">
+              <div class="leader-header-row">
+                <h2 class="leader-meta-title">${cmName}</h2>
+                <span class="leader-role-badge">${cmRole}</span>
+              </div>
+              <p class="leader-portfolio-text">
+                <strong><span data-i18n="portfolio">Portfolio</span>:</strong> ${cmPortfolio}
+              </p>
+              
+              <div style="margin-top: 0.5rem;">
+                <span class="dept-title-label" data-i18n="departments">Departments</span>:
+                <div class="dept-pill-list" style="margin-top: 0.35rem;">
+                  ${deptChips}
+                </div>
+              </div>
+
+              <div class="leader-actions-row">
+                <a href="tel:${cmData.phone}" class="leader-contact-btn" data-i18n="call_minister">
+                  <i class="fa-solid fa-phone"></i> Call Office
+                </a>
+                <a href="mailto:${cmData.email}" class="leader-contact-btn" data-i18n="email_minister">
+                  <i class="fa-solid fa-envelope"></i> Email Minister
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Filter other ministers
+      const filteredMinisters = otherMinisters.filter(m => {
+        const matchesQuery = !query || 
+          m.nameEn.toLowerCase().includes(query) || 
+          m.nameTa.toLowerCase().includes(query) || 
+          m.portfolioEn.toLowerCase().includes(query) || 
+          m.portfolioTa.toLowerCase().includes(query);
+
+        const matchesCategory = categoryFilter === 'all' || m.category === categoryFilter;
+
+        return matchesQuery && matchesCategory;
+      });
+
+      // Update count badge
+      let totalCount = filteredMinisters.length;
+      if (cmData && cmMatchesQuery && cmMatchesCategory) totalCount += 1;
+      
+      const countEl = document.getElementById('minister-count');
+      if (countEl) countEl.textContent = totalCount;
+
+      if (filteredMinisters.length === 0 && (!cmData || !cmMatchesQuery || !cmMatchesCategory)) {
+        gridContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 4rem 0; font-size: 0.95rem;">
+            <i class="fa-solid fa-user-xmark" style="font-size: 1.75rem; margin-bottom: 0.75rem; display: block; color: var(--primary);"></i>
+            No cabinet ministers match your search filters.
+          </div>
+        `;
+        return;
+      }
+
+      filteredMinisters.forEach((m, index) => {
+        const mName = lang === 'ta' ? m.nameTa : m.nameEn;
+        const mRole = lang === 'ta' ? m.roleTa : m.roleEn;
+        const mPortfolio = lang === 'ta' ? m.portfolioTa : m.portfolioEn;
+        const mDepts = lang === 'ta' ? m.departmentsTa : m.departmentsEn;
+        const initials = getInitials(mName);
+        
+        // Pick an avatar gradient index based on index
+        const gIndex = index % 5;
+        const deptPills = mDepts.map(d => `<span class="dept-pill">${d}</span>`).join('');
+
+        const card = document.createElement('div');
+        card.className = 'minister-card';
+        card.style.animationDelay = `${index * 0.015}s`;
+        card.innerHTML = `
+          <div class="minister-avatar-wrap">
+            <div class="minister-avatar avatar-g-${gIndex}">
+              ${initials}
+            </div>
+            <div class="minister-identity">
+              <span class="minister-name">${mName}</span>
+              <span class="minister-role">${mRole}</span>
+            </div>
+          </div>
+
+          <div class="portfolio-summary">
+            <strong><span data-i18n="portfolio">Portfolio</span>:</strong> ${mPortfolio}
+          </div>
+
+          <button class="details-toggle-btn" onclick="toggleDepartmentDetails(this, '${m.id}')">
+            <i class="fa-solid fa-chevron-down"></i> <span data-i18n="departments">Departments</span>
+          </button>
+
+          <div class="expandable-departments-panel" id="dept-panel-${m.id}">
+            <span class="dept-title-label" data-i18n="departments">Departments</span>
+            <div class="dept-pill-list">
+              ${deptPills}
+            </div>
+          </div>
+
+          <div class="card-actions-wrapper">
+            <a href="tel:${m.phone}" class="card-action-link card-action-call" data-i18n="call_minister">
+              <i class="fa-solid fa-phone"></i> Call
+            </a>
+            <a href="mailto:${m.email}" class="card-action-link card-action-email" data-i18n="email_minister">
+              <i class="fa-solid fa-envelope"></i> Email
+            </a>
+          </div>
+        `;
+        gridContainer.appendChild(card);
+      });
+
+      // Localize page contents
+      if (window.i18n && typeof window.i18n.translatePage === 'function') {
+        window.i18n.translatePage();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMinisters();
+
+      // Search functionality
+      const searchInput = document.getElementById('directory-search');
+      let currentCategory = 'all';
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          renderMinisters(e.target.value, currentCategory);
+        });
+      }
+
+      // Filter Categories functionality
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.dataset.category;
+          const query = searchInput ? searchInput.value : "";
+          renderMinisters(query, currentCategory);
+        });
+      });
+
+      // Language change listeners to update names instantly
+      window.addEventListener('language-change', () => {
+        const query = searchInput ? searchInput.value : "";
+        renderMinisters(query, currentCategory);
+      });
+
+      setTimeout(() => {
+        document.body.classList.add('ready');
+      }, 100);
+    });
+  </script>
+
+</body>
+</html>

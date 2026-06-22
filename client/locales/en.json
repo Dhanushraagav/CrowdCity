@@ -636,5 +636,13 @@
   "municipal_helpline_label": "Municipal Corporation Support",
   "visit_grievance_portal": "Visit Mudhalvarin Mugavari Portal",
   "district_directory": "District Official Directory",
-  "districts_loaded": "districts available"
+  "districts_loaded": "districts available",
+  "nav_ministers": "Council of Ministers",
+  "search_ministers": "Search ministers, portfolios, or departments...",
+  "cabinet_leadership": "Cabinet Leadership",
+  "portfolio": "Portfolio",
+  "departments": "Departments",
+  "ministers_loaded": "ministers loaded",
+  "call_minister": "Call Office",
+  "email_minister": "Email Minister"
 }

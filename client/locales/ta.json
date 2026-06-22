@@ -636,5 +636,13 @@
   "municipal_helpline_label": "மாநகராட்சி உதவி எண்",
   "visit_grievance_portal": "முதல்வரின் முகவரி போர்ட்டலை பார்வையிடவும்",
   "district_directory": "மாவட்ட அதிகாரப்பூர்வ அடைவு",
-  "districts_loaded": "மாவட்டங்கள் உள்ளன"
+  "districts_loaded": "மாவட்டங்கள் உள்ளன",
+  "nav_ministers": "அமைச்சரவை",
+  "search_ministers": "அமைச்சர்கள், துறைகளைத் தேடுக...",
+  "cabinet_leadership": "அமைச்சரவை தலைமை",
+  "portfolio": "பொறுப்பு",
+  "departments": "துறைகள்",
+  "ministers_loaded": "அமைச்சர்கள் உள்ளனர்",
+  "call_minister": "அலுவலகத்தை அழைக்கவும்",
+  "email_minister": "மின்னஞ்சல் அனுப்பவும்"
 }
