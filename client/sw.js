@@ -1,7 +1,7 @@
 // CrowdCity AI - Service Worker
 // Production-ready service worker focusing on lightweight fetch handling, offline support, and client claims.
 
-const OFFLINE_CACHE_NAME = 'crowdcity-offline-v1';
+const OFFLINE_CACHE_NAME = 'crowdcity-offline-v2';
 const OFFLINE_URL = 'offline.html';
 
 // 1. Install Event: Cache the offline fallback page
@@ -21,17 +21,20 @@ self.addEventListener('install', (event) => {
 
 // 2. Activate Event: Clean up old caches and claim clients
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activate Event triggered. Claiming clients...');
+  console.log('[Service Worker] Activate Event triggered. Cleaning up all caches and claiming clients...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== OFFLINE_CACHE_NAME) {
-            console.log('[Service Worker] Deleting outdated cache:', cacheName);
-            return caches.delete(cacheName);
-          }
+          console.log('[Service Worker] Deleting cache:', cacheName);
+          return caches.delete(cacheName);
         })
       );
+    }).then(() => {
+      // Re-cache the offline page
+      return caches.open(OFFLINE_CACHE_NAME).then((cache) => {
+        return cache.add(OFFLINE_URL);
+      });
     }).then(() => {
       // Claim all clients immediately so that pages do not need to be reloaded to be controlled
       return self.clients.claim();
@@ -58,9 +61,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first approach with cache fallback for navigation requests
+  // Network-first approach with cache fallback for navigation requests.
+  // Bypass browser's aggressive HTTP cache for HTML, JS and CSS files by using 'no-cache' options.
+  const isNavOrCode = event.request.mode === 'navigate' || 
+                      requestUrl.pathname.endsWith('.js') || 
+                      requestUrl.pathname.endsWith('.css');
+  
+  const fetchRequest = isNavOrCode 
+    ? new Request(event.request, { cache: 'no-cache' }) 
+    : event.request;
+
   event.respondWith(
-    fetch(event.request).catch(async (error) => {
+    fetch(fetchRequest).catch(async (error) => {
       console.warn('[Service Worker] Fetch failed, checking cache for fallback:', error);
 
       // Only redirect navigation (page loads) to the offline fallback page

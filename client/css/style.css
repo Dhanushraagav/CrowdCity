@@ -1064,7 +1064,7 @@ body::after {
   display: none !important;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .loader-logo-divider,
   [class*="loader-logo-divider"],
   .loader-logo div[style*="width: 1px"],
