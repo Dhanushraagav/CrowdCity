@@ -783,13 +783,34 @@ export const registerVerifiedUser = async (req, res) => {
       }
 
       const actionLink = linkData.properties?.action_link;
-      const url = new URL(actionLink);
+      
+      // Exchange verify link for session tokens by requesting it programmatically on the backend
+      const exchangeRes = await fetch(actionLink, { redirect: 'manual' });
+      const redirectUrlStr = exchangeRes.headers.get('location');
+      
+      if (!redirectUrlStr) {
+        logger.error(`[authController] Action link did not return redirect location after registration. Status: ${exchangeRes.status}`);
+        return res.status(201).json({
+          message: 'Account created successfully. Please sign in manually.',
+          user
+        });
+      }
+
+      const url = new URL(redirectUrlStr);
       const hash = url.hash.substring(1);
       const params = new URLSearchParams(hash);
       
       const accessToken = params.get('access_token');
       const refreshToken = params.get('refresh_token');
       const expiresAt = params.get('expires_in') ? Math.floor(Date.now() / 1000) + parseInt(params.get('expires_in'), 10) : null;
+
+      if (!accessToken) {
+        logger.error(`[authController] Login token exchange failed after registration: access token missing`);
+        return res.status(201).json({
+          message: 'Account created successfully. Please sign in manually.',
+          user
+        });
+      }
 
       return res.status(201).json({
         message: 'Account created and verified successfully.',
