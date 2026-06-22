@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.5"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="District Collectorate phone numbers, official emails, and government website directories for all 38 districts in Tamil Nadu.">
+  <title>District Helplines - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      opacity: 1;
+    }
+
+    .helplines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .helpline-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .helpline-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+
+    .helpline-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .helpline-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: var(--font-heading);
+    }
+
+    .district-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--primary-light-alpha);
+      color: var(--primary);
+      padding: 0.15rem 0.4rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .helpline-contact-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .helpline-contact-row:hover {
+      color: var(--primary);
+    }
+
+    .helpline-contact-row i {
+      width: 16px;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .helpline-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .helpline-action-btn {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .helpline-action-call {
+      background-color: var(--primary-light-alpha);
+      color: var(--primary);
+    }
+
+    .helpline-action-call:hover {
+      background-color: var(--primary);
+      color: var(--text-inverse);
+    }
+
+    .helpline-action-web {
+      background-color: var(--bg-app);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .helpline-action-web:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .central-helpline-banner {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(99, 102, 241, 0.05) 100%);
+      border: 1px solid rgba(13, 148, 136, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .central-helpline-banner {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+    }
+
+    .central-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .central-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: var(--font-heading);
+    }
+
+    .central-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .central-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: border-color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .central-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .central-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .central-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cc_theme');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
+      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+    })();
+  </script>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div></a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+      </nav>
+      
+      <!-- New Report Button -->
+      <a href="report.html" class="app-sidebar-btn">
+        <i class="fa-solid fa-plus"></i> <span data-i18n="new_report">New Report</span>
+      </a>
+      
+      <div class="app-sidebar-footer">
+        <a href="settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body">
+        <div style="max-width: 1100px; width: 100%; margin: 0 auto; padding: 1rem 0 3rem 0;">
+          
+          <!-- Page Header -->
+          <section style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.35rem;" data-i18n="district_helplines">District Helplines</h1>
+            <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="helpline_desc">Official contacts for all 38 districts of Tamil Nadu.</p>
+          </section>
+
+          <!-- Central Grievance Banner -->
+          <section class="central-helpline-banner">
+            <div class="central-col">
+              <span class="central-title" data-i18n="central_grievance">Central Grievance Redressal (Mudhalvarin Mugavari)</span>
+              <span class="central-desc">State-level public grievance redressal portal and emergency response contacts. Connect directly with the Chief Minister's Special Cell.</span>
+            </div>
+            <a href="tel:1100" class="central-item">
+              <span class="central-label">CM Helpline</span>
+              <span class="central-value">1100</span>
+            </a>
+            <a href="tel:1913" class="central-item">
+              <span class="central-label">Municipal Helpline</span>
+              <span class="central-value">1913</span>
+            </a>
+          </section>
+
+          <!-- Search Directory -->
+          <section class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="directory-search" class="search-input" placeholder="Search districts..." data-i18n-placeholder="search_districts">
+          </section>
+
+          <!-- District Cards Grid -->
+          <section class="helplines-grid" id="helplines-container">
+            <!-- Populated Dynamically by Javascript -->
+          </section>
+
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <p>Designed and engineered by Dhanushraagav S</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Client Script files -->
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+
+  <script>
+    const districtsData = [
+      { id: "ariyalur", en: "Ariyalur", ta: "அரியலூர்", code: "ari", phone: "04329-228200", url: "https://ariyalur.nic.in" },
+      { id: "chengalpattu", en: "Chengalpattu", ta: "செங்கல்பட்டு", code: "cpt", phone: "044-27427412", url: "https://chengalpattu.nic.in", emailOverride: "collr-cpt@gov.in" },
+      { id: "chennai", en: "Chennai", ta: "சென்னை", code: "chn", phone: "044-25268323", url: "https://chennai.nic.in" },
+      { id: "coimbatore", en: "Coimbatore", ta: "கோயம்புத்தூர்", code: "cbe", phone: "0422-2300124", url: "https://coimbatore.nic.in" },
+      { id: "cuddalore", en: "Cuddalore", ta: "கடலூர்", code: "cud", phone: "04142-220700", url: "https://cuddalore.nic.in" },
+      { id: "dharmapuri", en: "Dharmapuri", ta: "தர்மபுரி", code: "dpi", phone: "04342-230500", url: "https://dharmapuri.nic.in" },
+      { id: "dindigul", en: "Dindigul", ta: "திண்டுக்கல்", code: "dgl", phone: "0451-2461199", url: "https://dindigul.nic.in" },
+      { id: "erode", en: "Erode", ta: "ஈரோடு", code: "erd", phone: "0424-2260211", url: "https://erode.nic.in" },
+      { id: "kallakurichi", en: "Kallakurichi", ta: "கள்ளக்குறிச்சி", code: "kki", phone: "04151-228800", url: "https://kallakurichi.nic.in", emailOverride: "collr-kki@gov.in" },
+      { id: "kancheepuram", en: "Kancheepuram", ta: "காஞ்சிபுரம்", code: "kpm", phone: "044-27237433", url: "https://kancheepuram.nic.in" },
+      { id: "kanniyakumari", en: "Kanniyakumari", ta: "கன்னியாகுமரி", code: "kkm", phone: "04652-278888", url: "https://kanniyakumari.nic.in" },
+      { id: "karur", en: "Karur", ta: "கரூர்", code: "krr", phone: "04324-257555", url: "https://karur.nic.in" },
+      { id: "krishnagiri", en: "Krishnagiri", ta: "கிருஷ்ணகிரி", code: "kgi", phone: "04343-239500", url: "https://krishnagiri.nic.in" },
+      { id: "madurai", en: "Madurai", ta: "மதுரை", code: "mdu", phone: "0452-2531110", url: "https://madurai.nic.in" },
+      { id: "mayiladuthurai", en: "Mayiladuthurai", ta: "மயிலாடுதுறை", code: "myd", phone: "04364-222800", url: "https://mayiladuthurai.nic.in" },
+      { id: "nagapattinam", en: "Nagapattinam", ta: "நாகப்பட்டினம்", code: "ngp", phone: "04365-252500", url: "https://nagapattinam.nic.in" },
+      { id: "namakkal", en: "Namakkal", ta: "நாமக்கல்", code: "nmk", phone: "04286-281100", url: "https://namakkal.nic.in" },
+      { id: "nilgiris", en: "The Nilgiris", ta: "நீலகிரி", code: "nil", phone: "0423-2441010", url: "https://nilgiris.nic.in" },
+      { id: "perambalur", en: "Perambalur", ta: "பெரம்பலூர்", code: "pbl", phone: "04328-224133", url: "https://perambalur.nic.in" },
+      { id: "pudukkottai", en: "Pudukkottai", ta: "புதுக்கோட்டை", code: "pdk", phone: "04322-221600", url: "https://pudukkottai.nic.in" },
+      { id: "ramanathapuram", en: "Ramanathapuram", ta: "இராமநாதபுரம்", code: "ram", phone: "04567-230055", url: "https://ramanathapuram.nic.in" },
+      { id: "ranipet", en: "Ranipet", ta: "ராணிப்பேட்டை", code: "rpt", phone: "04172-273180", url: "https://ranipet.nic.in", emailOverride: "collr-rpt@gov.in" },
+      { id: "salem", en: "Salem", ta: "சேலம்", code: "slm", phone: "0427-2452244", url: "https://salem.nic.in" },
+      { id: "sivaganga", en: "Sivaganga", ta: "சிவகங்கை", code: "svg", phone: "04575-241555", url: "https://sivaganga.nic.in" },
+      { id: "tenkasi", en: "Tenkasi", ta: "தென்காசி", code: "tks", phone: "04633-290500", url: "https://tenkasi.nic.in", emailOverride: "collr-tks@gov.in" },
+      { id: "thanjavur", en: "Thanjavur", ta: "தஞ்சாவூர்", code: "tjr", phone: "04362-230101", url: "https://thanjavur.nic.in" },
+      { id: "theni", en: "Theni", ta: "தேனி", code: "tni", phone: "04546-253630", url: "https://theni.nic.in" },
+      { id: "thoothukudi", en: "Thoothukudi", ta: "தூத்துக்குடி", code: "tcy", phone: "0461-2340600", url: "https://thoothukudi.nic.in" },
+      { id: "tiruchirappalli", en: "Tiruchirappalli", ta: "திருச்சிராப்பள்ளி", code: "try", phone: "0431-2415031", url: "https://tiruchirappalli.nic.in" },
+      { id: "tirunelveli", en: "Tirunelveli", ta: "திருநெல்வேலி", code: "tnv", phone: "0462-2500820", url: "https://tirunelveli.nic.in" },
+      { id: "tirupathur", en: "Tirupathur", ta: "திருப்பத்தூர்", code: "tpt", phone: "04179-220011", url: "https://tirupathur.nic.in", emailOverride: "collr-tpt@gov.in" },
+      { id: "tiruppur", en: "Tiruppur", ta: "திருப்பூர்", code: "tup", phone: "0421-2971100", url: "https://tiruppur.nic.in" },
+      { id: "tiruvallur", en: "Tiruvallur", ta: "திருவள்ளூர்", code: "tlr", phone: "044-27661600", url: "https://tiruvallur.nic.in" },
+      { id: "tiruvannamalai", en: "Tiruvannamalai", ta: "திருவண்ணாமலை", code: "tvm", phone: "04175-233333", url: "https://tiruvannamalai.nic.in" },
+      { id: "tiruvarur", en: "Tiruvarur", ta: "திருவாரூர்", code: "tvr", phone: "04366-226066", url: "https://tiruvarur.nic.in" },
+      { id: "vellore", en: "Vellore", ta: "வேலூர்", code: "vel", phone: "0416-2252525", url: "https://vellore.nic.in" },
+      { id: "viluppuram", en: "Viluppuram", ta: "விழுப்புரம்", code: "vpm", phone: "04146-222450", url: "https://viluppuram.nic.in" },
+      { id: "virudhunagar", en: "Virudhunagar", ta: "விருதுநகர்", code: "vnr", phone: "04562-252525", url: "https://virudhunagar.nic.in" }
+    ];
+
+    function getDistrictEmail(dist) {
+      return dist.emailOverride || `collr${dist.code}@nic.in`;
+    }
+
+    function renderDistricts(searchQuery = "") {
+      const container = document.getElementById('helplines-container');
+      const lang = localStorage.getItem('cc_lang') || 'en';
+      container.innerHTML = '';
+
+      const query = searchQuery.toLowerCase().trim();
+
+      const filtered = districtsData.filter(d => {
+        return d.en.toLowerCase().includes(query) || d.ta.toLowerCase().includes(query);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 0; font-size: 0.95rem;">
+            <i class="fa-solid fa-circle-question" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; color: var(--primary);"></i>
+            No districts match your search query.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(d => {
+        const displayName = lang === 'ta' ? d.ta : d.en;
+        const email = getDistrictEmail(d);
+        const card = document.createElement('div');
+        card.className = 'helpline-card';
+        card.innerHTML = `
+          <div class="helpline-card-header">
+            <span class="helpline-card-title">${displayName}</span>
+            <span class="district-badge">${d.code.toUpperCase()}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <a href="tel:${d.phone}" class="helpline-contact-row">
+              <i class="fa-solid fa-phone"></i>
+              <span>${d.phone}</span>
+            </a>
+            <a href="mailto:${email}" class="helpline-contact-row">
+              <i class="fa-solid fa-envelope"></i>
+              <span>${email}</span>
+            </a>
+          </div>
+          <div class="helpline-actions">
+            <a href="tel:${d.phone}" class="helpline-action-btn helpline-action-call" data-i18n="call_collector">Call Office</a>
+            <a href="${d.url}" target="_blank" rel="noopener noreferrer" class="helpline-action-btn helpline-action-web" data-i18n="visit_website">Website</a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Rerun translation helper
+      if (window.i18n && typeof window.i18n.translatePage === 'function') {
+        window.i18n.translatePage();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderDistricts();
+
+      const searchInput = document.getElementById('directory-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          renderDistricts(e.target.value);
+        });
+      }
+
+      // Re-render when language changes to translate district names dynamically
+      window.addEventListener('language-change', () => {
+        const query = searchInput ? searchInput.value : "";
+        renderDistricts(query);
+      });
+
+      setTimeout(() => {
+        document.body.classList.add('ready');
+      }, 100);
+    });
+  </script>
+
+</body>
+</html>
