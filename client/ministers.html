@@ -13,7 +13,7 @@
   <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Official Council of Ministers and portfolios for the Government of Tamil Nadu, including contact details and portfolios.">
+  <meta name="description" content="Official Council of Ministers and responsibilities for the Government of Tamil Nadu, including contact details and responsibilities.">
   <title>Council of Ministers - CrowdCity AI</title>
   
   <!-- CSS -->
@@ -48,7 +48,7 @@
       position: absolute;
       border-radius: 50%;
       filter: blur(140px);
-      opacity: 0.08;
+      opacity: 0.04;
       pointer-events: none;
     }
 
@@ -57,7 +57,7 @@
       left: 5%;
       width: 380px;
       height: 380px;
-      background: radial-gradient(circle, rgba(13, 148, 136, 0.35), transparent 70%);
+      background: radial-gradient(circle, rgba(13, 148, 136, 0.08), transparent 70%);
       animation: float-orb-1 22s ease-in-out infinite alternate;
     }
 
@@ -66,7 +66,7 @@
       right: -5%;
       width: 450px;
       height: 450px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent 70%);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.06), transparent 70%);
       animation: float-orb-2 26s ease-in-out infinite alternate-reverse;
     }
 
@@ -75,7 +75,7 @@
       left: 15%;
       width: 320px;
       height: 320px;
-      background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.04), transparent 70%);
       animation: float-orb-3 24s ease-in-out infinite alternate;
     }
 
@@ -171,11 +171,11 @@
       width: 200px;
       height: 200px;
       border-radius: var(--radius-lg);
-      border: 2px solid #fbbf24;
+      border: 1.5px solid rgba(13, 148, 136, 0.25);
       position: relative;
       overflow: hidden;
       z-index: 1;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .leader-graphic-frame img {
@@ -192,10 +192,11 @@
       width: 100%;
       font-size: 0.65rem;
       font-weight: 800;
-      color: #fbbf24;
+      color: var(--primary);
       text-transform: uppercase;
       letter-spacing: 1px;
-      background: rgba(15, 23, 42, 0.85);
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
       padding: 0.35rem 0.25rem;
       text-align: center;
       z-index: 2;
@@ -225,8 +226,9 @@
     }
 
     .leader-role-badge {
-      background: #fbbf24;
-      color: #0f172a;
+      background: var(--primary-light-alpha);
+      color: var(--primary);
+      border: 1px solid rgba(13, 148, 136, 0.2);
       font-size: 0.7rem;
       font-weight: 800;
       text-transform: uppercase;
@@ -825,7 +827,7 @@
           <!-- Page Header -->
           <section style="margin-bottom: 2rem;">
             <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.35rem;" data-i18n="nav_ministers">Council of Ministers</h1>
-            <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="ministers_desc">Cabinet portfolios, official contact directories, and leadership roles in the Government of Tamil Nadu.</p>
+            <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="ministers_desc">Cabinet responsibilities, official contact directories, and leadership roles in the Government of Tamil Nadu.</p>
           </section>
 
           <!-- Featured Chief Minister Section -->
@@ -846,7 +848,7 @@
             <!-- Search wrapper -->
             <div class="search-wrapper">
               <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="directory-search" class="search-input" placeholder="Search ministers or portfolios..." data-i18n-placeholder="search_ministers">
+              <input type="text" id="directory-search" class="search-input" placeholder="Search ministers or responsibilities..." data-i18n-placeholder="search_ministers">
             </div>
           </div>
 
