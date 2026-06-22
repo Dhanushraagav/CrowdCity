@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="CrowdCity">
   <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
-  <script src="js/auth-router.js?v=1.0.2"></script>
+  <script src="js/auth-router.js?v=1.0.3"></script>
   <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +17,7 @@
   <title>Welcome to CrowdCity AI - Authentication</title>
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=1.0.2">
+  <link rel="stylesheet" href="css/style.css?v=1.0.3">
   <link rel="stylesheet" href="css/components.css">
   <script>
     (function() {
@@ -672,6 +672,9 @@
         padding: 1.5rem;
         box-sizing: border-box;
       }
+      .mobile-brand-header {
+        display: flex !important;
+      }
     }
 
     @media (max-width: 480px) {
@@ -996,6 +999,17 @@
     <main class="auth-form-panel">
       <div class="auth-card">
         
+        <!-- Mobile branding logo (hidden on desktop) -->
+        <div class="mobile-brand-header" style="display: none; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu Emblem" style="height: 48px; object-fit: contain;" />
+          <div style="width: 1px; height: 28px; background: rgba(255, 255, 255, 0.15); margin: 0 0.1rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="height: 34px; object-fit: contain;" />
+          <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
+            <span style="color: #ffffff; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px;">CrowdCity AI</span>
+            <span style="color: #fbbf24; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">TN Initiative</span>
+          </div>
+        </div>
+
         <!-- Welcome Title -->
         <div style="text-align: center; margin-bottom: 2rem;">
           <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;" data-i18n="crowdcity_ai_portal">CrowdCity AI Portal</h1>

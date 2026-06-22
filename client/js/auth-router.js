@@ -139,7 +139,7 @@
       font-weight: 600;
       text-transform: uppercase;
     }
-    @media (min-width: 576px) {
+    @media (min-width: 769px) {
       .loader-logo {
         flex-direction: row !important;
         text-align: left !important;
