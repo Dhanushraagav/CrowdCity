@@ -913,7 +913,12 @@ body::after {
 
   /* Responsive Stepper progress bar on mobile */
   .stepper-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
     min-width: 100% !important;
+    width: 100% !important;
     padding: 0.5rem 0 !important;
   }
   .step-node {

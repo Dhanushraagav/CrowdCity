@@ -116,12 +116,21 @@
     }
     .loader-logo {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.6rem;
+      text-align: center;
+      gap: 0.8rem;
       font-size: 1.35rem;
       font-weight: 700;
       color: #ffffff;
       letter-spacing: 0.05em;
+    }
+    .loader-logo-divider {
+      display: none !important;
+    }
+    .loader-logo div[style*="line-height"] {
+      text-align: center !important;
+      align-items: center !important;
     }
     .loader-text {
       font-size: 0.78rem;
@@ -130,19 +139,22 @@
       font-weight: 600;
       text-transform: uppercase;
     }
-    @media (max-width: 540px) {
+    @media (min-width: 576px) {
       .loader-logo {
-        flex-direction: column !important;
-        text-align: center !important;
-        gap: 0.8rem !important;
+        flex-direction: row !important;
+        text-align: left !important;
+        gap: 0.6rem !important;
       }
       .loader-logo-divider {
-        display: none !important;
+        display: block !important;
+        width: 1px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 0 0.1rem;
       }
-      .loader-logo div[style*="text-align: left"],
       .loader-logo div[style*="line-height"] {
-        text-align: center !important;
-        align-items: center !important;
+        text-align: left !important;
+        align-items: flex-start !important;
       }
     }
   `;
@@ -158,11 +170,11 @@
         <div class="loader-spinner-ring">
           <div></div><div></div><div></div><div></div>
         </div>
-        <div class="loader-logo" style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="loader-logo">
           <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="height: 48px; object-fit: contain;" />
-          <div class="loader-logo-divider" style="width: 1px; height: 32px; background: rgba(255, 255, 255, 0.2); margin: 0 0.1rem;"></div>
+          <div class="loader-logo-divider"></div>
           <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="height: 38px; object-fit: contain;" />
-          <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1; font-family: var(--font-heading, sans-serif);">
+          <div style="display: flex; flex-direction: column; line-height: 1.1; font-family: var(--font-heading, sans-serif);">
             <span style="font-size: 1.25rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px;">CrowdCity AI</span>
             <span style="font-size: 0.62rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px;">TN Government Partnership</span>
           </div>
