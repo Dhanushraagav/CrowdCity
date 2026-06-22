@@ -292,6 +292,35 @@ const API = {
       method: 'POST',
       body: JSON.stringify(overrideData)
     });
+  },
+
+  // 34. Withdraw complaint (Citizen Only)
+  withdrawIssue: async (id, reason = '') => {
+    return request(`/issues/${id}/withdraw`, {
+      method: 'POST',
+      body: JSON.stringify({ reason })
+    });
+  },
+
+  // 35. Upload additional evidence
+  uploadEvidence: async (id, formData) => {
+    return request(`/issues/${id}/evidence`, {
+      method: 'POST',
+      body: formData
+    });
+  },
+
+  // 36. Get chat messages for an issue
+  getChatMessages: async (id) => {
+    return request(`/issues/${id}/messages`, { method: 'GET' });
+  },
+
+  // 37. Send chat message
+  sendChatMessage: async (id, messageText) => {
+    return request(`/issues/${id}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ message_text: messageText })
+    });
   }
 };
 

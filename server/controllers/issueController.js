@@ -4,6 +4,7 @@ import { awardPointsAndCheckBadges } from './gamificationController.js';
 import logger from '../config/logger.js';
 import { analyzeComplaint } from '../services/groqService.js';
 import { validateServiceArea } from '../services/serviceAreaService.js';
+import { getUserEmail, sendIssueCreatedEmail, sendIssueStatusUpdateEmail, sendIssueWithdrawnEmail, sendNewChatMessageEmail } from '../services/emailService.js';
 
 /**
  * Get all reported civic issues.
@@ -156,10 +157,18 @@ export const getIssueById = async (req, res) => {
       }
     }
 
+    // Fetch evidence attachments
+    const { data: attachments, error: attachError } = await activeClient
+      .from('issue_attachments')
+      .select('*')
+      .eq('issue_id', id)
+      .order('created_at', { ascending: true });
+
     return res.status(200).json({
       ...issue,
       comments: commentsError ? [] : comments,
       history: historyError ? [] : history,
+      attachments: attachError ? [] : (attachments || []),
       user_has_upvoted: userHasUpvoted
     });
   } catch (err) {
@@ -329,6 +338,12 @@ export const createIssue = async (req, res) => {
     }
 
     awardPointsAndCheckBadges(req.user.id, 10, 'report', req).catch(err => logger.error('Background gamification error:', err));
+
+    // Send confirmation email (background)
+    getUserEmail(req.user.id).then(email => {
+      if (email) sendIssueCreatedEmail(email, req.user.user_metadata?.full_name || 'Citizen', issue);
+    }).catch(err => logger.error('Background email error:', err));
+
     return res.status(201).json(issue);
   } catch (err) {
     logger.error('createIssue Error: %O', err);
@@ -525,6 +540,11 @@ export const updateIssueStatus = async (req, res) => {
       "status_change",
       id
     );
+
+    // Send status update email (background)
+    getUserEmail(issue.reporter_id).then(email => {
+      if (email) sendIssueStatusUpdateEmail(email, '', issue, status, notes);
+    }).catch(err => logger.error('Background email error:', err));
 
     return res.status(200).json({ message: 'Status updated successfully', issue });
   } catch (err) {
@@ -1726,5 +1746,436 @@ export const exportReport = async (req, res) => {
   } catch (err) {
     logger.error('exportReport Error: %O', err);
     return res.status(500).send('Server error generating report export file.');
+  }
+};
+
+/**
+ * Withdraw an issue (Citizen Reporter Only)
+ */
+export const withdrawIssue = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const activeClient = getSupabaseClient(req);
+    const { data: issue, error } = await activeClient
+      .from('issues')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!issue) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    if (userId !== issue.reporter_id) {
+      return res.status(403).json({ error: 'Only the original citizen reporter can withdraw this complaint.' });
+    }
+
+    const allowedStatuses = ['pending', 'assigned', 'in_progress'];
+    if (!allowedStatuses.includes(issue.status)) {
+      return res.status(400).json({ error: `Complaint cannot be withdrawn when status is ${issue.status.toUpperCase()}.` });
+    }
+
+    // Update status to withdrawn
+    const { data: updatedIssue, error: updateError } = await activeClient
+      .from('issues')
+      .update({ status: 'withdrawn', updated_at: new Date() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    // Insert status_history entry using admin to bypass citizen restrictions
+    const activeAdmin = supabaseAdmin || supabase;
+    const { error: historyError } = await activeAdmin
+      .from('status_history')
+      .insert({
+        issue_id: id,
+        status: 'withdrawn',
+        updated_by: userId,
+        notes: 'Complaint withdrawn by citizen reporter.'
+      });
+
+    if (historyError) {
+      logger.error('Failed to log withdrawal status history: %O', historyError);
+    }
+
+    // Notify the reporter
+    await createNotification(
+      issue.reporter_id,
+      "Complaint Withdrawn",
+      `You have withdrawn the complaint '${issue.title}'.`,
+      "status_change",
+      id
+    );
+
+    // Notify the assigned authority if any
+    if (issue.assigned_to) {
+      await createNotification(
+        issue.assigned_to,
+        "Complaint Withdrawn by Citizen",
+        `The complaint '${issue.title}' has been withdrawn by the citizen reporter.`,
+        "status_change",
+        id
+      );
+    }
+
+    // Send withdrawal email (background)
+    getUserEmail(req.user.id).then(email => {
+      if (email) sendIssueWithdrawnEmail(email, req.user.user_metadata?.full_name || 'Citizen', issue);
+    }).catch(err => logger.error('Background email error:', err));
+
+    return res.status(200).json({ message: 'Complaint withdrawn successfully', issue: updatedIssue });
+  } catch (err) {
+    logger.error('withdrawIssue Error: %O', err);
+    return res.status(400).json({ error: `Withdrawal failed: ${err.message || err}` });
+  }
+};
+
+/**
+ * Upload additional evidence for an issue (Citizen Reporter Only)
+ */
+export const uploadEvidence = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const activeClient = getSupabaseClient(req);
+    const { data: issue, error } = await activeClient
+      .from('issues')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!issue) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    if (userId !== issue.reporter_id) {
+      return res.status(403).json({ error: 'Only the original citizen reporter can upload evidence for this complaint.' });
+    }
+
+    const disallowedStatuses = ['resolved', 'verified', 'withdrawn', 'rejected'];
+    if (disallowedStatuses.includes(issue.status)) {
+      return res.status(400).json({ error: `Evidence cannot be uploaded when complaint status is ${issue.status.toUpperCase()}.` });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No evidence files provided.' });
+    }
+
+    const activeStorageClient = supabaseAdmin || supabase;
+    const attachments = [];
+
+    for (const file of req.files) {
+      const fileExt = file.originalname.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `evidence/${fileName}`;
+
+      const { error: uploadError } = await activeStorageClient.storage
+        .from('issue-images')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: true
+        });
+
+      if (uploadError) {
+        logger.error('Failed to upload evidence file: %O', uploadError);
+        continue;
+      }
+
+      const { data: { publicUrl } } = activeStorageClient.storage
+        .from('issue-images')
+        .getPublicUrl(filePath);
+
+      // Insert attachment record
+      const { data: attachment, error: attachError } = await activeClient
+        .from('issue_attachments')
+        .insert({
+          issue_id: id,
+          uploaded_by: userId,
+          file_url: publicUrl,
+          file_name: file.originalname,
+          file_size: file.size
+        })
+        .select()
+        .single();
+
+      if (attachError) {
+        logger.error('Failed to insert attachment record: %O', attachError);
+      } else {
+        attachments.push(attachment);
+      }
+    }
+
+    // Insert status_history entry using admin
+    const activeAdmin = supabaseAdmin || supabase;
+    const { error: historyError } = await activeAdmin
+      .from('status_history')
+      .insert({
+        issue_id: id,
+        status: issue.status,
+        updated_by: userId,
+        notes: 'Additional evidence uploaded by citizen.'
+      });
+
+    if (historyError) {
+      logger.error('Failed to log evidence upload status history: %O', historyError);
+    }
+
+    return res.status(200).json({ message: 'Evidence uploaded successfully', attachments });
+  } catch (err) {
+    logger.error('uploadEvidence Error: %O', err);
+    return res.status(400).json({ error: `Evidence upload failed: ${err.message || err}` });
+  }
+};
+
+/**
+ * Get a printable receipt for an issue
+ */
+export const getIssueReceipt = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const activeClient = getSupabaseClient(req);
+    const { data: issue, error } = await activeClient
+      .from('issues')
+      .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url)')
+      .eq('id', id)
+      .single();
+
+    if (error || !issue) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    const statusColors = {
+      pending: '#f59e0b',
+      assigned: '#3b82f6',
+      in_progress: '#8b5cf6',
+      resolved: '#10b981',
+      verified: '#10b981',
+      rejected: '#ef4444',
+      withdrawn: '#6b7280'
+    };
+    const badgeColor = statusColors[issue.status] || '#3b82f6';
+    const generatedDate = new Date().toLocaleString();
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaint Receipt - ${issue.title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Outfit', sans-serif; background: #ffffff; color: #1e293b; padding: 40px; line-height: 1.6; }
+    .receipt-container { max-width: 700px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 40px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 30px; }
+    .logo { font-size: 22px; font-weight: 700; color: #1e293b; letter-spacing: 1px; }
+    .logo span { color: #3b82f6; }
+    .receipt-title { font-size: 13px; text-transform: uppercase; color: #64748b; letter-spacing: 1px; font-weight: 500; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
+    .detail-item { }
+    .detail-label { font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px; }
+    .detail-value { font-size: 15px; color: #1e293b; font-weight: 500; }
+    .full-width { grid-column: 1 / -1; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; color: #ffffff; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .description-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; font-size: 14px; color: #334155; line-height: 1.7; }
+    .footer { border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; text-align: center; font-size: 12px; color: #94a3b8; }
+    .print-btn { display: inline-block; padding: 10px 24px; background: #3b82f6; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; margin-bottom: 24px; }
+    .print-btn:hover { background: #2563eb; }
+    @media print {
+      body { padding: 20px; }
+      .receipt-container { border: none; padding: 0; }
+      .print-btn { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt-container">
+    <div style="text-align: right;">
+      <button class="print-btn" onclick="window.print()">Print Receipt</button>
+    </div>
+
+    <div class="header">
+      <div>
+        <div class="logo">CrowdCity<span>.</span></div>
+        <div class="receipt-title">Complaint Receipt</div>
+      </div>
+      <div style="text-align: right;">
+        <div class="detail-label">Complaint ID</div>
+        <div class="detail-value" style="font-family: monospace; font-size: 13px;">${issue.id}</div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="full-width">
+        <div class="detail-label">Title</div>
+        <div class="detail-value" style="font-size: 18px; font-weight: 600;">${issue.title || 'Untitled'}</div>
+      </div>
+
+      <div>
+        <div class="detail-label">Category</div>
+        <div class="detail-value" style="text-transform: capitalize;">${(issue.category || 'general').replace(/_/g, ' ')}</div>
+      </div>
+
+      <div>
+        <div class="detail-label">Status</div>
+        <div><span class="status-badge" style="background-color: ${badgeColor};">${(issue.status || 'pending').replace(/_/g, ' ')}</span></div>
+      </div>
+
+      <div>
+        <div class="detail-label">Reporter</div>
+        <div class="detail-value">${issue.reporter?.full_name || 'Anonymous'}</div>
+      </div>
+
+      <div>
+        <div class="detail-label">Date Reported</div>
+        <div class="detail-value">${issue.created_at ? new Date(issue.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</div>
+      </div>
+
+      <div class="full-width">
+        <div class="detail-label">Description</div>
+        <div class="description-box">${issue.description || 'No description provided.'}</div>
+      </div>
+
+      <div class="full-width">
+        <div class="detail-label">Address</div>
+        <div class="detail-value">${issue.address || 'Address not available'}</div>
+      </div>
+
+      <div>
+        <div class="detail-label">Latitude</div>
+        <div class="detail-value">${issue.latitude || 'N/A'}</div>
+      </div>
+
+      <div>
+        <div class="detail-label">Longitude</div>
+        <div class="detail-value">${issue.longitude || 'N/A'}</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Generated on ${generatedDate}</p>
+      <p style="margin-top: 4px;">CrowdCity AI &mdash; Civic Engagement Platform</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html');
+    return res.status(200).send(htmlContent);
+  } catch (err) {
+    logger.error('getIssueReceipt Error: %O', err);
+    return res.status(500).json({ error: 'Server error generating receipt' });
+  }
+};
+
+/**
+ * Get chat messages for an issue
+ */
+export const getChatMessages = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const activeClient = getSupabaseClient(req);
+    const { data: messages, error } = await activeClient
+      .from('messages')
+      .select('*, sender:profiles!messages_sender_id_fkey(full_name, avatar_url)')
+      .eq('issue_id', id)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    return res.status(200).json({ messages: messages || [] });
+  } catch (err) {
+    logger.error('getChatMessages Error: %O', err);
+    return res.status(500).json({ error: 'Server error fetching chat messages' });
+  }
+};
+
+/**
+ * Send a chat message for an issue
+ */
+export const sendChatMessage = async (req, res) => {
+  const { id } = req.params;
+  const { message_text } = req.body;
+  const userId = req.user.id;
+
+  if (!message_text || !message_text.trim()) {
+    return res.status(400).json({ error: 'Message text cannot be empty.' });
+  }
+
+  try {
+    const activeClient = getSupabaseClient(req);
+
+    // Fetch the issue to verify access
+    const { data: issue, error: issueError } = await activeClient
+      .from('issues')
+      .select('*, reporter:profiles!issues_reporter_id_fkey(full_name)')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (issueError) throw issueError;
+    if (!issue) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    // Verify user is either reporter or assigned authority
+    if (userId !== issue.reporter_id && userId !== issue.assigned_to) {
+      return res.status(403).json({ error: 'You are not authorized to send messages on this complaint.' });
+    }
+
+    // Insert the message
+    const { data: chatMessage, error: insertError } = await activeClient
+      .from('messages')
+      .insert({
+        issue_id: id,
+        sender_id: userId,
+        message_text: message_text.trim()
+      })
+      .select('*, sender:profiles!messages_sender_id_fkey(full_name, avatar_url)')
+      .single();
+
+    if (insertError) throw insertError;
+
+    // Determine recipient
+    const recipientId = userId === issue.reporter_id ? issue.assigned_to : issue.reporter_id;
+    const senderName = chatMessage.sender?.full_name || 'User';
+
+    // Send notification to recipient
+    if (recipientId) {
+      await createNotification(
+        recipientId,
+        "New Message",
+        `${senderName} sent a message on complaint '${issue.title}'.`,
+        "chat_message",
+        id
+      );
+
+      // Send email notification (background, don't await)
+      getUserEmail(recipientId).then(async (email) => {
+        if (email) {
+          const { data: recipientProfile } = await (supabaseAdmin || supabase)
+            .from('profiles')
+            .select('full_name')
+            .eq('id', recipientId)
+            .maybeSingle();
+          const recipientName = recipientProfile?.full_name || 'User';
+          const preview = message_text.trim().substring(0, 150);
+          sendNewChatMessageEmail(email, recipientName, issue.title, senderName, preview);
+        }
+      }).catch(err => logger.error('Background email error:', err));
+    }
+
+    return res.status(201).json({ message: 'Message sent', chatMessage });
+  } catch (err) {
+    logger.error('sendChatMessage Error: %O', err);
+    return res.status(400).json({ error: `Failed to send message: ${err.message || err}` });
   }
 };

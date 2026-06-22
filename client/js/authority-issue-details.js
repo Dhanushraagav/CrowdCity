@@ -178,6 +178,9 @@ async function loadCaseDetails() {
     // Trigger change event to toggle photo upload visibility
     statusSelect.dispatchEvent(new Event('change'));
   }
+
+  // Load new features (evidence gallery, chat)
+  await loadAuthorityNewFeatures(issue);
   } catch (error) {
     console.error("[Inspector] Exception in loadCaseDetails:", error);
     if (loader) {
@@ -485,4 +488,177 @@ function escapeHTML(str) {
       '"': '&quot;'
     }[tag] || tag)
   );
+}
+
+// ============================================================
+// NEW FEATURES: Evidence Gallery, Chat
+// ============================================================
+
+let chatRealtimeChannel = null;
+
+async function loadAuthorityNewFeatures(issue) {
+  // === Evidence Gallery ===
+  renderEvidenceGallery(issue.attachments || issue.evidence || []);
+
+  // === Chat Panel ===
+  const chatPanel = document.getElementById('chat-panel');
+  if (chatPanel) {
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (issue.assigned_to && currentUser && currentUser.id === issue.assigned_to) {
+      chatPanel.classList.remove('hidden');
+
+      // Load existing messages
+      const { data, error } = await window.API.getChatMessages(issueId);
+      if (!error && data && data.messages) {
+        renderChatMessages(data.messages);
+      }
+
+      // Setup realtime for new messages
+      setupChatRealtime(issueId);
+
+      // Setup chat form
+      setupChatForm();
+    } else {
+      chatPanel.classList.add('hidden');
+    }
+  }
+}
+
+function renderEvidenceGallery(attachments) {
+  const gallery = document.getElementById('evidence-gallery');
+  if (!gallery) return;
+
+  if (!attachments || attachments.length === 0) {
+    gallery.classList.add('hidden');
+    return;
+  }
+
+  gallery.classList.remove('hidden');
+  gallery.innerHTML = `
+    <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 0; overflow: hidden; box-shadow: var(--shadow-sm);">
+      <div style="padding: 1rem 1.5rem 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-images" style="color: var(--primary);"></i>
+        <h4 style="font-size: 1rem; font-family: var(--font-heading); margin: 0;">Citizen Evidence (${attachments.length})</h4>
+      </div>
+      <div class="evidence-grid">
+        ${attachments.map(att => `
+          <div class="evidence-thumb" onclick="window.open('${att.url || att.file_url || ''}', '_blank')">
+            <img src="${att.url || att.file_url || ''}" alt="Evidence" loading="lazy">
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderChatMessages(messages) {
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+
+  if (!messages || messages.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 2rem 0;">No messages yet. Start the conversation!</div>';
+    return;
+  }
+
+  container.innerHTML = messages.map(msg => {
+    const isSent = currentUser && msg.sender_id === currentUser.id;
+    const senderName = msg.sender?.full_name || (isSent ? 'You' : 'Citizen');
+    const timeStr = new Date(msg.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+    return `
+      <div class="chat-bubble ${isSent ? 'sent' : 'received'}">
+        <div style="font-size: 0.72rem; font-weight: 600; margin-bottom: 0.15rem; opacity: 0.85;">${escapeHTML(senderName)}</div>
+        ${escapeHTML(msg.message_text)}
+        <span class="chat-time">${timeStr}</span>
+      </div>
+    `;
+  }).join('');
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendChatMessage(message) {
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+
+  const placeholder = container.querySelector('div[style*="text-align: center"]');
+  if (placeholder && placeholder.textContent.includes('No messages')) {
+    placeholder.remove();
+  }
+
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  const isSent = currentUser && message.sender_id === currentUser.id;
+  const senderName = message.sender?.full_name || (isSent ? 'You' : 'Citizen');
+  const timeStr = new Date(message.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${isSent ? 'sent' : 'received'}`;
+  bubble.innerHTML = `
+    <div style="font-size: 0.72rem; font-weight: 600; margin-bottom: 0.15rem; opacity: 0.85;">${escapeHTML(senderName)}</div>
+    ${escapeHTML(message.message_text)}
+    <span class="chat-time">${timeStr}</span>
+  `;
+
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+
+function setupChatRealtime(currentIssueId) {
+  if (chatRealtimeChannel && typeof supabaseClient !== 'undefined' && supabaseClient) {
+    supabaseClient.removeChannel(chatRealtimeChannel);
+    chatRealtimeChannel = null;
+  }
+
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+
+  chatRealtimeChannel = supabaseClient
+    .channel(`public:messages:issue_${currentIssueId}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `issue_id=eq.${currentIssueId}`
+    }, (payload) => {
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (currentUser && payload.new.sender_id === currentUser.id) return;
+      appendChatMessage(payload.new);
+    })
+    .subscribe((status) => {
+      console.log(`[Authority Chat] Realtime subscription status: ${status}`);
+    });
+}
+
+function setupChatForm() {
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+
+  if (chatForm) {
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = chatInput ? chatInput.value.trim() : '';
+      if (!text) return;
+
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!currentUser) {
+        if (typeof showToast === 'function') showToast('You must be logged in to send messages.', 'warning');
+        return;
+      }
+
+      appendChatMessage({
+        message_text: text,
+        sender_id: currentUser.id,
+        created_at: new Date().toISOString(),
+        sender: { full_name: currentUser.user_metadata?.full_name || 'You' }
+      });
+
+      chatInput.value = '';
+
+      const { error } = await window.API.sendChatMessage(issueId, text);
+      if (error) {
+        if (typeof showToast === 'function') showToast(`Message failed: ${error}`, 'error');
+      }
+    });
+  }
 }

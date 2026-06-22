@@ -1,4 +1,5 @@
 import logger from '../config/logger.js';
+import { supabaseAdmin } from '../config/supabase.js';
 
 /**
  * Shared helper to send emails via Resend API
@@ -261,6 +262,165 @@ export const sendWelcomeEmail = async (email, fullName, userId = 'N/A') => {
 
   const html = getEmailHtmlWrapper('Welcome to CrowdCity', contentHtml);
   const text = `Welcome, ${fullName || 'Citizen'}!\n\nYour account has been created successfully.\n\nYou can now report civic issues, track complaint progress, and help improve your city through CrowdCity.\n\nOpen CrowdCity: ${appUrl}`;
+
+  return sendResendEmail({ to: email, subject, html, text });
+};
+
+/**
+ * Helper: Get a user's email from Supabase Auth by user ID
+ */
+export const getUserEmail = async (userId) => {
+  try {
+    const { data: { user }, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (error || !user) {
+      logger.error(`[Email Service] Failed to get user email for userId ${userId}: ${error?.message || 'User not found'}`);
+      return null;
+    }
+    return user.email;
+  } catch (err) {
+    logger.error(`[Email Service] Exception getting user email for userId ${userId}: %O`, err);
+    return null;
+  }
+};
+
+/**
+ * 5. Issue Created Confirmation Email
+ */
+export const sendIssueCreatedEmail = async (email, fullName, issue) => {
+  const subject = 'Complaint Submitted Successfully - CrowdCity';
+
+  const contentHtml = `
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">
+      Complaint Submitted
+    </h1>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #cbd5e1; text-align: center; line-height: 1.5;">
+      Hi ${fullName || 'Citizen'}, your complaint has been successfully submitted and is now being reviewed.
+    </p>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 4px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Title</p>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #ffffff; font-weight: 600;">${issue.title || 'Untitled'}</p>
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Category</p>
+      <p style="margin: 0; font-size: 14px; color: #3b82f6; font-weight: 500; text-transform: capitalize;">${(issue.category || 'general').replace(/_/g, ' ')}</p>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #9AA4B2; text-align: center; line-height: 1.5;">
+      You will receive updates as your complaint progresses. Thank you for helping improve your city.
+    </p>
+  `;
+
+  const html = getEmailHtmlWrapper('Complaint Submitted', contentHtml);
+  const text = `Complaint Submitted\n\nHi ${fullName || 'Citizen'}, your complaint "${issue.title || 'Untitled'}" in category "${(issue.category || 'general').replace(/_/g, ' ')}" has been successfully submitted.\n\nYou will receive updates as your complaint progresses.`;
+
+  return sendResendEmail({ to: email, subject, html, text });
+};
+
+/**
+ * 6. Issue Status Update Email
+ */
+export const sendIssueStatusUpdateEmail = async (email, fullName, issue, newStatus, notes) => {
+  const subject = `Complaint Status Updated to ${newStatus.toUpperCase()} - CrowdCity`;
+
+  const statusColors = {
+    pending: '#f59e0b',
+    assigned: '#3b82f6',
+    in_progress: '#8b5cf6',
+    resolved: '#10b981',
+    verified: '#10b981',
+    rejected: '#ef4444',
+    withdrawn: '#6b7280'
+  };
+  const badgeColor = statusColors[newStatus] || '#3b82f6';
+
+  const notesHtml = notes
+    ? `<p style="margin: 16px 0 0 0; font-size: 13px; color: #9AA4B2;">Notes: <span style="color: #cbd5e1;">${notes}</span></p>`
+    : '';
+
+  const contentHtml = `
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">
+      Status Update
+    </h1>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #cbd5e1; text-align: center; line-height: 1.5;">
+      Hi ${fullName || 'Citizen'}, there has been an update to your complaint.
+    </p>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 4px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Complaint</p>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #ffffff; font-weight: 600;">${issue.title || 'Untitled'}</p>
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">New Status</p>
+      <div style="display: inline-block; padding: 4px 12px; border-radius: 4px; background-color: ${badgeColor}; color: #ffffff; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+        ${newStatus.replace(/_/g, ' ')}
+      </div>
+      ${notesHtml}
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #9AA4B2; text-align: center; line-height: 1.5;">
+      Log in to CrowdCity to view the full details of your complaint.
+    </p>
+  `;
+
+  const html = getEmailHtmlWrapper('Status Update', contentHtml);
+  const text = `Status Update\n\nHi ${fullName || 'Citizen'}, your complaint "${issue.title || 'Untitled'}" has been updated to ${newStatus.toUpperCase()}.${notes ? `\n\nNotes: ${notes}` : ''}\n\nLog in to CrowdCity to view the full details.`;
+
+  return sendResendEmail({ to: email, subject, html, text });
+};
+
+/**
+ * 7. New Chat Message Notification Email
+ */
+export const sendNewChatMessageEmail = async (email, fullName, issueTitle, senderName, messagePreview) => {
+  const subject = `New message from ${senderName} - CrowdCity`;
+
+  const contentHtml = `
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">
+      New Message
+    </h1>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #cbd5e1; text-align: center; line-height: 1.5;">
+      Hi ${fullName || 'User'}, you have a new message regarding a complaint.
+    </p>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 4px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Complaint</p>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #ffffff; font-weight: 600;">${issueTitle || 'Untitled'}</p>
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">From</p>
+      <p style="margin: 0 0 16px 0; font-size: 14px; color: #3b82f6; font-weight: 500;">${senderName || 'Unknown'}</p>
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Message</p>
+      <p style="margin: 0; font-size: 14px; color: #cbd5e1; line-height: 1.5; font-style: italic;">"${messagePreview || ''}"</p>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #9AA4B2; text-align: center; line-height: 1.5;">
+      Log in to CrowdCity to reply.
+    </p>
+  `;
+
+  const html = getEmailHtmlWrapper('New Message', contentHtml);
+  const text = `New Message\n\nHi ${fullName || 'User'}, you have a new message regarding "${issueTitle || 'Untitled'}".\n\nFrom: ${senderName || 'Unknown'}\nMessage: "${messagePreview || ''}"\n\nLog in to CrowdCity to reply.`;
+
+  return sendResendEmail({ to: email, subject, html, text });
+};
+
+/**
+ * 8. Issue Withdrawn Confirmation Email
+ */
+export const sendIssueWithdrawnEmail = async (email, fullName, issue) => {
+  const subject = 'Complaint Withdrawn - CrowdCity';
+
+  const contentHtml = `
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">
+      Complaint Withdrawn
+    </h1>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #cbd5e1; text-align: center; line-height: 1.5;">
+      Hi ${fullName || 'Citizen'}, your complaint has been withdrawn successfully.
+    </p>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 4px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Title</p>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #ffffff; font-weight: 600;">${issue.title || 'Untitled'}</p>
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Status</p>
+      <div style="display: inline-block; padding: 4px 12px; border-radius: 4px; background-color: #6b7280; color: #ffffff; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+        Withdrawn
+      </div>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #9AA4B2; text-align: center; line-height: 1.5;">
+      This complaint will no longer be tracked. You can submit a new complaint at any time.
+    </p>
+  `;
+
+  const html = getEmailHtmlWrapper('Complaint Withdrawn', contentHtml);
+  const text = `Complaint Withdrawn\n\nHi ${fullName || 'Citizen'}, your complaint "${issue.title || 'Untitled'}" has been withdrawn successfully.\n\nThis complaint will no longer be tracked. You can submit a new complaint at any time.`;
 
   return sendResendEmail({ to: email, subject, html, text });
 };

@@ -20,6 +20,7 @@ async function initDetailsPage() {
   setupUpvoteAction();
   setupControlPanel();
   setupVerificationActions();
+  setupCitizenActions();
 }
 
 // Fetch issue details and draw page
@@ -176,6 +177,9 @@ async function loadIssueDetails() {
   // Hide loader, show content
   if (loader) loader.classList.add('hidden');
   if (content) content.classList.remove('hidden');
+
+  // Load new features (evidence, chat, citizen actions)
+  await loadNewFeatures(issue);
 }
 
 // Draw Leaflet Mini Map
@@ -831,5 +835,339 @@ function setupVerificationActions() {
         await loadIssueDetails();
       }
     });
+  }
+}
+
+// ============================================================
+// NEW FEATURES: Citizen Actions, Evidence, Chat, Withdraw
+// ============================================================
+
+let chatRealtimeChannel = null;
+
+// Setup citizen-specific action panel and all new feature handlers
+function setupCitizenActions() {
+  const panel = document.getElementById('citizen-actions-panel');
+  const withdrawBtn = document.getElementById('btn-withdraw');
+  const receiptBtn = document.getElementById('btn-download-receipt');
+  const showEvidenceBtn = document.getElementById('btn-show-evidence-upload');
+  const uploadBtn = document.getElementById('btn-upload-evidence');
+  const evidenceSection = document.getElementById('evidence-upload-section');
+  const evidenceDropzone = document.getElementById('evidence-dropzone');
+  const evidenceFileInput = document.getElementById('evidence-file-input');
+
+  // Download Receipt
+  if (receiptBtn) {
+    receiptBtn.addEventListener('click', async () => {
+      let token = null;
+      if (typeof window.getOrRefreshAccessToken === 'function') {
+        token = await window.getOrRefreshAccessToken();
+      } else if (typeof getAuthToken === 'function') {
+        token = getAuthToken();
+      }
+      const receiptUrl = `/api/issues/${issueId}/receipt${token ? '?token=' + encodeURIComponent(token) : ''}`;
+      window.open(receiptUrl, '_blank');
+    });
+  }
+
+  // Toggle evidence upload section
+  if (showEvidenceBtn && evidenceSection) {
+    showEvidenceBtn.addEventListener('click', () => {
+      evidenceSection.classList.toggle('hidden');
+    });
+  }
+
+  // Evidence dropzone click
+  if (evidenceDropzone && evidenceFileInput) {
+    evidenceDropzone.addEventListener('click', () => evidenceFileInput.click());
+    evidenceFileInput.addEventListener('change', () => {
+      if (uploadBtn) {
+        uploadBtn.disabled = !evidenceFileInput.files || evidenceFileInput.files.length === 0;
+      }
+    });
+  }
+
+  // Upload evidence files
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', async () => {
+      if (!evidenceFileInput || !evidenceFileInput.files || evidenceFileInput.files.length === 0) return;
+
+      const progressEl = document.getElementById('evidence-upload-progress');
+      if (progressEl) progressEl.classList.remove('hidden');
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading...';
+
+      const formData = new FormData();
+      for (let i = 0; i < evidenceFileInput.files.length; i++) {
+        formData.append('evidence', evidenceFileInput.files[i]);
+      }
+
+      const { data, error } = await window.API.uploadEvidence(issueId, formData);
+
+      if (progressEl) progressEl.classList.add('hidden');
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = '<i class="fa-solid fa-upload"></i> Upload Files';
+
+      if (error) {
+        window.showToast(`Evidence upload failed: ${error}`, 'error');
+      } else {
+        window.showToast('Evidence uploaded successfully!', 'success');
+        evidenceFileInput.value = '';
+        uploadBtn.disabled = true;
+        evidenceSection.classList.add('hidden');
+        // Reload to refresh evidence gallery
+        await loadIssueDetails();
+      }
+    });
+  }
+
+  // Withdraw button → show modal
+  if (withdrawBtn) {
+    withdrawBtn.addEventListener('click', () => {
+      const modal = document.getElementById('withdraw-modal');
+      if (modal) modal.classList.remove('hidden');
+    });
+  }
+
+  // Withdraw modal handlers
+  const withdrawModal = document.getElementById('withdraw-modal');
+  const withdrawCancel = document.getElementById('withdraw-cancel-btn');
+  const withdrawConfirm = document.getElementById('withdraw-confirm-btn');
+  const withdrawBackdrop = document.getElementById('withdraw-modal-backdrop');
+
+  function closeWithdrawModal() {
+    if (withdrawModal) withdrawModal.classList.add('hidden');
+    const reasonInput = document.getElementById('withdraw-reason');
+    if (reasonInput) reasonInput.value = '';
+  }
+
+  if (withdrawCancel) withdrawCancel.addEventListener('click', closeWithdrawModal);
+  if (withdrawBackdrop) withdrawBackdrop.addEventListener('click', closeWithdrawModal);
+
+  if (withdrawConfirm) {
+    withdrawConfirm.addEventListener('click', async () => {
+      const reasonInput = document.getElementById('withdraw-reason');
+      const reason = reasonInput ? reasonInput.value.trim() : '';
+
+      withdrawConfirm.disabled = true;
+      withdrawConfirm.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Withdrawing...';
+
+      const { error } = await window.API.withdrawIssue(issueId, reason);
+
+      withdrawConfirm.disabled = false;
+      withdrawConfirm.innerHTML = 'Confirm Withdraw';
+
+      if (error) {
+        window.showToast(`Failed to withdraw: ${error}`, 'error');
+      } else {
+        window.showToast('Complaint has been withdrawn successfully.', 'success');
+        closeWithdrawModal();
+        await loadIssueDetails();
+      }
+    });
+  }
+
+  // Chat form submit
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+
+  if (chatForm) {
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = chatInput ? chatInput.value.trim() : '';
+      if (!text) return;
+
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!currentUser) {
+        window.showToast('You must be logged in to send messages.', 'warning');
+        return;
+      }
+
+      // Optimistically append the message
+      appendChatMessage({
+        message_text: text,
+        sender_id: currentUser.id,
+        created_at: new Date().toISOString(),
+        sender: { full_name: currentUser.user_metadata?.full_name || 'You' }
+      });
+
+      chatInput.value = '';
+
+      const { error } = await window.API.sendChatMessage(issueId, text);
+      if (error) {
+        window.showToast(`Message failed: ${error}`, 'error');
+      }
+    });
+  }
+}
+
+// Render evidence gallery from attachments array
+function renderEvidenceGallery(attachments) {
+  const gallery = document.getElementById('evidence-gallery');
+  if (!gallery) return;
+
+  if (!attachments || attachments.length === 0) {
+    gallery.classList.add('hidden');
+    return;
+  }
+
+  gallery.classList.remove('hidden');
+  gallery.innerHTML = `
+    <div class="glass-panel" style="padding: 0; overflow: hidden;">
+      <div style="padding: 1rem 1.5rem 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-images" style="color: var(--primary);"></i>
+        <h4 style="font-size: 1rem; font-family: var(--font-heading); margin: 0;">Evidence Attachments (${attachments.length})</h4>
+      </div>
+      <div class="evidence-grid">
+        ${attachments.map(att => `
+          <div class="evidence-thumb" onclick="window.open('${att.url || att.file_url || ''}', '_blank')">
+            <img src="${att.url || att.file_url || att.thumbnail_url || ''}" alt="Evidence" loading="lazy">
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// Render all chat messages
+function renderChatMessages(messages) {
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+
+  if (!messages || messages.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 2rem 0;">No messages yet. Start the conversation!</div>';
+    return;
+  }
+
+  container.innerHTML = messages.map(msg => {
+    const isSent = currentUser && msg.sender_id === currentUser.id;
+    const senderName = msg.sender?.full_name || (isSent ? 'You' : 'Authority');
+    const timeStr = new Date(msg.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+    return `
+      <div class="chat-bubble ${isSent ? 'sent' : 'received'}">
+        <div style="font-size: 0.72rem; font-weight: 600; margin-bottom: 0.15rem; opacity: 0.85;">${escapeHTML(senderName)}</div>
+        ${escapeHTML(msg.message_text)}
+        <span class="chat-time">${timeStr}</span>
+      </div>
+    `;
+  }).join('');
+
+  container.scrollTop = container.scrollHeight;
+}
+
+// Append a single new chat message
+function appendChatMessage(message) {
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+
+  // Clear "no messages" placeholder
+  const placeholder = container.querySelector('div[style*="text-align: center"]');
+  if (placeholder && placeholder.textContent.includes('No messages')) {
+    placeholder.remove();
+  }
+
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  const isSent = currentUser && message.sender_id === currentUser.id;
+  const senderName = message.sender?.full_name || (isSent ? 'You' : 'Authority');
+  const timeStr = new Date(message.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${isSent ? 'sent' : 'received'}`;
+  bubble.innerHTML = `
+    <div style="font-size: 0.72rem; font-weight: 600; margin-bottom: 0.15rem; opacity: 0.85;">${escapeHTML(senderName)}</div>
+    ${escapeHTML(message.message_text)}
+    <span class="chat-time">${timeStr}</span>
+  `;
+
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+
+// Setup Supabase Realtime subscription for chat messages
+function setupChatRealtime(currentIssueId) {
+  // Clean up existing subscription
+  if (chatRealtimeChannel && typeof supabaseClient !== 'undefined' && supabaseClient) {
+    supabaseClient.removeChannel(chatRealtimeChannel);
+    chatRealtimeChannel = null;
+  }
+
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+
+  chatRealtimeChannel = supabaseClient
+    .channel(`public:messages:issue_${currentIssueId}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `issue_id=eq.${currentIssueId}`
+    }, (payload) => {
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      // Don't duplicate messages we sent ourselves (already optimistically appended)
+      if (currentUser && payload.new.sender_id === currentUser.id) return;
+      appendChatMessage(payload.new);
+    })
+    .subscribe((status) => {
+      console.log(`Chat Realtime subscription status: ${status}`);
+    });
+}
+
+// Load and configure new features after issue data is loaded
+async function loadNewFeatures(issue) {
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  const isReporter = currentUser && currentUser.id === issue.reporter_id;
+
+  // === Citizen Actions Panel ===
+  const citizenPanel = document.getElementById('citizen-actions-panel');
+  if (citizenPanel) {
+    if (isReporter) {
+      citizenPanel.classList.remove('hidden');
+
+      // Hide withdraw if status is terminal
+      const withdrawBtn = document.getElementById('btn-withdraw');
+      const terminalStatuses = ['resolved', 'verified', 'withdrawn', 'rejected'];
+      if (withdrawBtn) {
+        if (terminalStatuses.includes(issue.status)) {
+          withdrawBtn.style.display = 'none';
+        } else {
+          withdrawBtn.style.display = '';
+        }
+      }
+
+      // Hide evidence upload if terminal
+      const evidenceBtn = document.getElementById('btn-show-evidence-upload');
+      if (evidenceBtn) {
+        if (terminalStatuses.includes(issue.status)) {
+          evidenceBtn.style.display = 'none';
+        } else {
+          evidenceBtn.style.display = '';
+        }
+      }
+    } else {
+      citizenPanel.classList.add('hidden');
+    }
+  }
+
+  // === Evidence Gallery ===
+  renderEvidenceGallery(issue.attachments || issue.evidence || []);
+
+  // === Chat Panel ===
+  const chatPanel = document.getElementById('chat-panel');
+  if (chatPanel) {
+    if (issue.assigned_to) {
+      chatPanel.classList.remove('hidden');
+
+      // Load existing messages
+      const { data: messages, error } = await window.API.getChatMessages(issueId);
+      if (!error && messages) {
+        renderChatMessages(Array.isArray(messages) ? messages : []);
+      }
+
+      // Setup realtime for new messages
+      setupChatRealtime(issueId);
+    } else {
+      chatPanel.classList.add('hidden');
+    }
   }
 }

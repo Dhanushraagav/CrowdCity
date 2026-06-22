@@ -17,7 +17,12 @@ import {
   reopenIssue,
   getAiDecisions,
   overrideAiDecision,
-  exportReport
+  exportReport,
+  withdrawIssue,
+  uploadEvidence,
+  getIssueReceipt,
+  getChatMessages,
+  sendChatMessage
 } from '../controllers/issueController.js';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 import { upload, handleUploadError } from '../middlewares/uploadMiddleware.js';
@@ -44,6 +49,11 @@ router.patch('/comments/:commentId', requireAuth, validateEditComment, editComme
 router.delete('/comments/:commentId', requireAuth, validateIdParam('commentId'), deleteComment);
 router.post('/:id/verify', requireAuth, validateIdParam('id'), verifyIssue);
 router.post('/:id/reopen', requireAuth, validateIdParam('id'), reopenIssue);
+router.post('/:id/withdraw', requireAuth, validateIdParam('id'), withdrawIssue);
+router.post('/:id/evidence', requireAuth, validateIdParam('id'), upload.array('evidence', 5), handleUploadError, uploadEvidence);
+router.get('/:id/receipt', requireAuth, getIssueReceipt);
+router.get('/:id/messages', requireAuth, validateIdParam('id'), getChatMessages);
+router.post('/:id/messages', requireAuth, validateIdParam('id'), sendChatMessage);
 
 // Admin-only analytics route (registered before parameterized ID routes to avoid routing conflicts)
 router.get('/admin/analytics', requireAuth, requireRole(['admin']), getAdminAnalytics);
