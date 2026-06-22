@@ -463,3 +463,228 @@ window.authRouter = {
     document.documentElement.classList.remove('auth-protected-hidden');
   }
 })();
+
+// Temporary Mobile Maintenance Overlay Popup
+(function() {
+  // 1. Inject Maintenance Overlay CSS Styles
+  const style = document.createElement('style');
+  style.id = 'mobile-maintenance-style';
+  style.innerHTML = `
+    #mobile-maintenance-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000000;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 1.5rem;
+      box-sizing: border-box;
+      color: #ffffff;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #mobile-maintenance-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .maintenance-card {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 2.5rem 2rem;
+      border-radius: 24px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      transform: scale(0.95);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #mobile-maintenance-overlay.active .maintenance-card {
+      transform: scale(1);
+    }
+    .maintenance-icon-wrapper {
+      width: 80px;
+      height: 80px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1.5px dashed rgba(245, 158, 11, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      animation: rotate-dashed 20s linear infinite;
+    }
+    @keyframes rotate-dashed {
+      100% { transform: rotate(360deg); }
+    }
+    .maintenance-icon {
+      color: #f59e0b;
+      font-size: 2.2rem;
+      animation: pulse-icon 2s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-icon {
+      0% { transform: scale(1); opacity: 0.9; }
+      100% { transform: scale(1.1); opacity: 1; }
+    }
+    .maintenance-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 0.85rem;
+      letter-spacing: -0.02em;
+    }
+    .maintenance-desc {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #9ca3af;
+      margin-bottom: 1.75rem;
+    }
+    .maintenance-desc strong {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+    .desktop-guide {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+    .desktop-guide-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #e5e7eb;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .desktop-guide-steps {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.82rem;
+      color: #9ca3af;
+    }
+    .desktop-guide-steps li {
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .desktop-guide-steps li:last-child {
+      margin-bottom: 0;
+    }
+    .maintenance-btn {
+      background: #0d9488;
+      color: #ffffff;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    }
+    .maintenance-btn:hover {
+      background: #0f766e;
+      box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5);
+    }
+    .maintenance-btn:active {
+      transform: scale(0.98);
+    }
+  `;
+  (document.head || document.documentElement).appendChild(style);
+
+  // 2. Mobile Detection Logic
+  function checkMobile() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isSmallScreen = window.innerWidth < 980;
+    return isMobile && isSmallScreen;
+  }
+
+  // 3. Inject Maintenance HTML
+  function injectMaintenanceHTML() {
+    if (document.getElementById('mobile-maintenance-overlay')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'mobile-maintenance-overlay';
+    overlay.innerHTML = `
+      <div class="maintenance-card">
+        <div class="maintenance-icon-wrapper">
+          <div class="maintenance-icon">⚡</div>
+        </div>
+        <h2 class="maintenance-title">Mobile Layout Under Maintenance</h2>
+        <p class="maintenance-desc">
+          CrowdCity AI is currently undergoing mobile layout updates. To access the portal, please use a desktop computer or switch your mobile browser to <strong>'Desktop site'</strong> mode.
+        </p>
+        <div class="desktop-guide">
+          <div class="desktop-guide-title">
+            <span>⚙️</span> How to switch to Desktop Site
+          </div>
+          <ol class="desktop-guide-steps">
+            <li>Open your browser menu (tap <strong>⋮</strong> on Android or <strong>aA</strong> on iOS Safari).</li>
+            <li>Select/check <strong>"Desktop site"</strong> or <strong>"Request Desktop Website"</strong>.</li>
+            <li>The portal will automatically reload and let you sign in properly.</li>
+          </ol>
+        </div>
+        <button class="maintenance-btn" id="maintenance-reload-btn">I've switched to Desktop Site</button>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    document.getElementById('maintenance-reload-btn').addEventListener('click', () => {
+      window.location.reload();
+    });
+  }
+
+  // 4. Update Overlay Visibility State
+  function updateOverlayState() {
+    const overlay = document.getElementById('mobile-maintenance-overlay');
+    if (!overlay) {
+      if (checkMobile() && document.body) {
+        injectMaintenanceHTML();
+        setTimeout(() => {
+          const overlayNow = document.getElementById('mobile-maintenance-overlay');
+          if (overlayNow) overlayNow.classList.add('active');
+        }, 50);
+      }
+      return;
+    }
+
+    if (checkMobile()) {
+      overlay.classList.add('active');
+    } else {
+      overlay.classList.remove('active');
+    }
+  }
+
+  // Run immediately if DOM body is loaded, or wait
+  if (document.body) {
+    updateOverlayState();
+  } else {
+    const observer = new MutationObserver(() => {
+      if (document.body) {
+        updateOverlayState();
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.documentElement, { childList: true });
+    document.addEventListener('DOMContentLoaded', updateOverlayState);
+  }
+
+  // Re-check on window resize (e.g. rotating landscape mode or toggling DevTools device simulation)
+  window.addEventListener('resize', updateOverlayState);
+})();
+
