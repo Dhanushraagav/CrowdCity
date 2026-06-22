@@ -644,5 +644,8 @@
   "departments": "Departments",
   "ministers_loaded": "ministers loaded",
   "call_minister": "Call Office",
-  "email_minister": "Email Minister"
+  "email_minister": "Email Minister",
+  "constituency_label": "Assembly Constituency",
+  "office_location_label": "Office Room",
+  "biography_label": "Biography & Focus Area"
 }

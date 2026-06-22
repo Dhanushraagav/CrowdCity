@@ -40,6 +40,11 @@
       }
     }
 
+    /* Clickable Card pointer indicators */
+    .featured-leader-card, .minister-card {
+      cursor: pointer;
+    }
+
     /* Leader Card Styling */
     .featured-leader-card {
       position: relative;
@@ -95,50 +100,39 @@
       100% { transform: translate(-15px, 15px) scale(1.06); }
     }
 
-    /* Chief Minister SVG Portrait/Seal Wrapper */
+    /* Chief Minister Photo Frame */
     .leader-graphic-frame {
       width: 200px;
       height: 200px;
       border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       border: 2px solid #fbbf24;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       position: relative;
       overflow: hidden;
       z-index: 1;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
 
-    .leader-seal-bg {
-      position: absolute;
-      font-size: 8rem;
-      color: rgba(251, 191, 36, 0.03);
-      z-index: 0;
-    }
-
-    .leader-graphic-frame i.fa-user-tie {
-      font-size: 4.5rem;
-      color: #fbbf24;
-      z-index: 1;
-      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+    .leader-graphic-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .leader-graphic-frame .leader-emblem-badge {
       position: absolute;
-      bottom: 0.75rem;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       font-size: 0.65rem;
       font-weight: 800;
       color: #fbbf24;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      border-top: 1px solid rgba(251, 191, 36, 0.3);
-      padding-top: 0.25rem;
-      width: 80%;
+      letter-spacing: 1px;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 0.35rem 0.25rem;
       text-align: center;
-      z-index: 1;
+      z-index: 2;
     }
 
     .leader-info-content {
@@ -366,73 +360,10 @@
       letter-spacing: 0.5px;
     }
 
-    /* Departments expansion button & panel */
     .portfolio-summary {
       font-size: 0.82rem;
       color: var(--text-muted);
       line-height: 1.5;
-    }
-
-    .details-toggle-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0;
-      align-self: flex-start;
-      transition: color var(--transition-fast);
-    }
-
-    .details-toggle-btn:hover {
-      color: var(--primary);
-    }
-
-    .details-toggle-btn i {
-      transition: transform var(--transition-fast);
-    }
-
-    .details-toggle-btn.expanded i {
-      transform: rotate(180deg);
-    }
-
-    .expandable-departments-panel {
-      display: none;
-      border-top: 1px dashed var(--border-color);
-      padding-top: 0.75rem;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .expandable-departments-panel.show {
-      display: flex;
-    }
-
-    .dept-title-label {
-      font-size: 0.68rem;
-      font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .dept-pill-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.3rem;
-    }
-
-    .dept-pill {
-      font-size: 0.7rem;
-      background: var(--bg-app);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 0.15rem 0.45rem;
-      border-radius: var(--radius-sm);
     }
 
     /* Call/Email quick rows */
@@ -487,6 +418,200 @@
     .avatar-g-3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .avatar-g-4 { background: linear-gradient(135deg, #ec4899, #db2777); }
 
+    /* Modal Pop-up Styling */
+    .minister-details-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .minister-details-modal.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      transform: translateY(20px);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .minister-details-modal.show .modal-content-wrap {
+      transform: translateY(0);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color var(--transition-fast), color var(--transition-fast);
+      z-index: 10;
+    }
+
+    .modal-close-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .modal-profile-header {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    .modal-avatar-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #ffffff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-profile-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-title-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .modal-title-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: var(--font-heading);
+      margin: 0;
+    }
+
+    .modal-title-role {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 0;
+    }
+
+    .modal-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .modal-detail-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-detail-value {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .modal-bio-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .modal-bio-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-bio-text {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .dept-title-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dept-pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .dept-pill {
+      font-size: 0.7rem;
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+    }
+
     @media (max-width: 768px) {
       .featured-leader-card {
         grid-template-columns: 1fr;
@@ -498,9 +623,6 @@
       .leader-graphic-frame {
         width: 150px;
         height: 150px;
-      }
-      .leader-graphic-frame i.fa-user-tie {
-        font-size: 3rem;
       }
       .leader-header-row {
         flex-direction: column;
@@ -521,6 +643,18 @@
       }
       .search-wrapper {
         width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .modal-profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .modal-details-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
       }
     }
   </style>
@@ -654,6 +788,18 @@
     </div>
   </div>
 
+  <!-- Minister Details Modal Popup -->
+  <div class="minister-details-modal" id="minister-modal" onclick="closeMinisterModal(event)">
+    <div class="modal-content-wrap" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeMinisterModal(event)" aria-label="Close Details">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div id="modal-body-content">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
@@ -673,6 +819,12 @@
         category: "leadership",
         phone: "044-25671100",
         email: "cmcell@tn.gov.in",
+        constituencyEn: "Maduravoyal, Chennai",
+        constituencyTa: "மதுரவாயல், சென்னை",
+        roomEn: "Room No. 1, Main Secretariat",
+        roomTa: "அறை எண் 1, தலைமைச் செயலகம்",
+        bioEn: "Thiru C. Joseph Vijay serves as the Chief Minister of Tamil Nadu. He leads the cabinet with a strong focus on public welfare, digital governance, AI-driven administration, and infrastructure development.",
+        bioTa: "திரு சி. ஜோசப் விஜய் தமிழ்நாட்டின் முதலமைச்சராக பணியாற்றுகிறார். மக்கள் நலன், டிஜிட்டல் ஆளுமை, AI-இயக்கப்படும் நிர்வாகம் மற்றும் உள்கட்டமைப்பு மேம்பாட்டில் அதிக கவனம் செலுத்தி அமைச்சரவையை வழிநடத்துகிறார்.",
         portfolioEn: "Public, General Administration, Indian Administrative Service, Indian Police Service, Indian Forest Service, District Revenue Officers, Police, Home, Special Programme Implementation, Special Initiatives, Poverty Alleviation and Rural Indebtedness, Youth Welfare, Welfare of Children, Aged, Differently Abled Persons, Municipal Administration, Urban and Water Supply.",
         portfolioTa: "பொது, பொது நிர்வாகம், இந்திய ஆட்சிப் பணி, இந்திய காவல் பணி, இந்திய வனப் பணி, மாவட்ட வருவாய் அலுவலர்கள், காவல், உள் துறை, சிறப்புத் திட்டச் செயலாக்கம், சிறப்பு முயற்சிகள், வறுமை ஒழிப்பு மற்றும் கிராமப்புறக் கடன் சுமை, இளைஞர் நலன், குழந்தைகள் நலன், முதியோர், மாற்றுத்திறனாளிகள் நலன், நகராட்சி நிர்வாகம், நகர்ப்புறம் மற்றும் குடிநீர் வழங்கல்.",
         departmentsEn: ["Public Department", "General Administration", "Police & Home", "Municipal Administration", "Urban & Water Supply", "Youth Welfare & Sports", "Welfare of Differently Abled"],
@@ -687,6 +839,12 @@
         category: "infrastructure",
         phone: "044-25671501",
         email: "min.rdev@tn.gov.in",
+        constituencyEn: "Erode East",
+        constituencyTa: "ஈரோடு கிழக்கு",
+        roomEn: "Room No. 5, Main Secretariat",
+        roomTa: "அறை எண் 5, தலைமைச் செயலகம்",
+        bioEn: "Thiru N. Anand oversees panchayat organizations and rural expansion projects. He actively promotes eco-friendly irrigation models and coordinates water reservoir modernization programs.",
+        bioTa: "திரு N. ஆனந்த் பஞ்சாயத்து அமைப்புகள் மற்றும் கிராமப்புற விரிவாக்க திட்டங்களை மேற்பார்வையிடுகிறார். சுற்றுச்சூழல் நட்பு நீர்ப்பாசன மாதிரிகளை ஊக்குவித்து நீர்த்தேக்க நவீனமயமாக்கல் திட்டங்களை ஒருங்கிணைக்கிறார்.",
         portfolioEn: "Rural Development, Panchayats and Panchayat Union, Irrigation, Irrigation Projects including Small Irrigation.",
         portfolioTa: "ஊரக வளர்ச்சி, ஊராட்சிகள் மற்றும் ஊராட்சி ஒன்றியங்கள், பாசனம், சிறு பாசனம் உள்ளிட்ட பாசனத் திட்டங்கள்.",
         departmentsEn: ["Rural Development", "Panchayats", "Irrigation Projects", "Water Resources"],
@@ -701,6 +859,12 @@
         category: "infrastructure",
         phone: "044-25671502",
         email: "min.pworks@tn.gov.in",
+        constituencyEn: "Madurai Central",
+        constituencyTa: "மதுரை மத்திய",
+        roomEn: "Room No. 6, Main Secretariat",
+        roomTa: "அறை எண் 6, தலைமைச் செயலகம்",
+        bioEn: "Thiru Aadhav Arjuna manages government building assets, state highway networks, and minor port facilities, alongside fostering regional sports complexes and athletic programs.",
+        bioTa: "திரு ஆதவ் அர்ஜுனா அரசு கட்டிட சொத்துக்கள், மாநில நெடுஞ்சாலை நெட்வொர்க்குகள் மற்றும் சிறு துறைமுக வசதிகளை நிர்வகிப்பதோடு, பிராந்திய விளையாட்டு வளாகங்களையும் தடகள திட்டங்களையும் வளர்க்கிறார்.",
         portfolioEn: "Public Works (Buildings, Highways and Minor Ports), Sports Development.",
         portfolioTa: "பொதுப்பணி (கட்டிடங்கள், நெடுஞ்சாலைகள் மற்றும் சிறு துறைமுகங்கள்), விளையாட்டு மேம்பாடு.",
         departmentsEn: ["Public Works", "Highways", "Minor Ports", "Sports Development"],
@@ -715,6 +879,12 @@
         category: "welfare",
         phone: "044-25671503",
         email: "min.health@tn.gov.in",
+        constituencyEn: "Coimbatore North",
+        constituencyTa: "கோயம்புத்தூர் வடக்கு",
+        roomEn: "Room No. 7, Main Secretariat",
+        roomTa: "அறை எண் 7, தலைமைச் செயலகம்",
+        bioEn: "Dr. K.G. Arunraj is a medical professional directing public health campaigns, clinical education systems, hospital integrations, and community welfare networks throughout Tamil Nadu.",
+        bioTa: "டாக்டர் K.G. அருண்ராஜ் ஒரு மருத்துவ நிபுணர் ஆவார். அவர் தமிழகம் முழுவதும் பொது சுகாதார பிரச்சாரங்கள், மருத்துவ கல்வி அமைப்புகள், மருத்துவமனை ஒருங்கிணைப்புகள் மற்றும் சமூக நல நெட்வொர்க்குகளை வழிநடத்துகிறார்.",
         portfolioEn: "Health, Medical Education and Family Welfare.",
         portfolioTa: "சுகாதாரம், மருத்துவக் கல்வி மற்றும் குடும்ப நலன்.",
         departmentsEn: ["Health & Family Welfare", "Medical Education", "Primary Health Centres"],
@@ -729,6 +899,12 @@
         category: "finance",
         phone: "044-25671504",
         email: "min.revenue@tn.gov.in",
+        constituencyEn: "Gobichettipalayam",
+        constituencyTa: "கோபிச்செட்டிப்பாளையம்",
+        roomEn: "Room No. 8, Main Secretariat",
+        roomTa: "அறை எண் 8, தலைமைச் செயலகம்",
+        bioEn: "Thiru K.A. Sengottaiyan is a veteran administrator coordinating land registrations, agricultural relief programs, stamp duties, and emergency flood/cyclone disaster response networks.",
+        bioTa: "திரு K.A. செங்கோட்டையன் ஒரு மூத்த நிர்வாகி ஆவார். அவர் நில பதிவுகள், விவசாய நிவாரண திட்டங்கள், முத்திரை வரி மற்றும் அவசர வெள்ளம்/புயல் பேரிடர் மீட்பு நெட்வொர்க்குகளை ஒருங்கிணைக்கிறார்.",
         portfolioEn: "Revenue, District Revenue Establishment, Land Reforms, Registry, Disaster Management.",
         portfolioTa: "வருவாய், மாவட்ட வருவாய் நிர்வாகம், நிலச் சீர்திருத்தம், பதிவுத்துறை, பேரிடர் மேலாண்மை.",
         departmentsEn: ["Revenue Administration", "Land Reforms", "Disaster Management"],
@@ -739,10 +915,16 @@
         nameEn: "Thiru P. Venkataramanan",
         nameTa: "திரு P. வெங்கடரமணன்",
         roleEn: "Minister for Food and Civil Supplies",
-        roleTa: "அமைச்சா் - உணவு மற்றும் நுகர்வோர் பாதுகாப்பு",
+        roleTa: "அமைச்சர் - உணவு மற்றும் நுகர்வோர் பாதுகாப்பு",
         category: "welfare",
         phone: "044-25671505",
         email: "min.food@tn.gov.in",
+        constituencyEn: "Tirunelveli",
+        constituencyTa: "திருநெல்வேலி",
+        roomEn: "Room No. 9, Main Secretariat",
+        roomTa: "அறை எண் 9, தலைமைச் செயலகம்",
+        bioEn: "Thiru P. Venkataramanan supervises public distribution systems (ration outlets), consumer product quality control audits, and price stabilization policies for key food supplies.",
+        bioTa: "திரு P. வெங்கடரமணன் பொது விநியோக முறைகள் (ரேஷன் கடைகள்), நுகர்வோர் தயாரிப்பு தரக் கட்டுப்பாட்டு தணிக்கைகள் மற்றும் முக்கிய உணவுப் பொருட்களின் விலை நிலைப்படுத்தல் கொள்கைகளை கண்காணிக்கிறார்.",
         portfolioEn: "Food and Civil Supplies, Consumer Protection and Price Control.",
         portfolioTa: "உணவு மற்றும் பொது விநியோகம், நுகர்வோர் பாதுகாப்பு மற்றும் விலைக்கட்டுப்பாடு.",
         departmentsEn: ["Civil Supplies", "Consumer Protection", "Price Control"],
@@ -757,9 +939,15 @@
         category: "infrastructure",
         phone: "044-25671506",
         email: "min.law@tn.gov.in",
+        constituencyEn: "Salem West",
+        constituencyTa: "சேலம் மேற்கு",
+        roomEn: "Room No. 10, Main Secretariat",
+        roomTa: "அறை எண் 10, தலைமைச் செயலகம்",
+        bioEn: "Thiru R. Nirmalkumar manages solar grids, wind energy plants, TANGEDCO power distribution reforms, and judicial administrative frameworks including electoral guidelines.",
+        bioTa: "திரு R. நிர்மல்குமார் சூரியசக்தி கட்டமைப்பு, காற்றாலை ஆற்றல் நிலையங்கள், மின்வாரிய விநியோக சீர்திருத்தங்கள் மற்றும் தேர்தல் வழிகாட்டுதல்கள் உள்ளிட்ட நீதித்துறை நிர்வாக கட்டமைப்புகளை நிர்வகிக்கிறார்.",
         portfolioEn: "Electricity & Non-Conventional Energy Development, Law, Courts, Prisons and Prevention of Corruption, Governor, Elections and Passports.",
         portfolioTa: "மின்சாரம் மற்றும் மரபுசாரா எரிசக்தி வளர்ச்சி, சட்டம், நீதிமன்றங்கள், சிறைச்சாலைகள் மற்றும் ஊழல் தடுப்பு, ஆளுநர், தேர்தல்கள் மற்றும் கடவுச்சீட்டுக்கள்.",
-        departmentsEn: ["Energy Development", "TANGEDCO", "Law & Courts", "Prisons & Correction Services", "Elections"],
+        departmentsEn: ["Energy Development", "TANGEDCO", "Law & Courts", "Prisons", "Elections"],
         departmentsTa: ["எரிசக்தி வளர்ச்சி", "மின்வாரியம்", "சட்டம் மற்றும் நீதிமன்றங்கள்", "சிறைச்சாலைகள்", "தேர்தல்கள்"]
       },
       {
@@ -771,6 +959,12 @@
         category: "welfare",
         phone: "044-25671507",
         email: "min.se@tn.gov.in",
+        constituencyEn: "Trichy East",
+        constituencyTa: "திருச்சி கிழக்கு",
+        roomEn: "Room No. 11, Main Secretariat",
+        roomTa: "அறை எண் 11, தலைமைச் செயலகம்",
+        bioEn: "Thiru Rajmohan is dedicated to elementary education, government school infrastructure upgrade, archaeological preservation, and official state language promotions.",
+        bioTa: "திரு ராஜ்மோகன் ஆரம்பக் கல்வி, அரசு பள்ளி உள்கட்டமைப்பு மேம்பாடு, தொல்லியல் பாதுகாப்பு மற்றும் அதிகாரப்பூர்வ மாநில மொழி விளம்பரங்களுக்கு அர்ப்பணிக்கப்பட்டவர் ஆவார்.",
         portfolioEn: "School Education, Archaeology, Tamil Official Language and Tamil Culture, Information & Publicity, Film Technology and Cinematograph Act, Newsprint Control, Stationery and Printing, Government Press.",
         portfolioTa: "பள்ளிக்கல்வி, தொல்லியல், தமிழ் ஆட்சி மொழி மற்றும் தமிழ்ப் பண்பாடு, செய்தி மற்றும் விளம்பரம், திரைப்படத் தொழில்நுட்பம், செய்தித்தாள் கட்டுப்பாடு, எழுதுபொருள் மற்றும் அச்சுத்துறை.",
         departmentsEn: ["School Education", "Archaeology", "Tamil Development", "Information & Publicity", "Stationery & Printing"],
@@ -785,6 +979,12 @@
         category: "infrastructure",
         phone: "044-25671508",
         email: "min.natres@tn.gov.in",
+        constituencyEn: "Hosur",
+        constituencyTa: "ஓசூர்",
+        roomEn: "Room No. 12, Main Secretariat",
+        roomTa: "அறை எண் 12, தலைமைச் செயலகம்",
+        bioEn: "Dr. T.K. Prabhu implements strict monitoring of mineral extraction sites, mining lease policies, and clean resource extraction strategies across the state.",
+        bioTa: "டாக்டர் T.K. பிரபு மாநிலம் முழுவதும் கனிம பிரித்தெடுக்கும் தளங்கள், சுரங்க குத்தகை கொள்கைகள் மற்றும் தூய்மையான வள பிரித்தெடுக்கும் உத்திகளை கண்டிப்பாக கண்காணிப்பதை செயல்படுத்துகிறார்.",
         portfolioEn: "Minerals and Mines.",
         portfolioTa: "கனிமங்கள் மற்றும் சுரங்கங்கள்.",
         departmentsEn: ["Geology & Mining", "Mineral Resources"],
@@ -799,6 +999,12 @@
         category: "infrastructure",
         phone: "044-25671509",
         email: "min.ind@tn.gov.in",
+        constituencyEn: "Chennai South",
+        constituencyTa: "சென்னை தெற்கு",
+        roomEn: "Room No. 14, Main Secretariat",
+        roomTa: "அறை எண் 14, தலைமைச் செயலகம்",
+        bioEn: "Selvi S. Keerthana handles macro industrial expansions, foreign investment delegations, startup incubator parks, and corporate partnerships with tech corporations.",
+        bioTa: "செல்வி S. கீர்த்தனா மேக்ரோ தொழில்துறை விரிவாக்கங்கள், வெளிநாட்டு முதலீட்டு பிரதிநிதிகள், ஸ்டார்ட்அப் இன்குபேட்டர் பூங்காக்கள் மற்றும் தொழில்நுட்ப நிறுவனங்களுடனான கார்ப்பரேட் கூட்டாண்மைகளை கையாளுகிறார்.",
         portfolioEn: "Industries, Investment Promotion.",
         portfolioTa: "தொழில்கள், முதலீட்டு ஊக்குவிப்பு.",
         departmentsEn: ["Industries", "TIDCO", "SIPCOT", "Investment Promotion"],
@@ -813,6 +1019,12 @@
         category: "infrastructure",
         phone: "044-25671510",
         email: "min.hedu@tn.gov.in",
+        constituencyEn: "Tambaram",
+        constituencyTa: "தாம்பரம்",
+        roomEn: "Room No. 15, Main Secretariat",
+        roomTa: "அறை எண் 15, தலைமைச் செயலகம்",
+        bioEn: "Thiru P. Viswanathan supervises state universities, research funding allocations, engineering college accreditations, and vocational/technical training institutions.",
+        bioTa: "திரு P. விஸ்வநாதன் மாநில பல்கலைக்கழகங்கள், ஆராய்ச்சி நிதி ஒதுக்கீடுகள், பொறியியல் கல்லூரி அங்கீகாரங்கள் மற்றும் தொழிற்கல்வி/தொழில்நுட்ப பயிற்சி நிறுவனங்களை கண்காணிக்கிறார்.",
         portfolioEn: "Higher Education including Technical Education, Universities, Science and Technology.",
         portfolioTa: "தொழில்நுட்பக் கல்வி உள்ளிட்ட உயர்கல்வி, பல்கலைக்கழகங்கள், அறிவியல் மற்றும் தொழில்நுட்பம்.",
         departmentsEn: ["Higher Education", "Technical Education", "Science & Technology Council"],
@@ -827,6 +1039,12 @@
         category: "infrastructure",
         phone: "044-25671511",
         email: "min.tourism@tn.gov.in",
+        constituencyEn: "Kanyakumari",
+        constituencyTa: "கன்னியாகுமரி",
+        roomEn: "Room No. 16, Main Secretariat",
+        roomTa: "அறை எண் 16, தலைமைச் செயலகம்",
+        bioEn: "Thiru S. Rajesh Kumar guides cultural tourism programs, TTDC hotels expansion, heritage site accessibility improvements, and state branding initiatives.",
+        bioTa: "திரு S. ராஜேஷ் குமார் கலாச்சார சுற்றுலா திட்டங்கள், TTDC ஹோட்டல் விரிவாக்கம், பாரம்பரிய தள அணுகல் மேம்பாடுகள் மற்றும் மாநில பிராண்டிங் முயற்சிகளை வழிநடத்துகிறார்.",
         portfolioEn: "Tourism and Tourism Development Corporation.",
         portfolioTa: "சுற்றுலா மற்றும் சுற்றுலா வளர்ச்சிக் கழகம்.",
         departmentsEn: ["Tourism Development", "TTDC", "Hotel & Travel Administration"],
@@ -841,6 +1059,12 @@
         category: "welfare",
         phone: "044-25671512",
         email: "min.minority@tn.gov.in",
+        constituencyEn: "Vellore",
+        constituencyTa: "வேலூர்",
+        roomEn: "Room No. 17, Main Secretariat",
+        roomTa: "அறை எண் 17, தலைமைச் செயலகம்",
+        bioEn: "Thiru A.M. Shahjahan manages grants for minority colleges, Haj pilgrimage coordination councils, Wakf Board asset maintenance audits, and social inclusion packages.",
+        bioTa: "திரு A.M. ஷாஜகான் சிறுபான்மை கல்லூரிகளுக்கான மானியங்கள், ஹஜ் யாத்திரை ஒருங்கிணைப்பு குழுக்கள், வக்ஃப் வாரிய சொத்து பராமரிப்பு தணிக்கை மற்றும் சமூக சேர்ப்பு தொகுப்புகளை நிர்வகிக்கிறார்.",
         portfolioEn: "Minorities Welfare and Wakf Board.",
         portfolioTa: "சிறுபான்மையினர் நலன் மற்றும் வக்ஃப் வாரியம்.",
         departmentsEn: ["Minorities Welfare", "Wakf Board", "Haj Committee"],
@@ -855,6 +1079,12 @@
         category: "welfare",
         phone: "044-25671513",
         email: "min.sjustice@tn.gov.in",
+        constituencyEn: "Chidambaram",
+        constituencyTa: "சிதம்பரம்",
+        roomEn: "Room No. 18, Main Secretariat",
+        roomTa: "அறை எண் 18, தலைமைச் செயலகம்",
+        bioEn: "Thiru Vanni Arasu directs welfare programs for Adi Dravidar and tribal communities, tribal residential school setups, and equity-focused development packages.",
+        bioTa: "திரு வன்னி அரசு ஆதிதிராவிடர் மற்றும் பழங்குடியின சமூகங்களுக்கான நலத்திட்டங்கள், பழங்குடியினர் குடியிருப்பு பள்ளி அமைப்புகள் மற்றும் சமபங்கு சார்ந்த மேம்பாட்டு தொகுப்புகளை வழிநடத்துகிறார்.",
         portfolioEn: "Adi Dravidar Welfare and Hill Tribes.",
         portfolioTa: "ஆதிதிராவிடர் நலன் மற்றும் பழங்குடியினர் நலன்.",
         departmentsEn: ["Adi Dravidar Welfare", "Tribal Welfare", "Hill Area Development"],
@@ -869,6 +1099,12 @@
         category: "infrastructure",
         phone: "044-25671514",
         email: "min.transport@tn.gov.in",
+        constituencyEn: "Tiruvallur",
+        constituencyTa: "திருவள்ளூர்",
+        roomEn: "Room No. 19, Main Secretariat",
+        roomTa: "அறை எண் 19, தலைமைச் செயலகம்",
+        bioEn: "Thiru A. Vijay Tamilan Parthiban guides state bus corporation expansions, electric bus deployments, regional transport office (RTO) digital portals, and road safety guidelines.",
+        bioTa: "திரு ஏ. விஜய் தமிழன் பார்த்திபன் அரசு பேருந்து கழக விரிவாக்கங்கள், மின்சார பேருந்து அறிமுகங்கள், பிராந்திய போக்குவரத்து அலுவலக (RTO) டிஜிட்டல் தளங்கள் மற்றும் சாலை பாதுகாப்பு வழிகாட்டுதல்களை வழிநடத்துகிறார்.",
         portfolioEn: "Motor Vehicle Acts – Administration, Transport, Nationalised Transport and Motor Vehicles Act.",
         portfolioTa: "மோட்டார் வாகனச் சட்டங்கள் - நிர்வாகம், போக்குவரத்து, தேசியமயமாக்கப்பட்ட போக்குவரத்து.",
         departmentsEn: ["State Transport Undertakings", "Motor Vehicles Department", "Metro Transport"],
@@ -881,8 +1117,14 @@
         roleEn: "Minister for Housing and Urban Development",
         roleTa: "அமைச்சர் - வீட்டுவசதி மற்றும் நகர்ப்புற வளர்ச்சி",
         category: "infrastructure",
-        phone: "044-25671515",
+        phone: "044-25671520",
         email: "min.housing@tn.gov.in",
+        constituencyEn: "Avadi",
+        constituencyTa: "ஆவடி",
+        roomEn: "Room No. 20, Main Secretariat",
+        roomTa: "அறை எண் 20, தலைமைச் செயலகம்",
+        bioEn: "Thiru B. Rajkumar structures city zoning policies, CMDA infrastructure projects, urban housing board complexes, and slum rehabilitation welfare networks.",
+        bioTa: "திரு B. ராஜ்குமார் நகர மண்டல கொள்கைகள், சிஎம்டிஏ உள்கட்டமைப்பு திட்டங்கள், நகர்ப்புற வீட்டுவசதி வாரிய வளாகங்கள் மற்றும் குடிசை மாற்று நல நெட்வொர்க்குகளை உருவாக்குகிறார்.",
         portfolioEn: "Housing, Rural Housing, Town Planning Projects and Housing Development, Accommodation Control, CMDA, Tamil Nadu Urban Habitat Development Board, Urban Planning and Urban Development.",
         portfolioTa: "வீட்டுவசதி, ஊரக வீட்டுவசதி, நகரமைப்புத் திட்டங்கள், சிஎம்டிஏ, தமிழ்நாடு நகர்ப்புற வாழ்விட மேம்பாட்டு வாரியம், நகர்ப்புற திட்டமிடல்.",
         departmentsEn: ["Housing Board (TNHB)", "CMDA", "Urban Habitat Development", "Town & Country Planning"],
@@ -895,8 +1137,14 @@
         roleEn: "Minister for Backward Classes Welfare",
         roleTa: "அமைச்சர் - பிற்படுத்தப்பட்டோர் நலன்",
         category: "welfare",
-        phone: "044-25671516",
+        phone: "044-25671521",
         email: "min.bcwelfare@tn.gov.in",
+        constituencyEn: "Dharmapuri",
+        constituencyTa: "தர்மபுரி",
+        roomEn: "Room No. 21, Main Secretariat",
+        roomTa: "அறை எண் 21, தலைமைச் செயலகம்",
+        bioEn: "Thiru V. Sampath Kumar executes education scholarship programs and community hostel facility upgrades for backward classes and denotified communities.",
+        bioTa: "திரு V. சம்பத் குமார் பிற்படுத்தப்பட்டோர் மற்றும் சீர்மரபின சமூகங்களுக்கான கல்வி உதவித்தொகை திட்டங்கள் மற்றும் சமூக விடுதி வசதி மேம்பாடுகளை செயல்படுத்துகிறார்.",
         portfolioEn: "Backward Classes Welfare, Most Backward Classes Welfare and De-notified Communities Welfare.",
         portfolioTa: "பிற்படுத்தப்பட்டோர் நலன், மிகவும் பிற்படுத்தப்பட்டோர் நலன் மற்றும் சீர்மரபினர் நலன்.",
         departmentsEn: ["Backward Classes Welfare", "Most Backward Classes Welfare", "Denotified Communities"],
@@ -909,8 +1157,14 @@
         roleEn: "Minister for Handlooms, Textiles and Khadi",
         roleTa: "அமைச்சர் - கைத்தறி, துணிநூல் மற்றும் கதர்",
         category: "infrastructure",
-        phone: "044-25671517",
+        phone: "044-25671522",
         email: "min.textiles@tn.gov.in",
+        constituencyEn: "Karur",
+        constituencyTa: "கரூர்",
+        roomEn: "Room No. 22, Main Secretariat",
+        roomTa: "அறை எண் 22, தலைமைச் செயலகம்",
+        bioEn: "Thiru M. Vijay Balaji oversees Cooptex marketing expansions, weaver subsidy allocations, cotton spinning mill modernization, and khadi craft promotions.",
+        bioTa: "திரு M. விஜய் பாலாஜி கோ-ஆப்டெக்ஸ் சந்தைப்படுத்தல் விரிவாக்கங்கள், நெசவாளர் மானிய ஒதுக்கீடுகள், பருத்தி நூற்பு ஆலை நவீனமயமாக்கல் மற்றும் கதர் கைவினை விளம்பரங்களை மேற்பார்வையிடுகிறார்.",
         portfolioEn: "Handlooms and Textiles, Khadi and Village Industries Board.",
         portfolioTa: "கைத்தறி மற்றும் துணிநூல், கதர் கிராமத் தொழில்கள் வாரியம்.",
         departmentsEn: ["Handlooms & Textiles", "Cooptex", "Khadi & Village Industries Board"],
@@ -923,8 +1177,14 @@
         roleEn: "Minister for Prohibition and Excise",
         roleTa: "அமைச்சர் - மதுவிலக்கு மற்றும் ஆயத்தீர்வை",
         category: "infrastructure",
-        phone: "044-25671518",
+        phone: "044-25671523",
         email: "min.prohib@tn.gov.in",
+        constituencyEn: "Dindigul",
+        constituencyTa: "திண்டுக்கல்",
+        roomEn: "Room No. 23, Main Secretariat",
+        roomTa: "அறை எண் 23, தலைமைச் செயலகம்",
+        bioEn: "Thiru K. Vignesh implements excise duty auditing rules, TASMAC retail outlet regulations, and addiction rehabilitation clinic funding guidelines.",
+        bioTa: "திரு K. விக்னேஷ் ஆயத்தீர்வை தணிக்கை விதிகள், டாஸ்மாக் சில்லறை விற்பனை நிலைய ஒழுங்குமுறைகள் மற்றும் போதை மறுவாழ்வு மருத்துவமனை நிதி வழிகாட்டுதல்களை செயல்படுத்துகிறார்.",
         portfolioEn: "Prohibition and Excise.",
         portfolioTa: "மதுவிலக்கு மற்றும் ஆயத்தீர்வை.",
         departmentsEn: ["TASMAC Administration", "Prohibition Enforcement", "Excise Department"],
@@ -937,8 +1197,14 @@
         roleEn: "Minister for Non-Resident Tamils Welfare",
         roleTa: "அமைச்சர் - வெளிநாடு வாழ் தமிழர் நலன்",
         category: "welfare",
-        phone: "044-25671519",
+        phone: "044-25671524",
         email: "min.nrtamil@tn.gov.in",
+        constituencyEn: "Sivakasi",
+        constituencyTa: "சிவகாசி",
+        roomEn: "Room No. 24, Main Secretariat",
+        roomTa: "அறை எண் 24, தலைமைச் செயலகம்",
+        bioEn: "Thiru K. Thennarasu coordinates global Tamil community networks, legal aid desks for overseas workers, and rehabilitation support models for refugees.",
+        bioTa: "திரு K. தென்னரசு உலகளாவிய தமிழ் சமூக நெட்வொர்க்குகள், வெளிநாட்டு தொழிலாளர்களுக்கான சட்ட உதவி மையங்கள் மற்றும் அகதிகளுக்கான மறுவாழ்வு உதவி மாதிரிகளை ஒருங்கிணைக்கிறார்.",
         portfolioEn: "Non-Resident Tamils Welfare, Refugees & evacuees.",
         portfolioTa: "வெளிநாடு வாழ் தமிழர் நலன், அகதிகள் மற்றும் வெளியேற்றப்பட்டவர்கள்.",
         departmentsEn: ["Non-Resident Tamils Board", "Refugee Rehabilitation & Welfare"],
@@ -951,8 +1217,14 @@
         roleEn: "Minister for Labour Welfare and Skill Development",
         roleTa: "அமைச்சர் - தொழிலாளர் நலன் மற்றும் திறன் மேம்பாடு",
         category: "welfare",
-        phone: "044-25671520",
+        phone: "044-25671525",
         email: "min.labour@tn.gov.in",
+        constituencyEn: "Nagapattinam",
+        constituencyTa: "நாகப்பட்டினம்",
+        roomEn: "Room No. 25, Main Secretariat",
+        roomTa: "அறை எண் 25, தலைமைச் செயலகம்",
+        bioEn: "Thiru J. Mohamed Farvas drives state skill training academies, industrial safety audits, trade union arbitration frameworks, and employment exchange portals.",
+        bioTa: "திரு J. முகமது பர்வாஸ் மாநில திறன் பயிற்சி அகாடமிகள், தொழில்துறை பாதுகாப்பு தணிக்கைகள், தொழிற்சங்க நடுவர் கட்டமைப்புகள் மற்றும் வேலைவாய்ப்பு பரிமாற்ற தளங்களை நடத்துகிறார்.",
         portfolioEn: "Labour Welfare, Population, Employment and Training, Census, Weights and Measures, Urban and Rural Employment and Bonded Labour Welfare.",
         portfolioTa: "தொழிலாளர் நலன், மக்கள் தொகை, வேலைவாய்ப்பு மற்றும் பயிற்சி, மக்கள் தொகை கணக்கெடுப்பு, எடைகள் மற்றும் அளவைகள்.",
         departmentsEn: ["Labour Welfare Board", "Employment & Training", "Skill Development Corporation", "Weights & Measures"],
@@ -965,8 +1237,14 @@
         roleEn: "Minister for Co-operation",
         roleTa: "அமைச்சர் - கூட்டுறவுத் துறை",
         category: "infrastructure",
-        phone: "044-25671521",
+        phone: "044-25671526",
         email: "min.coop@tn.gov.in",
+        constituencyEn: "Namakkal",
+        constituencyTa: "நாமக்கல்",
+        roomEn: "Room No. 26, Main Secretariat",
+        roomTa: "அறை எண் 26, தலைமைச் செயலகம்",
+        bioEn: "Thiru V. Gandhiraj manages agricultural cooperative banks, rural credit channels, crop loan waiver audits, and cooperative dairy marketing networks.",
+        bioTa: "திரு V. காந்திராஜ் விவசாய கூட்டுறவு வங்கிகள், கிராமப்புற கடன் சேனல்கள், பயிர் கடன் தள்ளுபடி தணிக்கைகள் மற்றும் கூட்டுறவு பால் சந்தைப்படுத்தல் நெட்வொர்க்குகளை நிர்வகிக்கிறார்.",
         portfolioEn: "Co-operation.",
         portfolioTa: "கூட்டுறவுத்துறை மற்றும் சங்கங்கள்.",
         departmentsEn: ["Cooperative Societies", "Consumer Cooperatives", "Registrar of Cooperatives"],
@@ -979,8 +1257,14 @@
         roleEn: "Minister for Social Welfare and Women Empowerment",
         roleTa: "அமைச்சர் - சமூக நலன் மற்றும் மகளிர் உரிமை",
         category: "welfare",
-        phone: "044-25671522",
+        phone: "044-25671527",
         email: "min.swelfare@tn.gov.in",
+        constituencyEn: "Cuddalore",
+        constituencyTa: "கடலூர்",
+        roomEn: "Room No. 27, Main Secretariat",
+        roomTa: "அறை எண் 27, தலைமைச் செயலகம்",
+        bioEn: "Tmt K. Jegadeshwari executes women empowerment initiatives, integrated child nutrition schemes (ICDS), orphanage support frameworks, and pension payouts.",
+        bioTa: "திருமதி K. ஜெகதீஸ்வரி மகளிர் தன்னாட்சி முயற்சிகள், ஒருங்கிணைந்த குழந்தை ஊட்டச்சத்து திட்டங்கள் (ICDS), அனாதை இல்ல உதவி கட்டமைப்புகள் மற்றும் ஓய்வூதிய கொடுப்பனவுகளை செயல்படுத்துகிறார்.",
         portfolioEn: "Social Welfare including Women Welfare, Orphanages and Correctional Administration and Beggar Homes and Social Reforms & Nutritious Meal Programme.",
         portfolioTa: "மகளிர் நல்வாழ்வு உள்ளிட்ட சமூக நலன், அனாதை இல்லங்கள், சீர்திருத்த நிர்வாகம், சத்துணவுத் திட்டம்.",
         departmentsEn: ["Social Welfare", "Women Empowerment", "Integrated Child Development (ICDS)", "Nutritious Meal Scheme"],
@@ -993,10 +1277,16 @@
         roleEn: "Minister for Agriculture - Farmers Welfare",
         roleTa: "அமைச்சர் - வேளாண்மை - உழவர் நலன்",
         category: "welfare",
-        phone: "044-25671523",
+        phone: "044-25671528",
         email: "min.agri@tn.gov.in",
+        constituencyEn: "Thanjavur",
+        constituencyTa: "தஞ்சாவூர்",
+        roomEn: "Room No. 28, Main Secretariat",
+        roomTa: "அறை எண் 28, தலைமைச் செயலகம்",
+        bioEn: "Thiru Vinoth directs crop insurance subsidies, soil health card audits, high-yield seed distributions, organic farming guides, and sugarcane development programs.",
+        bioTa: "திரு வினோத் பயிர் காப்பீட்டு மானியங்கள், மண் ஆரோக்கிய அட்டை தணிக்கைகள், அதிக மகசூல் தரும் விதை விநியோகங்கள், இயற்கை விவசாய வழிகாட்டிகள் மற்றும் கரும்பு மேம்பாட்டு திட்டங்களை வழிநடத்துகிறார்.",
         portfolioEn: "Agriculture, Agricultural Engineering, Agro Service Co-operatives, Horticulture, Sugar, Sugarcane Excise, Sugarcane Development and Waste Land Development.",
-        portfolioTa: "வேளாண்மை, வேளாண்மைப் பொறியியல், தட்டக்கலை, சர்க்கரை மற்றும் கரும்பு மேம்பாடு, தரிசு நில மேம்பாடு.",
+        portfolioTa: "வேளாண்மை, வேளாண்மைப் பொறியியல், தோட்டக்கலை, சர்க்கரை மற்றும் கரும்பு மேம்பாடு, தரிசு நில மேம்பாடு.",
         departmentsEn: ["Agriculture Department", "Agricultural Engineering", "Horticulture", "Sugarcane Development"],
         departmentsTa: ["வேளாண்மைத் துறை", "வேளாண் பொறியியல்", "தோட்டக்கலைத் துறை", "கரும்பு மேம்பாடு"]
       },
@@ -1007,8 +1297,14 @@
         roleEn: "Minister for Milk and Dairy Development",
         roleTa: "அமைச்சர் - பால்வள மேம்பாடு",
         category: "infrastructure",
-        phone: "044-25671524",
+        phone: "044-25671529",
         email: "min.dairy@tn.gov.in",
+        constituencyEn: "Theni",
+        constituencyTa: "தேனி",
+        roomEn: "Room No. 29, Main Secretariat",
+        roomTa: "அறை எண் 29, தலைமைச் செயலகம்",
+        bioEn: "Tmt C. Vijayalakshmi manages milk procurement prices, Aavin distribution network expansions, dairy processing plant upgrades, and quality assurance checks.",
+        bioTa: "திருமதி C. விஜயலட்சுமி பால் கொள்முதல் விலைகள், ஆவின் விநியோக நெட்வொர்க் விரிவாக்கங்கள், பால் பதப்படுத்தும் ஆலை மேம்பாடுகள் மற்றும் தர உறுதி சோதனைகளை நிர்வகிக்கிறார்.",
         portfolioEn: "Milk and Dairy Development.",
         portfolioTa: "பால்வளம் மற்றும் பால் உற்பத்தி மேம்பாடு.",
         departmentsEn: ["Dairy Development Department", "Aavin (TCMPF)"],
@@ -1021,8 +1317,14 @@
         roleEn: "Minister for Human Resources Management",
         roleTa: "அமைச்சர் - மனிதவள மேலாண்மை",
         category: "finance",
-        phone: "044-25671525",
+        phone: "044-25671530",
         email: "min.hrm@tn.gov.in",
+        constituencyEn: "Tuticorin",
+        constituencyTa: "தூத்துக்குடி",
+        roomEn: "Room No. 30, Main Secretariat",
+        roomTa: "அறை எண் 30, தலைமைச் செயலகம்",
+        bioEn: "Thiru D. Sarathkumar handles government staff service rules, administrative reforms, state pension frameworks, and ex-servicemen resettlement programs.",
+        bioTa: "திரு D. சரத்குமார் அரசு ஊழியர் சேவை விதிகள், நிர்வாக சீர்திருத்தங்கள், மாநில ஓய்வூதிய கட்டமைப்புகள் மற்றும் முன்னாள் படைவீரர் மறுவாழ்வு திட்டங்களை கையாளுகிறார்.",
         portfolioEn: "Human Resources Management & Ex-Servicemen Welfare.",
         portfolioTa: "மனிதவள மேலாண்மை மற்றும் முன்னாள் படைவீரர் நலன்.",
         departmentsEn: ["Human Resources Management", "TNPSC Liaison", "Ex-Servicemen Welfare"],
@@ -1035,8 +1337,14 @@
         roleEn: "Minister for Hindu Religious and Charitable Endowments",
         roleTa: "அமைச்சர் - இந்து சமய அறநிலையத் துறை",
         category: "finance",
-        phone: "044-25671526",
+        phone: "044-25671531",
         email: "min.hrce@tn.gov.in",
+        constituencyEn: "Ramanathapuram",
+        constituencyTa: "இராமநாதபுரம்",
+        roomEn: "Room No. 31, Main Secretariat",
+        roomTa: "அறை எண் 31, தலைமைச் செயலகம்",
+        bioEn: "Thiru Ramesh supervises Hindu temple lands protection audits, heritage temple renovation funds, and festival management coordination councils.",
+        bioTa: "திரு ரமேஷ் இந்து கோவில் நிலங்கள் பாதுகாப்பு தணிக்கை, பாரம்பரிய கோவில் சீரமைப்பு நிதி மற்றும் திருவிழா மேலாண்மை ஒருங்கிணைப்பு குழுக்களை மேற்பார்வையிடுகிறார்.",
         portfolioEn: "Hindu Religious and Charitable Endowments.",
         portfolioTa: "இந்து சமய மற்றும் அறக்கட்டளை நிறுவனங்கள்.",
         departmentsEn: ["HR & CE Administration", "Temple Property Management"],
@@ -1049,8 +1357,14 @@
         roleEn: "Minister for Micro, Small and Medium Enterprises",
         roleTa: "அமைச்சர் - குறு, சிறு மற்றும் நடுத்தரத் தொழில்கள்",
         category: "infrastructure",
-        phone: "044-25671527",
+        phone: "044-25671532",
         email: "min.msme@tn.gov.in",
+        constituencyEn: "Ranipet",
+        constituencyTa: "இராணிப்பேட்டை",
+        roomEn: "Room No. 32, Main Secretariat",
+        roomTa: "அறை எண் 32, தலைமைச் செயலகம்",
+        bioEn: "Thiru P. Mathan Raja structures MSME credit subsidy programs, cottage industry cluster parks, SIDCO industrial plot allocations, and handicraft promotions.",
+        bioTa: "திரு P. மதன் ராஜா MSME கடன் மானிய திட்டங்கள், குடிசை தொழில் கிளஸ்டர் பூங்காக்கள், சிட்கோ தொழில்துறை இட ஒதுக்கீடுகள் மற்றும் கைவினை மேம்பாடுகளை உருவாக்குகிறார்.",
         portfolioEn: "Rural Industries including Cottage Industries, Small Industries.",
         portfolioTa: "குடிசைத் தொழில்கள் மற்றும் சிறு தொழில்கள் உள்ளிட்ட ஊரகத் தொழில்கள்.",
         departmentsEn: ["MSME Department", "Cottage Industries", "SIDCO", "TANSIDCO"],
@@ -1063,8 +1377,14 @@
         roleEn: "Minister for Finance, Planning and Development",
         roleTa: "அமைச்சர் - நிதி மற்றும் திட்டமிடல்",
         category: "finance",
-        phone: "044-25671528",
+        phone: "044-25671533",
         email: "min.finance@tn.gov.in",
+        constituencyEn: "Virudhunagar",
+        constituencyTa: "விருதுநகர்",
+        roomEn: "Room No. 33, Main Secretariat",
+        roomTa: "அறை எண் 33, தலைமைச் செயலகம்",
+        bioEn: "Thiru N. Marie Wilson directs state budget drafting, planning commission guidelines, expenditure auditing audits, and pension fund allocations.",
+        bioTa: "திரு N. மேரி வில்சன் மாநில வரவு-செலவுத் திட்டம் தயாரிப்பு, திட்டக்குழு வழிகாட்டுதல்கள், செலவின தணிக்கைகள் மற்றும் ஓய்வூதிய நிதி ஒதுக்கீடுகளை வழிநடத்துகிறார்.",
         portfolioEn: "Finance, Pensions and Pensionary Benefits, Planning & Development.",
         portfolioTa: "நிதித் துறை, ஓய்வூதியம் மற்றும் ஓய்வூதியப் பயன்கள், திட்டமிடல் மற்றும் வளர்ச்சி.",
         departmentsEn: ["Finance & Budget", "Treasuries & Accounts", "State Planning Commission", "Pensions Department"],
@@ -1077,8 +1397,14 @@
         roleEn: "Minister for Fisheries - Fishermen Welfare",
         roleTa: "அமைச்சர் - மீன்வளம் - மீனவர் நலன்",
         category: "infrastructure",
-        phone: "044-25671529",
+        phone: "044-25671534",
         email: "min.fisheries@tn.gov.in",
+        constituencyEn: "Mayiladuthurai",
+        constituencyTa: "மயிலாடுதுறை",
+        roomEn: "Room No. 34, Main Secretariat",
+        roomTa: "அறை எண் 34, தலைமைச் செயலகம்",
+        bioEn: "Thiru Srinath implements deep-sea fishing vessel subsidy programs, modern fish harbor setups, and welfare relief checks for coastal fishing communities.",
+        bioTa: "திரு ஸ்ரீநாத் ஆழ்கடல் மீன்பிடி படகு மானிய திட்டங்கள், நவீன மீன்பிடி துறைமுக அமைப்புகள் மற்றும் கடலோர மீன்பிடி சமூகங்களுக்கான நல நிவாரண சோதனைகளை செயல்படுத்துகிறார்.",
         portfolioEn: "Fisheries, Fisheries Development Corporation.",
         portfolioTa: "மீன்வளம் மற்றும் மீன்வள மேம்பாட்டுக் கழகம்.",
         departmentsEn: ["Fisheries Department", "Fisheries Development Corporation (TNFDC)"],
@@ -1091,8 +1417,14 @@
         roleEn: "Minister for Animal Husbandry",
         roleTa: "அமைச்சர் - கால்நடை பராமரிப்புத் துறை",
         category: "welfare",
-        phone: "044-25671530",
+        phone: "044-25671535",
         email: "min.ahusbandry@tn.gov.in",
+        constituencyEn: "Perambalur",
+        constituencyTa: "பெரம்பலூர்",
+        roomEn: "Room No. 35, Main Secretariat",
+        roomTa: "அறை எண் 35, தலைமைச் செயலகம்",
+        bioEn: "Tmt S. Kamali supervises veterinary clinic upgrades, state livestock breeding programs, fodder distribution initiatives, and poultry farm subsidies.",
+        bioTa: "திருமதி S. கமலி கால்நடை மருத்துவமனை மேம்பாடுகள், மாநில கால்நடை இனப்பெருக்க திட்டங்கள், தீவன விநியோக முயற்சிகள் மற்றும் கோழி பண்ணை மானியங்களை கண்காணிக்கிறார்.",
         portfolioEn: "Animal Husbandry.",
         portfolioTa: "கால்நடை பராமரிப்பு மற்றும் மருத்துவம்.",
         departmentsEn: ["Animal Husbandry Department", "Veterinary Services"],
@@ -1105,8 +1437,14 @@
         roleEn: "Minister for Artificial Intelligence, IT and Digital Services",
         roleTa: "அமைச்சர் - செயற்கை நுண்ணறிவு மற்றும் தகவல் தொழில்நுட்பம்",
         category: "infrastructure",
-        phone: "044-25671531",
+        phone: "044-25671536",
         email: "min.it@tn.gov.in",
+        constituencyEn: "Tiruppur South",
+        constituencyTa: "திருப்பூர் தெற்கு",
+        roomEn: "Room No. 36, Main Secretariat",
+        roomTa: "அறை எண் 36, தலைமைச் செயலகம்",
+        bioEn: "Thiru R. Kumar manages Tamil Nadu e-Governance (TNeGA) portals, software park infrastructure projects, cybersecurity guidelines, and AI integration plans.",
+        bioTa: "திரு R. குமார் தமிழ்நாடு மின்னளுமை (TNeGA) இணையதளங்கள், மென்பொருள் பூங்கா உள்கட்டமைப்பு திட்டங்கள், இணைய பாதுகாப்பு வழிகாட்டுதல்கள் மற்றும் AI ஒருங்கிணைப்பு திட்டங்களை நிர்வகிக்கிறார்.",
         portfolioEn: "Artificial Intelligence, Information Technology and Digital Services.",
         portfolioTa: "செயற்கை நுண்ணறிவு, தகவல் தொழில்நுட்பம் மற்றும் டிஜிட்டல் சேவைகள்.",
         departmentsEn: ["Information Technology", "Digital Services", "ELCOT", "TNeGA (e-Governance)"],
@@ -1119,8 +1457,14 @@
         roleEn: "Minister for Forests",
         roleTa: "அமைச்சர் - வனத் துறை",
         category: "infrastructure",
-        phone: "044-25671532",
+        phone: "044-25671537",
         email: "min.forest@tn.gov.in",
+        constituencyEn: "Udhagamandalam",
+        constituencyTa: "உதகமண்டலம்",
+        roomEn: "Room No. 37, Main Secretariat",
+        roomTa: "அறை எண் 37, தலைமைச் செயலகம்",
+        bioEn: "Thiru R.V. Ranjithkumar structures afforestation projects, wildlife sanctuary patrol rules, biosphere reserve conservation, and eco-tourism programs.",
+        bioTa: "திரு R.V. ரஞ்சித்குமார் காடழிப்பு எதிர்ப்பு திட்டங்கள், வனவிலங்கு சரணாலய ரோந்து விதிகள், உயிர்க்கோள இருப்பு பாதுகாப்பு மற்றும் சுற்றுச்சூழல் சுற்றுலா திட்டங்களை உருவாக்குகிறார்.",
         portfolioEn: "Forests.",
         portfolioTa: "காடுகள் மற்றும் வனவிலங்கு பாதுகாப்பு.",
         departmentsEn: ["Forest Department", "Forest Development Corporation (TAFCORN)", "Wildlife Board"],
@@ -1133,8 +1477,14 @@
         roleEn: "Minister for Commercial Taxes and Registration",
         roleTa: "அமைச்சர் - வணிகவரி மற்றும் பதிவுத் துறை",
         category: "finance",
-        phone: "044-25671533",
+        phone: "044-25671538",
         email: "min.tax@tn.gov.in",
+        constituencyEn: "Villupuram",
+        constituencyTa: "விழுப்புரம்",
+        roomEn: "Room No. 38, Main Secretariat",
+        roomTa: "அறை எண் 38, தலைமைச் செயலகம்",
+        bioEn: "Thiru D. Logesh Tamilselvan coordinates state GST audits, property registration stamp duty rules, company filings liaison, and debt relief packages.",
+        bioTa: "திரு D. லோகேஷ் தமிழ்ச்செல்வன் மாநில ஜிஎஸ்டி தணிக்கைகள், சொத்து பதிவு முத்திரை வரி விதிகள், நிறுவன தாக்கல் மற்றும் கடன் நிவாரண தொகுப்புகளை ஒருங்கிணைக்கிறார்.",
         portfolioEn: "Commercial Taxes, Registration and Stamp Act, Debt Relief including legislation on Money lending, Chits and Registration of Companies.",
         portfolioTa: "வணிகவரிகள், பதிவு மற்றும் முத்திரைச் சட்டம், கடனுதவி மற்றும் கம்பெனிகள் பதிவு.",
         departmentsEn: ["Commercial Taxes", "Registration Department", "Stamps & Chit Funds"],
@@ -1147,8 +1497,14 @@
         roleEn: "Minister for Environment and Climate Change",
         roleTa: "அமைச்சர் - சுற்றுச்சூழல் மற்றும் பருவநிலை மாற்றம்",
         category: "welfare",
-        phone: "044-25671534",
+        phone: "044-25671539",
         email: "min.env@tn.gov.in",
+        constituencyEn: "Tenkasi",
+        constituencyTa: "தென்காசி",
+        roomEn: "Room No. 39, Main Secretariat",
+        roomTa: "அறை எண் 39, தலைமைச் செயலகம்",
+        bioEn: "Thiru Rajeev guides industrial pollution audits, climate resilience models, beach cleanup campaigns, and environmental education frameworks.",
+        bioTa: "திரு ராஜீவ் தொழில்துறை மாசு தணிக்கை, பருவநிலை மீள்தன்மை மாதிரிகள், கடற்கரை தூய்மைப்படுத்தும் பிரச்சாரங்கள் மற்றும் சுற்றுச்சூழல் கல்வி கட்டமைப்புகளை வழிநடத்துகிறார்.",
         portfolioEn: "Environment, Pollution Control Board, Climate Change.",
         portfolioTa: "சுற்றுச்சூழல், மாசு கட்டுப்பாட்டு வாரியம், பருவநிலை மாற்றம்.",
         departmentsEn: ["Environment Department", "Pollution Control Board (TNPCB)", "Climate Change Mission"],
@@ -1157,12 +1513,10 @@
     ];
 
     function getInitials(name) {
-      // Remove Thiru/Dr/Tmt/Selvi prefixes
       const cleaned = name.replace(/^(Thiru|Dr\.|Tmt|Selvi)\s+/i, '').trim();
       const parts = cleaned.split(/\s+/);
       let initials = "";
       if (parts.length > 0) {
-        // Handle initials like C. Joseph Vijay -> CJV
         for (const part of parts) {
           if (part.includes('.')) {
             initials += part.replace('.', '').charAt(0);
@@ -1189,6 +1543,90 @@
       }
     }
 
+    function openMinisterModal(id) {
+      const m = ministersData.find(item => item.id === id);
+      if (!m) return;
+
+      const modal = document.getElementById('minister-modal');
+      const modalBody = document.getElementById('modal-body-content');
+      const lang = localStorage.getItem('cc_lang') || 'en';
+
+      const name = lang === 'ta' ? m.nameTa : m.nameEn;
+      const role = lang === 'ta' ? m.roleTa : m.roleEn;
+      const portfolio = lang === 'ta' ? m.portfolioTa : m.portfolioEn;
+      const depts = lang === 'ta' ? m.departmentsTa : m.departmentsEn;
+      const constituency = lang === 'ta' ? m.constituencyTa : m.constituencyEn;
+      const room = lang === 'ta' ? m.roomTa : m.roomEn;
+      const bio = lang === 'ta' ? m.bioTa : m.bioEn;
+      
+      let deptPills = depts.map(d => `<span class="dept-pill">${d}</span>`).join('');
+
+      let photoHtml = '';
+      if (m.id === 'joseph_vijay') {
+        photoHtml = `<img src="images/ministers/joseph_vijay.jpg" class="modal-profile-img" alt="${name}" />`;
+      } else {
+        const initials = getInitials(name);
+        const index = ministersData.findIndex(item => item.id === m.id);
+        const gIndex = index % 5;
+        photoHtml = `<div class="modal-avatar-circle avatar-g-${gIndex}">${initials}</div>`;
+      }
+
+      modalBody.innerHTML = `
+        <div class="modal-profile-header">
+          ${photoHtml}
+          <div class="modal-title-col">
+            <h3 class="modal-title-name">${name}</h3>
+            <span class="modal-title-role">${role}</span>
+          </div>
+        </div>
+
+        <div class="modal-details-grid">
+          <div class="modal-detail-item">
+            <span class="modal-detail-label" data-i18n="constituency_label">Assembly Constituency</span>
+            <span class="modal-detail-value">${constituency}</span>
+          </div>
+          <div class="modal-detail-item">
+            <span class="modal-detail-label" data-i18n="office_location_label">Office Room</span>
+            <span class="modal-detail-value">${room}</span>
+          </div>
+        </div>
+
+        <div class="modal-bio-section">
+          <span class="modal-bio-title" data-i18n="biography_label">Biography & Focus Area</span>
+          <p class="modal-bio-text">${bio}</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <span class="dept-title-label" data-i18n="departments">Departments</span>
+          <div class="dept-pill-list">
+            ${deptPills}
+          </div>
+        </div>
+
+        <div class="card-actions-wrapper" style="border-top: none; padding-top: 0.5rem; margin-top: 0.5rem;">
+          <a href="tel:${m.phone}" class="card-action-link card-action-call" style="padding: 0.65rem;" data-i18n="call_minister">
+            <i class="fa-solid fa-phone"></i> Call Office
+          </a>
+          <a href="mailto:${m.email}" class="card-action-link card-action-email" style="padding: 0.65rem;" data-i18n="email_minister">
+            <i class="fa-solid fa-envelope"></i> Email Minister
+          </a>
+        </div>
+      `;
+
+      if (window.i18n && typeof window.i18n.translatePage === 'function') {
+        window.i18n.translatePage();
+      }
+
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMinisterModal(e) {
+      const modal = document.getElementById('minister-modal');
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
     function renderMinisters(searchQuery = "", categoryFilter = "all") {
       const cmContainer = document.getElementById('cm-featured-container');
       const gridContainer = document.getElementById('ministers-grid-container');
@@ -1199,11 +1637,9 @@
 
       const query = searchQuery.toLowerCase().trim();
 
-      // Separate CM from other ministers
       const cmData = ministersData.find(m => m.id === "joseph_vijay");
       const otherMinisters = ministersData.filter(m => m.id !== "joseph_vijay");
 
-      // Render CM if they match query and category
       const cmMatchesQuery = !query || 
         cmData.nameEn.toLowerCase().includes(query) || 
         cmData.nameTa.toLowerCase().includes(query) || 
@@ -1221,10 +1657,9 @@
         let deptChips = cmDepts.map(d => `<span class="dept-pill">${d}</span>`).join('');
 
         cmContainer.innerHTML = `
-          <div class="featured-leader-card">
+          <div class="featured-leader-card" onclick="openMinisterModal('joseph_vijay')">
             <div class="leader-graphic-frame">
-              <i class="fa-solid fa-crown leader-seal-bg"></i>
-              <i class="fa-solid fa-user-tie"></i>
+              <img src="images/ministers/joseph_vijay.jpg" alt="${cmName}" />
               <span class="leader-emblem-badge" data-i18n="cabinet_leadership">Cabinet Leadership</span>
             </div>
             <div class="leader-info-content">
@@ -1243,7 +1678,7 @@
                 </div>
               </div>
 
-              <div class="leader-actions-row">
+              <div class="leader-actions-row" onclick="event.stopPropagation()">
                 <a href="tel:${cmData.phone}" class="leader-contact-btn" data-i18n="call_minister">
                   <i class="fa-solid fa-phone"></i> Call Office
                 </a>
@@ -1256,7 +1691,6 @@
         `;
       }
 
-      // Filter other ministers
       const filteredMinisters = otherMinisters.filter(m => {
         const matchesQuery = !query || 
           m.nameEn.toLowerCase().includes(query) || 
@@ -1269,7 +1703,6 @@
         return matchesQuery && matchesCategory;
       });
 
-      // Update count badge
       let totalCount = filteredMinisters.length;
       if (cmData && cmMatchesQuery && cmMatchesCategory) totalCount += 1;
       
@@ -1290,15 +1723,12 @@
         const mName = lang === 'ta' ? m.nameTa : m.nameEn;
         const mRole = lang === 'ta' ? m.roleTa : m.roleEn;
         const mPortfolio = lang === 'ta' ? m.portfolioTa : m.portfolioEn;
-        const mDepts = lang === 'ta' ? m.departmentsTa : m.departmentsEn;
         const initials = getInitials(mName);
-        
-        // Pick an avatar gradient index based on index
         const gIndex = index % 5;
-        const deptPills = mDepts.map(d => `<span class="dept-pill">${d}</span>`).join('');
 
         const card = document.createElement('div');
         card.className = 'minister-card';
+        card.setAttribute('onclick', `openMinisterModal('${m.id}')`);
         card.style.animationDelay = `${index * 0.015}s`;
         card.innerHTML = `
           <div class="minister-avatar-wrap">
@@ -1315,18 +1745,7 @@
             <strong><span data-i18n="portfolio">Portfolio</span>:</strong> ${mPortfolio}
           </div>
 
-          <button class="details-toggle-btn" onclick="toggleDepartmentDetails(this, '${m.id}')">
-            <i class="fa-solid fa-chevron-down"></i> <span data-i18n="departments">Departments</span>
-          </button>
-
-          <div class="expandable-departments-panel" id="dept-panel-${m.id}">
-            <span class="dept-title-label" data-i18n="departments">Departments</span>
-            <div class="dept-pill-list">
-              ${deptPills}
-            </div>
-          </div>
-
-          <div class="card-actions-wrapper">
+          <div class="card-actions-wrapper" onclick="event.stopPropagation()">
             <a href="tel:${m.phone}" class="card-action-link card-action-call" data-i18n="call_minister">
               <i class="fa-solid fa-phone"></i> Call
             </a>
@@ -1338,7 +1757,6 @@
         gridContainer.appendChild(card);
       });
 
-      // Localize page contents
       if (window.i18n && typeof window.i18n.translatePage === 'function') {
         window.i18n.translatePage();
       }
@@ -1347,7 +1765,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderMinisters();
 
-      // Search functionality
       const searchInput = document.getElementById('directory-search');
       let currentCategory = 'all';
 
@@ -1357,7 +1774,6 @@
         });
       }
 
-      // Filter Categories functionality
       const filterBtns = document.querySelectorAll('.filter-btn');
       filterBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1369,10 +1785,16 @@
         });
       });
 
-      // Language change listeners to update names instantly
       window.addEventListener('language-change', () => {
         const query = searchInput ? searchInput.value : "";
         renderMinisters(query, currentCategory);
+      });
+
+      // Handle Escape key to close modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeMinisterModal();
+        }
       });
 
       setTimeout(() => {

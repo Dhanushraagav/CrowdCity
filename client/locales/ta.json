@@ -644,5 +644,8 @@
   "departments": "துறைகள்",
   "ministers_loaded": "அமைச்சர்கள் உள்ளனர்",
   "call_minister": "அலுவலகத்தை அழைக்கவும்",
-  "email_minister": "மின்னஞ்சல் அனுப்பவும்"
+  "email_minister": "மின்னஞ்சல் அனுப்பவும்",
+  "constituency_label": "சட்டமன்ற தொகுதி",
+  "office_location_label": "அலுவலக அறை",
+  "biography_label": "வாழ்க்கைக்குறிப்பு மற்றும் முக்கியப் பணிகள்"
 }
