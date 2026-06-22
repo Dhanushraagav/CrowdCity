@@ -510,29 +510,73 @@ window.authRouter = {
     #mobile-maintenance-overlay.active .maintenance-card {
       transform: scale(1);
     }
-    .maintenance-icon-wrapper {
-      width: 80px;
-      height: 80px;
-      background: rgba(245, 158, 11, 0.1);
-      border: 1.5px dashed rgba(245, 158, 11, 0.5);
-      border-radius: 50%;
+    .maintenance-logos-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 1.5rem;
-      animation: rotate-dashed 20s linear infinite;
+      gap: 1.25rem;
+      margin: 0 auto 1.75rem;
+      position: relative;
     }
-    @keyframes rotate-dashed {
-      100% { transform: rotate(360deg); }
+    .logo-box {
+      width: 76px;
+      height: 76px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, border-color 0.3s;
     }
-    .maintenance-icon {
-      color: #f59e0b;
-      font-size: 2.2rem;
-      animation: pulse-icon 2s ease-in-out infinite alternate;
+    .logo-box img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
     }
-    @keyframes pulse-icon {
-      0% { transform: scale(1); opacity: 0.9; }
-      100% { transform: scale(1.1); opacity: 1; }
+    .logo-left {
+      animation: float-left 4s ease-in-out infinite alternate;
+    }
+    .logo-right {
+      animation: float-right 4s ease-in-out infinite alternate;
+    }
+    @keyframes float-left {
+      0% { transform: translateY(0) rotate(-2deg); }
+      100% { transform: translateY(-8px) rotate(3deg); }
+    }
+    @keyframes float-right {
+      0% { transform: translateY(0) rotate(2deg); }
+      100% { transform: translateY(-8px) rotate(-3deg); }
+    }
+    .logo-connector {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #0d9488;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #0d9488;
+      position: absolute;
+    }
+    .pulse-ring {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(13, 148, 136, 0.4);
+      border-radius: 50%;
+      position: absolute;
+      animation: ring-expand 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+    @keyframes ring-expand {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
     }
     .maintenance-title {
       font-size: 1.5rem;
@@ -569,6 +613,11 @@ window.authRouter = {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+    .guide-icon {
+      width: 16px;
+      height: 16px;
+      color: #9ca3af;
     }
     .desktop-guide-steps {
       margin: 0;
@@ -621,8 +670,17 @@ window.authRouter = {
     overlay.id = 'mobile-maintenance-overlay';
     overlay.innerHTML = `
       <div class="maintenance-card">
-        <div class="maintenance-icon-wrapper">
-          <div class="maintenance-icon">⚡</div>
+        <div class="maintenance-logos-container">
+          <div class="logo-box logo-left">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" />
+          </div>
+          <div class="logo-connector">
+            <span class="pulse-ring"></span>
+            <span class="pulse-dot"></span>
+          </div>
+          <div class="logo-box logo-right">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" />
+          </div>
         </div>
         <h2 class="maintenance-title">Mobile Layout Under Maintenance</h2>
         <p class="maintenance-desc">
@@ -630,7 +688,8 @@ window.authRouter = {
         </p>
         <div class="desktop-guide">
           <div class="desktop-guide-title">
-            <span>⚙️</span> How to switch to Desktop Site
+            <svg class="guide-icon" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.13,5.91,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.04,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" fill="currentColor"/></svg>
+            How to switch to Desktop Site
           </div>
           <ol class="desktop-guide-steps">
             <li>Open your browser menu (tap <strong>⋮</strong> on Android or <strong>aA</strong> on iOS Safari).</li>
