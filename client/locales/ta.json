@@ -629,5 +629,12 @@
   "call_collector": "மாவட்ட ஆட்சியர் அலுவலகத்தை அழைக்கவும்",
   "email_collector": "மின்னஞ்சல் அனுப்பவும்",
   "visit_website": "இணையதளத்தைப் பார்வையிடவும்",
-  "central_grievance": "மத்திய குறைதீர்க்கும் பிரிவு (முதல்வரின் முகவரி)"
+  "central_grievance": "மத்திய குறைதீர்க்கும் பிரிவு (முதல்வரின் முகவரி)",
+  "state_level": "மாநில அளவிலான போர்டல்",
+  "live_support": "24/7 சேவை",
+  "cm_helpline_label": "முதலமைச்சர் உதவி எண்",
+  "municipal_helpline_label": "மாநகராட்சி உதவி எண்",
+  "visit_grievance_portal": "முதல்வரின் முகவரி போர்ட்டலை பார்வையிடவும்",
+  "district_directory": "மாவட்ட அதிகாரப்பூர்வ அடைவு",
+  "districts_loaded": "மாவட்டங்கள் உள்ளன"
 }

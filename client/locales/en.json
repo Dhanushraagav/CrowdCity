@@ -629,5 +629,12 @@
   "call_collector": "Call Collector Office",
   "email_collector": "Email Collector",
   "visit_website": "Visit Website",
-  "central_grievance": "Central Grievance Redressal (Mudhalvarin Mugavari)"
+  "central_grievance": "Central Grievance Redressal (Mudhalvarin Mugavari)",
+  "state_level": "State Level Portal",
+  "live_support": "24/7 Support",
+  "cm_helpline_label": "CM Helpline",
+  "municipal_helpline_label": "Municipal Corporation Support",
+  "visit_grievance_portal": "Visit Mudhalvarin Mugavari Portal",
+  "district_directory": "District Official Directory",
+  "districts_loaded": "districts available"
 }

@@ -28,11 +28,23 @@
       opacity: 1;
     }
 
+    /* Page-level entrance animation */
+    @keyframes card-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .helplines-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.25rem;
-      margin-top: 1.5rem;
+      margin-top: 0.5rem;
     }
 
     .helpline-card {
@@ -46,12 +58,28 @@
       gap: 0.75rem;
       position: relative;
       overflow: hidden;
+      opacity: 0;
+      animation: card-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .helpline-card:hover {
       transform: translateY(-2px);
       border-color: var(--primary);
-      box-shadow: 0 4px 20px var(--primary-glow);
+      /* Removed glowing box-shadow; replaced with extremely subtle premium surface shadow */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Wiggle/Shake animation for the phone icon on hover */
+    @keyframes phone-shake {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(-8deg); }
+      40% { transform: rotate(6deg); }
+      60% { transform: rotate(-6deg); }
+      80% { transform: rotate(4deg); }
+    }
+
+    .helpline-card:hover .fa-phone {
+      animation: phone-shake 0.4s ease-in-out;
     }
 
     .helpline-card-header {
@@ -137,106 +165,339 @@
       color: var(--primary);
     }
 
+    /* Redesigned Search & Controls Bar */
+    .directory-controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 2.5rem 0 1.25rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .directory-title-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .directory-section-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: var(--font-heading);
+      margin: 0;
+    }
+
+    .directory-section-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
     .search-container {
       position: relative;
-      margin-bottom: 2rem;
-      max-width: 500px;
+      width: 320px;
+    }
+
+    @media (max-width: 600px) {
+      .directory-controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-container {
+        width: 100%;
+      }
     }
 
     .search-input {
       width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      padding: 0.65rem 1rem 0.65rem 2.25rem;
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-color);
       background-color: var(--bg-surface);
       color: var(--text-main);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
 
     .search-input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-glow);
+      /* Removed all glowing focus outline box shadows */
+      box-shadow: none;
     }
 
     .search-icon {
       position: absolute;
-      left: 1rem;
+      left: 0.85rem;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       pointer-events: none;
     }
 
-    .central-helpline-banner {
-      background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(99, 102, 241, 0.05) 100%);
-      border: 1px solid rgba(13, 148, 136, 0.2);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+    /* Redesigned Premium Top Dashboard Layout */
+    .helpline-dashboard-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-columns: 1.6fr 1fr;
       gap: 1.5rem;
-      align-items: center;
+      margin-bottom: 2rem;
     }
 
-    @media (max-width: 768px) {
-      .central-helpline-banner {
+    @media (max-width: 900px) {
+      .helpline-dashboard-grid {
         grid-template-columns: 1fr;
         gap: 1.25rem;
       }
     }
 
-    .central-col {
+    /* Central Grievance Card with floating background decorations */
+    .central-grievance-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+      border: 1px solid rgba(13, 148, 136, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.85rem;
+      overflow: hidden;
+      transition: border-color var(--transition-normal), transform var(--transition-normal);
     }
 
-    .central-title {
-      font-size: 1.15rem;
+    .central-grievance-card:hover {
+      border-color: rgba(13, 148, 136, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Animated background graphics (Floating Orbs) */
+    .central-grievance-card::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -10%;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(13, 148, 136, 0.08) 0%, rgba(99, 102, 241, 0.01) 70%);
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+      animation: float-slow 12s ease-in-out infinite alternate;
+    }
+
+    .central-grievance-card::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -5%;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, rgba(13, 148, 136, 0.01) 70%);
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+      animation: float-slow 15s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes float-slow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-20px, 15px) scale(1.08); }
+    }
+
+    .central-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .central-card-badge {
+      font-size: 0.65rem;
       font-weight: 700;
+      text-transform: uppercase;
+      background: var(--primary-light-alpha);
+      color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+    }
+
+    .pulse-container {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    .pulse-text {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .central-card-title {
+      font-size: 1.3rem;
+      font-weight: 800;
       color: var(--text-main);
       font-family: var(--font-heading);
+      margin: 0;
+      z-index: 1;
     }
 
-    .central-desc {
-      font-size: 0.85rem;
+    .central-card-desc {
+      font-size: 0.88rem;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.5;
+      margin: 0;
+      z-index: 1;
     }
 
-    .central-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+    .central-card-actions {
+      margin-top: 0.5rem;
+      z-index: 1;
+    }
+
+    .central-portal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
-      padding: 0.85rem 1rem;
+      color: var(--text-main);
+      padding: 0.55rem 1.1rem;
       border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .central-portal-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateX(3px);
+    }
+
+    .central-portal-btn i {
+      font-size: 0.75rem;
+    }
+
+    /* Stack style for hotlines */
+    .hotlines-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .hotline-item-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1.25rem;
       text-decoration: none;
       transition: border-color var(--transition-fast), transform var(--transition-fast);
+      position: relative;
+      overflow: hidden;
     }
 
-    .central-item:hover {
+    .hotline-item-card:hover {
       border-color: var(--primary);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
 
-    .central-label {
-      font-size: 0.68rem;
+    .hotline-icon-wrap {
+      width: 44px;
+      height: 44px;
+      background: var(--primary-light-alpha);
+      color: var(--primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: transform var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .hotline-item-card:hover .hotline-icon-wrap {
+      background-color: var(--primary);
+      color: var(--text-inverse);
+    }
+
+    .hotline-item-card:hover .hotline-icon-wrap i {
+      animation: phone-shake 0.4s ease-in-out infinite;
+    }
+
+    .hotline-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      flex: 1;
+    }
+
+    .hotline-label {
+      font-size: 0.7rem;
       font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .central-value {
-      font-size: 1.1rem;
-      font-weight: 800;
+    .hotline-number {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--text-main);
+      font-family: var(--font-heading);
+    }
+
+    .hotline-action-icon {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .hotline-item-card:hover .hotline-action-icon {
+      border-color: var(--primary);
       color: var(--primary);
+      transform: scale(1.1);
     }
   </style>
 </head>
@@ -324,27 +585,72 @@
             <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="helpline_desc">Official contacts for all 38 districts of Tamil Nadu.</p>
           </section>
 
-          <!-- Central Grievance Banner -->
-          <section class="central-helpline-banner">
-            <div class="central-col">
-              <span class="central-title" data-i18n="central_grievance">Central Grievance Redressal (Mudhalvarin Mugavari)</span>
-              <span class="central-desc">State-level public grievance redressal portal and emergency response contacts. Connect directly with the Chief Minister's Special Cell.</span>
+          <!-- Top Dashboard Grid -->
+          <div class="helpline-dashboard-grid">
+            
+            <!-- Central Grievance Card -->
+            <div class="central-grievance-card">
+              <div class="central-card-header">
+                <span class="central-card-badge" data-i18n="state_level">State Level Portal</span>
+                <div class="pulse-container">
+                  <span class="pulse-dot"></span>
+                  <span class="pulse-text" data-i18n="live_support">24/7 Support</span>
+                </div>
+              </div>
+              <h2 class="central-card-title" data-i18n="central_grievance">Central Grievance Redressal (Mudhalvarin Mugavari)</h2>
+              <p class="central-card-desc">State-level public grievance redressal portal and emergency response contacts. Connect directly with the Chief Minister's Special Cell.</p>
+              
+              <div class="central-card-actions">
+                <a href="https://onlinegrievance.tn.gov.in" target="_blank" rel="noopener noreferrer" class="central-portal-btn">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <span data-i18n="visit_grievance_portal">Visit Mudhalvarin Mugavari Portal</span>
+                </a>
+              </div>
             </div>
-            <a href="tel:1100" class="central-item">
-              <span class="central-label">CM Helpline</span>
-              <span class="central-value">1100</span>
-            </a>
-            <a href="tel:1913" class="central-item">
-              <span class="central-label">Municipal Helpline</span>
-              <span class="central-value">1913</span>
-            </a>
-          </section>
 
-          <!-- Search Directory -->
-          <section class="search-container">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="directory-search" class="search-input" placeholder="Search districts..." data-i18n-placeholder="search_districts">
-          </section>
+            <!-- Direct Hotline Cards Stack -->
+            <div class="hotlines-stack">
+              <a href="tel:1100" class="hotline-item-card">
+                <div class="hotline-icon-wrap">
+                  <i class="fa-solid fa-phone-volume"></i>
+                </div>
+                <div class="hotline-info">
+                  <span class="hotline-label" data-i18n="cm_helpline_label">CM Helpline</span>
+                  <span class="hotline-number">1100</span>
+                </div>
+                <div class="hotline-action-icon">
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+              </a>
+
+              <a href="tel:1913" class="hotline-item-card">
+                <div class="hotline-icon-wrap">
+                  <i class="fa-solid fa-building-shield"></i>
+                </div>
+                <div class="hotline-info">
+                  <span class="hotline-label" data-i18n="municipal_helpline_label">Municipal Corporation Support</span>
+                  <span class="hotline-number">1913</span>
+                </div>
+                <div class="hotline-action-icon">
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+              </a>
+            </div>
+            
+          </div>
+
+          <!-- Directory Header & Controls Bar -->
+          <div class="directory-controls-bar">
+            <div class="directory-title-area">
+              <h2 class="directory-section-title" data-i18n="district_directory">District Official Directory</h2>
+              <span class="directory-section-subtitle"><span id="district-count">38</span> <span data-i18n="districts_loaded">districts available</span></span>
+            </div>
+            <!-- Search Directory -->
+            <div class="search-container">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="directory-search" class="search-input" placeholder="Search districts..." data-i18n-placeholder="search_districts">
+            </div>
+          </div>
 
           <!-- District Cards Grid -->
           <section class="helplines-grid" id="helplines-container">
@@ -425,6 +731,12 @@
         return d.en.toLowerCase().includes(query) || d.ta.toLowerCase().includes(query);
       });
 
+      // Update dynamic district count
+      const countEl = document.getElementById('district-count');
+      if (countEl) {
+        countEl.textContent = filtered.length;
+      }
+
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 0; font-size: 0.95rem;">
@@ -435,11 +747,12 @@
         return;
       }
 
-      filtered.forEach(d => {
+      filtered.forEach((d, index) => {
         const displayName = lang === 'ta' ? d.ta : d.en;
         const email = getDistrictEmail(d);
         const card = document.createElement('div');
         card.className = 'helpline-card';
+        card.style.animationDelay = `${index * 0.015}s`;
         card.innerHTML = `
           <div class="helpline-card-header">
             <span class="helpline-card-title">${displayName}</span>
