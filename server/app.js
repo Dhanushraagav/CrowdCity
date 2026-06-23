@@ -116,7 +116,8 @@ app.get('/api/health', (req, res) => {
 app.get('/api/config', (req, res) => {
   res.status(200).json({
     supabaseUrl: process.env.SUPABASE_URL || 'https://placeholder.supabase.co',
-    supabaseAnonKey: process.env.SUPABASE_ANON_KEY || 'placeholder'
+    supabaseAnonKey: process.env.SUPABASE_ANON_KEY || 'placeholder',
+    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY || '1x00000000000000000000AA'
   });
 });
 

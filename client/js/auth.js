@@ -137,6 +137,7 @@ async function initAuth() {
     }
 
     const config = await response.json();
+    window.supabaseConfig = config;
 
     const isKeyPlaceholder = !config.supabaseAnonKey || 
                              config.supabaseAnonKey.includes('placeholder') || 
@@ -172,6 +173,9 @@ async function initAuth() {
     console.log("Supabase Auth initialized successfully.");
     _attachAuthStateListener();
     updateAuthUI();
+    if (window.turnstileLoaded) {
+      window.renderTurnstileWidgets();
+    }
     resolveAuthInit();
 
   } catch (error) {
@@ -191,6 +195,7 @@ function _tryInitFromCache() {
     const raw = localStorage.getItem('cc_config_cache');
     if (!raw) return false;
     const config = JSON.parse(raw);
+    window.supabaseConfig = config;
     const isKeyPlaceholder = !config.supabaseAnonKey || 
                              config.supabaseAnonKey.includes('placeholder') || 
                              (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
@@ -199,6 +204,9 @@ function _tryInitFromCache() {
     console.log('[Auth] Supabase initialised from cached config.');
     _attachAuthStateListener();
     updateAuthUI();
+    if (window.turnstileLoaded) {
+      window.renderTurnstileWidgets();
+    }
     resolveAuthInit();
     return true;
   } catch (e) {
@@ -783,14 +791,15 @@ async function verifyProfileAndRoute(user, showAlert) {
 window.verifyProfileAndRoute = verifyProfileAndRoute;
 
 // Register a new user
-async function registerUser(email, password, fullName) {
+async function registerUser(email, password, fullName, captchaToken) {
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
     options: {
       data: {
         full_name: fullName
-      }
+      },
+      captchaToken: captchaToken
     }
   });
 
@@ -821,10 +830,16 @@ async function registerUser(email, password, fullName) {
 }
 
 // Sign in with email and password
-async function loginUser(email, password) {
+async function loginUser(email, password, captchaToken) {
   console.log(`[Auth Client] Attempting Email/Password login for: ${email}`);
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+      email, 
+      password,
+      options: {
+        captchaToken: captchaToken
+      }
+    });
     if (error) {
       console.error('[Auth Client] Supabase signInWithPassword error:', error.message || error);
     } else {
@@ -873,9 +888,12 @@ async function loginWithGoogle() {
 }
 
 // Send password reset email
-async function requestPasswordReset(email) {
+async function requestPasswordReset(email, captchaToken) {
   const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/reset-password.html'
+    redirectTo: window.location.origin + '/reset-password.html',
+    options: {
+      captchaToken: captchaToken
+    }
   });
   return { data, error };
 }
@@ -2057,3 +2075,78 @@ document.addEventListener('DOMContentLoaded', () => {
     docLoaded
   ]).then(dismissLoader);
 })();
+
+// Cloudflare Turnstile CAPTCHA Integration
+window.loginWidgetId = null;
+window.signupWidgetId = null;
+window.recoveryWidgetId = null;
+window.turnstileLoaded = false;
+
+window.renderTurnstileWidgets = function() {
+  if (typeof turnstile === 'undefined') {
+    console.warn('[Turnstile] Script not yet loaded.');
+    return;
+  }
+
+  const siteKey = window.supabaseConfig?.turnstileSiteKey || '1x00000000000000000000AA';
+  const theme = localStorage.getItem('cc_theme') === 'dark' ? 'dark' : 'light';
+
+  if (document.getElementById('login-captcha') && window.loginWidgetId === null) {
+    try {
+      window.loginWidgetId = turnstile.render('#login-captcha', {
+        sitekey: siteKey,
+        theme: theme,
+        callback: function(token) {
+          console.log('[Turnstile] Login challenge completed');
+        }
+      });
+    } catch (e) {
+      console.error('[Turnstile] Failed to render login widget:', e);
+    }
+  }
+
+  if (document.getElementById('signup-captcha') && window.signupWidgetId === null) {
+    try {
+      window.signupWidgetId = turnstile.render('#signup-captcha', {
+        sitekey: siteKey,
+        theme: theme,
+        callback: function(token) {
+          console.log('[Turnstile] Signup challenge completed');
+        }
+      });
+    } catch (e) {
+      console.error('[Turnstile] Failed to render signup widget:', e);
+    }
+  }
+
+  if (document.getElementById('recovery-captcha') && window.recoveryWidgetId === null) {
+    try {
+      window.recoveryWidgetId = turnstile.render('#recovery-captcha', {
+        sitekey: siteKey,
+        theme: theme,
+        callback: function(token) {
+          console.log('[Turnstile] Recovery challenge completed');
+        }
+      });
+    } catch (e) {
+      console.error('[Turnstile] Failed to render recovery widget:', e);
+    }
+  }
+};
+
+window.onloadTurnstileCallback = function() {
+  window.turnstileLoaded = true;
+  if (window.supabaseConfig) {
+    window.renderTurnstileWidgets();
+  }
+};
+
+// Listen for theme changes to dynamically update Turnstile theme if they toggle
+window.addEventListener('theme-change', () => {
+  if (typeof turnstile !== 'undefined') {
+    const theme = localStorage.getItem('cc_theme') === 'dark' ? 'dark' : 'light';
+    if (window.loginWidgetId !== null) turnstile.reset(window.loginWidgetId);
+    if (window.signupWidgetId !== null) turnstile.reset(window.signupWidgetId);
+    if (window.recoveryWidgetId !== null) turnstile.reset(window.recoveryWidgetId);
+  }
+});

@@ -30,6 +30,9 @@
     })();
   </script>
   
+  <!-- Cloudflare Turnstile CAPTCHA -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -1045,6 +1048,9 @@
               </div>
             </div>
 
+            <!-- Cloudflare Turnstile CAPTCHA container -->
+            <div id="login-captcha" style="margin: 0; display: flex; justify-content: center;"></div>
+
             <button type="submit" id="btn-login-submit" class="btn btn-primary" style="width: 100%; margin: 0;" data-i18n="sign_in">
               Sign In
             </button>
@@ -1140,6 +1146,9 @@
             <span id="confirm-password-feedback" class="hidden" style="font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem; display: block;"></span>
           </div>
 
+          <!-- Cloudflare Turnstile CAPTCHA container -->
+          <div id="signup-captcha" style="margin-top: 1rem; display: flex; justify-content: center;"></div>
+
           <button type="submit" id="btn-signup-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" >
             <i class="fa-solid fa-user-plus"></i> <span data-i18n="create_account">Create Account</span>
           </button>
@@ -1154,6 +1163,9 @@
             <label for="recovery-email" class="form-label" data-i18n="email_address">Email Address</label>
             <input type="email" id="recovery-email" class="form-input" placeholder="you@example.com" data-i18n-placeholder="email_placeholder" required autocomplete="email">
           </div>
+
+          <!-- Cloudflare Turnstile CAPTCHA container -->
+          <div id="recovery-captcha" style="margin-top: 1rem; display: flex; justify-content: center;"></div>
 
           <button type="submit" id="btn-recovery-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" >
             <i class="fa-solid fa-paper-plane"></i> <span data-i18n="send_recovery_link">Send Recovery Link</span>
@@ -1466,6 +1478,10 @@
         loginForm.classList.add('hidden');
         signupForm.classList.remove('hidden');
       }
+      
+      if (typeof window.renderTurnstileWidgets === 'function') {
+        window.renderTurnstileWidgets();
+      }
     }
 
     // Toggle Recovery display
@@ -1480,6 +1496,10 @@
       document.getElementById('auth-alert').classList.add('hidden');
       const googleSection = document.getElementById('google-sso-section');
       if (googleSection) googleSection.classList.add('hidden');
+      
+      if (typeof window.renderTurnstileWidgets === 'function') {
+        window.renderTurnstileWidgets();
+      }
     }
 
     function showLoginForm(e) {
@@ -1667,13 +1687,28 @@
             const password = document.getElementById('login-password').value;
 
             const submitBtn = document.getElementById('btn-login-submit');
+            
+            // Check Cloudflare Turnstile token
+            const turnstileToken = (typeof turnstile !== 'undefined' && window.loginWidgetId !== null)
+              ? turnstile.getResponse(window.loginWidgetId)
+              : null;
+              
+            if (!turnstileToken) {
+              showAlert('Please complete the CAPTCHA security check.');
+              return;
+            }
+
             submitBtn.disabled = true;
             const signingInText = window.i18n ? window.i18n.t('connecting') : 'Signing In...';
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ' + signingInText;
 
-            const { data, error } = await loginUser(email, password);
+            const { data, error } = await loginUser(email, password, turnstileToken);
 
             if (error) {
+              // Automatically reset Turnstile widget after error
+              if (typeof turnstile !== 'undefined' && window.loginWidgetId !== null) {
+                turnstile.reset(window.loginWidgetId);
+              }
               submitBtn.disabled = false;
               submitBtn.innerHTML = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
               showAlert(error.message || 'Login failed.');
@@ -1854,6 +1889,16 @@
 
           if (password !== confirmPassword) { showAlert('Passwords do not match.'); return; }
 
+          // Check Cloudflare Turnstile token
+          const turnstileToken = (typeof turnstile !== 'undefined' && window.signupWidgetId !== null)
+            ? turnstile.getResponse(window.signupWidgetId)
+            : null;
+            
+          if (!turnstileToken) {
+            showAlert('Please complete the CAPTCHA security check.');
+            return;
+          }
+
           const submitBtn = document.getElementById('btn-signup-submit');
           submitBtn.disabled = true;
           submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ' + (window.i18n ? window.i18n.t('initializing') : 'Initializing...');
@@ -1866,6 +1911,9 @@
             });
             const sendData = await sendRes.json();
             if (!sendRes.ok) {
+              if (typeof turnstile !== 'undefined' && window.signupWidgetId !== null) {
+                turnstile.reset(window.signupWidgetId);
+              }
               showAlert(sendData.error || 'Failed to send verification email.');
               submitBtn.disabled = false;
               submitBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> <span data-i18n="create_account">' + (window.i18n ? window.i18n.t('create_account') : 'Create Account') + '</span>';
@@ -1879,6 +1927,9 @@
             showOtpScreen('signup', email);
             window.showToast('Verification code sent to your email.', 'success');
           } catch (err) {
+            if (typeof turnstile !== 'undefined' && window.signupWidgetId !== null) {
+              turnstile.reset(window.signupWidgetId);
+            }
             showAlert('An error occurred during verification setup.');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> <span data-i18n="create_account">' + (window.i18n ? window.i18n.t('create_account') : 'Create Account') + '</span>';
@@ -1916,10 +1967,26 @@
         recoveryForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const email = document.getElementById('recovery-email').value;
+
+          // Check Cloudflare Turnstile token
+          const turnstileToken = (typeof turnstile !== 'undefined' && window.recoveryWidgetId !== null)
+            ? turnstile.getResponse(window.recoveryWidgetId)
+            : null;
+            
+          if (!turnstileToken) {
+            showAlert('Please complete the CAPTCHA security check.');
+            return;
+          }
+
           const submitBtn = document.getElementById('btn-recovery-submit');
           submitBtn.disabled = true;
           submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
-          const { error } = await requestPasswordReset(email);
+          const { error } = await requestPasswordReset(email, turnstileToken);
+          
+          if (typeof turnstile !== 'undefined' && window.recoveryWidgetId !== null) {
+            turnstile.reset(window.recoveryWidgetId);
+          }
+
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span data-i18n="send_recovery_link">' + (window.i18n ? window.i18n.t('send_recovery_link') : 'Send Recovery Link') + '</span>';
           if (error) { showAlert(error.message); }
