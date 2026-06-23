@@ -1733,7 +1733,13 @@
         cmData.nameEn.toLowerCase().includes(query) || 
         cmData.nameTa.toLowerCase().includes(query) || 
         cmData.portfolioEn.toLowerCase().includes(query) || 
-        cmData.portfolioTa.toLowerCase().includes(query);
+        cmData.portfolioTa.toLowerCase().includes(query) ||
+        (cmData.constituencyEn && cmData.constituencyEn.toLowerCase().includes(query)) ||
+        (cmData.constituencyTa && cmData.constituencyTa.toLowerCase().includes(query)) ||
+        (cmData.roleEn && cmData.roleEn.toLowerCase().includes(query)) ||
+        (cmData.roleTa && cmData.roleTa.toLowerCase().includes(query)) ||
+        (cmData.departmentsEn && cmData.departmentsEn.join(" ").toLowerCase().includes(query)) ||
+        (cmData.departmentsTa && cmData.departmentsTa.join(" ").toLowerCase().includes(query));
 
       const cmMatchesCategory = categoryFilter === 'all' || categoryFilter === 'leadership';
 
@@ -1760,6 +1766,11 @@
                 <strong><span data-i18n="portfolio">Portfolio</span>:</strong> ${cmPortfolio}
               </p>
               
+              <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem; font-weight: 600; margin-top: -0.25rem; margin-bottom: 0.5rem;">
+                <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i>
+                <span>${lang === 'ta' ? 'தொகுதி: ' + cmData.constituencyTa : 'Constituency: ' + cmData.constituencyEn}</span>
+              </div>
+              
               <div style="margin-top: 0.5rem;">
                 <span class="dept-title-label" data-i18n="departments">Departments</span>:
                 <div class="dept-pill-list" style="margin-top: 0.35rem;">
@@ -1785,7 +1796,13 @@
           m.nameEn.toLowerCase().includes(query) || 
           m.nameTa.toLowerCase().includes(query) || 
           m.portfolioEn.toLowerCase().includes(query) || 
-          m.portfolioTa.toLowerCase().includes(query);
+          m.portfolioTa.toLowerCase().includes(query) ||
+          (m.constituencyEn && m.constituencyEn.toLowerCase().includes(query)) ||
+          (m.constituencyTa && m.constituencyTa.toLowerCase().includes(query)) ||
+          (m.roleEn && m.roleEn.toLowerCase().includes(query)) ||
+          (m.roleTa && m.roleTa.toLowerCase().includes(query)) ||
+          (m.departmentsEn && m.departmentsEn.join(" ").toLowerCase().includes(query)) ||
+          (m.departmentsTa && m.departmentsTa.join(" ").toLowerCase().includes(query));
 
         const matchesCategory = categoryFilter === 'all' || m.category === categoryFilter;
 
@@ -1832,6 +1849,11 @@
 
           <div class="portfolio-summary">
             <strong><span data-i18n="portfolio">Portfolio</span>:</strong> ${mPortfolio}
+          </div>
+
+          <div style="font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.25rem; font-weight: 600; margin-top: 0.5rem; margin-bottom: 0.25rem;">
+            <i class="fa-solid fa-location-dot" style="color: var(--primary); font-size: 0.75rem;"></i>
+            <span>${lang === 'ta' ? 'தொகுதி: ' + m.constituencyTa : 'Constituency: ' + m.constituencyEn}</span>
           </div>
 
           <div class="card-actions-wrapper" onclick="event.stopPropagation()">
