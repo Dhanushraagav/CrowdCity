@@ -3486,6 +3486,40 @@
   border-left: 3px solid #ef4444 !important;
 }
 
+/* Sidebar Light & Dark Mode Contrast Overrides */
+.brand-title {
+  color: var(--text-main) !important;
+}
+
+.brand-subtitle {
+  color: #ea580c !important; /* Orange/amber for high contrast on light sidebar */
+}
+
+:root.dark-theme .brand-subtitle,
+:root:not(.light-theme) .brand-subtitle {
+  color: #fbbf24 !important; /* Yellow for dark sidebar */
+}
+
+/* Sidebar Helpdesk Widget Light/Dark Mode Fix */
+.sidebar-helpdesk-card {
+  background: var(--bg-app) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
+
+.sidebar-helpdesk-card div:first-child {
+  color: #ea580c !important; /* High contrast orange on light bg */
+}
+
+:root.dark-theme .sidebar-helpdesk-card div:first-child,
+:root:not(.light-theme) .sidebar-helpdesk-card div:first-child {
+  color: #fbbf24 !important; /* Gold on dark bg */
+}
+
+.sidebar-helpdesk-card div:nth-child(2) {
+  color: var(--text-main) !important;
+}
+
 
 
 
