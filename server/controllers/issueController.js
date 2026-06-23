@@ -218,7 +218,7 @@ function getCategoryDefaultImage(category) {
  * Report a new issue.
  */
 export const createIssue = async (req, res) => {
-  const { title, description, category, latitude, longitude, address } = req.body;
+  const { title, description, category, latitude, longitude, address, is_emergency } = req.body;
   const reporter_id = req.user.id;
 
   if (!title || title.trim().length < 5 || title.trim().length > 100) {
@@ -327,7 +327,8 @@ export const createIssue = async (req, res) => {
       ai_summary: aiResult.summary,
       ai_category: aiResult.category,
       ai_department: aiResult.department,
-      ai_priority: aiResult.priority ? aiResult.priority.toLowerCase() : 'medium'
+      ai_priority: (is_emergency === 'true' || is_emergency === true) ? 'critical' : (aiResult.priority ? aiResult.priority.toLowerCase() : 'medium'),
+      is_emergency: is_emergency === 'true' || is_emergency === true
     };
 
     // Production flow: insert to Supabase using request-scoped client
@@ -485,7 +486,7 @@ export const updateIssueStatus = async (req, res) => {
   const { id } = req.params;
   const { status, notes } = req.body;
 
-  const validStatuses = ['pending', 'assigned', 'in_progress', 'resolved', 'rejected'];
+  const validStatuses = ['pending', 'assigned', 'in_progress', 'resolved', 'rejected', 'timeline_update'];
   if (!status || !validStatuses.includes(status)) {
     return res.status(400).json({ error: 'Please provide a valid status.' });
   }
@@ -493,26 +494,10 @@ export const updateIssueStatus = async (req, res) => {
   try {
     const activeClient = getSupabaseClient(req);
 
-    // Enforce mandatory proof image file when status transitions to resolved
-    if (status === 'resolved') {
-      if (!req.file) {
-        const { data: currentIssue } = await activeClient
-          .from('issues')
-          .select('completion_proof_url')
-          .eq('id', id)
-          .maybeSingle();
-        if (!currentIssue || !currentIssue.completion_proof_url) {
-          return res.status(400).json({ error: 'Resolution proof image is strictly required to resolve a complaint.' });
-        }
-      }
-    }
-
-    let proofUrl = '';
-
-    // Fetch original issue status
+    // Fetch original issue details to evaluate validation
     const { data: originalIssue, error: fetchError } = await activeClient
       .from('issues')
-      .select('status, reporter_id, completion_proof_url')
+      .select('status, reporter_id, completion_proof_url, title')
       .eq('id', id)
       .single();
 
@@ -520,8 +505,21 @@ export const updateIssueStatus = async (req, res) => {
       return res.status(404).json({ error: 'Issue not found in database' });
     }
 
+    const targetStatus = status === 'timeline_update' ? originalIssue.status : status;
+
+    // Enforce mandatory proof image file when status transitions to resolved
+    if (targetStatus === 'resolved') {
+      if (!req.file) {
+        if (!originalIssue.completion_proof_url) {
+          return res.status(400).json({ error: 'Resolution proof image is strictly required to resolve a complaint.' });
+        }
+      }
+    }
+
+    let proofUrl = '';
+
     // Handle resolution image upload if status is resolved and file exists
-    if (status === 'resolved' && req.file) {
+    if (targetStatus === 'resolved' && req.file) {
       const activeStorageClient = supabaseAdmin || activeClient;
       const fileExt = req.file.originalname.split('.').pop();
       const fileName = `resolved-${Date.now()}.${fileExt}`;
@@ -546,11 +544,11 @@ export const updateIssueStatus = async (req, res) => {
     }
 
     const updates = { 
-      status, 
+      status: targetStatus, 
       updated_at: new Date() 
     };
 
-    if (status === 'resolved') {
+    if (targetStatus === 'resolved') {
       if (proofUrl) updates.completion_proof_url = proofUrl;
       updates.completion_notes = notes || 'Complaint resolved successfully.';
     }
@@ -570,9 +568,9 @@ export const updateIssueStatus = async (req, res) => {
       .from('status_history')
       .insert({
         issue_id: id,
-        status,
+        status: targetStatus,
         updated_by: req.user.id,
-        notes: notes || `Status updated to ${status.toUpperCase()} by authority dispatch.`
+        notes: notes || (status === 'timeline_update' ? 'Caselog timeline update posted.' : `Status updated to ${status.toUpperCase()} by authority dispatch.`)
       });
 
     if (historyError) {
@@ -580,11 +578,17 @@ export const updateIssueStatus = async (req, res) => {
     }
 
     // 3. Notify the citizen reporter
+    const isTimelineUpdate = status === 'timeline_update';
+    const notifTitle = isTimelineUpdate ? "Complaint Timeline Update" : "Complaint Status Update";
+    const notifBody = isTimelineUpdate
+      ? `A progress update has been added to your complaint '${issue.title}': "${notes || 'No notes provided'}"`
+      : `Your reported complaint '${issue.title}' has been updated to ${status.toUpperCase()}.`;
+
     await createNotification(
       issue.reporter_id,
-      "Complaint Status Update",
-      `Your reported complaint '${issue.title}' has been updated to ${status.toUpperCase()}.`,
-      "status_change",
+      notifTitle,
+      notifBody,
+      isTimelineUpdate ? "timeline_update" : "status_change",
       id
     );
 

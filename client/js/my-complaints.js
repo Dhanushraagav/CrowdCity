@@ -218,10 +218,13 @@ async function loadAndRenderMyIssues() {
     const tTimelineDetails = window.i18n ? window.i18n.t('timeline_details') : 'Timeline & Details';
 
     return `
-      <article class="issue-card" onclick="window.location.href='issue-details.html?id=${issue.id}'">
+      <article class="issue-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='issue-details.html?id=${issue.id}'">
         <div class="issue-card-header">
           <span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span>
-          <span class="badge badge-status ${issue.status}">${tStatus}</span>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            ${issue.is_emergency ? `<span class="badge badge-status critical" style="background-color: #ef4444; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
+            <span class="badge badge-status ${issue.status}">${tStatus}</span>
+          </div>
         </div>
         <h3 class="issue-card-title">${escapeHTML(issue.title)}</h3>
         <p class="issue-card-description">${escapeHTML(issue.description)}</p>

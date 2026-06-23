@@ -567,9 +567,10 @@ function filterAndRenderComplaints(authorities) {
     const statusText = issue.status ? issue.status.replace('_', ' ') : 'pending';
 
     return `
-      <div class="complaint-admin-card" id="card-${issue.id}">
+      <div class="complaint-admin-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" id="card-${issue.id}">
         <div class="complaint-admin-header">
           <div>
+            ${issue.is_emergency ? `<span class="badge" style="background-color: #ef4444; color: white; text-transform: uppercase; font-size: 0.72rem; margin-right: 0.5rem; display: inline-block; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
             <span class="badge" style="background-color: var(--color-${issue.category || 'other'}); color: white; text-transform: uppercase; font-size: 0.72rem; margin-right: 0.5rem; display: inline-block;">
               ${catNames[issue.category] || 'Other'}
             </span>
@@ -876,9 +877,12 @@ function renderAiDecisions() {
       : `<span class="badge" style="background-color: #ef4444; color: white; font-size: 0.72rem; font-weight:700;">MISMATCH</span>`;
 
     return `
-      <tr>
+      <tr class="${issue.is_emergency ? 'emergency-row' : ''}">
         <td>
-          <div style="font-weight: 600;">${issue.title}</div>
+          <div style="font-weight: 600;">
+            ${issue.is_emergency ? `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; margin-right: 0.35rem; animation: pulse-red 1.5s infinite;" title="EMERGENCY"></i>` : ''}
+            ${issue.title}
+          </div>
           <div style="font-size: 0.75rem; color: var(--text-muted);">${issue.id}</div>
         </td>
         <td style="text-transform: capitalize;">${issue.category || 'other'}</td>

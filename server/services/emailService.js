@@ -287,7 +287,8 @@ export const getUserEmail = async (userId) => {
  * 5. Issue Created Confirmation Email
  */
 export const sendIssueCreatedEmail = async (email, fullName, issue) => {
-  const subject = 'Complaint Submitted Successfully - CrowdCity';
+  const subjectPrefix = issue.is_emergency ? '[🚨 EMERGENCY - CRITICAL] ' : '';
+  const subject = `${subjectPrefix}Complaint Submitted Successfully - CrowdCity`;
 
   const contentHtml = `
     <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">
@@ -317,7 +318,11 @@ export const sendIssueCreatedEmail = async (email, fullName, issue) => {
  * 6. Issue Status Update Email
  */
 export const sendIssueStatusUpdateEmail = async (email, fullName, issue, newStatus, notes) => {
-  const subject = `Complaint Status Updated to ${newStatus.toUpperCase()} - CrowdCity`;
+  const isTimelineUpdate = newStatus === 'timeline_update';
+  const subjectPrefix = issue.is_emergency ? '[🚨 EMERGENCY - CRITICAL] ' : '';
+  const subject = isTimelineUpdate
+    ? `${subjectPrefix}Complaint Timeline Updated - CrowdCity`
+    : `${subjectPrefix}Complaint Status Updated to ${newStatus.toUpperCase()} - CrowdCity`;
 
   const statusColors = {
     pending: '#f59e0b',
@@ -326,7 +331,8 @@ export const sendIssueStatusUpdateEmail = async (email, fullName, issue, newStat
     resolved: '#10b981',
     verified: '#10b981',
     rejected: '#ef4444',
-    withdrawn: '#6b7280'
+    withdrawn: '#6b7280',
+    timeline_update: '#3b82f6'
   };
   const badgeColor = statusColors[newStatus] || '#3b82f6';
 
@@ -334,9 +340,13 @@ export const sendIssueStatusUpdateEmail = async (email, fullName, issue, newStat
     ? `<p style="margin: 16px 0 0 0; font-size: 13px; color: #9AA4B2;">Notes: <span style="color: #cbd5e1;">${notes}</span></p>`
     : '';
 
+  const headingText = isTimelineUpdate ? 'Timeline Update' : 'Status Update';
+  const badgeLabel = isTimelineUpdate ? 'PROGRESS UPDATE' : newStatus.replace(/_/g, ' ');
+  const labelText = isTimelineUpdate ? 'Update Type' : 'New Status';
+
   const contentHtml = `
     <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">
-      Status Update
+      ${headingText}
     </h1>
     <p style="margin: 0 0 24px 0; font-size: 14px; color: #cbd5e1; text-align: center; line-height: 1.5;">
       Hi ${fullName || 'Citizen'}, there has been an update to your complaint.
@@ -344,9 +354,9 @@ export const sendIssueStatusUpdateEmail = async (email, fullName, issue, newStat
     <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 4px; padding: 20px; margin: 24px 0;">
       <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Complaint</p>
       <p style="margin: 0 0 16px 0; font-size: 15px; color: #ffffff; font-weight: 600;">${issue.title || 'Untitled'}</p>
-      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">New Status</p>
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">${labelText}</p>
       <div style="display: inline-block; padding: 4px 12px; border-radius: 4px; background-color: ${badgeColor}; color: #ffffff; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-        ${newStatus.replace(/_/g, ' ')}
+        ${badgeLabel}
       </div>
       ${notesHtml}
     </div>
@@ -355,8 +365,8 @@ export const sendIssueStatusUpdateEmail = async (email, fullName, issue, newStat
     </p>
   `;
 
-  const html = getEmailHtmlWrapper('Status Update', contentHtml);
-  const text = `Status Update\n\nHi ${fullName || 'Citizen'}, your complaint "${issue.title || 'Untitled'}" has been updated to ${newStatus.toUpperCase()}.${notes ? `\n\nNotes: ${notes}` : ''}\n\nLog in to CrowdCity to view the full details.`;
+  const html = getEmailHtmlWrapper(headingText, contentHtml);
+  const text = `${headingText}\n\nHi ${fullName || 'Citizen'}, your complaint "${issue.title || 'Untitled'}" has been updated with a ${badgeLabel}.${notes ? `\n\nNotes: ${notes}` : ''}\n\nLog in to CrowdCity to view the full details.`;
 
   return sendResendEmail({ to: email, subject, html, text });
 };

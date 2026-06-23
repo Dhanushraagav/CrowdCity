@@ -35,6 +35,19 @@ function initReportPage() {
     });
   }
 
+  // Emergency toggle interaction
+  const emergencyCheckbox = document.getElementById('report-emergency');
+  const emergencyWarningBox = document.getElementById('emergency-warning-box');
+  if (emergencyCheckbox && emergencyWarningBox) {
+    emergencyCheckbox.addEventListener('change', () => {
+      if (emergencyCheckbox.checked) {
+        emergencyWarningBox.classList.remove('hidden');
+      } else {
+        emergencyWarningBox.classList.add('hidden');
+      }
+    });
+  }
+
   // Proactively request browser location on load to center the map
   requestBrowserLocation(false);
 }
@@ -705,6 +718,9 @@ function setupFormSubmit() {
     formData.append('latitude', finalLat);
     formData.append('longitude', finalLng);
     formData.append('address', finalAddress || 'Location detected. Address unavailable.');
+    
+    const isEmergencyCheckbox = document.getElementById('report-emergency');
+    formData.append('is_emergency', isEmergencyCheckbox ? isEmergencyCheckbox.checked : false);
 
     if (selectedFiles.length) {
       selectedFiles.forEach(file => {

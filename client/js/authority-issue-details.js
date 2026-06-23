@@ -130,6 +130,16 @@ async function loadCaseDetails() {
     document.getElementById('issue-image-container').classList.add('hidden');
   }
 
+  // Toggle Emergency Alert Banner
+  const emergencyBanner = document.getElementById('emergency-alert-banner');
+  if (emergencyBanner) {
+    if (issue.is_emergency) {
+      emergencyBanner.classList.remove('hidden');
+    } else {
+      emergencyBanner.classList.add('hidden');
+    }
+  }
+
   // Reporter
   const reporterName = issue.reporter?.full_name || 'Anonymous Citizen';
   document.getElementById('reporter-name').textContent = reporterName;
@@ -452,7 +462,9 @@ function setupFormHandlers() {
           // Show confirmation message
           const successMsg = status === 'resolved'
             ? 'Success: Case status updated to Resolved! The citizen who filed this report has been informed.'
-            : `Success: Case status updated to ${status.replace('_', ' ')}!`;
+            : (status === 'timeline_update'
+               ? 'Success: Casework timeline update added!'
+               : `Success: Case status updated to ${status.replace('_', ' ')}!`);
           
           showAlert(successMsg, true);
           window.showToast(successMsg, "success");

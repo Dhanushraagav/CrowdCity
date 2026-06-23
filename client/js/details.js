@@ -87,6 +87,16 @@ async function loadIssueDetails() {
   // Update visual stepper
   updateStepperUI(issue.status);
 
+  // Toggle Emergency Alert Banner
+  const emergencyBanner = document.getElementById('emergency-alert-banner');
+  if (emergencyBanner) {
+    if (issue.is_emergency) {
+      emergencyBanner.classList.remove('hidden');
+    } else {
+      emergencyBanner.classList.add('hidden');
+    }
+  }
+
   // Toggle Citizen Verification and Resolution Proof Showcase
   const verifyPanel = document.getElementById('citizen-verification-panel');
   const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;

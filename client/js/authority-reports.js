@@ -172,9 +172,12 @@ function applyFiltersAndRender() {
       `Coordinates: ${issue.latitude.toFixed(4)}, ${issue.longitude.toFixed(4)}`;
 
     return `
-      <tr>
+      <tr class="${issue.is_emergency ? 'emergency-row' : ''}">
         <td><span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span></td>
-        <td style="font-weight: 700; color: var(--text-main); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(issue.title)}</td>
+        <td style="font-weight: 700; color: var(--text-main); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${issue.is_emergency ? `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; margin-right: 0.35rem; animation: pulse-red 1.5s infinite;" title="EMERGENCY"></i>` : ''}
+          ${escapeHTML(issue.title)}
+        </td>
         <td>${dateStr}</td>
         <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(issue.address || '')}">${escapeHTML(truncatedAddress)}</td>
         <td><span class="badge badge-status ${issue.status}">${issue.status.replace('_', ' ')}</span></td>

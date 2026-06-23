@@ -152,7 +152,7 @@ export const validateUpdateStatus = validateSchema({
     id: { required: true, pattern: idRegex }
   },
   body: {
-    status: { type: 'string', required: true, enum: ['pending', 'assigned', 'in_progress', 'resolved', 'rejected', 'verified'] },
+    status: { type: 'string', required: true, enum: ['pending', 'assigned', 'in_progress', 'resolved', 'rejected', 'verified', 'timeline_update'] },
     notes: { type: 'string', required: false, maxLength: 500 }
   }
 });

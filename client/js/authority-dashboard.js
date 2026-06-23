@@ -102,9 +102,12 @@ async function loadRecentAssigned() {
     });
     
     return `
-      <div class="case-preview-card" onclick="window.location.href='authority-issue-details.html?id=${issue.id}'">
+      <div class="case-preview-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='authority-issue-details.html?id=${issue.id}'">
         <div>
-          <div class="case-title">${escapeHTML(issue.title)}</div>
+          <div class="case-title">
+            ${issue.is_emergency ? `<span class="badge" style="background-color: #ef4444; color: white; text-transform: uppercase; font-size: 0.65rem; padding: 0.1rem 0.35rem; margin-right: 0.35rem; display: inline-block; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
+            ${escapeHTML(issue.title)}
+          </div>
           <div class="case-meta">
             <span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span>
             <span style="margin-left: 0.5rem;">Reported: ${dateStr}</span>
@@ -155,9 +158,12 @@ async function loadPriorityCases() {
       });
       
       return `
-        <div class="case-preview-card" onclick="window.location.href='authority-issue-details.html?id=${issue.id}'">
+        <div class="case-preview-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='authority-issue-details.html?id=${issue.id}'">
           <div>
-            <div class="case-title">${escapeHTML(issue.title)}</div>
+            <div class="case-title">
+              ${issue.is_emergency ? `<span class="badge" style="background-color: #ef4444; color: white; text-transform: uppercase; font-size: 0.65rem; padding: 0.15rem 0.35rem; margin-right: 0.35rem; display: inline-block; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
+              ${escapeHTML(issue.title)}
+            </div>
             <div class="case-meta">
               <span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span>
               <span style="margin-left: 0.5rem; font-weight: 600; color: var(--primary);"><i class="fa-solid fa-thumbs-up"></i> ${issue.upvotes_count || 0} Upvotes</span>

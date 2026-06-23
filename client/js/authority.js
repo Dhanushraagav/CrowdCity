@@ -109,10 +109,13 @@ function renderQueueList(issues) {
     }
 
     return `
-      <article class="issue-card" style="background-color: var(--bg-surface);">
+      <article class="issue-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" style="background-color: var(--bg-surface);">
         <div class="issue-card-header">
           <span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span>
-          <span class="badge badge-status ${issue.status}">${issue.status.replace('_', ' ')}</span>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            ${issue.is_emergency ? `<span class="badge badge-status critical" style="background-color: #ef4444; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
+            <span class="badge badge-status ${issue.status}">${issue.status.replace('_', ' ')}</span>
+          </div>
         </div>
         <h3 class="issue-card-title">${escapeHTML(issue.title)}</h3>
         <p class="issue-card-description" style="-webkit-line-clamp: 3;">${escapeHTML(issue.description)}</p>

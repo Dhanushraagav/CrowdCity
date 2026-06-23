@@ -380,8 +380,11 @@ function renderFeedList(issues) {
     const categoryName = window.formatCategoryName(issue.category);
     const voteColor = upvotedClass ? 'var(--primary)' : 'var(--text-muted)';
 
+    const isEmergency = issue.is_emergency;
+    const emergencyBadge = isEmergency ? `<span class="stitch-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 800; font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.25rem; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation" style="font-size: 0.7rem;"></i> EMERGENCY</span>` : '';
+
     return `
-      <div class="stitch-item-card" onclick="window.location.href='issue-details.html?id=${issue.id}'">
+      <div class="stitch-item-card ${isEmergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='issue-details.html?id=${issue.id}'">
         <div class="stitch-item-icon">
           <i class="fa-solid ${categoryIcon}"></i>
         </div>
@@ -399,6 +402,7 @@ function renderFeedList(issues) {
           </div>
         </div>
         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+          ${emergencyBadge}
           <span class="stitch-badge ${issue.status}">${issue.status.replace('_', ' ')}</span>
         </div>
       </div>

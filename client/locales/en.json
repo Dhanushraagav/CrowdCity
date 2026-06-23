@@ -490,6 +490,7 @@
   "latitude": "Latitude:",
   "longitude": "Longitude:",
   "status_history": "Status History",
+  "timeline_update_keep": "Timeline Update (Keep status)",
   "issue_reported": "Issue Reported",
   "add_comment_placeholder": "Add a public comment or suggestion...",
   "explain_resolution_work": "Explain the resolution work done...",

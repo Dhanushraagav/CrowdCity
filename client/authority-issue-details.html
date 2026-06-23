@@ -178,7 +178,16 @@
       <div id="details-content" class="details-grid hidden">
         
         <!-- Left: Case Details Card, Image, History -->
-        <section style="display: flex; flex-direction: column; gap: 2rem;">
+        <section style="display: flex; flex-direction: column; gap: 2rem; height: fit-content;">
+          
+          <!-- Emergency Alert Banner (Initially hidden) -->
+          <div id="emergency-alert-banner" class="hidden" style="padding: 1rem 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-lg); display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; animation: pulse-red-border 2s infinite;">
+            <i class="fa-solid fa-circle-exclamation" style="color: #ef4444; font-size: 1.5rem; animation: pulse-red 1.5s infinite;"></i>
+            <div>
+              <h4 style="margin: 0; color: #ef4444; font-weight: 800; font-family: var(--font-heading); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Critical Emergency Priority 1</h4>
+              <p style="margin: 0.15rem 0 0 0; color: #fca5a5; font-size: 0.85rem;">This issue has been flagged as a life-threatening or safety-critical emergency by the reporter.</p>
+            </div>
+          </div>
           
           <!-- Core Details Block -->
           <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
@@ -270,6 +279,7 @@
               <div class="form-group">
                 <label for="dispatch-status-select" class="form-label" data-i18n="update_case_status">Update Case Status *</label>
                 <select id="dispatch-status-select" class="form-select" required>
+                  <option value="timeline_update" data-i18n="timeline_update_keep">Timeline Update (Keep current status)</option>
                   <option value="assigned" data-i18n="assigned">Assigned</option>
                   <option value="in_progress" data-i18n="in_progress">In Progress</option>
                   <option value="resolved" data-i18n="resolved">Resolved</option>
