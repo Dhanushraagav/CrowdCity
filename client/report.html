@@ -753,12 +753,11 @@
               <div class="upload-zone" id="image-upload-zone">
                 <i class="fa-solid fa-cloud-arrow-up upload-zone-icon"></i>
                 <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); display: block;" data-i18n="drag_drop_images">Drag &amp; drop images</span>
-                <span style="font-size: 0.73rem; color: var(--text-muted); margin-top: 0.2rem; display: block;" data-i18n="supported_formats">Supported formats: JPG, PNG, max 10MB</span>
-                <input type="file" id="report-image-input" class="hidden" accept="image/*">
+                <span style="font-size: 0.73rem; color: var(--text-muted); margin-top: 0.2rem; display: block;" data-i18n="supported_formats">Supported formats: JPG, PNG, max 10MB (Max 5 images)</span>
+                <input type="file" id="report-image-input" class="hidden" accept="image/*" multiple>
               </div>
-              <div id="image-preview-container" class="hidden" style="margin-top: 0.75rem; position: relative; border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden;">
-                <img id="image-preview" src="#" alt="Upload preview" style="max-height: 200px; width: 100%; object-fit: cover;">
-                <button type="button" id="btn-remove-preview" style="position: absolute; top: 8px; left: 8px; padding: 0.3rem 0.6rem; font-size: 0.78rem; border-radius: var(--radius-sm); background: rgba(15,19,26,0.88); color: var(--text-main); border: 1px solid var(--border-color); cursor: pointer;" data-i18n="remove">Remove</button>
+              <div id="image-preview-container" class="hidden" style="margin-top: 0.75rem;">
+                <div id="image-previews-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem;"></div>
               </div>
             </div>
 

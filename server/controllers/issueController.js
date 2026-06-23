@@ -251,17 +251,21 @@ export const createIssue = async (req, res) => {
 
   try {
     let imageUrl = '';
+    const uploadedAttachments = [];
 
-    if (req.file) {
+    if (req.files && req.files.length > 0) {
       const activeClient = supabaseAdmin || supabase;
-      const fileExt = req.file.originalname.split('.').pop();
+      
+      // 1. Process primary image (first uploaded file)
+      const primaryFile = req.files[0];
+      const fileExt = primaryFile.originalname.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `reports/${fileName}`;
 
       const { data: uploadData, error: uploadError } = await activeClient.storage
         .from('issue-images')
-        .upload(filePath, req.file.buffer, {
-          contentType: req.file.mimetype,
+        .upload(filePath, primaryFile.buffer, {
+          contentType: primaryFile.mimetype,
           upsert: true
         });
 
@@ -270,11 +274,35 @@ export const createIssue = async (req, res) => {
           .from('issue-images')
           .getPublicUrl(filePath);
         imageUrl = publicUrl;
+      } else {
+        imageUrl = `data:${primaryFile.mimetype};base64,${primaryFile.buffer.toString('base64')}`;
       }
-    }
 
-    if (!imageUrl && req.file) {
-      imageUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      // 2. Process remaining images as attachments
+      const attachmentFiles = req.files.slice(1);
+      for (const file of attachmentFiles) {
+        const ext = file.originalname.split('.').pop();
+        const fName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+        const fPath = `evidence/${fName}`;
+
+        const { data: uploadAttachData, error: uploadAttachError } = await activeClient.storage
+          .from('issue-images')
+          .upload(fPath, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true
+          });
+
+        if (!uploadAttachError) {
+          const { data: { publicUrl } } = activeClient.storage
+            .from('issue-images')
+            .getPublicUrl(fPath);
+          uploadedAttachments.push({
+            file_url: publicUrl,
+            file_name: file.originalname,
+            file_size: file.size
+          });
+        }
+      }
     }
 
     // Perform AI analysis on submission
@@ -317,6 +345,25 @@ export const createIssue = async (req, res) => {
         details: error.details,
         hint: error.hint
       });
+    }
+
+    // Insert additional attachments if any were uploaded
+    if (uploadedAttachments.length > 0) {
+      const attachmentsToInsert = uploadedAttachments.map(att => ({
+        issue_id: issue.id,
+        uploaded_by: reporter_id,
+        file_url: att.file_url,
+        file_name: att.file_name,
+        file_size: att.file_size
+      }));
+
+      const { error: attachInsertError } = await activeClient
+        .from('issue_attachments')
+        .insert(attachmentsToInsert);
+
+      if (attachInsertError) {
+        logger.error('Failed to insert additional issue attachments: %O', attachInsertError);
+      }
     }
 
     // Insert timeline tracking entry using admin context to bypass citizen restrictions on status_history
@@ -1969,102 +2016,146 @@ export const getIssueReceipt = async (req, res) => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Complaint Receipt - ${issue.title}</title>
+  <title>Official Receipt - ${issue.title}</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Outfit', sans-serif; background: #ffffff; color: #1e293b; padding: 40px; line-height: 1.6; }
-    .receipt-container { max-width: 700px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 40px; }
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 22px; font-weight: 700; color: #1e293b; letter-spacing: 1px; }
-    .logo span { color: #3b82f6; }
-    .receipt-title { font-size: 13px; text-transform: uppercase; color: #64748b; letter-spacing: 1px; font-weight: 500; }
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
-    .detail-item { }
-    .detail-label { font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px; }
-    .detail-value { font-size: 15px; color: #1e293b; font-weight: 500; }
+    body { font-family: 'Outfit', sans-serif; background: #f8fafc; color: #1e293b; padding: 40px; line-height: 1.6; }
+    .receipt-container { max-width: 800px; margin: 0 auto; border: 2px solid #0f766e; background: #ffffff; border-radius: 12px; padding: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: relative; }
+    .receipt-container::before { content: ""; position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px; border: 1px dashed rgba(15, 118, 110, 0.3); border-radius: 8px; pointer-events: none; }
+    
+    /* Top Logo Header */
+    .logo-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 24px; margin-bottom: 30px; }
+    .gov-logo { height: 75px; object-fit: contain; }
+    .cc-logo { height: 60px; object-fit: contain; }
+    
+    /* Document Titles */
+    .title-section { text-align: center; margin-bottom: 35px; }
+    .title-gov { font-size: 15px; font-weight: 700; color: #0f766e; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+    .title-dept { font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .title-doc { font-size: 22px; font-weight: 700; color: #1e293b; letter-spacing: 0.5px; border-bottom: 2px solid #0f766e; display: inline-block; padding-bottom: 6px; }
+    
+    /* Detail Layout */
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 30px; margin-bottom: 35px; }
+    .detail-label { font-size: 10px; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
+    .detail-value { font-size: 14px; color: #1e293b; font-weight: 500; }
     .full-width { grid-column: 1 / -1; }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; color: #ffffff; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .description-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; font-size: 14px; color: #334155; line-height: 1.7; }
-    .footer { border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; text-align: center; font-size: 12px; color: #94a3b8; }
-    .print-btn { display: inline-block; padding: 10px 24px; background: #3b82f6; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; margin-bottom: 24px; }
-    .print-btn:hover { background: #2563eb; }
+    
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .description-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; font-size: 14px; color: #334155; line-height: 1.7; }
+    
+    /* Validation & Seal */
+    .validation-row { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #e2e8f0; padding-top: 25px; margin-top: 35px; }
+    .seal-text { font-size: 12px; color: #64748b; max-width: 450px; line-height: 1.5; }
+    .qr-placeholder { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; font-size: 10px; text-align: center; color: #64748b; font-weight: 600; background: #f8fafc; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100px; height: 100px; justify-content: center; }
+    .qr-icon { font-size: 28px; color: #0f766e; margin-bottom: 4px; }
+    
+    .footer { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 40px; }
+    .print-btn { display: inline-block; padding: 10px 24px; background: #0f766e; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; transition: background-color 0.2s; box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2); }
+    .print-btn:hover { background: #0d9488; }
+    
     @media print {
-      body { padding: 20px; }
-      .receipt-container { border: none; padding: 0; }
-      .print-btn { display: none !important; }
+      body { background: #ffffff; padding: 0; }
+      .receipt-container { border: none; padding: 10px; box-shadow: none; }
+      .receipt-container::before { display: none; }
+      .print-btn-container { display: none !important; }
     }
   </style>
 </head>
 <body>
+  <div class="print-btn-container" style="max-width: 800px; margin: 0 auto 15px auto; text-align: right;">
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+  
   <div class="receipt-container">
-    <div style="text-align: right;">
-      <button class="print-btn" onclick="window.print()">Print Receipt</button>
+    <div class="logo-header">
+      <img src="/images/tamilnadu_auth.png" alt="Government of Tamil Nadu" class="gov-logo">
+      <img src="/images/crowdcity_logo_transparent.png" alt="CrowdCity AI" class="cc-logo">
     </div>
-
-    <div class="header">
-      <div>
-        <div class="logo">CrowdCity<span>.</span></div>
-        <div class="receipt-title">Complaint Receipt</div>
-      </div>
-      <div style="text-align: right;">
-        <div class="detail-label">Complaint ID</div>
-        <div class="detail-value" style="font-family: monospace; font-size: 13px;">${issue.id}</div>
-      </div>
+    
+    <div class="title-section">
+      <div class="title-gov">Government of Tamil Nadu</div>
+      <div class="title-dept">Civic Issue Acknowledgement Receipt</div>
+      <div class="title-doc">Complaint Receipt</div>
     </div>
-
+    
     <div class="detail-grid">
-      <div class="full-width">
-        <div class="detail-label">Title</div>
-        <div class="detail-value" style="font-size: 18px; font-weight: 600;">${issue.title || 'Untitled'}</div>
-      </div>
-
       <div>
-        <div class="detail-label">Category</div>
-        <div class="detail-value" style="text-transform: capitalize;">${(issue.category || 'general').replace(/_/g, ' ')}</div>
+        <div class="detail-label">Complaint ID</div>
+        <div class="detail-value" style="font-family: monospace; font-size: 13px; font-weight: 600; color: #0f766e;">${issue.id}</div>
       </div>
-
       <div>
         <div class="detail-label">Status</div>
         <div><span class="status-badge" style="background-color: ${badgeColor};">${(issue.status || 'pending').replace(/_/g, ' ')}</span></div>
       </div>
-
-      <div>
-        <div class="detail-label">Reporter</div>
-        <div class="detail-value">${issue.reporter?.full_name || 'Anonymous'}</div>
-      </div>
-
-      <div>
-        <div class="detail-label">Date Reported</div>
-        <div class="detail-value">${issue.created_at ? new Date(issue.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</div>
-      </div>
-
+      
       <div class="full-width">
-        <div class="detail-label">Description</div>
-        <div class="description-box">${issue.description || 'No description provided.'}</div>
+        <div class="detail-label">Complaint Title</div>
+        <div class="detail-value" style="font-size: 16px; font-weight: 600; color: #0f766e;">${issue.title || 'Untitled'}</div>
       </div>
-
+      
+      <div>
+        <div class="detail-label">Category</div>
+        <div class="detail-value" style="text-transform: capitalize;">${(issue.category || 'general').replace(/_/g, ' ')}</div>
+      </div>
+      <div>
+        <div class="detail-label">Date Submitted</div>
+        <div class="detail-value">${issue.created_at ? new Date(issue.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</div>
+      </div>
+      
+      <div>
+        <div class="detail-label">Submitted By</div>
+        <div class="detail-value">${issue.reporter?.full_name || 'Anonymous Citizen'}</div>
+      </div>
+      <div>
+        <div class="detail-label">Assigned Authority</div>
+        <div class="detail-value">${issue.assigned_to ? 'Department Official' : 'Pending Assignment'}</div>
+      </div>
+      
       <div class="full-width">
-        <div class="detail-label">Address</div>
+        <div class="detail-label">Location Address</div>
         <div class="detail-value">${issue.address || 'Address not available'}</div>
       </div>
-
+      
       <div>
         <div class="detail-label">Latitude</div>
         <div class="detail-value">${issue.latitude || 'N/A'}</div>
       </div>
-
       <div>
         <div class="detail-label">Longitude</div>
         <div class="detail-value">${issue.longitude || 'N/A'}</div>
       </div>
+      
+      <div class="full-width">
+        <div class="detail-label">Complaint Description</div>
+        <div class="description-box">${issue.description || 'No description provided.'}</div>
+      </div>
     </div>
-
+    
+    <div class="validation-row">
+      <div class="seal-text">
+        <strong style="color: #0f766e; display: block; margin-bottom: 4px;">Digitally Verified Receipt</strong>
+        This is an official computer-generated receipt issued by the CrowdCity Civic Engagement Portal, Department of Municipal Administration & Water Supply, Government of Tamil Nadu. It is digitally signed and serves as valid proof of complaint registration.
+      </div>
+      <div class="qr-placeholder">
+        <span style="font-size: 24px; margin-bottom: 2px;">🛡️</span>
+        <span style="font-size: 9px; line-height: 1.1;">CROWDCITY<br>VERIFIED</span>
+      </div>
+    </div>
+    
     <div class="footer">
-      <p>Generated on ${generatedDate}</p>
-      <p style="margin-top: 4px;">CrowdCity AI &mdash; Civic Engagement Platform</p>
+      <p>Generated on ${generatedDate} &bull; System ID: CC-PRT-${issue.id.substring(0,8).toUpperCase()}</p>
+      <p style="margin-top: 4px; font-weight: 500; color: #0f766e;">CrowdCity AI &mdash; Enhancing Civic Accountability</p>
     </div>
   </div>
+  
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
 </body>
 </html>`;
 

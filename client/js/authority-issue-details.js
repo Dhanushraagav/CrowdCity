@@ -495,6 +495,7 @@ function escapeHTML(str) {
 // ============================================================
 
 let chatRealtimeChannel = null;
+let chatPresenceChannel = null;
 
 async function loadAuthorityNewFeatures(issue) {
   // === Evidence Gallery ===
@@ -610,9 +611,14 @@ function setupChatRealtime(currentIssueId) {
     supabaseClient.removeChannel(chatRealtimeChannel);
     chatRealtimeChannel = null;
   }
+  if (chatPresenceChannel && typeof supabaseClient !== 'undefined' && supabaseClient) {
+    supabaseClient.removeChannel(chatPresenceChannel);
+    chatPresenceChannel = null;
+  }
 
   if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
 
+  // 1. Subscribe to Chat Messages
   chatRealtimeChannel = supabaseClient
     .channel(`public:messages:issue_${currentIssueId}`)
     .on('postgres_changes', {
@@ -627,6 +633,43 @@ function setupChatRealtime(currentIssueId) {
     })
     .subscribe((status) => {
       console.log(`[Authority Chat] Realtime subscription status: ${status}`);
+    });
+
+  // 2. Subscribe to Presence (Online Status tracking)
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  chatPresenceChannel = supabaseClient.channel(`presence:issue_${currentIssueId}`);
+  chatPresenceChannel
+    .on('presence', { event: 'sync' }, () => {
+      const state = chatPresenceChannel.presenceState();
+      let citizenOnline = false;
+      Object.keys(state).forEach((key) => {
+        state[key].forEach((pres) => {
+          if (pres.role === 'citizen') {
+            citizenOnline = true;
+          }
+        });
+      });
+
+      const statusSpan = document.getElementById('chat-presence-status');
+      if (statusSpan) {
+        if (citizenOnline) {
+          statusSpan.style.background = 'rgba(16, 185, 129, 0.1)';
+          statusSpan.style.color = '#10b981';
+          statusSpan.innerHTML = '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981; display: inline-block;"></span>Online';
+        } else {
+          statusSpan.style.background = 'rgba(107, 114, 128, 0.1)';
+          statusSpan.style.color = '#6b7280';
+          statusSpan.innerHTML = '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #6b7280; display: inline-block;"></span>Offline';
+        }
+      }
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED' && currentUser) {
+        await chatPresenceChannel.track({
+          user_id: currentUser.id,
+          role: 'authority'
+        });
+      }
     });
 }
 

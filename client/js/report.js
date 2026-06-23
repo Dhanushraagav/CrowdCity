@@ -5,6 +5,7 @@ let lastRecentIssuesReport = null;
 let reportMap = null;
 let reportMarker = null;
 let isAddressManuallyEntered = false;
+let selectedFiles = [];
 
 const DEFAULT_CENTER = [11.0168, 76.9558]; // Coimbatore, India
 const DEFAULT_ZOOM = 13;
@@ -406,8 +407,7 @@ function setupImageUpload() {
   const uploadZone = document.getElementById('image-upload-zone');
   const fileInput = document.getElementById('report-image-input');
   const previewContainer = document.getElementById('image-preview-container');
-  const previewImage = document.getElementById('image-preview');
-  const removeBtn = document.getElementById('btn-remove-preview');
+  const previewsGrid = document.getElementById('image-previews-grid');
 
   if (!uploadZone || !fileInput) return;
 
@@ -430,31 +430,106 @@ function setupImageUpload() {
     uploadZone.style.backgroundColor = 'transparent';
     
     if (e.dataTransfer.files.length) {
-      fileInput.files = e.dataTransfer.files;
-      handleFileChange(e.dataTransfer.files[0]);
+      addFiles(e.dataTransfer.files);
     }
   });
 
   fileInput.addEventListener('change', () => {
     if (fileInput.files.length) {
-      handleFileChange(fileInput.files[0]);
+      addFiles(fileInput.files);
+      fileInput.value = ''; // Clear value to allow selecting same files again if removed
     }
   });
 
-  removeBtn.addEventListener('click', () => {
-    fileInput.value = '';
-    previewContainer.classList.add('hidden');
-    uploadZone.classList.remove('hidden');
-  });
+  function addFiles(filesList) {
+    for (let i = 0; i < filesList.length; i++) {
+      const file = filesList[i];
+      if (selectedFiles.length >= 5) {
+        window.showToast("You can upload a maximum of 5 images.", "warning");
+        break;
+      }
+      if (!file.type.startsWith('image/')) {
+        window.showToast("Only image files are supported.", "error");
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        window.showToast(`File ${file.name} is too large. Max size is 10MB.`, "error");
+        continue;
+      }
+      const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+      if (!exists) {
+        selectedFiles.push(file);
+      }
+    }
+    renderPreviews();
+  }
 
-  function handleFileChange(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      previewImage.src = e.target.result;
-      previewContainer.classList.remove('hidden');
+  function renderPreviews() {
+    if (!previewsGrid || !previewContainer) return;
+
+    previewsGrid.innerHTML = '';
+    
+    if (selectedFiles.length === 0) {
+      previewContainer.classList.add('hidden');
+      uploadZone.classList.remove('hidden');
+      return;
+    }
+
+    previewContainer.classList.remove('hidden');
+    if (selectedFiles.length >= 5) {
       uploadZone.classList.add('hidden');
-    };
-    reader.readAsDataURL(file);
+    } else {
+      uploadZone.classList.remove('hidden');
+    }
+
+    selectedFiles.forEach((file, index) => {
+      const reader = new FileReader();
+      
+      const card = document.createElement('div');
+      card.style.position = 'relative';
+      card.style.height = '120px';
+      card.style.borderRadius = 'var(--radius-md)';
+      card.style.border = '1px solid var(--border-color)';
+      card.style.overflow = 'hidden';
+      card.style.backgroundColor = 'var(--bg-app)';
+
+      const img = document.createElement('img');
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      card.appendChild(img);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      removeBtn.style.position = 'absolute';
+      removeBtn.style.top = '4px';
+      removeBtn.style.right = '4px';
+      removeBtn.style.width = '20px';
+      removeBtn.style.height = '20px';
+      removeBtn.style.borderRadius = '50%';
+      removeBtn.style.background = 'rgba(15,19,26,0.85)';
+      removeBtn.style.color = '#ffffff';
+      removeBtn.style.border = '1px solid var(--border-color)';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.style.display = 'flex';
+      removeBtn.style.alignItems = 'center';
+      removeBtn.style.justifyContent = 'center';
+      removeBtn.style.fontSize = '0.75rem';
+      
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedFiles.splice(index, 1);
+        renderPreviews();
+      });
+      card.appendChild(removeBtn);
+      previewsGrid.appendChild(card);
+
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
   }
 }
 
@@ -631,8 +706,10 @@ function setupFormSubmit() {
     formData.append('longitude', finalLng);
     formData.append('address', finalAddress || 'Location detected. Address unavailable.');
 
-    if (fileInput.files.length) {
-      formData.append('image', fileInput.files[0]);
+    if (selectedFiles.length) {
+      selectedFiles.forEach(file => {
+        formData.append('image', file);
+      });
     }
 
     // --- NEW LOGIC FOR AI LOADING OVERLAY ---
@@ -660,6 +737,9 @@ function setupFormSubmit() {
       alertBanner.style.color = '#ef4444';
       alertBanner.classList.remove('hidden');
     } else {
+      // Clear local file uploads on success
+      selectedFiles = [];
+      
       // Transition to Stage 2: Results
       if (overlay && loaderStage && resultsStage) {
         loaderStage.classList.add('hidden');

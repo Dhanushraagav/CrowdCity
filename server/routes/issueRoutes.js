@@ -42,7 +42,7 @@ router.get('/analytics', requireAuth, getAdvancedAnalytics);
 router.get('/:id', validateIdParam('id'), getIssueById);
 
 // Authenticated routes (All citizens/roles)
-router.post('/', requireAuth, upload.single('image'), handleUploadError, validateCreateIssue, createIssue);
+router.post('/', requireAuth, upload.array('image', 5), handleUploadError, validateCreateIssue, createIssue);
 router.post('/:id/upvote', requireAuth, validateIdParam('id'), upvoteIssue);
 router.post('/:id/comments', requireAuth, validateAddComment, addComment);
 router.patch('/comments/:commentId', requireAuth, validateEditComment, editComment);
