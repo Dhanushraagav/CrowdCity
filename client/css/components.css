@@ -3487,17 +3487,20 @@
 }
 
 /* Sidebar Light & Dark Mode Contrast Overrides */
+:root {
+  --brand-subtitle-color: #ea580c;
+}
+:root.dark-theme,
+:root:not(.light-theme) {
+  --brand-subtitle-color: #fbbf24;
+}
+
 .brand-title {
   color: var(--text-main) !important;
 }
 
 .brand-subtitle {
-  color: #ea580c !important; /* Orange/amber for high contrast on light sidebar */
-}
-
-:root.dark-theme .brand-subtitle,
-:root:not(.light-theme) .brand-subtitle {
-  color: #fbbf24 !important; /* Yellow for dark sidebar */
+  color: var(--brand-subtitle-color) !important;
 }
 
 /* Sidebar Helpdesk Widget Light/Dark Mode Fix */
@@ -3508,12 +3511,7 @@
 }
 
 .sidebar-helpdesk-card div:first-child {
-  color: #ea580c !important; /* High contrast orange on light bg */
-}
-
-:root.dark-theme .sidebar-helpdesk-card div:first-child,
-:root:not(.light-theme) .sidebar-helpdesk-card div:first-child {
-  color: #fbbf24 !important; /* Gold on dark bg */
+  color: var(--brand-subtitle-color) !important;
 }
 
 .sidebar-helpdesk-card div:nth-child(2) {

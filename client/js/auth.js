@@ -1045,15 +1045,39 @@ function updateAuthUI() {
       const role = getUserRole();
       const subtitleText = role === 'authority' || role === 'admin' ? 'Authority Portal' : 'Citizen Portal';
       
-      logo.innerHTML = `
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" class="brand-emblem" style="width: 38px; height: 38px; flex-shrink: 0; object-fit: contain;" />
-        <div style="width: 1px; height: 26px; background: rgba(255, 255, 255, 0.15); margin: 0 0.1rem;"></div>
-        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 28px; height: 28px; flex-shrink: 0; object-fit: contain;" />
-        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; text-align: left; gap: 0.05rem;">
-          <span class="brand-title" style="font-size: 0.95rem; font-weight: 800; color: #ffffff; letter-spacing: 0.3px; font-family: var(--font-heading, inherit);">CrowdCity AI</span>
-          <span class="brand-subtitle" style="font-size: 0.58rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">${subtitleText}</span>
-        </div>
-      `;
+      const tnEmblem = document.createElement('img');
+      tnEmblem.src = "https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg";
+      tnEmblem.alt = "Govt. of Tamil Nadu";
+      tnEmblem.className = "brand-emblem";
+      tnEmblem.style.cssText = "width: 38px; height: 38px; flex-shrink: 0; object-fit: contain;";
+      
+      const divider = document.createElement('div');
+      divider.style.cssText = "width: 1px; height: 26px; background: var(--border-color); margin: 0 0.1rem;";
+      
+      const ccEmblem = logo.querySelector('.brand-emblem');
+      if (ccEmblem) {
+        ccEmblem.style.width = "28px";
+        ccEmblem.style.height = "28px";
+      }
+      
+      logo.insertBefore(divider, logo.firstChild);
+      logo.insertBefore(tnEmblem, logo.firstChild);
+      
+      const brandText = logo.querySelector('.brand-text-container');
+      if (brandText) {
+        brandText.style.gap = "0.05rem";
+        const title = brandText.querySelector('.brand-title');
+        if (title) {
+          title.style.fontSize = "0.95rem";
+          title.style.color = "var(--text-main)";
+        }
+        const subtitle = brandText.querySelector('.brand-subtitle');
+        if (subtitle) {
+          subtitle.style.fontSize = "0.58rem";
+          subtitle.style.color = "var(--brand-subtitle-color)";
+          subtitle.textContent = subtitleText;
+        }
+      }
     });
 
     // 2. Mobile Header Logos
@@ -1068,11 +1092,11 @@ function updateAuthUI() {
       logo.innerHTML = `
         <div style="display: flex; align-items: center; gap: 0.4rem;">
           <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 26px; height: 26px; object-fit: contain;" />
-          <div style="width: 1px; height: 18px; background: rgba(255, 255, 255, 0.15); margin: 0 0.05rem;"></div>
+          <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 0.05rem;"></div>
           <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 20px; height: 20px; object-fit: contain;" />
           <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
             <span>CrowdCity AI</span>
-            <span style="font-size: 0.52rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.3px;">${subtitleText}</span>
+            <span style="font-size: 0.52rem; font-weight: 700; color: var(--brand-subtitle-color, #fbbf24); text-transform: uppercase; letter-spacing: 0.3px;">${subtitleText}</span>
           </span>
         </div>
       `;
@@ -1091,7 +1115,7 @@ function updateAuthUI() {
           <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 24px; height: 24px; object-fit: contain;" />
           <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
             <span>CrowdCity AI</span>
-            <span style="font-size: 0.55rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.3px;">Tamil Nadu Portal</span>
+            <span style="font-size: 0.55rem; font-weight: 700; color: var(--brand-subtitle-color, #fbbf24); text-transform: uppercase; letter-spacing: 0.3px;">Tamil Nadu Portal</span>
           </span>
         </div>
       `;
@@ -1106,15 +1130,37 @@ function updateAuthUI() {
       const role = getUserRole();
       const subtitleText = role === 'admin' ? 'Admin Control' : 'TN Initiative';
       
-      container.innerHTML = `
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 32px; height: 32px; object-fit: contain;" />
-        <div style="width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;"></div>
-        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain;" />
-        <span style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
-          <span>CrowdCity AI</span>
-          <span style="font-size: 0.55rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.3px;">${subtitleText}</span>
-        </span>
-      `;
+      const tnEmblem = document.createElement('img');
+      tnEmblem.src = "https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg";
+      tnEmblem.alt = "Govt. of Tamil Nadu";
+      tnEmblem.style.cssText = "width: 32px; height: 32px; flex-shrink: 0; object-fit: contain;";
+      
+      const divider = document.createElement('div');
+      divider.style.cssText = "width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;";
+      
+      const ccEmblem = container.querySelector('.brand-emblem');
+      if (ccEmblem) {
+        ccEmblem.style.width = "26px";
+        ccEmblem.style.height = "26px";
+      }
+      
+      container.insertBefore(divider, container.firstChild);
+      container.insertBefore(tnEmblem, container.firstChild);
+      
+      const brandText = container.querySelector('.brand-text-container');
+      if (brandText) {
+        const title = brandText.querySelector('.brand-title');
+        if (title) {
+          title.style.fontSize = "0.95rem";
+          title.style.color = "var(--text-main)";
+        }
+        const subtitle = brandText.querySelector('.brand-subtitle');
+        if (subtitle) {
+          subtitle.style.fontSize = "0.55rem";
+          subtitle.style.color = "var(--brand-subtitle-color)";
+          subtitle.textContent = subtitleText;
+        }
+      }
     });
   };
 
