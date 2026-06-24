@@ -123,6 +123,27 @@ window.showFatalConfigError = showFatalConfigError;
 
 // Initialize Supabase Client dynamically from server config
 async function initAuth() {
+  // Pre-load from cache for instant CAPTCHA and UI loading
+  try {
+    const raw = localStorage.getItem('cc_config_cache');
+    if (raw) {
+      const cachedConfig = JSON.parse(raw);
+      if (cachedConfig && cachedConfig.supabaseUrl && cachedConfig.supabaseAnonKey) {
+        window.supabaseConfig = cachedConfig;
+        if (typeof window.supabase !== 'undefined' && !supabaseClient) {
+          supabaseClient = window.supabase.createClient(cachedConfig.supabaseUrl, cachedConfig.supabaseAnonKey);
+          _attachAuthStateListener();
+          updateAuthUI();
+          if (window.turnstileLoaded) {
+            window.renderTurnstileWidgets();
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[Auth] Pre-init config cache check failed:', e);
+  }
+
   try {
     const response = await fetch('/api/config');
 
