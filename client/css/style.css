@@ -389,6 +389,7 @@ img {
   display: grid;
   grid-template-columns: 1fr 400px;
   gap: 2rem;
+  align-items: start;
 }
 
 /* Full Map Dashboard Mode overrides */

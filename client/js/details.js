@@ -1174,29 +1174,36 @@ async function loadNewFeatures(issue) {
   // === Citizen Actions Panel ===
   const citizenPanel = document.getElementById('citizen-actions-panel');
   if (citizenPanel) {
-    if (isReporter) {
+    const userRole = (typeof getUserRole === 'function' ? getUserRole() : localStorage.getItem('cc_user_role')) || '';
+    const isAuthorityOrAdmin = userRole === 'authority' || userRole === 'admin';
+    const isAssigned = currentUser && currentUser.id === issue.assigned_to;
+    const terminalStatuses = ['resolved', 'verified', 'withdrawn', 'rejected'];
+    const isTerminal = terminalStatuses.includes(issue.status);
+
+    // 1. Download Receipt: visible if resolved or verified
+    const receiptBtn = document.getElementById('btn-download-receipt');
+    const showReceipt = isTerminal && (issue.status === 'resolved' || issue.status === 'verified');
+    if (receiptBtn) {
+      receiptBtn.style.display = showReceipt ? '' : 'none';
+    }
+
+    // 2. Upload Evidence: visible if not terminal AND (isReporter OR isAuthorityOrAdmin OR isAssigned)
+    const evidenceBtn = document.getElementById('btn-show-evidence-upload');
+    const showEvidence = !isTerminal && (isReporter || isAuthorityOrAdmin || isAssigned);
+    if (evidenceBtn) {
+      evidenceBtn.style.display = showEvidence ? '' : 'none';
+    }
+
+    // 3. Withdraw: visible if not terminal AND isReporter
+    const withdrawBtn = document.getElementById('btn-withdraw');
+    const showWithdraw = !isTerminal && isReporter;
+    if (withdrawBtn) {
+      withdrawBtn.style.display = showWithdraw ? '' : 'none';
+    }
+
+    // Show the panel if at least one action is available
+    if (showReceipt || showEvidence || showWithdraw) {
       citizenPanel.classList.remove('hidden');
-
-      // Hide withdraw if status is terminal
-      const withdrawBtn = document.getElementById('btn-withdraw');
-      const terminalStatuses = ['resolved', 'verified', 'withdrawn', 'rejected'];
-      if (withdrawBtn) {
-        if (terminalStatuses.includes(issue.status)) {
-          withdrawBtn.style.display = 'none';
-        } else {
-          withdrawBtn.style.display = '';
-        }
-      }
-
-      // Hide evidence upload if terminal
-      const evidenceBtn = document.getElementById('btn-show-evidence-upload');
-      if (evidenceBtn) {
-        if (terminalStatuses.includes(issue.status)) {
-          evidenceBtn.style.display = 'none';
-        } else {
-          evidenceBtn.style.display = '';
-        }
-      }
     } else {
       citizenPanel.classList.add('hidden');
     }
