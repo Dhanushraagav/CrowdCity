@@ -779,7 +779,7 @@ window.authRouter = {
         background: linear-gradient(135deg, #111827, #0f172a);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
-        max-width: 600px;
+        max-width: 850px;
         width: 100%;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
         overflow: hidden;
@@ -846,11 +846,28 @@ window.authRouter = {
         border: 1px solid rgba(59, 130, 246, 0.25);
         border-radius: 12px;
         padding: 1.75rem 2rem;
-        display: flex;
-        gap: 1rem;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
         box-sizing: border-box;
         position: relative;
+      }
+      .demo-notice-col-left {
+        padding-right: 2rem;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      @media (max-width: 768px) {
+        .demo-notice-banner {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          padding: 1.25rem 1.5rem;
+        }
+        .demo-notice-col-left {
+          padding-right: 0;
+          border-right: none;
+          padding-bottom: 1.5rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
       }
       .demo-notice-banner-icon {
         color: #60a5fa;
@@ -982,9 +999,9 @@ window.authRouter = {
           <span class="demo-notice-badge">${t.badge}</span>
         </div>
         <div class="demo-notice-body">
-          <div class="demo-notice-banner" style="flex-direction: column; gap: 1.25rem; align-items: stretch;">
+          <div class="demo-notice-banner">
             <!-- English Version -->
-            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+            <div class="demo-notice-col-left" style="display: flex; gap: 1rem; align-items: flex-start;">
               <div class="demo-notice-banner-icon">
                 <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
@@ -995,11 +1012,8 @@ window.authRouter = {
               </p>
             </div>
             
-            <!-- Separator Line -->
-            <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 0.15rem 0;"></div>
-            
             <!-- Tamil Version -->
-            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+            <div class="demo-notice-col-right" style="display: flex; gap: 1rem; align-items: flex-start;">
               <div class="demo-notice-banner-icon" style="color: #60a5fa;">
                 <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
