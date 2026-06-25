@@ -39,7 +39,7 @@ class I18nService {
   }
 
   async loadLocale(lang) {
-    const res = await fetch(`/locales/${lang}.json`);
+    const res = await fetch(`/locales/${lang}.json?v=1.0.6`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     return await res.json();
   }
