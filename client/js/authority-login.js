@@ -23,16 +23,33 @@ function initAuthorityLogin() {
       const password = document.getElementById('login-password').value;
 
       const submitBtn = document.getElementById('btn-login-submit');
+      
+      // Check Cloudflare Turnstile token
+      const turnstileToken = (typeof turnstile !== 'undefined' && window.loginWidgetId !== null)
+        ? turnstile.getResponse(window.loginWidgetId)
+        : null;
+        
+      if (!turnstileToken) {
+        showAlert('Please complete the CAPTCHA security check.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Access Dashboard';
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Signing In...';
       alertBanner.classList.add('hidden');
 
       console.log('[Authority Login] Attempting sign in for:', email);
 
-      const { data, error } = await loginUser(email, password);
+      const { data, error } = await loginUser(email, password, turnstileToken);
 
       if (error) {
         console.error('[Authority Login] Error:', error);
+        // Automatically reset Turnstile widget after error
+        if (typeof turnstile !== 'undefined' && window.loginWidgetId !== null) {
+          turnstile.reset(window.loginWidgetId);
+        }
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Access Dashboard';
         showAlert(error.message || 'Login failed.');

@@ -28,6 +28,9 @@
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Cloudflare Turnstile CAPTCHA -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async></script>
 
   <style>
     body {
@@ -181,6 +184,9 @@
             <i class="fa-regular fa-eye toggle-password-visibility" data-target="login-password"></i>
           </div>
         </div>
+
+        <!-- Cloudflare Turnstile CAPTCHA container -->
+        <div id="login-captcha" style="margin: 0; display: flex; justify-content: center;"></div>
 
         <button type="submit" id="btn-login-submit" class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">
           <i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="access_dashboard">Access Dashboard</span>
