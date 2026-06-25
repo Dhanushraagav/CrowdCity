@@ -733,17 +733,15 @@ window.authRouter = {
 
     const translations = {
       en: {
-        title: "Demo Notice",
+        title: "Notice",
         badge: "Sandbox",
-        text: "This application is a <strong class=\"alert-strong\">demonstration prototype</strong> developed for educational and project purposes. It is <strong class=\"alert-strong\">not an official Government of India or State Government service</strong>. Any complaints, user accounts, images, locations, analytics, notifications, reports, AI responses, and other data shown may be sample or test data and should not be considered official records. <span class=\"alert-highlight\">Do not submit confidential, personal, financial, or legally sensitive information</span> through this demo. The developers are not responsible for decisions made based on the information displayed in this prototype.",
         checkbox: "I understand that this is a demonstration application.",
         learnMore: "Learn More",
         continue: "Continue"
       },
       ta: {
-        title: "மாதிரி அறிவிப்பு",
+        title: "அறிவிப்பு",
         badge: "சோதனைக்களம்",
-        text: "இந்த செயலி கல்வி மற்றும் திட்ட நோக்கங்களுக்காக உருவாக்கப்பட்ட ஒரு <strong class=\"alert-strong\">மாதிரி முன்மாதிரி (prototype)</strong> ஆகும். இது <strong class=\"alert-strong\">இந்திய அரசு அல்லது மாநில அரசின் அதிகாரப்பூர்வ சேவை அல்ல</strong>. இதில் காண்பிக்கப்படும் புகார்கள், பயனர் கணக்குகள், படங்கள், இருப்பிடங்கள், பகுப்பாய்வுகள், அறிவிப்புகள், அறிக்கைகள், AI பதில்கள் மற்றும் பிற தரவுகள் மாதிரி அல்லது சோதனைத் தரவுகளாக இருக்கலாம் மற்றும் அதிகாரப்பூர்வ பதிவுகளாகக் கருதப்படக் கூடாது. இந்த மாதிரியின் மூலம் <span class=\"alert-highlight\">ரகசியமான, தனிப்பட்ட, நிதி அல்லது சட்டப்பூர்வ உணர்வுப்பூர்வமான தகவல்களை சமர்ப்பிக்க வேண்டாம்</span>. இந்த முன்மாதிரியில் காட்டப்படும் தகவல்களின் அடிப்படையில் எடுக்கப்படும் முடிவுகளுக்கு டெவலப்பர்கள் பொறுப்பல்ல.",
         checkbox: "இது ஒரு மாதிரி செயலி என்பதை நான் புரிந்து கொள்கிறேன்.",
         learnMore: "மேலும் அறிய",
         continue: "தொடரவும்"
@@ -976,25 +974,41 @@ window.authRouter = {
       <div class="demo-notice-card">
         <div class="demo-notice-header">
           <div class="demo-notice-header-left">
-            <div class="demo-notice-header-icon">
-              <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-              </svg>
+            <div class="demo-notice-header-icon" style="margin-right: 0.25rem;">
+              <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="height: 32px; width: auto; display: block;" />
             </div>
             <h3 class="demo-notice-title">${t.title}</h3>
           </div>
           <span class="demo-notice-badge">${t.badge}</span>
         </div>
         <div class="demo-notice-body">
-          <div class="demo-notice-banner">
-            <div class="demo-notice-banner-icon">
-              <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11 9h2V7h-2v2zm0 8h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-              </svg>
+          <div class="demo-notice-banner" style="flex-direction: column; gap: 1.25rem; align-items: stretch;">
+            <!-- English Version -->
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+              <div class="demo-notice-banner-icon">
+                <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+              </div>
+              <p class="demo-notice-banner-text">
+                This application is a <strong class="alert-strong">demonstration prototype</strong> developed for educational and project purposes. It is <strong class="alert-strong">not an official Government of India or State Government service</strong>. Any complaints, user accounts, images, locations, analytics, notifications, reports, AI responses, and other data shown may be sample or test data and should not be considered official records. <span class="alert-highlight">Do not submit confidential, personal, financial, or legally sensitive information</span> through this demo. The developers are not responsible for decisions made based on the information displayed in this prototype.
+              </p>
             </div>
-            <p class="demo-notice-banner-text">
-              ${t.text}
-            </p>
+            
+            <!-- Separator Line -->
+            <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 0.15rem 0;"></div>
+            
+            <!-- Tamil Version -->
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+              <div class="demo-notice-banner-icon" style="color: #60a5fa;">
+                <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+              </div>
+              <p class="demo-notice-banner-text">
+                இந்த செயலி கல்வி மற்றும் திட்ட நோக்கங்களுக்காக உருவாக்கப்பட்ட ஒரு <strong class="alert-strong">மாதிரி முன்மாதிரி (prototype)</strong> ஆகும். இது <strong class="alert-strong">இந்திய அரசு அல்லது மாநில அரசின் அதிகாரப்பூர்வ சேவை அல்ல</strong>. இதில் காண்பிக்கப்படும் புகார்கள், பயனர் கணக்குகள், படங்கள், இருப்பிடங்கள், பகுப்பாய்வுகள், அறிவிப்புகள், அறிக்கைகள், AI பதில்கள் மற்றும் பிற தரவுகள் மாதிரி அல்லது சோதனைத் தரவுகளாக இருக்கலாம் மற்றும் அதிகாரப்பூர்வ பதிவுகளாகக் கருதப்படக் கூடாது. இந்த மாதிரியின் மூலம் <span class="alert-highlight">ரகசியமான, தனிப்பட்ட, நிதி அல்லது சட்டப்பூர்வ உணர்வுப்பூர்வமான தகவல்களை சமர்ப்பிக்க வேண்டாம்</span>. இந்த முன்மாதிரியில் காட்டப்படும் தகவல்களின் அடிப்படையில் எடுக்கப்படும் முடிவுகளுக்கு டெவலப்பர்கள் பொறுப்பல்ல.
+              </p>
+            </div>
           </div>
           <label class="demo-notice-checkbox-wrapper" for="demo-notice-checkbox">
             <input type="checkbox" id="demo-notice-checkbox" class="demo-notice-checkbox-input" />
