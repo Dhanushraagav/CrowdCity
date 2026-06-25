@@ -788,6 +788,7 @@ window.authRouter = {
         border-radius: 20px;
         max-width: 680px;
         width: 100%;
+        max-height: 90vh;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
         overflow: hidden;
         display: flex;
@@ -847,6 +848,8 @@ window.authRouter = {
         flex-direction: column;
         gap: 1.25rem;
         box-sizing: border-box;
+        overflow-y: auto;
+        max-height: calc(90vh - 120px);
       }
       .demo-notice-banner {
         background: rgba(3, 7, 18, 0.6);
@@ -1008,26 +1011,26 @@ window.authRouter = {
         <div class="demo-notice-body">
           <div class="demo-notice-banner">
             <!-- English Version -->
-            <div class="demo-notice-col-left" style="display: flex; gap: 1rem; align-items: flex-start;">
-              <div class="demo-notice-banner-icon">
-                <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
+            <div class="demo-notice-col-left" style="display: flex; gap: 0.75rem; align-items: flex-start;">
+              <div class="demo-notice-banner-icon" style="color: #60a5fa; margin-top: 0.1rem;">
+                <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                 </svg>
               </div>
               <p class="demo-notice-banner-text">
-                This application is a <strong class="alert-strong">demonstration prototype</strong> developed for educational and project purposes. It is <strong class="alert-strong">not an official Government of India or State Government service</strong>. Any complaints, user accounts, images, locations, analytics, notifications, reports, AI responses, and other data shown may be sample or test data and should not be considered official records. <span class="alert-highlight">Do not submit confidential, personal, financial, or legally sensitive information</span> through this demo. The developers are not responsible for decisions made based on the information displayed in this prototype.
+                This is a <strong class="alert-strong">demonstration prototype</strong> for project purposes, <strong class="alert-strong">not an official government service</strong>. All complaints, accounts, and analytics are simulated/sample data. <span class="alert-highlight">Do not submit confidential, personal, financial, or sensitive information</span>. The developers are not liable for actions based on this prototype.
               </p>
             </div>
             
             <!-- Tamil Version -->
-            <div class="demo-notice-col-right" style="display: flex; gap: 1rem; align-items: flex-start;">
-              <div class="demo-notice-banner-icon" style="color: #60a5fa;">
-                <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
+            <div class="demo-notice-col-right" style="display: flex; gap: 0.75rem; align-items: flex-start;">
+              <div class="demo-notice-banner-icon" style="color: #60a5fa; margin-top: 0.1rem;">
+                <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                 </svg>
               </div>
               <p class="demo-notice-banner-text">
-                இந்த செயலி கல்வி மற்றும் திட்ட நோக்கங்களுக்காக உருவாக்கப்பட்ட ஒரு <strong class="alert-strong">மாதிரி முன்மாதிரி (prototype)</strong> ஆகும். இது <strong class="alert-strong">இந்திய அரசு அல்லது மாநில அரசின் அதிகாரப்பூர்வ சேவை அல்ல</strong>. இதில் காண்பிக்கப்படும் புகார்கள், பயனர் கணக்குகள், படங்கள், இருப்பிடங்கள், பகுப்பாய்வுகள், அறிவிப்புகள், அறிக்கைகள், AI பதில்கள் மற்றும் பிற தரவுகள் மாதிரி அல்லது சோதனைத் தரவுகளாக இருக்கலாம் மற்றும் அதிகாரப்பூர்வ பதிவுகளாகக் கருதப்படக் கூடாது. இந்த மாதிரியின் மூலம் <span class="alert-highlight">ரகசியமான, தனிப்பட்ட, நிதி அல்லது சட்டப்பூர்வ உணர்வுப்பூர்வமான தகவல்களை சமர்ப்பிக்க வேண்டாம்</span>. இந்த முன்மாதிரியில் காட்டப்படும் தகவல்களின் அடிப்படையில் எடுக்கப்படும் முடிவுகளுக்கு டெவலப்பர்கள் பொறுப்பல்ல.
+                இது ஒரு <strong class="alert-strong">மாதிரி முன்மாதிரி (prototype)</strong> செயலி, <strong class="alert-strong">அதிகாரப்பூர்வ அரசு சேவை அல்ல</strong>. இதில் உள்ள புகார்கள் மற்றும் தரவுகள் அனைத்தும் மாதிரி தகவல்களே. <span class="alert-highlight">ரகசியமான, தனிப்பட்ட, நிதி அல்லது உணர்வுப்பூர்வமான தகவல்களை சமர்ப்பிக்க வேண்டாம்</span>. இதில் காட்டப்படும் தகவல்களால் ஏற்படும் விளைவுகளுக்கு டெவலப்பர்கள் பொறுப்பல்ல.
               </p>
             </div>
           </div>
