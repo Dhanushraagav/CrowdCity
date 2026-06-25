@@ -268,6 +268,10 @@ function _attachAuthStateListener() {
       // Prevent automatic dashboard redirects if recovery is active (Goal 3 & 6)
       if (isLoginOrRoot && !isResetPage && !isRecoveryActive) {
         console.log('[Auth] OAuth SIGNED_IN on login page. Routing user.');
+        const hasHash = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+        if (hasHash) {
+          window.cc_manual_signin = true;
+        }
         // Reset routing guard so each fresh sign-in can proceed
         window.cc_routing_in_progress = false;
         await verifyProfileAndRoute(session.user, showAuthAlert);
@@ -786,30 +790,37 @@ async function verifyProfileAndRoute(user, showAlert) {
   console.log("ROLE DETECTED: " + role);
   console.log("TARGET PAGE: " + redirectTarget);
 
-  const successOverlay = document.getElementById('auth-success-overlay');
-  if (successOverlay) {
-    const fullName = user.user_metadata?.full_name || user.email || 'Citizen';
-    const nameElem = document.getElementById('success-user-name');
-    if (nameElem) nameElem.textContent = fullName;
-    
-    // Hide standard alerts since success overlay covers the screen
-    const alertBanner = document.getElementById('auth-alert');
-    if (alertBanner) alertBanner.classList.add('hidden');
-    
-    successOverlay.classList.remove('hidden-field');
-    
-    setTimeout(() => {
-      document.body.style.transition = 'opacity 0.5s ease-out';
-      document.body.style.opacity = '0';
+  const isManual = window.cc_manual_signin === true;
+  
+  if (isManual) {
+    const successOverlay = document.getElementById('auth-success-overlay');
+    if (successOverlay) {
+      const fullName = user.user_metadata?.full_name || user.email || 'Citizen';
+      const nameElem = document.getElementById('success-user-name');
+      if (nameElem) nameElem.textContent = fullName;
+      
+      // Hide standard alerts since success overlay covers the screen
+      const alertBanner = document.getElementById('auth-alert');
+      if (alertBanner) alertBanner.classList.add('hidden');
+      
+      successOverlay.classList.remove('hidden-field');
+      
+      setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s ease-out';
+        document.body.style.opacity = '0';
+        setTimeout(() => {
+          window.authRouter.redirectToDashboard(role);
+        }, 500);
+      }, 1000);
+    } else {
+      showAlert("Login successful! Redirecting...", true);
       setTimeout(() => {
         window.authRouter.redirectToDashboard(role);
-      }, 500);
-    }, 1000);
+      }, 1000);
+    }
   } else {
-    showAlert("Login successful! Redirecting...", true);
-    setTimeout(() => {
-      window.authRouter.redirectToDashboard(role);
-    }, 1000);
+    // Silent instant redirection for background cached session restoration
+    window.authRouter.redirectToDashboard(role);
   }
 }
 

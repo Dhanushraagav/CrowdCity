@@ -49,6 +49,7 @@ function initAuthorityLogin() {
 
       console.log('[Authority Login] Success. User:', user.id, '| Email:', user.email);
       showAlert('Login successful! Checking access...', true);
+      window.cc_manual_signin = true;
       await verifyProfileAndRoute(user, showAlert);
     });
   }

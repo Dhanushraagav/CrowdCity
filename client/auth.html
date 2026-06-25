@@ -1718,6 +1718,7 @@
               showAlert(error.message || 'Login failed.');
             } else {
               const user = data.user || (data.session && data.session.user);
+              window.cc_manual_signin = true;
               await verifyProfileAndRoute(user, showAlert);
             }
           } else {
@@ -1819,6 +1820,7 @@
                   submitBtn.disabled = false;
                   submitBtn.innerHTML = window.i18n ? window.i18n.t('verify_otp') : 'Verify OTP';
                 } else {
+                  window.cc_manual_signin = true;
                   await verifyProfileAndRoute(session.user, showAlert);
                 }
               } catch (err) {
@@ -2072,6 +2074,7 @@
                 otpVerifyBtn.disabled = false;
                 otpVerifyBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ' + (window.i18n ? window.i18n.t('verify_code') : 'Verify Code');
               } else {
+                window.cc_manual_signin = true;
                 await verifyProfileAndRoute(session.user, showAlert);
               }
             } else {
@@ -2118,6 +2121,7 @@
                 otpVerifyBtn.disabled = false;
                 otpVerifyBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ' + (window.i18n ? window.i18n.t('verify_code') : 'Verify Code');
               } else {
+                window.cc_manual_signin = true;
                 await verifyProfileAndRoute(session.user, showAlert);
               }
             }
