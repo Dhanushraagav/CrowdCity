@@ -756,37 +756,18 @@ window.authRouter = {
         box-sizing: border-box;
       }
       .demo-notice-card {
-        background: linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(10, 15, 30, 0.98));
+        background: linear-gradient(135deg, #111827, #0f172a);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         max-width: 600px;
         width: 100%;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 
-                    0 0 30px rgba(59, 130, 246, 0.15), 
-                    0 0 60px rgba(13, 148, 136, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
         overflow: hidden;
         display: flex;
         flex-direction: column;
         animation: demoModalFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         box-sizing: border-box;
         position: relative;
-      }
-      .demo-notice-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, transparent 60%);
-        pointer-events: none;
-        z-index: 0;
-        animation: radialShine 8s linear infinite;
-      }
-      @keyframes radialShine {
-        0% { transform: translate(-10%, -10%) rotate(0deg); }
-        50% { transform: translate(10%, 10%) rotate(180deg); }
-        100% { transform: translate(-10%, -10%) rotate(360deg); }
       }
       @keyframes demoModalFadeIn {
         from { opacity: 0; transform: scale(0.93) translateY(20px); }
@@ -812,12 +793,6 @@ window.authRouter = {
         display: flex;
         align-items: center;
         justify-content: center;
-        animation: floatIcon 4s ease-in-out infinite;
-      }
-      @keyframes floatIcon {
-        0% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3)); }
-        50% { transform: translateY(-3px) rotate(5deg); filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.7)); }
-        100% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3)); }
       }
       .demo-notice-title {
         font-size: 1.4rem;
@@ -825,7 +800,6 @@ window.authRouter = {
         color: #ffffff;
         margin: 0;
         letter-spacing: -0.02em;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
       }
       .demo-notice-badge {
         font-size: 0.7rem;
@@ -835,14 +809,8 @@ window.authRouter = {
         color: #60a5fa;
         padding: 0.25rem 0.6rem;
         border-radius: 9999px;
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid rgba(59, 130, 246, 0.2);
         letter-spacing: 0.05em;
-        animation: badgePulse 2s ease-in-out infinite;
-      }
-      @keyframes badgePulse {
-        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-        70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
       }
       .demo-notice-body {
         position: relative;
@@ -854,48 +822,24 @@ window.authRouter = {
         box-sizing: border-box;
       }
       .demo-notice-banner {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(13, 148, 136, 0.04) 100%);
-        border: 1px solid rgba(59, 130, 246, 0.18);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(13, 148, 136, 0.03) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.15);
         border-radius: 12px;
-        padding: 1.25rem 1.5rem;
+        padding: 1.75rem 2rem;
         display: flex;
         gap: 1rem;
         align-items: flex-start;
         box-sizing: border-box;
-        box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.05);
         position: relative;
-        overflow: hidden;
-      }
-      .demo-notice-banner::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(0deg, transparent 24%, rgba(59, 130, 246, 0.03) 25%, rgba(59, 130, 246, 0.03) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.03) 75%, rgba(59, 130, 246, 0.03) 76%, transparent 77%);
-        background-size: 100% 30px;
-        animation: scanlines 4s linear infinite;
-        pointer-events: none;
-      }
-      @keyframes scanlines {
-        0% { background-position: 0 0; }
-        100% { background-position: 0 100%; }
       }
       .demo-notice-banner-icon {
         color: #60a5fa;
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         margin-top: 0.15rem;
         flex-shrink: 0;
-        animation: pulseIcon 2s ease-in-out infinite;
-      }
-      @keyframes pulseIcon {
-        0% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.1); opacity: 1; }
-        100% { transform: scale(1); opacity: 0.8; }
       }
       .demo-notice-banner-text {
-        font-size: 0.92rem;
+        font-size: 0.98rem;
         line-height: 1.6;
         color: #cbd5e1;
         margin: 0;
@@ -903,12 +847,10 @@ window.authRouter = {
       .demo-notice-banner-text strong {
         color: #ffffff;
         font-weight: 700;
-        text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
       }
       .demo-notice-banner-text .alert-highlight {
         color: #f59e0b;
         font-weight: 700;
-        text-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
       }
       .demo-notice-checkbox-wrapper {
         display: flex;
@@ -936,9 +878,6 @@ window.authRouter = {
         accent-color: #0D9488;
         flex-shrink: 0;
         transition: all 0.2s ease;
-      }
-      .demo-notice-checkbox-input:checked {
-        box-shadow: 0 0 10px rgba(13, 148, 136, 0.5);
       }
       .demo-notice-checkbox-label {
         font-size: 0.9rem;
@@ -977,7 +916,6 @@ window.authRouter = {
       }
       .demo-notice-btn-primary:hover:not(:disabled) {
         transform: translateY(-1.5px);
-        box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4), 0 0 12px rgba(13, 148, 136, 0.2);
         background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
       }
       .demo-notice-btn-primary:active:not(:disabled) {
