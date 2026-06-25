@@ -1054,22 +1054,6 @@
             <button type="submit" id="btn-login-submit" class="btn btn-primary" style="width: 100%; margin: 0;" data-i18n="sign_in">
               Sign In
             </button>
-
-            <!-- OTP Promo container -->
-            <div id="otp-promo-container" class="otp-promo-container" style="margin: 0;">
-              <div class="otp-promo-header">
-                <div class="otp-promo-icon-wrapper">
-                  <i class="fa-solid fa-envelope-open-text"></i>
-                </div>
-                <div class="otp-promo-text">
-                  <h4 class="otp-promo-heading" data-i18n="sign_in_with_email_otp">Sign in with Email OTP</h4>
-                  <p class="otp-promo-subtitle" data-i18n="otp_promo_subtitle">Get a one-time verification code sent to your email.</p>
-                </div>
-              </div>
-              <a href="#" class="otp-promo-cta" id="otp-promo-cta-link" onclick="switchLoginMethod('otp', event)">
-                Continue with Email OTP <span class="cta-arrow">â†’</span>
-              </a>
-            </div>
           </div>
 
           <!-- OTP Field Wrapper -->
@@ -1215,7 +1199,7 @@
         </div>
 
         <!-- Google OAuth Provider Section -->
-        <div id="google-sso-section" style="display: flex; flex-direction: column; gap: 20px; margin: 0;">
+        <div id="google-sso-section" style="display: flex; flex-direction: column; gap: 15px; margin: 0;">
           <div class="oauth-divider" style="margin: 0;">
             <span data-i18n="or_continue_with">or continue with</span>
           </div>
@@ -1229,6 +1213,14 @@
             </svg>
             <span data-i18n="continue_with_google">Continue with Google</span>
           </button>
+
+          <!-- Compact OTP Link option -->
+          <div id="otp-promo-container" style="text-align: center; margin: 0.25rem 0 0 0; transition: all 0.3s ease;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="otp_sign_in_prompt">Need another way?</span>
+            <a href="#" id="otp-promo-cta-link" style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-decoration: none; margin-left: 0.35rem; transition: color 0.2s ease;" onclick="switchLoginMethod('otp', event)" data-i18n="sign_in_with_otp_link">
+              Sign in with Email OTP
+            </a>
+          </div>
         </div>
 
         <!-- Trust Indicators Section -->
@@ -1280,7 +1272,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Client Script files -->
-  <script src="js/auth.js"></script>
+  <script src="js/auth.js?v=1.0.6"></script>
   
   <script>
     let otpFlowType = 'login'; // 'login' or 'signup'
@@ -1472,11 +1464,23 @@
         signupTab.classList.remove('active');
         loginForm.classList.remove('hidden');
         signupForm.classList.add('hidden');
+        
+        // Show compact OTP link if on sign-in
+        const promoContainer = document.getElementById('otp-promo-container');
+        if (promoContainer) {
+          promoContainer.classList.remove('hidden-field');
+        }
       } else {
         loginTab.classList.remove('active');
         signupTab.classList.add('active');
         loginForm.classList.add('hidden');
         signupForm.classList.remove('hidden');
+        
+        // Hide compact OTP link if on sign-up
+        const promoContainer = document.getElementById('otp-promo-container');
+        if (promoContainer) {
+          promoContainer.classList.add('hidden-field');
+        }
       }
       
       if (typeof window.renderTurnstileWidgets === 'function') {
