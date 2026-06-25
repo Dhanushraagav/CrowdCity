@@ -660,7 +660,7 @@ async function verifyProfileAndRoute(user, showAlert) {
       .single();
       
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 4000)
+      setTimeout(() => reject(new Error('Timeout')), 15000)
     );
 
     const result = await Promise.race([queryPromise, timeoutPromise]);
@@ -677,7 +677,6 @@ async function verifyProfileAndRoute(user, showAlert) {
     console.error("[Auth Client] Unexpected exception during profile fetch:", err);
     if (err.message === 'Timeout') {
       window.cc_routing_in_progress = false;
-      await clearSessionSilent();
       showAlert("Profile query timed out. If you are using Brave, please try disabling Shields or checking your connection.");
       restoreSubmitButtons();
       return;
