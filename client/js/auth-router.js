@@ -742,8 +742,8 @@ window.authRouter = {
         width: 100vw;
         height: 100vh;
         background: rgba(3, 7, 18, 0.85);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -756,112 +756,214 @@ window.authRouter = {
         box-sizing: border-box;
       }
       .demo-notice-card {
-        background: rgba(17, 24, 39, 0.95);
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(10, 15, 30, 0.98));
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        max-width: 550px;
+        border-radius: 20px;
+        max-width: 600px;
         width: 100%;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(13, 148, 136, 0.15);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 
+                    0 0 30px rgba(59, 130, 246, 0.15), 
+                    0 0 60px rgba(13, 148, 136, 0.1);
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        animation: demoModalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: demoModalFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         box-sizing: border-box;
+        position: relative;
+      }
+      .demo-notice-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, transparent 60%);
+        pointer-events: none;
+        z-index: 0;
+        animation: radialShine 8s linear infinite;
+      }
+      @keyframes radialShine {
+        0% { transform: translate(-10%, -10%) rotate(0deg); }
+        50% { transform: translate(10%, 10%) rotate(180deg); }
+        100% { transform: translate(-10%, -10%) rotate(360deg); }
       }
       @keyframes demoModalFadeIn {
-        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        from { opacity: 0; transform: scale(0.93) translateY(20px); }
         to { opacity: 1; transform: scale(1) translateY(0); }
       }
       .demo-notice-header {
-        padding: 1.5rem 1.75rem 1rem;
+        position: relative;
+        z-index: 1;
+        padding: 1.75rem 2rem 1.25rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        justify-content: space-between;
+      }
+      .demo-notice-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
       }
       .demo-notice-header-icon {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         color: #3b82f6;
         display: flex;
         align-items: center;
         justify-content: center;
+        animation: floatIcon 4s ease-in-out infinite;
+      }
+      @keyframes floatIcon {
+        0% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3)); }
+        50% { transform: translateY(-3px) rotate(5deg); filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.7)); }
+        100% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3)); }
       }
       .demo-notice-title {
-        font-size: 1.25rem;
-        font-weight: 700;
+        font-size: 1.4rem;
+        font-weight: 800;
         color: #ffffff;
         margin: 0;
+        letter-spacing: -0.02em;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      }
+      .demo-notice-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        padding: 0.25rem 0.6rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        letter-spacing: 0.05em;
+        animation: badgePulse 2s ease-in-out infinite;
+      }
+      @keyframes badgePulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+        70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
       }
       .demo-notice-body {
-        padding: 1.5rem 1.75rem;
+        position: relative;
+        z-index: 1;
+        padding: 1.75rem 2rem;
         display: flex;
         flex-direction: column;
-        gap: 1.25rem;
+        gap: 1.5rem;
         box-sizing: border-box;
       }
       .demo-notice-banner {
-        background: rgba(59, 130, 246, 0.08);
-        border-left: 4px solid #3b82f6;
-        border-radius: 6px;
-        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(13, 148, 136, 0.04) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.18);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
         display: flex;
-        gap: 0.75rem;
+        gap: 1rem;
         align-items: flex-start;
         box-sizing: border-box;
+        box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.05);
+        position: relative;
+        overflow: hidden;
+      }
+      .demo-notice-banner::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(0deg, transparent 24%, rgba(59, 130, 246, 0.03) 25%, rgba(59, 130, 246, 0.03) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.03) 75%, rgba(59, 130, 246, 0.03) 76%, transparent 77%);
+        background-size: 100% 30px;
+        animation: scanlines 4s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes scanlines {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 100%; }
       }
       .demo-notice-banner-icon {
-        color: #3b82f6;
-        font-size: 1.1rem;
-        margin-top: 0.1rem;
+        color: #60a5fa;
+        font-size: 1.3rem;
+        margin-top: 0.15rem;
         flex-shrink: 0;
+        animation: pulseIcon 2s ease-in-out infinite;
+      }
+      @keyframes pulseIcon {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
       }
       .demo-notice-banner-text {
-        font-size: 0.88rem;
-        line-height: 1.5;
+        font-size: 0.92rem;
+        line-height: 1.6;
         color: #cbd5e1;
         margin: 0;
       }
+      .demo-notice-banner-text strong {
+        color: #ffffff;
+        font-weight: 700;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+      }
+      .demo-notice-banner-text .alert-highlight {
+        color: #f59e0b;
+        font-weight: 700;
+        text-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
+      }
       .demo-notice-checkbox-wrapper {
         display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
+        align-items: center;
+        gap: 0.85rem;
         cursor: pointer;
         user-select: none;
-        padding: 0.25rem 0;
+        padding: 0.6rem 0.85rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        transition: all 0.2s ease;
+      }
+      .demo-notice-checkbox-wrapper:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.07);
       }
       .demo-notice-checkbox-input {
-        width: 18px;
-        height: 18px;
-        border-radius: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
         background: rgba(255, 255, 255, 0.05);
         cursor: pointer;
-        margin-top: 0.1rem;
         accent-color: #0D9488;
         flex-shrink: 0;
+        transition: all 0.2s ease;
+      }
+      .demo-notice-checkbox-input:checked {
+        box-shadow: 0 0 10px rgba(13, 148, 136, 0.5);
       }
       .demo-notice-checkbox-label {
-        font-size: 0.88rem;
+        font-size: 0.9rem;
         color: #e2e8f0;
         line-height: 1.4;
-        font-weight: 500;
+        font-weight: 600;
       }
       .demo-notice-footer {
-        padding: 1.25rem 1.75rem 1.5rem;
+        position: relative;
+        z-index: 1;
+        padding: 1.25rem 2rem 1.75rem;
         border-top: 1px solid rgba(255, 255, 255, 0.06);
         display: flex;
         justify-content: flex-end;
-        gap: 0.75rem;
+        gap: 0.85rem;
         background: rgba(10, 15, 30, 0.5);
         box-sizing: border-box;
       }
       .demo-notice-btn {
-        padding: 0.6rem 1.25rem;
-        font-size: 0.88rem;
-        font-weight: 600;
-        border-radius: 8px;
+        padding: 0.7rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border-radius: 10px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -869,28 +971,36 @@ window.authRouter = {
         box-sizing: border-box;
       }
       .demo-notice-btn-primary {
-        background: #0D9488;
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
         color: #ffffff;
-        border: 1px solid transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
       .demo-notice-btn-primary:hover:not(:disabled) {
-        background: #0f766e;
-        box-shadow: 0 0 12px rgba(13, 148, 136, 0.3);
+        transform: translateY(-1.5px);
+        box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4), 0 0 12px rgba(13, 148, 136, 0.2);
+        background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+      }
+      .demo-notice-btn-primary:active:not(:disabled) {
+        transform: translateY(0);
       }
       .demo-notice-btn-primary:disabled {
-        opacity: 0.4;
+        opacity: 0.35;
         cursor: not-allowed;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
       .demo-notice-btn-secondary {
         background: transparent;
         color: #cbd5e1;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         text-decoration: none;
       }
       .demo-notice-btn-secondary:hover {
         background: rgba(255, 255, 255, 0.05);
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-1.5px);
       }
     `;
     document.head.appendChild(modalStyle);
@@ -901,22 +1011,25 @@ window.authRouter = {
     modal.innerHTML = `
       <div class="demo-notice-card">
         <div class="demo-notice-header">
-          <div class="demo-notice-header-icon">
-            <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-            </svg>
+          <div class="demo-notice-header-left">
+            <div class="demo-notice-header-icon">
+              <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+              </svg>
+            </div>
+            <h3 class="demo-notice-title">Demo Notice</h3>
           </div>
-          <h3 class="demo-notice-title">Demo Notice</h3>
+          <span class="demo-notice-badge">Sandbox</span>
         </div>
         <div class="demo-notice-body">
           <div class="demo-notice-banner">
             <div class="demo-notice-banner-icon">
-              <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
+              <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M11 9h2V7h-2v2zm0 8h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
               </svg>
             </div>
             <p class="demo-notice-banner-text">
-              This application is a demonstration prototype developed for educational and project purposes. It is not an official Government of India or State Government service. Any complaints, user accounts, images, locations, analytics, notifications, reports, AI responses, and other data shown may be sample or test data and should not be considered official records. Do not submit confidential, personal, financial, or legally sensitive information through this demo. The developers are not responsible for decisions made based on the information displayed in this prototype.
+              This application is a <strong>demonstration prototype</strong> developed for educational and project purposes. It is <strong>not an official Government of India or State Government service</strong>. Any complaints, user accounts, images, locations, analytics, notifications, reports, AI responses, and other data shown may be sample or test data and should not be considered official records. <span class="alert-highlight">Do not submit confidential, personal, financial, or legally sensitive information</span> through this demo. The developers are not responsible for decisions made based on the information displayed in this prototype.
             </p>
           </div>
           <label class="demo-notice-checkbox-wrapper" for="demo-notice-checkbox">
