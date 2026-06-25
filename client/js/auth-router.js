@@ -726,6 +726,13 @@ window.authRouter = {
       return;
     }
 
+    // Avoid showing on login or authentication pages
+    const path = window.location.pathname;
+    const normalizedPath = path.toLowerCase().replace(/\.html$/, '');
+    if (normalizedPath.endsWith('/auth') || normalizedPath.endsWith('/authority-login') || normalizedPath.includes('auth.html') || normalizedPath.includes('authority-login.html') || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index')) {
+      return;
+    }
+
     // Ensure we don't inject multiple times
     if (document.getElementById('demo-notice-modal')) {
       return;
@@ -779,7 +786,7 @@ window.authRouter = {
         background: linear-gradient(135deg, #111827, #0f172a);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
-        max-width: 850px;
+        max-width: 680px;
         width: 100%;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
         overflow: hidden;
@@ -796,7 +803,7 @@ window.authRouter = {
       .demo-notice-header {
         position: relative;
         z-index: 1;
-        padding: 1.75rem 2rem 1.25rem;
+        padding: 1.25rem 1.5rem 1rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         display: flex;
         align-items: center;
@@ -815,7 +822,7 @@ window.authRouter = {
         justify-content: center;
       }
       .demo-notice-title {
-        font-size: 1.4rem;
+        font-size: 1.25rem;
         font-weight: 800;
         color: #ffffff;
         margin: 0;
@@ -835,48 +842,48 @@ window.authRouter = {
       .demo-notice-body {
         position: relative;
         z-index: 1;
-        padding: 1.75rem 2rem;
+        padding: 1.25rem 1.5rem;
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 1.25rem;
         box-sizing: border-box;
       }
       .demo-notice-banner {
         background: rgba(3, 7, 18, 0.6);
         border: 1px solid rgba(59, 130, 246, 0.25);
         border-radius: 12px;
-        padding: 1.75rem 2rem;
+        padding: 1.25rem 1.5rem;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 2rem;
+        gap: 1.5rem;
         box-sizing: border-box;
         position: relative;
       }
       .demo-notice-col-left {
-        padding-right: 2rem;
+        padding-right: 1.5rem;
         border-right: 1px solid rgba(255, 255, 255, 0.08);
       }
       @media (max-width: 768px) {
         .demo-notice-banner {
           grid-template-columns: 1fr;
-          gap: 1.5rem;
-          padding: 1.25rem 1.5rem;
+          gap: 1.25rem;
+          padding: 1rem 1.25rem;
         }
         .demo-notice-col-left {
           padding-right: 0;
           border-right: none;
-          padding-bottom: 1.5rem;
+          padding-bottom: 1.25rem;
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
       }
       .demo-notice-banner-icon {
         color: #60a5fa;
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         margin-top: 0.15rem;
         flex-shrink: 0;
       }
       .demo-notice-banner-text {
-        font-size: 0.98rem;
+        font-size: 0.92rem;
         line-height: 1.6;
         color: #f1f5f9;
         margin: 0;
@@ -899,7 +906,7 @@ window.authRouter = {
         gap: 0.85rem;
         cursor: pointer;
         user-select: none;
-        padding: 0.6rem 0.85rem;
+        padding: 0.5rem 0.75rem;
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.02);
         border: 1px solid rgba(255, 255, 255, 0.03);
@@ -921,7 +928,7 @@ window.authRouter = {
         transition: all 0.2s ease;
       }
       .demo-notice-checkbox-label {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         color: #e2e8f0;
         line-height: 1.4;
         font-weight: 600;
@@ -929,7 +936,7 @@ window.authRouter = {
       .demo-notice-footer {
         position: relative;
         z-index: 1;
-        padding: 1.25rem 2rem 1.75rem;
+        padding: 1rem 1.5rem 1.25rem;
         border-top: 1px solid rgba(255, 255, 255, 0.06);
         display: flex;
         justify-content: flex-end;
