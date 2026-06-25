@@ -718,3 +718,260 @@ window.authRouter = {
   window.addEventListener('resize', updateOverlayState);
 })();
 
+// Universal Demo Notice Modal Injection
+(function() {
+  function injectDemoNotice() {
+    // Only show if the session storage flag is set to true
+    if (sessionStorage.getItem('cc_show_demo_notice') !== 'true') {
+      return;
+    }
+
+    // Ensure we don't inject multiple times
+    if (document.getElementById('demo-notice-modal')) {
+      return;
+    }
+
+    // Inject modal styles
+    const modalStyle = document.createElement('style');
+    modalStyle.id = 'demo-notice-modal-style';
+    modalStyle.innerHTML = `
+      #demo-notice-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(3, 7, 18, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999999;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        font-family: system-ui, -apple-system, sans-serif;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+      .demo-notice-card {
+        background: rgba(17, 24, 39, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        max-width: 550px;
+        width: 100%;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(13, 148, 136, 0.15);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        animation: demoModalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-sizing: border-box;
+      }
+      @keyframes demoModalFadeIn {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      .demo-notice-header {
+        padding: 1.5rem 1.75rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .demo-notice-header-icon {
+        font-size: 1.5rem;
+        color: #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .demo-notice-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+      }
+      .demo-notice-body {
+        padding: 1.5rem 1.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        box-sizing: border-box;
+      }
+      .demo-notice-banner {
+        background: rgba(59, 130, 246, 0.08);
+        border-left: 4px solid #3b82f6;
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        box-sizing: border-box;
+      }
+      .demo-notice-banner-icon {
+        color: #3b82f6;
+        font-size: 1.1rem;
+        margin-top: 0.1rem;
+        flex-shrink: 0;
+      }
+      .demo-notice-banner-text {
+        font-size: 0.88rem;
+        line-height: 1.5;
+        color: #cbd5e1;
+        margin: 0;
+      }
+      .demo-notice-checkbox-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+        user-select: none;
+        padding: 0.25rem 0;
+      }
+      .demo-notice-checkbox-input {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        margin-top: 0.1rem;
+        accent-color: #0D9488;
+        flex-shrink: 0;
+      }
+      .demo-notice-checkbox-label {
+        font-size: 0.88rem;
+        color: #e2e8f0;
+        line-height: 1.4;
+        font-weight: 500;
+      }
+      .demo-notice-footer {
+        padding: 1.25rem 1.75rem 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        background: rgba(10, 15, 30, 0.5);
+        box-sizing: border-box;
+      }
+      .demo-notice-btn {
+        padding: 0.6rem 1.25rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        outline: none;
+        box-sizing: border-box;
+      }
+      .demo-notice-btn-primary {
+        background: #0D9488;
+        color: #ffffff;
+        border: 1px solid transparent;
+      }
+      .demo-notice-btn-primary:hover:not(:disabled) {
+        background: #0f766e;
+        box-shadow: 0 0 12px rgba(13, 148, 136, 0.3);
+      }
+      .demo-notice-btn-primary:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .demo-notice-btn-secondary {
+        background: transparent;
+        color: #cbd5e1;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        text-decoration: none;
+      }
+      .demo-notice-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+    `;
+    document.head.appendChild(modalStyle);
+
+    // Build the modal HTML elements dynamically
+    const modal = document.createElement('div');
+    modal.id = 'demo-notice-modal';
+    modal.innerHTML = `
+      <div class="demo-notice-card">
+        <div class="demo-notice-header">
+          <div class="demo-notice-header-icon">
+            <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+          </div>
+          <h3 class="demo-notice-title">Demo Notice</h3>
+        </div>
+        <div class="demo-notice-body">
+          <div class="demo-notice-banner">
+            <div class="demo-notice-banner-icon">
+              <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11 9h2V7h-2v2zm0 8h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              </svg>
+            </div>
+            <p class="demo-notice-banner-text">
+              This application is a demonstration prototype developed for educational and project purposes. It is not an official Government of India or State Government service. Any complaints, user accounts, images, locations, analytics, notifications, reports, AI responses, and other data shown may be sample or test data and should not be considered official records. Do not submit confidential, personal, financial, or legally sensitive information through this demo. The developers are not responsible for decisions made based on the information displayed in this prototype.
+            </p>
+          </div>
+          <label class="demo-notice-checkbox-wrapper" for="demo-notice-checkbox">
+            <input type="checkbox" id="demo-notice-checkbox" class="demo-notice-checkbox-input" />
+            <span class="demo-notice-checkbox-label">I understand that this is a demonstration application.</span>
+          </label>
+        </div>
+        <div class="demo-notice-footer">
+          <a href="https://github.com/Dhanushraagav/CrowdCity" target="_blank" class="demo-notice-btn demo-notice-btn-secondary">Learn More</a>
+          <button type="button" id="demo-notice-continue-btn" class="demo-notice-btn demo-notice-btn-primary" disabled>Continue</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Add interactivity
+    const checkbox = document.getElementById('demo-notice-checkbox');
+    const continueBtn = document.getElementById('demo-notice-continue-btn');
+
+    checkbox.addEventListener('change', function() {
+      continueBtn.disabled = !this.checked;
+    });
+
+    continueBtn.addEventListener('click', function() {
+      sessionStorage.removeItem('cc_show_demo_notice');
+      modal.style.opacity = '0';
+      modal.style.visibility = 'hidden';
+      setTimeout(() => {
+        modal.remove();
+        modalStyle.remove();
+      }, 300);
+    });
+
+    // Make sure ESC key does not close it
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('demo-notice-modal')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  }
+
+  // Inject once DOM body is available
+  if (document.body) {
+    injectDemoNotice();
+  } else {
+    const observer = new MutationObserver(() => {
+      if (document.body) {
+        injectDemoNotice();
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.documentElement, { childList: true });
+    document.addEventListener('DOMContentLoaded', injectDemoNotice);
+  }
+})();
+

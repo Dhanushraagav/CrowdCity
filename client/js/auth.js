@@ -767,6 +767,10 @@ async function verifyProfileAndRoute(user, showAlert) {
   // Cache session info
   localStorage.setItem('cc_user_role', role);
   
+  if (role === 'citizen' || role === 'authority') {
+    sessionStorage.setItem('cc_show_demo_notice', 'true');
+  }
+  
   // Set user profile in localStorage so other components can access full_name etc.
   const storedProfile = {
     role: role,
