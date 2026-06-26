@@ -628,9 +628,7 @@ window.authRouter = {
 
   // 2. Mobile Detection Logic
   function checkMobile() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isSmallScreen = window.innerWidth < 980;
-    return isMobile && isSmallScreen;
+    return false; // Mobile layout enabled: bypass mobile maintenance overlay
   }
 
   // 3. Inject Maintenance HTML
