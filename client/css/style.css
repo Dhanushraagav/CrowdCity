@@ -946,3 +946,34 @@ body::after {
   transform: translateY(-50%) scale(1.1);
 }
 
+/* Mobile Layout Support & Custom Scrollbars Override */
+@media (max-width: 980px) {
+  /* Hide all custom/default scrollbars on mobile devices while keeping page scrolling functional */
+  html, body, * {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+  /* Prevent horizontal or vertical spill overflow from showing track layout gaps */
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-thumb {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+  }
+}
+
+/* Loader active states to occupy 100vw x 100vh with overflow hidden */
+html.loader-active, 
+body.loader-active {
+  overflow: hidden !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+

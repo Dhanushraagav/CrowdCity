@@ -17,15 +17,26 @@
   <script src="js/i18n.js"></script>
 
   <style>
-    body {
+    html, body {
       background-color: #0c101b;
       color: #cbd5e1;
       font-family: system-ui, -apple-system, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100vw;
       height: 100vh;
       margin: 0;
+      overflow: hidden !important;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      width: 0 !important;
+      height: 0 !important;
+      display: none !important;
     }
     .loader {
       text-align: center;

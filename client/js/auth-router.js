@@ -81,6 +81,11 @@
       opacity: 0;
       visibility: hidden;
     }
+    html.loader-active, body.loader-active {
+      overflow: hidden !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
     .loader-container {
       display: flex;
       flex-direction: column;
@@ -166,6 +171,7 @@
   // Inject loader HTML as soon as body is available
   function injectLoaderHTML() {
     if (document.getElementById('global-page-loader')) return;
+    document.documentElement.classList.add('loader-active');
     const loader = document.createElement('div');
     loader.id = 'global-page-loader';
     loader.innerHTML = `

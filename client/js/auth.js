@@ -2046,6 +2046,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       loader.classList.add('fade-out');
+      document.documentElement.classList.remove('loader-active');
       // Remove from DOM after transition completes
       setTimeout(() => {
         if (loader.parentNode) {
