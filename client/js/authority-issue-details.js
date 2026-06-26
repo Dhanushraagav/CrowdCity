@@ -154,8 +154,13 @@ async function loadCaseDetails() {
   aiCat.className = `badge badge-category ${issue.ai_category ? issue.ai_category.toLowerCase() : 'other'}`;
 
   const aiPri = document.getElementById('ai-priority-badge');
-  aiPri.textContent = issue.ai_priority || 'low';
-  aiPri.className = `badge badge-status ${issue.ai_priority ? issue.ai_priority.toLowerCase() : 'pending'}`;
+  const aiPriority = (issue.ai_priority || 'low').toLowerCase();
+  aiPri.textContent = aiPriority.toUpperCase();
+  let priorityClass = 'badge-priority medium';
+  if (aiPriority === 'low') priorityClass = 'badge-priority low';
+  else if (aiPriority === 'high') priorityClass = 'badge-priority high';
+  else if (aiPriority === 'critical') priorityClass = 'badge-priority critical';
+  aiPri.className = `badge ${priorityClass}`;
 
   // Showcase proof
   const showcase = document.getElementById('resolution-proof-showcase');

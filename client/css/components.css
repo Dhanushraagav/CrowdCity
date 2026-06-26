@@ -48,6 +48,19 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.btn-danger {
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
 .btn-outline {
   background-color: transparent;
   color: var(--text-main);
@@ -92,9 +105,21 @@
   padding: 0.15rem 0.45rem;
   border-radius: var(--radius-sm);
   font-size: 0.7rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: capitalize;
 }
+.badge-category.roads { background-color: rgba(71, 85, 105, 0.08); color: #334155; border-color: rgba(71, 85, 105, 0.25); }
+.badge-category.streetlights { background-color: rgba(234, 88, 12, 0.08); color: #c2410c; border-color: rgba(234, 88, 12, 0.25); }
+.badge-category.water_supply { background-color: rgba(15, 118, 110, 0.08); color: #0F766E; border-color: rgba(15, 118, 110, 0.25); }
+.badge-category.drainage { background-color: rgba(101, 163, 13, 0.08); color: #4d7c0f; border-color: rgba(101, 163, 13, 0.25); }
+.badge-category.garbage { background-color: rgba(16, 185, 129, 0.08); color: #047857; border-color: rgba(16, 185, 129, 0.25); }
+.badge-category.traffic { background-color: rgba(244, 63, 94, 0.08); color: #be123c; border-color: rgba(244, 63, 94, 0.25); }
+.badge-category.sewerage { background-color: rgba(124, 45, 18, 0.08); color: #7c2d12; border-color: rgba(124, 45, 18, 0.25); }
+.badge-category.parks { background-color: rgba(16, 185, 129, 0.08); color: #047857; border-color: rgba(16, 185, 129, 0.25); }
+.badge-category.sanitation { background-color: rgba(219, 39, 119, 0.08); color: #be185d; border-color: rgba(219, 39, 119, 0.25); }
+.badge-category.safety_hazard { background-color: rgba(234, 88, 12, 0.08); color: #c2410c; border-color: rgba(234, 88, 12, 0.25); }
+.badge-category.environment { background-color: rgba(15, 118, 110, 0.08); color: #0F766E; border-color: rgba(15, 118, 110, 0.25); }
+.badge-category.other { background-color: rgba(100, 116, 139, 0.08); color: #475569; border-color: rgba(100, 116, 139, 0.25); }
 
 /* Status Badges */
 .badge-status {
@@ -102,34 +127,34 @@
   color: var(--text-muted);
   border: 1px solid var(--border-color);
 }
-.badge-status.pending { background-color: rgba(217, 119, 6, 0.06); color: #d97706; border-color: rgba(217, 119, 6, 0.18); }
-.badge-status.assigned { background-color: rgba(139, 92, 246, 0.06); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.18); }
-.badge-status.in_progress { background-color: rgba(13, 148, 136, 0.06); color: #0d9488; border-color: rgba(13, 148, 136, 0.18); }
-.badge-status.resolved { background-color: rgba(16, 185, 129, 0.06); color: #10b981; border-color: rgba(16, 185, 129, 0.18); }
-.badge-status.rejected { background-color: rgba(225, 29, 72, 0.06); color: #e11d48; border-color: rgba(225, 29, 72, 0.18); }
-.badge-status.verified { background-color: rgba(16, 185, 129, 0.12); color: #10b981; border-color: rgba(16, 185, 129, 0.25); }
+.badge-status.pending { background-color: rgba(217, 119, 6, 0.08); color: #b45309; border-color: rgba(217, 119, 6, 0.25); }
+.badge-status.assigned { background-color: rgba(139, 92, 246, 0.08); color: #6d28d9; border-color: rgba(139, 92, 246, 0.25); }
+.badge-status.in_progress { background-color: rgba(15, 118, 110, 0.08); color: #0F766E; border-color: rgba(15, 118, 110, 0.25); }
+.badge-status.resolved { background-color: rgba(22, 163, 74, 0.08); color: #15803d; border-color: rgba(22, 163, 74, 0.25); }
+.badge-status.rejected { background-color: rgba(225, 29, 72, 0.08); color: #be123c; border-color: rgba(225, 29, 72, 0.25); }
+.badge-status.verified { background-color: rgba(22, 163, 74, 0.12); color: #15803d; border-color: rgba(22, 163, 74, 0.3); }
 
 /* Priority Badges */
 .badge-priority {
   font-weight: 700;
 }
 .badge-priority.low {
-  background-color: rgba(22, 163, 74, 0.08);
-  color: #16a34a;
-  border: 1px solid rgba(22, 163, 74, 0.15);
+  background-color: rgba(22, 163, 74, 0.1);
+  color: #15803d;
+  border: 1px solid rgba(22, 163, 74, 0.25);
 }
 .badge-priority.medium {
-  background-color: rgba(217, 119, 6, 0.08);
-  color: #d97706;
-  border: 1px solid rgba(217, 119, 6, 0.15);
+  background-color: rgba(217, 119, 6, 0.1);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }
 .badge-priority.high {
-  background-color: rgba(220, 38, 38, 0.08);
-  color: #dc2626;
-  border: 1px solid rgba(220, 38, 38, 0.15);
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+  border: 1px solid rgba(220, 38, 38, 0.25);
 }
 .badge-priority.critical {
-  background-color: #dc2626;
+  background-color: #b91c1c;
   color: white;
 }
 

@@ -1182,7 +1182,7 @@ async function loadNewFeatures(issue) {
 
     // 1. Download Receipt: visible if resolved or verified
     const receiptBtn = document.getElementById('btn-download-receipt');
-    const showReceipt = isTerminal && (issue.status === 'resolved' || issue.status === 'verified');
+    const showReceipt = isReporter || isAuthorityOrAdmin;
     if (receiptBtn) {
       receiptBtn.style.display = showReceipt ? '' : 'none';
     }
