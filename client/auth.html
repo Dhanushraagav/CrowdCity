@@ -21,9 +21,8 @@
   <link rel="stylesheet" href="css/components.css">
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('cc_theme');
-      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
-      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
       document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('ready');
       });
@@ -49,19 +48,7 @@
       
       --input-focus-border: #0D9488;
     }
-    
-    :root.dark-theme {
-      --primary: #14b8a6;
-      --primary-hover: #0d9488;
-      --primary-light-alpha: rgba(20, 184, 166, 0.12);
-      --primary-glow: rgba(20, 184, 166, 0.2);
-      
-      --btn-primary-bg: #14b8a6;
-      --btn-primary-hover: #0d9488;
-      --btn-primary-text: #030712;
-      
-      --input-focus-border: #14b8a6;
-    }
+
 
     .fade-in {
       animation: authFadeIn 0.2s ease-out forwards;
@@ -100,10 +87,7 @@
       gap: 0.75rem;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .dark-theme .otp-promo-container {
-      border: 1px dashed rgba(16, 185, 129, 0.4);
-      background-color: rgba(16, 185, 129, 0.04);
-    }
+
     .otp-promo-container:hover {
       border-color: var(--primary);
       background-color: rgba(16, 185, 129, 0.08);
@@ -261,10 +245,7 @@
       margin: 0 auto;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .dark-theme .otp-status-banner {
-      background-color: #05070a;
-      border-color: rgba(16, 185, 129, 0.15);
-    }
+
     .otp-status-icon {
       font-size: 1.25rem;
       display: flex;

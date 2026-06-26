@@ -83,9 +83,8 @@ function renderCharts(analytics) {
   if (statusesChart) statusesChart.destroy();
   if (performanceChart) performanceChart.destroy();
 
-  const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const textColor = isDarkMode ? '#cbd5e1' : '#334155';
-  const gridColor = isDarkMode ? '#1e293b' : '#cbd5e1';
+  const textColor = '#334155';
+  const gridColor = '#cbd5e1';
 
   // Chart 1: Categories Doughnut Chart
   const categoriesCtx = document.getElementById('chart-categories');

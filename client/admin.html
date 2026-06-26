@@ -25,9 +25,8 @@
   <!-- Synchronous Redirect Script to prevent flash of content -->
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('cc_theme');
-      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
-      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
       document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('ready');
       });
@@ -205,12 +204,7 @@
       border-bottom: 1px solid var(--border-color);
     }
     
-    @media (prefers-color-scheme: dark) {
-      .admin-table th {
-        background-color: var(--slate-800);
-        color: var(--slate-300);
-      }
-    }
+
     
     .admin-table td {
       padding: 1rem;
@@ -305,12 +299,7 @@
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-color);
     }
-    
-    @media (prefers-color-scheme: dark) {
-      .complaint-admin-body {
-        background-color: var(--slate-800);
-      }
-    }
+
     
     .delegation-control {
       display: flex;

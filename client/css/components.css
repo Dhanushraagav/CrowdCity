@@ -547,17 +547,6 @@
   border-radius: var(--radius-sm);
 }
 
-:root.dark-theme .skeleton-pulse {
-  background: linear-gradient(90deg, #10141d 25%, #1b2230 50%, #10141d 75%) !important;
-  background-size: 200% 100% !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light-theme) .skeleton-pulse {
-    background: linear-gradient(90deg, #10141d 25%, #1b2230 50%, #10141d 75%);
-    background-size: 200% 100%;
-  }
-}
 
 @keyframes shimmer {
   0% { background-position: 200% 0; }
@@ -1216,11 +1205,6 @@
 .contrib-day.level-3 { background-color: var(--slate-500); }
 .contrib-day.level-4 { background-color: var(--primary); }
 
-.dark-theme .contrib-day.level-0 { background-color: var(--border-color); }
-.dark-theme .contrib-day.level-1 { background-color: var(--bg-surface-hover); }
-.dark-theme .contrib-day.level-2 { background-color: #252C36; }
-.dark-theme .contrib-day.level-3 { background-color: #4B5563; }
-.dark-theme .contrib-day.level-4 { background-color: var(--primary); }
 
 .contrib-footer {
   display: flex;
@@ -1630,9 +1614,6 @@
   box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
 }
 
-.dark-theme .app-sidebar-link.active {
-  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.25);
-}
 
 .app-sidebar-btn {
   margin: 1.5rem 0.5rem;
@@ -3486,13 +3467,8 @@
   border-left: 3px solid #ef4444 !important;
 }
 
-/* Sidebar Light & Dark Mode Contrast Overrides */
 :root {
   --brand-subtitle-color: #ea580c;
-}
-:root.dark-theme,
-:root:not(.light-theme) {
-  --brand-subtitle-color: #fbbf24;
 }
 
 .brand-title {

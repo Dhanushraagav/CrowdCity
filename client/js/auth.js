@@ -1717,15 +1717,10 @@ function initAuthModule() {
     });
   }
 
-  // Apply saved theme on page load immediately to align with localStorage
-  const activeTheme = getActiveTheme();
-  if (activeTheme === 'dark') {
-    document.documentElement.classList.add('dark-theme');
-    document.documentElement.classList.remove('light-theme');
-  } else {
-    document.documentElement.classList.add('light-theme');
-    document.documentElement.classList.remove('dark-theme');
-  }
+  // Apply saved theme on page load immediately (lock to light-theme)
+  document.documentElement.classList.add('light-theme');
+  document.documentElement.classList.remove('dark-theme');
+  localStorage.setItem('cc_theme', 'light');
 
   localStorage.removeItem('cc_mock_session');
 
@@ -1837,43 +1832,12 @@ function updateDailyStreak() {
 }
 
 function initThemeToggle() {
-  const navMenu = document.getElementById('nav-menu');
-  const authContainer = document.getElementById('auth-nav-container');
-  if (!navMenu || !authContainer) return;
-
-  if (document.getElementById('header-theme-toggle')) return;
-
-  const toggleBtn = document.createElement('button');
-  toggleBtn.id = 'header-theme-toggle';
-  toggleBtn.className = 'theme-toggle-btn';
-  toggleBtn.setAttribute('aria-label', 'Toggle Theme');
-  
-  const currentTheme = getActiveTheme();
-  toggleBtn.innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-  
-  navMenu.insertBefore(toggleBtn, authContainer);
-
-  toggleBtn.addEventListener('click', () => {
-    const activeTheme = getActiveTheme();
-    if (activeTheme === 'dark') {
-      document.documentElement.classList.remove('dark-theme');
-      document.documentElement.classList.add('light-theme');
-      localStorage.setItem('cc_theme', 'light');
-      toggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-    } else {
-      document.documentElement.classList.remove('light-theme');
-      document.documentElement.classList.add('dark-theme');
-      localStorage.setItem('cc_theme', 'dark');
-      toggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-    }
-    window.dispatchEvent(new Event('theme-change'));
-  });
+  // Theme toggle disabled to enforce clean professional white theme
+  return;
 }
 
 function getActiveTheme() {
-  const savedTheme = localStorage.getItem('cc_theme');
-  if (savedTheme) return savedTheme;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'light';
 }
 
 window.addEventListener('language-change', () => {
@@ -2122,7 +2086,7 @@ window.renderTurnstileWidgets = function() {
   }
 
   const siteKey = window.supabaseConfig?.turnstileSiteKey || '1x00000000000000000000AA';
-  const theme = localStorage.getItem('cc_theme') === 'dark' ? 'dark' : 'light';
+  const theme = 'light';
 
   if (document.getElementById('login-captcha') && window.loginWidgetId === null) {
     try {
@@ -2174,12 +2138,4 @@ window.onloadTurnstileCallback = function() {
   }
 };
 
-// Listen for theme changes to dynamically update Turnstile theme if they toggle
-window.addEventListener('theme-change', () => {
-  if (typeof turnstile !== 'undefined') {
-    const theme = localStorage.getItem('cc_theme') === 'dark' ? 'dark' : 'light';
-    if (window.loginWidgetId !== null) turnstile.reset(window.loginWidgetId);
-    if (window.signupWidgetId !== null) turnstile.reset(window.signupWidgetId);
-    if (window.recoveryWidgetId !== null) turnstile.reset(window.recoveryWidgetId);
-  }
-});
+

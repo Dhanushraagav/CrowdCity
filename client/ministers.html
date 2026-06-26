@@ -742,9 +742,8 @@
 
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('cc_theme');
-      if (savedTheme === 'dark') document.documentElement.classList.add('dark-theme');
-      else if (savedTheme === 'light') document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
     })();
   </script>
 
