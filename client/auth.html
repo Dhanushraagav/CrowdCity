@@ -356,8 +356,8 @@
     /* Left Column: Hero branding panel */
     .auth-brand-panel {
       flex: 1;
-      background: linear-gradient(135deg, #090f1d 0%, #050a14 100%);
-      color: white;
+      background: linear-gradient(135deg, #F5F7FA 0%, #E2E8F0 100%);
+      color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -379,13 +379,13 @@
       font-size: 2.2rem;
       font-weight: 800;
       line-height: 1.2;
-      background: linear-gradient(to right, #ffffff, var(--slate-300));
+      background: linear-gradient(to right, #0F766E, #2563EB);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .brand-panel-content p {
-      color: var(--slate-400);
+      color: var(--text-muted);
       font-size: 1.15rem;
       line-height: 1.6;
     }
@@ -451,8 +451,8 @@
       object-fit: cover;
       border-radius: 6px !important;
       display: block;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.65)) brightness(0.8);
+      border: 1px solid var(--border-color);
+      filter: drop-shadow(0 12px 24px rgba(15, 118, 110, 0.12)) brightness(1);
       z-index: 1;
     }
 
@@ -674,23 +674,23 @@
 
     /* Premium right-side form panel overrides */
     .auth-form-panel {
-      background: radial-gradient(circle at 80% 20%, rgba(13, 148, 136, 0.01) 0%, #030712 100%);
+      background: #F8FAFC;
     }
 
     .auth-card {
-      background-color: rgba(15, 23, 42, 0.4) !important;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      background-color: #FFFFFF !important;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: 1px solid #E2E8F0 !important;
       border-radius: 8px !important;
       padding: 3rem 2.5rem !important;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
     }
 
     .auth-tabs {
       display: flex;
-      background-color: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      background-color: #F1F5F9 !important;
+      border: 1px solid #E2E8F0 !important;
       border-radius: 6px !important;
       padding: 4px !important;
       margin-bottom: 2.5rem !important;
@@ -704,7 +704,7 @@
       font-size: 0.9rem !important;
       border-radius: 4px !important;
       border-bottom: none !important;
-      color: var(--text-muted) !important;
+      color: #4B5563 !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
@@ -715,9 +715,9 @@
     }
 
     .form-input {
-      background-color: rgba(15, 23, 42, 0.5) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      color: #ffffff !important;
+      background-color: #FFFFFF !important;
+      border: 1px solid #CBD5E1 !important;
+      color: #1F2937 !important;
       padding: 0.85rem 1.1rem !important;
       border-radius: 4px !important;
       font-size: 0.95rem !important;
@@ -725,13 +725,13 @@
     }
 
     .form-input::placeholder {
-      color: rgba(255, 255, 255, 0.25) !important;
+      color: #94A3B8 !important;
     }
 
     .form-input:focus {
       border-color: var(--primary) !important;
-      box-shadow: none !important;
-      background-color: rgba(15, 23, 42, 0.8) !important;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
+      background-color: #FFFFFF !important;
       padding-left: 1.4rem !important;
     }
 
@@ -780,39 +780,39 @@
     }
 
     .oauth-divider {
-      color: rgba(255, 255, 255, 0.3) !important;
+      color: #94A3B8 !important;
     }
 
     .oauth-divider::before, .oauth-divider::after {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-bottom: 1px solid #E2E8F0 !important;
     }
 
     .btn-google {
-      background-color: rgba(255, 255, 255, 0.02) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      color: #ffffff !important;
+      background-color: #FFFFFF !important;
+      border: 1px solid #E2E8F0 !important;
+      color: #4B5563 !important;
       border-radius: 4px !important;
       padding: 0.8rem 1.2rem !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .btn-google:hover {
-      background-color: rgba(255, 255, 255, 0.04) !important;
-      border-color: rgba(255, 255, 255, 0.15) !important;
+      background-color: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
       transform: translateY(-2px) !important;
       box-shadow: none !important;
     }
 
     .authority-card-container {
-      background-color: rgba(255, 255, 255, 0.02) !important;
-      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      background-color: #F8FAFC !important;
+      border: 1px solid #E2E8F0 !important;
       border-radius: 6px !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .authority-card-container:hover {
-      background-color: rgba(255, 255, 255, 0.04) !important;
-      border-color: rgba(255, 255, 255, 0.12) !important;
+      background-color: #F1F5F9 !important;
+      border-color: #CBD5E1 !important;
       transform: translateY(-2px) !important;
     }
 
@@ -871,19 +871,18 @@
       bottom: 12px;
       left: 50%;
       transform: translateX(-50%) translateY(6px);
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #ffffff;
+      border: 1px solid var(--border-color);
       padding: 5px 14px;
       border-radius: 4px;
-      color: rgba(255, 255, 255, 0.95);
+      color: var(--text-main);
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.03em;
       z-index: 4;
       pointer-events: none;
       opacity: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
       transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       white-space: nowrap;
     }
@@ -896,10 +895,10 @@
     /* Namakkal slides get a premium teal glow highlighting it as the target city */
     .slide-caption.namakkal-caption {
       border-color: var(--primary) !important;
-      color: #ffffff !important;
+      color: var(--primary) !important;
       font-weight: 700;
-      background: rgba(13, 148, 136, 0.25) !important;
-      box-shadow: 0 0 15px rgba(13, 148, 136, 0.3), 0 4px 20px rgba(0, 0, 0, 0.4);
+      background: rgba(13, 148, 136, 0.08) !important;
+      box-shadow: 0 4px 10px rgba(13, 148, 136, 0.15);
     }
 
     .namakkal-badge {
@@ -936,15 +935,15 @@
       <div class="brand-panel-content">
         <div class="logo-container" style="margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.75rem;">
           <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu Emblem" style="height: 52px; object-fit: contain;" />
-          <div style="width: 1px; height: 32px; background: rgba(255, 255, 255, 0.25); margin: 0 0.25rem;"></div>
+          <div style="width: 1px; height: 32px; background: rgba(15, 118, 110, 0.25); margin: 0 0.25rem;"></div>
           <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="height: 38px; object-fit: contain;" />
           <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
-            <span class="logo-text" style="color: #ffffff; font-size: 1.35rem; font-weight: 800; letter-spacing: 0.5px;">CrowdCity AI</span>
-            <span style="color: #fbbf24; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">TN Government Initiative</span>
+            <span class="logo-text" style="color: var(--primary); font-size: 1.35rem; font-weight: 800; letter-spacing: 0.5px;">CrowdCity AI</span>
+            <span style="color: #d97706; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">TN Government Initiative</span>
           </div>
         </div>
-        <h2 data-i18n="auth_hero_title" style="font-size: 1.35rem; font-weight: 600; line-height: 1.4; background: none; -webkit-text-fill-color: #f1f5f9; color: #f1f5f9; margin-top: 1rem; margin-bottom: 0.5rem;">Empowering citizens to build cleaner, safer, and better neighborhoods.</h2>
-        <p style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); margin-top: 0.5rem; margin-bottom: 0px;">Collaborative civic portal in partnership with local urban bodies.</p>
+        <h2 data-i18n="auth_hero_title" style="font-size: 1.35rem; font-weight: 600; line-height: 1.4; background: none; -webkit-text-fill-color: var(--text-main); color: var(--text-main); margin-top: 1rem; margin-bottom: 0.5rem;">Empowering citizens to build cleaner, safer, and better neighborhoods.</h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0px;">Collaborative civic portal in partnership with local urban bodies.</p>
         
         <div class="branding-graphic" style="margin-top: 2rem; text-align: center;">
           <div class="slideshow-container" id="slideshow-container">
@@ -972,8 +971,8 @@
             <div class="slideshow-overlay"></div>
           </div>
           <div id="slideshow-desc-container" style="margin-top: 1.25rem; text-align: center; height: 3.2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 420px; margin-left: auto; margin-right: auto; gap: 4px;">
-            <p id="slideshow-desc-line1" style="font-size: 0.78rem; color: rgba(255, 255, 255, 0.85); font-weight: 500; margin: 0; line-height: 1.4; letter-spacing: 0.01em; height: 1.2rem; display: inline-block; border-right: 2px solid transparent; font-family: system-ui, sans-serif; transition: width 0.1s ease;"></p>
-            <p id="slideshow-desc-line2" style="font-size: 0.74rem; color: rgba(255, 255, 255, 0.5); font-weight: 400; margin: 0; line-height: 1.4; letter-spacing: 0.01em; height: 1.2rem; display: inline-block; border-right: 2px solid transparent; font-family: system-ui, sans-serif; transition: width 0.1s ease;"></p>
+            <p id="slideshow-desc-line1" style="font-size: 0.78rem; color: var(--text-main); font-weight: 500; margin: 0; line-height: 1.4; letter-spacing: 0.01em; height: 1.2rem; display: inline-block; border-right: 2px solid transparent; font-family: system-ui, sans-serif; transition: width 0.1s ease;"></p>
+            <p id="slideshow-desc-line2" style="font-size: 0.74rem; color: var(--text-muted); font-weight: 400; margin: 0; line-height: 1.4; letter-spacing: 0.01em; height: 1.2rem; display: inline-block; border-right: 2px solid transparent; font-family: system-ui, sans-serif; transition: width 0.1s ease;"></p>
           </div>
         </div>
       </div>
@@ -986,11 +985,11 @@
         <!-- Mobile branding logo (hidden on desktop) -->
         <div class="mobile-brand-header" style="display: none; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem;">
           <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu Emblem" style="height: 48px; object-fit: contain;" />
-          <div style="width: 1px; height: 28px; background: rgba(255, 255, 255, 0.15); margin: 0 0.1rem;"></div>
+          <div style="width: 1px; height: 28px; background: rgba(15, 118, 110, 0.15); margin: 0 0.1rem;"></div>
           <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="height: 34px; object-fit: contain;" />
           <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
-            <span style="color: #ffffff; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px;">CrowdCity AI</span>
-            <span style="color: #fbbf24; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">TN Initiative</span>
+            <span style="color: var(--primary); font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px;">CrowdCity AI</span>
+            <span style="color: #d97706; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">TN Initiative</span>
           </div>
         </div>
 

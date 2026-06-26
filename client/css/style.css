@@ -2,11 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Design Tokens - Colors (Default: Light Theme) */
-  --primary: #0D9488;
-  --primary-hover: #0d9488e0;
-  --primary-light-alpha: rgba(13, 148, 136, 0.08);
-  --primary-glow: rgba(13, 148, 136, 0.15);
+  /* Design Tokens - Colors (TN Government Inspired Theme) */
+  --primary: #0F766E;
+  --primary-hover: #0d625b;
+  --primary-light-alpha: rgba(15, 118, 110, 0.08);
+  --primary-glow: rgba(15, 118, 110, 0.15);
 
   --slate-50: #f8fafc;
   --slate-100: #f1f5f9;
@@ -20,51 +20,51 @@
   --slate-900: #0f172a;
   --slate-950: #020617;
 
-  /* Theme Variables (Default: Light Mode) */
-  --bg-app: #f4f6f9;
+  /* Theme Variables (Government Light Mode) */
+  --bg-app: #F5F7FA;
   --bg-surface: #ffffff;
-  --bg-surface-hover: #f8fafc;
+  --bg-surface-hover: #f1f5f9;
   --bg-header: #ffffff;
-  --border-color: rgba(226, 232, 240, 0.8);
+  --border-color: #D1D5DB;
   --bg-sidebar: #ffffff;
   
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-main: #111827;
+  --text-muted: #4B5563;
   --text-inverse: #ffffff;
 
   /* Polished Component Specific Variables */
-  --btn-primary-bg: #0D9488;
-  --btn-primary-hover: #0b7a70;
+  --btn-primary-bg: #0F766E;
+  --btn-primary-hover: #0d625b;
   --btn-primary-text: #ffffff;
 
   --btn-secondary-bg: #ffffff;
-  --btn-secondary-border: #e2e8f0;
-  --btn-secondary-text: #334155;
-  --btn-secondary-hover: #f8fafc;
+  --btn-secondary-border: #0F766E;
+  --btn-secondary-text: #0F766E;
+  --btn-secondary-hover: rgba(15, 118, 110, 0.05);
 
-  --input-bg: #f8fafc;
-  --input-border: #e2e8f0;
-  --input-focus-border: #0D9488;
-  --input-text: #0f172a;
+  --input-bg: #ffffff;
+  --input-border: #D1D5DB;
+  --input-focus-border: #0F766E;
+  --input-text: #111827;
 
   --card-bg: #ffffff;
-  --card-border: rgba(226, 232, 240, 0.8);
+  --card-border: #D1D5DB;
   
   /* Linear/Notion Panel tokens */
   --glass-bg: #ffffff;
-  --glass-border: rgba(226, 232, 240, 0.8);
-  --glass-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+  --glass-border: #D1D5DB;
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --glass-blur: none;
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 10px 30px -5px rgba(148, 163, 184, 0.16), 0 4px 12px -2px rgba(148, 163, 184, 0.08);
-  --shadow-lg: 0 24px 48px -10px rgba(148, 163, 184, 0.22), 0 8px 24px -4px rgba(148, 163, 184, 0.12);
-  --shadow-glow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 
   /* Category Colors */
   --color-roads: #475569;
   --color-streetlights: #ea580c;
-  --color-water_supply: #0d9488;
+  --color-water_supply: #0f766e;
   --color-drainage: #65a30d;
   --color-garbage: #10b981;
   --color-traffic: #f43f5e;
@@ -72,20 +72,20 @@
   --color-parks: #10b981;
   --color-sanitation: #db2777;
   --color-safety_hazard: #ea580c;
-  --color-environment: #0d9488;
+  --color-environment: #0f766e;
   --color-other: #64748b;
 
   /* Backwards compatibility */
   --color-pothole: #475569;
-  --color-leakage: #0d9488;
+  --color-leakage: #0f766e;
   --color-streetlight: #ea580c;
   --color-road: #64748b;
 
   --status-reported: #ea580c;
   --status-investigating: #8b5cf6;
-  --status-in-progress: #0d9488;
-  --status-resolved: #10b981;
-  --status-duplicate: #e11d48;
+  --status-in-progress: #0f766e;
+  --status-resolved: #16a34a;
+  --status-duplicate: #dc2626;
 
   /* Global Fonts */
   --font-heading: 'Inter', sans-serif;
@@ -93,9 +93,9 @@
   
   /* Dimensions & Spacing */
   --header-height: 64px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-round: 9999px;
   
   --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -878,21 +878,21 @@ body::after {
 
 /* Sidebar Helpdesk Widget styling */
 .sidebar-helpdesk-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #FFFBEB;
+  border: 1px solid #F59E0B;
   border-radius: var(--radius-sm);
   padding: 0.75rem;
   margin: 0.5rem 0.75rem 1rem 0.75rem;
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--text-main);
   font-family: var(--font-heading, inherit);
   transition: all var(--transition-fast);
 }
 
 
 .sidebar-helpdesk-card:hover {
-  border-color: rgba(251, 191, 36, 0.3);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: #d97706;
+  background: #FEF3C7;
 }
 
 @media (max-width: 900px) {
@@ -936,20 +936,13 @@ body::after {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.4);
+  color: #64748B;
   font-size: 1.05rem;
   transition: color 0.2s ease, transform 0.15s ease;
   z-index: 10;
 }
 .toggle-password-visibility:hover {
-  color: #ffffff;
+  color: var(--primary);
   transform: translateY(-50%) scale(1.1);
-}
-/* Light theme support */
-.light-theme .toggle-password-visibility {
-  color: rgba(0, 0, 0, 0.4);
-}
-.light-theme .toggle-password-visibility:hover {
-  color: #000000;
 }
 
