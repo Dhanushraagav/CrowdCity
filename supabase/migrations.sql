@@ -34,6 +34,7 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
 -- Messages Policies:
 -- Only the reporter and the assigned authority (or admin) can read messages for an issue
+DROP POLICY IF EXISTS "Chat participants can view messages" ON public.messages;
 CREATE POLICY "Chat participants can view messages" ON public.messages
   FOR SELECT USING (
     EXISTS (
@@ -51,6 +52,7 @@ CREATE POLICY "Chat participants can view messages" ON public.messages
   );
 
 -- Only the reporter and assigned authority can send messages
+DROP POLICY IF EXISTS "Chat participants can send messages" ON public.messages;
 CREATE POLICY "Chat participants can send messages" ON public.messages
   FOR INSERT WITH CHECK (
     auth.uid() = sender_id
@@ -90,9 +92,11 @@ CREATE TABLE IF NOT EXISTS public.issue_attachments (
 ALTER TABLE public.issue_attachments ENABLE ROW LEVEL SECURITY;
 
 -- Attachments Policies
+DROP POLICY IF EXISTS "Attachments are viewable by everyone" ON public.issue_attachments;
 CREATE POLICY "Attachments are viewable by everyone" ON public.issue_attachments
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Reporter can upload attachments" ON public.issue_attachments;
 CREATE POLICY "Reporter can upload attachments" ON public.issue_attachments
   FOR INSERT WITH CHECK (
     auth.uid() = uploaded_by
@@ -120,6 +124,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 -- ===================================================
 -- The existing policy only allows authority/admin inserts.
 -- We need to also allow citizens to insert when withdrawing their own complaint.
+DROP POLICY IF EXISTS "Citizens can log withdrawal status" ON public.status_history;
 CREATE POLICY "Citizens can log withdrawal status" ON public.status_history
   FOR INSERT WITH CHECK (
     auth.uid() = updated_by
