@@ -248,29 +248,26 @@
             <p id="issue-description" style="color: var(--slate-600); line-height: 1.7; font-size: 1rem;">Description text...</p>
           </div>
 
-          <!-- Citizen Actions Panel (visible only to reporter) -->
-          <div id="citizen-actions-panel" class="glass-panel hidden" style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; animation: fadeSlideUp 0.4s ease;">
+          <!-- Download Receipt Card -->
+          <div id="download-receipt-card" class="glass-panel" style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; animation: fadeSlideUp 0.4s ease; margin-bottom: 1.5rem; width: 100%;">
             <h3 style="font-size: 1.15rem; font-family: var(--font-heading); color: var(--primary); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-              <i class="fa-solid fa-gear"></i> Complaint Actions
+              <i class="fa-solid fa-file-invoice"></i> Download Complaint Receipt
             </h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-              <button id="btn-download-receipt" class="btn btn-secondary" style="flex: 1; min-width: 140px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; padding: 0.6rem 1rem; border-radius: var(--radius-md); transition: all 0.2s ease;">
+            <p style="font-size: 0.9rem; color: var(--text-main); margin: 0;">You can download the official PDF receipt of this civic complaint for your records and official tracking.</p>
+            <div style="display: flex; gap: 0.75rem;">
+              <button id="btn-download-receipt" class="btn btn-secondary" style="flex: 1; max-width: 250px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; padding: 0.6rem 1rem; border-radius: var(--radius-md); transition: all 0.2s ease;">
                 <i class="fa-solid fa-file-invoice"></i> Download Receipt
-              </button>
-              <button id="btn-show-evidence-upload" class="btn btn-secondary" style="flex: 1; min-width: 140px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; padding: 0.6rem 1rem; border-radius: var(--radius-md); transition: all 0.2s ease;">
-                <i class="fa-solid fa-cloud-upload"></i> Upload Evidence
-              </button>
-              <button id="btn-withdraw" class="btn btn-danger" style="flex: 1; min-width: 140px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; padding: 0.6rem 1rem; border-radius: var(--radius-md); transition: all 0.2s ease;">
-                <i class="fa-solid fa-ban"></i> Withdraw Complaint
               </button>
             </div>
           </div>
 
-          <!-- Evidence Upload Section (hidden toggle) -->
-          <div id="evidence-upload-section" class="glass-panel hidden" style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; animation: fadeSlideUp 0.3s ease;">
-            <h4 style="font-size: 1rem; font-family: var(--font-heading); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fa-solid fa-paperclip"></i> Upload Additional Evidence
-            </h4>
+          <!-- Upload Additional Evidence Card -->
+          <div id="evidence-upload-section" class="glass-panel" style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; animation: fadeSlideUp 0.4s ease; margin-bottom: 1.5rem; width: 100%;">
+            <h3 style="font-size: 1.15rem; font-family: var(--font-heading); color: var(--primary); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+              <i class="fa-solid fa-cloud-upload"></i> Upload Additional Evidence
+            </h3>
+            <p style="font-size: 0.9rem; color: var(--text-main); margin: 0;">Provide more photos or documents to help authorities verify and resolve this issue faster.</p>
+            
             <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s ease;" id="evidence-dropzone">
               <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 0.5rem;"></i>
               <p style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin: 0;">Click to select images or drag & drop</p>
@@ -282,6 +279,20 @@
             <button id="btn-upload-evidence" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.5rem 1rem; align-self: flex-end;" disabled>
               <i class="fa-solid fa-upload"></i> Upload Files
             </button>
+          </div>
+
+          <!-- Citizen Actions Panel (for Withdraw action) -->
+          <div id="citizen-actions-panel" class="glass-panel hidden" style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; animation: fadeSlideUp 0.4s ease; margin-bottom: 1.5rem; width: 100%;">
+            <h3 style="font-size: 1.15rem; font-family: var(--font-heading); color: var(--primary); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+              <i class="fa-solid fa-gear"></i> Complaint Actions
+            </h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+              <button id="btn-withdraw" class="btn btn-danger" style="flex: 1; max-width: 250px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; padding: 0.6rem 1rem; border-radius: var(--radius-md); transition: all 0.2s ease;">
+                <i class="fa-solid fa-ban"></i> Withdraw Complaint
+              </button>
+              <!-- Hidden compatibility button -->
+              <button id="btn-show-evidence-upload" class="hidden" style="display: none;"></button>
+            </div>
           </div>
 
           <!-- Evidence Gallery -->

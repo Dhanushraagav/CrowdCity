@@ -156,31 +156,37 @@ async function loadIssueDetails() {
   renderControlPanelUI(issue.status);
 
   // Render AI Insights Card if AI data is available
+  // Render AI Insights Card (Always visible, show sensible placeholders if null/undefined)
   const aiCard = document.getElementById('ai-insights-card');
   if (aiCard) {
-    if (issue.ai_summary || issue.ai_category || issue.ai_department || issue.ai_priority) {
-      document.getElementById('ai-summary-text').textContent = issue.ai_summary || (window.i18n ? window.i18n.t('no_summary_generated') : 'No summary generated.');
-      
-      const aiCatBadge = document.getElementById('ai-category-badge');
+    aiCard.classList.remove('hidden');
+    
+    const summaryText = document.getElementById('ai-summary-text');
+    if (summaryText) {
+      summaryText.textContent = issue.ai_summary || (window.i18n ? window.i18n.t('no_summary_generated') : 'No summary generated.');
+    }
+    
+    const aiCatBadge = document.getElementById('ai-category-badge');
+    if (aiCatBadge) {
       const aiCategory = issue.ai_category || 'other';
       aiCatBadge.textContent = window.formatCategoryName(aiCategory);
       aiCatBadge.className = `badge badge-category ${aiCategory}`;
-      
-      const aiPriorityBadge = document.getElementById('ai-priority-badge');
+    }
+    
+    const aiPriorityBadge = document.getElementById('ai-priority-badge');
+    if (aiPriorityBadge) {
       const aiPriority = issue.ai_priority || 'low';
       aiPriorityBadge.textContent = aiPriority.toUpperCase();
-      
-      // Set priority badge styling depending on predicted severity
-      let priorityClass = 'badge-priority medium'; // medium
+      let priorityClass = 'badge-priority medium';
       if (aiPriority === 'low') priorityClass = 'badge-priority low';
       else if (aiPriority === 'high') priorityClass = 'badge-priority high';
       else if (aiPriority === 'critical') priorityClass = 'badge-priority critical';
-      
       aiPriorityBadge.className = `badge ${priorityClass}`;
-      document.getElementById('ai-dept-text').innerHTML = `<i class="fa-solid fa-building-flag"></i> ${issue.ai_department || 'Department of Public Works'}`;
-      aiCard.classList.remove('hidden');
-    } else {
-      aiCard.classList.add('hidden');
+    }
+    
+    const aiDeptText = document.getElementById('ai-dept-text');
+    if (aiDeptText) {
+      aiDeptText.innerHTML = `<i class="fa-solid fa-building-flag"></i> ${issue.ai_department || 'Department of Public Works'}`;
     }
   }
 
@@ -644,14 +650,30 @@ window.addEventListener('language-change', () => {
     }
 
     const aiCard = document.getElementById('ai-insights-card');
-    if (aiCard && !aiCard.classList.contains('hidden')) {
+    if (aiCard) {
       const summaryText = document.getElementById('ai-summary-text');
       if (summaryText) {
         summaryText.textContent = issue.ai_summary || (window.i18n ? window.i18n.t('no_summary_generated') : 'No summary generated.');
       }
       const aiCatBadge = document.getElementById('ai-category-badge');
       if (aiCatBadge) {
-        aiCatBadge.textContent = window.formatCategoryName(issue.ai_category || 'other');
+        const aiCategory = issue.ai_category || 'other';
+        aiCatBadge.textContent = window.formatCategoryName(aiCategory);
+        aiCatBadge.className = `badge badge-category ${aiCategory}`;
+      }
+      const aiPriorityBadge = document.getElementById('ai-priority-badge');
+      if (aiPriorityBadge) {
+        const aiPriority = issue.ai_priority || 'low';
+        aiPriorityBadge.textContent = aiPriority.toUpperCase();
+        let priorityClass = 'badge-priority medium';
+        if (aiPriority === 'low') priorityClass = 'badge-priority low';
+        else if (aiPriority === 'high') priorityClass = 'badge-priority high';
+        else if (aiPriority === 'critical') priorityClass = 'badge-priority critical';
+        aiPriorityBadge.className = `badge ${priorityClass}`;
+      }
+      const aiDeptText = document.getElementById('ai-dept-text');
+      if (aiDeptText) {
+        aiDeptText.innerHTML = `<i class="fa-solid fa-building-flag"></i> ${issue.ai_department || 'Department of Public Works'}`;
       }
     }
 
@@ -1171,41 +1193,43 @@ async function loadNewFeatures(issue) {
   const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   const isReporter = currentUser && currentUser.id === issue.reporter_id;
 
-  // === Citizen Actions Panel ===
+  // === Always Show Receipt & Upload Evidence Cards ===
+  const receiptCard = document.getElementById('download-receipt-card');
+  if (receiptCard) {
+    receiptCard.style.display = 'flex';
+    receiptCard.style.visibility = 'visible';
+    receiptCard.style.opacity = '1';
+    receiptCard.classList.remove('hidden');
+  }
+
+  const evidenceCard = document.getElementById('evidence-upload-section');
+  if (evidenceCard) {
+    evidenceCard.style.display = 'flex';
+    evidenceCard.style.visibility = 'visible';
+    evidenceCard.style.opacity = '1';
+    evidenceCard.classList.remove('hidden');
+  }
+
+  // === Citizen Actions Panel (for Withdraw action) ===
   const citizenPanel = document.getElementById('citizen-actions-panel');
   if (citizenPanel) {
-    const userRole = (typeof getUserRole === 'function' ? getUserRole() : localStorage.getItem('cc_user_role')) || '';
-    const isAuthorityOrAdmin = userRole === 'authority' || userRole === 'admin';
-    const isAssigned = currentUser && currentUser.id === issue.assigned_to;
     const terminalStatuses = ['resolved', 'verified', 'withdrawn', 'rejected'];
     const isTerminal = terminalStatuses.includes(issue.status);
-
-    // 1. Download Receipt: visible if resolved or verified
-    const receiptBtn = document.getElementById('btn-download-receipt');
-    const showReceipt = isReporter || isAuthorityOrAdmin;
-    if (receiptBtn) {
-      receiptBtn.style.display = showReceipt ? '' : 'none';
-    }
-
-    // 2. Upload Evidence: visible if not terminal AND (isReporter OR isAuthorityOrAdmin OR isAssigned)
-    const evidenceBtn = document.getElementById('btn-show-evidence-upload');
-    const showEvidence = !isTerminal && (isReporter || isAuthorityOrAdmin || isAssigned);
-    if (evidenceBtn) {
-      evidenceBtn.style.display = showEvidence ? '' : 'none';
-    }
-
-    // 3. Withdraw: visible if not terminal AND isReporter
-    const withdrawBtn = document.getElementById('btn-withdraw');
     const showWithdraw = !isTerminal && isReporter;
+    
+    const withdrawBtn = document.getElementById('btn-withdraw');
     if (withdrawBtn) {
       withdrawBtn.style.display = showWithdraw ? '' : 'none';
     }
 
-    // Show the panel if at least one action is available
-    if (showReceipt || showEvidence || showWithdraw) {
+    if (showWithdraw) {
       citizenPanel.classList.remove('hidden');
+      citizenPanel.style.display = 'flex';
+      citizenPanel.style.visibility = 'visible';
+      citizenPanel.style.opacity = '1';
     } else {
       citizenPanel.classList.add('hidden');
+      citizenPanel.style.display = 'none';
     }
   }
 
