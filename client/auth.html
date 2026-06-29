@@ -352,6 +352,10 @@
       min-height: 100vh;
       width: 100vw;
       background: #fafafb;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(234, 179, 8, 0.03) 0px, transparent 50%);
       position: relative;
       overflow: hidden;
     }
@@ -376,7 +380,7 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 1.75rem;
+      gap: 1.5rem;
       z-index: 2;
     }
 
@@ -401,6 +405,67 @@
       gap: 1.5rem;
       margin-top: 1rem;
       width: 100%;
+    }
+
+    /* Map Widget Hub Styles */
+    .map-widget-card {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 16px 40px rgba(15, 118, 110, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 440px;
+      margin-top: 0.5rem;
+      box-sizing: border-box;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-align: left;
+    }
+    .map-widget-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 56px rgba(15, 118, 110, 0.08);
+    }
+    .map-widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(15, 118, 110, 0.1);
+      padding-bottom: 0.5rem;
+    }
+    .map-widget-title {
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+    }
+    .map-active-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: var(--primary);
+      background: rgba(13, 148, 136, 0.08);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .map-canvas-container {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(15, 118, 110, 0.1);
     }
 
     /* Telemetry Hub styles */
@@ -983,8 +1048,6 @@
   </style>
 </head>
 <body>
-  <!-- Cinematic background canvas -->
-  <canvas id="hero-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;"></canvas>
 
   <div class="auth-wrapper">
     <!-- Left branding banner -->
@@ -1002,6 +1065,18 @@
         <h2 data-i18n="auth_hero_title" style="font-size: 1.35rem; font-weight: 600; line-height: 1.4; background: none; -webkit-text-fill-color: var(--text-main); color: var(--text-main); margin-top: 1rem; margin-bottom: 0.5rem;">Empowering citizens to build cleaner, safer, and better neighborhoods.</h2>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0px;">Collaborative civic portal in partnership with local urban bodies.</p>
         
+        <div class="map-widget-card">
+          <div class="map-widget-header">
+            <h3 class="map-widget-title">
+              <i class="fa-solid fa-earth-asia"></i> AI Dispatch Constellation Map
+            </h3>
+            <div class="map-active-badge">Active Grid</div>
+          </div>
+          <div class="map-canvas-container">
+            <canvas id="hero-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+          </div>
+        </div>
+
         <div class="telemetry-card">
           <div class="telemetry-header">
             <h3 class="telemetry-title">
@@ -2233,15 +2308,15 @@
         });
       }
 
-      // ————— Cinematic background animation —————
+      // ————— AI Grid Constellation Animation —————
       (function() {
         const canvas = document.getElementById('hero-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
+        let width = canvas.width = canvas.parentElement.clientWidth;
+        let height = canvas.height = canvas.parentElement.clientHeight;
 
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -2275,16 +2350,16 @@
 
         // City nodes with coordinates scaled into TN boundary container
         const cityNodes = [
-          { name: "Chennai", rx: 0.83, ry: 0.16, size: 5, color: "#0d9488", pulse: 0 },
-          { name: "Vellore", rx: 0.70, ry: 0.22, size: 4, color: "#3b82f6", pulse: 0 },
-          { name: "Salem", rx: 0.48, ry: 0.44, size: 4.5, color: "#0d9488", pulse: 0 },
-          { name: "Coimbatore", rx: 0.28, ry: 0.58, size: 5, color: "#d97706", pulse: 0 },
-          { name: "Trichy", rx: 0.55, ry: 0.58, size: 4.5, color: "#3b82f6", pulse: 0 },
-          { name: "Madurai", rx: 0.45, ry: 0.74, size: 5, color: "#0d9488", pulse: 0 },
-          { name: "Tirunelveli", rx: 0.35, ry: 0.88, size: 4, color: "#3b82f6", pulse: 0 }
+          { name: "Chennai", rx: 0.83, ry: 0.16, size: 4.5, color: "#0d9488", pulse: 0 },
+          { name: "Vellore", rx: 0.70, ry: 0.22, size: 3.5, color: "#3b82f6", pulse: 0 },
+          { name: "Salem", rx: 0.48, ry: 0.44, size: 4, color: "#0d9488", pulse: 0 },
+          { name: "Coimbatore", rx: 0.28, ry: 0.58, size: 4.5, color: "#d97706", pulse: 0 },
+          { name: "Trichy", rx: 0.55, ry: 0.58, size: 4, color: "#3b82f6", pulse: 0 },
+          { name: "Madurai", rx: 0.45, ry: 0.74, size: 4.5, color: "#0d9488", pulse: 0 },
+          { name: "Tirunelveli", rx: 0.35, ry: 0.88, size: 3.5, color: "#3b82f6", pulse: 0 }
         ];
 
-        // Connection lines between city nodes (AI network visualization)
+        // Connection lines between city nodes
         const connections = [
           { from: 0, to: 1 },
           { from: 1, to: 2 },
@@ -2296,21 +2371,12 @@
           { from: 3, to: 5 }
         ];
 
-        // Light trails (Citizen Reports)
         let trails = [];
-        // Dot grid points inside TN
         let gridPoints = [];
 
-        // Mouse Parallax coordinates
+        // Mouse Parallax variables
         let mouseX = 0, mouseY = 0;
         let targetX = 0, targetY = 0;
-
-        // Volumetric Lights (Auroras)
-        const auroras = [
-          { x: 0.2, y: 0.2, rx: 0.2, ry: 0.2, baseColor: "rgba(13, 148, 136, 0.07)", size: 450, phase: 0, speed: 0.0005 },
-          { x: 0.8, y: 0.4, rx: 0.8, ry: 0.4, baseColor: "rgba(59, 130, 246, 0.05)", size: 550, phase: Math.PI / 3, speed: 0.0004 },
-          { x: 0.5, y: 0.8, rx: 0.5, ry: 0.8, baseColor: "rgba(234, 179, 8, 0.03)", size: 400, phase: Math.PI / 1.5, speed: 0.0006 }
-        ];
 
         // Preloaded emblem watermark
         const emblem = new Image();
@@ -2336,20 +2402,20 @@
         });
 
         function resize() {
-          width = canvas.width = window.innerWidth;
-          height = canvas.height = window.innerHeight;
+          const rect = canvas.parentElement.getBoundingClientRect();
+          width = canvas.width = rect.width;
+          height = canvas.height = rect.height;
 
-          // Recalculate grid points inside TN outline based on layout columns
           gridPoints = [];
           
-          // Map is positioned in the left half on desktop, centered on mobile
-          const mapWidth = window.innerWidth > 900 ? width * 0.42 : width * 0.8;
-          const mapHeight = window.innerWidth > 900 ? height * 0.65 : height * 0.45;
-          const mapLeft = window.innerWidth > 900 ? width * 0.08 : (width - mapWidth) / 2;
-          const mapTop = window.innerWidth > 900 ? height * 0.22 : height * 0.45;
+          const padding = 15;
+          const mapWidth = width - padding * 2;
+          const mapHeight = height - padding * 2;
+          const mapLeft = padding;
+          const mapTop = padding;
 
-          const cols = window.innerWidth > 900 ? 28 : 20;
-          const rows = window.innerWidth > 900 ? 32 : 24;
+          const cols = 22;
+          const rows = 14;
 
           for (let c = 0; c < cols; c++) {
             for (let r = 0; r < rows; r++) {
@@ -2367,11 +2433,11 @@
           }
         }
         window.addEventListener('resize', resize);
-        resize();
+        // Execute resize slightly after load to ensure parent dimensions are set
+        setTimeout(resize, 100);
 
-        // Spawn a report trail randomly
         function spawnTrail() {
-          if (prefersReduced || trails.length > 5) return;
+          if (prefersReduced || trails.length > 4) return;
           const connIdx = Math.floor(Math.random() * connections.length);
           const conn = connections[connIdx];
           const forward = Math.random() > 0.5;
@@ -2383,12 +2449,11 @@
             startNode: start,
             endNode: end,
             progress: 0,
-            speed: 0.008 + Math.random() * 0.012,
+            speed: 0.01 + Math.random() * 0.015,
             color: colors[Math.floor(Math.random() * colors.length)],
             history: []
           });
 
-          // Add a report update to the live feed card!
           triggerLiveFeedUpdate(start, end);
         }
 
@@ -2396,10 +2461,9 @@
         let fpsCounter = 60;
         let framesThisSecond = 0;
         let lastFpsUpdateTime = 0;
-        let performanceMode = "high"; // "high", "medium", "low"
+        let performanceMode = "high";
 
         function draw(time) {
-          // Adaptive FPS calculation
           if (lastTime) {
             const dt = time - lastTime;
             framesThisSecond++;
@@ -2408,110 +2472,82 @@
               framesThisSecond = 0;
               lastFpsUpdateTime = time;
               
-              // Automatically scale quality down if frame rate drops
-              if (fpsCounter < 42 && performanceMode === "high") {
-                performanceMode = "medium";
-                console.warn("[Hero Animation] Quality adjusted to MEDIUM due to performance constraints.");
-              } else if (fpsCounter < 30 && performanceMode === "medium") {
+              if (fpsCounter < 40 && performanceMode === "high") {
                 performanceMode = "low";
-                console.warn("[Hero Animation] Quality adjusted to LOW due to performance constraints.");
               }
             }
           }
           lastTime = time;
 
-          // Interpolate mouse parallax coordinates
           mouseX += (targetX - mouseX) * 0.08;
           mouseY += (targetY - mouseY) * 0.08;
 
-          // 3D card tilt effect
-          const card = document.querySelector('.auth-card');
-          if (card && !prefersReduced) {
-            card.style.transform = `perspective(1000px) rotateX(${mouseY * 0.4}deg) rotateY(${-mouseX * 0.4}deg) translateY(0)`;
+          // Parallax 3D Card tilt
+          const cards = document.querySelectorAll('.auth-card, .map-widget-card, .telemetry-card');
+          if (cards.length > 0 && !prefersReduced) {
+            cards.forEach(c => {
+              c.style.transform = `perspective(1000px) rotateX(${mouseY * 0.3}deg) rotateY(${-mouseX * 0.3}deg) translateY(0)`;
+            });
           }
           const brandPanel = document.querySelector('.brand-panel-content');
           if (brandPanel && !prefersReduced) {
-            brandPanel.style.transform = `perspective(1000px) rotateX(${mouseY * 0.2}deg) rotateY(${-mouseX * 0.2}deg) translateZ(10px)`;
+            brandPanel.style.transform = `perspective(1000px) rotateX(${mouseY * 0.15}deg) rotateY(${-mouseX * 0.15}deg) translateZ(5px)`;
           }
 
-          ctx.fillStyle = "#fafafb";
-          ctx.fillRect(0, 0, width, height);
+          // Clear for clean glassmorphism transparency
+          ctx.clearRect(0, 0, width, height);
 
-          // 1. Draw Volumetric Auroras
-          auroras.forEach((a) => {
-            if (!prefersReduced) {
-              a.phase += a.speed;
-              a.x = a.rx + Math.sin(a.phase) * 0.08;
-              a.y = a.ry + Math.cos(a.phase) * 0.06;
-            }
-
-            const ax = a.x * width + mouseX * 2.5;
-            const ay = a.y * height + mouseY * 2.5;
-            const grad = ctx.createRadialGradient(ax, ay, 0, ax, ay, a.size);
-            grad.addColorStop(0, a.baseColor);
-            grad.addColorStop(1, "rgba(250, 250, 251, 0)");
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, width, height);
-          });
-
-          // 2. Draw Digital Grid
-          ctx.strokeStyle = "rgba(15, 118, 110, 0.035)";
+          // 1. Draw Grid
+          ctx.strokeStyle = "rgba(15, 118, 110, 0.025)";
           ctx.lineWidth = 1;
-          const gridSize = window.innerWidth > 900 ? 55 : 40;
-          
-          if (performanceMode !== "low") {
-            ctx.beginPath();
-            for (let x = 0; x < width; x += gridSize) {
-              ctx.moveTo(x + mouseX * 0.3, 0);
-              ctx.lineTo(x + mouseX * 0.3, height);
-            }
-            for (let y = 0; y < height; y += gridSize) {
-              ctx.moveTo(0, y + mouseY * 0.3);
-              ctx.lineTo(width, y + mouseY * 0.3);
-            }
-            ctx.stroke();
+          const gridSize = 35;
+          ctx.beginPath();
+          for (let x = 0; x < width; x += gridSize) {
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
           }
+          for (let y = 0; y < height; y += gridSize) {
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+          }
+          ctx.stroke();
 
-          // 3. Draw Tamil Nadu Emblem Watermark
+          // 2. Draw Tamil Nadu Emblem Watermark inside card
           if (emblemLoaded && performanceMode !== "low") {
             ctx.save();
             ctx.globalAlpha = 0.024;
-            const emblemSize = Math.min(width, height) * 0.44;
-            const ex = width * 0.5 + mouseX * 1.5 - emblemSize / 2;
-            const ey = height * 0.5 + mouseY * 1.5 - emblemSize / 2;
+            const emblemSize = Math.min(width, height) * 0.85;
+            const ex = (width - emblemSize) / 2;
+            const ey = (height - emblemSize) / 2;
             ctx.drawImage(emblem, ex, ey, emblemSize, emblemSize);
             ctx.restore();
           }
 
-          // Compute responsive map geometry
-          const mapWidth = window.innerWidth > 900 ? width * 0.42 : width * 0.8;
-          const mapHeight = window.innerWidth > 900 ? height * 0.65 : height * 0.45;
-          const mapLeft = window.innerWidth > 900 ? width * 0.08 : (width - mapWidth) / 2;
-          const mapTop = window.innerWidth > 900 ? height * 0.22 : height * 0.45;
+          const padding = 15;
+          const mapWidth = width - padding * 2;
+          const mapHeight = height - padding * 2;
 
           const getScreenCoords = (rx, ry) => {
             return {
-              x: mapLeft + rx * mapWidth + mouseX * 1.2,
-              y: mapTop + ry * mapHeight + mouseY * 1.2
+              x: padding + rx * mapWidth,
+              y: padding + ry * mapHeight
             };
           };
 
-          // 4. Draw Dot Grid Map of Tamil Nadu
+          // 3. Draw Dot Grid Map of Tamil Nadu
           if (performanceMode !== "low") {
             gridPoints.forEach((pt) => {
-              const alpha = prefersReduced ? pt.baseAlpha : pt.baseAlpha + Math.sin(time * 0.0012 + pt.phase) * 0.06;
+              const alpha = prefersReduced ? pt.baseAlpha : pt.baseAlpha + Math.sin(time * 0.0012 + pt.phase) * 0.05;
               ctx.fillStyle = `rgba(13, 148, 136, ${alpha})`;
               ctx.beginPath();
-              const px = pt.x + mouseX * 0.8;
-              const py = pt.y + mouseY * 0.8;
-              ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+              ctx.arc(pt.x, pt.y, 1.1, 0, Math.PI * 2);
               ctx.fill();
             });
           }
 
-          // 5. Draw Network Connection Lines
-          ctx.strokeStyle = "rgba(15, 118, 110, 0.08)";
-          ctx.lineWidth = 1.5;
+          // 4. Connection Lines
+          ctx.strokeStyle = "rgba(15, 118, 110, 0.07)";
+          ctx.lineWidth = 1.2;
           ctx.beginPath();
           connections.forEach((conn) => {
             const p1 = getScreenCoords(cityNodes[conn.from].rx, cityNodes[conn.from].ry);
@@ -2521,7 +2557,7 @@
           });
           ctx.stroke();
 
-          // 6. Draw Report Trails (Data streams traveling)
+          // 5. Report Trails
           if (!prefersReduced) {
             trails.forEach((trail, idx) => {
               trail.progress += trail.speed;
@@ -2533,7 +2569,7 @@
               const cy = pStart.y + (pEnd.y - pStart.y) * trail.progress;
 
               trail.history.push({ x: cx, y: cy });
-              if (trail.history.length > 12) {
+              if (trail.history.length > 10) {
                 trail.history.shift();
               }
 
@@ -2542,8 +2578,8 @@
                 for (let i = 0; i < trail.history.length - 1; i++) {
                   const pct = i / trail.history.length;
                   ctx.strokeStyle = trail.color;
-                  ctx.globalAlpha = pct * 0.6;
-                  ctx.lineWidth = 1 + pct * 2.5;
+                  ctx.globalAlpha = pct * 0.5;
+                  ctx.lineWidth = 0.8 + pct * 2.0;
                   ctx.beginPath();
                   ctx.moveTo(trail.history[i].x, trail.history[i].y);
                   ctx.lineTo(trail.history[i + 1].x, trail.history[i + 1].y);
@@ -2554,18 +2590,8 @@
 
               ctx.fillStyle = trail.color;
               ctx.beginPath();
-              ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+              ctx.arc(cx, cy, 3, 0, Math.PI * 2);
               ctx.fill();
-
-              if (performanceMode === "high") {
-                ctx.save();
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = trail.color;
-                ctx.beginPath();
-                ctx.arc(cx, cy, 2, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-              }
 
               if (trail.progress >= 1) {
                 cityNodes[trail.endNode].pulse = 1.0;
@@ -2574,14 +2600,14 @@
             });
           }
 
-          // 7. Draw City Nodes
+          // 6. Draw City Nodes
           cityNodes.forEach((node) => {
             const p = getScreenCoords(node.rx, node.ry);
             
-            ctx.fillStyle = "rgba(71, 85, 105, 0.75)";
-            ctx.font = "bold 9px system-ui, -apple-system, sans-serif";
+            ctx.fillStyle = "rgba(71, 85, 105, 0.7)";
+            ctx.font = "bold 8px system-ui, -apple-system, sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText(node.name.toUpperCase(), p.x, p.y - 12);
+            ctx.fillText(node.name.toUpperCase(), p.x, p.y - 10);
 
             if (!prefersReduced && node.pulse > 0) {
               node.pulse -= 0.02;
@@ -2589,7 +2615,7 @@
               ctx.lineWidth = 1;
               ctx.globalAlpha = node.pulse;
               ctx.beginPath();
-              ctx.arc(p.x, p.y, node.size + (1.0 - node.pulse) * 16, 0, Math.PI * 2);
+              ctx.arc(p.x, p.y, node.size + (1.0 - node.pulse) * 12, 0, Math.PI * 2);
               ctx.stroke();
               ctx.globalAlpha = 1.0;
             }
