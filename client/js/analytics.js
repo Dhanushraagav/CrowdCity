@@ -102,6 +102,25 @@ function initAnalyticsMap() {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
+
+  // Resize handling to ensure Leaflet maps redraw correctly on mobile/window resize
+  const mapElement = document.getElementById('analytics-map');
+  if (mapElement) {
+    window.addEventListener('resize', () => {
+      if (map) {
+        map.invalidateSize();
+      }
+    });
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => {
+        if (map) {
+          map.invalidateSize();
+        }
+      });
+      observer.observe(mapElement);
+    }
+  }
 }
 
 /**

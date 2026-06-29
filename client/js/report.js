@@ -151,6 +151,22 @@ function initReportMap() {
   reportMap.on('click', (e) => {
     setCoordinates(e.latlng.lat, e.latlng.lng);
   });
+
+  // Resize handling to ensure Leaflet maps redraw correctly on mobile/window resize
+  window.addEventListener('resize', () => {
+    if (reportMap) {
+      reportMap.invalidateSize();
+    }
+  });
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const observer = new ResizeObserver(() => {
+      if (reportMap) {
+        reportMap.invalidateSize();
+      }
+    });
+    observer.observe(mapElement);
+  }
 }
 
 // Set coordinates programmatically

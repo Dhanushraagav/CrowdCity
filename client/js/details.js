@@ -233,6 +233,22 @@ function initDetailsMiniMap(lat, lng, category) {
   });
 
   L.marker([lat, lng], { icon: customIcon }).addTo(detailsMap);
+
+  // Resize handling to ensure Leaflet maps redraw correctly on mobile/window resize
+  window.addEventListener('resize', () => {
+    if (detailsMap) {
+      detailsMap.invalidateSize();
+    }
+  });
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const observer = new ResizeObserver(() => {
+      if (detailsMap) {
+        detailsMap.invalidateSize();
+      }
+    });
+    observer.observe(mapElement);
+  }
 }
 
 // Render Comments Thread list

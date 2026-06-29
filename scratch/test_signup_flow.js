@@ -13,7 +13,7 @@ async function runTest() {
 
   const payload = {
     email: process.env.TEST_RECIPIENT_EMAIL || "test-signup@example.com",
-    userId: "mock-user-id-" + Date.now(),
+    userId: "a0eebc99-9c0b-4ef8-bb6d-" + Date.now().toString().slice(-12),
     fullName: "Test User"
   };
 

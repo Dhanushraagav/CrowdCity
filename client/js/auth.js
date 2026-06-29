@@ -660,7 +660,7 @@ async function verifyProfileAndRoute(user, showAlert) {
       .single();
       
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 15000)
+      setTimeout(() => reject(new Error('Timeout')), 5000)
     );
 
     const result = await Promise.race([queryPromise, timeoutPromise]);
@@ -669,17 +669,37 @@ async function verifyProfileAndRoute(user, showAlert) {
 
     if (error) {
       console.error("[Auth Client] Error fetching profile from Supabase:", error.message || error);
+      throw error;
     } else {
       console.log("[Auth Client] Profile queried successfully from Supabase:", data);
       profile = data;
     }
   } catch (err) {
-    console.error("[Auth Client] Unexpected exception during profile fetch:", err);
-    if (err.message === 'Timeout') {
-      window.cc_routing_in_progress = false;
-      showAlert("Profile query timed out. If you are using Brave, please try disabling Shields or checking your connection.");
-      restoreSubmitButtons();
-      return;
+    console.warn("[Auth Client] Direct Supabase profile query failed or timed out. Attempting server fallback API...", err);
+    try {
+      const token = await getOrRefreshAccessToken();
+      if (token) {
+        console.log("[Auth Client] Fetching profile via Express API endpoint /api/auth/profile...");
+        const response = await fetch('/api/auth/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const freshProfile = await response.json();
+          console.log("[Auth Client] Profile retrieved successfully from Express API:", freshProfile);
+          profile = {
+            role: freshProfile.role,
+            is_verified: freshProfile.is_verified_authority || freshProfile.is_verified
+          };
+        } else {
+          console.error("[Auth Client] Express API profile fetch returned non-ok status:", response.status);
+        }
+      } else {
+        console.warn("[Auth Client] No access token available for Express API fallback.");
+      }
+    } catch (fallbackErr) {
+      console.error("[Auth Client] Express API profile fallback query failed:", fallbackErr);
     }
   }
 

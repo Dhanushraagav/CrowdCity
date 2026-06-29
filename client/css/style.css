@@ -475,8 +475,8 @@ body {
 .comment-card,
 .profile-stat-card,
 .glass-panel {
-  opacity: 0;
-  transform: translateY(20px);
+  opacity: 1;
+  transform: translateY(0);
   animation: cardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -681,7 +681,7 @@ body::after {
   }
 
   /* Prevent horizontal overflow on entire viewport and containers */
-  html, body, .app-layout, .app-main, .app-content-body, .content-wrapper, .details-grid, .app-header-main, footer, section, main, div:not(.filter-pills):not(#feed-tabs-container):not(.stepper-container) {
+  html, body, .app-layout, .app-main, .app-content-body, .content-wrapper, .app-header-main, footer, section, main {
     max-width: 100% !important;
     overflow-x: hidden !important;
   }

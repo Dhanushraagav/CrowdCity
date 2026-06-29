@@ -44,6 +44,22 @@ function initMap() {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
+  // Resize handling to ensure Leaflet maps redraw correctly on mobile/window resize
+  window.addEventListener('resize', () => {
+    if (map) {
+      map.invalidateSize();
+    }
+  });
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const observer = new ResizeObserver(() => {
+      if (map) {
+        map.invalidateSize();
+      }
+    });
+    observer.observe(mapElement);
+  }
+
   markersGroup = L.markerClusterGroup({
     iconCreateFunction: function(cluster) {
       const childCount = cluster.getChildCount();

@@ -11,44 +11,106 @@ const SENT_WELCOME_ATTEMPTS = new Set();
  */
 async function triggerWelcomeEmail(userId, email, fullName) {
   const emailLower = (email || '').toLowerCase().trim();
+  if (!emailLower || !userId) {
+    logger.warn(`[Welcome] Missing parameters: email=${emailLower}, userId=${userId}`);
+    return { success: false, error: 'Missing email or userId' };
+  }
+
+  if (SENT_WELCOME_ATTEMPTS.has(userId)) {
+    logger.info(`[Welcome] Welcome email already sent in this session for user ${userId}`);
+    return { success: true, alreadySent: true };
+  }
   
   // Real Supabase Mode
   try {
-    let { data: profiles, error: selectError } = await supabaseAdmin
-      .from('profiles')
-      .select('welcome_email_sent, full_name')
-      .eq('id', userId);
+    let profiles = null;
+    let selectError = null;
+    let hasWelcomeColumn = true;
+
+    // Retry checking for profile up to 3 times with a delay to handle DB trigger latency
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const res = await supabaseAdmin
+        .from('profiles')
+        .select(hasWelcomeColumn ? 'welcome_email_sent, full_name' : 'full_name')
+        .eq('id', userId);
+      
+      if (res.error) {
+        // If the column does not exist, set flag to false and retry immediately without the column
+        if (res.error.message && res.error.message.includes('column') && res.error.message.includes('welcome_email_sent') && res.error.message.includes('does not exist')) {
+          logger.warn(`[Welcome] column welcome_email_sent does not exist in database. Retrying query without it.`);
+          hasWelcomeColumn = false;
+          attempt--; // Retry this attempt index
+          continue;
+        }
+        selectError = res.error;
+      } else if (res.data && res.data.length > 0) {
+        profiles = res.data;
+        break;
+      }
+      
+      if (attempt < 3) {
+        logger.info(`[Welcome] Profile not found on attempt ${attempt} for user ${userId}. Retrying in 1s...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
 
     if (selectError) {
       logger.error(`[Welcome] Error fetching profile: ${selectError.message}`);
       return { success: false, error: selectError.message };
     }
 
-    const profile = profiles && profiles.length > 0 ? profiles[0] : null;
+    let profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
+    // If still not found, create a fallback profile row
     if (!profile) {
-      logger.error(`[Welcome] No profile found for user: ${userId}`);
-      return { success: false, error: 'Profile not found' };
+      logger.warn(`[Welcome] Profile not found after retries for user: ${userId}. Inserting fallback profile...`);
+      const insertPayload = {
+        id: userId,
+        full_name: fullName || 'Citizen',
+        avatar_url: '',
+        role: 'citizen'
+      };
+      if (hasWelcomeColumn) {
+        insertPayload.welcome_email_sent = false;
+      }
+      
+      const { data: inserted, error: insertError } = await supabaseAdmin
+        .from('profiles')
+        .insert(insertPayload)
+        .select();
+
+      if (insertError) {
+        logger.error(`[Welcome] Failed to insert profile for user ${userId}: ${insertError.message}`);
+        // Fallback to in-memory object so email can still be sent
+        profile = { welcome_email_sent: false, full_name: fullName || 'Citizen' };
+      } else {
+        profile = inserted && inserted.length > 0 ? inserted[0] : { welcome_email_sent: false, full_name: fullName || 'Citizen' };
+      }
     }
 
-    if (profile.welcome_email_sent === true || SENT_WELCOME_ATTEMPTS.has(userId)) {
-      logger.info('[Welcome] Existing user - skipping welcome email');
+    if (profile.welcome_email_sent === true) {
+      logger.info(`[Welcome] Existing user - skipping welcome email (flag is true for user ${userId})`);
+      SENT_WELCOME_ATTEMPTS.add(userId);
       return { success: true, alreadySent: true };
     }
 
-    logger.info('[Welcome] New account detected');
+    logger.info(`[Welcome] New account detected for user ${userId}`);
     logger.info('[Welcome] Sending welcome email...');
     const success = await sendWelcomeEmail(emailLower, fullName || profile.full_name || 'Citizen', userId);
     if (success) {
-      const { error: updateError } = await supabaseAdmin
-        .from('profiles')
-        .update({ welcome_email_sent: true })
-        .eq('id', userId);
+      if (hasWelcomeColumn) {
+        const { error: updateError } = await supabaseAdmin
+          .from('profiles')
+          .update({ welcome_email_sent: true })
+          .eq('id', userId);
 
-      if (updateError) {
-        logger.warn(`[Welcome] Failed to update welcome_email_sent flag in database: ${updateError.message}`);
+        if (updateError) {
+          logger.warn(`[Welcome] Failed to update welcome_email_sent flag in database: ${updateError.message}`);
+        } else {
+          logger.info('[Welcome] welcome_email_sent updated');
+        }
       } else {
-        logger.info('[Welcome] welcome_email_sent updated');
+        logger.info('[Welcome] welcome_email_sent column not in database. Tracking welcome email in-memory.');
       }
 
       SENT_WELCOME_ATTEMPTS.add(userId);
