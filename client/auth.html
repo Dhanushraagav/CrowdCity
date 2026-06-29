@@ -351,19 +351,24 @@
       flex-direction: row;
       min-height: 100vh;
       width: 100vw;
+      background: #fafafb;
+      position: relative;
+      overflow: hidden;
     }
 
     /* Left Column: Hero branding panel */
     .auth-brand-panel {
       flex: 1;
-      background: linear-gradient(135deg, #F5F7FA 0%, #E2E8F0 100%);
+      background: transparent;
       color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 4rem;
       position: relative;
-      overflow: hidden;
+      z-index: 2;
+      transition: transform 0.1s ease-out;
+      transform-style: preserve-3d;
     }
 
     .brand-panel-content {
@@ -398,66 +403,107 @@
       width: 100%;
     }
 
-    .slideshow-container {
-      position: relative;
+    /* Telemetry Hub styles */
+    .telemetry-card {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: 0 20px 48px rgba(15, 118, 110, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
       width: 100%;
-      height: 420px;
-      perspective: 1500px;
-      background-color: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      overflow: visible;
+      max-width: 440px;
+      margin-top: 0.5rem;
+      box-sizing: border-box;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-align: left;
+    }
+    .telemetry-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 56px rgba(15, 118, 110, 0.08);
+    }
+    .telemetry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(15, 118, 110, 0.1);
+      padding-bottom: 0.75rem;
+    }
+    .telemetry-title {
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      cursor: pointer;
+      gap: 0.5rem;
+      margin: 0;
     }
-
-    .slideshow-container:hover {
-      transform: translateY(-6px) scale(1.025);
+    .telemetry-live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse-green 2s infinite;
     }
-
-    .slideshow-slide {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+    @keyframes pulse-green {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .telemetry-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+    .telemetry-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      background: rgba(15, 118, 110, 0.03);
+      padding: 0.6rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(15, 118, 110, 0.05);
+    }
+    .telemetry-stat-val {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+    .telemetry-stat-lbl {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .telemetry-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-height: 85px;
+    }
+    .telemetry-feed-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transform: translateX(100%) rotateY(45deg) scale(0.85);
-      transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) !important;
-      z-index: 1;
+      gap: 0.5rem;
+      font-size: 0.74rem;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.6);
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--primary);
+      animation: slide-in-telemetry 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-
-    .slideshow-slide.active {
-      opacity: 1;
-      transform: translateX(0) rotateY(0deg) scale(1);
-      z-index: 2;
-    }
-
-    .slideshow-slide.prev {
-      opacity: 0;
-      transform: translateX(-100%) rotateY(-45deg) scale(0.85);
-      z-index: 1;
-    }
-
-    .slideshow-slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 6px !important;
-      display: block;
-      border: 1px solid var(--border-color);
-      filter: drop-shadow(0 12px 24px rgba(15, 118, 110, 0.12)) brightness(1);
-      z-index: 1;
-    }
-
-    .slideshow-overlay {
-      display: none;
+    @keyframes slide-in-telemetry {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Right Column: Forms panel */
@@ -467,20 +513,29 @@
       align-items: center;
       justify-content: center;
       padding: 2rem;
-      background-color: var(--bg-app);
+      background: transparent;
+      z-index: 2;
+      transition: transform 0.1s ease-out;
+      transform-style: preserve-3d;
     }
 
     .auth-card {
       width: 100%;
       max-width: 420px;
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.55);
       border-radius: var(--radius-lg);
       padding: 2.5rem;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 24px 64px rgba(15, 118, 110, 0.08);
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .auth-card:hover {
+      box-shadow: 0 32px 72px rgba(15, 118, 110, 0.12);
     }
 
     .btn-google {
@@ -928,6 +983,8 @@
   </style>
 </head>
 <body>
+  <!-- Cinematic background canvas -->
+  <canvas id="hero-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;"></canvas>
 
   <div class="auth-wrapper">
     <!-- Left branding banner -->
@@ -945,34 +1002,32 @@
         <h2 data-i18n="auth_hero_title" style="font-size: 1.35rem; font-weight: 600; line-height: 1.4; background: none; -webkit-text-fill-color: var(--text-main); color: var(--text-main); margin-top: 1rem; margin-bottom: 0.5rem;">Empowering citizens to build cleaner, safer, and better neighborhoods.</h2>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0px;">Collaborative civic portal in partnership with local urban bodies.</p>
         
-        <div class="branding-graphic" style="margin-top: 2rem; text-align: center;">
-          <div class="slideshow-container" id="slideshow-container">
-            <div class="slideshow-slide active">
-              <img src="images/slideshow_1.png" alt="Kathipara Flyover" />
-              <div class="slide-caption" data-i18n="slideshow_caption_1">Kathipara Flyover, Chennai</div>
+        <div class="telemetry-card">
+          <div class="telemetry-header">
+            <h3 class="telemetry-title">
+              <i class="fa-solid fa-microchip"></i> AI Civic Grid Telemetry
+            </h3>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 0.62rem; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">ONLINE</span>
+              <div class="telemetry-live-dot"></div>
             </div>
-            <div class="slideshow-slide">
-              <img src="images/slideshow_2.png" alt="Gandhipuram Flyover" />
-              <div class="slide-caption" data-i18n="slideshow_caption_2">Gandhipuram Flyover, Coimbatore</div>
-            </div>
-            <div class="slideshow-slide">
-              <img src="images/slideshow_3.png" alt="Meenakshi Temple" />
-              <div class="slide-caption" data-i18n="slideshow_caption_3">Meenakshi Temple & Smart Junction, Madurai</div>
-            </div>
-            <div class="slideshow-slide">
-              <img src="images/slideshow_4.png" alt="Rockfort" />
-              <div class="slide-caption" data-i18n="slideshow_caption_4">Rockfort & Kaveri Bridge, Trichy</div>
-            </div>
-            <div class="slideshow-slide">
-              <img src="images/slideshow_5.png" alt="Namakkal Rock Fort" />
-              <div class="namakkal-badge" data-i18n="active_deployment_city">Active Deployment</div>
-              <div class="slide-caption namakkal-caption" data-i18n="slideshow_caption_5">Namakkal Rock Fort</div>
-            </div>
-            <div class="slideshow-overlay"></div>
           </div>
-          <div id="slideshow-desc-container" style="margin-top: 1.25rem; text-align: center; height: 3.2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 420px; margin-left: auto; margin-right: auto; gap: 4px;">
-            <p id="slideshow-desc-line1" style="font-size: 0.78rem; color: var(--text-main); font-weight: 500; margin: 0; line-height: 1.4; letter-spacing: 0.01em; height: 1.2rem; display: inline-block; border-right: 2px solid transparent; font-family: system-ui, sans-serif; transition: width 0.1s ease;"></p>
-            <p id="slideshow-desc-line2" style="font-size: 0.74rem; color: var(--text-muted); font-weight: 400; margin: 0; line-height: 1.4; letter-spacing: 0.01em; height: 1.2rem; display: inline-block; border-right: 2px solid transparent; font-family: system-ui, sans-serif; transition: width 0.1s ease;"></p>
+          <div class="telemetry-stats-grid">
+            <div class="telemetry-stat-item">
+              <span class="telemetry-stat-val" id="telemetry-stat-resolved">98.4%</span>
+              <span class="telemetry-stat-lbl">Resolve Rate</span>
+            </div>
+            <div class="telemetry-stat-item">
+              <span class="telemetry-stat-val" id="telemetry-stat-active">14,285</span>
+              <span class="telemetry-stat-lbl">Active Users</span>
+            </div>
+            <div class="telemetry-stat-item">
+              <span class="telemetry-stat-val" id="telemetry-stat-xp">392K XP</span>
+              <span class="telemetry-stat-lbl">Rewards Paid</span>
+            </div>
+          </div>
+          <div class="telemetry-feed" id="telemetry-feed-container">
+            <!-- Dynamically populated report updates representing data streams traveling -->
           </div>
         </div>
       </div>
@@ -2178,86 +2233,436 @@
         });
       }
 
-      // Preload and cycle auth page hero images every 3s via 3D sliding cube crossfade
-      const slides = document.querySelectorAll('.slideshow-slide');
-      if (slides.length > 0) {
-        let currentSlideIdx = 0;
-        let typingTimeout1 = null;
-        let typingTimeout2 = null;
+      // ————— Cinematic background animation —————
+      (function() {
+        const canvas = document.getElementById('hero-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-        function typeWriter(text1, text2) {
-          clearTimeout(typingTimeout1);
-          clearTimeout(typingTimeout2);
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
 
-          const el1 = document.getElementById('slideshow-desc-line1');
-          const el2 = document.getElementById('slideshow-desc-line2');
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-          if (!el1 || !el2) return;
+        // Tamil Nadu Border Vertices (normalized to [0,1])
+        const tnVertices = [
+          {x: 0.70, y: 0.08},
+          {x: 0.88, y: 0.12},
+          {x: 0.85, y: 0.35},
+          {x: 0.94, y: 0.52},
+          {x: 0.76, y: 0.65},
+          {x: 0.62, y: 0.85},
+          {x: 0.40, y: 0.97},
+          {x: 0.32, y: 0.85},
+          {x: 0.18, y: 0.60},
+          {x: 0.35, y: 0.38},
+          {x: 0.55, y: 0.20}
+        ];
 
-          el1.textContent = '';
-          el1.style.borderRight = '2px solid rgba(255,255,255,0.75)';
-          el2.textContent = '';
-          el2.style.borderRight = 'none';
-
-          let i = 0;
-          let j = 0;
-          const speed = 15; // smooth character typing rate (15ms)
-
-          function typeLine1() {
-            if (i < text1.length) {
-              el1.textContent += text1.charAt(i);
-              i++;
-              typingTimeout1 = setTimeout(typeLine1, speed);
-            } else {
-              el1.style.borderRight = 'none';
-              el2.style.borderRight = '2px solid rgba(255,255,255,0.75)';
-              typeLine2();
-            }
+        // Points-in-Polygon check to mask dot grid
+        function isPointInTN(px, py) {
+          let inside = false;
+          for (let i = 0, j = tnVertices.length - 1; i < tnVertices.length; j = i++) {
+            const xi = tnVertices[i].x, yi = tnVertices[i].y;
+            const xj = tnVertices[j].x, yj = tnVertices[j].y;
+            const intersect = ((yi > py) !== (yj > py))
+                && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
           }
-
-          function typeLine2() {
-            if (j < text2.length) {
-              el2.textContent += text2.charAt(j);
-              j++;
-              typingTimeout2 = setTimeout(typeLine2, speed);
-            } else {
-              el2.style.borderRight = 'none';
-            }
-          }
-
-          typeLine1();
+          return inside;
         }
 
-        function triggerDescription(idx) {
-          if (!window.i18n) return;
-          const line1 = window.i18n.t(`slideshow_desc_${idx + 1}_line1`);
-          const line2 = window.i18n.t(`slideshow_desc_${idx + 1}_line2`);
-          typeWriter(line1, line2);
-        }
+        // City nodes with coordinates scaled into TN boundary container
+        const cityNodes = [
+          { name: "Chennai", rx: 0.83, ry: 0.16, size: 5, color: "#0d9488", pulse: 0 },
+          { name: "Vellore", rx: 0.70, ry: 0.22, size: 4, color: "#3b82f6", pulse: 0 },
+          { name: "Salem", rx: 0.48, ry: 0.44, size: 4.5, color: "#0d9488", pulse: 0 },
+          { name: "Coimbatore", rx: 0.28, ry: 0.58, size: 5, color: "#d97706", pulse: 0 },
+          { name: "Trichy", rx: 0.55, ry: 0.58, size: 4.5, color: "#3b82f6", pulse: 0 },
+          { name: "Madurai", rx: 0.45, ry: 0.74, size: 5, color: "#0d9488", pulse: 0 },
+          { name: "Tirunelveli", rx: 0.35, ry: 0.88, size: 4, color: "#3b82f6", pulse: 0 }
+        ];
 
-        // Initialize typewriter for the first slide immediately
-        triggerDescription(currentSlideIdx);
+        // Connection lines between city nodes (AI network visualization)
+        const connections = [
+          { from: 0, to: 1 },
+          { from: 1, to: 2 },
+          { from: 2, to: 3 },
+          { from: 2, to: 4 },
+          { from: 4, to: 5 },
+          { from: 5, to: 6 },
+          { from: 0, to: 4 },
+          { from: 3, to: 5 }
+        ];
 
-        setInterval(() => {
-          const prevIdx = currentSlideIdx;
-          currentSlideIdx = (currentSlideIdx + 1) % slides.length;
-          
-          slides.forEach(slide => {
-            slide.classList.remove('active', 'prev');
-          });
-          
-          slides[prevIdx].classList.add('prev');
-          slides[currentSlideIdx].classList.add('active');
+        // Light trails (Citizen Reports)
+        let trails = [];
+        // Dot grid points inside TN
+        let gridPoints = [];
 
-          // Trigger typing animation simultaneously with the slide transitions
-          triggerDescription(currentSlideIdx);
-        }, 3000);
+        // Mouse Parallax coordinates
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
 
-        // Listen for language changes and re-type the current slide description instantly
-        window.addEventListener('language-change', () => {
-          triggerDescription(currentSlideIdx);
+        // Volumetric Lights (Auroras)
+        const auroras = [
+          { x: 0.2, y: 0.2, rx: 0.2, ry: 0.2, baseColor: "rgba(13, 148, 136, 0.07)", size: 450, phase: 0, speed: 0.0005 },
+          { x: 0.8, y: 0.4, rx: 0.8, ry: 0.4, baseColor: "rgba(59, 130, 246, 0.05)", size: 550, phase: Math.PI / 3, speed: 0.0004 },
+          { x: 0.5, y: 0.8, rx: 0.5, ry: 0.8, baseColor: "rgba(234, 179, 8, 0.03)", size: 400, phase: Math.PI / 1.5, speed: 0.0006 }
+        ];
+
+        // Preloaded emblem watermark
+        const emblem = new Image();
+        emblem.crossOrigin = "anonymous";
+        emblem.src = "https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg";
+        let emblemLoaded = false;
+        emblem.onload = () => { emblemLoaded = true; };
+
+        // Parallax sensitivity
+        const sensitivity = 0.02;
+
+        window.addEventListener('mousemove', (e) => {
+          if (prefersReduced) return;
+          targetX = (e.clientX - window.innerWidth / 2) * sensitivity;
+          targetY = (e.clientY - window.innerHeight / 2) * sensitivity;
         });
+
+        // Touch device tilt
+        window.addEventListener('deviceorientation', (e) => {
+          if (prefersReduced || !e.gamma || !e.beta) return;
+          targetX = e.gamma * 0.4;
+          targetY = (e.beta - 45) * 0.4;
+        });
+
+        function resize() {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+
+          // Recalculate grid points inside TN outline based on layout columns
+          gridPoints = [];
+          
+          // Map is positioned in the left half on desktop, centered on mobile
+          const mapWidth = window.innerWidth > 900 ? width * 0.42 : width * 0.8;
+          const mapHeight = window.innerWidth > 900 ? height * 0.65 : height * 0.45;
+          const mapLeft = window.innerWidth > 900 ? width * 0.08 : (width - mapWidth) / 2;
+          const mapTop = window.innerWidth > 900 ? height * 0.22 : height * 0.45;
+
+          const cols = window.innerWidth > 900 ? 28 : 20;
+          const rows = window.innerWidth > 900 ? 32 : 24;
+
+          for (let c = 0; c < cols; c++) {
+            for (let r = 0; r < rows; r++) {
+              const rx = c / cols;
+              const ry = r / rows;
+              if (isPointInTN(rx, ry)) {
+                gridPoints.push({
+                  x: mapLeft + rx * mapWidth,
+                  y: mapTop + ry * mapHeight,
+                  baseAlpha: 0.12 + Math.random() * 0.18,
+                  phase: Math.random() * Math.PI * 2
+                });
+              }
+            }
+          }
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Spawn a report trail randomly
+        function spawnTrail() {
+          if (prefersReduced || trails.length > 5) return;
+          const connIdx = Math.floor(Math.random() * connections.length);
+          const conn = connections[connIdx];
+          const forward = Math.random() > 0.5;
+          const start = forward ? conn.from : conn.to;
+          const end = forward ? conn.to : conn.from;
+
+          const colors = ["#0d9488", "#3b82f6", "#d97706"];
+          trails.push({
+            startNode: start,
+            endNode: end,
+            progress: 0,
+            speed: 0.008 + Math.random() * 0.012,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            history: []
+          });
+
+          // Add a report update to the live feed card!
+          triggerLiveFeedUpdate(start, end);
+        }
+
+        let lastTime = 0;
+        let fpsCounter = 60;
+        let framesThisSecond = 0;
+        let lastFpsUpdateTime = 0;
+        let performanceMode = "high"; // "high", "medium", "low"
+
+        function draw(time) {
+          // Adaptive FPS calculation
+          if (lastTime) {
+            const dt = time - lastTime;
+            framesThisSecond++;
+            if (time > lastFpsUpdateTime + 1000) {
+              fpsCounter = framesThisSecond;
+              framesThisSecond = 0;
+              lastFpsUpdateTime = time;
+              
+              // Automatically scale quality down if frame rate drops
+              if (fpsCounter < 42 && performanceMode === "high") {
+                performanceMode = "medium";
+                console.warn("[Hero Animation] Quality adjusted to MEDIUM due to performance constraints.");
+              } else if (fpsCounter < 30 && performanceMode === "medium") {
+                performanceMode = "low";
+                console.warn("[Hero Animation] Quality adjusted to LOW due to performance constraints.");
+              }
+            }
+          }
+          lastTime = time;
+
+          // Interpolate mouse parallax coordinates
+          mouseX += (targetX - mouseX) * 0.08;
+          mouseY += (targetY - mouseY) * 0.08;
+
+          // 3D card tilt effect
+          const card = document.querySelector('.auth-card');
+          if (card && !prefersReduced) {
+            card.style.transform = `perspective(1000px) rotateX(${mouseY * 0.4}deg) rotateY(${-mouseX * 0.4}deg) translateY(0)`;
+          }
+          const brandPanel = document.querySelector('.brand-panel-content');
+          if (brandPanel && !prefersReduced) {
+            brandPanel.style.transform = `perspective(1000px) rotateX(${mouseY * 0.2}deg) rotateY(${-mouseX * 0.2}deg) translateZ(10px)`;
+          }
+
+          ctx.fillStyle = "#fafafb";
+          ctx.fillRect(0, 0, width, height);
+
+          // 1. Draw Volumetric Auroras
+          auroras.forEach((a) => {
+            if (!prefersReduced) {
+              a.phase += a.speed;
+              a.x = a.rx + Math.sin(a.phase) * 0.08;
+              a.y = a.ry + Math.cos(a.phase) * 0.06;
+            }
+
+            const ax = a.x * width + mouseX * 2.5;
+            const ay = a.y * height + mouseY * 2.5;
+            const grad = ctx.createRadialGradient(ax, ay, 0, ax, ay, a.size);
+            grad.addColorStop(0, a.baseColor);
+            grad.addColorStop(1, "rgba(250, 250, 251, 0)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+          });
+
+          // 2. Draw Digital Grid
+          ctx.strokeStyle = "rgba(15, 118, 110, 0.035)";
+          ctx.lineWidth = 1;
+          const gridSize = window.innerWidth > 900 ? 55 : 40;
+          
+          if (performanceMode !== "low") {
+            ctx.beginPath();
+            for (let x = 0; x < width; x += gridSize) {
+              ctx.moveTo(x + mouseX * 0.3, 0);
+              ctx.lineTo(x + mouseX * 0.3, height);
+            }
+            for (let y = 0; y < height; y += gridSize) {
+              ctx.moveTo(0, y + mouseY * 0.3);
+              ctx.lineTo(width, y + mouseY * 0.3);
+            }
+            ctx.stroke();
+          }
+
+          // 3. Draw Tamil Nadu Emblem Watermark
+          if (emblemLoaded && performanceMode !== "low") {
+            ctx.save();
+            ctx.globalAlpha = 0.024;
+            const emblemSize = Math.min(width, height) * 0.44;
+            const ex = width * 0.5 + mouseX * 1.5 - emblemSize / 2;
+            const ey = height * 0.5 + mouseY * 1.5 - emblemSize / 2;
+            ctx.drawImage(emblem, ex, ey, emblemSize, emblemSize);
+            ctx.restore();
+          }
+
+          // Compute responsive map geometry
+          const mapWidth = window.innerWidth > 900 ? width * 0.42 : width * 0.8;
+          const mapHeight = window.innerWidth > 900 ? height * 0.65 : height * 0.45;
+          const mapLeft = window.innerWidth > 900 ? width * 0.08 : (width - mapWidth) / 2;
+          const mapTop = window.innerWidth > 900 ? height * 0.22 : height * 0.45;
+
+          const getScreenCoords = (rx, ry) => {
+            return {
+              x: mapLeft + rx * mapWidth + mouseX * 1.2,
+              y: mapTop + ry * mapHeight + mouseY * 1.2
+            };
+          };
+
+          // 4. Draw Dot Grid Map of Tamil Nadu
+          if (performanceMode !== "low") {
+            gridPoints.forEach((pt) => {
+              const alpha = prefersReduced ? pt.baseAlpha : pt.baseAlpha + Math.sin(time * 0.0012 + pt.phase) * 0.06;
+              ctx.fillStyle = `rgba(13, 148, 136, ${alpha})`;
+              ctx.beginPath();
+              const px = pt.x + mouseX * 0.8;
+              const py = pt.y + mouseY * 0.8;
+              ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+              ctx.fill();
+            });
+          }
+
+          // 5. Draw Network Connection Lines
+          ctx.strokeStyle = "rgba(15, 118, 110, 0.08)";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          connections.forEach((conn) => {
+            const p1 = getScreenCoords(cityNodes[conn.from].rx, cityNodes[conn.from].ry);
+            const p2 = getScreenCoords(cityNodes[conn.to].rx, cityNodes[conn.to].ry);
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+          });
+          ctx.stroke();
+
+          // 6. Draw Report Trails (Data streams traveling)
+          if (!prefersReduced) {
+            trails.forEach((trail, idx) => {
+              trail.progress += trail.speed;
+              
+              const pStart = getScreenCoords(cityNodes[trail.startNode].rx, cityNodes[trail.startNode].ry);
+              const pEnd = getScreenCoords(cityNodes[trail.endNode].rx, cityNodes[trail.endNode].ry);
+              
+              const cx = pStart.x + (pEnd.x - pStart.x) * trail.progress;
+              const cy = pStart.y + (pEnd.y - pStart.y) * trail.progress;
+
+              trail.history.push({ x: cx, y: cy });
+              if (trail.history.length > 12) {
+                trail.history.shift();
+              }
+
+              if (performanceMode !== "low" && trail.history.length > 1) {
+                ctx.save();
+                for (let i = 0; i < trail.history.length - 1; i++) {
+                  const pct = i / trail.history.length;
+                  ctx.strokeStyle = trail.color;
+                  ctx.globalAlpha = pct * 0.6;
+                  ctx.lineWidth = 1 + pct * 2.5;
+                  ctx.beginPath();
+                  ctx.moveTo(trail.history[i].x, trail.history[i].y);
+                  ctx.lineTo(trail.history[i + 1].x, trail.history[i + 1].y);
+                  ctx.stroke();
+                }
+                ctx.restore();
+              }
+
+              ctx.fillStyle = trail.color;
+              ctx.beginPath();
+              ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+              ctx.fill();
+
+              if (performanceMode === "high") {
+                ctx.save();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = trail.color;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+              }
+
+              if (trail.progress >= 1) {
+                cityNodes[trail.endNode].pulse = 1.0;
+                trails.splice(idx, 1);
+              }
+            });
+          }
+
+          // 7. Draw City Nodes
+          cityNodes.forEach((node) => {
+            const p = getScreenCoords(node.rx, node.ry);
+            
+            ctx.fillStyle = "rgba(71, 85, 105, 0.75)";
+            ctx.font = "bold 9px system-ui, -apple-system, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(node.name.toUpperCase(), p.x, p.y - 12);
+
+            if (!prefersReduced && node.pulse > 0) {
+              node.pulse -= 0.02;
+              ctx.strokeStyle = node.color;
+              ctx.lineWidth = 1;
+              ctx.globalAlpha = node.pulse;
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, node.size + (1.0 - node.pulse) * 16, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.globalAlpha = 1.0;
+            }
+
+            ctx.fillStyle = node.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, node.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, node.size * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          requestAnimationFrame(draw);
+        }
+
+        setInterval(spawnTrail, 1800);
+        setTimeout(spawnTrail, 200);
+        setTimeout(spawnTrail, 800);
+
+        requestAnimationFrame(draw);
+      })();
+
+      // ————— Operations Telemetry Feed Updater —————
+      const liveFeeds = [
+        "Coimbatore Node: Pothole dispatch verified (Confidence 94%)",
+        "Chennai Node: New trash accumulation reported via camera",
+        "Madurai Node: Streetlight malfunction resolved dynamically",
+        "Salem Node: Citizen claiming 150 points reward",
+        "Trichy Node: Pothole report classified automatically by AI",
+        "Namakkal Node: Smart City integration live and synced",
+        "Vellore Node: Leakage complaint routed to water authority",
+        "Tirunelveli Node: Dispatch confirmed by sanitation crew"
+      ];
+
+      function triggerLiveFeedUpdate(startIdx, endIdx) {
+        const feedContainer = document.getElementById('telemetry-feed-container');
+        if (!feedContainer) return;
+
+        const startNodeName = ["Chennai", "Vellore", "Salem", "Coimbatore", "Trichy", "Madurai", "Tirunelveli"][startIdx] || "Node";
+        const endNodeName = ["Chennai", "Vellore", "Salem", "Coimbatore", "Trichy", "Madurai", "Tirunelveli"][endIdx] || "Authority";
+        
+        let updateMsg = "";
+        if (Math.random() > 0.5) {
+          updateMsg = `Data Link: citizen report dispatched from ${startNodeName} to ${endNodeName} Local Body.`;
+        } else {
+          updateMsg = liveFeeds[Math.floor(Math.random() * liveFeeds.length)];
+        }
+
+        const item = document.createElement('div');
+        item.className = 'telemetry-feed-item';
+        item.innerHTML = `
+          <i class="fa-solid fa-bolt" style="color: #d97706; font-size: 0.65rem;"></i>
+          <span>${updateMsg}</span>
+        `;
+
+        feedContainer.insertBefore(item, feedContainer.firstChild);
+
+        while (feedContainer.children.length > 2) {
+          feedContainer.removeChild(feedContainer.lastChild);
+        }
       }
+
+      setInterval(() => {
+        const activeUsersSpan = document.getElementById('telemetry-stat-active');
+        if (activeUsersSpan) {
+          const current = parseInt(activeUsersSpan.textContent.replace(/,/g, ''));
+          const shift = Math.floor(Math.random() * 5) - 2;
+          activeUsersSpan.textContent = (current + shift).toLocaleString();
+        }
+      }, 5000);
     }
 
     if (document.readyState === 'loading') {
