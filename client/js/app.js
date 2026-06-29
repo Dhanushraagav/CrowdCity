@@ -8,6 +8,7 @@ let cachedUserCoords = null;
 let lastLoadedUserIdApp = null;
 let isLoadingIssues = false;
 let lastUserIssues = [];
+let appRealtimeChannel = null;
 
 // High-performance requestAnimationFrame count-up animation
 function animateCountUp(element, targetVal, suffix = '') {
@@ -78,6 +79,8 @@ function initDashboard() {
     loadUserStats().catch(err => console.error("Error in loadUserStats:", err)),
     loadRecentNotifications().catch(err => console.error("Error in loadRecentNotifications:", err))
   ]);
+
+  initRealtimeDashboard();
 }
 
 // Fetch user profile and display points
@@ -598,7 +601,44 @@ window.addEventListener('auth-change', async () => {
     loadAndRenderIssues().catch(err => console.error("Error updating issues on auth change:", err)),
     loadUserStats().catch(err => console.error("Error updating user stats on auth change:", err))
   ]);
+
+  initRealtimeDashboard();
 });
+
+function initRealtimeDashboard() {
+  if (appRealtimeChannel) {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client) {
+      client.removeChannel(appRealtimeChannel);
+    }
+    appRealtimeChannel = null;
+  }
+
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+  appRealtimeChannel = window.API.subscribeRealtime({
+    channelName: 'public:issues_dashboard',
+    events: [
+      { event: 'INSERT', table: 'issues' },
+      { event: 'UPDATE', table: 'issues' }
+    ],
+    onEvent: (event, payload) => {
+      console.log(`[Dashboard Realtime] Event ${event} received.`, payload);
+      if (window.showToast) {
+        if (event === 'INSERT') {
+          window.showToast(window.i18n ? window.i18n.t('toast_new_complaint') || 'New civic complaint reported in your city!' : 'New civic complaint reported in your city!', 'info');
+        } else if (event === 'UPDATE') {
+          window.showToast(window.i18n ? window.i18n.t('toast_complaint_updated') || 'A complaint status was updated.' : 'A complaint status was updated.', 'info');
+        } else if (event === 'RECONNECT') {
+          // Automatic reconnect already notifies, just sync
+        }
+      }
+      // Re-fetch issues and telemetry without reloading page
+      loadAndRenderIssues().catch(err => console.error("Error refreshing issues on realtime update:", err));
+      loadUserStats().catch(err => console.error("Error refreshing user stats on realtime update:", err));
+    }
+  });
+}
 
 // Initialize when both window is ready (using readystate check to prevent DOMContentLoaded race condition)
 if (document.readyState === 'loading') {

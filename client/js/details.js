@@ -3,6 +3,7 @@
 let detailsMap = null;
 let issueId = null;
 let issueDetailData = null;
+let detailsRealtimeChannel = null;
 
 // Initialize Details Page
 async function initDetailsPage() {
@@ -196,6 +197,45 @@ async function loadIssueDetails() {
 
   // Load new features (evidence, chat, citizen actions)
   await loadNewFeatures(issue);
+
+  initRealtimeDetails();
+}
+
+function initRealtimeDetails() {
+  if (detailsRealtimeChannel) {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client) {
+      client.removeChannel(detailsRealtimeChannel);
+    }
+    detailsRealtimeChannel = null;
+  }
+
+  if (!issueId) return;
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+  detailsRealtimeChannel = window.API.subscribeRealtime({
+    channelName: `public:issue_details:${issueId}`,
+    events: [
+      { event: 'UPDATE', table: 'issues', filter: `id=eq.${issueId}` },
+      { event: 'INSERT', table: 'comments', filter: `issue_id=eq.${issueId}` }
+    ],
+    onEvent: (event, payload) => {
+      console.log(`[Details Realtime] Event ${event} received.`, payload);
+      
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      
+      if (window.showToast) {
+        if (event === 'UPDATE') {
+          window.showToast(window.i18n ? window.i18n.t('toast_issue_updated') || 'This complaint has been updated!' : 'This complaint has been updated!', 'info');
+        } else if (event === 'INSERT') {
+          if (currentUser && payload.new.user_id === currentUser.id) return;
+          window.showToast(window.i18n ? window.i18n.t('toast_new_comment') || 'New comment added to this complaint.' : 'New comment added to this complaint.', 'info');
+        }
+      }
+      
+      loadIssueDetails().catch(err => console.error("Error refreshing details:", err));
+    }
+  });
 }
 
 // Draw Leaflet Mini Map

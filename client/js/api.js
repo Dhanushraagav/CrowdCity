@@ -321,6 +321,54 @@ const API = {
       method: 'POST',
       body: JSON.stringify({ message_text: messageText })
     });
+  },
+
+  // 38. Centralized Realtime Subscription Helper with Reconnection Auto-Sync
+  subscribeRealtime: (options) => {
+    const { channelName, events, onEvent, onStatusChange } = options;
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (!client) {
+      console.warn("[Realtime] supabaseClient not initialized yet.");
+      return null;
+    }
+
+    let wasDisconnected = false;
+    const channel = client.channel(channelName);
+
+    events.forEach(evt => {
+      channel.on('postgres_changes', {
+        event: evt.event || '*',
+        schema: 'public',
+        table: evt.table,
+        filter: evt.filter
+      }, (payload) => {
+        console.log(`[Realtime] Event received on ${channelName}:`, payload);
+        if (onEvent) onEvent(evt.event, payload);
+      });
+    });
+
+    channel.subscribe((status, err) => {
+      console.log(`[Realtime] Subscription status for ${channelName}: ${status}`, err || '');
+      
+      if (onStatusChange) {
+        onStatusChange(status, err);
+      }
+
+      if (status === 'SUBSCRIBED') {
+        if (wasDisconnected) {
+          console.log(`[Realtime] Reconnected on ${channelName}. Triggering sync...`);
+          if (window.showToast) {
+            window.showToast(window.i18n ? window.i18n.t('realtime_reconnected') || 'Real-time sync restored.' : 'Real-time sync restored.', 'success');
+          }
+          if (onEvent) onEvent('RECONNECT', null);
+          wasDisconnected = false;
+        }
+      } else if (status === 'CLOSED' || status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
+        wasDisconnected = true;
+      }
+    });
+
+    return channel;
   }
 };
 

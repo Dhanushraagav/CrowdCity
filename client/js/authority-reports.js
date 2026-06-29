@@ -2,6 +2,7 @@
 
 let allIssues = [];
 let lastLoadedUserIdAuthReports = null;
+let reportsRealtimeChannel = null;
 
 const bootstrapReports = () => {
   // Check authorization and load data
@@ -55,6 +56,41 @@ async function loadReportsData() {
 
   allIssues = issues;
   applyFiltersAndRender();
+  initRealtimeReports();
+}
+
+function initRealtimeReports() {
+  if (reportsRealtimeChannel) {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client) {
+      client.removeChannel(reportsRealtimeChannel);
+    }
+    reportsRealtimeChannel = null;
+  }
+
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (!user) return;
+
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+  reportsRealtimeChannel = window.API.subscribeRealtime({
+    channelName: `public:auth_reports:${user.id}`,
+    events: [
+      { event: 'INSERT', table: 'issues' },
+      { event: 'UPDATE', table: 'issues' }
+    ],
+    onEvent: (event, payload) => {
+      console.log(`[Authority Reports Realtime] Event ${event} received.`, payload);
+      if (window.showToast) {
+        if (event === 'INSERT') {
+          window.showToast(window.i18n ? window.i18n.t('toast_new_complaint_assigned') || 'New civic complaint reported!' : 'New civic complaint reported!', 'info');
+        } else if (event === 'UPDATE') {
+          window.showToast(window.i18n ? window.i18n.t('toast_complaint_updated') || 'A case status was updated.' : 'A case status was updated.', 'info');
+        }
+      }
+      loadReportsData().catch(err => console.error("Error refreshing reports data:", err));
+    }
+  });
 }
 
 function setupFilterListeners() {

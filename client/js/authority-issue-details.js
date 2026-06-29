@@ -4,6 +4,7 @@ let issueId = null;
 let issueDetailData = null;
 let detailsMap = null;
 let selectedProofFile = null;
+let detailsRealtimeChannel = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   // Check auth session
@@ -196,6 +197,8 @@ async function loadCaseDetails() {
 
   // Load new features (evidence gallery, chat)
   await loadAuthorityNewFeatures(issue);
+
+  initRealtimeDetails();
   } catch (error) {
     console.error("[Inspector] Exception in loadCaseDetails:", error);
     if (loader) {
@@ -210,6 +213,43 @@ async function loadCaseDetails() {
       `;
     }
   }
+}
+
+function initRealtimeDetails() {
+  if (detailsRealtimeChannel) {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client) {
+      client.removeChannel(detailsRealtimeChannel);
+    }
+    detailsRealtimeChannel = null;
+  }
+
+  if (!issueId) return;
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+  detailsRealtimeChannel = window.API.subscribeRealtime({
+    channelName: `public:auth_issue_details:${issueId}`,
+    events: [
+      { event: 'UPDATE', table: 'issues', filter: `id=eq.${issueId}` },
+      { event: 'INSERT', table: 'comments', filter: `issue_id=eq.${issueId}` }
+    ],
+    onEvent: (event, payload) => {
+      console.log(`[Authority Details Realtime] Event ${event} received.`, payload);
+      
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+
+      if (window.showToast) {
+        if (event === 'UPDATE') {
+          window.showToast(window.i18n ? window.i18n.t('toast_issue_updated') || 'Case details updated!' : 'Case details updated!', 'info');
+        } else if (event === 'INSERT') {
+          if (currentUser && payload.new.user_id === currentUser.id) return;
+          window.showToast(window.i18n ? window.i18n.t('toast_new_comment') || 'New discussion comment added.' : 'New discussion comment added.', 'info');
+        }
+      }
+
+      loadCaseDetails().catch(err => console.error("Error refreshing case details:", err));
+    }
+  });
 }
 
 function initDetailsMiniMap(lat, lng, category) {

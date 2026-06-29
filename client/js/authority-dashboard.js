@@ -1,4 +1,5 @@
 let lastLoadedUserIdAuthDashboard = null;
+let authDashboardRealtimeChannel = null;
 
 const bootstrapDashboard = () => {
   // Check authorization and bootstrap page loading
@@ -38,6 +39,43 @@ async function loadDashboardTelemetry() {
     loadPriorityCases(),
     loadActivityLog()
   ]);
+  
+  initRealtimeAuthDashboard();
+}
+
+function initRealtimeAuthDashboard() {
+  if (authDashboardRealtimeChannel) {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client) {
+      client.removeChannel(authDashboardRealtimeChannel);
+    }
+    authDashboardRealtimeChannel = null;
+  }
+
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (!user) return;
+
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+  authDashboardRealtimeChannel = window.API.subscribeRealtime({
+    channelName: `public:auth_dashboard:${user.id}`,
+    events: [
+      { event: 'INSERT', table: 'issues' },
+      { event: 'UPDATE', table: 'issues' },
+      { event: 'INSERT', table: 'notifications', filter: `user_id=eq.${user.id}` }
+    ],
+    onEvent: (event, payload) => {
+      console.log(`[Authority Dashboard Realtime] Event ${event} received.`, payload);
+      if (window.showToast) {
+        if (event === 'INSERT' && payload.table === 'issues') {
+          window.showToast(window.i18n ? window.i18n.t('toast_new_complaint_assigned') || 'New civic complaint reported!' : 'New civic complaint reported!', 'info');
+        } else if (event === 'UPDATE' && payload.table === 'issues') {
+          window.showToast(window.i18n ? window.i18n.t('toast_complaint_updated') || 'A case status was updated.' : 'A case status was updated.', 'info');
+        }
+      }
+      loadDashboardTelemetry().catch(err => console.error("Error refreshing dashboard data:", err));
+    }
+  });
 }
 
 // Fetch stats via API

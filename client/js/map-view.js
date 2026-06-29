@@ -6,6 +6,7 @@ let currentIssues = [];
 let activeCategory = '';
 let activeStatus = '';
 let activeSelectedIssue = null;
+let mapRealtimeChannel = null;
 
 // Default coordinates (Coimbatore)
 const DEFAULT_CENTER = [11.0168, 76.9558];
@@ -20,10 +21,31 @@ async function initMapView() {
   // Geolocation auto-centering
   requestBrowserLocation();
 
-  // Start 30-second polling for real-time updates
-  setInterval(async () => {
-    await loadAndRenderMapIssues();
-  }, 30000);
+  initRealtimeMap();
+}
+
+function initRealtimeMap() {
+  if (mapRealtimeChannel) {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client) {
+      client.removeChannel(mapRealtimeChannel);
+    }
+    mapRealtimeChannel = null;
+  }
+
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+  mapRealtimeChannel = window.API.subscribeRealtime({
+    channelName: 'public:map_view',
+    events: [
+      { event: 'INSERT', table: 'issues' },
+      { event: 'UPDATE', table: 'issues' }
+    ],
+    onEvent: (event, payload) => {
+      console.log(`[Map Realtime] Event ${event} received.`, payload);
+      loadAndRenderMapIssues().catch(err => console.error("Error refreshing map issues:", err));
+    }
+  });
 }
 
 // Initialize Leaflet Map

@@ -132,6 +132,7 @@ async function initAuth() {
         window.supabaseConfig = cachedConfig;
         if (typeof window.supabase !== 'undefined' && !supabaseClient) {
           supabaseClient = window.supabase.createClient(cachedConfig.supabaseUrl, cachedConfig.supabaseAnonKey);
+          window.supabaseClient = supabaseClient;
           _attachAuthStateListener();
           updateAuthUI();
           if (window.turnstileLoaded) {
@@ -191,6 +192,7 @@ async function initAuth() {
     // Initialize real Supabase client
     console.log("[Auth] Connecting to Supabase at URL:", config.supabaseUrl);
     supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    window.supabaseClient = supabaseClient;
     console.log("Supabase Auth initialized successfully.");
     _attachAuthStateListener();
     updateAuthUI();
@@ -222,6 +224,7 @@ function _tryInitFromCache() {
                              (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
     if (!config.supabaseUrl || config.supabaseUrl.includes('placeholder') || isKeyPlaceholder) return false;
     supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    window.supabaseClient = supabaseClient;
     console.log('[Auth] Supabase initialised from cached config.');
     _attachAuthStateListener();
     updateAuthUI();

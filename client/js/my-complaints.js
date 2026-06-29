@@ -8,6 +8,7 @@ let lastLoadedState = {
   category: undefined,
   status: undefined
 };
+let myComplaintsRealtimeChannel = null;
 
 async function initMyComplaints() {
   setupFilterListeners();
@@ -342,7 +343,40 @@ function escapeHTML(str) {
 
 window.addEventListener('auth-change', async () => {
   await loadAndRenderMyIssues();
+  initRealtimeMyComplaints();
 });
+
+function initRealtimeMyComplaints() {
+  if (myComplaintsRealtimeChannel) {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client) {
+      client.removeChannel(myComplaintsRealtimeChannel);
+    }
+    myComplaintsRealtimeChannel = null;
+  }
+
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (!user) return;
+
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+  myComplaintsRealtimeChannel = window.API.subscribeRealtime({
+    channelName: `public:my_complaints:${user.id}`,
+    events: [
+      { event: 'INSERT', table: 'issues', filter: `reporter_id=eq.${user.id}` },
+      { event: 'UPDATE', table: 'issues', filter: `reporter_id=eq.${user.id}` }
+    ],
+    onEvent: (event, payload) => {
+      console.log(`[My Complaints Realtime] Event ${event} received.`, payload);
+      if (window.showToast) {
+        if (event === 'UPDATE') {
+          window.showToast(window.i18n ? window.i18n.t('toast_my_complaint_updated') || 'Your reported complaint was updated!' : 'Your reported complaint was updated!', 'info');
+        }
+      }
+      loadAndRenderMyIssues().catch(err => console.error("Error refreshing my complaints:", err));
+    }
+  });
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   initMyComplaints();
