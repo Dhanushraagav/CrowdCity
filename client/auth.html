@@ -407,14 +407,14 @@
       width: 100%;
     }
 
-    /* AI Camera Widget Hub Styles */
-    .ai-camera-card {
+    /* Brand Showcase Container Styles */
+    .brand-showcase-container {
       background: rgba(255, 255, 255, 0.72);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid rgba(255, 255, 255, 0.55);
       border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
+      padding: 1.25rem;
       box-shadow: 0 16px 40px rgba(15, 118, 110, 0.04);
       display: flex;
       flex-direction: column;
@@ -426,254 +426,99 @@
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       text-align: left;
     }
-    .ai-camera-card:hover {
+    .brand-showcase-container:hover {
       transform: translateY(-4px);
       box-shadow: 0 24px 56px rgba(15, 118, 110, 0.08);
     }
-    .camera-widget-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(15, 118, 110, 0.1);
-      padding-bottom: 0.5rem;
-    }
-    .camera-widget-title {
-      font-weight: 700;
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0;
-    }
-    .camera-live-badge {
-      font-size: 0.62rem;
-      font-weight: 800;
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.08);
-      padding: 2px 8px;
-      border-radius: var(--radius-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .camera-live-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: #ef4444;
-      animation: camera-pulse 1.5s infinite;
-    }
-    @keyframes camera-pulse {
-      0% { opacity: 0.3; }
-      50% { opacity: 1; }
-      100% { opacity: 0.3; }
-    }
-    .camera-feed-viewport {
+    .showcase-viewport {
       position: relative;
       width: 100%;
-      height: 230px;
+      height: 250px;
       overflow: hidden;
-      background: #090d16;
       border-radius: var(--radius-md);
+      background: #090d16;
       border: 1px solid rgba(15, 118, 110, 0.15);
     }
-    .camera-feed-image {
+    .showcase-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
       opacity: 0;
-      transform: scale(1.08);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      filter: blur(8px) brightness(0.85);
+      transform: scale(1.06);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .camera-feed-image.active {
+    .showcase-image.active {
       opacity: 1;
-      transform: scale(1.02);
-      filter: blur(0) brightness(0.95);
-      animation: ken-burns 12s ease-in-out infinite alternate;
+      transform: scale(1.01);
+      animation: showcase-zoom 10s ease-in-out infinite alternate;
     }
-    @keyframes ken-burns {
-      0% { transform: scale(1.02) translate(0, 0); }
-      100% { transform: scale(1.09) translate(1%, -1%); }
+    @keyframes showcase-zoom {
+      0% { transform: scale(1.01); }
+      100% { transform: scale(1.07); }
     }
-    .scanning-laser {
+    .showcase-caption {
       position: absolute;
-      top: 0;
+      bottom: 0;
       left: 0;
       width: 100%;
-      height: 2px;
-      background: linear-gradient(to right, transparent, rgba(13, 148, 136, 0.5), transparent);
-      box-shadow: 0 0 8px rgba(13, 148, 136, 0.8);
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+      padding: 2.25rem 1.25rem 1.25rem;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      pointer-events: none;
+      box-sizing: border-box;
       z-index: 5;
-      animation: laser-scan 4s linear infinite;
-      pointer-events: none;
     }
-    @keyframes laser-scan {
-      0% { top: 0%; }
-      50% { top: 100%; }
-      100% { top: 0%; }
-    }
-    .camera-hud {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 6;
-      pointer-events: none;
-      box-sizing: border-box;
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      font-family: 'Courier New', Courier, monospace;
-      color: rgba(13, 148, 136, 0.75);
-      font-size: 0.65rem;
-      text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
-    }
-    .hud-row {
-      display: flex;
-      justify-content: space-between;
-    }
-    .hud-reticle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 24px;
-      height: 24px;
-      border: 1px solid rgba(13, 148, 136, 0.35);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-    .hud-reticle::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 4px;
-      height: 4px;
-      background-color: rgba(13, 148, 136, 0.6);
-      border-radius: 50%;
-    }
-    .hud-corner {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border: 1px solid rgba(13, 148, 136, 0.45);
-    }
-    .hud-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
-    .hud-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
-    .hud-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
-    .hud-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
-
-    /* Telemetry Hub styles */
-    .telemetry-card {
-      background: rgba(255, 255, 255, 0.72);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      box-shadow: 0 20px 48px rgba(15, 118, 110, 0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      width: 100%;
-      max-width: 440px;
-      margin-top: 0.5rem;
-      box-sizing: border-box;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      text-align: left;
-    }
-    .telemetry-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 24px 56px rgba(15, 118, 110, 0.08);
-    }
-    .telemetry-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(15, 118, 110, 0.1);
-      padding-bottom: 0.75rem;
-    }
-    .telemetry-title {
-      font-weight: 700;
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0;
-    }
-    .telemetry-live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: #10b981;
-      box-shadow: 0 0 10px #10b981;
-      animation: pulse-green 2s infinite;
-    }
-    @keyframes pulse-green {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-    .telemetry-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-    }
-    .telemetry-stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      background: rgba(15, 118, 110, 0.03);
-      padding: 0.6rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(15, 118, 110, 0.05);
-    }
-    .telemetry-stat-val {
+    .showcase-city {
+      font-size: 1.15rem;
       font-weight: 800;
-      font-size: 0.95rem;
-      color: var(--text-main);
-    }
-    .telemetry-stat-lbl {
-      font-size: 0.62rem;
-      color: var(--text-muted);
+      letter-spacing: 0.5px;
       text-transform: uppercase;
+      color: #ffffff;
+    }
+    .showcase-desc {
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.75);
       font-weight: 600;
-      white-space: nowrap;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
-    .telemetry-feed {
+    .showcase-controls {
       display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      min-height: 85px;
-    }
-    .telemetry-feed-item {
-      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.74rem;
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.6);
-      padding: 0.5rem 0.75rem;
-      border-radius: var(--radius-sm);
-      border-left: 3px solid var(--primary);
-      animation: slide-in-telemetry 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      padding: 0 0.25rem;
     }
-    @keyframes slide-in-telemetry {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    .showcase-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .showcase-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(15, 118, 110, 0.18);
+      transition: background 0.3s ease, transform 0.3s ease;
+      cursor: pointer;
+    }
+    .showcase-dot.active {
+      background: var(--primary);
+      transform: scale(1.3);
+    }
+    .showcase-progress-container {
+      width: 80px;
+      height: 2px;
+      background: rgba(15, 118, 110, 0.08);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .showcase-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      transition: width 0.1s linear;
     }
 
     /* Right Column: Forms panel */
@@ -1170,63 +1015,25 @@
         <h2 data-i18n="auth_hero_title" style="font-size: 1.35rem; font-weight: 600; line-height: 1.4; background: none; -webkit-text-fill-color: var(--text-main); color: var(--text-main); margin-top: 1rem; margin-bottom: 0.5rem;">Empowering citizens to build cleaner, safer, and better neighborhoods.</h2>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0px;">Collaborative civic portal in partnership with local urban bodies.</p>
         
-        <div class="ai-camera-card">
-          <div class="camera-widget-header">
-            <h3 class="camera-widget-title">
-              <i class="fa-solid fa-video"></i> AI Live Camera Feed
-            </h3>
-            <div class="camera-live-badge">
-              <div class="camera-live-dot"></div>
-              <span>LIVE FEED</span>
+        <div class="brand-showcase-container">
+          <div class="showcase-viewport">
+            <img id="active-showcase-image" class="showcase-image active" src="images/slideshow_1.png" alt="Kathipara Flyover" />
+            <div class="showcase-caption">
+              <span id="showcase-city-text" class="showcase-city">Chennai</span>
+              <span id="showcase-desc-text" class="showcase-desc">Kathipara Flyover</span>
             </div>
           </div>
-          <div class="camera-feed-viewport">
-            <div class="scanning-laser"></div>
-            <img id="active-camera-image" class="camera-feed-image active" src="images/slideshow_1.png" alt="Kathipara Flyover" />
-            <div class="camera-hud">
-              <div class="hud-corner hud-tl"></div>
-              <div class="hud-corner hud-tr"></div>
-              <div class="hud-corner hud-bl"></div>
-              <div class="hud-corner hud-br"></div>
-              <div class="hud-reticle"></div>
-              <div class="hud-row">
-                <span id="hud-city-node">NODE: CHENNAI</span>
-                <span id="hud-confidence">AI CONFIDENCE: 98.4%</span>
-              </div>
-              <div class="hud-row">
-                <span id="hud-location">LOC: KATHIPARA FLYOVER</span>
-                <span id="hud-coords">13.0827° N, 80.2707° E</span>
-              </div>
+          <div class="showcase-controls">
+            <div class="showcase-dots">
+              <div class="showcase-dot active" onclick="switchShowcaseSlide(0)"></div>
+              <div class="showcase-dot" onclick="switchShowcaseSlide(1)"></div>
+              <div class="showcase-dot" onclick="switchShowcaseSlide(2)"></div>
+              <div class="showcase-dot" onclick="switchShowcaseSlide(3)"></div>
+              <div class="showcase-dot" onclick="switchShowcaseSlide(4)"></div>
             </div>
-          </div>
-        </div>
-
-        <div class="telemetry-card">
-          <div class="telemetry-header">
-            <h3 class="telemetry-title">
-              <i class="fa-solid fa-microchip"></i> AI Civic Grid Telemetry
-            </h3>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="font-size: 0.62rem; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">ONLINE</span>
-              <div class="telemetry-live-dot"></div>
+            <div class="showcase-progress-container">
+              <div id="showcase-progress" class="showcase-progress-bar"></div>
             </div>
-          </div>
-          <div class="telemetry-stats-grid">
-            <div class="telemetry-stat-item">
-              <span class="telemetry-stat-val" id="telemetry-stat-resolved">98.4%</span>
-              <span class="telemetry-stat-lbl">Resolve Rate</span>
-            </div>
-            <div class="telemetry-stat-item">
-              <span class="telemetry-stat-val" id="telemetry-stat-active">14,285</span>
-              <span class="telemetry-stat-lbl">Active Users</span>
-            </div>
-            <div class="telemetry-stat-item">
-              <span class="telemetry-stat-val" id="telemetry-stat-xp">392K XP</span>
-              <span class="telemetry-stat-lbl">Rewards Paid</span>
-            </div>
-          </div>
-          <div class="telemetry-feed" id="telemetry-feed-container">
-            <!-- Dynamically populated report updates representing data streams traveling -->
           </div>
         </div>
       </div>
@@ -2430,78 +2237,108 @@
         });
       }
 
-      // ————— AI Camera Feed Rotation & Sequential Preloader —————
-      (function() {
-        const cameraNodes = [
-          { name: "Chennai", src: "images/slideshow_1.png", location: "KATHIPARA FLYOVER", coords: "13.0827° N, 80.2707° E", status: "TRAFFIC OPTIMIZED (98.4%)" },
-          { name: "Coimbatore", src: "images/slideshow_2.png", location: "GANDHIPURAM FLYOVER", coords: "11.0168° N, 76.9558° E", status: "ROAD INTEGRITY: NOMINAL" },
-          { name: "Madurai", src: "images/slideshow_3.png", location: "MEENAKSHI TEMPLE JUNCTION", coords: "9.9252° N, 78.1198° E", status: "CROWD CLASSIFIED: SAFE" },
-          { name: "Trichy", src: "images/slideshow_4.png", location: "ROCKFORT KAIVERI BRIDGE", coords: "10.7905° N, 78.7047° E", status: "PUBLIC WASTE: CLEAN" },
-          { name: "Namakkal", src: "images/slideshow_5.png", location: "NAMAKKAL FORT HUB", coords: "11.2189° N, 78.1672° E", status: "SMART GRID INTEGRITY: 100%" }
-        ];
+      // ————— Authentic Brand Showcase & Sequential Preloader —————
+      const showcaseNodes = [
+        { name: "Chennai", src: "images/slideshow_1.png", description: "Kathipara Flyover" },
+        { name: "Coimbatore", src: "images/slideshow_2.png", description: "Gandhipuram Flyover" },
+        { name: "Madurai", src: "images/slideshow_3.png", description: "Meenakshi Temple" },
+        { name: "Trichy", src: "images/slideshow_4.png", description: "Rockfort" },
+        { name: "Namakkal", src: "images/slideshow_5.png", description: "Namakkal Rock Fort" }
+      ];
 
-        // Sequential background image loader to ensure instant initial page load
-        const preloadedImages = {};
-        function preloadNext(index) {
-          if (index >= cameraNodes.length) return;
-          const img = new Image();
-          img.src = cameraNodes[index].src;
-          img.onload = () => {
-            preloadedImages[cameraNodes[index].src] = img;
-            setTimeout(() => preloadNext(index + 1), 600);
-          };
-        }
-        // Start background preloading after page is fully interactive
-        setTimeout(() => preloadNext(1), 1000);
+      // Sequential background preloading to keep initial load instantaneous
+      const preloadedImages = {};
+      function preloadNext(index) {
+        if (index >= showcaseNodes.length) return;
+        const img = new Image();
+        img.src = showcaseNodes[index].src;
+        img.onload = () => {
+          preloadedImages[showcaseNodes[index].src] = img;
+          setTimeout(() => preloadNext(index + 1), 500);
+        };
+      }
+      setTimeout(() => preloadNext(1), 1000);
 
-        let currentNodeIdx = 0;
+      let currentSlideIdx = 0;
+      let rotationInterval;
+      let progressInterval;
+      let progressPercent = 0;
+      const slideDuration = 4000; // 4 seconds per slide
 
-        function updateActiveCameraFeed() {
-          const nextIdx = (currentNodeIdx + 1) % cameraNodes.length;
-          const node = cameraNodes[nextIdx];
-          
-          const imgEl = document.getElementById('active-camera-image');
-          const nodeEl = document.getElementById('hud-city-node');
-          const confEl = document.getElementById('hud-confidence');
-          const locEl = document.getElementById('hud-location');
-          const coordEl = document.getElementById('hud-coords');
+      window.switchShowcaseSlide = function(index) {
+        if (index === currentSlideIdx) return;
+        
+        const imgEl = document.getElementById('active-showcase-image');
+        const cityEl = document.getElementById('showcase-city-text');
+        const descEl = document.getElementById('showcase-desc-text');
+        const dots = document.querySelectorAll('.showcase-dot');
 
-          if (!imgEl) return;
+        if (!imgEl) return;
 
-          // Slide out with transition blur
-          imgEl.classList.remove('active');
-          
-          setTimeout(() => {
-            imgEl.src = node.src;
-            imgEl.alt = node.location;
-            
-            if (nodeEl) nodeEl.textContent = `NODE: ${node.name.toUpperCase()}`;
-            if (confEl) confEl.textContent = `AI STATUS: ${node.status}`;
-            if (locEl) locEl.textContent = `LOC: ${node.location}`;
-            if (coordEl) coordEl.textContent = node.coords;
+        // Reset progress bar
+        progressPercent = 0;
+        const progressEl = document.getElementById('showcase-progress');
+        if (progressEl) progressEl.style.width = '0%';
 
-            imgEl.classList.add('active');
-            currentNodeIdx = nextIdx;
+        // Start dissolve fade out
+        imgEl.classList.remove('active');
 
-            // Update local telemetry list
-            triggerLiveFeedUpdate(node.name, node.location);
-          }, 800);
-        }
+        setTimeout(() => {
+          const node = showcaseNodes[index];
+          imgEl.src = node.src;
+          imgEl.alt = node.description;
 
-        let cameraRotationInterval = setInterval(updateActiveCameraFeed, 4000);
+          if (cityEl) cityEl.textContent = node.name;
+          if (descEl) descEl.textContent = node.description;
 
-        // Click to cycle manually
-        const cameraCard = document.querySelector('.ai-camera-card');
-        if (cameraCard) {
-          cameraCard.style.cursor = 'pointer';
-          cameraCard.addEventListener('click', () => {
-            clearInterval(cameraRotationInterval);
-            updateActiveCameraFeed();
-            cameraRotationInterval = setInterval(updateActiveCameraFeed, 4000);
+          // Sync indicator dots
+          dots.forEach((dot, dIdx) => {
+            if (dIdx === index) {
+              dot.classList.add('active');
+            } else {
+              dot.classList.remove('active');
+            }
           });
-        }
 
-        // Mouse move 3D tilt parallax
+          imgEl.classList.add('active');
+          currentSlideIdx = index;
+        }, 500);
+
+        // Reset auto rotation interval
+        resetSlideIntervals();
+      };
+
+      function autoAdvanceSlide() {
+        const nextIdx = (currentSlideIdx + 1) % showcaseNodes.length;
+        window.switchShowcaseSlide(nextIdx);
+      }
+
+      function startProgressBar() {
+        const progressEl = document.getElementById('showcase-progress');
+        progressInterval = setInterval(() => {
+          progressPercent += (100 / (slideDuration / 100)); // increment every 100ms
+          if (progressPercent >= 100) {
+            progressPercent = 100;
+          }
+          if (progressEl) {
+            progressEl.style.width = `${progressPercent}%`;
+          }
+        }, 100);
+      }
+
+      function resetSlideIntervals() {
+        clearInterval(rotationInterval);
+        clearInterval(progressInterval);
+        progressPercent = 0;
+        startProgressBar();
+        rotationInterval = setInterval(autoAdvanceSlide, slideDuration);
+      }
+
+      // Initialize slide intervals
+      resetSlideIntervals();
+
+      // Mouse move 3D tilt parallax
+      (function() {
         let mouseX = 0, mouseY = 0;
         let targetX = 0, targetY = 0;
         const sensitivity = 0.02;
@@ -2518,7 +2355,7 @@
             mouseX += (targetX - mouseX) * 0.08;
             mouseY += (targetY - mouseY) * 0.08;
 
-            const cards = document.querySelectorAll('.auth-card, .ai-camera-card, .telemetry-card');
+            const cards = document.querySelectorAll('.auth-card, .brand-showcase-container');
             if (cards.length > 0) {
               cards.forEach(c => {
                 c.style.transform = `perspective(1000px) rotateX(${mouseY * 0.35}deg) rotateY(${-mouseX * 0.35}deg) translateY(0)`;
@@ -2533,52 +2370,6 @@
         }
         requestAnimationFrame(animateParallax);
       })();
-
-      // ————— Operations Telemetry Feed Updater —————
-      const liveFeeds = [
-        "Coimbatore Node: Smart traffic dispatch optimized (94% confidence)",
-        "Chennai Node: Garbage level analysis live feed monitoring active",
-        "Madurai Node: Streetlight anomaly flagged automatically by AI model",
-        "Salem Node: Citizen payout reward confirmed and logged",
-        "Trichy Node: Pothole report categorized under civic services",
-        "Namakkal Node: Fort Area security integration synced and active",
-        "Vellore Node: Leakage complaint routed directly to local water body",
-        "Tirunelveli Node: Dispatch confirmed to ground sanitation crew"
-      ];
-
-      function triggerLiveFeedUpdate(cityName, locationName) {
-        const feedContainer = document.getElementById('telemetry-feed-container');
-        if (!feedContainer) return;
-
-        let updateMsg = "";
-        if (Math.random() > 0.4) {
-          updateMsg = `[Node: ${cityName.toUpperCase()}] live camera feed active - monitoring ${locationName}.`;
-        } else {
-          updateMsg = liveFeeds[Math.floor(Math.random() * liveFeeds.length)];
-        }
-
-        const item = document.createElement('div');
-        item.className = 'telemetry-feed-item';
-        item.innerHTML = `
-          <i class="fa-solid fa-bolt" style="color: #d97706; font-size: 0.65rem;"></i>
-          <span>${updateMsg}</span>
-        `;
-
-        feedContainer.insertBefore(item, feedContainer.firstChild);
-
-        while (feedContainer.children.length > 2) {
-          feedContainer.removeChild(feedContainer.lastChild);
-        }
-      }
-
-      setInterval(() => {
-        const activeUsersSpan = document.getElementById('telemetry-stat-active');
-        if (activeUsersSpan) {
-          const current = parseInt(activeUsersSpan.textContent.replace(/,/g, ''));
-          const shift = Math.floor(Math.random() * 5) - 2;
-          activeUsersSpan.textContent = (current + shift).toLocaleString();
-        }
-      }, 5000);
     }
 
     if (document.readyState === 'loading') {
