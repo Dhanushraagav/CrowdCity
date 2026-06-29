@@ -23,6 +23,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Enable trust proxy to correctly identify client IPs for rate limiting
+app.set('trust proxy', 1);
+
 const isProduction = process.env.NODE_ENV === 'production';
 
 // 1. Security Headers (Relaxed CSP to allow CDN fonts, maps, styles)
