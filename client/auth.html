@@ -521,6 +521,25 @@
       transition: width 0.1s linear;
     }
 
+    /* Caret typing cursor effects */
+    @keyframes cursor-blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+    .showcase-city::after, .showcase-desc::after {
+      content: '|';
+      animation: cursor-blink 0.8s steps(2, start) infinite;
+      color: var(--primary);
+      margin-left: 3px;
+      display: inline-block;
+      vertical-align: baseline;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .showcase-city.typing::after, .showcase-desc.typing::after {
+      opacity: 1;
+    }
+
     /* Right Column: Forms panel */
     .auth-form-panel {
       flex: 1;
@@ -2265,12 +2284,58 @@
       let progressPercent = 0;
       const slideDuration = 4000; // 4 seconds per slide
 
+      let typingTimeoutCity;
+      let typingTimeoutDesc;
+
+      function startShowcaseTypewriter(cityName, descName) {
+        clearTimeout(typingTimeoutCity);
+        clearTimeout(typingTimeoutDesc);
+
+        const cityEl = document.getElementById('showcase-city-text');
+        const descEl = document.getElementById('showcase-desc-text');
+
+        if (!cityEl || !descEl) return;
+
+        cityEl.textContent = "";
+        descEl.textContent = "";
+        
+        cityEl.classList.remove('typing');
+        descEl.classList.remove('typing');
+
+        let cityCharIdx = 0;
+        let descCharIdx = 0;
+
+        cityEl.classList.add('typing');
+
+        function typeCity() {
+          if (cityCharIdx < cityName.length) {
+            cityEl.textContent += cityName.charAt(cityCharIdx);
+            cityCharIdx++;
+            typingTimeoutCity = setTimeout(typeCity, 45);
+          } else {
+            cityEl.classList.remove('typing');
+            descEl.classList.add('typing');
+            typeDesc();
+          }
+        }
+
+        function typeDesc() {
+          if (descCharIdx < descName.length) {
+            descEl.textContent += descName.charAt(descCharIdx);
+            descCharIdx++;
+            typingTimeoutDesc = setTimeout(typeDesc, 30);
+          } else {
+            descEl.classList.remove('typing');
+          }
+        }
+
+        typeCity();
+      }
+
       window.switchShowcaseSlide = function(index) {
         if (index === currentSlideIdx) return;
         
         const imgEl = document.getElementById('active-showcase-image');
-        const cityEl = document.getElementById('showcase-city-text');
-        const descEl = document.getElementById('showcase-desc-text');
         const dots = document.querySelectorAll('.showcase-dot');
 
         if (!imgEl) return;
@@ -2288,9 +2353,6 @@
           imgEl.src = node.src;
           imgEl.alt = node.description;
 
-          if (cityEl) cityEl.textContent = node.name;
-          if (descEl) descEl.textContent = node.description;
-
           // Sync indicator dots
           dots.forEach((dot, dIdx) => {
             if (dIdx === index) {
@@ -2302,6 +2364,9 @@
 
           imgEl.classList.add('active');
           currentSlideIdx = index;
+
+          // Trigger typewriter animation simultaneously with transition
+          startShowcaseTypewriter(node.name, node.description);
         }, 500);
 
         // Reset auto rotation interval
@@ -2334,8 +2399,9 @@
         rotationInterval = setInterval(autoAdvanceSlide, slideDuration);
       }
 
-      // Initialize slide intervals
+      // Initialize slide intervals & trigger first slide typewriter
       resetSlideIntervals();
+      startShowcaseTypewriter(showcaseNodes[0].name, showcaseNodes[0].description);
 
       // Mouse move 3D tilt parallax
       (function() {
