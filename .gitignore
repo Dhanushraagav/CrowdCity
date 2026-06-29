@@ -25,3 +25,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Temp scratch directory
+scratch/
+
