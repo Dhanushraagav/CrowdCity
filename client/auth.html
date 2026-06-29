@@ -407,8 +407,8 @@
       width: 100%;
     }
 
-    /* Map Widget Hub Styles */
-    .map-widget-card {
+    /* AI Camera Widget Hub Styles */
+    .ai-camera-card {
       background: rgba(255, 255, 255, 0.72);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -426,18 +426,18 @@
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       text-align: left;
     }
-    .map-widget-card:hover {
+    .ai-camera-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 24px 56px rgba(15, 118, 110, 0.08);
     }
-    .map-widget-header {
+    .camera-widget-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid rgba(15, 118, 110, 0.1);
       padding-bottom: 0.5rem;
     }
-    .map-widget-title {
+    .camera-widget-title {
       font-weight: 700;
       font-size: 0.82rem;
       text-transform: uppercase;
@@ -448,25 +448,130 @@
       gap: 0.5rem;
       margin: 0;
     }
-    .map-active-badge {
+    .camera-live-badge {
       font-size: 0.62rem;
       font-weight: 800;
-      color: var(--primary);
-      background: rgba(13, 148, 136, 0.08);
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.08);
       padding: 2px 8px;
       border-radius: var(--radius-sm);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
-    .map-canvas-container {
+    .camera-live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #ef4444;
+      animation: camera-pulse 1.5s infinite;
+    }
+    @keyframes camera-pulse {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    .camera-feed-viewport {
       position: relative;
       width: 100%;
-      height: 220px;
+      height: 230px;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.2);
+      background: #090d16;
       border-radius: var(--radius-md);
-      border: 1px dashed rgba(15, 118, 110, 0.1);
+      border: 1px solid rgba(15, 118, 110, 0.15);
     }
+    .camera-feed-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.08);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      filter: blur(8px) brightness(0.85);
+    }
+    .camera-feed-image.active {
+      opacity: 1;
+      transform: scale(1.02);
+      filter: blur(0) brightness(0.95);
+      animation: ken-burns 12s ease-in-out infinite alternate;
+    }
+    @keyframes ken-burns {
+      0% { transform: scale(1.02) translate(0, 0); }
+      100% { transform: scale(1.09) translate(1%, -1%); }
+    }
+    .scanning-laser {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(13, 148, 136, 0.5), transparent);
+      box-shadow: 0 0 8px rgba(13, 148, 136, 0.8);
+      z-index: 5;
+      animation: laser-scan 4s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes laser-scan {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+    .camera-hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 6;
+      pointer-events: none;
+      box-sizing: border-box;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-family: 'Courier New', Courier, monospace;
+      color: rgba(13, 148, 136, 0.75);
+      font-size: 0.65rem;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    }
+    .hud-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .hud-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      border: 1px solid rgba(13, 148, 136, 0.35);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hud-reticle::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px;
+      height: 4px;
+      background-color: rgba(13, 148, 136, 0.6);
+      border-radius: 50%;
+    }
+    .hud-corner {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border: 1px solid rgba(13, 148, 136, 0.45);
+    }
+    .hud-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+    .hud-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+    .hud-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+    .hud-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
     /* Telemetry Hub styles */
     .telemetry-card {
@@ -1065,15 +1170,34 @@
         <h2 data-i18n="auth_hero_title" style="font-size: 1.35rem; font-weight: 600; line-height: 1.4; background: none; -webkit-text-fill-color: var(--text-main); color: var(--text-main); margin-top: 1rem; margin-bottom: 0.5rem;">Empowering citizens to build cleaner, safer, and better neighborhoods.</h2>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0px;">Collaborative civic portal in partnership with local urban bodies.</p>
         
-        <div class="map-widget-card">
-          <div class="map-widget-header">
-            <h3 class="map-widget-title">
-              <i class="fa-solid fa-earth-asia"></i> AI Dispatch Constellation Map
+        <div class="ai-camera-card">
+          <div class="camera-widget-header">
+            <h3 class="camera-widget-title">
+              <i class="fa-solid fa-video"></i> AI Live Camera Feed
             </h3>
-            <div class="map-active-badge">Active Grid</div>
+            <div class="camera-live-badge">
+              <div class="camera-live-dot"></div>
+              <span>LIVE FEED</span>
+            </div>
           </div>
-          <div class="map-canvas-container">
-            <canvas id="hero-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+          <div class="camera-feed-viewport">
+            <div class="scanning-laser"></div>
+            <img id="active-camera-image" class="camera-feed-image active" src="images/slideshow_1.png" alt="Kathipara Flyover" />
+            <div class="camera-hud">
+              <div class="hud-corner hud-tl"></div>
+              <div class="hud-corner hud-tr"></div>
+              <div class="hud-corner hud-bl"></div>
+              <div class="hud-corner hud-br"></div>
+              <div class="hud-reticle"></div>
+              <div class="hud-row">
+                <span id="hud-city-node">NODE: CHENNAI</span>
+                <span id="hud-confidence">AI CONFIDENCE: 98.4%</span>
+              </div>
+              <div class="hud-row">
+                <span id="hud-location">LOC: KATHIPARA FLYOVER</span>
+                <span id="hud-coords">13.0827° N, 80.2707° E</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2265,9 +2389,7 @@
             sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span data-i18n="send_otp">' + (window.i18n ? window.i18n.t('send_otp') : 'Send OTP Code') + '</span>';
           }
         });
-      }
-
-      // â”€â”€â”€ Inline Sign In OTP Bindings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ————— Inline Sign In OTP Bindings —————
       const loginOtpResendBtn = document.getElementById('btn-login-otp-resend');
 
       if (loginOtpResendBtn) {
@@ -2300,7 +2422,7 @@
               statusBanner.textContent = 'New OTP Sent';
             }
 
-            window.showToast('âœ“ New OTP Sent', 'success');
+            window.showToast('✓ New OTP Sent', 'success');
           } catch (err) {
             window.showToast('An error occurred resending OTP.', 'error');
             loginOtpResendBtn.disabled = false;
@@ -2308,85 +2430,82 @@
         });
       }
 
-      // ————— AI Grid Constellation Animation —————
+      // ————— AI Camera Feed Rotation & Sequential Preloader —————
       (function() {
-        const canvas = document.getElementById('hero-canvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        let width = canvas.width = canvas.parentElement.clientWidth;
-        let height = canvas.height = canvas.parentElement.clientHeight;
-
-        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        // Tamil Nadu Border Vertices (normalized to [0,1])
-        const tnVertices = [
-          {x: 0.70, y: 0.08},
-          {x: 0.88, y: 0.12},
-          {x: 0.85, y: 0.35},
-          {x: 0.94, y: 0.52},
-          {x: 0.76, y: 0.65},
-          {x: 0.62, y: 0.85},
-          {x: 0.40, y: 0.97},
-          {x: 0.32, y: 0.85},
-          {x: 0.18, y: 0.60},
-          {x: 0.35, y: 0.38},
-          {x: 0.55, y: 0.20}
+        const cameraNodes = [
+          { name: "Chennai", src: "images/slideshow_1.png", location: "KATHIPARA FLYOVER", coords: "13.0827° N, 80.2707° E", status: "TRAFFIC OPTIMIZED (98.4%)" },
+          { name: "Coimbatore", src: "images/slideshow_2.png", location: "GANDHIPURAM FLYOVER", coords: "11.0168° N, 76.9558° E", status: "ROAD INTEGRITY: NOMINAL" },
+          { name: "Madurai", src: "images/slideshow_3.png", location: "MEENAKSHI TEMPLE JUNCTION", coords: "9.9252° N, 78.1198° E", status: "CROWD CLASSIFIED: SAFE" },
+          { name: "Trichy", src: "images/slideshow_4.png", location: "ROCKFORT KAIVERI BRIDGE", coords: "10.7905° N, 78.7047° E", status: "PUBLIC WASTE: CLEAN" },
+          { name: "Namakkal", src: "images/slideshow_5.png", location: "NAMAKKAL FORT HUB", coords: "11.2189° N, 78.1672° E", status: "SMART GRID INTEGRITY: 100%" }
         ];
 
-        // Points-in-Polygon check to mask dot grid
-        function isPointInTN(px, py) {
-          let inside = false;
-          for (let i = 0, j = tnVertices.length - 1; i < tnVertices.length; j = i++) {
-            const xi = tnVertices[i].x, yi = tnVertices[i].y;
-            const xj = tnVertices[j].x, yj = tnVertices[j].y;
-            const intersect = ((yi > py) !== (yj > py))
-                && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
-            if (intersect) inside = !inside;
-          }
-          return inside;
+        // Sequential background image loader to ensure instant initial page load
+        const preloadedImages = {};
+        function preloadNext(index) {
+          if (index >= cameraNodes.length) return;
+          const img = new Image();
+          img.src = cameraNodes[index].src;
+          img.onload = () => {
+            preloadedImages[cameraNodes[index].src] = img;
+            setTimeout(() => preloadNext(index + 1), 600);
+          };
+        }
+        // Start background preloading after page is fully interactive
+        setTimeout(() => preloadNext(1), 1000);
+
+        let currentNodeIdx = 0;
+
+        function updateActiveCameraFeed() {
+          const nextIdx = (currentNodeIdx + 1) % cameraNodes.length;
+          const node = cameraNodes[nextIdx];
+          
+          const imgEl = document.getElementById('active-camera-image');
+          const nodeEl = document.getElementById('hud-city-node');
+          const confEl = document.getElementById('hud-confidence');
+          const locEl = document.getElementById('hud-location');
+          const coordEl = document.getElementById('hud-coords');
+
+          if (!imgEl) return;
+
+          // Slide out with transition blur
+          imgEl.classList.remove('active');
+          
+          setTimeout(() => {
+            imgEl.src = node.src;
+            imgEl.alt = node.location;
+            
+            if (nodeEl) nodeEl.textContent = `NODE: ${node.name.toUpperCase()}`;
+            if (confEl) confEl.textContent = `AI STATUS: ${node.status}`;
+            if (locEl) locEl.textContent = `LOC: ${node.location}`;
+            if (coordEl) coordEl.textContent = node.coords;
+
+            imgEl.classList.add('active');
+            currentNodeIdx = nextIdx;
+
+            // Update local telemetry list
+            triggerLiveFeedUpdate(node.name, node.location);
+          }, 800);
         }
 
-        // City nodes with coordinates scaled into TN boundary container
-        const cityNodes = [
-          { name: "Chennai", rx: 0.83, ry: 0.16, size: 4.5, color: "#0d9488", pulse: 0 },
-          { name: "Vellore", rx: 0.70, ry: 0.22, size: 3.5, color: "#3b82f6", pulse: 0 },
-          { name: "Salem", rx: 0.48, ry: 0.44, size: 4, color: "#0d9488", pulse: 0 },
-          { name: "Coimbatore", rx: 0.28, ry: 0.58, size: 4.5, color: "#d97706", pulse: 0 },
-          { name: "Trichy", rx: 0.55, ry: 0.58, size: 4, color: "#3b82f6", pulse: 0 },
-          { name: "Madurai", rx: 0.45, ry: 0.74, size: 4.5, color: "#0d9488", pulse: 0 },
-          { name: "Tirunelveli", rx: 0.35, ry: 0.88, size: 3.5, color: "#3b82f6", pulse: 0 }
-        ];
+        let cameraRotationInterval = setInterval(updateActiveCameraFeed, 4000);
 
-        // Connection lines between city nodes
-        const connections = [
-          { from: 0, to: 1 },
-          { from: 1, to: 2 },
-          { from: 2, to: 3 },
-          { from: 2, to: 4 },
-          { from: 4, to: 5 },
-          { from: 5, to: 6 },
-          { from: 0, to: 4 },
-          { from: 3, to: 5 }
-        ];
+        // Click to cycle manually
+        const cameraCard = document.querySelector('.ai-camera-card');
+        if (cameraCard) {
+          cameraCard.style.cursor = 'pointer';
+          cameraCard.addEventListener('click', () => {
+            clearInterval(cameraRotationInterval);
+            updateActiveCameraFeed();
+            cameraRotationInterval = setInterval(updateActiveCameraFeed, 4000);
+          });
+        }
 
-        let trails = [];
-        let gridPoints = [];
-
-        // Mouse Parallax variables
+        // Mouse move 3D tilt parallax
         let mouseX = 0, mouseY = 0;
         let targetX = 0, targetY = 0;
-
-        // Preloaded emblem watermark
-        const emblem = new Image();
-        emblem.crossOrigin = "anonymous";
-        emblem.src = "https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg";
-        let emblemLoaded = false;
-        emblem.onload = () => { emblemLoaded = true; };
-
-        // Parallax sensitivity
         const sensitivity = 0.02;
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         window.addEventListener('mousemove', (e) => {
           if (prefersReduced) return;
@@ -2394,275 +2513,46 @@
           targetY = (e.clientY - window.innerHeight / 2) * sensitivity;
         });
 
-        // Touch device tilt
-        window.addEventListener('deviceorientation', (e) => {
-          if (prefersReduced || !e.gamma || !e.beta) return;
-          targetX = e.gamma * 0.4;
-          targetY = (e.beta - 45) * 0.4;
-        });
-
-        function resize() {
-          const rect = canvas.parentElement.getBoundingClientRect();
-          width = canvas.width = rect.width;
-          height = canvas.height = rect.height;
-
-          gridPoints = [];
-          
-          const padding = 15;
-          const mapWidth = width - padding * 2;
-          const mapHeight = height - padding * 2;
-          const mapLeft = padding;
-          const mapTop = padding;
-
-          const cols = 22;
-          const rows = 14;
-
-          for (let c = 0; c < cols; c++) {
-            for (let r = 0; r < rows; r++) {
-              const rx = c / cols;
-              const ry = r / rows;
-              if (isPointInTN(rx, ry)) {
-                gridPoints.push({
-                  x: mapLeft + rx * mapWidth,
-                  y: mapTop + ry * mapHeight,
-                  baseAlpha: 0.12 + Math.random() * 0.18,
-                  phase: Math.random() * Math.PI * 2
-                });
-              }
-            }
-          }
-        }
-        window.addEventListener('resize', resize);
-        // Execute resize slightly after load to ensure parent dimensions are set
-        setTimeout(resize, 100);
-
-        function spawnTrail() {
-          if (prefersReduced || trails.length > 4) return;
-          const connIdx = Math.floor(Math.random() * connections.length);
-          const conn = connections[connIdx];
-          const forward = Math.random() > 0.5;
-          const start = forward ? conn.from : conn.to;
-          const end = forward ? conn.to : conn.from;
-
-          const colors = ["#0d9488", "#3b82f6", "#d97706"];
-          trails.push({
-            startNode: start,
-            endNode: end,
-            progress: 0,
-            speed: 0.01 + Math.random() * 0.015,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            history: []
-          });
-
-          triggerLiveFeedUpdate(start, end);
-        }
-
-        let lastTime = 0;
-        let fpsCounter = 60;
-        let framesThisSecond = 0;
-        let lastFpsUpdateTime = 0;
-        let performanceMode = "high";
-
-        function draw(time) {
-          if (lastTime) {
-            const dt = time - lastTime;
-            framesThisSecond++;
-            if (time > lastFpsUpdateTime + 1000) {
-              fpsCounter = framesThisSecond;
-              framesThisSecond = 0;
-              lastFpsUpdateTime = time;
-              
-              if (fpsCounter < 40 && performanceMode === "high") {
-                performanceMode = "low";
-              }
-            }
-          }
-          lastTime = time;
-
-          mouseX += (targetX - mouseX) * 0.08;
-          mouseY += (targetY - mouseY) * 0.08;
-
-          // Parallax 3D Card tilt
-          const cards = document.querySelectorAll('.auth-card, .map-widget-card, .telemetry-card');
-          if (cards.length > 0 && !prefersReduced) {
-            cards.forEach(c => {
-              c.style.transform = `perspective(1000px) rotateX(${mouseY * 0.3}deg) rotateY(${-mouseX * 0.3}deg) translateY(0)`;
-            });
-          }
-          const brandPanel = document.querySelector('.brand-panel-content');
-          if (brandPanel && !prefersReduced) {
-            brandPanel.style.transform = `perspective(1000px) rotateX(${mouseY * 0.15}deg) rotateY(${-mouseX * 0.15}deg) translateZ(5px)`;
-          }
-
-          // Clear for clean glassmorphism transparency
-          ctx.clearRect(0, 0, width, height);
-
-          // 1. Draw Grid
-          ctx.strokeStyle = "rgba(15, 118, 110, 0.025)";
-          ctx.lineWidth = 1;
-          const gridSize = 35;
-          ctx.beginPath();
-          for (let x = 0; x < width; x += gridSize) {
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, height);
-          }
-          for (let y = 0; y < height; y += gridSize) {
-            ctx.moveTo(0, y);
-            ctx.lineTo(width, y);
-          }
-          ctx.stroke();
-
-          // 2. Draw Tamil Nadu Emblem Watermark inside card
-          if (emblemLoaded && performanceMode !== "low") {
-            ctx.save();
-            ctx.globalAlpha = 0.024;
-            const emblemSize = Math.min(width, height) * 0.85;
-            const ex = (width - emblemSize) / 2;
-            const ey = (height - emblemSize) / 2;
-            ctx.drawImage(emblem, ex, ey, emblemSize, emblemSize);
-            ctx.restore();
-          }
-
-          const padding = 15;
-          const mapWidth = width - padding * 2;
-          const mapHeight = height - padding * 2;
-
-          const getScreenCoords = (rx, ry) => {
-            return {
-              x: padding + rx * mapWidth,
-              y: padding + ry * mapHeight
-            };
-          };
-
-          // 3. Draw Dot Grid Map of Tamil Nadu
-          if (performanceMode !== "low") {
-            gridPoints.forEach((pt) => {
-              const alpha = prefersReduced ? pt.baseAlpha : pt.baseAlpha + Math.sin(time * 0.0012 + pt.phase) * 0.05;
-              ctx.fillStyle = `rgba(13, 148, 136, ${alpha})`;
-              ctx.beginPath();
-              ctx.arc(pt.x, pt.y, 1.1, 0, Math.PI * 2);
-              ctx.fill();
-            });
-          }
-
-          // 4. Connection Lines
-          ctx.strokeStyle = "rgba(15, 118, 110, 0.07)";
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          connections.forEach((conn) => {
-            const p1 = getScreenCoords(cityNodes[conn.from].rx, cityNodes[conn.from].ry);
-            const p2 = getScreenCoords(cityNodes[conn.to].rx, cityNodes[conn.to].ry);
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-          });
-          ctx.stroke();
-
-          // 5. Report Trails
+        function animateParallax() {
           if (!prefersReduced) {
-            trails.forEach((trail, idx) => {
-              trail.progress += trail.speed;
-              
-              const pStart = getScreenCoords(cityNodes[trail.startNode].rx, cityNodes[trail.startNode].ry);
-              const pEnd = getScreenCoords(cityNodes[trail.endNode].rx, cityNodes[trail.endNode].ry);
-              
-              const cx = pStart.x + (pEnd.x - pStart.x) * trail.progress;
-              const cy = pStart.y + (pEnd.y - pStart.y) * trail.progress;
+            mouseX += (targetX - mouseX) * 0.08;
+            mouseY += (targetY - mouseY) * 0.08;
 
-              trail.history.push({ x: cx, y: cy });
-              if (trail.history.length > 10) {
-                trail.history.shift();
-              }
-
-              if (performanceMode !== "low" && trail.history.length > 1) {
-                ctx.save();
-                for (let i = 0; i < trail.history.length - 1; i++) {
-                  const pct = i / trail.history.length;
-                  ctx.strokeStyle = trail.color;
-                  ctx.globalAlpha = pct * 0.5;
-                  ctx.lineWidth = 0.8 + pct * 2.0;
-                  ctx.beginPath();
-                  ctx.moveTo(trail.history[i].x, trail.history[i].y);
-                  ctx.lineTo(trail.history[i + 1].x, trail.history[i + 1].y);
-                  ctx.stroke();
-                }
-                ctx.restore();
-              }
-
-              ctx.fillStyle = trail.color;
-              ctx.beginPath();
-              ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-              ctx.fill();
-
-              if (trail.progress >= 1) {
-                cityNodes[trail.endNode].pulse = 1.0;
-                trails.splice(idx, 1);
-              }
-            });
-          }
-
-          // 6. Draw City Nodes
-          cityNodes.forEach((node) => {
-            const p = getScreenCoords(node.rx, node.ry);
-            
-            ctx.fillStyle = "rgba(71, 85, 105, 0.7)";
-            ctx.font = "bold 8px system-ui, -apple-system, sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText(node.name.toUpperCase(), p.x, p.y - 10);
-
-            if (!prefersReduced && node.pulse > 0) {
-              node.pulse -= 0.02;
-              ctx.strokeStyle = node.color;
-              ctx.lineWidth = 1;
-              ctx.globalAlpha = node.pulse;
-              ctx.beginPath();
-              ctx.arc(p.x, p.y, node.size + (1.0 - node.pulse) * 12, 0, Math.PI * 2);
-              ctx.stroke();
-              ctx.globalAlpha = 1.0;
+            const cards = document.querySelectorAll('.auth-card, .ai-camera-card, .telemetry-card');
+            if (cards.length > 0) {
+              cards.forEach(c => {
+                c.style.transform = `perspective(1000px) rotateX(${mouseY * 0.35}deg) rotateY(${-mouseX * 0.35}deg) translateY(0)`;
+              });
             }
-
-            ctx.fillStyle = node.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, node.size, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, node.size * 0.35, 0, Math.PI * 2);
-            ctx.fill();
-          });
-
-          requestAnimationFrame(draw);
+            const brandPanel = document.querySelector('.brand-panel-content');
+            if (brandPanel) {
+              brandPanel.style.transform = `perspective(1000px) rotateX(${mouseY * 0.15}deg) rotateY(${-mouseX * 0.15}deg) translateZ(5px)`;
+            }
+          }
+          requestAnimationFrame(animateParallax);
         }
-
-        setInterval(spawnTrail, 1800);
-        setTimeout(spawnTrail, 200);
-        setTimeout(spawnTrail, 800);
-
-        requestAnimationFrame(draw);
+        requestAnimationFrame(animateParallax);
       })();
 
       // ————— Operations Telemetry Feed Updater —————
       const liveFeeds = [
-        "Coimbatore Node: Pothole dispatch verified (Confidence 94%)",
-        "Chennai Node: New trash accumulation reported via camera",
-        "Madurai Node: Streetlight malfunction resolved dynamically",
-        "Salem Node: Citizen claiming 150 points reward",
-        "Trichy Node: Pothole report classified automatically by AI",
-        "Namakkal Node: Smart City integration live and synced",
-        "Vellore Node: Leakage complaint routed to water authority",
-        "Tirunelveli Node: Dispatch confirmed by sanitation crew"
+        "Coimbatore Node: Smart traffic dispatch optimized (94% confidence)",
+        "Chennai Node: Garbage level analysis live feed monitoring active",
+        "Madurai Node: Streetlight anomaly flagged automatically by AI model",
+        "Salem Node: Citizen payout reward confirmed and logged",
+        "Trichy Node: Pothole report categorized under civic services",
+        "Namakkal Node: Fort Area security integration synced and active",
+        "Vellore Node: Leakage complaint routed directly to local water body",
+        "Tirunelveli Node: Dispatch confirmed to ground sanitation crew"
       ];
 
-      function triggerLiveFeedUpdate(startIdx, endIdx) {
+      function triggerLiveFeedUpdate(cityName, locationName) {
         const feedContainer = document.getElementById('telemetry-feed-container');
         if (!feedContainer) return;
 
-        const startNodeName = ["Chennai", "Vellore", "Salem", "Coimbatore", "Trichy", "Madurai", "Tirunelveli"][startIdx] || "Node";
-        const endNodeName = ["Chennai", "Vellore", "Salem", "Coimbatore", "Trichy", "Madurai", "Tirunelveli"][endIdx] || "Authority";
-        
         let updateMsg = "";
-        if (Math.random() > 0.5) {
-          updateMsg = `Data Link: citizen report dispatched from ${startNodeName} to ${endNodeName} Local Body.`;
+        if (Math.random() > 0.4) {
+          updateMsg = `[Node: ${cityName.toUpperCase()}] live camera feed active - monitoring ${locationName}.`;
         } else {
           updateMsg = liveFeeds[Math.floor(Math.random() * liveFeeds.length)];
         }
