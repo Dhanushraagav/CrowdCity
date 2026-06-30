@@ -500,7 +500,11 @@ async function getOrRefreshAccessToken() {
 
   if (typeof supabaseClient !== 'undefined' && supabaseClient) {
     try {
-      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      const getSessionPromise = supabaseClient.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session timeout')), 2000)
+      );
+      const { data: { session }, error } = await Promise.race([getSessionPromise, timeoutPromise]);
       if (!error && session) {
         localStorage.setItem('cc_session', JSON.stringify(session));
         return session.access_token;
@@ -680,7 +684,7 @@ async function verifyProfileAndRoute(user, showAlert) {
   } catch (err) {
     console.warn("[Auth Client] Direct Supabase profile query failed or timed out. Attempting server fallback API...", err);
     try {
-      const token = await getOrRefreshAccessToken();
+      const token = getAuthToken() || await getOrRefreshAccessToken();
       if (token) {
         console.log("[Auth Client] Fetching profile via Express API endpoint /api/auth/profile...");
         const response = await fetch('/api/auth/profile', {

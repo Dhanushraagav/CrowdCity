@@ -61,15 +61,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first approach with cache fallback for navigation requests.
-  // Bypass browser's aggressive HTTP cache for HTML, JS and CSS files by using 'no-cache' options.
-  const isNavOrCode = event.request.mode === 'navigate' || 
-                      requestUrl.pathname.endsWith('.js') || 
-                      requestUrl.pathname.endsWith('.css');
-  
-  const fetchRequest = isNavOrCode 
-    ? new Request(event.request, { cache: 'no-cache' }) 
-    : event.request;
+  const fetchRequest = event.request;
 
   event.respondWith(
     fetch(fetchRequest).catch(async (error) => {
