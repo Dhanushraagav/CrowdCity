@@ -411,7 +411,7 @@
         }));
       } catch (e) {
         console.warn('Weather fetch failed:', e);
-        cityEl.textContent = currentLang === 'ta' ? 'à®¤à®®à®¿à®´à¯ à®¨à®¾à®Ÿà¯ ' : 'Tamil Nadu';
+        cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
         tempEl.textContent = '--\u00B0C';
         widget.classList.remove('loading');
       }
