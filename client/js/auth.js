@@ -277,7 +277,7 @@ function _attachAuthStateListener() {
         }
         // Reset routing guard so each fresh sign-in can proceed
         window.cc_routing_in_progress = false;
-        await verifyProfileAndRoute(session.user, showAuthAlert);
+        await verifyProfileAndRoute(session.user, showAuthAlert, session.access_token);
       } else {
         await fetchAndCacheRole(session.access_token);
         syncUserProfileBackground();
@@ -343,7 +343,7 @@ function _attachAuthStateListener() {
           localStorage.setItem('cc_session', JSON.stringify(session));
           // Allow routing even if onAuthStateChange already fired
           window.cc_routing_in_progress = false;
-          await verifyProfileAndRoute(session.user, showAuthAlert);
+          await verifyProfileAndRoute(session.user, showAuthAlert, session.access_token);
         } else {
           // On dashboard/protected pages: just refresh cache silently
           localStorage.setItem('cc_session', JSON.stringify(session));
@@ -486,10 +486,36 @@ function getSession() {
   return real ? JSON.parse(real) : null;
 }
 
+// Helper to search localStorage for native Supabase auth keys when CC session cache is not yet synced
+function getSupabaseFallbackToken() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+        // Read directly using the original localStorage method if needed, but since it's not in authKeys list
+        // the proxied getItem will delegate to the original localStorage.getItem anyway.
+        const val = localStorage.getItem(key);
+        if (val) {
+          const parsed = JSON.parse(val);
+          if (parsed && parsed.access_token) {
+            return parsed.access_token;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[Auth Fallback] Failed to parse Supabase local token:", e);
+  }
+  return null;
+}
+
 // Get JWT Token for API header injection
 function getAuthToken() {
   const session = getSession();
-  return session ? session.access_token : null;
+  if (session && session.access_token) {
+    return session.access_token;
+  }
+  return getSupabaseFallbackToken();
 }
 
 // Get or refresh JWT Token for API header injection
@@ -644,7 +670,7 @@ function verifyRoleForCurrentPage(role) {
 window.verifyRoleForCurrentPage = verifyRoleForCurrentPage;
 
 // Core routing verification function
-async function verifyProfileAndRoute(user, showAlert) {
+async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   console.log("[Auth Client] verifyProfileAndRoute triggered for user ID:", user ? user.id : 'none', "Email:", user ? user.email : 'none');
   if (window.cc_routing_in_progress) {
     console.warn("[Auth Client] Routing already in progress, ignoring subsequent call.");
@@ -684,7 +710,7 @@ async function verifyProfileAndRoute(user, showAlert) {
   } catch (err) {
     console.warn("[Auth Client] Direct Supabase profile query failed or timed out. Attempting server fallback API...", err);
     try {
-      const token = getAuthToken() || await getOrRefreshAccessToken();
+      const token = passedToken || getAuthToken() || await getOrRefreshAccessToken();
       if (token) {
         console.log("[Auth Client] Fetching profile via Express API endpoint /api/auth/profile...");
         const response = await fetch('/api/auth/profile', {

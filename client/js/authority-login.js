@@ -66,8 +66,9 @@ function initAuthorityLogin() {
 
       console.log('[Authority Login] Success. User:', user.id, '| Email:', user.email);
       showAlert('Login successful! Checking access...', true);
+      const token = data.session ? data.session.access_token : null;
       window.cc_manual_signin = true;
-      await verifyProfileAndRoute(user, showAlert);
+      await verifyProfileAndRoute(user, showAlert, token);
     });
   }
 }

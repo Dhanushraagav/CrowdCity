@@ -1778,8 +1778,9 @@
               showAlert(error.message || 'Login failed.');
             } else {
               const user = data.user || (data.session && data.session.user);
+              const token = data.session ? data.session.access_token : null;
               window.cc_manual_signin = true;
-              await verifyProfileAndRoute(user, showAlert);
+              await verifyProfileAndRoute(user, showAlert, token);
             }
           } else {
             // OTP Mode
