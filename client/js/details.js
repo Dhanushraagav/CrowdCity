@@ -1295,7 +1295,7 @@ async function loadNewFeatures(issue) {
   // === Chat Panel ===
   const chatPanel = document.getElementById('chat-panel');
   if (chatPanel) {
-    if (issue.assigned_to) {
+    if (issue.assigned_to && isReporter) {
       chatPanel.classList.remove('hidden');
 
       // Load existing messages
