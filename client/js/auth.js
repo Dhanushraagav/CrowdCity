@@ -520,6 +520,36 @@ function getAuthToken() {
 
 // Get or refresh JWT Token for API header injection
 async function getOrRefreshAccessToken() {
+  // Check cache first: if we have a valid, unexpired token, use it immediately
+  const cachedSession = getSession();
+  if (cachedSession && cachedSession.access_token && cachedSession.expires_at) {
+    // Check if token has at least 60 seconds of validity remaining
+    const isExpired = Math.floor(Date.now() / 1000) >= (cachedSession.expires_at - 60);
+    if (!isExpired) {
+      return cachedSession.access_token;
+    }
+  }
+
+  // Fallback check in native Supabase local storage key
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+        const val = localStorage.getItem(key);
+        if (val) {
+          const parsed = JSON.parse(val);
+          if (parsed && parsed.access_token && parsed.expires_at) {
+            const isExpired = Math.floor(Date.now() / 1000) >= (parsed.expires_at - 60);
+            if (!isExpired) {
+              return parsed.access_token;
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {}
+
+  // If expired or not found, try to refresh via Supabase Client
   if (window.authInitPromise) {
     await window.authInitPromise;
   }
@@ -536,12 +566,15 @@ async function getOrRefreshAccessToken() {
         return session.access_token;
       }
     } catch (e) {
-      console.error("Error retrieving fresh session in getOrRefreshAccessToken:", e);
+      console.warn("Error retrieving fresh session in getOrRefreshAccessToken (will use cached fallback):", e.message || e);
     }
   }
 
   const session = getSession();
-  return session ? session.access_token : null;
+  if (session && session.access_token) {
+    return session.access_token;
+  }
+  return getSupabaseFallbackToken();
 }
 window.getOrRefreshAccessToken = getOrRefreshAccessToken;
 
