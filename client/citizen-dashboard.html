@@ -268,13 +268,13 @@
             <!-- Sort By section removed -->
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 100%; overflow: hidden;">
             <div class="search-input-wrapper" style="margin: 0;">
               <i class="fa-solid fa-magnifying-glass search-icon" style="font-size: 0.85rem;"></i>
               <input type="text" id="search-input" class="form-input search-input" style="padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.88rem; height: 36px;" data-i18n-placeholder="search_placeholder" placeholder="Search issues by title, category, or address...">
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.25rem; max-width: 100%; overflow: hidden;">
               <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" data-i18n="filter_category">Filter Category</span>
               <div class="filter-pills" id="category-filters" style="padding-bottom: 0.25rem;">
                 <button class="filter-pill active" data-category="" data-i18n="all_categories">All Categories</button>
@@ -293,7 +293,7 @@
               </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.25rem; max-width: 100%; overflow: hidden;">
               <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" data-i18n="filter_status">Filter Status</span>
               <div class="filter-pills" id="status-filters" style="padding-bottom: 0.25rem;">
                 <button class="filter-pill active" data-status="" data-i18n="all_statuses">All Statuses</button>

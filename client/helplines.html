@@ -334,6 +334,8 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .pulse-dot {
@@ -342,6 +344,7 @@
       background-color: #10b981;
       border-radius: 50%;
       display: inline-block;
+      flex-shrink: 0;
       animation: pulse-ring 2s infinite;
     }
 
@@ -605,7 +608,7 @@
               <p class="central-card-desc">State-level public grievance redressal portal and emergency response contacts. Connect directly with the Chief Minister's Special Cell.</p>
               
               <div class="central-card-actions">
-                <a href="https://onlinegrievance.tn.gov.in" target="_blank" rel="noopener noreferrer" class="central-portal-btn">
+                <a href="https://cmhelpline.tnega.org/" target="_blank" rel="noopener noreferrer" class="central-portal-btn">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i>
                   <span data-i18n="visit_grievance_portal">Visit Mudhalvarin Mugavari Portal</span>
                 </a>
