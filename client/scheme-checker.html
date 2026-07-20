@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Government Scheme Eligibility Checker - Find Tamil Nadu State and Central Government welfare schemes you qualify for.">
+  <title>Scheme Eligibility Checker - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Wizard Step Progress Tracker */
+    .step-progress-tracker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .step-progress-tracker::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--border-color);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+    .step-progress-item {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg-surface);
+      padding: 0 0.5rem;
+    }
+    .step-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--bg-app);
+      border: 2px solid var(--border-color);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    .step-progress-item.active .step-circle {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(13, 148, 136, 0.35);
+    }
+    .step-progress-item.completed .step-circle {
+      border-color: #10b981;
+      background: #10b981;
+      color: #ffffff;
+    }
+    .step-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .step-progress-item.active .step-label {
+      color: var(--primary);
+    }
+
+    /* Step Panes */
+    .checker-step-pane {
+      display: none;
+    }
+    .checker-step-pane.active {
+      display: block;
+      animation: fadeInPane 0.35s ease forwards;
+    }
+    @keyframes fadeInPane {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Touch Friendly Select & Checkbox styling */
+    .form-group-custom {
+      margin-bottom: 1.5rem;
+    }
+    .form-label-custom {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+    .form-input-custom, .form-select-custom {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease;
+    }
+    .form-input-custom:focus, .form-select-custom:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .checkbox-tile-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+    }
+    .checkbox-tile {
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .checkbox-tile input[type="checkbox"] {
+      display: none;
+    }
+    .checkbox-tile:has(input[type="checkbox"]:checked) {
+      border-color: var(--primary);
+      background: rgba(13, 148, 136, 0.08);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    }
+    .checkbox-tile i {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+    }
+    .checkbox-tile:has(input[type="checkbox"]:checked) i {
+      color: var(--primary);
+    }
+    .checkbox-tile span {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+  </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <a href="services.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
+            <i class="fa-solid fa-arrow-left"></i>
+          </a>
+          <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Scheme Eligibility Checker</h1>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; max-width: 800px; margin: 0 auto;">
+        
+        <!-- Header Introduction Card -->
+        <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(99, 102, 241, 0.08)); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div>
+              <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0;">Find Government Schemes You Qualify For</h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+                Answer a few quick questions to instantly discover Tamil Nadu State and Central Government welfare schemes tailored to your profile.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-step Form Card -->
+        <div id="checker-form-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+          
+          <!-- Step Progress Bar -->
+          <div class="step-progress-tracker">
+            <div class="step-progress-item active" id="step-tracker-1">
+              <div class="step-circle">1</div>
+              <span class="step-label">Demographics</span>
+            </div>
+            <div class="step-progress-item" id="step-tracker-2">
+              <div class="step-circle">2</div>
+              <span class="step-label">Income</span>
+            </div>
+            <div class="step-progress-item" id="step-tracker-3">
+              <div class="step-circle">3</div>
+              <span class="step-label">Status</span>
+            </div>
+            <div class="step-progress-item" id="step-tracker-4">
+              <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+              <span class="step-label">Results</span>
+            </div>
+          </div>
+
+          <form id="checker-wizard-form" onsubmit="return false;">
+            
+            <!-- STEP 1: Basic Demographics -->
+            <div class="checker-step-pane active" id="checker-step-1">
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 1 of 3: Basic Profile</h3>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom" for="check-age">Age (Years) <span style="color: #ef4444;">*</span></label>
+                <input type="number" id="check-age" class="form-input-custom" placeholder="e.g. 25" min="1" max="120" required>
+              </div>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom" for="check-gender">Gender <span style="color: #ef4444;">*</span></label>
+                <select id="check-gender" class="form-select-custom">
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="transgender">Transgender</option>
+                  <option value="all">Prefer not to say</option>
+                </select>
+              </div>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom" for="check-district">Tamil Nadu District <span style="color: #ef4444;">*</span></label>
+                <select id="check-district" class="form-select-custom" required>
+                  <option value="" disabled selected>Select your district</option>
+                  <option value="Ariyalur">Ariyalur</option>
+                  <option value="Chengalpattu">Chengalpattu</option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="Coimbatore">Coimbatore</option>
+                  <option value="Cuddalore">Cuddalore</option>
+                  <option value="Dharmapuri">Dharmapuri</option>
+                  <option value="Dindigul">Dindigul</option>
+                  <option value="Erode">Erode</option>
+                  <option value="Kallakurichi">Kallakurichi</option>
+                  <option value="Kanchipuram">Kanchipuram</option>
+                  <option value="Kanyakumari">Kanyakumari</option>
+                  <option value="Karur">Karur</option>
+                  <option value="Krishnagiri">Krishnagiri</option>
+                  <option value="Madurai">Madurai</option>
+                  <option value="Mayiladuthurai">Mayiladuthurai</option>
+                  <option value="Nagapattinam">Nagapattinam</option>
+                  <option value="Namakkal">Namakkal</option>
+                  <option value="Nilgiris">Nilgiris</option>
+                  <option value="Perambalur">Perambalur</option>
+                  <option value="Pudukkottai">Pudukkottai</option>
+                  <option value="Ramanathapuram">Ramanathapuram</option>
+                  <option value="Ranipet">Ranipet</option>
+                  <option value="Salem">Salem</option>
+                  <option value="Sivaganga">Sivaganga</option>
+                  <option value="Tenkasi">Tenkasi</option>
+                  <option value="Thanjavur">Thanjavur</option>
+                  <option value="Theni">Theni</option>
+                  <option value="Thoothukudi">Thoothukudi</option>
+                  <option value="Tiruchirappalli">Tiruchirappalli</option>
+                  <option value="Tirunelveli">Tirunelveli</option>
+                  <option value="Tirupathur">Tirupathur</option>
+                  <option value="Tiruppur">Tiruppur</option>
+                  <option value="Tiruvallur">Tiruvallur</option>
+                  <option value="Tiruvannamalai">Tiruvannamalai</option>
+                  <option value="Tiruvarur">Tiruvarur</option>
+                  <option value="Vellore">Vellore</option>
+                  <option value="Viluppuram">Viluppuram</option>
+                  <option value="Virudhunagar">Virudhunagar</option>
+                </select>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+                <button type="button" class="btn btn-primary btn-next-step" style="padding: 0.75rem 1.75rem; font-weight: 700; border-radius: 12px;">
+                  <span>Next Step</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 2: Occupation & Income -->
+            <div class="checker-step-pane" id="checker-step-2">
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 2 of 3: Income & Occupation</h3>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom" for="check-occupation">Primary Occupation</label>
+                <select id="check-occupation" class="form-select-custom">
+                  <option value="unemployed">Unemployed / Job Seeker</option>
+                  <option value="student">Student</option>
+                  <option value="farmer">Farmer / Agricultural Laborer</option>
+                  <option value="salaried">Private / Salaried Employee</option>
+                  <option value="self_employed">Self-Employed / Micro Business</option>
+                  <option value="homemaker">Homemaker</option>
+                  <option value="retired">Retired / Pensioner</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom" for="check-income">Annual Family Income (₹) <span style="color: #ef4444;">*</span></label>
+                <input type="number" id="check-income" class="form-input-custom" placeholder="e.g. 150000" min="0" step="5000" required>
+                <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.35rem;">Used to determine income-based government welfare subsidies.</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary btn-prev-step" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 12px;">
+                  <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+                </button>
+                <button type="button" class="btn btn-primary btn-next-step" style="padding: 0.75rem 1.75rem; font-weight: 700; border-radius: 12px;">
+                  <span>Next Step</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 3: Special Categories & Status -->
+            <div class="checker-step-pane" id="checker-step-3">
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 3 of 3: Special Categories</h3>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom">Select all that apply to you:</label>
+                <div class="checkbox-tile-group">
+                  <label class="checkbox-tile">
+                    <input type="checkbox" id="check-student">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Student</span>
+                  </label>
+                  <label class="checkbox-tile">
+                    <input type="checkbox" id="check-farmer">
+                    <i class="fa-solid fa-wheat-awn"></i>
+                    <span>Farmer</span>
+                  </label>
+                  <label class="checkbox-tile">
+                    <input type="checkbox" id="check-senior">
+                    <i class="fa-solid fa-person-cane"></i>
+                    <span>Senior Citizen</span>
+                  </label>
+                  <label class="checkbox-tile">
+                    <input type="checkbox" id="check-disability">
+                    <i class="fa-solid fa-wheelchair"></i>
+                    <span>Differently Abled</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom" for="check-social-category">Social Category (Optional)</label>
+                <select id="check-social-category" class="form-select-custom">
+                  <option value="all">General / All Categories</option>
+                  <option value="BC">Backward Class (BC)</option>
+                  <option value="MBC">Most Backward Class (MBC)</option>
+                  <option value="SC">Scheduled Caste (SC)</option>
+                  <option value="ST">Scheduled Tribe (ST)</option>
+                  <option value="FC">Forward Class (FC)</option>
+                </select>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary btn-prev-step" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 12px;">
+                  <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+                </button>
+                <button type="button" class="btn btn-primary btn-next-step" style="padding: 0.85rem 2rem; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #0d9488, #6366f1); border: none;">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Find Eligible Schemes</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 4: Results Display -->
+            <div class="checker-step-pane" id="checker-step-4">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                  <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0;">
+                    You qualify for <span id="matched-count-number" style="color: var(--primary);">0</span> Government Schemes!
+                  </h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                    Based on your age, income, and demographic criteria.
+                  </p>
+                </div>
+
+                <button type="button" id="btn-reset-checker" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px;">
+                  <i class="fa-solid fa-rotate-left"></i> <span>Recalculate</span>
+                </button>
+              </div>
+
+              <!-- Schemes List Container -->
+              <div id="checker-results-list">
+                <!-- Dynamically populated by js/scheme-checker.js -->
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/scheme-checker.js"></script>
+</body>
+</html>
