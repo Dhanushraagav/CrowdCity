@@ -1,5 +1,5 @@
 // CrowdCity AI v2.0 - Government Scheme Details JavaScript
-// Fetches scheme details, handles bookmark state, renders FAQs, application process, and related schemes.
+// Features Application Guide, Interactive Document Checklist, Vertical Timeline, and Bookmark Management.
 
 (function() {
   'use strict';
@@ -25,7 +25,6 @@
 
           if (!error && data) return data;
 
-          // Try matching by scheme_code if UUID query fails
           const { data: codeData } = await client
             .from('government_schemes')
             .select('*, scheme_categories(category_name, category_code, icon_name)')
@@ -53,7 +52,7 @@
         short_description: 'Monthly financial rights assistance of ₹1,000 for female heads of households in Tamil Nadu.',
         detailed_description: 'Kalaignar Magalir Urimai Thittam provides direct monthly financial assistance of ₹1,000 to eligible female heads of families in Tamil Nadu. The scheme aims to enhance financial independence, support household nutrition, and safeguard women against economic vulnerability.',
         benefits_summary: 'Direct Bank Transfer (DBT) of ₹1,000 per month directly deposited into the beneficiary’s Aadhaar-linked savings account.',
-        required_documents: ["Smart Family Ration Card", "Aadhaar Card", "Active Bank Passbook", "Electricity Bill / Income Certificate"],
+        required_documents: ["Smart Family Card (Ration Card)", "Aadhaar Card", "Active Bank Passbook", "Electricity Bill / Income Certificate"],
         official_portal_url: 'https://kmut.tn.gov.in/',
         application_fee: 0.00,
         eligibility_criteria: { min_age: 21, max_age: 60, gender: 'female', max_annual_income: 250000, state: 'Tamil Nadu' }
@@ -108,7 +107,7 @@
         state_or_central: 'central',
         short_description: 'Annual direct income support of ₹6,000 for landholding farmer families across India.',
         detailed_description: 'PM-KISAN provides direct financial income support of ₹6,000 per annum to cultivable landholding farmer families across India to meet agricultural input costs and household expenses.',
-        benefits_summary: '₹6,000 per year paid directly in 3 equal installments of ₹2,000 every 4 months via Direct Benefit Transfer.',
+        benefits_summary: '₹6,00,00 per year paid directly in 3 equal installments of ₹2,000 every 4 months via Direct Benefit Transfer.',
         required_documents: ["Aadhaar Card", "Land Ownership Proof (Patta / RoR)", "Aadhaar-linked Bank Account Passbook"],
         official_portal_url: 'https://pmkisan.gov.in/',
         application_fee: 0.00,
@@ -173,13 +172,11 @@
           }
 
           if (isSaved) {
-            // Remove Bookmark
             await client.from('saved_schemes').delete().eq('user_id', userId).eq('scheme_id', currentScheme.id);
             isSaved = false;
             updateBookmarkButtonUI(false);
             if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
           } else {
-            // Save Bookmark
             await client.from('saved_schemes').insert({ user_id: userId, scheme_id: currentScheme.id });
             isSaved = true;
             updateBookmarkButtonUI(true);
@@ -192,7 +189,6 @@
       console.warn("Toggle bookmark error:", err);
     }
 
-    // Toggle local state fallback
     isSaved = !isSaved;
     updateBookmarkButtonUI(isSaved);
     if (window.showToast) window.showToast(isSaved ? "Saved scheme to your bookmarks!" : "Removed scheme from bookmarks.", "info");
@@ -215,16 +211,102 @@
     }
   }
 
+  // Document Readiness Checklist Persistence
+  function getSavedChecklistState(schemeId) {
+    try {
+      const stored = localStorage.getItem(`cc_checklist_${schemeId}`);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return {};
+  }
+
+  function saveChecklistState(schemeId, stateObj) {
+    try {
+      localStorage.setItem(`cc_checklist_${schemeId}`, JSON.stringify(stateObj));
+    } catch (e) {}
+  }
+
+  function renderDocumentChecklist(scheme) {
+    const container = document.getElementById('scheme-details-docs-checklist');
+    if (!container) return;
+
+    const docs = Array.isArray(scheme.required_documents) 
+      ? scheme.required_documents 
+      : (typeof scheme.required_documents === 'string' ? JSON.parse(scheme.required_documents || '[]') : []);
+
+    const savedState = getSavedChecklistState(scheme.id);
+
+    const updateProgressUI = () => {
+      let readyCount = 0;
+      docs.forEach(doc => {
+        if (savedState[doc] === true) readyCount++;
+      });
+      const pendingCount = docs.length - readyCount;
+
+      const readyElem = document.getElementById('doc-progress-ready');
+      const pendingElem = document.getElementById('doc-progress-pending');
+      const progressBar = document.getElementById('doc-progress-bar-inner');
+
+      if (readyElem) readyElem.textContent = `${readyCount} Ready`;
+      if (pendingElem) pendingElem.textContent = `${pendingCount} Pending`;
+      if (progressBar && docs.length > 0) {
+        const percent = Math.round((readyCount / docs.length) * 100);
+        progressBar.style.width = `${percent}%`;
+      }
+    };
+
+    container.innerHTML = docs.map((doc, idx) => {
+      const isChecked = savedState[doc] === true;
+      return `
+        <label class="doc-checklist-item" style="background: var(--bg-app); border: 1px solid ${isChecked ? 'rgba(16, 185, 129, 0.4)' : 'var(--border-color)'}; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: all 0.2s ease;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <input type="checkbox" class="doc-checkbox-input" data-doc="${doc}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;">
+            <span style="font-size: 0.88rem; font-weight: 600; color: var(--text-main);">${doc}</span>
+          </div>
+          <span class="doc-status-badge" style="font-size: 0.7rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 999px; background: ${isChecked ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-surface)'}; color: ${isChecked ? '#10b981' : 'var(--text-muted)'}; border: 1px solid ${isChecked ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-color)'};">
+            ${isChecked ? '✓ Ready' : 'Pending'}
+          </span>
+        </label>
+      `;
+    }).join('');
+
+    updateProgressUI();
+
+    // Attach checkbox handlers
+    container.querySelectorAll('.doc-checkbox-input').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const docName = chk.dataset.doc;
+        savedState[docName] = chk.checked;
+        saveChecklistState(scheme.id, savedState);
+
+        const parentLabel = chk.closest('.doc-checklist-item');
+        const badge = parentLabel.querySelector('.doc-status-badge');
+        if (chk.checked) {
+          parentLabel.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          badge.style.background = 'rgba(16, 185, 129, 0.15)';
+          badge.style.color = '#10b981';
+          badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+          badge.textContent = '✓ Ready';
+        } else {
+          parentLabel.style.borderColor = 'var(--border-color)';
+          badge.style.background = 'var(--bg-surface)';
+          badge.style.color = 'var(--text-muted)';
+          badge.style.borderColor = 'var(--border-color)';
+          badge.textContent = 'Pending';
+        }
+
+        updateProgressUI();
+      });
+    });
+  }
+
   function renderSchemeDetails(scheme) {
     currentScheme = scheme;
-
-    // Set Title
     document.title = `${scheme.scheme_name || scheme.name} - CrowdCity AI`;
-    
+
     const isState = (scheme.state_or_central === 'state');
     const badgeText = isState ? 'Tamil Nadu State Scheme' : 'Central Government Scheme';
 
-    // Hero Section
     const titleElem = document.getElementById('scheme-details-title');
     if (titleElem) titleElem.textContent = scheme.scheme_name || scheme.name;
 
@@ -245,7 +327,7 @@
     const benefitsElem = document.getElementById('scheme-details-benefits');
     if (benefitsElem) benefitsElem.textContent = scheme.benefits_summary || scheme.benefits;
 
-    // Eligibility Criteria Box
+    // Eligibility Criteria List
     const criteria = scheme.eligibility_criteria || {};
     const criteriaListElem = document.getElementById('scheme-details-criteria-list');
     if (criteriaListElem) {
@@ -266,43 +348,55 @@
       `).join('');
     }
 
-    // Documents List
-    const docs = Array.isArray(scheme.required_documents) 
-      ? scheme.required_documents 
-      : (typeof scheme.required_documents === 'string' ? JSON.parse(scheme.required_documents || '[]') : []);
+    // Application Guide Quick Facts
+    const guideMode = document.getElementById('guide-fact-mode');
+    if (guideMode) guideMode.textContent = 'Online Portal / E-Sevai Center';
 
-    const docsContainer = document.getElementById('scheme-details-docs-list');
-    if (docsContainer) {
-      docsContainer.innerHTML = docs.map(doc => `
-        <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-          <i class="fa-solid fa-file-check" style="color: var(--primary);"></i> <span>${doc}</span>
-        </div>
-      `).join('');
-    }
+    const guideFee = document.getElementById('guide-fact-fee');
+    if (guideFee) guideFee.textContent = 'Free (₹0.00)';
 
-    // Application Steps
-    const stepsContainer = document.getElementById('scheme-details-steps-list');
-    if (stepsContainer) {
-      stepsContainer.innerHTML = `
-        <div style="margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: flex-start;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">1</div>
-          <div>
-            <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main);">Gather Required Documents</div>
-            <div style="font-size: 0.82rem; color: var(--text-muted);">Ensure you have valid copies of your Smart Ration Card, Aadhaar Card, and Bank Passbook.</div>
+    const guideTime = document.getElementById('guide-fact-time');
+    if (guideTime) guideTime.textContent = '15 - 30 Working Days';
+
+    const guideDept = document.getElementById('guide-fact-dept');
+    if (guideDept) guideDept.textContent = scheme.department_name || scheme.department;
+
+    // Render Interactive Document Checklist
+    renderDocumentChecklist(scheme);
+
+    // Vertical Application Timeline
+    const timelineContainer = document.getElementById('scheme-details-timeline');
+    if (timelineContainer) {
+      timelineContainer.innerHTML = `
+        <div style="position: relative; padding-left: 2rem; border-left: 2px solid var(--border-color);">
+          <div style="margin-bottom: 1.5rem; position: relative;">
+            <div style="position: absolute; left: -2.55rem; top: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;">1</div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem;">Step 1: Check Eligibility Criteria</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Verify age, family income limit, and state residency requirements listed on this page.</div>
           </div>
-        </div>
-        <div style="margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: flex-start;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">2</div>
-          <div>
-            <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main);">Access Official Portal</div>
-            <div style="font-size: 0.82rem; color: var(--text-muted);">Click the 'Apply on Official Portal' button below to open the official government website.</div>
+
+          <div style="margin-bottom: 1.5rem; position: relative;">
+            <div style="position: absolute; left: -2.55rem; top: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;">2</div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem;">Step 2: Collect Required Documents</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Check off your documents in the Document Checklist above (Aadhaar, Ration Card, Bank Passbook).</div>
           </div>
-        </div>
-        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">3</div>
-          <div>
-            <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main);">Complete Application & Track Status</div>
-            <div style="font-size: 0.82rem; color: var(--text-muted);">Fill in your application details, upload required attachments, and note down your reference application number.</div>
+
+          <div style="margin-bottom: 1.5rem; position: relative;">
+            <div style="position: absolute; left: -2.55rem; top: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;">3</div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem;">Step 3: Visit Official Government Portal</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Click the 'Official Apply' button to open the official government website safely in a new tab.</div>
+          </div>
+
+          <div style="margin-bottom: 1.5rem; position: relative;">
+            <div style="position: absolute; left: -2.55rem; top: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;">4</div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem;">Step 4: Submit Application Online</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Fill in your application details, upload document scans, and submit on the official portal.</div>
+          </div>
+
+          <div style="position: relative;">
+            <div style="position: absolute; left: -2.55rem; top: 0; width: 20px; height: 20px; border-radius: 50%; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;">5</div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem;">Step 5: Track Application Status</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Save your application reference number to track verification and direct benefit transfer.</div>
           </div>
         </div>
       `;
@@ -323,7 +417,7 @@
       `;
     }
 
-    // External Portal Link Buttons
+    // External Links
     const applyBtn = document.getElementById('btn-details-apply');
     if (applyBtn) {
       applyBtn.href = scheme.official_portal_url || '#';
@@ -338,7 +432,6 @@
       websiteBtn.rel = 'noopener noreferrer';
     }
 
-    // Fetch Related Schemes
     fetchRelatedSchemes(scheme);
   }
 
@@ -380,13 +473,11 @@
       updateBookmarkButtonUI(isSaved);
     }
 
-    // Save Button Handler
     const saveBtn = document.getElementById('btn-details-save');
     if (saveBtn) {
       saveBtn.addEventListener('click', toggleBookmark);
     }
 
-    // Share Button Handler
     const shareBtn = document.getElementById('btn-details-share');
     if (shareBtn) {
       shareBtn.addEventListener('click', () => {

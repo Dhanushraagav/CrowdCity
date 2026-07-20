@@ -15,8 +15,8 @@
   <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Government Scheme Details - Overview, Eligibility Criteria, Benefits, Documents, and Official Application Link.">
-  <title>Scheme Details - CrowdCity AI</title>
+  <meta name="description" content="Government Scheme Application Guide - Document Readiness Checklist, Verification Steps, and Official Application Links.">
+  <title>Scheme Details & Application Guide - CrowdCity AI</title>
   
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
@@ -93,6 +93,54 @@
       flex-wrap: wrap;
       margin-top: 1.5rem;
     }
+
+    /* Application Guide Quick Facts Grid */
+    .app-guide-facts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 500px) {
+      .app-guide-facts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .app-guide-fact-item {
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .app-guide-fact-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .app-guide-fact-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Progress bar styling */
+    .doc-progress-container {
+      background: var(--bg-app);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin: 0.75rem 0 1rem 0;
+      border: 1px solid var(--border-color);
+    }
+    .doc-progress-inner {
+      background: linear-gradient(90deg, #10b981, #0d9488);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
   </style>
 
   <script>
@@ -141,7 +189,7 @@
             <a href="scheme-results.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
               <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Government Scheme Details</h1>
+            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Government Scheme Application Guide</h1>
           </div>
           
           <a href="saved-schemes.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
@@ -182,6 +230,30 @@
           
           <!-- Left Main Column -->
           <div>
+            <!-- Application Guide Quick Facts -->
+            <div class="details-card-block">
+              <h3 class="details-section-title"><i class="fa-solid fa-compass" style="color: var(--primary);"></i> Application Guide</h3>
+              
+              <div class="app-guide-facts-grid">
+                <div class="app-guide-fact-item">
+                  <div class="app-guide-fact-label">Application Mode</div>
+                  <div class="app-guide-fact-value" id="guide-fact-mode">Online / E-Sevai Center</div>
+                </div>
+                <div class="app-guide-fact-item">
+                  <div class="app-guide-fact-label">Application Fee</div>
+                  <div class="app-guide-fact-value" id="guide-fact-fee">Free (₹0.00)</div>
+                </div>
+                <div class="app-guide-fact-item">
+                  <div class="app-guide-fact-label">Processing Time</div>
+                  <div class="app-guide-fact-value" id="guide-fact-time">15 - 30 Working Days</div>
+                </div>
+                <div class="app-guide-fact-item">
+                  <div class="app-guide-fact-label">Nodal Department</div>
+                  <div class="app-guide-fact-value" id="guide-fact-dept">Department of Welfare</div>
+                </div>
+              </div>
+            </div>
+
             <!-- Scheme Overview -->
             <div class="details-card-block">
               <h3 class="details-section-title"><i class="fa-solid fa-file-text" style="color: var(--primary);"></i> Scheme Overview</h3>
@@ -206,11 +278,11 @@
               </div>
             </div>
 
-            <!-- Application Process -->
+            <!-- Step-by-Step Vertical Application Timeline -->
             <div class="details-card-block">
-              <h3 class="details-section-title"><i class="fa-solid fa-diagram-project" style="color: #f59e0b;"></i> Application Process</h3>
-              <div id="scheme-details-steps-list">
-                <!-- Dynamically populated -->
+              <h3 class="details-section-title"><i class="fa-solid fa-route" style="color: #f59e0b;"></i> Step-by-Step Application Guide</h3>
+              <div id="scheme-details-timeline" style="margin-top: 1.25rem;">
+                <!-- Dynamically populated vertical timeline -->
               </div>
             </div>
 
@@ -225,17 +297,31 @@
 
           <!-- Right Sidebar Column -->
           <div>
-            <!-- Required Documents Checklist -->
+            <!-- Interactive Document Readiness Checklist -->
             <div class="details-card-block">
-              <h3 class="details-section-title" style="font-size: 1rem;"><i class="fa-solid fa-file-lines" style="color: var(--primary);"></i> Required Documents</h3>
-              <div id="scheme-details-docs-list">
-                <!-- Dynamically populated -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 class="details-section-title" style="font-size: 1rem; margin: 0;"><i class="fa-solid fa-square-check" style="color: #10b981;"></i> Document Readiness</h3>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="doc-progress-container">
+                <div class="doc-progress-inner" id="doc-progress-bar-inner"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; margin-bottom: 1rem;">
+                <span id="doc-progress-ready" style="color: #10b981;">0 Ready</span>
+                <span id="doc-progress-pending" style="color: var(--text-muted);">0 Pending</span>
+              </div>
+
+              <!-- Checkbox List -->
+              <div id="scheme-details-docs-checklist">
+                <!-- Dynamically populated interactive checklist -->
               </div>
             </div>
 
             <!-- Important Notes -->
             <div class="details-card-block" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.05)); border-color: rgba(245, 158, 11, 0.25);">
-              <h3 class="details-section-title" style="font-size: 1rem; color: #d97706;"><i class="fa-solid fa-triangle-exclamation"></i> Important Notes</h3>
+              <h3 class="details-section-title" style="font-size: 1rem; color: #d97706;"><i class="fa-solid fa-shield-halved"></i> Application Notes</h3>
               <ul style="padding-left: 1.2rem; margin: 0; font-size: 0.85rem; color: var(--text-main); line-height: 1.5;">
                 <li style="margin-bottom: 0.5rem;">Ensure your bank account is active and seeded with your Aadhaar number.</li>
                 <li style="margin-bottom: 0.5rem;">Mobile number must be registered with your Aadhaar card for OTP verification.</li>
