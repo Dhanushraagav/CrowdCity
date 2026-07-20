@@ -316,6 +316,10 @@
     }
 
     const userProfile = getFormData();
+    try {
+      sessionStorage.setItem('cc_scheme_checker_profile', JSON.stringify(userProfile));
+    } catch (e) {}
+
     saveUserPreferencesToDb(userProfile);
 
     const dbSchemes = await fetchSchemesFromDatabase();
