@@ -234,6 +234,11 @@
 
           <!-- Card Actions -->
           <div class="scheme-actions-v2">
+            <a href="scheme-details.html?id=${scheme.id}" class="btn-save-bookmark" style="text-decoration: none;">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>View Details</span>
+            </a>
+
             <button class="btn-save-bookmark" data-id="${scheme.id}">
               <i class="fa-regular fa-bookmark"></i>
               <span>Save Scheme</span>
