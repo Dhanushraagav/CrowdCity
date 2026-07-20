@@ -648,5 +648,9 @@
   "email_minister": "Email Minister",
   "constituency_label": "Assembly Constituency",
   "office_location_label": "Office Room",
-  "biography_label": "Biography & Focus Area"
+  "biography_label": "Biography & Focus Area",
+  "nav_services": "Government Services",
+  "services_title": "Government Services Hub",
+  "services_subtitle": "AI-Powered Digital Citizen Services for Tamil Nadu & India",
+  "explore_services": "Explore Govt Services"
 }

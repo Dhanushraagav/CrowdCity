@@ -648,5 +648,9 @@
   "email_minister": "மின்னஞ்சல் அனுப்பவும்",
   "constituency_label": "சட்டமன்ற தொகுதி",
   "office_location_label": "அலுவலக அறை",
-  "biography_label": "வாழ்க்கைக்குறிப்பு மற்றும் முக்கியப் பணிகள்"
+  "biography_label": "வாழ்க்கைக்குறிப்பு மற்றும் முக்கியப் பணிகள்",
+  "nav_services": "அரசு சேவைகள்",
+  "services_title": "அரசு சேவைகள் மையம்",
+  "services_subtitle": "தமிழ்நாடு மற்றும் இந்திய குடிமக்களுக்கான AI-அரசு டிஜிட்டல் சேவைகள்",
+  "explore_services": "அரசு சேவைகளை ஆராய்க"
 }

@@ -42,6 +42,40 @@ window.authInitPromise = new Promise((resolve) => {
 let supabaseClient = null;
 const isMockAuth = false;
 
+// Helper to guarantee Supabase client is initialized before executing auth operations
+async function getOrInitSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  if (window.supabaseClient) {
+    supabaseClient = window.supabaseClient;
+    return supabaseClient;
+  }
+  if (window.authInitPromise) {
+    try {
+      await window.authInitPromise;
+    } catch (e) {}
+  }
+  if (supabaseClient) return supabaseClient;
+  if (window.supabaseClient) {
+    supabaseClient = window.supabaseClient;
+    return supabaseClient;
+  }
+  _tryInitFromCache();
+  if (supabaseClient) return supabaseClient;
+  if (window.supabaseClient) {
+    supabaseClient = window.supabaseClient;
+    return supabaseClient;
+  }
+  if (typeof window.supabase !== 'undefined' && window.supabaseConfig && window.supabaseConfig.supabaseUrl) {
+    try {
+      supabaseClient = window.supabase.createClient(window.supabaseConfig.supabaseUrl, window.supabaseConfig.supabaseAnonKey);
+      window.supabaseClient = supabaseClient;
+      return supabaseClient;
+    } catch (e) {}
+  }
+  return null;
+}
+window.getOrInitSupabaseClient = getOrInitSupabaseClient;
+
 // Fatal configuration error screen displaying a premium glassmorphic overlay
 function showFatalConfigError(details) {
   // Create fatal overlay if not already present
@@ -140,6 +174,7 @@ async function initAuth() {
           if (window.turnstileLoaded) {
             window.renderTurnstileWidgets();
           }
+          resolveAuthInit();
         }
       }
     }
@@ -728,7 +763,10 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   let profile = null;
 
   try {
-    const supabase = supabaseClient;
+    const supabase = await getOrInitSupabaseClient();
+    if (!supabase) {
+      throw new Error("Supabase client not initialized");
+    }
     console.log(`[Auth Client] Querying profiles table for user ID: ${user.id}...`);
     
     const queryPromise = supabase
@@ -862,32 +900,23 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
     return;
   }
 
-  console.log("REDIRECT TARGET");
-  console.log("Redirecting to:", redirectTarget);
+  console.log("REDIRECT TARGET: " + redirectTarget);
 
-  // Cache session info
-  localStorage.setItem('cc_user_role', role);
-  
-  if (role === 'citizen' || role === 'authority') {
-    sessionStorage.setItem('cc_show_demo_notice', 'true');
-  }
-  
-  // Set user profile in localStorage so other components can access full_name etc.
-  const storedProfile = {
-    role: role,
-    is_verified_authority: profile.is_verified,
-    full_name: user.user_metadata?.full_name || (role === 'authority' ? 'Inspector' : (role === 'admin' ? 'Admin' : 'Citizen')),
-    email: user.email
-  };
-  localStorage.setItem('cc_user_profile', JSON.stringify(storedProfile));
+  // Store user profile & role in cache before routing
+  try {
+    localStorage.setItem('cc_user_role', role);
+    localStorage.setItem('cc_user_profile', JSON.stringify({
+      id: user.id,
+      email: user.email,
+      role: role,
+      full_name: user.user_metadata?.full_name || 'User',
+      avatar_url: user.user_metadata?.avatar_url || ''
+    }));
+  } catch (e) {}
 
-  const provider = user?.app_metadata?.provider;
-  const flow = provider === 'google' ? 'GOOGLE_LOGIN' : 'NORMAL_LOGIN';
-  console.log("FLOW DETECTED: " + flow);
-  console.log("ROLE DETECTED: " + role);
-  console.log("TARGET PAGE: " + redirectTarget);
+  window.cc_routing_in_progress = false;
 
-  const isManual = window.cc_manual_signin === true;
+  const isManual = window.cc_manual_signin || false;
   
   if (isManual) {
     const successOverlay = document.getElementById('auth-success-overlay');
@@ -925,7 +954,14 @@ window.verifyProfileAndRoute = verifyProfileAndRoute;
 
 // Register a new user
 async function registerUser(email, password, fullName, captchaToken) {
-  const { data, error } = await supabaseClient.auth.signUp({
+  const client = await getOrInitSupabaseClient();
+  if (!client || !client.auth) {
+    return {
+      data: null,
+      error: { message: "Authentication service is initializing. Please try again in a moment." }
+    };
+  }
+  const { data, error } = await client.auth.signUp({
     email,
     password,
     options: {
@@ -966,7 +1002,14 @@ async function registerUser(email, password, fullName, captchaToken) {
 async function loginUser(email, password, captchaToken) {
   console.log(`[Auth Client] Attempting Email/Password login for: ${email}`);
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+    const client = await getOrInitSupabaseClient();
+    if (!client || !client.auth) {
+      return {
+        data: null,
+        error: { message: "Authentication service is initializing. Please try again in a moment." }
+      };
+    }
+    const { data, error } = await client.auth.signInWithPassword({ 
       email, 
       password,
       options: {
@@ -999,7 +1042,14 @@ async function loginWithGoogle() {
   console.log('[Auth Client] Google OAuth redirectTo URL:', redirectUrl);
 
   try {
-    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    const client = await getOrInitSupabaseClient();
+    if (!client || !client.auth) {
+      return {
+        data: null,
+        error: { message: "Authentication service is initializing. Please try again in a moment." }
+      };
+    }
+    const { data, error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
@@ -1022,7 +1072,14 @@ async function loginWithGoogle() {
 
 // Send password reset email
 async function requestPasswordReset(email, captchaToken) {
-  const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+  const client = await getOrInitSupabaseClient();
+  if (!client || !client.auth) {
+    return {
+      data: null,
+      error: { message: "Authentication service is initializing. Please try again in a moment." }
+    };
+  }
+  const { data, error } = await client.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/reset-password.html',
     captchaToken: captchaToken
   });
@@ -1031,7 +1088,14 @@ async function requestPasswordReset(email, captchaToken) {
 
 // Update password (used in recovery mode)
 async function updatePassword(newPassword) {
-  const { data, error } = await supabaseClient.auth.updateUser({
+  const client = await getOrInitSupabaseClient();
+  if (!client || !client.auth) {
+    return {
+      data: null,
+      error: { message: "Authentication service is initializing. Please try again in a moment." }
+    };
+  }
+  const { data, error } = await client.auth.updateUser({
     password: newPassword
   });
   return { data, error };
@@ -1044,11 +1108,16 @@ async function verifyAndChangePassword(currentPassword, newPassword) {
     return { error: { message: "User session not found. Please sign in again." } };
   }
 
+  const client = await getOrInitSupabaseClient();
+  if (!client || !client.auth) {
+    return { error: { message: "Authentication service is initializing. Please try again in a moment." } };
+  }
+
   const isGoogleUser = session.user.app_metadata && session.user.app_metadata.provider === 'google';
 
   if (!isGoogleUser) {
     // Re-authenticate by signing in with the current password
-    const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+    const { error: signInError } = await client.auth.signInWithPassword({
       email: session.user.email,
       password: currentPassword
     });
@@ -1060,7 +1129,7 @@ async function verifyAndChangePassword(currentPassword, newPassword) {
   }
 
   // Update password
-  const { data, error: updateError } = await supabaseClient.auth.updateUser({
+  const { data, error: updateError } = await client.auth.updateUser({
     password: newPassword
   });
 

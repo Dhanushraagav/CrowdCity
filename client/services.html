@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CrowdCity AI v2.0 - Government Services Module: AI Scheme Eligibility Checker, Document Translator, Application Tracker, and AI Government Assistant for Citizens.">
+  <title>Government Services - CrowdCity AI v2.0</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/services.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span> <span class="badge-v2-glow">v2.0</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link">
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <a href="ministers.html" class="app-sidebar-link">
+          <i class="fa-solid fa-users-gear"></i> <span data-i18n="nav_ministers">Council of Ministers</span>
+        </a>
+      </nav>
+      
+      <!-- New Report Button -->
+      <a href="report.html" class="app-sidebar-btn">
+        <i class="fa-solid fa-plus"></i> <span data-i18n="new_report">New Report</span>
+      </a>
+      
+      <div class="app-sidebar-footer">
+        <a href="settings.html" class="app-sidebar-link">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span>
+        </a>
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
+        
+        <!-- Weather Widget -->
+        <div class="weather-widget loading" id="weather-widget" title="Auto-detected from your location">
+          <div class="weather-icon" id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+          <div class="weather-info">
+            <span class="weather-city" id="weather-city">Detecting...</span>
+            <span class="weather-temp" id="weather-temp">--&deg;C</span>
+          </div>
+        </div>
+
+        <!-- Live Date and Time Widget -->
+        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 0.75rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Body -->
+      <div class="app-content-body">
+        
+        <!-- Live Ticker -->
+        <div class="ticker-banner" style="margin-bottom: 2rem;">
+          <div class="status-dot-pulse active ticker-pulse"></div>
+          <span class="ticker-text">🏛 CrowdCity AI v2.0 Phase 1: Announcing the Government Services Hub for Tamil Nadu & India. Explore 8 upcoming AI citizen modules below.</span>
+        </div>
+
+        <!-- Services Hero Banner -->
+        <section class="services-hero-banner">
+          <div class="services-hero-glow"></div>
+          <div class="services-hero-content">
+            <div class="services-v2-badge">
+              <i class="fa-solid fa-sparkles"></i>
+              <span>CrowdCity AI v2.0 Expansion</span>
+            </div>
+            <h1 class="services-hero-title" data-i18n="services_title">Government Services Hub</h1>
+            <p class="services-hero-desc" data-i18n="services_subtitle">
+              Next-generation AI-powered citizen services designed to simplify welfare scheme matching, document translation, instant form assistance, and department application tracking.
+            </p>
+
+            <!-- Search & Filter Controls -->
+            <div class="services-search-filter-bar">
+              <div class="services-search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="services-search-input" placeholder="Search upcoming services (e.g. scheme, translator, tracker, form)..." aria-label="Search government services">
+              </div>
+
+              <div class="services-tab-pills">
+                <button class="services-tab-btn active" data-category="all">
+                  <i class="fa-solid fa-grid-2"></i> All Services
+                </button>
+                <button class="services-tab-btn" data-category="ai">
+                  <i class="fa-solid fa-brain"></i> AI Intelligence
+                </button>
+                <button class="services-tab-btn" data-category="docs">
+                  <i class="fa-solid fa-file-invoice"></i> Documents & Forms
+                </button>
+                <button class="services-tab-btn" data-category="tracker">
+                  <i class="fa-solid fa-chart-line"></i> Citizen Tracking
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Spotlight Card: Government Scheme Eligibility Checker -->
+        <section class="services-spotlight-card">
+          <div class="services-spotlight-grid">
+            <div>
+              <div class="services-spotlight-header">
+                <span class="spotlight-pulse-tag">
+                  <span class="spotlight-pulse-dot"></span> Phase 1 - In Active Dev
+                </span>
+                <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary);">⭐ Featured Spotlight</span>
+              </div>
+              <h2 class="services-spotlight-title">Government Scheme Eligibility Checker</h2>
+              <p class="services-spotlight-desc">
+                Never miss out on government assistance. Our upcoming AI engine automatically analyzes your household demographics, location, and income criteria to match you with 120+ Tamil Nadu state & central welfare schemes, agricultural grants, and scholarships.
+              </p>
+              
+              <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-primary notify-btn" id="spotlight-notify-btn" style="width: auto; padding: 0.75rem 1.75rem; font-weight: 700;">
+                  <i class="fa-regular fa-bell"></i> <span>Notify Me on Launch</span>
+                </button>
+                <button onclick="window.getOrInitSupabaseClient && window.showToast('Blueprint Preview: Target release in Phase 2 (Q3 2026)!', 'info')" class="btn btn-secondary" style="width: auto; padding: 0.75rem 1.5rem; font-weight: 700; border: 1px solid var(--border-color); background: transparent; color: var(--text-main);">
+                  <i class="fa-solid fa-diagram-project"></i> View Architecture Blueprint
+                </button>
+              </div>
+            </div>
+
+            <!-- Development Progress Meter -->
+            <div class="services-progress-widget">
+              <div class="progress-header-row">
+                <span><i class="fa-solid fa-code-commit" style="color: var(--primary);"></i> Engine Development</span>
+                <span class="progress-pct-text">85% Complete</span>
+              </div>
+              <div class="progress-track-bg">
+                <div class="progress-fill-anim" style="width: 85%;"></div>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Scheme Rules DB</span>
+                  <strong style="color: var(--text-main);">Ready</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Tamil NLP Parser</span>
+                  <strong style="color: var(--text-main);">Ready</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span><i class="fa-solid fa-spinner fa-spin" style="color: var(--services-accent-amber);"></i> e-Seva Integration</span>
+                  <strong style="color: var(--services-accent-amber);">Testing</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Feature Cards Section -->
+        <section>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+              <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading);">
+                Upcoming AI Citizen Services
+              </h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
+                Click any feature card to preview planned capabilities or turn on launch notifications.
+              </p>
+            </div>
+          </div>
+
+          <!-- Dynamic Feature Grid Container -->
+          <div class="services-cards-grid" id="services-cards-grid">
+            <!-- Populated dynamically by js/services.js -->
+          </div>
+        </section>
+
+        <!-- Development Roadmap Section -->
+        <section class="roadmap-section">
+          <div class="roadmap-header">
+            <span class="services-v2-badge" style="margin: 0 auto 0.75rem auto;">Release Roadmap</span>
+            <h2 class="roadmap-title">CrowdCity AI v2.0 Development Timeline</h2>
+            <p class="roadmap-subtitle">Phased rollout strategy designed to ensure absolute platform stability and zero downtime for Version 1.</p>
+          </div>
+
+          <div class="roadmap-timeline-track">
+            <!-- Phase 1 -->
+            <div class="roadmap-step active">
+              <span class="roadmap-step-tag" style="color: #10b981;">✓ Phase 1 — Q2 2026</span>
+              <h3 class="roadmap-step-title">UI & Architecture Blueprint</h3>
+              <p class="roadmap-step-desc">Establish Government Services UI, modular CSS/JS architecture, notification preferences, and non-breaking integration.</p>
+            </div>
+
+            <!-- Phase 2 -->
+            <div class="roadmap-step active" style="border-color: var(--services-accent-cyan);">
+              <span class="roadmap-step-tag" style="color: var(--services-accent-cyan);">🚀 Phase 2 — Q3 2026</span>
+              <h3 class="roadmap-step-title">AI Scheme Checker & Assistant</h3>
+              <p class="roadmap-step-desc">Deploy Tamil Nadu welfare scheme eligibility engine & 24/7 conversational AI government companion.</p>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="roadmap-step">
+              <span class="roadmap-step-tag">Phase 3 — Q4 2026</span>
+              <h3 class="roadmap-step-title">Form Filler & Translator</h3>
+              <p class="roadmap-step-desc">AI-assisted official application auto-filling, Tamil document translation, and policy PDF summarizer.</p>
+            </div>
+
+            <!-- Phase 4 -->
+            <div class="roadmap-step">
+              <span class="roadmap-step-tag">Phase 4 — Q1 2027</span>
+              <h3 class="roadmap-step-title">Full Integration & Reminders</h3>
+              <p class="roadmap-step-desc">Unified application tracking across departments, office locator map, and SMS tax/fee reminders.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Future Vision Showcase Section -->
+        <section style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2.5rem 2rem; margin-bottom: 2rem;">
+          <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+            <i class="fa-solid fa-building-columns" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.75rem 0;">
+              The Future of Digital Citizen Governance
+            </h2>
+            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;">
+              CrowdCity AI v2.0 bridges the gap between citizens and government services through transparent, accessible, and multilingual AI technology built for every household in Tamil Nadu.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; text-align: left;">
+              <div style="padding: 1rem; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <i class="fa-solid fa-shield-halved" style="color: var(--primary); font-size: 1.2rem; margin-bottom: 0.5rem;"></i>
+                <h4 style="margin: 0 0 0.25rem 0; color: var(--text-main); font-size: 0.9rem; font-weight: 700;">100% Data Privacy</h4>
+                <p style="margin: 0; color: var(--text-muted); font-size: 0.8rem; line-height: 1.4;">Zero credentials stored. End-to-end encrypted AI query processing.</p>
+              </div>
+
+              <div style="padding: 1rem; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <i class="fa-solid fa-language" style="color: var(--services-accent-indigo); font-size: 1.2rem; margin-bottom: 0.5rem;"></i>
+                <h4 style="margin: 0 0 0.25rem 0; color: var(--text-main); font-size: 0.9rem; font-weight: 700;">Native Tamil First</h4>
+                <p style="margin: 0; color: var(--text-muted); font-size: 0.8rem; line-height: 1.4;">Full bilingual support in casual & official Tamil language dialects.</p>
+              </div>
+
+              <div style="padding: 1rem; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <i class="fa-solid fa-mobile-screen-button" style="color: var(--services-accent-emerald); font-size: 1.2rem; margin-bottom: 0.5rem;"></i>
+                <h4 style="margin: 0 0 0.25rem 0; color: var(--text-main); font-size: 0.9rem; font-weight: 700;">Mobile First PWA</h4>
+                <p style="margin: 0; color: var(--text-muted); font-size: 0.8rem; line-height: 1.4;">Lightning fast response times on mobile networks across all 38 districts.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/auth.js"></script>
+  <script src="js/services.js"></script>
+</body>
+</html>
