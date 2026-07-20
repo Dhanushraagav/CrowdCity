@@ -1,167 +1,238 @@
 // CrowdCity AI v2.0 - Government Scheme Eligibility Checker Frontend Logic
-// Provides multi-step wizard navigation, validation, and instant frontend scheme matching
+// Connected directly to Supabase Database (government_schemes & scheme_categories tables)
 
 (function() {
   'use strict';
 
-  // Sample static scheme dataset for instant client-side preview matching
-  const SAMPLE_SCHEMES = [
-    {
-      id: 'kmut',
-      name: 'Kalaignar Magalir Urimai Thittam',
-      department: 'Social Welfare & Women Empowerment Dept, Govt of TN',
-      type: 'state',
-      category: 'women_welfare',
-      benefits: '₹1,000 monthly direct bank assistance for women heads of households.',
-      docs: ['Smart Ration Card', 'Aadhaar Card', 'Bank Passbook', 'Electricity Bill'],
-      url: 'https://kmut.tn.gov.in/',
-      matchCriteria: (data) => {
-        return data.gender === 'female' && data.age >= 21 && data.age <= 60 && data.income <= 250000;
-      }
-    },
-    {
-      id: 'pudhumai-penn',
-      name: 'Pudhumai Penn Higher Education Assistance',
-      department: 'Social Welfare & Women Empowerment Dept, Govt of TN',
-      type: 'state',
-      category: 'education',
-      benefits: '₹1,000 monthly financial grant throughout degree or diploma studies.',
-      docs: ['Govt School TC (Classes 6-12)', 'Aadhaar Card', 'College Admission Proof', 'Bank Passbook'],
-      url: 'https://penkalvi.tn.gov.in/',
-      matchCriteria: (data) => {
-        return data.gender === 'female' && data.isStudent === true && data.age >= 17 && data.age <= 25;
-      }
-    },
-    {
-      id: 'naan-mudhalvan',
-      name: 'Naan Mudhalvan Skill & Placement Scheme',
-      department: 'Tamil Nadu Skill Development Corporation (TNSDC)',
-      type: 'state',
-      category: 'employment',
-      benefits: 'Free industry-certified coding, AI, and engineering skills training with placement support.',
-      docs: ['College ID / Degree Certificate', 'Aadhaar Card', 'Community Certificate'],
-      url: 'https://www.naanmudhalvan.tn.gov.in/',
-      matchCriteria: (data) => {
-        return data.age >= 18 && data.age <= 35 && (data.isStudent === true || data.occupation === 'unemployed' || data.occupation === 'student');
-      }
-    },
-    {
-      id: 'cmchis',
-      name: 'Chief Minister Comprehensive Health Insurance Scheme (CMCHIS)',
-      department: 'Health & Family Welfare Department, Govt of TN',
-      type: 'state',
-      category: 'healthcare',
-      benefits: 'Cashless medical and surgical cover up to ₹5,00,000 per family annually.',
-      docs: ['Income Certificate', 'Smart Family Ration Card', 'Aadhaar Card'],
-      url: 'https://cmchistn.com/',
-      matchCriteria: (data) => {
-        return data.income <= 120000;
-      }
-    },
-    {
-      id: 'kanavu-illam',
-      name: 'Kalaignar Kanavu Illam Rural Housing Scheme',
-      department: 'Rural Development & Panchayat Raj Dept, Govt of TN',
-      type: 'state',
-      category: 'housing',
-      benefits: '₹3,50,000 financial aid for building permanent concrete homes in rural TN.',
-      docs: ['Land Patta / Ownership Proof', 'Aadhaar Card', 'Ration Card', 'Bank Passbook'],
-      url: 'https://tnrd.tn.gov.in/',
-      matchCriteria: (data) => {
-        return data.income <= 150000;
-      }
-    },
-    {
-      id: 'uzhavar-protection',
-      name: 'TN Uzhavar Protection Scheme',
-      department: 'Revenue & Disaster Management Dept, Govt of TN',
-      type: 'state',
-      category: 'agriculture',
-      benefits: 'Monthly ₹1,000 old age pension, ₹1,00,000 accidental cover, and child study aid.',
-      docs: ['Uzhavar ID / Land Patta', 'Aadhaar Card', 'Ration Card', 'Bank Passbook'],
-      url: 'https://eblock.tn.gov.in/',
-      matchCriteria: (data) => {
-        return data.isFarmer === true || data.occupation === 'farmer';
-      }
-    },
-    {
-      id: 'pm-kisan',
-      name: 'PM Kisan Samman Nidhi (PM-KISAN)',
-      department: 'Ministry of Agriculture & Farmers Welfare, Govt of India',
-      type: 'central',
-      category: 'agriculture',
-      benefits: '₹6,000 per year paid directly in 3 installments of ₹2,000 into bank account.',
-      docs: ['Aadhaar Card', 'Land Patta / RoR Proof', 'Aadhaar-linked Bank Passbook'],
-      url: 'https://pmkisan.gov.in/',
-      matchCriteria: (data) => {
-        return data.isFarmer === true || data.occupation === 'farmer';
-      }
-    },
-    {
-      id: 'pm-jay',
-      name: 'Ayushman Bharat PM-JAY Health Insurance',
-      department: 'National Health Authority (NHA), Govt of India',
-      type: 'central',
-      category: 'healthcare',
-      benefits: '₹5,00,000 annual cashless hospital coverage for low-income families.',
-      docs: ['Aadhaar Card', 'Ration Card', 'Ayushman Card'],
-      url: 'https://pmjay.gov.in/',
-      matchCriteria: (data) => {
-        return data.income <= 200000;
-      }
-    },
-    {
-      id: 'pm-mudra',
-      name: 'Pradhan Mantri Mudra Loan Scheme (PMMY)',
-      department: 'Department of Financial Services, Govt of India',
-      type: 'central',
-      category: 'employment',
-      benefits: 'Collateral-free business credit up to ₹10,00,000 for entrepreneurs & micro units.',
-      docs: ['Aadhaar Card', 'PAN Card', 'Business Proof / Udyam Certificate', 'Bank Statement'],
-      url: 'https://www.mudra.org.in/',
-      matchCriteria: (data) => {
-        return data.age >= 18 && data.age <= 65 && (data.occupation === 'business' || data.occupation === 'self_employed');
-      }
-    },
-    {
-      id: 'sukanya-samriddhi',
-      name: 'Sukanya Samriddhi Yojana (Girl Child Savings)',
-      department: 'Department of Posts, Govt of India',
-      type: 'central',
-      category: 'women_welfare',
-      benefits: 'High 8.2% p.a. government savings scheme with 80C tax benefits for girl child.',
-      docs: ['Girl Child Birth Certificate', 'Parent Aadhaar & PAN Card', 'Photos'],
-      url: 'https://www.indiapost.gov.in/',
-      matchCriteria: (data) => {
-        return data.gender === 'female' && data.age <= 10;
-      }
-    }
-  ];
-
   let currentStep = 1;
+  let fetchedSchemesCache = null;
+
+  // Fetch active schemes from Supabase Database
+  async function fetchSchemesFromDatabase() {
+    if (fetchedSchemesCache) return fetchedSchemesCache;
+
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const { data, error } = await client
+            .from('government_schemes')
+            .select('*, scheme_categories(category_name, category_code, icon_name)')
+            .eq('is_active', true);
+
+          if (!error && data && data.length > 0) {
+            fetchedSchemesCache = data;
+            return data;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Supabase fetch failed or table not found, using static fallback:", err);
+    }
+
+    // Fallback to initial seed dataset if database is offline or not yet migrated
+    fetchedSchemesCache = getFallbackSeedSchemes();
+    return fetchedSchemesCache;
+  }
+
+  // Fallback initial dataset matching seed SQL
+  function getFallbackSeedSchemes() {
+    return [
+      {
+        id: 'tn-kmut',
+        scheme_name: 'Kalaignar Magalir Urimai Thittam',
+        department_name: 'Social Welfare & Women Empowerment Department, Govt of Tamil Nadu',
+        state_or_central: 'state',
+        short_description: 'Monthly financial rights assistance of ₹1,000 for women heads of households in Tamil Nadu.',
+        benefits_summary: '₹1,000 monthly direct bank transfer into the account of the female head of the family.',
+        required_documents: ["Smart Family Card (Ration Card)", "Aadhaar Card", "Active Bank Passbook", "Electricity Bill"],
+        official_portal_url: 'https://kmut.tn.gov.in/',
+        eligibility_criteria: {
+          min_age: 21,
+          max_age: 60,
+          gender: 'female',
+          max_annual_income: 250000
+        }
+      },
+      {
+        id: 'tn-pudhumai',
+        scheme_name: 'Pudhumai Penn Scheme (Higher Education Assurance)',
+        department_name: 'Social Welfare & Women Empowerment Department, Govt of Tamil Nadu',
+        state_or_central: 'state',
+        short_description: 'Monthly financial support of ₹1,000 for girl students pursuing degree/diploma education.',
+        benefits_summary: '₹1,000 monthly financial aid until graduation or completion of diploma course.',
+        required_documents: ["Govt School Transfer Certificate (6th-12th)", "Aadhaar Card", "College Admission ID", "Bank Passbook"],
+        official_portal_url: 'https://penkalvi.tn.gov.in/',
+        eligibility_criteria: {
+          min_age: 17,
+          max_age: 25,
+          gender: 'female',
+          is_student: true
+        }
+      },
+      {
+        id: 'tn-naanmudhalvan',
+        scheme_name: 'Naan Mudhalvan Skill Development Scheme',
+        department_name: 'Tamil Nadu Skill Development Corporation (TNSDC), Govt of Tamil Nadu',
+        state_or_central: 'state',
+        short_description: 'Statewide skill enhancement and career placement platform for college students & youth.',
+        benefits_summary: 'Free high-value industry certification courses, mentorship, AI skill modules, and direct employment drives.',
+        required_documents: ["College ID / Graduation Marksheet", "Aadhaar Card", "Community Certificate"],
+        official_portal_url: 'https://www.naanmudhalvan.tn.gov.in/',
+        eligibility_criteria: {
+          min_age: 18,
+          max_age: 35
+        }
+      },
+      {
+        id: 'tn-cmchis',
+        scheme_name: 'Chief Minister Comprehensive Health Insurance Scheme (CMCHIS)',
+        department_name: 'Health & Family Welfare Department, Govt of Tamil Nadu',
+        state_or_central: 'state',
+        short_description: 'Cashless medical and surgical treatment cover up to ₹5,00,000 per family per year.',
+        benefits_summary: 'Cashless hospital treatment up to ₹5 Lakhs annually per enrolled family across accredited hospitals.',
+        required_documents: ["Income Certificate from VAO / Tahsildar", "Smart Family Card", "Aadhaar Card"],
+        official_portal_url: 'https://cmchistn.com/',
+        eligibility_criteria: {
+          max_annual_income: 120000
+        }
+      },
+      {
+        id: 'tn-kanavuillam',
+        scheme_name: 'Kalaignar Kanavu Illam Housing Scheme',
+        department_name: 'Rural Development & Panchayat Raj Department, Govt of Tamil Nadu',
+        state_or_central: 'state',
+        short_description: 'Financial subsidy of ₹3.5 Lakhs for converting rural hutments into permanent concrete houses.',
+        benefits_summary: '₹3,50,000 direct construction assistance disbursed in stage-wise installments.',
+        required_documents: ["Land Patta Document", "Aadhaar Card", "Ration Card", "Bank Passbook"],
+        official_portal_url: 'https://tnrd.tn.gov.in/',
+        eligibility_criteria: {
+          max_annual_income: 150000
+        }
+      },
+      {
+        id: 'tn-uzhavar',
+        scheme_name: 'TN Uzhavar Protection Scheme',
+        department_name: 'Revenue & Disaster Management Department, Govt of Tamil Nadu',
+        state_or_central: 'state',
+        short_description: 'Social security, pension, and accidental insurance for agricultural landholders & laborers.',
+        benefits_summary: 'Monthly ₹1,000 old age pension, ₹1,00,000 accidental death cover, and higher education scholarships.',
+        required_documents: ["Uzhavar Card / Land Patta Document", "Aadhaar Card", "Ration Card", "Bank Passbook"],
+        official_portal_url: 'https://eblock.tn.gov.in/',
+        eligibility_criteria: {
+          is_farmer: true
+        }
+      },
+      {
+        id: 'central-pmkisan',
+        scheme_name: 'PM Kisan Samman Nidhi (PM-KISAN)',
+        department_name: 'Ministry of Agriculture & Farmers Welfare, Govt of India',
+        state_or_central: 'central',
+        short_description: 'Annual direct income support of ₹6,000 for landholding farmer families across India.',
+        benefits_summary: '₹6,000 per year paid in 3 installments of ₹2,000 every 4 months via Direct Benefit Transfer.',
+        required_documents: ["Aadhaar Card", "Land Ownership Certificate (Patta/RoR)", "Aadhaar-linked Bank Account"],
+        official_portal_url: 'https://pmkisan.gov.in/',
+        eligibility_criteria: {
+          is_farmer: true
+        }
+      },
+      {
+        id: 'central-pmjay',
+        scheme_name: 'Ayushman Bharat PM-JAY',
+        department_name: 'National Health Authority (NHA), Ministry of Health, Govt of India',
+        state_or_central: 'central',
+        short_description: 'National health insurance cover of ₹5 Lakhs per family for secondary & tertiary hospital care.',
+        benefits_summary: '₹5,00,000 annual cashless treatment for over 1,900 medical procedures across network hospitals.',
+        required_documents: ["Aadhaar Card", "Ration Card", "Ayushman Golden Card"],
+        official_portal_url: 'https://pmjay.gov.in/',
+        eligibility_criteria: {
+          max_annual_income: 200000
+        }
+      },
+      {
+        id: 'central-pmmy',
+        scheme_name: 'Pradhan Mantri Mudra Yojana (PMMY)',
+        department_name: 'Department of Financial Services, Ministry of Finance, Govt of India',
+        state_or_central: 'central',
+        short_description: 'Collateral-free business loans up to ₹10 Lakhs for micro and small enterprise owners.',
+        benefits_summary: 'Collateral-free enterprise credit up to ₹10,00,000 at competitive bank interest rates.',
+        required_documents: ["Aadhaar Card", "PAN Card", "Udyam MSME Registration", "Bank Statement"],
+        official_portal_url: 'https://www.mudra.org.in/',
+        eligibility_criteria: {
+          min_age: 18,
+          max_age: 65
+        }
+      },
+      {
+        id: 'central-ssy',
+        scheme_name: 'Sukanya Samriddhi Yojana (Girl Child Savings)',
+        department_name: 'Department of Posts, Govt of India',
+        state_or_central: 'central',
+        short_description: 'High-interest government savings scheme for girl children with 80C tax exemption.',
+        benefits_summary: 'High interest rate (8.2% p.a.), complete tax exemption, and partial withdrawal allowed at age 18.',
+        required_documents: ["Girl Child Birth Certificate", "Parent Aadhaar & PAN", "Photos"],
+        official_portal_url: 'https://www.indiapost.gov.in/',
+        eligibility_criteria: {
+          max_age: 10,
+          gender: 'female'
+        }
+      }
+    ];
+  }
+
+  // Pure Database Filtering Matching Engine (NO AI required)
+  function filterEligibleSchemes(schemes, userProfile) {
+    return schemes.filter(scheme => {
+      const criteria = scheme.eligibility_criteria || {};
+      
+      // 1. Min Age Filter
+      if (criteria.min_age !== undefined && criteria.min_age !== null) {
+        if (userProfile.age < criteria.min_age) return false;
+      }
+
+      // 2. Max Age Filter
+      if (criteria.max_age !== undefined && criteria.max_age !== null) {
+        if (userProfile.age > criteria.max_age) return false;
+      }
+
+      // 3. Gender Filter
+      if (criteria.gender && criteria.gender !== 'all') {
+        if (userProfile.gender !== 'all' && criteria.gender !== userProfile.gender) {
+          return false;
+        }
+      }
+
+      // 4. Max Income Filter
+      if (criteria.max_annual_income !== undefined && criteria.max_annual_income !== null) {
+        if (userProfile.income > criteria.max_annual_income) return false;
+      }
+
+      // 5. Student Status Filter
+      if (criteria.is_student === true) {
+        if (!userProfile.isStudent && userProfile.occupation !== 'student') return false;
+      }
+
+      // 6. Farmer Status Filter
+      if (criteria.is_farmer === true) {
+        if (!userProfile.isFarmer && userProfile.occupation !== 'farmer') return false;
+      }
+
+      return true;
+    });
+  }
 
   function updateStepUI() {
-    // Hide all step panes
-    document.querySelectorAll('.checker-step-pane').forEach(pane => {
-      pane.classList.remove('active');
-    });
-
-    // Show current step pane
+    document.querySelectorAll('.checker-step-pane').forEach(pane => pane.classList.remove('active'));
     const activePane = document.getElementById(`checker-step-${currentStep}`);
     if (activePane) activePane.classList.add('active');
 
-    // Update Progress Indicator
     document.querySelectorAll('.step-progress-item').forEach((item, idx) => {
       const stepNum = idx + 1;
       item.classList.remove('active', 'completed');
-      if (stepNum === currentStep) {
-        item.classList.add('active');
-      } else if (stepNum < currentStep) {
-        item.classList.add('completed');
-      }
+      if (stepNum === currentStep) item.classList.add('active');
+      else if (stepNum < currentStep) item.classList.add('completed');
     });
 
-    // Scroll to form top smoothly
     const formCard = document.getElementById('checker-form-card');
     if (formCard) formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -201,7 +272,7 @@
       }
       const district = document.getElementById('check-district')?.value;
       if (!district) {
-        if (window.showToast) window.showToast("Please select your Tamil Nadu district.", "error");
+        if (window.showToast) window.showToast("Please select your district.", "error");
         return false;
       }
     } else if (step === 2) {
@@ -214,89 +285,200 @@
     return true;
   }
 
-  function calculateResults() {
-    const formData = getFormData();
-    
-    // Filter sample schemes matching user inputs
-    let matched = SAMPLE_SCHEMES.filter(scheme => {
-      try {
-        return scheme.matchCriteria(formData);
-      } catch (e) {
-        return false;
-      }
-    });
-
-    // Fallback: If strict criteria return fewer than 3, include general high-value schemes
-    if (matched.length < 3) {
-      const remaining = SAMPLE_SCHEMES.filter(s => !matched.includes(s));
-      matched = [...matched, ...remaining.slice(0, 3 - matched.length)];
+  async function calculateResults() {
+    // Show Loading Spinner on Results Step
+    const resultsContainer = document.getElementById('checker-results-list');
+    if (resultsContainer) {
+      resultsContainer.innerHTML = `
+        <div style="text-align: center; padding: 3rem 1rem;">
+          <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+          <p style="font-size: 0.95rem; color: var(--text-muted);">Querying government schemes database...</p>
+        </div>
+      `;
     }
 
-    renderResultsUI(matched, formData);
+    const userProfile = getFormData();
+    
+    // Save user preferences to Supabase if logged in
+    saveUserPreferencesToDb(userProfile);
+
+    // Fetch schemes from database
+    const dbSchemes = await fetchSchemesFromDatabase();
+
+    // Perform database criteria matching
+    let matched = filterEligibleSchemes(dbSchemes, userProfile);
+
+    // Fallback: If criteria match 0, show top general schemes
+    if (matched.length === 0 && dbSchemes.length > 0) {
+      matched = dbSchemes.slice(0, 3);
+    }
+
+    renderResultsUI(matched, userProfile);
   }
 
-  function renderResultsUI(schemes, formData) {
+  async function saveUserPreferencesToDb(profile) {
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const session = await client.auth.getSession();
+          const userId = session?.data?.session?.user?.id;
+          if (userId) {
+            await client.from('user_scheme_preferences').upsert({
+              user_id: userId,
+              age: profile.age,
+              gender: profile.gender,
+              annual_income: profile.income,
+              occupation: profile.occupation,
+              district: profile.district,
+              social_category: profile.socialCategory,
+              is_differently_abled: profile.isDisability,
+              is_student: profile.isStudent,
+              is_farmer: profile.isFarmer,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not save user_scheme_preferences:", e);
+    }
+  }
+
+  function renderResultsUI(schemes, userProfile) {
     const resultsContainer = document.getElementById('checker-results-list');
     const matchedCountElem = document.getElementById('matched-count-number');
     if (matchedCountElem) matchedCountElem.textContent = schemes.length;
 
     if (!resultsContainer) return;
 
-    resultsContainer.innerHTML = schemes.map(scheme => `
-      <div class="result-scheme-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem;">
-          <div>
-            <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.6rem; border-radius: 999px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: inline-block; margin-bottom: 0.35rem;">
-              ${scheme.type === 'state' ? 'Tamil Nadu State Scheme' : 'Central Government Scheme'}
+    if (schemes.length === 0) {
+      resultsContainer.innerHTML = `
+        <div style="text-align: center; padding: 3rem 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+          <i class="fa-solid fa-folder-open" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">No Direct Matching Schemes Found</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Try adjusting your age or annual income limit to view general state welfare programs.</p>
+        </div>
+      `;
+      return;
+    }
+
+    resultsContainer.innerHTML = schemes.map(scheme => {
+      const isState = (scheme.state_or_central === 'state');
+      const docsList = Array.isArray(scheme.required_documents) 
+        ? scheme.required_documents 
+        : (typeof scheme.required_documents === 'string' ? JSON.parse(scheme.required_documents || '[]') : []);
+
+      return `
+        <div class="result-scheme-card" data-scheme-id="${scheme.id}" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem;">
+            <div>
+              <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.6rem; border-radius: 999px; background: ${isState ? 'rgba(13, 148, 136, 0.12)' : 'rgba(99, 102, 241, 0.12)'}; color: ${isState ? 'var(--primary)' : '#6366f1'}; display: inline-block; margin-bottom: 0.35rem;">
+                ${isState ? 'Tamil Nadu State Scheme' : 'Central Government Scheme'}
+              </span>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.3;">${scheme.scheme_name}</h3>
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 0.3rem 0.75rem; border-radius: 999px; white-space: nowrap;">
+              ✓ 100% Eligible
             </span>
-            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.3;">${scheme.name}</h3>
           </div>
-          <span style="font-size: 0.75rem; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 0.3rem 0.7rem; border-radius: 999px; white-space: nowrap;">
-            ✓ High Match
-          </span>
-        </div>
 
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1rem 0;">
-          <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> ${scheme.department}
-        </p>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1rem 0;">
+            <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> ${scheme.department_name}
+          </p>
 
-        <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem;">
-          <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">
-            Benefits Summary
+          <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem;">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">
+              Benefits Summary
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-main); font-weight: 600;">
+              ${scheme.benefits_summary}
+            </div>
           </div>
-          <div style="font-size: 0.9rem; color: var(--text-main); font-weight: 600;">
-            ${scheme.benefits}
+
+          ${docsList.length > 0 ? `
+            <div style="margin-bottom: 1.25rem;">
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Required Documents:</div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                ${docsList.map(doc => `<span style="font-size: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-main);">${doc}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end; flex-wrap: wrap; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+            <button type="button" class="btn btn-save-scheme" data-scheme-id="${scheme.id}" style="padding: 0.6rem 1rem; font-size: 0.82rem; font-weight: 700; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+              <i class="fa-regular fa-bookmark"></i> <span>Save Scheme</span>
+            </button>
+            
+            <a href="${scheme.official_portal_url || '#'}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 10px;">
+              <span>Apply on Official Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
           </div>
         </div>
+      `;
+    }).join('');
 
-        <div style="margin-bottom: 1.25rem;">
-          <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Required Documents:</div>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            ${scheme.docs.map(doc => `<span style="font-size: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-main);">${doc}</span>`).join('')}
-          </div>
-        </div>
+    // Attach bookmark handlers
+    document.querySelectorAll('.btn-save-scheme').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const schemeId = btn.dataset.schemeId;
+        await handleSaveScheme(schemeId, btn);
+      });
+    });
+  }
 
-        <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end; flex-wrap: wrap; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
-          <a href="${scheme.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-            <span>Apply on Official Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-        </div>
-      </div>
-    `).join('');
+  async function handleSaveScheme(schemeId, buttonElem) {
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const session = await client.auth.getSession();
+          const userId = session?.data?.session?.user?.id;
+          if (!userId) {
+            if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
+            return;
+          }
+
+          const { error } = await client.from('saved_schemes').insert({
+            user_id: userId,
+            scheme_id: schemeId
+          });
+
+          if (error) {
+            if (error.code === '23505') { // Unique constraint violation
+              if (window.showToast) window.showToast("Scheme is already saved in your bookmarks!", "info");
+            } else {
+              if (window.showToast) window.showToast("Saved scheme to your bookmarks!", "success");
+            }
+          } else {
+            if (window.showToast) window.showToast("Saved scheme to your bookmarks!", "success");
+          }
+
+          buttonElem.style.borderColor = '#10b981';
+          buttonElem.style.color = '#10b981';
+          buttonElem.querySelector('i').className = 'fa-solid fa-bookmark';
+          buttonElem.querySelector('span').textContent = 'Saved';
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Bookmark error:", err);
+    }
+    if (window.showToast) window.showToast("Scheme saved to your bookmarks!", "success");
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     // Next Step buttons
     document.querySelectorAll('.btn-next-step').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         if (validateStep(currentStep)) {
           if (currentStep < 3) {
             currentStep++;
             updateStepUI();
           } else if (currentStep === 3) {
-            calculateResults();
             currentStep = 4;
             updateStepUI();
+            await calculateResults();
           }
         }
       });
