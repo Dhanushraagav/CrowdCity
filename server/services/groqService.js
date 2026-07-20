@@ -155,4 +155,73 @@ export function getLocalFallbackAnalysis(title, description) {
     priority,
     department
   };
+};
+
+/**
+ * Explain why a citizen qualifies for a government scheme using Groq AI.
+ * Isolated function for CrowdCity AI v2.0 Government Services.
+ */
+export const explainSchemeEligibility = async (scheme, userProfile, lang = 'en') => {
+  if (!scheme) {
+    throw new Error('Scheme data is required for AI explanation.');
+  }
+
+  const isTamil = (lang === 'ta');
+
+  if (!groq) {
+    return generateFallbackSchemeExplanation(scheme, userProfile, isTamil);
+  }
+
+  const promptLanguage = isTamil ? 'Tamil (தமிழ்)' : 'English';
+
+  const systemPrompt = `You are a helpful, clear, and friendly AI Government Welfare Advisor for CrowdCity AI.
+Your task is to generate a simple, citizen-friendly explanation in ${promptLanguage} explaining why the user qualifies for the scheme.
+
+Return ONLY a valid JSON object with the following structure:
+{
+  "whyQualify": "1-2 sentences explaining why the citizen qualifies based on their age (${userProfile?.age || 25}), income (₹${userProfile?.income || 0}), occupation, or gender.",
+  "mainBenefits": "Clear summary of financial or welfare benefits.",
+  "requiredDocuments": "Brief guidance on documents to bring.",
+  "importantNotes": "Practical tip (e.g., link Aadhaar to bank account)."
+}`;
+
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Scheme: ${scheme.scheme_name || scheme.name}\nDepartment: ${scheme.department_name || scheme.department}\nBenefits: ${scheme.benefits_summary || scheme.benefits}\nDocuments: ${JSON.stringify(scheme.required_documents || scheme.docs)}` }
+      ],
+      model: model,
+      temperature: 0.3,
+      response_format: { type: 'json_object' }
+    });
+
+    const content = response.choices[0]?.message?.content;
+    return JSON.parse(content);
+  } catch (err) {
+    logger.warn('Groq explainSchemeEligibility error, falling back:', err);
+    return generateFallbackSchemeExplanation(scheme, userProfile, isTamil);
+  }
+};
+
+function generateFallbackSchemeExplanation(scheme, userProfile, isTamil) {
+  const schemeTitle = scheme.scheme_name || scheme.name || "Government Scheme";
+  const userAge = userProfile?.age || 25;
+  const userIncome = userProfile?.income || 0;
+
+  if (isTamil) {
+    return {
+      whyQualify: `உங்கள் வயது (${userAge}) மற்றும் வருமானம் (₹${userIncome}) அடிப்படையில், நீங்கள் ${schemeTitle} திட்டத்திற்கான அனைத்து தகுதிகளையும் பெற்றுள்ளீர்கள்.`,
+      mainBenefits: scheme.benefits_summary || scheme.benefits || "மாதாந்திர நிதி உதவி அல்லது அரசு காப்பீட்டு சலுகைகள்.",
+      requiredDocuments: "ரேஷன் கார்டு, ஆதார் கார்டு மற்றும் வங்கி கணக்கு புத்தகம் நகலை தயாராக வைத்துக்கொள்ளவும்.",
+      importantNotes: "நேரடி பணப்பரிமாற்றத்திற்கு உங்கள் வங்கி கணக்குடன் ஆதார் எண்ணை இணைத்துள்ளதை உறுதிப்படுத்திக் கொள்ளவும்."
+    };
+  }
+  return {
+    whyQualify: `Based on your age of ${userAge} and annual family income of ₹${userIncome}, you meet all official eligibility requirements for ${schemeTitle}.`,
+    mainBenefits: scheme.benefits_summary || scheme.benefits || "Financial support, insurance coverage, or government welfare aid.",
+    requiredDocuments: "Ensure you have your Smart Ration Card, Aadhaar Card, and Bank Passbook ready before applying.",
+    importantNotes: "Make sure your bank account is linked to your Aadhaar for direct benefit transfer."
+  };
 }
+

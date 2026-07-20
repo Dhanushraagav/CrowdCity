@@ -652,5 +652,10 @@
   "nav_services": "Government Services",
   "services_title": "Government Services Hub",
   "services_subtitle": "AI-Powered Digital Citizen Services for Tamil Nadu & India",
-  "explore_services": "Explore Govt Services"
+  "explore_services": "Explore Govt Services",
+  "ai_explanation_title": "AI Qualification Explanation",
+  "ai_why_qualify": "Why You Qualify",
+  "ai_main_benefits": "Main Benefits",
+  "ai_required_docs": "Required Documents",
+  "ai_important_notes": "Important Notes"
 }

@@ -652,5 +652,10 @@
   "nav_services": "அரசு சேவைகள்",
   "services_title": "அரசு சேவைகள் மையம்",
   "services_subtitle": "தமிழ்நாடு மற்றும் இந்திய குடிமக்களுக்கான AI-அரசு டிஜிட்டல் சேவைகள்",
-  "explore_services": "அரசு சேவைகளை ஆராய்க"
+  "explore_services": "அரசு சேவைகளை ஆராய்க",
+  "ai_explanation_title": "AI தகுதி விளக்கம்",
+  "ai_why_qualify": "நீங்கள் ஏன் தகுதி பெறுகிறீர்கள்",
+  "ai_main_benefits": "முக்கிய நன்மைகள்",
+  "ai_required_docs": "தேவையான ஆவணங்கள்",
+  "ai_important_notes": "முக்கிய குறிப்புகள்"
 }

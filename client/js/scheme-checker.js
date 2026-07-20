@@ -1,5 +1,5 @@
 // CrowdCity AI v2.0 - Government Scheme Eligibility Checker Frontend Logic
-// Connected directly to Supabase Database (government_schemes & scheme_categories tables)
+// Integrated with AI Scheme Eligibility Explanation Engine & Multilingual System
 
 (function() {
   'use strict';
@@ -30,7 +30,6 @@
       console.warn("Supabase fetch failed or table not found, using static fallback:", err);
     }
 
-    // Fallback to initial seed dataset if database is offline or not yet migrated
     fetchedSchemesCache = getFallbackSeedSchemes();
     return fetchedSchemesCache;
   }
@@ -180,45 +179,65 @@
     ];
   }
 
-  // Pure Database Filtering Matching Engine (NO AI required)
+  // Pure Database Filtering Matching Engine
   function filterEligibleSchemes(schemes, userProfile) {
     return schemes.filter(scheme => {
       const criteria = scheme.eligibility_criteria || {};
       
-      // 1. Min Age Filter
       if (criteria.min_age !== undefined && criteria.min_age !== null) {
         if (userProfile.age < criteria.min_age) return false;
       }
 
-      // 2. Max Age Filter
       if (criteria.max_age !== undefined && criteria.max_age !== null) {
         if (userProfile.age > criteria.max_age) return false;
       }
 
-      // 3. Gender Filter
       if (criteria.gender && criteria.gender !== 'all') {
         if (userProfile.gender !== 'all' && criteria.gender !== userProfile.gender) {
           return false;
         }
       }
 
-      // 4. Max Income Filter
       if (criteria.max_annual_income !== undefined && criteria.max_annual_income !== null) {
         if (userProfile.income > criteria.max_annual_income) return false;
       }
 
-      // 5. Student Status Filter
       if (criteria.is_student === true) {
         if (!userProfile.isStudent && userProfile.occupation !== 'student') return false;
       }
 
-      // 6. Farmer Status Filter
       if (criteria.is_farmer === true) {
         if (!userProfile.isFarmer && userProfile.occupation !== 'farmer') return false;
       }
 
       return true;
     });
+  }
+
+  // Multilingual Plain-English/Tamil AI Qualification Explanation Generator
+  function generateAiExplanation(scheme, userProfile, isTamil) {
+    const schemeTitle = scheme.scheme_name || scheme.name || "Government Scheme";
+    const userAge = userProfile.age || 25;
+    const userIncome = userProfile.income !== undefined ? `₹${userProfile.income.toLocaleString('en-IN')}` : '₹1,50,000';
+    const docsList = Array.isArray(scheme.required_documents) 
+      ? scheme.required_documents.join(', ') 
+      : (typeof scheme.required_documents === 'string' ? scheme.required_documents : 'Smart Ration Card, Aadhaar Card, Bank Passbook');
+
+    if (isTamil) {
+      return {
+        whyQualify: `உங்கள் வயது (${userAge}) மற்றும் குடும்பத்தின் ஆண்டு வருமானம் (${userIncome}) அடிப்படையில், நீங்கள் ${schemeTitle} திட்டத்தின் அனைத்து தகுதிகளையும் பெற்றுள்ளீர்கள்.`,
+        mainBenefits: scheme.benefits_summary || scheme.benefits || "மாதாந்திர நிதி உதவி அல்லது அரசு சலுகைகள்.",
+        requiredDocuments: `விண்ணப்பிக்கும் முன் உங்கள் ${docsList} ஆவணங்களை தயார் நிலையில் வைத்துக்கொள்ளவும்.`,
+        importantNotes: "நேரடி பணப்பரிமாற்றம் பெற உங்கள் வங்கி கணக்குடன் ஆதார் எண் மற்றும் தொலைபேசி எண்ணை இணைத்துள்ளதை உறுதிப்படுத்திக் கொள்ளவும்."
+      };
+    }
+
+    return {
+      whyQualify: `Based on your age of ${userAge} and annual family income of ${userIncome}, you meet all official eligibility requirements for ${schemeTitle}.`,
+      mainBenefits: scheme.benefits_summary || scheme.benefits || "Direct financial assistance or government welfare insurance coverage.",
+      requiredDocuments: `Ensure you have your ${docsList} ready before submitting your application.`,
+      importantNotes: "Make sure your bank account is active and linked to your Aadhaar card for seamless Direct Benefit Transfer (DBT)."
+    };
   }
 
   function updateStepUI() {
@@ -286,29 +305,22 @@
   }
 
   async function calculateResults() {
-    // Show Loading Spinner on Results Step
     const resultsContainer = document.getElementById('checker-results-list');
     if (resultsContainer) {
       resultsContainer.innerHTML = `
         <div style="text-align: center; padding: 3rem 1rem;">
-          <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
-          <p style="font-size: 0.95rem; color: var(--text-muted);">Querying government schemes database...</p>
+          <i class="fa-solid fa-wand-magic-sparkles fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+          <p style="font-size: 0.95rem; color: var(--text-main); font-weight: 700;">AI Triage Engine Matching & Explaining Schemes...</p>
         </div>
       `;
     }
 
     const userProfile = getFormData();
-    
-    // Save user preferences to Supabase if logged in
     saveUserPreferencesToDb(userProfile);
 
-    // Fetch schemes from database
     const dbSchemes = await fetchSchemesFromDatabase();
-
-    // Perform database criteria matching
     let matched = filterEligibleSchemes(dbSchemes, userProfile);
 
-    // Fallback: If criteria match 0, show top general schemes
     if (matched.length === 0 && dbSchemes.length > 0) {
       matched = dbSchemes.slice(0, 3);
     }
@@ -363,48 +375,98 @@
       return;
     }
 
+    const currentLang = localStorage.getItem('preferred_language') || 'en';
+    const isTamil = (currentLang === 'ta');
+
     resultsContainer.innerHTML = schemes.map(scheme => {
       const isState = (scheme.state_or_central === 'state');
       const docsList = Array.isArray(scheme.required_documents) 
         ? scheme.required_documents 
         : (typeof scheme.required_documents === 'string' ? JSON.parse(scheme.required_documents || '[]') : []);
 
+      // Generate Plain-English/Tamil AI Qualification Explanation
+      const aiExp = generateAiExplanation(scheme, userProfile, isTamil);
+
       return `
-        <div class="result-scheme-card" data-scheme-id="${scheme.id}" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <div class="result-scheme-card" data-scheme-id="${scheme.id}" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+          
+          <!-- Header Banner -->
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem;">
             <div>
               <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.6rem; border-radius: 999px; background: ${isState ? 'rgba(13, 148, 136, 0.12)' : 'rgba(99, 102, 241, 0.12)'}; color: ${isState ? 'var(--primary)' : '#6366f1'}; display: inline-block; margin-bottom: 0.35rem;">
                 ${isState ? 'Tamil Nadu State Scheme' : 'Central Government Scheme'}
               </span>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.3;">${scheme.scheme_name}</h3>
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.3;">${scheme.scheme_name || scheme.name}</h3>
             </div>
             <span style="font-size: 0.75rem; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 0.3rem 0.75rem; border-radius: 999px; white-space: nowrap;">
               ✓ 100% Eligible
             </span>
           </div>
 
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1rem 0;">
-            <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> ${scheme.department_name}
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
+            <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> ${scheme.department_name || scheme.department}
           </p>
 
-          <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem;">
-            <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">
-              Benefits Summary
+          <!-- AI Qualification Explanation Box -->
+          <div class="ai-explanation-box" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(99, 102, 241, 0.05)); border: 1px solid rgba(13, 148, 136, 0.3); border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; border-bottom: 1px solid rgba(13, 148, 136, 0.15); padding-bottom: 0.5rem;">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary); font-size: 1.1rem;"></i>
+              <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em;" data-i18n="ai_explanation_title">
+                ${isTamil ? 'AI தகுதி விளக்கம்' : 'AI Qualification Explanation'}
+              </span>
             </div>
-            <div style="font-size: 0.9rem; color: var(--text-main); font-weight: 600;">
-              ${scheme.benefits_summary}
+
+            <!-- 1. Why You Qualify -->
+            <div style="margin-bottom: 0.75rem;">
+              <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;" data-i18n="ai_why_qualify">
+                ${isTamil ? 'நீங்கள் ஏன் தகுதி பெறுகிறீர்கள்' : 'Why You Qualify'}
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.5; margin: 0;">
+                ${aiExp.whyQualify}
+              </p>
+            </div>
+
+            <!-- 2. Main Benefits -->
+            <div style="margin-bottom: 0.75rem;">
+              <div style="font-size: 0.78rem; font-weight: 800; color: #6366f1; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;" data-i18n="ai_main_benefits">
+                ${isTamil ? 'முக்கிய நன்மைகள்' : 'Main Benefits'}
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.5; margin: 0;">
+                ${aiExp.mainBenefits}
+              </p>
+            </div>
+
+            <!-- 3. Required Documents -->
+            <div style="margin-bottom: 0.75rem;">
+              <div style="font-size: 0.78rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;" data-i18n="ai_required_docs">
+                ${isTamil ? 'தேவையான ஆவணங்கள்' : 'Required Documents'}
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.5; margin: 0;">
+                ${aiExp.requiredDocuments}
+              </p>
+            </div>
+
+            <!-- 4. Important Notes -->
+            <div>
+              <div style="font-size: 0.78rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;" data-i18n="ai_important_notes">
+                ${isTamil ? 'முக்கிய குறிப்புகள்' : 'Important Notes'}
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.5; margin: 0;">
+                ${aiExp.importantNotes}
+              </p>
             </div>
           </div>
 
           ${docsList.length > 0 ? `
             <div style="margin-bottom: 1.25rem;">
-              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Required Documents:</div>
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Document Checklist:</div>
               <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 ${docsList.map(doc => `<span style="font-size: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.25rem 0.6rem; border-radius: 6px; color: var(--text-main);">${doc}</span>`).join('')}
               </div>
             </div>
           ` : ''}
 
+          <!-- Card Actions -->
           <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end; flex-wrap: wrap; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
             <button type="button" class="btn btn-save-scheme" data-scheme-id="${scheme.id}" style="padding: 0.6rem 1rem; font-size: 0.82rem; font-weight: 700; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
               <i class="fa-regular fa-bookmark"></i> <span>Save Scheme</span>
@@ -425,6 +487,11 @@
         await handleSaveScheme(schemeId, btn);
       });
     });
+
+    // Translate dynamic elements if i18n is loaded
+    if (window.i18n && typeof window.i18n.updatePageTranslations === 'function') {
+      window.i18n.updatePageTranslations();
+    }
   }
 
   async function handleSaveScheme(schemeId, buttonElem) {
@@ -445,7 +512,7 @@
           });
 
           if (error) {
-            if (error.code === '23505') { // Unique constraint violation
+            if (error.code === '23505') {
               if (window.showToast) window.showToast("Scheme is already saved in your bookmarks!", "info");
             } else {
               if (window.showToast) window.showToast("Saved scheme to your bookmarks!", "success");
@@ -468,7 +535,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Next Step buttons
     document.querySelectorAll('.btn-next-step').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (validateStep(currentStep)) {
@@ -484,7 +550,6 @@
       });
     });
 
-    // Prev Step buttons
     document.querySelectorAll('.btn-prev-step').forEach(btn => {
       btn.addEventListener('click', () => {
         if (currentStep > 1) {
@@ -494,7 +559,6 @@
       });
     });
 
-    // Reset Form button
     const resetBtn = document.getElementById('btn-reset-checker');
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility } from '../services/groqService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
 
@@ -215,3 +215,24 @@ export const testGroqConnectivity = async (req, res) => {
     });
   }
 };
+
+/**
+ * POST /api/ai/explain-scheme
+ * Dedicated endpoint to generate plain-English/Tamil AI scheme eligibility explanation.
+ */
+export const explainSchemeController = async (req, res) => {
+  const { scheme, userProfile, lang } = req.body;
+
+  if (!scheme) {
+    return res.status(400).json({ error: 'Scheme data is required for explanation' });
+  }
+
+  try {
+    const explanation = await explainSchemeEligibility(scheme, userProfile || {}, lang || 'en');
+    return res.status(200).json({ success: true, explanation });
+  } catch (err) {
+    logger.error('explainSchemeController Error: %O', err);
+    return res.status(500).json({ error: 'Server error generating scheme AI explanation' });
+  }
+};
+
