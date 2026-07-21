@@ -145,21 +145,16 @@
     if (!container) return;
 
     const activities = [
-      { text: 'Eligibility Checked for Welfare Schemes', time: 'Today', icon: 'fa-user-check', color: 'var(--primary)' },
-      { text: 'Document Wallet Sync Completed', time: 'Yesterday', icon: 'fa-folder-check', color: '#10b981' },
-      { text: 'AI Assistant Query: Kalaignar Magalir Urimai', time: '2 days ago', icon: 'fa-robot', color: '#6366f1' },
-      { text: 'Nearby E-Sevai Center Located', time: '3 days ago', icon: 'fa-location-dot', color: '#f59e0b' }
+      { text: 'Eligibility Checked for Welfare Schemes', time: 'Today' },
+      { text: 'Document Wallet Sync Completed', time: 'Yesterday' },
+      { text: 'AI Assistant Query: Kalaignar Magalir Urimai', time: '2 days ago' },
+      { text: 'Nearby E-Sevai Center Located', time: '3 days ago' }
     ];
 
     container.innerHTML = activities.map(act => `
-      <div style="display: flex; gap: 0.85rem; align-items: flex-start; margin-bottom: 1rem;">
-        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(13, 148, 136, 0.1); color: ${act.color}; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0;">
-          <i class="fa-solid ${act.icon}"></i>
-        </div>
-        <div>
-          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">${act.text}</div>
-          <div style="font-size: 0.72rem; color: var(--text-muted);">${act.time}</div>
-        </div>
+      <div style="padding: 0.65rem 0; border-bottom: 1px solid var(--border-color);">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">${act.text}</div>
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem;">${act.time}</div>
       </div>
     `).join('');
   }
@@ -251,7 +246,7 @@
       <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.2rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
         <div>
           <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: #6366f1; background: rgba(99, 102, 241, 0.12); padding: 0.25rem 0.6rem; border-radius: 999px;">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Proactive AI Match
+            Proactive AI Match
           </span>
           <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0.35rem 0 0.15rem 0;">${r.title}</h4>
           <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.35rem 0;">${r.description}</p>
