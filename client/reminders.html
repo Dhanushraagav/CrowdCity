@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Reminder Center - Manage document expiry, office appointments, and application deadlines.">
+  <title>Smart Reminder Center - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .rem-hero-card {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="services-dashboard.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
+              <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Smart Reminder Center</h1>
+          </div>
+
+          <button id="btn-open-add-reminder-modal" type="button" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-plus"></i> <span>Create Reminder</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; max-width: 960px; margin: 0 auto;">
+        
+        <!-- Hero Header -->
+        <div class="rem-hero-card">
+          <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.85rem; border-radius: 999px; background: rgba(13, 148, 136, 0.15); border: 1px solid rgba(13, 148, 136, 0.3); color: var(--primary); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+            <i class="fa-solid fa-bell"></i> <span id="reminder-count">0</span> Active Reminders
+          </div>
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0; font-family: var(--font-heading, system-ui);">
+            Never Miss Important Government Deadlines
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0; max-width: 650px; line-height: 1.5;">
+            Schedule personal reminders for document renewals, office appointments, scheme registration deadlines, and application follow-ups.
+          </p>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+          <input id="input-reminder-search" type="text" class="form-control" placeholder="Search reminders by title or scheme..." style="max-width: 360px; padding: 0.65rem 1rem; font-size: 0.88rem; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);" />
+
+          <select id="select-filter-status" class="form-control" style="max-width: 200px; padding: 0.65rem 1rem; font-size: 0.88rem; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
+            <option value="all">All Reminders</option>
+            <option value="Upcoming">Upcoming</option>
+            <option value="Today">Today</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+        <!-- Reminders List Container -->
+        <div id="reminders-list-container">
+          <!-- Dynamically populated by js/reminders.js -->
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Reminder Modal -->
+  <div id="add-reminder-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; max-width: 500px; width: 100%; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+      <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0 0 1rem 0;">
+        <i class="fa-solid fa-bell-plus" style="color: var(--primary);"></i> Create New Reminder
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Reminder Title *</label>
+          <input id="new-rem-title" type="text" class="form-control" placeholder="e.g. Income Certificate Renewal" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Category</label>
+            <select id="new-rem-category" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);">
+              <option value="Government Application Follow-up">Application Follow-up</option>
+              <option value="Income Certificate Renewal">Income Cert Renewal</option>
+              <option value="Aadhaar Update">Aadhaar Update</option>
+              <option value="Office Visit">Office Visit</option>
+              <option value="Document Expiry">Document Expiry</option>
+              <option value="Scheme Last Date">Scheme Last Date</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Priority</label>
+            <select id="new-rem-priority" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Related Scheme (Optional)</label>
+          <input id="new-rem-scheme" type="text" class="form-control" placeholder="e.g. Kalaignar Magalir Urimai Thittam" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Date *</label>
+            <input id="new-rem-date" type="date" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Time</label>
+            <input id="new-rem-time" type="time" value="09:00" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Notes</label>
+          <textarea id="new-rem-notes" class="form-control" rows="2" placeholder="e.g. Bring original Ration card and bank passbook copy..." style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);"></textarea>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+        <button id="btn-close-add-reminder-modal" type="button" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-weight: 700; border-radius: 8px;">
+          Cancel
+        </button>
+        <button id="btn-save-new-reminder" type="button" class="btn btn-primary" style="padding: 0.5rem 1.4rem; font-weight: 800; border-radius: 8px;">
+          Save Reminder
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/reminders.js"></script>
+</body>
+</html>
