@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Government Office Locator - Find nearby E-Sevai Centers, Taluk Offices, Collectorates, and VAO Offices in Tamil Nadu.">
+  <title>Government Office Locator - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .locator-hero-card {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    }
+    .locator-filter-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .locator-filter-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+    .locator-map-container {
+      height: 340px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+      z-index: 1;
+    }
+    .office-card-v2 {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .office-card-v2:hover {
+      border-color: rgba(13, 148, 136, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+  </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="services.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
+              <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Government Office Locator</h1>
+          </div>
+
+          <a href="assistant.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-robot"></i> <span>Ask AI Assistant</span>
+          </a>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; max-width: 980px; margin: 0 auto;">
+        
+        <!-- Hero Header -->
+        <div class="locator-hero-card">
+          <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.85rem; border-radius: 999px; background: rgba(13, 148, 136, 0.15); border: 1px solid rgba(13, 148, 136, 0.3); color: var(--primary); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+            <i class="fa-solid fa-location-dot"></i> <span id="office-count-badge">0</span> Offices Located
+          </div>
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0; font-family: var(--font-heading, system-ui);">
+            Find Nearby Government Offices & E-Sevai Centers
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0; max-width: 650px; line-height: 1.5;">
+            Locate Taluk offices, VAO offices, Collectorates, and E-Sevai centers across Tamil Nadu. View office hours, phone numbers, and open directions directly in Google Maps.
+          </p>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div class="locator-filter-bar">
+          <input id="input-office-search" type="text" class="form-control" placeholder="Search by office name, department, or pincode..." style="padding: 0.7rem 1rem; font-size: 0.88rem; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);" />
+
+          <select id="select-office-type" class="form-control" style="padding: 0.7rem 1rem; font-size: 0.88rem; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
+            <option value="all">All Office Types</option>
+            <option value="esevai">E-Sevai Centers</option>
+            <option value="taluk">Taluk Offices</option>
+            <option value="vao">VAO Offices</option>
+            <option value="collectorate">Collectorates</option>
+          </select>
+
+          <select id="select-office-district" class="form-control" style="padding: 0.7rem 1rem; font-size: 0.88rem; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
+            <option value="all">All Districts</option>
+            <option value="Chennai">Chennai</option>
+            <option value="Coimbatore">Coimbatore</option>
+            <option value="Madurai">Madurai</option>
+            <option value="Tiruchirappalli">Tiruchirappalli</option>
+            <option value="Salem">Salem</option>
+          </select>
+
+          <button id="btn-use-location" type="button" class="btn btn-secondary" style="padding: 0.7rem 1.1rem; font-size: 0.85rem; font-weight: 700; border-radius: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-location-crosshairs"></i> <span>Use My Location</span>
+          </button>
+        </div>
+
+        <!-- Interactive Independent Map View -->
+        <div id="office-locator-map" class="locator-map-container"></div>
+
+        <!-- Office Cards List -->
+        <div id="office-cards-container">
+          <!-- Dynamically populated by js/office-locator.js -->
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Leaflet JS for Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/office-locator.js"></script>
+</body>
+</html>

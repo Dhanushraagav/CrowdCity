@@ -36,6 +36,12 @@
     return matches;
   }
 
+  function detectOfficeQuery(text) {
+    const lower = text.toLowerCase();
+    const officeKeywords = ['office', 'nearest', 'where to apply', 'e-sevai', 'esevai', 'collectorate', 'taluk', 'vao', 'location', 'address'];
+    return officeKeywords.some(k => lower.includes(k));
+  }
+
   function renderMessages() {
     const container = document.getElementById('chat-messages-container');
     const welcomeScreen = document.getElementById('assistant-welcome-screen');
@@ -53,12 +59,29 @@
     container.innerHTML = currentConversation.map((msg, idx) => {
       const isUser = msg.sender === 'user';
       const detectedSchemes = !isUser ? detectSmartSchemes(msg.text) : [];
+      const showOfficeCard = !isUser && detectOfficeQuery(msg.text);
 
       return `
         <div class="chat-row ${isUser ? 'user-row' : 'assistant-row'}">
           ${!isUser ? `<div class="chat-avatar"><i class="fa-solid fa-landmark"></i></div>` : ''}
           <div class="chat-bubble">
             <div style="white-space: pre-line;">${escapeHtml(msg.text)}</div>
+
+            ${showOfficeCard ? `
+              <div class="embedded-smart-card" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.05);">
+                <div class="embedded-smart-title" style="color: #10b981;">
+                  <i class="fa-solid fa-building-flag"></i> Government Office Locator Available
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-main); margin-bottom: 0.5rem;">
+                  Find nearby E-Sevai Centers, Taluk Offices, VAO offices, and Collectorates in your district.
+                </div>
+                <div class="embedded-smart-actions">
+                  <a href="office-locator.html" class="smart-action-btn btn-primary-smart" style="background: #10b981; border-color: #10b981;">
+                    <i class="fa-solid fa-location-dot"></i> Open Office Locator
+                  </a>
+                </div>
+              </div>
+            ` : ''}
 
             ${detectedSchemes.length > 0 ? `
               <div class="embedded-smart-card">
