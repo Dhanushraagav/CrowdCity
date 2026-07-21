@@ -124,7 +124,7 @@
             <a href="citizen-dashboard.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
               <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Citizen Services Dashboard</h1>
+            <h1 data-i18n="citizen_services_dashboard" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Citizen Services Dashboard</h1>
           </div>
 
           <!-- Notification Bell -->
@@ -135,7 +135,7 @@
 
             <!-- Notification Dropdown Menu -->
             <div id="notification-dropdown-menu" style="display: none; position: absolute; right: 0; top: 50px; width: 300px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 999;">
-              <div style="padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; font-weight: 800; color: var(--text-main);">
+              <div data-i18n="nav_notifications" style="padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; font-weight: 800; color: var(--text-main);">
                 Notifications
               </div>
               <!-- Dynamically populated -->
@@ -150,7 +150,7 @@
         <div class="dash-hero-banner">
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div>
-              <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
+              <span data-i18n="citizen_portal" style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
                 Citizen Portal
               </span>
               <h2 id="dash-user-name" style="font-size: 1.7rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui);">
@@ -163,7 +163,7 @@
 
             <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem 1.4rem; min-width: 200px;">
               <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.4rem;">
-                <span>Profile Status</span>
+                <span data-i18n="profile_status">Profile Status</span>
                 <span id="dash-profile-completion" style="color: var(--primary);">85% Complete</span>
               </div>
               <div style="background: var(--bg-app); border-radius: 999px; height: 8px; overflow: hidden; border: 1px solid var(--border-color);">
@@ -180,8 +180,8 @@
               <i class="fa-solid fa-award"></i>
             </div>
             <div>
-              <div style="font-size: 0.92rem; font-weight: 800;">Scheme Eligibility</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Check Welfare Qualification</div>
+              <div data-i18n="scheme_eligibility" style="font-size: 0.92rem; font-weight: 800;">Scheme Eligibility</div>
+              <div data-i18n="check_welfare_qualification" style="font-size: 0.75rem; color: var(--text-muted);">Check Welfare Qualification</div>
             </div>
           </a>
 
@@ -190,8 +190,8 @@
               <i class="fa-solid fa-folder-closed"></i>
             </div>
             <div>
-              <div style="font-size: 0.92rem; font-weight: 800;">Document Wallet</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);"><span id="dash-docs-count">0</span> Files Uploaded</div>
+              <div data-i18n="document_wallet" style="font-size: 0.92rem; font-weight: 800;">Document Wallet</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);"><span id="dash-docs-count">0</span> <span data-i18n="files_uploaded">Files Uploaded</span></div>
             </div>
           </a>
 
@@ -200,8 +200,8 @@
               <i class="fa-solid fa-robot"></i>
             </div>
             <div>
-              <div style="font-size: 0.92rem; font-weight: 800;">AI Assistant</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Ask Scheme Guidance</div>
+              <div data-i18n="ai_assistant" style="font-size: 0.92rem; font-weight: 800;">AI Assistant</div>
+              <div data-i18n="ask_scheme_guidance" style="font-size: 0.75rem; color: var(--text-muted);">Ask Scheme Guidance</div>
             </div>
           </a>
 
@@ -210,8 +210,8 @@
               <i class="fa-solid fa-location-dot"></i>
             </div>
             <div>
-              <div style="font-size: 0.92rem; font-weight: 800;">Office Locator</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Find E-Sevai & Taluk</div>
+              <div data-i18n="office_locator" style="font-size: 0.92rem; font-weight: 800;">Office Locator</div>
+              <div data-i18n="find_esevai_taluk" style="font-size: 0.75rem; color: var(--text-muted);">Find E-Sevai & Taluk</div>
             </div>
           </a>
         </div>
@@ -224,10 +224,10 @@
             <!-- Proactive AI Recommendation Engine Widget -->
             <div class="dash-widget-box" style="border: 1px solid rgba(99, 102, 241, 0.3); background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(13, 148, 136, 0.05) 100%);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
+                <h3 data-i18n="proactive_ai_recommendations" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
                   Proactive AI Recommendations
                 </h3>
-                <a href="assistant.html" style="font-size: 0.8rem; font-weight: 700; color: #6366f1; text-decoration: none;">Ask AI →</a>
+                <a href="assistant.html" data-i18n="ask_ai" style="font-size: 0.8rem; font-weight: 700; color: #6366f1; text-decoration: none;">Ask AI →</a>
               </div>
 
               <div id="dash-ai-recommendations-list">
@@ -239,9 +239,9 @@
             <div class="dash-widget-box">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                 <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
-                  Saved Welfare Schemes (<span id="dash-saved-count">0</span>)
+                  <span data-i18n="saved_welfare_schemes">Saved Welfare Schemes</span> (<span id="dash-saved-count">0</span>)
                 </h3>
-                <a href="saved-schemes.html" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">View All →</a>
+                <a href="saved-schemes.html" data-i18n="view_all" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">View All →</a>
               </div>
 
               <div id="dash-saved-schemes-list">
@@ -252,10 +252,10 @@
             <!-- Documents Summary Widget -->
             <div class="dash-widget-box">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
+                <h3 data-i18n="document_wallet_readiness" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
                   Document Wallet Readiness
                 </h3>
-                <a href="my-documents.html" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">Manage Wallet →</a>
+                <a href="my-documents.html" data-i18n="manage_wallet" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">Manage Wallet →</a>
               </div>
 
               <div id="dash-recent-docs-list">
@@ -268,7 +268,7 @@
           <div>
             <!-- Activity Timeline Widget -->
             <div class="dash-widget-box">
-              <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0; font-family: var(--font-heading, system-ui);">
+              <h3 data-i18n="recent_activity" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0; font-family: var(--font-heading, system-ui);">
                 Recent Activity
               </h3>
 
@@ -279,14 +279,14 @@
 
             <!-- AI Assistant Quick Launch Box -->
             <div class="dash-widget-box" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(99, 102, 241, 0.08));">
-              <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
+              <h3 data-i18n="need_application_help" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
                 Need Application Help?
               </h3>
-              <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem 0; line-height: 1.5;">
+              <p data-i18n="ask_ai_assistant_desc" style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem 0; line-height: 1.5;">
                 Ask our AI Government Assistant about eligibility rules, document checklists, or application steps.
               </p>
               <a href="assistant.html" class="btn btn-primary" style="width: 100%; padding: 0.65rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center;">
-                <span>Ask AI Assistant</span>
+                <span data-i18n="ask_ai_assistant_btn">Ask AI Assistant</span>
               </a>
             </div>
           </div>
