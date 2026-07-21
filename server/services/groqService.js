@@ -372,5 +372,57 @@ function generateFallbackDocVerification(docMeta, scheme) {
   };
 }
 
+/**
+ * AI Form Field Guidance Generator using Groq LLM.
+ * Isolated service function for CrowdCity AI v2.0 Form Filling Assistant.
+ */
+export const getFormFieldGuidance = async (schemeName = '', fieldName = '') => {
+  const systemPrompt = `You are the CrowdCity AI Form Filling Assistant.
+Provide clear, simple, citizen-friendly explanations for a specific government form field.
+
+Return ONLY a valid JSON object with the following structure:
+{
+  "explanation": "Clear 1-2 sentence explanation of what this field means.",
+  "whyRequired": "Why government departments require this field.",
+  "commonMistakes": ["Common mistake 1", "Common mistake 2"],
+  "exampleValue": "Representative sample input value"
+}`;
+
+  if (!groq) {
+    return generateFallbackFieldGuidance(fieldName);
+  }
+
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Scheme Name: ${schemeName}\nForm Field: ${fieldName}` }
+      ],
+      model: model,
+      temperature: 0.2,
+      response_format: { type: 'json_object' }
+    });
+
+    const content = response.choices[0]?.message?.content;
+    return JSON.parse(content);
+  } catch (err) {
+    logger.error('getFormFieldGuidance error:', err);
+    return generateFallbackFieldGuidance(fieldName);
+  }
+};
+
+function generateFallbackFieldGuidance(fieldName) {
+  return {
+    explanation: `Enter your official ${fieldName.toLowerCase()} exactly as printed on your government-issued identity cards.`,
+    whyRequired: "Required for identity verification and direct benefit transfer eligibility.",
+    commonMistakes: [
+      "Spelling mismatch between Ration Card and Aadhaar Card.",
+      "Entering joint bank account without primary holder name."
+    ],
+    exampleValue: "Kavitha R / 1234 5678 9012"
+  };
+}
+
+
 
 

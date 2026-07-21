@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Form Filling Assistant - Step-by-step guidance, auto-prefill, and official portal application launcher.">
+  <title>AI Form Filling Assistant - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .form-hero-card {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    }
+    .form-main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.75rem;
+    }
+    @media (max-width: 768px) {
+      .form-main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="services-dashboard.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
+              <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">AI Form Filling Assistant</h1>
+          </div>
+
+          <button id="btn-auto-prefill" type="button" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Auto-Prefill</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; max-width: 1020px; margin: 0 auto;">
+        
+        <!-- Hero Header -->
+        <div class="form-hero-card">
+          <span style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 999px; background: rgba(13, 148, 136, 0.15); color: var(--primary); display: inline-block; margin-bottom: 0.5rem;">
+            Application Form Preparation
+          </span>
+          <h1 id="form-title" style="font-size: 1.7rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0; font-family: var(--font-heading, system-ui);">
+            Loading Form Assistant...
+          </h1>
+          <p id="form-dept" style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">
+            Department of Welfare
+          </p>
+        </div>
+
+        <!-- 2 Column Layout -->
+        <div class="form-main-grid">
+          
+          <!-- Left Column: Fields -->
+          <div>
+            <div id="form-fields-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Right Column: Review & Submission -->
+          <div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; padding: 1.5rem; position: sticky; top: 80px; box-shadow: 0 6px 20px rgba(0,0,0,0.03);">
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.75rem 0;">
+                <i class="fa-solid fa-clipboard-check" style="color: var(--primary);"></i> Form Preparation Review
+              </h3>
+
+              <div style="font-size: 0.88rem; font-weight: 700; color: #10b981; margin-bottom: 1rem;" id="review-ready-count">
+                0 Fields Prepared
+              </div>
+
+              <!-- Mandatory Disclaimer -->
+              <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px; padding: 0.85rem; font-size: 0.78rem; color: var(--text-main); line-height: 1.5; margin-bottom: 1.25rem;">
+                <i class="fa-solid fa-shield-halved" style="color: #d97706;"></i>
+                CrowdCity AI is an assistance platform only. Final submission must be completed on official government portals.
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button id="btn-save-draft" type="button" class="btn btn-secondary" style="width: 100%; padding: 0.7rem; font-weight: 700; border-radius: 10px;">
+                  <i class="fa-regular fa-floppy-disk"></i> Save Draft Progress
+                </button>
+
+                <a id="btn-portal-submit" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 800; border-radius: 10px; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
+                  <span>Continue on Official Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- AI Guidance Modal -->
+  <div id="ai-guidance-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; max-width: 500px; width: 100%; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+      <div id="ai-guidance-content">
+        <!-- Dynamically populated -->
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+        <button id="btn-close-guidance-modal" type="button" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-weight: 700; border-radius: 8px;">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/form-assistant.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance } from '../services/groqService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
 
@@ -275,6 +275,27 @@ export const verifyDocumentController = async (req, res) => {
     return res.status(500).json({ error: 'Server error analyzing document quality' });
   }
 };
+
+/**
+ * POST /api/ai/form-guidance
+ * Dedicated endpoint for AI Form Field guidance explanations.
+ */
+export const formGuidanceController = async (req, res) => {
+  const { schemeName, fieldName } = req.body;
+
+  if (!fieldName) {
+    return res.status(400).json({ error: 'Field name is required for guidance' });
+  }
+
+  try {
+    const guidance = await getFormFieldGuidance(schemeName || '', fieldName);
+    return res.status(200).json({ success: true, guidance });
+  } catch (err) {
+    logger.error('formGuidanceController Error: %O', err);
+    return res.status(500).json({ error: 'Server error generating field guidance' });
+  }
+};
+
 
 
 
