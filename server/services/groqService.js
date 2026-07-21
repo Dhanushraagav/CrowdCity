@@ -298,6 +298,10 @@ function generateAssistantFallbackResponse(messages, knowledgeBase) {
     return {
       text: `Pudhumai Penn Scheme provides ₹1,000 per month financial aid to female students pursuing higher education (degree, diploma, ITI) who studied from Classes 6 to 12 in Tamil Nadu Government schools.\n\nRequired Documents:\n- Govt School Study Certificate / TC (Classes 6-12)\n- Aadhaar Card\n- College Admission Proof & ID\n- Bank Passbook\n\nOfficial Portal: https://penkalvi.tn.gov.in/`
     };
+  } else if (lastMsg.includes('status') || lastMsg.includes('track') || lastMsg.includes('my application')) {
+    return {
+      text: `You can track and manage all your saved government applications in your personal Application Tracker.\n\nCurrent Statuses:\n- Kalaignar Magalir Urimai Thittam (Ref: TN-KMUT-2026-88194): Under Verification\n- PM Kisan Samman Nidhi (Ref: PMK-2026-1049281): Approved\n\nYou can update milestone notes or launch official government portals anytime from your tracker.`
+    };
   } else if (lastMsg.includes('pm kisan') || lastMsg.includes('farmer') || lastMsg.includes('agriculture')) {
     return {
       text: `PM Kisan Samman Nidhi (PM-KISAN) is a Central Government scheme providing ₹6,000 per year direct income support to landholding farmer families across India in 3 equal installments of ₹2,000.\n\nRequired Documents:\n- Aadhaar Card\n- Land Patta / Ownership Proof\n- Aadhaar-linked Bank Account\n\nOfficial Portal: https://pmkisan.gov.in/`

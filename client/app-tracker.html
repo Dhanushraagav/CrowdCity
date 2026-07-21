@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Government Application Tracker - Organize and monitor your submitted government welfare applications.">
+  <title>Government Application Tracker - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .tracker-hero-card {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="services-dashboard.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
+              <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Government Application Tracker</h1>
+          </div>
+
+          <button id="btn-open-add-app-modal" type="button" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-plus"></i> <span>Add Application</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; max-width: 980px; margin: 0 auto;">
+        
+        <!-- Hero Header -->
+        <div class="tracker-hero-card">
+          <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.85rem; border-radius: 999px; background: rgba(13, 148, 136, 0.15); border: 1px solid rgba(13, 148, 136, 0.3); color: var(--primary); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+            <i class="fa-solid fa-clock-rotate-left"></i> <span id="app-tracker-count">0</span> Tracked Applications
+          </div>
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0; font-family: var(--font-heading, system-ui);">
+            Organize & Monitor Submitted Applications
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0; max-width: 650px; line-height: 1.5;">
+            Keep track of application reference numbers, submission dates, verification milestones, and notes for all your Tamil Nadu State and Central Government welfare applications in one place.
+          </p>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+          <input id="input-app-search" type="text" class="form-control" placeholder="Search by scheme name, reference no, or department..." style="max-width: 380px; padding: 0.65rem 1rem; font-size: 0.88rem; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);" />
+
+          <select id="select-filter-status" class="form-control" style="max-width: 220px; padding: 0.65rem 1rem; font-size: 0.88rem; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
+            <option value="all">All Application Statuses</option>
+            <option value="Submitted">Submitted</option>
+            <option value="Under Verification">Under Verification</option>
+            <option value="Additional Documents Requested">Additional Documents Requested</option>
+            <option value="Approved">Approved</option>
+            <option value="Completed">Completed</option>
+            <option value="Draft">Draft</option>
+          </select>
+        </div>
+
+        <!-- Applications Cards List -->
+        <div id="applications-list-container">
+          <!-- Dynamically populated by js/app-tracker.js -->
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Application Modal -->
+  <div id="add-app-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; max-width: 520px; width: 100%; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+      <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0 0 1rem 0;">
+        <i class="fa-solid fa-plus-circle" style="color: var(--primary);"></i> Add Application to Tracker
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Scheme Name *</label>
+          <input id="new-app-scheme-name" type="text" class="form-control" placeholder="e.g. Kalaignar Magalir Urimai Thittam" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+        </div>
+
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Application Reference Number *</label>
+          <input id="new-app-ref-no" type="text" class="form-control" placeholder="e.g. TN-KMUT-2026-98124" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+        </div>
+
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Department Name</label>
+          <input id="new-app-dept" type="text" class="form-control" placeholder="e.g. Social Welfare Dept, Govt of TN" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Submission Date</label>
+            <input id="new-app-date" type="date" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Status</label>
+            <select id="new-app-status" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);">
+              <option value="Submitted">Submitted</option>
+              <option value="Under Verification">Under Verification</option>
+              <option value="Draft">Draft</option>
+              <option value="Approved">Approved</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Official Portal URL</label>
+          <input id="new-app-portal" type="url" class="form-control" placeholder="https://kmut.tn.gov.in/" style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);" />
+        </div>
+
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Personal Notes</label>
+          <textarea id="new-app-notes" class="form-control" rows="2" placeholder="e.g. Submitted via Guindy E-Sevai center..." style="width: 100%; padding: 0.6rem; border-radius: 8px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main);"></textarea>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+        <button id="btn-close-add-app-modal" type="button" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-weight: 700; border-radius: 8px;">
+          Cancel
+        </button>
+        <button id="btn-save-new-app" type="button" class="btn btn-primary" style="padding: 0.5rem 1.4rem; font-weight: 800; border-radius: 8px;">
+          Save Application
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/app-tracker.js"></script>
+</body>
+</html>
