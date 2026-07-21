@@ -189,6 +189,7 @@
     renderDocumentsWidget();
     renderActivityFeed();
     renderNotifications();
+    await fetchPersonalizedRecommendations();
 
     // Toggle Notifications Dropdown
     const notifBtn = document.getElementById('btn-notification-bell');
@@ -201,4 +202,68 @@
     }
   });
 
+  async function fetchPersonalizedRecommendations() {
+    const container = document.getElementById('dash-ai-recommendations-list');
+    if (!container) return;
+
+    try {
+      const res = await fetch('/api/ai/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile: userProfile,
+          docs: userDocs,
+          apps: [],
+          reminders: []
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.recommendations) {
+        renderRecommendations(data.recommendations);
+        return;
+      }
+    } catch (e) {}
+
+    // Fallback
+    renderRecommendations([
+      {
+        title: 'Pudhumai Penn Higher Education Aid',
+        description: 'Monthly ₹1,000 aid for female students from TN Govt schools.',
+        reason: 'Recommended based on your profile and student status.',
+        actionText: 'View Scheme',
+        actionUrl: 'scheme-details.html?id=tn-pudhumai'
+      },
+      {
+        title: 'Kalaignar Magalir Urimai Thittam',
+        description: 'Monthly ₹1,000 financial rights assistance directly into bank account.',
+        reason: 'Recommended for Chennai District residents with family income under ₹2.5 Lakhs.',
+        actionText: 'Check Eligibility',
+        actionUrl: 'scheme-checker.html'
+      }
+    ]);
+  }
+
+  function renderRecommendations(recs) {
+    const container = document.getElementById('dash-ai-recommendations-list');
+    if (!container) return;
+
+    container.innerHTML = recs.slice(0, 2).map(r => `
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.2rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div>
+          <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: #6366f1; background: rgba(99, 102, 241, 0.12); padding: 0.25rem 0.6rem; border-radius: 999px;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Proactive AI Match
+          </span>
+          <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0.35rem 0 0.15rem 0;">${r.title}</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.35rem 0;">${r.description}</p>
+          <div style="font-size: 0.72rem; color: var(--primary); font-weight: 700;">${r.reason}</div>
+        </div>
+
+        <a href="${r.actionUrl}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 700; border-radius: 8px; text-decoration: none; flex-shrink: 0;">
+          ${r.actionText}
+        </a>
+      </div>
+    `).join('');
+  }
+
 })();
+

@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
 import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance } from '../services/groqService.js';
+import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
 
@@ -295,6 +296,23 @@ export const formGuidanceController = async (req, res) => {
     return res.status(500).json({ error: 'Server error generating field guidance' });
   }
 };
+
+/**
+ * POST /api/ai/recommendations
+ * Dedicated endpoint for Proactive AI Recommendations & Insights Engine.
+ */
+export const recommendationController = async (req, res) => {
+  const { profile, docs, apps, reminders } = req.body;
+
+  try {
+    const data = await generatePersonalizedRecommendations(profile || {}, docs || [], apps || [], reminders || []);
+    return res.status(200).json(data);
+  } catch (err) {
+    logger.error('recommendationController Error: %O', err);
+    return res.status(500).json({ error: 'Server error generating personalized recommendations' });
+  }
+};
+
 
 
 
