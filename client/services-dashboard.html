@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Government Services Citizen Dashboard - Central Hub for Welfare Schemes, Document Wallet, AI Assistant, and Office Locator.">
+  <title>Government Services Dashboard - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .dash-hero-banner {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2.25rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    }
+    .dash-quick-links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .dash-quick-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+    .dash-quick-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    }
+    .dash-main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.75rem;
+    }
+    @media (max-width: 800px) {
+      .dash-main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .dash-widget-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.03);
+    }
+  </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="services.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
+              <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Citizen Services Dashboard</h1>
+          </div>
+
+          <!-- Notification Bell -->
+          <div style="position: relative;">
+            <button id="btn-notification-bell" type="button" class="btn btn-secondary" style="width: 40px; height: 40px; border-radius: 10px; padding: 0; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-bell"></i>
+            </button>
+
+            <!-- Notification Dropdown Menu -->
+            <div id="notification-dropdown-menu" style="display: none; position: absolute; right: 0; top: 50px; width: 300px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 999;">
+              <div style="padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; font-weight: 800; color: var(--text-main);">
+                Notifications
+              </div>
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; max-width: 1060px; margin: 0 auto;">
+        
+        <!-- Profile Summary Hero Banner -->
+        <div class="dash-hero-banner">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
+                Citizen Portal
+              </span>
+              <h2 id="dash-user-name" style="font-size: 1.7rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui);">
+                Citizen User
+              </h2>
+              <p id="dash-user-location" style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">
+                Chennai District, Tamil Nadu
+              </p>
+            </div>
+
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem 1.4rem; min-width: 200px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.4rem;">
+                <span>Profile Status</span>
+                <span id="dash-profile-completion" style="color: var(--primary);">85% Complete</span>
+              </div>
+              <div style="background: var(--bg-app); border-radius: 999px; height: 8px; overflow: hidden; border: 1px solid var(--border-color);">
+                <div id="dash-profile-progress-bar" style="background: var(--primary); height: 100%; width: 85%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Quick Modules Grid -->
+        <div class="dash-quick-links-grid">
+          <a href="scheme-checker.html" class="dash-quick-card">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(13, 148, 136, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.92rem; font-weight: 800;">Scheme Eligibility</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Check Welfare Qualification</div>
+            </div>
+          </a>
+
+          <a href="my-documents.html" class="dash-quick-card">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+              <i class="fa-solid fa-folder-closed"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.92rem; font-weight: 800;">Document Wallet</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);"><span id="dash-docs-count">0</span> Files Uploaded</div>
+            </div>
+          </a>
+
+          <a href="assistant.html" class="dash-quick-card">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+              <i class="fa-solid fa-robot"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.92rem; font-weight: 800;">AI Assistant</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Ask Scheme Guidance</div>
+            </div>
+          </a>
+
+          <a href="office-locator.html" class="dash-quick-card">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.92rem; font-weight: 800;">Office Locator</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Find E-Sevai & Taluk</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 2 Column Main Widgets Layout -->
+        <div class="dash-main-grid">
+          
+          <!-- Left Column -->
+          <div>
+            <!-- Saved / Matched Schemes Widget -->
+            <div class="dash-widget-box">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
+                  <i class="fa-solid fa-bookmark" style="color: var(--primary);"></i> Saved Welfare Schemes (<span id="dash-saved-count">0</span>)
+                </h3>
+                <a href="saved-schemes.html" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">View All →</a>
+              </div>
+
+              <div id="dash-saved-schemes-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Documents Summary Widget -->
+            <div class="dash-widget-box">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
+                  <i class="fa-solid fa-shield-halved" style="color: #6366f1;"></i> Document Wallet Readiness
+                </h3>
+                <a href="my-documents.html" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">Manage Wallet →</a>
+              </div>
+
+              <div id="dash-recent-docs-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Column -->
+          <div>
+            <!-- Activity Timeline Widget -->
+            <div class="dash-widget-box">
+              <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0; font-family: var(--font-heading, system-ui);">
+                <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Activity
+              </h3>
+
+              <div id="dash-activity-feed">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- AI Assistant Quick Launch Box -->
+            <div class="dash-widget-box" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(99, 102, 241, 0.08));">
+              <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
+                Need Application Help?
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem 0; line-height: 1.5;">
+                Ask our AI Government Assistant about eligibility rules, document checklists, or application steps.
+              </p>
+              <a href="assistant.html" class="btn btn-primary" style="width: 100%; padding: 0.65rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fa-solid fa-robot"></i> <span>Ask AI Assistant</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/services-dashboard.js"></script>
+</body>
+</html>
