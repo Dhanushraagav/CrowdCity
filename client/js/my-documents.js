@@ -154,17 +154,35 @@
           </div>
 
           <div style="display: flex; gap: 0.5rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
-            <a href="${doc.file_url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-decoration: none; text-align: center;">
+            <button type="button" class="btn btn-secondary btn-view-doc" data-id="${doc.id}" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-align: center; cursor: pointer;">
               <i class="fa-solid fa-eye"></i> View
-            </a>
-            <a href="${doc.file_url}" download="${doc.doc_name}" class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-decoration: none; text-align: center;">
+            </button>
+            <button type="button" class="btn btn-secondary btn-download-doc" data-id="${doc.id}" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-align: center; cursor: pointer;">
               <i class="fa-solid fa-download"></i> Download
-            </a>
+            </button>
           </div>
 
         </div>
       `;
     }).join('');
+
+    // Attach View Listeners
+    container.querySelectorAll('.btn-view-doc').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const docId = btn.dataset.id;
+        const target = userDocuments.find(d => d.id === docId);
+        if (target) openDocumentView(target.file_url, target.doc_name);
+      });
+    });
+
+    // Attach Download Listeners
+    container.querySelectorAll('.btn-download-doc').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const docId = btn.dataset.id;
+        const target = userDocuments.find(d => d.id === docId);
+        if (target) downloadDocumentFile(target.file_url, target.doc_name);
+      });
+    });
 
     // Attach Delete Listeners
     container.querySelectorAll('.btn-delete-doc').forEach(btn => {
@@ -173,6 +191,60 @@
         await deleteDocument(docId);
       });
     });
+  }
+
+  function openDocumentView(fileUrl, docName) {
+    if (!fileUrl) return;
+
+    if (fileUrl.startsWith('data:')) {
+      try {
+        const parts = fileUrl.split(',');
+        const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
+        const bstr = atob(parts[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        const blob = new Blob([u8arr], { type: mime });
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+        return;
+      } catch (e) {
+        console.error("Error creating Blob URL for view:", e);
+      }
+    }
+
+    window.open(fileUrl, '_blank');
+  }
+
+  function downloadDocumentFile(fileUrl, docName) {
+    if (!fileUrl) return;
+
+    const a = document.createElement('a');
+    if (fileUrl.startsWith('data:')) {
+      try {
+        const parts = fileUrl.split(',');
+        const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
+        const bstr = atob(parts[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        const blob = new Blob([u8arr], { type: mime });
+        a.href = URL.createObjectURL(blob);
+      } catch (e) {
+        a.href = fileUrl;
+      }
+    } else {
+      a.href = fileUrl;
+    }
+
+    a.download = docName || 'document';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   async function uploadDocument(file, docType, docName) {
