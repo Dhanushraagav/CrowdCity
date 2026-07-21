@@ -217,13 +217,13 @@ function generateFallbackSchemeExplanation(scheme, userProfile, isTamil) {
       importantNotes: "நேரடி பணப்பரிமாற்றத்திற்கு உங்கள் வங்கி கணக்குடன் ஆதார் எண்ணை இணைத்துள்ளதை உறுதிப்படுத்திக் கொள்ளவும்."
     };
   }
-    return {
-      whyQualify: `Based on your age of ${userAge} and annual family income of ₹${userIncome}, you meet all official eligibility requirements for ${schemeTitle}.`,
-      mainBenefits: scheme.benefits_summary || scheme.benefits || "Financial support, insurance coverage, or government welfare aid.",
-      requiredDocuments: "Ensure you have your Smart Ration Card, Aadhaar Card, and Bank Passbook ready before applying.",
-      importantNotes: "Make sure your bank account is linked to your Aadhaar for direct benefit transfer."
-    };
-  }
+
+  return {
+    whyQualify: `Based on your age of ${userAge} and annual family income of ₹${userIncome}, you meet all official eligibility requirements for ${schemeTitle}.`,
+    mainBenefits: scheme.benefits_summary || scheme.benefits || "Financial support, insurance coverage, or government welfare aid.",
+    requiredDocuments: "Ensure you have your Smart Ration Card, Aadhaar Card, and Bank Passbook ready before applying.",
+    importantNotes: "Make sure your bank account is linked to your Aadhaar for direct benefit transfer."
+  };
 }
 
 /**
