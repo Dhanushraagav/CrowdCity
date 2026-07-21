@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant } from '../services/groqService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
 
@@ -235,4 +235,25 @@ export const explainSchemeController = async (req, res) => {
     return res.status(500).json({ error: 'Server error generating scheme AI explanation' });
   }
 };
+
+/**
+ * POST /api/ai/assistant-chat
+ * Dedicated endpoint for Government Assistant ChatGPT-style conversational advisor.
+ */
+export const assistantChatController = async (req, res) => {
+  const { messages, userProfile, schemeKnowledge } = req.body;
+
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Messages array is required for Assistant chat' });
+  }
+
+  try {
+    const response = await chatWithGovernmentAssistant(messages, userProfile || {}, schemeKnowledge || []);
+    return res.status(200).json({ success: true, text: response.text });
+  } catch (err) {
+    logger.error('assistantChatController Error: %O', err);
+    return res.status(500).json({ error: 'Server error in Government Assistant chat' });
+  }
+};
+
 

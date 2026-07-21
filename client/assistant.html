@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Government Assistant - Ask anything about government welfare schemes, eligibility rules, and document requirements.">
+  <title>AI Government Assistant - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/assistant.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; padding: 0.5rem 0.75rem;" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
+        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
+          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
+          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
+        </div>
+      </a>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">DASHBOARD</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link active">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Govt Services</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link">
+          <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">REPORT ISSUE</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="my_complaints">MY COMPLAINTS</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="map">MAP</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main" style="padding: 0; overflow: hidden;">
+      
+      <div class="assistant-layout">
+        
+        <!-- Left Assistant Sidebar -->
+        <aside class="assistant-sidebar">
+          <button id="btn-new-chat-sidebar" class="btn-new-chat">
+            <i class="fa-solid fa-plus"></i> New Chat
+          </button>
+
+          <div>
+            <div class="sidebar-section-title">Recent Conversations</div>
+            <div class="recent-chat-list">
+              <div class="recent-chat-item active">
+                <i class="fa-regular fa-message"></i> Scheme Eligibility Query
+              </div>
+              <div class="recent-chat-item">
+                <i class="fa-regular fa-message"></i> Magalir Urimai Documents
+              </div>
+              <div class="recent-chat-item">
+                <i class="fa-regular fa-message"></i> PM Kisan Farmer Benefit
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+            <a href="saved-schemes.html" style="font-size: 0.85rem; color: var(--text-main); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fa-solid fa-bookmark" style="color: var(--primary);"></i> My Saved Schemes
+            </a>
+          </div>
+        </aside>
+
+        <!-- Right Chat Viewport -->
+        <section class="assistant-chat-viewport">
+          
+          <!-- Top Header Bar -->
+          <div class="chat-header-bar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(13, 148, 136, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div>
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0;">AI Government Assistant</h2>
+                <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Information & Guidance Platform</span>
+              </div>
+            </div>
+
+            <button id="btn-clear-chat-header" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px;">
+              <i class="fa-solid fa-rotate"></i> Clear Chat
+            </button>
+          </div>
+
+          <!-- Chat Messages Container -->
+          <div id="chat-messages-container" class="chat-messages-container">
+            
+            <!-- Welcome Screen (Visible when chat is empty) -->
+            <div id="assistant-welcome-screen" class="assistant-welcome-screen">
+              <div style="width: 60px; height: 60px; border-radius: 18px; background: linear-gradient(135deg, rgba(13, 148, 136, 0.2), rgba(99, 102, 241, 0.15)); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1.25rem auto;">
+                <i class="fa-solid fa-landmark"></i>
+              </div>
+              <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0; font-family: var(--font-heading, system-ui);">
+                Welcome to Government Assistant
+              </h2>
+              <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+                Ask anything about government schemes, eligibility criteria, required documents, or application guidance.
+              </p>
+
+              <!-- Suggested Questions Cards -->
+              <div class="suggested-questions-grid">
+                <div class="suggested-card" data-question="Which government schemes am I eligible for?">
+                  <span>Which government schemes am I eligible for?</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </div>
+                <div class="suggested-card" data-question="What documents are required for Kalaignar Magalir Urimai Thittam?">
+                  <span>What documents are required for Kalaignar Magalir Urimai Thittam?</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </div>
+                <div class="suggested-card" data-question="Explain Pudhumai Penn Scheme in simple English.">
+                  <span>Explain Pudhumai Penn Scheme in simple English.</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </div>
+                <div class="suggested-card" data-question="How do I apply for PM Kisan Samman Nidhi?">
+                  <span>How do I apply for PM Kisan Samman Nidhi?</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Chat Input Bar -->
+          <div class="chat-input-bar">
+            <input id="chat-input-text" type="text" class="chat-input-field" placeholder="Ask about government schemes, eligibility, documents..." />
+            <button id="btn-send-message" type="button" class="btn-send-chat">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+
+        </section>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application Logic -->
+  <script src="js/auth.js"></script>
+  <script src="js/assistant.js"></script>
+</body>
+</html>

@@ -217,11 +217,96 @@ function generateFallbackSchemeExplanation(scheme, userProfile, isTamil) {
       importantNotes: "நேரடி பணப்பரிமாற்றத்திற்கு உங்கள் வங்கி கணக்குடன் ஆதார் எண்ணை இணைத்துள்ளதை உறுதிப்படுத்திக் கொள்ளவும்."
     };
   }
+    return {
+      whyQualify: `Based on your age of ${userAge} and annual family income of ₹${userIncome}, you meet all official eligibility requirements for ${schemeTitle}.`,
+      mainBenefits: scheme.benefits_summary || scheme.benefits || "Financial support, insurance coverage, or government welfare aid.",
+      requiredDocuments: "Ensure you have your Smart Ration Card, Aadhaar Card, and Bank Passbook ready before applying.",
+      importantNotes: "Make sure your bank account is linked to your Aadhaar for direct benefit transfer."
+    };
+  }
+}
+
+/**
+ * Chat with Government Assistant using Groq LLM.
+ * Isolated function for CrowdCity AI v2.0 Government Assistant.
+ */
+export const chatWithGovernmentAssistant = async (messages, userProfile = {}, schemeKnowledge = []) => {
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    throw new Error('Messages array is required for Government Assistant chat.');
+  }
+
+  const defaultKnowledge = [
+    { name: "Kalaignar Magalir Urimai Thittam", code: "TN-KMUT-001", dept: "Social Welfare Dept, TN", benefits: "₹1,000 monthly for female household heads", age: "21-60", income: "≤ ₹2,50,000", docs: ["Ration Card", "Aadhaar Card", "Bank Passbook"], url: "https://kmut.tn.gov.in/" },
+    { name: "Pudhumai Penn Scheme", code: "TN-PUDHUMAI-002", dept: "Social Welfare Dept, TN", benefits: "₹1,000 monthly for girl students in higher education", age: "17-25", docs: ["School TC (Classes 6-12)", "Aadhaar", "College ID"], url: "https://penkalvi.tn.gov.in/" },
+    { name: "Naan Mudhalvan Skill Scheme", code: "TN-NM-003", dept: "TNSDC, TN", benefits: "Free coding, AI, technical skills & campus placements", age: "18-35", url: "https://www.naanmudhalvan.tn.gov.in/" },
+    { name: "Chief Minister Comprehensive Health Insurance (CMCHIS)", code: "TN-CMCHIS-004", dept: "Health Dept, TN", benefits: "Cashless hospital cover up to ₹5,00,000 per family/year", income: "≤ ₹1,20,000", url: "https://cmchistn.com/" },
+    { name: "PM Kisan Samman Nidhi (PM-KISAN)", code: "CENTRAL-PMKISAN-007", dept: "Ministry of Agriculture", benefits: "₹6,000 per year in 3 installments of ₹2,000", farmer: true, url: "https://pmkisan.gov.in/" },
+    { name: "Ayushman Bharat PM-JAY", code: "CENTRAL-PMJAY-008", dept: "National Health Authority", benefits: "₹5,00,000 health insurance per family/year", url: "https://pmjay.gov.in/" }
+  ];
+
+  const knowledgeBase = (schemeKnowledge && schemeKnowledge.length > 0) ? schemeKnowledge : defaultKnowledge;
+
+  const systemPrompt = `You are the official CrowdCity AI Government Assistant, an expert AI advisor on Tamil Nadu State and Central Government welfare schemes, eligibility rules, document requirements, and application procedures.
+
+STRICT GUIDELINES:
+1) Provide clear, polite, concise, and citizen-friendly answers in plain English or Tamil based on the user query language.
+2) Rely strictly on the official government scheme knowledge base provided below. Never hallucinate fake schemes, fake eligibility rules, or unverified portal URLs.
+3) Never attempt to submit applications on behalf of citizens. Always guide citizens to prepare documents and visit official portals (.gov.in / .tn.gov.in).
+4) Do not provide legal or financial advice.
+5) If you mention specific schemes in your response (e.g. Kalaignar Magalir Urimai Thittam, Pudhumai Penn, Naan Mudhalvan, CMCHIS, PM-KISAN, PM-JAY), state their exact name clearly.
+
+OFFICIAL GOVERNMENT SCHEMES KNOWLEDGE BASE:
+${JSON.stringify(knowledgeBase, null, 2)}`;
+
+  if (!groq) {
+    logger.info('Groq SDK unconfigured, using rule-based Government Assistant fallback.');
+    return generateAssistantFallbackResponse(messages, knowledgeBase);
+  }
+
+  try {
+    const formattedMessages = [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text || m.content
+      }))
+    ];
+
+    const response = await groq.chat.completions.create({
+      messages: formattedMessages,
+      model: model,
+      temperature: 0.3,
+      max_tokens: 600
+    });
+
+    const replyText = response.choices[0]?.message?.content || "I am your AI Government Assistant. How can I help you regarding government schemes, eligibility, or required documents today?";
+    return { text: replyText };
+  } catch (err) {
+    logger.error('chatWithGovernmentAssistant error:', err);
+    return generateAssistantFallbackResponse(messages, knowledgeBase);
+  }
+};
+
+function generateAssistantFallbackResponse(messages, knowledgeBase) {
+  const lastMsg = messages[messages.length - 1]?.text?.toLowerCase() || '';
+
+  if (lastMsg.includes('kmut') || lastMsg.includes('magalir urimai') || lastMsg.includes('women right')) {
+    return {
+      text: `Kalaignar Magalir Urimai Thittam provides ₹1,000 monthly financial rights assistance directly into the bank accounts of female heads of households in Tamil Nadu.\n\nEligibility:\n- Female head of family aged 21 to 60 years\n- Annual family income up to ₹2,50,000\n- Annual electricity consumption under 3,600 units\n\nRequired Documents:\n1. Smart Family Ration Card\n2. Aadhaar Card\n3. Active Bank Passbook\n\nOfficial Portal: https://kmut.tn.gov.in/`
+    };
+  } else if (lastMsg.includes('pudhumai penn') || lastMsg.includes('student') || lastMsg.includes('higher education')) {
+    return {
+      text: `Pudhumai Penn Scheme provides ₹1,000 per month financial aid to female students pursuing higher education (degree, diploma, ITI) who studied from Classes 6 to 12 in Tamil Nadu Government schools.\n\nRequired Documents:\n- Govt School Study Certificate / TC (Classes 6-12)\n- Aadhaar Card\n- College Admission Proof & ID\n- Bank Passbook\n\nOfficial Portal: https://penkalvi.tn.gov.in/`
+    };
+  } else if (lastMsg.includes('pm kisan') || lastMsg.includes('farmer') || lastMsg.includes('agriculture')) {
+    return {
+      text: `PM Kisan Samman Nidhi (PM-KISAN) is a Central Government scheme providing ₹6,000 per year direct income support to landholding farmer families across India in 3 equal installments of ₹2,000.\n\nRequired Documents:\n- Aadhaar Card\n- Land Patta / Ownership Proof\n- Aadhaar-linked Bank Account\n\nOfficial Portal: https://pmkisan.gov.in/`
+    };
+  }
+
   return {
-    whyQualify: `Based on your age of ${userAge} and annual family income of ₹${userIncome}, you meet all official eligibility requirements for ${schemeTitle}.`,
-    mainBenefits: scheme.benefits_summary || scheme.benefits || "Financial support, insurance coverage, or government welfare aid.",
-    requiredDocuments: "Ensure you have your Smart Ration Card, Aadhaar Card, and Bank Passbook ready before applying.",
-    importantNotes: "Make sure your bank account is linked to your Aadhaar for direct benefit transfer."
+    text: `Welcome! I am your AI Government Assistant. I can help you check eligibility, understand required documents, and guide you on applying for Tamil Nadu State and Central Government welfare schemes like Kalaignar Magalir Urimai Thittam, Pudhumai Penn, CMCHIS Health Insurance, Naan Mudhalvan, and PM-KISAN.\n\nFeel free to ask any question about eligibility, income limits, or required documents!`
   };
 }
+
 
