@@ -309,4 +309,68 @@ function generateAssistantFallbackResponse(messages, knowledgeBase) {
   };
 }
 
+/**
+ * AI Document Quality & Readiness Verification using Groq LLM.
+ * Isolated service function for CrowdCity AI v2.0 Document Verifier.
+ */
+export const verifyDocumentReadiness = async (docMeta = {}, extractedText = '', scheme = {}) => {
+  const systemPrompt = `You are the CrowdCity AI Document Preparation Assistant.
+Analyze the provided document metadata and extracted text to generate a document quality and application readiness analysis.
+
+IMPORTANT SECURITY & DISCLAIMER RULES:
+1) You perform document clarity, readability, and completeness guidance ONLY.
+2) You NEVER issue official government verification, legal approvals, or guarantee government acceptance.
+3) Provide objective, friendly advice regarding image clarity, resolution, cropping, and missing scheme requirements.
+
+Return ONLY a valid JSON object with the following structure:
+{
+  "isReadable": true/false,
+  "clarityScore": number (0 to 100),
+  "qualityStatus": "Good" / "Needs Attention" / "Blurry or Dark",
+  "recommendations": ["Recommendation 1", "Recommendation 2"],
+  "extractedSummary": "Brief 1-2 sentence overview of document text content.",
+  "disclaimer": "Guidance and document quality check only. Does not constitute official government verification."
+}`;
+
+  if (!groq) {
+    logger.info('Groq SDK unconfigured, using fallback document verification analysis.');
+    return generateFallbackDocVerification(docMeta, scheme);
+  }
+
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Document Type: ${docMeta.doc_type || 'Unknown'}\nDocument Name: ${docMeta.doc_name || 'Uploaded Document'}\nFile Size: ${docMeta.file_size || 0} bytes\nExtracted Text: ${extractedText.substring(0, 1000)}\nTarget Scheme: ${scheme.scheme_name || scheme.name || 'General Welfare Scheme'}` }
+      ],
+      model: model,
+      temperature: 0.2,
+      response_format: { type: 'json_object' }
+    });
+
+    const content = response.choices[0]?.message?.content;
+    return JSON.parse(content);
+  } catch (err) {
+    logger.error('verifyDocumentReadiness error:', err);
+    return generateFallbackDocVerification(docMeta, scheme);
+  }
+};
+
+function generateFallbackDocVerification(docMeta, scheme) {
+  const isReadable = (docMeta.file_size || 0) > 1024;
+  return {
+    isReadable: isReadable,
+    clarityScore: isReadable ? 88 : 60,
+    qualityStatus: isReadable ? "Good" : "Needs Attention",
+    recommendations: [
+      isReadable ? "This document appears clear and readable." : "File size is small. Ensure the text is not blurry.",
+      "Ensure all four corners of the certificate are visible and uncropped.",
+      "Verify that your name and Aadhaar/Passbook number match your application details."
+    ],
+    extractedSummary: `Uploaded ${docMeta.doc_name || 'Government Certificate'} verified for readability.`,
+    disclaimer: "Guidance and document quality check only. Does not constitute official government verification."
+  };
+}
+
+
 

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness } from '../services/groqService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
 
@@ -255,5 +255,26 @@ export const assistantChatController = async (req, res) => {
     return res.status(500).json({ error: 'Server error in Government Assistant chat' });
   }
 };
+
+/**
+ * POST /api/ai/verify-document
+ * Dedicated endpoint for Document Quality & Readiness Assistant.
+ */
+export const verifyDocumentController = async (req, res) => {
+  const { docMeta, extractedText, scheme } = req.body;
+
+  if (!docMeta) {
+    return res.status(400).json({ error: 'Document metadata is required for verification' });
+  }
+
+  try {
+    const report = await verifyDocumentReadiness(docMeta, extractedText || '', scheme || {});
+    return res.status(200).json({ success: true, report });
+  } catch (err) {
+    logger.error('verifyDocumentController Error: %O', err);
+    return res.status(500).json({ error: 'Server error analyzing document quality' });
+  }
+};
+
 
 
