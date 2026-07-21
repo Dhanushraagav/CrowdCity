@@ -69,35 +69,7 @@
       
       <div class="assistant-layout">
         
-        <!-- Left Assistant Sidebar -->
-        <aside class="assistant-sidebar">
-          <button id="btn-new-chat-sidebar" class="btn-new-chat">
-            <i class="fa-solid fa-plus"></i> New Chat
-          </button>
-
-          <div>
-            <div class="sidebar-section-title">Recent Conversations</div>
-            <div class="recent-chat-list">
-              <div class="recent-chat-item active">
-                <i class="fa-regular fa-message"></i> Scheme Eligibility Query
-              </div>
-              <div class="recent-chat-item">
-                <i class="fa-regular fa-message"></i> Magalir Urimai Documents
-              </div>
-              <div class="recent-chat-item">
-                <i class="fa-regular fa-message"></i> PM Kisan Farmer Benefit
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-            <a href="saved-schemes.html" style="font-size: 0.85rem; color: var(--text-main); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 0.6rem;">
-              <i class="fa-solid fa-bookmark" style="color: var(--primary);"></i> My Saved Schemes
-            </a>
-          </div>
-        </aside>
-
-        <!-- Right Chat Viewport -->
+        <!-- Full Page Chat Viewport -->
         <section class="assistant-chat-viewport">
           
           <!-- Top Header Bar -->
@@ -115,9 +87,14 @@
               </div>
             </div>
 
-            <button id="btn-clear-chat-header" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px;">
-              <i class="fa-solid fa-rotate"></i> Clear Chat
-            </button>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <a href="saved-schemes.html" class="btn btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-bookmark" style="color: var(--primary);"></i> <span>Saved Schemes</span>
+              </a>
+              <button id="btn-clear-chat-header" class="btn btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-plus"></i> <span>New Chat</span>
+              </button>
+            </div>
           </div>
 
           <!-- Chat Messages Container -->
