@@ -446,17 +446,10 @@
       height: 100%;
       object-fit: cover;
       opacity: 0;
-      transform: scale(1.06);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.6s ease-in-out;
     }
     .showcase-image.active {
       opacity: 1;
-      transform: scale(1.01);
-      animation: showcase-zoom 10s ease-in-out infinite alternate;
-    }
-    @keyframes showcase-zoom {
-      0% { transform: scale(1.01); }
-      100% { transform: scale(1.07); }
     }
     .showcase-caption {
       position: absolute;
@@ -2332,6 +2325,7 @@
         let descCharIdx = 0;
 
         cityEl.classList.add('typing');
+        descEl.classList.add('typing');
 
         function typeCity() {
           if (cityCharIdx < cityName.length) {
@@ -2340,8 +2334,6 @@
             typingTimeoutCity = setTimeout(typeCity, 45);
           } else {
             cityEl.classList.remove('typing');
-            descEl.classList.add('typing');
-            typeDesc();
           }
         }
 
@@ -2356,6 +2348,7 @@
         }
 
         typeCity();
+        typeDesc();
       }
 
       window.switchShowcaseSlide = function(index) {
@@ -2447,7 +2440,7 @@
             mouseX += (targetX - mouseX) * 0.08;
             mouseY += (targetY - mouseY) * 0.08;
 
-            const cards = document.querySelectorAll('.auth-card, .brand-showcase-container');
+            const cards = document.querySelectorAll('.auth-card');
             if (cards.length > 0) {
               cards.forEach(c => {
                 c.style.transform = `perspective(1000px) rotateX(${mouseY * 0.35}deg) rotateY(${-mouseX * 0.35}deg) translateY(0)`;
