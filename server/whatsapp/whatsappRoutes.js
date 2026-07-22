@@ -1,5 +1,6 @@
-// CrowdCity AI v2.3 - WhatsApp Integration Express Routes
+// CrowdCity AI v2.3.1 - WhatsApp Integration Express Routes
 // Routing mapping for administrative actions and monitoring queries.
+// Strictly secured: Authenticated user with role admin is mandatory for all operations.
 
 import express from 'express';
 import { 
@@ -11,17 +12,20 @@ import {
   getLogs, 
   getQueue 
 } from './whatsappController.js';
-import { requireAuth } from '../middlewares/authMiddleware.js';
+import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Public/Admin route mapping for project demonstration purposes
-router.get('/status', requireAuth, getStatus);
-router.post('/reconnect', requireAuth, triggerReconnect);
-router.post('/disconnect', requireAuth, triggerDisconnect);
-router.post('/test', requireAuth, sendTestMessage);
-router.post('/notify', requireAuth, triggerNotification);
-router.get('/logs', requireAuth, getLogs);
-router.get('/queue', requireAuth, getQueue);
+// Apply auth middleware and strict admin role restrictions to all endpoints
+router.use(requireAuth);
+router.use(requireRole(['admin']));
+
+router.get('/status', getStatus);
+router.post('/reconnect', triggerReconnect);
+router.post('/disconnect', triggerDisconnect);
+router.post('/test', sendTestMessage);
+router.post('/notify', triggerNotification);
+router.get('/logs', getLogs);
+router.get('/queue', getQueue);
 
 export default router;

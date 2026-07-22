@@ -278,8 +278,8 @@
             .eq('id', user.id)
             .single();
 
-          if (!profile || (profile.role !== 'admin' && profile.role !== 'authority')) {
-            window.location.href = 'citizen-dashboard.html';
+          if (!profile || profile.role !== 'admin') {
+            window.location.href = 'auth.html';
             return;
           }
         }
