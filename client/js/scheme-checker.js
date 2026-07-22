@@ -501,10 +501,57 @@
   async function calculateResults() {
     const resultsContainer = document.getElementById('checker-results-list');
     if (resultsContainer) {
+      const currentLang = localStorage.getItem('preferred_language') || 'en';
+      const isTamil = (currentLang === 'ta');
+      
       resultsContainer.innerHTML = `
-        <div style="text-align: center; padding: 3rem 1rem;">
-          <i class="fa-solid fa-wand-magic-sparkles fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
-          <p style="font-size: 0.95rem; color: var(--text-main); font-weight: 700;">Eligibility Engine Evaluating Official Conditions...</p>
+        <div class="ai-scanning-wrapper" style="text-align: center; padding: 4rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem;">
+          
+          <!-- Injected local animation styles -->
+          <style>
+            @keyframes ai-pulse-ring {
+              0% { transform: scale(0.65); opacity: 0; }
+              50% { opacity: 0.25; }
+              100% { transform: scale(1.3); opacity: 0; }
+            }
+            @keyframes ai-sparkle-float {
+              0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+              50% { transform: translateY(-10px) rotate(180deg); opacity: 1; }
+              100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
+            }
+            @keyframes ai-glow-bar {
+              0% { left: -100%; }
+              100% { left: 200%; }
+            }
+            .ai-glow-bar-el {
+              position: absolute;
+              top: 0;
+              height: 3px;
+              width: 50%;
+              background: linear-gradient(90deg, transparent, var(--primary), transparent);
+              animation: ai-glow-bar 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            }
+          </style>
+
+          <div class="ai-glow-bar-el"></div>
+
+          <!-- Pulsating Core Circle -->
+          <div style="position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+            <div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: var(--primary); animation: ai-pulse-ring 2.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;"></div>
+            <div style="position: absolute; width: 80%; height: 80%; border-radius: 50%; background: rgba(13, 148, 136, 0.15); animation: ai-pulse-ring 2.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite; animation-delay: 0.6s;"></div>
+            <div style="position: relative; width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #6366f1); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4); z-index: 2;">
+              <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 1.5rem; color: #ffffff; animation: ai-sparkle-float 3s ease-in-out infinite;"></i>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui); letter-spacing: -0.02em;">
+              ${isTamil ? 'அதிநவீன தகுதி ஆய்வு' : 'AI Eligibility Engine Analysis'}
+            </h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; font-weight: 600;">
+              ${isTamil ? 'அதிகாரப்பூர்வ நிபந்தனைகள் சரிபார்க்கப்படுகின்றன...' : 'Evaluating official government guidelines and rules...'}
+            </p>
+          </div>
         </div>
       `;
     }
@@ -619,6 +666,24 @@
         badgeColor = "#0d9488"; // Teal
         badgeBg = "rgba(13, 148, 136, 0.12)";
         statusText = isTamil ? "தகுதி இருக்கக்கூடும்" : "Likely Eligible";
+      }
+
+      // Confidence badge color
+      let confColor = "#10b981";
+      let confBg = "rgba(16, 185, 129, 0.08)";
+      let confIcon = "fa-circle-check";
+      let confLabel = isTamil ? "அதிநம்பிக்கை" : "High Confidence";
+
+      if (evalData.confidence === "Medium Confidence") {
+        confColor = "#3b82f6";
+        confBg = "rgba(59, 130, 246, 0.08)";
+        confIcon = "fa-circle-info";
+        confLabel = isTamil ? "நடுத்தர நம்பிக்கை" : "Medium Confidence";
+      } else if (evalData.confidence === "Needs Verification") {
+        confColor = "#f59e0b";
+        confBg = "rgba(245, 158, 11, 0.08)";
+        confIcon = "fa-triangle-exclamation";
+        confLabel = isTamil ? "சரிபார்ப்பு தேவை" : "Needs Verification";
       }
 
       return `
