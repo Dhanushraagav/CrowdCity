@@ -2462,14 +2462,24 @@
       
       window.handleGatewayClick = async function() {
         try {
-          const supabase = await getOrInitSupabaseClient();
+          const getClient = window.getOrInitSupabaseClient || (typeof getOrInitSupabaseClient === 'function' ? getOrInitSupabaseClient : null);
+          if (!getClient) {
+            window.location.href = 'auth.html';
+            return;
+          }
+          const supabase = await getClient();
           if (!supabase) {
             window.location.href = 'auth.html';
             return;
           }
           const { data: { session } } = await supabase.auth.getSession();
           if (!session || !session.user) {
-            window.location.href = 'auth.html';
+            if (window.showToast) {
+              window.showToast('Please sign in to your administrator account first.', 'error');
+            }
+            if (typeof switchAuthTab === 'function') {
+              switchAuthTab('login');
+            }
             return;
           }
           
