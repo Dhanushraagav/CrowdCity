@@ -206,6 +206,7 @@
 
       <!-- Card 3: WhatsApp Notification Preferences -->
       <div class="settings-card" id="whatsapp-settings-card">
+        <button class="mobile-only subpage-back-btn" onclick="closeSubpage('whatsapp-settings-card')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
           <i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 1.3rem;"></i> <span>WhatsApp Notifications</span>
         </h3>
@@ -314,6 +315,13 @@
             <div class="settings-item-info">
               <span class="settings-item-title" data-i18n="change_password">Change Password</span>
               <span class="settings-item-desc">Update your login security credentials</span>
+            </div>
+            <i class="fa-solid fa-chevron-right settings-arrow"></i>
+          </div>
+          <div class="settings-item clickable" onclick="openWhatsAppSubpage()">
+            <div class="settings-item-info">
+              <span class="settings-item-title"><i class="fa-brands fa-whatsapp" style="color: #25d366; margin-right: 0.25rem;"></i> WhatsApp Alerts</span>
+              <span class="settings-item-desc">Configure WhatsApp alerts for civic updates</span>
             </div>
             <i class="fa-solid fa-chevron-right settings-arrow"></i>
           </div>
@@ -727,6 +735,10 @@
       };
       window.openPasswordSubpage = function() {
         const card = document.getElementById('change-password-card');
+        if (card) card.classList.add('open');
+      };
+      window.openWhatsAppSubpage = function() {
+        const card = document.getElementById('whatsapp-settings-card');
         if (card) card.classList.add('open');
       };
       window.closeSubpage = function(id) {
