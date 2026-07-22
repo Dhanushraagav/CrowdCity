@@ -120,140 +120,136 @@
     const passed = [];
     const failed = [];
     const missing = [];
-    const missingDocs = [];
+    
+    const verifiedDocs = [];
+    const expiredDocs = [];
+    const renewingDocs = [];
+    const missingDocsList = [];
 
     const currentLang = localStorage.getItem('preferred_language') || 'en';
     const isTamil = (currentLang === 'ta');
 
     // 1. Age check
-    if (criteria.min_age !== undefined && criteria.min_age !== null) {
+    if ((criteria.min_age !== undefined && criteria.min_age !== null) || (criteria.max_age !== undefined && criteria.max_age !== null)) {
+      const min = criteria.min_age || 18;
+      const max = criteria.max_age || 120;
       if (!profile.age) {
-        missing.push(isTamil ? "வயது விவரம் தேவை." : "Age information is required.");
-      } else if (profile.age < criteria.min_age) {
+        missing.push(isTamil ? `? வயது விவரம் தேவை (வயது ${min}–${max}க்குள் இருக்க வேண்டும்)` : `? Age information still required (Must be between ${min}–${max})`);
+      } else if (profile.age < min || profile.age > max) {
         failed.push(isTamil 
-          ? `வயது வரம்பு ${criteria.min_age}க்கு குறைவாக உள்ளது.` 
-          : `Age is below the minimum required age of ${criteria.min_age}.`);
+          ? `✗ வயது வரம்பு ${min}–${max}க்குள் இருக்க வேண்டும் (தற்போதைய வயது: ${profile.age})` 
+          : `✗ Age must be between ${min}–${max} (Current: ${profile.age})`);
       } else {
         passed.push(isTamil 
-          ? `வயது தகுதி பூர்த்தி செய்யப்பட்டது (${profile.age} >= ${criteria.min_age}).` 
-          : `Age satisfies minimum requirement (${profile.age} >= ${criteria.min_age}).`);
-      }
-    }
-    if (criteria.max_age !== undefined && criteria.max_age !== null) {
-      if (!profile.age) {
-        const msg = isTamil ? "வயது விவரம் தேவை." : "Age information is required.";
-        if (!missing.includes(msg)) missing.push(msg);
-      } else if (profile.age > criteria.max_age) {
-        failed.push(isTamil 
-          ? `வயது வரம்பு ${criteria.max_age}க்கு அதிகமாக உள்ளது.` 
-          : `Age exceeds the maximum allowed age of ${criteria.max_age}.`);
-      } else {
-        passed.push(isTamil 
-          ? `வயது தகுதி பூர்த்தி செய்யப்பட்டது (${profile.age} <= ${criteria.max_age}).` 
-          : `Age satisfies maximum limit (${profile.age} <= ${criteria.max_age}).`);
+          ? `✓ வயது ${min}–${max}க்குள் உள்ளது` 
+          : `✓ Age between ${min}–${max}`);
       }
     }
 
     // 2. Gender check
     if (criteria.gender && criteria.gender !== 'all') {
       if (!profile.gender || profile.gender === 'all') {
-        missing.push(isTamil ? "பாலினம் விவரம் தேவை." : "Gender specification is required.");
+        missing.push(isTamil ? "? பாலினம் விவரம் தேவை" : "? Gender information still required");
       } else if (profile.gender !== criteria.gender) {
+        const expected = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (isTamil ? 'ஆண்' : 'Male');
         failed.push(isTamil 
-          ? `பாலின தகுதி பொருந்தவில்லை (இத்திட்டம் ${criteria.gender === 'female' ? 'பெண்களுக்கு' : criteria.gender} மட்டுமே).` 
-          : `Gender requirement mismatch (Available for ${criteria.gender} only).`);
+          ? `✗ பாலினம் ${expected} ஆக இருக்க வேண்டும்` 
+          : `✗ Gender must be ${expected}`);
       } else {
+        const genderVal = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (isTamil ? 'ஆண்' : 'Male');
         passed.push(isTamil 
-          ? `பாலின தகுதி பொருந்துகிறது (${profile.gender}).` 
-          : `Gender matches requirements (${profile.gender}).`);
+          ? `✓ பாலினம்: ${genderVal}` 
+          : `✓ Gender is ${genderVal}`);
       }
     }
 
     // 3. Income check
     if (criteria.max_annual_income !== undefined && criteria.max_annual_income !== null) {
       if (profile.income === undefined || profile.income === null || profile.income === 0) {
-        missing.push(isTamil ? "ஆண்டு வருமானம் விவரம் தேவை." : "Annual family income is required.");
+        missing.push(isTamil 
+          ? `? ஆண்டு வருமானம் விவரம் தேவை (₹${criteria.max_annual_income.toLocaleString('en-IN')}க்குள் இருக்க வேண்டும்)` 
+          : `? Family income information still required (Must be under ₹${criteria.max_annual_income.toLocaleString('en-IN')})`);
       } else if (profile.income > criteria.max_annual_income) {
         failed.push(isTamil 
-          ? `ஆண்டு வருமானம் ₹${profile.income.toLocaleString('en-IN')} வரம்பைவிட (₹${criteria.max_annual_income.toLocaleString('en-IN')}) அதிகமாக உள்ளது.` 
-          : `Annual income of ₹${profile.income.toLocaleString()} exceeds the limit of ₹${criteria.max_annual_income.toLocaleString()}.`);
+          ? `✗ ஆண்டு குடும்ப வருமானம் ₹${criteria.max_annual_income.toLocaleString('en-IN')}க்கு மேல் உள்ளது (தற்போதைய வருமானம்: ₹${profile.income.toLocaleString('en-IN')})` 
+          : `✗ Family income exceeds ₹${criteria.max_annual_income.toLocaleString('en-IN')} (Current: ₹${profile.income.toLocaleString('en-IN')})`);
       } else {
         passed.push(isTamil 
-          ? `ஆண்டு வருமானம் வரம்பிற்குள் உள்ளது (₹${profile.income.toLocaleString('en-IN')} <= ₹${criteria.max_annual_income.toLocaleString('en-IN')}).` 
-          : `Annual income is within the limit (₹${profile.income.toLocaleString()} <= ₹${criteria.max_annual_income.toLocaleString()}).`);
+          ? `✓ குடும்ப வருமானம் ₹${criteria.max_annual_income.toLocaleString('en-IN')}க்குள் உள்ளது` 
+          : `✓ Family income is under ₹${criteria.max_annual_income.toLocaleString('en-IN')}`);
       }
     }
 
     // 4. Student status
     if (criteria.student_required) {
       if (!profile.isStudent && profile.occupation !== 'student') {
-        failed.push(isTamil ? "மாணவர் நிலை தேவை." : "Student status is required.");
+        failed.push(isTamil ? "✗ மாணவர் நிலை தேவை" : "✗ Enrolled Student status required");
       } else {
-        passed.push(isTamil ? "மாணவர் நிலை சரிபார்க்கப்பட்டது." : "Candidate is a verified current student.");
+        passed.push(isTamil ? "✓ மாணவர் நிலை சரிபார்க்கப்பட்டது" : "✓ Enrolled Student status verified");
       }
     }
 
     // 5. Gov School studied
     if (criteria.gov_school_required) {
       if (profile.govSchoolStudied === undefined || profile.govSchoolStudied === null) {
-        missing.push(isTamil ? "அரசு பள்ளி கல்வி விவரம் தேவை." : "Government school study verification is required.");
+        missing.push(isTamil ? "? அரசு பள்ளி கல்வி விவரம் தேவை" : "? Government school schooling information still required");
       } else if (!profile.govSchoolStudied) {
-        failed.push(isTamil ? "அரசு பள்ளியில் படித்திருக்க வேண்டும்." : "Welfare benefit requires studying in a Government School.");
+        failed.push(isTamil ? "✗ அரசு பள்ளியில் படித்திருக்க வேண்டும்" : "✗ Government School schooling required");
       } else {
-        passed.push(isTamil ? "அரசு பள்ளியில் படித்தது சரிபார்க்கப்பட்டது." : "Studied in Government School verified.");
+        passed.push(isTamil ? "✓ அரசு பள்ளியில் படித்தது சரிபார்க்கப்பட்டது" : "✓ Studied in Government School");
       }
     }
 
     // 6. Gov College studied
     if (criteria.gov_college_required) {
       if (profile.govCollegeStudied === undefined || profile.govCollegeStudied === null) {
-        missing.push(isTamil ? "அரசு கல்லூரி கல்வி விவரம் தேவை." : "Government college study verification is required.");
+        missing.push(isTamil ? "? அரசு கல்லூரி கல்வி விவரம் தேவை" : "? Government college enrollment information still required");
       } else if (!profile.govCollegeStudied) {
-        failed.push(isTamil ? "அரசு கல்லூரியில் படித்திருக்க வேண்டும்." : "Welfare benefit requires studying in a Government College.");
+        failed.push(isTamil ? "✗ அரசு கல்லூரியில் படித்திருக்க வேண்டும்" : "✗ Government College enrollment required");
       } else {
-        passed.push(isTamil ? "அரசு கல்லூரியில் படித்தது சரிபார்க்கப்பட்டது." : "Studied in Government College verified.");
+        passed.push(isTamil ? "✓ அரசு கல்லூரியில் படித்தது சரிபார்க்கப்பட்டது" : "✓ Enrolled in Government College");
       }
     }
 
     // 7. Disability status
     if (criteria.disability_required) {
       if (!profile.isDisability) {
-        failed.push(isTamil ? "மாற்றுத்திறனாளி தகுதி தேவை." : "Scheme requires differently-abled / disability status.");
+        failed.push(isTamil ? "✗ மாற்றுத்திறனாளி தகுதி தேவை" : "✗ Differently-abled status required");
       } else {
-        passed.push(isTamil ? "மாற்றுத்திறனாளி தகுதி பொருந்துகிறது." : "Differently-abled status satisfied.");
+        passed.push(isTamil ? "✓ மாற்றுத்திறனாளி தகுதி சரிபார்க்கப்பட்டது" : "✓ Differently-abled status satisfied");
       }
     }
 
     // 8. Widow / Single Parent status
     if (criteria.widow_required) {
       if (!profile.isWidow) {
-        failed.push(isTamil ? "விதவை அல்லது ஒற்றை பெற்றோர் தகுதி தேவை." : "Scheme requires widow / single parent status.");
+        failed.push(isTamil ? "✗ விதவை அல்லது ஒற்றை பெற்றோர் தகுதி தேவை" : "✗ Widow / Single Parent status required");
       } else {
-        passed.push(isTamil ? "விதவை / ஒற்றை பெற்றோர் தகுதி பொருந்துகிறது." : "Widow / Single parent status satisfied.");
+        passed.push(isTamil ? "✓ விதவை / ஒற்றை பெற்றோர் தகுதி சரிபார்க்கப்பட்டது" : "✓ Widow / Single Parent status satisfied");
       }
     }
 
     // 9. Farmer family status
     if (criteria.farmer_required) {
       if (!profile.isFarmer && profile.occupation !== 'farmer') {
-        failed.push(isTamil ? "விவசாயி தகுதி தேவை." : "Scheme requires agricultural landholder / farmer status.");
+        failed.push(isTamil ? "✗ விவசாயி தகுதி தேவை" : "✗ Farmer / Landholder family status required");
       } else {
-        passed.push(isTamil ? "விவசாயி தகுதி சரிபார்க்கப்பட்டது." : "Farmer status verified.");
+        passed.push(isTamil ? "✓ விவசாயி தகுதி சரிபார்க்கப்பட்டது" : "✓ Farmer / Landholder family status verified");
       }
     }
 
     // 10. Residency state check
     if (criteria.native_state) {
       if (!profile.district) {
-        missing.push(isTamil ? "இருப்பிட/மாவட்ட விவரங்கள் தேவை." : "Residency/District proof details are required.");
+        missing.push(isTamil ? "? இருப்பிட/மாவட்ட விவரங்கள் தேவை" : "? Residency district information still required");
       } else {
         passed.push(isTamil 
-          ? `தமிழக இருப்பிட தகுதி (${profile.district} மாவட்டம்).` 
-          : `Native resident of ${criteria.native_state} (${profile.district} District).`);
+          ? `✓ தமிழக இருப்பிட தகுதி (${profile.district} மாவட்டம்)` 
+          : `✓ resident of ${criteria.native_state} (${profile.district} District)`);
       }
     }
 
-    // Check certificates list availability
+    // 11. Cross-check documents & renewals
     const reqCerts = criteria.required_certificates || [];
     let uploadedDocs = [];
     try {
@@ -261,30 +257,94 @@
       if (stored) uploadedDocs = JSON.parse(stored);
     } catch (e) {}
 
-    const uploadedTypes = uploadedDocs.map(d => d.doc_type || "");
+    const now = new Date();
+    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
     reqCerts.forEach(cert => {
-      const matchFound = uploadedTypes.some(type => {
-        const t = type.toLowerCase();
+      const matchingUploaded = uploadedDocs.find(d => {
+        const t = (d.doc_type || "").toLowerCase();
         const c = cert.toLowerCase();
         return t.includes(c) || c.includes(t);
       });
 
-      if (!matchFound) {
-        missingDocs.push(cert);
+      if (!matchingUploaded) {
+        missingDocsList.push(cert);
+        missing.push(isTamil ? `? ${cert} ஆவணம் சமர்ப்பிக்கப்படவில்லை` : `? ${cert} not provided in document wallet`);
       } else {
-        passed.push(isTamil ? `ஆவணம் பதிவேற்றப்பட்டது: ${cert}` : `Required Document uploaded: ${cert}`);
+        let isExpired = false;
+        let isRenewalSoon = false;
+        let expiryDateStr = "";
+
+        if (matchingUploaded.expiry_date) {
+          const exp = new Date(matchingUploaded.expiry_date);
+          expiryDateStr = exp.toLocaleDateString(isTamil ? 'ta-IN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+          if (exp < now) {
+            isExpired = true;
+          } else if (exp <= thirtyDaysFromNow) {
+            isRenewalSoon = true;
+          }
+        }
+
+        if (isExpired) {
+          expiredDocs.push({ name: cert, expiry: expiryDateStr });
+          failed.push(isTamil ? `✗ ${cert} காலாவதியாகிவிட்டது (முடிந்த தேதி: ${expiryDateStr})` : `✗ ${cert} is expired (Expired on ${expiryDateStr})`);
+        } else if (isRenewalSoon) {
+          renewingDocs.push({ name: cert, expiry: expiryDateStr });
+          passed.push(isTamil ? `✓ ${cert} சரிபார்க்கப்பட்டது (ஆனால் புதுப்பிக்க வேண்டும்: ${expiryDateStr})` : `✓ ${cert} verified (But needs renewal soon: ${expiryDateStr})`);
+        } else {
+          verifiedDocs.push({ name: cert, expiry: expiryDateStr });
+          passed.push(isTamil ? `✓ ${cert} ஆவணம் சரிபார்க்கப்பட்டது` : `✓ ${cert} provided and verified`);
+        }
       }
     });
 
+    // 12. Calculate Eligibility Status
     let status = "Eligible";
     if (failed.length > 0) {
       status = "Not Eligible";
     } else if (missing.length > 0) {
       status = "Additional Information Required";
-    } else if (missingDocs.length > 0) {
+    } else if (missingDocsList.length > 0) {
       status = "Additional Documents Required";
     } else {
       status = "Eligible";
+    }
+
+    // 13. Calculate Confidence Score / Rating
+    let confidence = "High Confidence";
+    const confidenceReasons = [];
+
+    if (failed.length > 0) {
+      confidence = "Needs Verification";
+      confidenceReasons.push(isTamil ? "திட்ட தகுதி விதிகள் பொருந்தவில்லை" : "Eligibility criteria failed");
+    } else if (missing.some(m => !m.includes("not provided") && !m.includes("சமர்ப்பிக்கப்படவில்லை"))) {
+      confidence = "Needs Verification";
+      confidenceReasons.push(isTamil ? "சுயவிவர தகவல் விடுபட்டுள்ளது" : "Missing profile information");
+    } else if (expiredDocs.length > 0) {
+      confidence = "Needs Verification";
+      confidenceReasons.push(isTamil ? "காலாவதியான ஆவணங்கள் உள்ளன" : "Expired documents");
+    }
+
+    if (confidence !== "Needs Verification") {
+      if (missingDocsList.length > 0) {
+        confidence = "Medium Confidence";
+        confidenceReasons.push(isTamil ? "கூடுதல் ஆவணங்கள் தேவை" : "Incomplete document verification");
+      }
+      if (renewingDocs.length > 0) {
+        confidence = "Medium Confidence";
+        confidenceReasons.push(isTamil ? "ஆவணங்கள் விரைவில் புதுப்பிக்கப்பட வேண்டும்" : "Documents needing renewal soon");
+      }
+      
+      // Check if rules updated recently (within 7 days)
+      if (scheme.updated_at) {
+        const updateDate = new Date(scheme.updated_at);
+        const diffTime = Math.abs(now - updateDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays <= 7) {
+          confidence = "Medium Confidence";
+          confidenceReasons.push(isTamil ? "திட்ட விதிகள் சமீபத்தில் புதுப்பிக்கப்பட்டன" : "Scheme rules recently updated");
+        }
+      }
     }
 
     return {
@@ -292,7 +352,12 @@
       passed,
       failed,
       missing,
-      missingDocs
+      verifiedDocs,
+      expiredDocs,
+      renewingDocs,
+      missingDocsList,
+      confidence,
+      confidenceReasons
     };
   }
 
@@ -347,7 +412,7 @@
 
     container.innerHTML = filtered.map(scheme => {
       const isState = (scheme.state_or_central === 'state');
-      const evalData = scheme.evaluation || { status: 'Eligible', passed: [], failed: [], missing: [], missingDocs: [] };
+      const evalData = scheme.evaluation || { status: 'Eligible', passed: [], failed: [], missing: [], verifiedDocs: [], expiredDocs: [], renewingDocs: [], missingDocsList: [], confidence: 'High Confidence', confidenceReasons: [] };
       
       let badgeColor = "#10b981"; // Green
       let badgeBg = "rgba(16, 185, 129, 0.12)";
@@ -367,6 +432,34 @@
         statusText = isTamil ? "தகுதி இருக்கக்கூடும்" : "Likely Eligible";
       }
 
+      // Confidence badge color
+      let confColor = "#10b981";
+      let confBg = "rgba(16, 185, 129, 0.08)";
+      let confIcon = "fa-circle-check";
+      let confLabel = isTamil ? "அதிநம்பிக்கை" : "High Confidence";
+
+      if (evalData.confidence === "Medium Confidence") {
+        confColor = "#3b82f6";
+        confBg = "rgba(59, 130, 246, 0.08)";
+        confIcon = "fa-circle-info";
+        confLabel = isTamil ? "நடுத்தர நம்பிக்கை" : "Medium Confidence";
+      } else if (evalData.confidence === "Needs Verification") {
+        confColor = "#f59e0b";
+        confBg = "rgba(245, 158, 11, 0.08)";
+        confIcon = "fa-triangle-exclamation";
+        confLabel = isTamil ? "சரிபார்ப்பு தேவை" : "Needs Verification";
+      }
+
+      // Metadata formats
+      let lastVerifiedDateStr = isTamil ? "குறிப்பிடப்படவில்லை" : "Not specified";
+      if (scheme.last_verified_date) {
+        const d = new Date(scheme.last_verified_date);
+        lastVerifiedDateStr = d.toLocaleDateString(isTamil ? 'ta-IN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      }
+
+      const notifNumber = scheme.official_notification_number || (isTamil ? "வழங்கப்படவில்லை" : "Not specified");
+      const dataSourceVal = scheme.data_source || (isTamil ? "அரசாங்கம்" : "Official Govt Source");
+
       return `
         <div class="scheme-result-card-v2" data-id="${scheme.id}">
           
@@ -385,7 +478,7 @@
 
           <!-- Department Info -->
           <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-            <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> ${scheme.department_name || scheme.department}
+            <i class="fa-solid fa-building-columns" style="color: var(--primary); margin-right: 0.25rem;"></i> ${scheme.department_name || scheme.department}
           </div>
 
           <!-- Short Description -->
@@ -395,95 +488,141 @@
 
           <!-- Collapsible Explanation Panel -->
           <div class="ai-why-eligible-box" style="margin-bottom: 1.25rem; background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(99, 102, 241, 0.05)); border: 1px solid rgba(13, 148, 136, 0.3); border-radius: 12px; padding: 1.25rem;">
-            <div class="ai-box-title" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 800; color: var(--text-main); font-size: 0.9rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(13, 148, 136, 0.15); padding-bottom: 0.4rem;">
-              <i class="fa-solid fa-award" style="color: var(--primary);"></i>
-              <span>${isTamil ? 'தகுதி மதிப்பீடு' : 'Eligibility Evaluation'}</span>
+            
+            <!-- Metadata & Sources Trust Section -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; background: var(--bg-app); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.78rem;">
+              <div>
+                <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'தரவு மூலம்' : 'Data Source'}</span>
+                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-server" style="color: var(--primary); margin-right: 0.25rem;"></i>${dataSourceVal}</span>
+              </div>
+              <div>
+                <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'கடைசியாக சரிபார்க்கப்பட்டது' : 'Last Verified'}</span>
+                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 0.25rem;"></i>${lastVerifiedDateStr}</span>
+              </div>
+              <div>
+                <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'அரசாணை எண்' : 'Notification No.'}</span>
+                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-file-contract" style="color: #6366f1; margin-right: 0.25rem;"></i>${notifNumber}</span>
+              </div>
             </div>
 
-            <!-- Status Notice Box -->
-            ${evalData.status === "Likely Eligible" ? `
-              <div style="background: rgba(13, 148, 136, 0.1); border-left: 4px solid #0d9488; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; color: var(--text-main); margin-bottom: 0.75rem;">
-                <i class="fa-solid fa-circle-info"></i> ${isTamil ? 'ஓரளவு தகுதி - அதிகாரப்பூர்வ திட்ட வழிகாட்டுதல்களை சரிபார்க்கவும்.' : 'Likely Eligible – Please verify with the official scheme guidelines.'}
-              </div>
-            ` : ''}
-
-            ${evalData.status === "Additional Information Required" ? `
-              <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; color: var(--text-main); margin-bottom: 0.75rem;">
-                <i class="fa-solid fa-circle-exclamation"></i> ${isTamil ? 'கூடுதல் தகவல் தேவை - உங்கள் சுயவிவரத்தை முழுமையாக நிரப்பவும்.' : 'Additional Information Required – Please fill in missing profile fields.'}
-              </div>
-            ` : ''}
-
-            <!-- 1. Why You Qualify (Passed Rules) -->
-            ${evalData.passed.length > 0 ? `
-              <div style="margin-bottom: 0.65rem;">
-                <div style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
-                  ${isTamil ? 'நிறைவு செய்த தகுதிகள்' : 'Satisfied Conditions'}
+            <!-- Eligibility Confidence Rating -->
+            <div style="background: ${confBg}; border: 1px solid ${confColor}; border-radius: 10px; padding: 0.85rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.85rem; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid ${confIcon}" style="color: ${confColor}; font-size: 1.2rem;"></i>
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">${isTamil ? 'மதிப்பீட்டு நம்பிக்கை அளவு' : 'Assessment Confidence'}</div>
+                  ${evalData.confidenceReasons.length > 0 ? `<div style="font-size: 0.72rem; color: var(--text-muted);">${isTamil ? 'காரணங்கள்' : 'Reasons'}: ${evalData.confidenceReasons.join(', ')}</div>` : ''}
                 </div>
-                <ul style="font-size: 0.82rem; color: var(--text-main); line-height: 1.4; margin: 0; padding-left: 1.1rem;">
-                  ${evalData.passed.map(p => `<li>${p}</li>`).join('')}
-                </ul>
               </div>
-            ` : ''}
+              <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: ${confColor}; background: ${confBg}; border: 1px solid ${confColor}; padding: 0.25rem 0.6rem; border-radius: 999px;">
+                ${confLabel}
+              </span>
+            </div>
 
-            <!-- 2. Missing Information -->
-            ${evalData.missing.length > 0 ? `
-              <div style="margin-bottom: 0.65rem;">
-                <div style="font-size: 0.75rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
-                  ${isTamil ? 'விடுபட்ட விவரங்கள்' : 'Missing Information'}
-                </div>
-                <ul style="font-size: 0.82rem; color: var(--text-main); line-height: 1.4; margin: 0; padding-left: 1.1rem;">
-                  ${evalData.missing.map(m => `<li style="color: #d97706;">${m}</li>`).join('')}
-                </ul>
+            <!-- Rule-by-rule Checklist Explanation -->
+            <div style="margin-bottom: 1rem;">
+              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                ${isTamil ? 'தகுதி நிபந்தனைகள் விவரம்' : 'Rule-by-Rule Evaluation'}
               </div>
-            ` : ''}
+              
+              <ul style="font-size: 0.85rem; color: var(--text-main); line-height: 1.5; margin: 0; padding: 0; list-style: none;">
+                <!-- Passed Rules -->
+                ${evalData.passed.map(p => `
+                  <li style="margin-bottom: 0.4rem; display: flex; align-items: flex-start; gap: 0.4rem; color: #047857;">
+                    <i class="fa-solid fa-circle-check" style="margin-top: 0.2rem; flex-shrink: 0;"></i>
+                    <span>${p.replace('✓ ', '')}</span>
+                  </li>
+                `).join('')}
+                
+                <!-- Failed Rules -->
+                ${evalData.failed.map(f => `
+                  <li style="margin-bottom: 0.4rem; display: flex; align-items: flex-start; gap: 0.4rem; color: #b91c1c;">
+                    <i class="fa-solid fa-circle-xmark" style="margin-top: 0.2rem; flex-shrink: 0;"></i>
+                    <span>${f.replace('✗ ', '')}</span>
+                  </li>
+                `).join('')}
 
-            <!-- 3. Required Documents Checklist -->
-            <div style="margin-top: 0.5rem; border-top: 1px dashed rgba(13, 148, 136, 0.15); padding-top: 0.5rem;">
-              <div style="font-size: 0.75rem; font-weight: 800; color: #6366f1; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
-                ${isTamil ? 'தேவையான சான்றிதழ்கள்' : 'Required Documents'}
+                <!-- Missing Rules -->
+                ${evalData.missing.map(m => `
+                  <li style="margin-bottom: 0.4rem; display: flex; align-items: flex-start; gap: 0.4rem; color: #b45309;">
+                    <i class="fa-solid fa-circle-question" style="margin-top: 0.2rem; flex-shrink: 0;"></i>
+                    <span>${m.replace('? ', '')}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <!-- Detailed Document Verification Checklist -->
+            <div style="border-top: 1px dashed rgba(13, 148, 136, 0.15); padding-top: 0.85rem;">
+              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem;">
+                ${isTamil ? 'சான்றிதழ் சரிபார்ப்பு நிலை' : 'Document Wallet Verification'}
               </div>
-              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.25rem;">
-                ${(scheme.eligibility_criteria.required_certificates || []).map(cert => {
-                  const hasDoc = !evalData.missingDocs.includes(cert);
-                  return `
-                    <span style="font-size: 0.72rem; background: ${hasDoc ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)'}; border: 1px solid ${hasDoc ? '#10b981' : '#9ca3af'}; padding: 0.2rem 0.5rem; border-radius: 6px; color: ${hasDoc ? '#10b981' : '#4b5563'};">
-                      <i class="fa-solid ${hasDoc ? 'fa-check' : 'fa-circle-question'}"></i> ${cert}
-                    </span>
-                  `;
-                }).join('')}
+              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <!-- Verified Docs -->
+                ${evalData.verifiedDocs.map(d => `
+                  <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.08); border: 1px solid #10b981; padding: 0.2rem 0.5rem; border-radius: 6px; color: #10b981; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <i class="fa-solid fa-circle-check"></i> ${d.name} (${isTamil ? 'சரிபார்க்கப்பட்டது' : 'Verified'})
+                  </span>
+                `).join('')}
+
+                <!-- Renewals needed soon -->
+                ${evalData.renewingDocs.map(d => `
+                  <span style="font-size: 0.72rem; background: rgba(59, 130, 246, 0.08); border: 1px solid #3b82f6; padding: 0.2rem 0.5rem; border-radius: 6px; color: #3b82f6; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <i class="fa-solid fa-clock-rotate-left"></i> ${d.name} (${isTamil ? 'புதுப்பிக்கப்பட வேண்டும்' : 'Renewal Needed'}: ${d.expiry})
+                  </span>
+                `).join('')}
+
+                <!-- Expired Docs -->
+                ${evalData.expiredDocs.map(d => `
+                  <span style="font-size: 0.72rem; background: rgba(239, 68, 68, 0.08); border: 1px solid #ef4444; padding: 0.2rem 0.5rem; border-radius: 6px; color: #ef4444; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> ${d.name} (${isTamil ? 'காலாவதியானது' : 'Expired'}: ${d.expiry})
+                  </span>
+                `).join('')}
+
+                <!-- Missing Docs -->
+                ${evalData.missingDocsList.map(name => `
+                  <span style="font-size: 0.72rem; background: rgba(107, 114, 128, 0.08); border: 1px solid #9ca3af; padding: 0.2rem 0.5rem; border-radius: 6px; color: #4b5563; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <i class="fa-solid fa-circle-question"></i> ${name} (${isTamil ? 'இல்லை' : 'Missing'})
+                  </span>
+                `).join('')}
               </div>
             </div>
 
           </div>
 
-          <!-- Details Grid: Benefits & Documents -->
-          <div class="scheme-details-grid">
-            
-            <!-- Benefits Block -->
-            <div class="scheme-detail-block">
-              <div class="scheme-block-title">
-                <i class="fa-solid fa-gift" style="color: #6366f1;"></i> ${isTamil ? 'முக்கிய நன்மைகள்' : 'Key Benefits'}
-              </div>
-              <div class="scheme-block-body">
-                ${scheme.benefits_summary || scheme.benefits || 'Direct financial transfer or medical assistance.'}
-              </div>
-            </div>
-
+          <!-- Professional Assessment Disclaimer -->
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.75rem; color: var(--text-muted); line-height: 1.45;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--primary); margin-right: 0.4rem; font-size: 0.85rem;"></i>
+            <span>${isTamil 
+              ? 'இந்த தகுதி மதிப்பீடு CrowdCity AI-ல் உள்ள தற்போதைய விதிகளின் அடிப்படையில் உருவாக்கப்பட்டது. இறுதி ஒப்புதல் சம்பந்தப்பட்ட அரசுத் துறையின் சரிபார்ப்புக்கு உட்பட்டது.' 
+              : 'This eligibility assessment is generated using the latest rules available in CrowdCity AI. Final approval is subject to verification by the concerned Government Department.'}</span>
           </div>
 
           <!-- Card Actions -->
-          <div class="scheme-actions-v2">
-            <a href="scheme-details.html?id=${scheme.id}" class="btn-save-bookmark" style="text-decoration: none;">
+          <div class="scheme-actions-v2" style="display: flex; gap: 0.65rem; align-items: center; justify-content: flex-end; flex-wrap: wrap;">
+            <a href="scheme-details.html?id=${scheme.id}" class="btn-save-bookmark" style="text-decoration: none; padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 0.4rem;">
               <i class="fa-solid fa-circle-info"></i>
               <span>${isTamil ? 'விவரங்கள் பார்' : 'View Details'}</span>
             </a>
 
-            <button class="btn-save-bookmark" data-id="${scheme.id}">
+            <button class="btn-save-bookmark" data-id="${scheme.id}" style="padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 0.4rem; background: transparent; cursor: pointer;">
               <i class="fa-regular fa-bookmark"></i>
               <span>${isTamil ? 'சேமிக்கவும்' : 'Save Scheme'}</span>
             </button>
 
-            <a href="${scheme.official_portal_url || '#'}" target="_blank" rel="noopener noreferrer" class="btn-apply-portal">
+            <!-- Official Source Button -->
+            <a href="${scheme.official_portal_url || '#'}" target="_blank" rel="noopener noreferrer" class="btn" style="padding: 0.6rem 1rem; font-size: 0.82rem; font-weight: 700; text-decoration: none; border: 1px solid var(--primary); color: var(--primary); background: transparent; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+              <i class="fa-solid fa-building-columns"></i> <span>${isTamil ? 'அதிகாரப்பூர்வ மூலம்' : 'Official Source'}</span>
+            </a>
+
+            <!-- View Official Guidelines Button -->
+            ${scheme.official_pdf_link ? `
+              <a href="${scheme.official_pdf_link}" target="_blank" rel="noopener noreferrer" class="btn" style="padding: 0.6rem 1rem; font-size: 0.82rem; font-weight: 700; text-decoration: none; border: 1px solid #6366f1; color: #6366f1; background: transparent; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-file-pdf"></i> <span>${isTamil ? 'வழிகாட்டுதல்கள்' : 'View Guidelines'}</span>
+              </a>
+            ` : ''}
+
+            <a href="${scheme.official_portal_url || '#'}" target="_blank" rel="noopener noreferrer" class="btn-apply-portal" style="padding: 0.6rem 1.25rem; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none;">
               <span>${isTamil ? 'விண்ணப்பிக்க' : 'Official Apply'}</span>
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
             </a>

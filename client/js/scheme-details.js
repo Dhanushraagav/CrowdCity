@@ -394,6 +394,85 @@
     const guideDept = document.getElementById('guide-fact-dept');
     if (guideDept) guideDept.textContent = scheme.department_name || scheme.department;
 
+    // Appending Trust Metadata into guide facts grid
+    const factsGrid = document.querySelector('.app-guide-facts-grid');
+    if (factsGrid) {
+      const currentLang = localStorage.getItem('preferred_language') || 'en';
+      const isTamil = (currentLang === 'ta');
+      
+      const lastVerifiedVal = scheme.last_verified_date 
+        ? new Date(scheme.last_verified_date).toLocaleDateString(isTamil ? 'ta-IN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+        : (isTamil ? 'அண்மையில்' : 'Recently');
+
+      // Prevent duplicate additions
+      const existingMeta = factsGrid.querySelectorAll('.app-guide-fact-item-dynamic');
+      existingMeta.forEach(el => el.remove());
+
+      const notifItem = document.createElement('div');
+      notifItem.className = 'app-guide-fact-item app-guide-fact-item-dynamic';
+      notifItem.innerHTML = `
+        <div class="app-guide-fact-label">${isTamil ? 'அரசாணை எண்' : 'Notification No.'}</div>
+        <div class="app-guide-fact-value" style="color: #6366f1; font-weight: 800;">${scheme.official_notification_number || 'N/A'}</div>
+      `;
+      factsGrid.appendChild(notifItem);
+
+      const verifiedItem = document.createElement('div');
+      verifiedItem.className = 'app-guide-fact-item app-guide-fact-item-dynamic';
+      verifiedItem.innerHTML = `
+        <div class="app-guide-fact-label">${isTamil ? 'சரிபார்க்கப்பட்ட தேதி' : 'Last Verified'}</div>
+        <div class="app-guide-fact-value" style="color: #10b981; font-weight: 800;">${lastVerifiedVal}</div>
+      `;
+      factsGrid.appendChild(verifiedItem);
+
+      const sourceItem = document.createElement('div');
+      sourceItem.className = 'app-guide-fact-item app-guide-fact-item-dynamic';
+      sourceItem.innerHTML = `
+        <div class="app-guide-fact-label">${isTamil ? 'தரவு மூலம்' : 'Data Source'}</div>
+        <div class="app-guide-fact-value" style="color: var(--primary); font-weight: 800;">${scheme.data_source || 'Government'}</div>
+      `;
+      factsGrid.appendChild(sourceItem);
+    }
+
+    // Appending Guidelines & Official Source buttons
+    const actionContainer = document.querySelector('.details-action-bar');
+    if (actionContainer) {
+      const currentLang = localStorage.getItem('preferred_language') || 'en';
+      const isTamil = (currentLang === 'ta');
+      
+      // Update apply button text & url
+      const applyBtn = document.getElementById('btn-details-apply');
+      if (applyBtn) {
+        applyBtn.href = scheme.official_portal_url || '#';
+        applyBtn.querySelector('span').textContent = isTamil ? 'விண்ணப்பிக்க' : 'Official Apply';
+      }
+
+      // Prevent duplicate additions
+      const existingDynamicBtns = actionContainer.querySelectorAll('.btn-details-action-dynamic');
+      existingDynamicBtns.forEach(el => el.remove());
+
+      // Add Official Source link button
+      const sourceBtn = document.createElement('a');
+      sourceBtn.href = scheme.official_portal_url || '#';
+      sourceBtn.target = '_blank';
+      sourceBtn.rel = 'noopener noreferrer';
+      sourceBtn.className = 'btn btn-secondary btn-details-action-dynamic';
+      sourceBtn.style = 'padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;';
+      sourceBtn.innerHTML = `<i class="fa-solid fa-building-columns"></i> <span>${isTamil ? 'அதிகாரப்பூர்வ மூலம்' : 'Official Source'}</span>`;
+      actionContainer.appendChild(sourceBtn);
+
+      // Add guidelines PDF button if exists
+      if (scheme.official_pdf_link) {
+        const guideBtn = document.createElement('a');
+        guideBtn.href = scheme.official_pdf_link;
+        guideBtn.target = '_blank';
+        guideBtn.rel = 'noopener noreferrer';
+        guideBtn.className = 'btn btn-secondary btn-details-action-dynamic';
+        guideBtn.style = 'padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; border-color: #6366f1; color: #6366f1;';
+        guideBtn.innerHTML = `<i class="fa-solid fa-file-pdf"></i> <span>${isTamil ? 'வழிகாட்டுதல்கள்' : 'View Guidelines'}</span>`;
+        actionContainer.appendChild(guideBtn);
+      }
+    }
+
     // Render Interactive Document Checklist
     renderDocumentChecklist(scheme);
 

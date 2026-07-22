@@ -1,4 +1,4 @@
-// CrowdCity AI v2.0 - Step 19: AI Proactive Recommendation Engine Service
+// CrowdCity AI v2.2.1 - Step 19: AI Proactive Recommendation Engine Service
 // Analyzes citizen profile, document wallet, application tracker, and reminders to generate personalized insights and next steps.
 
 import logger from '../config/logger.js';
@@ -10,25 +10,25 @@ function evaluateEligibilityServer(scheme, profile, docs = []) {
   const passed = [];
   const failed = [];
   const missing = [];
-  const missingDocs = [];
+  
+  const verifiedDocs = [];
+  const expiredDocs = [];
+  const renewingDocs = [];
+  const missingDocsList = [];
+
+  const now = new Date();
+  const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   // 1. Age check
-  if (criteria.min_age !== undefined && criteria.min_age !== null) {
+  if ((criteria.min_age !== undefined && criteria.min_age !== null) || (criteria.max_age !== undefined && criteria.max_age !== null)) {
+    const min = criteria.min_age || 18;
+    const max = criteria.max_age || 120;
     if (!profile.age) {
-      missing.push("Age information is required.");
-    } else if (profile.age < criteria.min_age) {
-      failed.push(`Age is below the minimum required age of ${criteria.min_age}.`);
+      missing.push(`Age information still required (Must be between ${min}–${max})`);
+    } else if (profile.age < min || profile.age > max) {
+      failed.push(`Age must be between ${min}–${max} (Current: ${profile.age})`);
     } else {
-      passed.push(`Age satisfies minimum requirement.`);
-    }
-  }
-  if (criteria.max_age !== undefined && criteria.max_age !== null) {
-    if (!profile.age) {
-      if (!missing.includes("Age information is required.")) missing.push("Age information is required.");
-    } else if (profile.age > criteria.max_age) {
-      failed.push(`Age exceeds the maximum allowed age of ${criteria.max_age}.`);
-    } else {
-      passed.push(`Age satisfies maximum limit.`);
+      passed.push(`Age between ${min}–${max}`);
     }
   }
 
@@ -46,11 +46,11 @@ function evaluateEligibilityServer(scheme, profile, docs = []) {
   // 3. Income check
   if (criteria.max_annual_income !== undefined && criteria.max_annual_income !== null) {
     if (profile.income === undefined || profile.income === null || profile.income === 0) {
-      missing.push("Annual family income is required.");
+      missing.push(`Annual family income information still required (Must be under ₹${criteria.max_annual_income.toLocaleString('en-IN')})`);
     } else if (profile.income > criteria.max_annual_income) {
-      failed.push(`Annual income of ₹${profile.income.toLocaleString()} exceeds the limit.`);
+      failed.push(`Family income exceeds ₹${criteria.max_annual_income.toLocaleString('en-IN')} (Current: ₹${profile.income.toLocaleString('en-IN')})`);
     } else {
-      passed.push(`Annual income is within the limit.`);
+      passed.push(`Family income is under ₹${criteria.max_annual_income.toLocaleString('en-IN')}`);
     }
   }
 
@@ -121,32 +121,92 @@ function evaluateEligibilityServer(scheme, profile, docs = []) {
     }
   }
 
-  // Check certificates list availability
+  // 11. Cross-check documents & renewals
   const reqCerts = criteria.required_certificates || [];
-  const uploadedTypes = docs.map(d => d.doc_type || "");
   reqCerts.forEach(cert => {
-    const matchFound = uploadedTypes.some(type => {
-      const t = type.toLowerCase();
+    // Check if doc matches in list
+    const matchingUploaded = docs.find(d => {
+      const t = (d.doc_type || "").toLowerCase();
       const c = cert.toLowerCase();
       return t.includes(c) || c.includes(t);
     });
 
-    if (!matchFound) {
-      missingDocs.push(cert);
+    if (!matchingUploaded) {
+      missingDocsList.push(cert);
+      missing.push(`${cert} not provided in document wallet`);
     } else {
-      passed.push(`Required Document uploaded: ${cert}`);
+      let isExpired = false;
+      let isRenewalSoon = false;
+      let expiryDateStr = "";
+
+      if (matchingUploaded.expiry_date) {
+        const exp = new Date(matchingUploaded.expiry_date);
+        expiryDateStr = exp.toLocaleDateString('en-US');
+        if (exp < now) {
+          isExpired = true;
+        } else if (exp <= thirtyDaysFromNow) {
+          isRenewalSoon = true;
+        }
+      }
+
+      if (isExpired) {
+        expiredDocs.push({ name: cert, expiry: expiryDateStr });
+        failed.push(`${cert} is expired (Expired on ${expiryDateStr})`);
+      } else if (isRenewalSoon) {
+        renewingDocs.push({ name: cert, expiry: expiryDateStr });
+        passed.push(`${cert} verified (But needs renewal soon: ${expiryDateStr})`);
+      } else {
+        verifiedDocs.push({ name: cert, expiry: expiryDateStr });
+        passed.push(`${cert} provided and verified`);
+      }
     }
   });
 
+  // Calculate status
   let status = "Eligible";
   if (failed.length > 0) {
     status = "Not Eligible";
   } else if (missing.length > 0) {
     status = "Additional Information Required";
-  } else if (missingDocs.length > 0) {
+  } else if (missingDocsList.length > 0) {
     status = "Additional Documents Required";
   } else {
     status = "Eligible";
+  }
+
+  // Calculate confidence
+  let confidence = "High Confidence";
+  const confidenceReasons = [];
+
+  if (failed.length > 0) {
+    confidence = "Needs Verification";
+    confidenceReasons.push("Eligibility criteria failed");
+  } else if (missing.some(m => !m.includes("not provided"))) {
+    confidence = "Needs Verification";
+    confidenceReasons.push("Missing profile information");
+  } else if (expiredDocs.length > 0) {
+    confidence = "Needs Verification";
+    confidenceReasons.push("Expired documents");
+  }
+
+  if (confidence !== "Needs Verification") {
+    if (missingDocsList.length > 0) {
+      confidence = "Medium Confidence";
+      confidenceReasons.push("Incomplete document verification");
+    }
+    if (renewingDocs.length > 0) {
+      confidence = "Medium Confidence";
+      confidenceReasons.push("Documents needing renewal soon");
+    }
+    if (scheme.updated_at) {
+      const updateDate = new Date(scheme.updated_at);
+      const diffTime = Math.abs(now - updateDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays <= 7) {
+        confidence = "Medium Confidence";
+        confidenceReasons.push("Scheme rules recently updated");
+      }
+    }
   }
 
   return {
@@ -154,7 +214,12 @@ function evaluateEligibilityServer(scheme, profile, docs = []) {
     passed,
     failed,
     missing,
-    missingDocs
+    verifiedDocs,
+    expiredDocs,
+    renewingDocs,
+    missingDocsList,
+    confidence,
+    confidenceReasons
   };
 }
 
@@ -181,11 +246,11 @@ export const generatePersonalizedRecommendations = async (profile = {}, docs = [
         
         // Only recommend schemes that are not explicitly ineligible
         if (evalData.status !== "Not Eligible") {
-          let reasonText = 'Matched based on your profile preferences.';
-          if (evalData.status === "Additional Documents Required") {
-            reasonText = `Matched, but requires ${evalData.missingDocs[0]} in your Wallet.`;
-          } else if (evalData.status === "Additional Information Required") {
-            reasonText = `Matched, but needs complete schooling / category details.`;
+          let reasonText = `Matched perfectly with ${evalData.confidence}.`;
+          if (evalData.confidence === "Needs Verification") {
+            reasonText = `Requires profile updates / verification (${evalData.confidenceReasons[0]}).`;
+          } else if (evalData.confidence === "Medium Confidence") {
+            reasonText = `Requires document updates (${evalData.confidenceReasons[0]}).`;
           }
 
           recommendations.push({
@@ -242,13 +307,25 @@ export const generatePersonalizedRecommendations = async (profile = {}, docs = [
       actionUrl: 'my-documents.html'
     });
   } else {
-    insights.push({
-      id: 'ins-doc-ready',
-      title: `${docs.length} Verified Certificates in Wallet`,
-      message: 'Your uploaded certificates are ready for instant scheme eligibility checking.',
-      actionText: 'Verify Readability',
-      actionUrl: 'doc-verifier.html'
-    });
+    // Check if user has expired documents
+    const expiredCount = docs.filter(d => d.expiry_date && new Date(d.expiry_date) < new Date()).length;
+    if (expiredCount > 0) {
+      insights.push({
+        id: 'ins-doc-expired',
+        title: `${expiredCount} Expired Document${expiredCount > 1 ? 's' : ''} in Wallet`,
+        message: 'Some of your uploaded certificates have expired. Please renew them to maintain scheme qualification.',
+        actionText: 'Renew Documents',
+        actionUrl: 'my-documents.html'
+      });
+    } else {
+      insights.push({
+        id: 'ins-doc-ready',
+        title: `${docs.length} Verified Certificates in Wallet`,
+        message: 'Your uploaded certificates are ready for instant scheme eligibility checking.',
+        actionText: 'Verify Readability',
+        actionUrl: 'doc-verifier.html'
+      });
+    }
   }
 
   // 3. Application Tracker Insights

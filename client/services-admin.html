@@ -256,6 +256,45 @@
           <input type="text" id="edit-native-state" class="form-input-custom" placeholder="e.g. Tamil Nadu">
         </div>
 
+        <!-- Official Sources trust configuration fields -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-official-url">Official Scheme Website</label>
+            <input type="url" id="edit-official-url" class="form-input-custom" placeholder="https://...">
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-dept-name">Official Government Department</label>
+            <input type="text" id="edit-dept-name" class="form-input-custom" placeholder="e.g. Department of Social Welfare">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-notif-number">Official Notification Number</label>
+            <input type="text" id="edit-notif-number" class="form-input-custom" placeholder="e.g. G.O. (Ms) No. 25">
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-pdf-link">Official PDF / GO Guidelines Link</label>
+            <input type="url" id="edit-pdf-link" class="form-input-custom" placeholder="https://...">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-data-source">Data Source Reference</label>
+            <input type="text" id="edit-data-source" class="form-input-custom" placeholder="e.g. Tamil Nadu Government">
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-verified-date">Last Verified Date</label>
+            <input type="date" id="edit-verified-date" class="form-input-custom">
+          </div>
+        </div>
+
+        <div class="form-group-custom" style="margin-bottom: 1rem;">
+          <label class="form-label-custom" for="edit-change-reason" style="font-weight: 800; color: #b45309;"><i class="fa-solid fa-clipboard-list"></i> Reason for Change (Logged in Audit Trail)</label>
+          <textarea id="edit-change-reason" class="form-input-custom" rows="2" placeholder="Explain why the criteria or official links are being modified..." required style="height: auto; resize: vertical; border-color: #f59e0b;"></textarea>
+        </div>
+
         <div class="form-group-custom" style="margin-bottom: 1.5rem;">
           <label class="form-label-custom" for="edit-certificates">Required Certificates (Comma separated)</label>
           <textarea id="edit-certificates" class="form-input-custom" rows="3" placeholder="e.g. Aadhaar Card, Ration Card, Income Certificate" style="height: auto; resize: vertical;"></textarea>

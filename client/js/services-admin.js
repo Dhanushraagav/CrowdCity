@@ -1,4 +1,4 @@
-// CrowdCity AI v2.2 - Government Services Admin Portal JavaScript
+// CrowdCity AI v2.2.1 - Government Services Admin Portal JavaScript
 // Manages Government Schemes, Departments, Offices, Announcements, FAQs, Knowledge Base, and Audit Logs.
 
 (function() {
@@ -210,6 +210,27 @@
     document.getElementById('edit-native-state').value = criteria.native_state || '';
     document.getElementById('edit-certificates').value = (criteria.required_certificates || []).join(', ');
 
+    // Seeding trust details
+    document.getElementById('edit-official-url').value = scheme.official_portal_url || '';
+    document.getElementById('edit-dept-name').value = scheme.department_name || '';
+    document.getElementById('edit-notif-number').value = scheme.official_notification_number || '';
+    document.getElementById('edit-pdf-link').value = scheme.official_pdf_link || '';
+    document.getElementById('edit-data-source').value = scheme.data_source || '';
+    
+    if (scheme.last_verified_date) {
+      // Format as YYYY-MM-DD
+      const dateObj = new Date(scheme.last_verified_date);
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+      document.getElementById('edit-verified-date').value = `${yyyy}-${mm}-${dd}`;
+    } else {
+      document.getElementById('edit-verified-date').value = '';
+    }
+
+    // Clear change reason field
+    document.getElementById('edit-change-reason').value = '';
+
     modal.style.display = 'flex';
   }
 
@@ -283,17 +304,54 @@
       required_certificates
     };
 
+    // Trust metadata updates
+    const official_portal_url = document.getElementById('edit-official-url').value || null;
+    const department_name = document.getElementById('edit-dept-name').value || '';
+    const official_notification_number = document.getElementById('edit-notif-number').value || null;
+    const official_pdf_link = document.getElementById('edit-pdf-link').value || null;
+    const data_source = document.getElementById('edit-data-source').value || null;
+    const last_verified_date = document.getElementById('edit-verified-date').value || new Date().toISOString().split('T')[0];
+    const change_reason = document.getElementById('edit-change-reason').value || 'Eligibility rules updated.';
+
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
+          // Get user details for auditing
+          const session = await client.auth.getSession();
+          const adminUser = session?.data?.session?.user?.email || 'Admin User';
+
+          // 1. Log change in eligibility_audit_logs
+          const { error: auditError } = await client
+            .from('eligibility_audit_logs')
+            .insert({
+              scheme_id: id,
+              previous_rule: selectedScheme.eligibility_criteria || {},
+              updated_rule: updatedCriteria,
+              administrator: adminUser,
+              reason_for_change: change_reason
+            });
+
+          if (auditError) {
+            console.warn("Failed to create audit log row:", auditError);
+          }
+
+          // 2. Save rule changes to government_schemes
           const { error } = await client
             .from('government_schemes')
-            .update({ eligibility_criteria: updatedCriteria })
+            .update({ 
+              eligibility_criteria: updatedCriteria,
+              official_portal_url,
+              department_name,
+              official_notification_number,
+              official_pdf_link,
+              data_source,
+              last_verified_date
+            })
             .eq('id', id);
 
           if (!error) {
-            if (window.showToast) window.showToast("Scheme eligibility rules updated successfully in database!", "success");
+            if (window.showToast) window.showToast("Scheme criteria and trust metadata saved successfully!", "success");
             closeModal();
             await fetchAllSchemes();
             renderTabContent();
@@ -309,9 +367,16 @@
 
     // Local fallback update
     selectedScheme.eligibility_criteria = updatedCriteria;
+    selectedScheme.official_portal_url = official_portal_url;
+    selectedScheme.department_name = department_name;
+    selectedScheme.official_notification_number = official_notification_number;
+    selectedScheme.official_pdf_link = official_pdf_link;
+    selectedScheme.data_source = data_source;
+    selectedScheme.last_verified_date = last_verified_date;
+
     closeModal();
     renderTabContent();
-    if (window.showToast) window.showToast("Local fallback eligibility rules updated!", "success");
+    if (window.showToast) window.showToast("Local fallback eligibility rules and metadata updated!", "success");
   }
 
   document.addEventListener('DOMContentLoaded', () => {
