@@ -204,6 +204,65 @@
         </form>
       </div>
 
+      <!-- Card 3: WhatsApp Notification Preferences -->
+      <div class="settings-card" id="whatsapp-settings-card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 1.3rem;"></i> <span>WhatsApp Notifications</span>
+        </h3>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;">Configure free local WhatsApp alerts for civic complaints, applications, reminders, and announcements.</p>
+        
+        <form id="whatsapp-settings-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+          <div class="form-group">
+            <label for="settings-whatsapp-number" class="form-label" style="font-weight: 700;">WhatsApp Number</label>
+            <input type="text" id="settings-whatsapp-number" class="form-input" placeholder="e.g. 919876543210 (include country code)">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="checkbox" id="settings-whatsapp-enabled" style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="settings-whatsapp-enabled" style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); cursor: pointer;">Enable WhatsApp Notifications</label>
+          </div>
+
+          <div style="border-top: 1px dashed var(--border-color); padding-top: 0.75rem;">
+            <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Alert Categories Opt-in</span>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem; color: var(--text-main);">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="settings-whatsapp-complaints" style="width: 16px; height: 16px; cursor: pointer;">
+                <label for="settings-whatsapp-complaints" style="cursor: pointer;">Civic Complaint Updates</label>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="settings-whatsapp-applications" style="width: 16px; height: 16px; cursor: pointer;">
+                <label for="settings-whatsapp-applications" style="cursor: pointer;">Welfare Scheme Applications</label>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="settings-whatsapp-reminders" style="width: 16px; height: 16px; cursor: pointer;">
+                <label for="settings-whatsapp-reminders" style="cursor: pointer;">Deadline & Expiry Reminders</label>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="settings-whatsapp-schemes" style="width: 16px; height: 16px; cursor: pointer;">
+                <label for="settings-whatsapp-schemes" style="cursor: pointer;">New Matching Schemes</label>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="settings-whatsapp-announcements" style="width: 16px; height: 16px; cursor: pointer;">
+                <label for="settings-whatsapp-announcements" style="cursor: pointer;">Admin Broadcast Announcements</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 0.25rem;">
+            <label for="settings-whatsapp-lang" class="form-label" style="font-weight: 700;">Notification Language</label>
+            <select id="settings-whatsapp-lang" class="form-select-custom" style="padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); font-weight: 600; width: 100%;">
+              <option value="en">English</option>
+              <option value="ta">Tamil (தமிழ்)</option>
+            </select>
+          </div>
+
+          <button type="submit" id="btn-save-whatsapp-settings" class="btn btn-primary" style="margin-top: 0.5rem; align-self: flex-start; padding: 0.65rem 1.5rem; font-size: 0.85rem; font-weight: 700;">
+            Save Preferences
+          </button>
+        </form>
+      </div>
+
       <!-- Modern Mobile Settings List (Visible only on mobile) -->
       <div class="settings-mobile-container mobile-only">
         
@@ -326,7 +385,7 @@
         }
       }
 
-      function populateCitizenDetails() {
+      async function populateCitizenDetails() {
         const user = getCurrentUser();
         if (!user) return;
         
@@ -351,6 +410,31 @@
         if (nameEl) nameEl.value = fullName;
         if (emailEl) emailEl.value = user.email;
         if (pointsEl) pointsEl.value = `${points} Points`;
+
+        // Fetch and prefill WhatsApp settings
+        try {
+          const supabase = await getOrInitSupabaseClient();
+          if (supabase) {
+            const { data: profileData, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+
+            if (!error && profileData) {
+              document.getElementById('settings-whatsapp-number').value = profileData.whatsapp_number || '';
+              document.getElementById('settings-whatsapp-enabled').checked = !!profileData.whatsapp_notifications_enabled;
+              document.getElementById('settings-whatsapp-complaints').checked = !!profileData.whatsapp_notify_complaints;
+              document.getElementById('settings-whatsapp-applications').checked = !!profileData.whatsapp_notify_applications;
+              document.getElementById('settings-whatsapp-reminders').checked = !!profileData.whatsapp_notify_reminders;
+              document.getElementById('settings-whatsapp-schemes').checked = !!profileData.whatsapp_notify_schemes;
+              document.getElementById('settings-whatsapp-announcements').checked = !!profileData.whatsapp_notify_announcements;
+              document.getElementById('settings-whatsapp-lang').value = profileData.whatsapp_language || 'en';
+            }
+          }
+        } catch(e) {
+          console.warn("Failed to load user WhatsApp preferences:", e);
+        }
       }
 
       const passwordForm = document.getElementById('change-password-form');
@@ -380,6 +464,58 @@
             window.showToast("Password updated successfully!", "success");
             passwordForm.reset();
           }
+        });
+      }
+
+      const whatsappForm = document.getElementById('whatsapp-settings-form');
+      if (whatsappForm) {
+        whatsappForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const user = getCurrentUser();
+          if (!user) return;
+
+          const whatsapp_number = document.getElementById('settings-whatsapp-number').value.trim();
+          const whatsapp_notifications_enabled = document.getElementById('settings-whatsapp-enabled').checked;
+          const whatsapp_notify_complaints = document.getElementById('settings-whatsapp-complaints').checked;
+          const whatsapp_notify_applications = document.getElementById('settings-whatsapp-applications').checked;
+          const whatsapp_notify_reminders = document.getElementById('settings-whatsapp-reminders').checked;
+          const whatsapp_notify_schemes = document.getElementById('settings-whatsapp-schemes').checked;
+          const whatsapp_notify_announcements = document.getElementById('settings-whatsapp-announcements').checked;
+          const whatsapp_language = document.getElementById('settings-whatsapp-lang').value;
+
+          const btn = document.getElementById('btn-save-whatsapp-settings');
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+          try {
+            const supabase = await getOrInitSupabaseClient();
+            if (supabase) {
+              const { error } = await supabase
+                .from('profiles')
+                .update({
+                  whatsapp_number,
+                  whatsapp_notifications_enabled,
+                  whatsapp_notify_complaints,
+                  whatsapp_notify_applications,
+                  whatsapp_notify_reminders,
+                  whatsapp_notify_schemes,
+                  whatsapp_notify_announcements,
+                  whatsapp_language
+                })
+                .eq('id', user.id);
+
+              if (error) {
+                window.showToast("Error saving WhatsApp preferences: " + error.message, "error");
+              } else {
+                window.showToast("WhatsApp preferences updated successfully!", "success");
+              }
+            }
+          } catch (err) {
+            window.showToast("Failed to connect to database.", "error");
+          }
+
+          btn.disabled = false;
+          btn.innerHTML = 'Save Preferences';
         });
       }
 
