@@ -332,14 +332,47 @@
     const criteriaListElem = document.getElementById('scheme-details-criteria-list');
     if (criteriaListElem) {
       const criteriaItems = [];
-      if (criteria.min_age || criteria.max_age) criteriaItems.push(`Age: ${criteria.min_age || 18} to ${criteria.max_age || 60} Years`);
-      if (criteria.gender && criteria.gender !== 'all') criteriaItems.push(`Gender: ${criteria.gender === 'female' ? 'Women / Female' : criteria.gender}`);
-      if (criteria.max_annual_income) criteriaItems.push(`Annual Income: Up to ₹${criteria.max_annual_income.toLocaleString('en-IN')}`);
-      if (criteria.is_student) criteriaItems.push(`Status: Enrolled Student`);
-      if (criteria.is_farmer) criteriaItems.push(`Occupation: Landholding Farmer / Agricultural Laborer`);
-      if (criteria.state) criteriaItems.push(`Residency: ${criteria.state}`);
+      const currentLang = localStorage.getItem('preferred_language') || 'en';
+      const isTamil = (currentLang === 'ta');
 
-      if (criteriaItems.length === 0) criteriaItems.push("General public welfare eligibility applies.");
+      if (criteria.min_age || criteria.max_age) {
+        criteriaItems.push(isTamil 
+          ? `வயது: ${criteria.min_age || 18} முதல் ${criteria.max_age || 60} ஆண்டுகள் வரை` 
+          : `Age: ${criteria.min_age || 18} to ${criteria.max_age || 60} Years`);
+      }
+      if (criteria.gender && criteria.gender !== 'all') {
+        criteriaItems.push(isTamil 
+          ? `பாலினம்: ${criteria.gender === 'female' ? 'பெண்கள்' : criteria.gender}` 
+          : `Gender: ${criteria.gender === 'female' ? 'Women / Female' : criteria.gender}`);
+      }
+      if (criteria.max_annual_income) {
+        criteriaItems.push(isTamil 
+          ? `ஆண்டு வருமானம்: ₹${criteria.max_annual_income.toLocaleString('en-IN')} வரை` 
+          : `Annual Income: Up to ₹${criteria.max_annual_income.toLocaleString('en-IN')}`);
+      }
+      if (criteria.student_required) {
+        criteriaItems.push(isTamil ? `மாணவர் நிலை: தற்போது பயிலும் மாணவர்` : `Status: Enrolled Student`);
+      }
+      if (criteria.gov_school_required) {
+        criteriaItems.push(isTamil ? `பள்ளி வகை: அரசுப் பள்ளியில் பயின்றிருக்க வேண்டும்` : `School Type: Studied in Government School`);
+      }
+      if (criteria.gov_college_required) {
+        criteriaItems.push(isTamil ? `கல்லூரி வகை: அரசு கல்லூரியில் பயில வேண்டும்` : `College Type: Enrolled in Government College`);
+      }
+      if (criteria.disability_required) {
+        criteriaItems.push(isTamil ? `தகுதி: மாற்றுத்திறனாளி குடிமகன்` : `Qualification: Differently-abled Citizen`);
+      }
+      if (criteria.widow_required) {
+        criteriaItems.push(isTamil ? `தகுதி: விதவை / ஒற்றை பெற்றோர்` : `Qualification: Widow / Single Parent`);
+      }
+      if (criteria.farmer_required) {
+        criteriaItems.push(isTamil ? `தொழில்: விவசாயக் குடும்பம்` : `Occupation: Farmer Family / Agricultural Laborer`);
+      }
+      if (criteria.native_state) {
+        criteriaItems.push(isTamil ? `இருப்பிடம்: ${criteria.native_state}` : `Residency: Native of ${criteria.native_state}`);
+      }
+
+      if (criteriaItems.length === 0) criteriaItems.push(isTamil ? "பொது மக்கள் நலத்திட்ட தகுதி பொருந்தும்." : "General public welfare eligibility applies.");
 
       criteriaListElem.innerHTML = criteriaItems.map(item => `
         <li style="margin-bottom: 0.5rem; color: var(--text-main); font-size: 0.9rem; font-weight: 600;">

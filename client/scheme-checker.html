@@ -368,7 +368,7 @@
 
             <!-- STEP 3: Special Categories & Status -->
             <div class="checker-step-pane" id="checker-step-3">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 3 of 3: Special Categories</h3>
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 3 of 3: Special Categories & Schooling</h3>
 
               <div class="form-group-custom">
                 <label class="form-label-custom">Select all that apply to you:</label>
@@ -393,18 +393,52 @@
                     <i class="fa-solid fa-wheelchair"></i>
                     <span>Differently Abled</span>
                   </label>
+                  <label class="checkbox-tile">
+                    <input type="checkbox" id="check-widow">
+                    <i class="fa-solid fa-person-breastfeeding"></i>
+                    <span>Widow / Single Parent</span>
+                  </label>
                 </div>
               </div>
 
               <div class="form-group-custom">
-                <label class="form-label-custom" for="check-social-category">Social Category (Optional)</label>
+                <label class="form-label-custom" for="check-social-category">Social Category / Community</label>
                 <select id="check-social-category" class="form-select-custom">
                   <option value="all">General / All Categories</option>
+                  <option value="OC">Open Competition (OC)</option>
                   <option value="BC">Backward Class (BC)</option>
                   <option value="MBC">Most Backward Class (MBC)</option>
                   <option value="SC">Scheduled Caste (SC)</option>
                   <option value="ST">Scheduled Tribe (ST)</option>
-                  <option value="FC">Forward Class (FC)</option>
+                </select>
+              </div>
+
+              <div class="form-group-custom" id="group-check-gov-school">
+                <label class="form-label-custom" for="check-gov-school">Did you study in a TN Government School (from Classes 6th to 12th)?</label>
+                <select id="check-gov-school" class="form-select-custom">
+                  <option value="false">No / Private Schooling</option>
+                  <option value="true">Yes, Government School</option>
+                </select>
+              </div>
+
+              <div class="form-group-custom" id="group-check-institution-type">
+                <label class="form-label-custom" for="check-institution-type">Current College / Institution Type</label>
+                <select id="check-institution-type" class="form-select-custom">
+                  <option value="none">Not Applicable</option>
+                  <option value="Government">Government Institution</option>
+                  <option value="Aided">Government-Aided Institution</option>
+                  <option value="Private">Private / Self-Financing College</option>
+                </select>
+              </div>
+
+              <div class="form-group-custom" id="group-check-degree">
+                <label class="form-label-custom" for="check-degree">Current Course / Degree Level</label>
+                <select id="check-degree" class="form-select-custom">
+                  <option value="none">Not Applicable</option>
+                  <option value="School">School Education</option>
+                  <option value="Diploma">Diploma / Polytechnic</option>
+                  <option value="Undergraduate">Undergraduate Degree (UG)</option>
+                  <option value="Postgraduate">Postgraduate Degree (PG)</option>
                 </select>
               </div>
 
