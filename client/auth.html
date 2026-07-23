@@ -1300,11 +1300,10 @@
               <span class="authority-card-subtitle" data-i18n="government_officials_only">Government Officials Only</span>
             </div>
           </div>
-          <div class="authority-card-right" style="display: flex; align-items: center; gap: 0.85rem;">
+          <div class="authority-card-right">
             <span class="authority-card-link" data-i18n="open_portal">
               Open Portal <i class="fa-solid fa-arrow-right"></i>
             </span>
-            <span id="gateway-admin-trigger" style="font-size: 11px; color: var(--primary, #0d9488); font-weight: 700; text-decoration: none; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.textDecoration='underline'; this.style.opacity='0.85';" onmouseout="this.style.textDecoration='none'; this.style.opacity='1';">⚙ Gateway</span>
           </div>
         </a>
 
@@ -1322,19 +1321,6 @@
 
       </div>
     </main>
-  </div>
-
-  <!-- Access Denied Modal -->
-  <div id="gateway-access-denied-modal" class="hidden-field" style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;">
-    <div style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" onclick="closeGatewayModal()"></div>
-    <div style="position: relative; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); text-align: center; z-index: 10000; animation: authFadeSlideIn 0.3s ease-out;">
-      <div style="width: 56px; height: 56px; border-radius: 50%; background: #fef2f2; color: #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; font-size: 1.75rem;">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-      </div>
-      <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; font-family: system-ui, -apple-system, sans-serif;">Access Denied</h3>
-      <p style="font-size: 0.92rem; color: #64748b; line-height: 1.6; margin-bottom: 1.75rem; font-family: system-ui, -apple-system, sans-serif;">Only CrowdCity AI administrators can access the WhatsApp Gateway.</p>
-      <button onclick="closeGatewayModal()" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 8px; width: 100%; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer; font-size: 0.9rem; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='#f8fafc'">Close</button>
-    </div>
   </div>
 
   <!-- Supabase CDN Client -->
@@ -2266,15 +2252,6 @@
           }
         });
       }
-      const gatewayTrigger = document.getElementById('gateway-admin-trigger');
-      if (gatewayTrigger) {
-        gatewayTrigger.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          handleGatewayClick();
-        });
-      }
-
       // ————— Authentic Brand Showcase & Sequential Preloader —————
       const showcaseNodes = [
         { name: "Chennai", src: "images/slideshow_1.png", description: "Kathipara Flyover" },
@@ -2455,55 +2432,6 @@
         }
         requestAnimationFrame(animateParallax);
       })();
-      window.closeGatewayModal = function() {
-        const modal = document.getElementById('gateway-access-denied-modal');
-        if (modal) modal.classList.add('hidden-field');
-      };
-      
-      window.handleGatewayClick = async function() {
-        try {
-          const getClient = window.getOrInitSupabaseClient || (typeof getOrInitSupabaseClient === 'function' ? getOrInitSupabaseClient : null);
-          if (!getClient) {
-            window.location.href = 'auth.html';
-            return;
-          }
-          const supabase = await getClient();
-          if (!supabase) {
-            window.location.href = 'auth.html';
-            return;
-          }
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session || !session.user) {
-            if (window.showToast) {
-              window.showToast('Please sign in to your administrator account first.', 'error');
-            }
-            if (typeof switchAuthTab === 'function') {
-              switchAuthTab('login');
-            }
-            return;
-          }
-          
-          // Show spinner or toast during check
-          if (window.showToast) window.showToast("Verifying access permissions...", "info");
-          
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-
-          if (error || !profile || profile.role !== 'admin') {
-            const modal = document.getElementById('gateway-access-denied-modal');
-            if (modal) modal.classList.remove('hidden-field');
-            return;
-          }
-
-          window.location.href = 'whatsapp-admin.html';
-        } catch (err) {
-          console.error("Gateway access validation failed:", err);
-          window.location.href = 'auth.html';
-        }
-      };
     }
 
     if (document.readyState === 'loading') {

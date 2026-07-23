@@ -1479,11 +1479,41 @@ function updateAuthUI() {
     }, 6000);
   };
 
+  const injectWhatsAppGatewayLink = () => {
+    const sidebarNav = document.querySelector('.app-sidebar-nav');
+    if (!sidebarNav) return;
+    
+    const path = window.location.pathname;
+    const isAuthorityPage = path.includes('authority-') || path.includes('whatsapp-admin.html');
+    if (!isAuthorityPage) return;
+
+    const role = getUserRole();
+    if (user && role === 'admin') {
+      if (document.getElementById('sidebar-whatsapp-gateway-link')) return;
+
+      const gatewayLink = document.createElement('a');
+      gatewayLink.id = 'sidebar-whatsapp-gateway-link';
+      gatewayLink.href = 'whatsapp-admin.html';
+      gatewayLink.className = 'app-sidebar-link';
+      
+      const isGatewayActive = path.includes('whatsapp-admin.html');
+      if (isGatewayActive) {
+        gatewayLink.classList.add('active');
+      }
+
+      gatewayLink.innerHTML = `
+        <i class="fa-solid fa-comments"></i> <span>WhatsApp Gateway</span>
+      `;
+      sidebarNav.appendChild(gatewayLink);
+    }
+  };
+
   // Run dynamic branding injections
   injectGovtBranding();
   injectGovtBanner();
   injectHelplineWidget();
   initNewsTicker();
+  injectWhatsAppGatewayLink();
 
   const container = document.getElementById('auth-nav-container');
   const navMenu = document.getElementById('nav-menu');
@@ -1515,7 +1545,11 @@ function updateAuthUI() {
         `;
         if (role === 'admin') {
           const isAdmin = path.includes('admin.html');
-          linksHtml += `<a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''}"><i class="fa-solid fa-chart-line"></i> ${tAdminPanel}</a>`;
+          const isGateway = path.includes('whatsapp-admin.html');
+          linksHtml += `
+            <a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''}"><i class="fa-solid fa-chart-line"></i> ${tAdminPanel}</a>
+            <a href="whatsapp-admin.html" class="nav-link ${isGateway ? 'active' : ''}"><i class="fa-solid fa-comments"></i> WhatsApp Gateway</a>
+          `;
         }
       } else {
         const isDashboard = path.includes('citizen-dashboard.html') || path.endsWith('/') || path.endsWith('/index.html');
@@ -2172,6 +2206,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Also run setup whenever auth UI renders
   window.addEventListener('auth-change', () => {
     setTimeout(setupToggleListeners, 50);
+    setTimeout(injectWhatsAppGatewayLink, 50);
   });
 
   // Dynamic password visibility toggle listener
