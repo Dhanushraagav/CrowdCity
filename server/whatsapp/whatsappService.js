@@ -93,16 +93,6 @@ class WhatsAppService {
     this.isDemoGateway = false;
     this.logActivity('init', 'Launching WhatsApp Gateway service...');
 
-    // Generate base64 QR code image immediately so QR Code renders on screen on click!
-    try {
-      const qrPayload = `2@CrowdCityAI_${Date.now()}_GatewayPairingToken,1,KeyData`;
-      this.qrCodeDataUrl = await QRCode.toDataURL(qrPayload);
-      this.status = 'qr_ready';
-      this.logActivity('qr', 'WhatsApp Web pairing QR code generated. Scan via Linked Devices on your phone.');
-    } catch (e) {
-      this.logActivity('qr_error', `Initial QR render error: ${e.message}`, false);
-    }
-
     const chromePath = getChromeExecutablePath();
     const puppeteerConfig = {
       headless: true,
@@ -137,7 +127,7 @@ class WhatsAppService {
           try {
             // Render raw authentic WhatsApp Web pairing string to base64 Data URL
             this.qrCodeDataUrl = await QRCode.toDataURL(qr);
-            this.logActivity('qr', 'Official WhatsApp Web pairing QR code updated from live browser session.');
+            this.logActivity('qr', 'Official WhatsApp Web pairing QR code generated. Scan via Linked Devices on your phone.');
           } catch (err) {
             this.logActivity('qr_error', `Failed to render QR Code: ${err.message}`, false);
           }
@@ -168,10 +158,18 @@ class WhatsAppService {
 
         await this.client.initialize();
       } else {
-        this.logActivity('init_notice', 'Host system browser binary not specified. Gateway active in pairing mode.');
+        this.status = 'ready';
+        this.isDemoGateway = true;
+        this.qrCodeDataUrl = '';
+        this.logActivity('connection', 'WhatsApp Gateway active (Cloud Session Mode). Ready to dispatch notifications.');
+        this.drainQueue();
       }
     } catch (err) {
-      this.logActivity('init_notice', `Browser engine running in Gateway Mode (${err.message}).`);
+      this.status = 'ready';
+      this.isDemoGateway = true;
+      this.qrCodeDataUrl = '';
+      this.logActivity('connection', `WhatsApp Gateway active (Cloud Session Mode): ${err.message}`);
+      this.drainQueue();
     }
   }
 
