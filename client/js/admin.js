@@ -1288,14 +1288,34 @@
         badgeContainer.innerHTML = `<span class="status-badge ${badgeClass}"><i class="fa-solid ${icon}"></i> ${text}</span>`;
       }
 
-      if ((data.status === 'qr_ready' || data.qrCode) && data.qrCode) {
+      if (data.status === 'qr_ready' && data.qrCode) {
         if (qrPlaceholder) qrPlaceholder.classList.add('hidden');
         if (qrImg) {
           qrImg.src = data.qrCode;
           qrImg.classList.remove('hidden');
         }
       } else {
-        if (qrPlaceholder) qrPlaceholder.classList.remove('hidden');
+        if (qrPlaceholder) {
+          qrPlaceholder.classList.remove('hidden');
+          if (data.status === 'ready') {
+            qrPlaceholder.innerHTML = `
+              <i class="fa-solid fa-circle-check" style="font-size: 3.5rem; color: #10b981; margin-bottom: 0.75rem; display: block;"></i>
+              <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Device Linked & Ready</span>
+              <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0.35rem 0 0 0;">WhatsApp Gateway is active and monitoring events.</p>
+            `;
+          } else if (data.status === 'connecting') {
+            qrPlaceholder.innerHTML = `
+              <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: #f59e0b; margin-bottom: 0.75rem; display: block;"></i>
+              <span style="font-weight: 700; color: var(--text-main);">Launching WhatsApp Web...</span>
+              <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0.35rem 0 0 0;">Generating QR code for device pairing.</p>
+            `;
+          } else {
+            qrPlaceholder.innerHTML = `
+              <i class="fa-solid fa-qrcode" style="font-size: 3rem; margin-bottom: 0.75rem; display: block; color: var(--text-muted);"></i>
+              Scan QR code when prompted to associate device.
+            `;
+          }
+        }
         if (qrImg) {
           qrImg.src = '';
           qrImg.classList.add('hidden');

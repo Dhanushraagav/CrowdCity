@@ -71,14 +71,6 @@ class WhatsAppService {
     }
   }
 
-  async activateDemoGatewayMode() {
-    this.status = 'ready';
-    this.isDemoGateway = true;
-    this.qrCodeDataUrl = '';
-    this.logActivity('connection', 'WhatsApp Gateway active (Demo Session Mode). Ready to process & dispatch notifications.');
-    this.drainQueue();
-  }
-
   async initialize() {
     // If client is actively connecting, ready, or QR is ready, don't re-initialize
     if (this.status === 'connecting' || this.status === 'qr_ready' || this.status === 'ready') {
@@ -122,7 +114,7 @@ class WhatsAppService {
 
     try {
       if (!chromePath && !process.env.PUPPETEER_EXECUTABLE_PATH) {
-        throw new Error('No system Chrome/Chromium installation detected.');
+        throw new Error('Chrome/Chromium executable not found on host environment.');
       }
 
       this.client = new Client({
@@ -138,7 +130,7 @@ class WhatsAppService {
         try {
           // Render raw authentic WhatsApp Web pairing string to base64 Data URL
           this.qrCodeDataUrl = await QRCode.toDataURL(qr);
-          this.logActivity('qr', 'Official WhatsApp Web pairing QR code generated. Scan via Linked Devices.');
+          this.logActivity('qr', 'Official WhatsApp Web pairing QR code generated. Scan via Linked Devices on your phone.');
         } catch (err) {
           this.logActivity('qr_error', `Failed to render QR Code: ${err.message}`, false);
         }
@@ -170,8 +162,8 @@ class WhatsAppService {
 
       await this.client.initialize();
     } catch (err) {
-      this.logActivity('init_notice', `Browser engine notice (${err.message}). Activating Gateway Demo Mode.`);
-      await this.activateDemoGatewayMode();
+      this.status = 'failed';
+      this.logActivity('init_error', `Browser launch error: ${err.message}. Install Chrome or set PUPPETEER_EXECUTABLE_PATH.`, false);
     }
   }
 
