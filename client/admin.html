@@ -366,6 +366,31 @@
       50% { opacity: 0.5; }
       100% { opacity: 1; }
     }
+
+    /* Mobile sidebar overlay */
+    @media (max-width: 1023px) {
+      .app-sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 260px;
+        height: 100vh;
+        z-index: 3000;
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .app-sidebar.sidebar-open {
+        left: 0;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+      }
+      .mobile-menu-toggle {
+        display: flex !important;
+      }
+    }
+    @media (min-width: 1024px) {
+      .mobile-menu-toggle {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body class="protected-page">

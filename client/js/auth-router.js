@@ -416,6 +416,7 @@ window.authRouter = {
   }
 
   // D. Role Separation Redirection (Prevent accessing wrong dashboards/pages)
+  // NOTE: admin.html is the unified Authority Portal shared by both 'authority' and 'admin' roles.
   if (sessionActive && role) {
     if (role === 'citizen') {
       if (isAuthorityPage || isAdminPage) {
@@ -424,14 +425,15 @@ window.authRouter = {
         return;
       }
     } else if (role === 'authority') {
-      if (isCitizenPage || isAdminPage) {
-        console.warn("[Auth Router] Authority role cannot access citizen/admin page. Redirecting.");
+      // Authority users CAN access admin.html (unified portal) but NOT citizen pages
+      if (isCitizenPage) {
+        console.warn("[Auth Router] Authority role cannot access citizen page. Redirecting.");
         window.location.href = AUTHORITY_DASHBOARD;
         return;
       }
     } else if (role === 'admin') {
-      if (isCitizenPage || isAuthorityPage) {
-        console.warn("[Auth Router] Admin role cannot access citizen/authority page. Redirecting.");
+      if (isCitizenPage) {
+        console.warn("[Auth Router] Admin role cannot access citizen page. Redirecting.");
         window.location.href = ADMIN_DASHBOARD;
         return;
       }

@@ -68,10 +68,13 @@
   // ----------------------------------------------------
   window.DashboardService = {
     init: async function() {
-      await this.loadKPIs();
-      await this.loadRecentAssigned();
-      await this.loadPriorityCases();
-      await this.loadActivityLog();
+      // Load all dashboard widgets in parallel for faster initial render
+      await Promise.allSettled([
+        this.loadKPIs(),
+        this.loadRecentAssigned(),
+        this.loadPriorityCases(),
+        this.loadActivityLog()
+      ]);
     },
 
     loadKPIs: async function() {
@@ -1163,7 +1166,7 @@
           if (!confirm(`Are you sure you want to ${actionWord} this user account?`)) return;
 
           try {
-            const suspendRes = await API.setUserSuspended(userId, !isSuspended);
+            const suspendRes = await API.suspendUser(userId, !isSuspended);
             if (suspendRes.error) throw new Error(suspendRes.error);
             showToast(`User account ${isSuspended ? 'reactivated' : 'suspended'} successfully.`);
             await this.loadUsers();
@@ -1672,10 +1675,21 @@
     }
   };
 
+  // Admin-only tabs that require 'admin' role
+  const ADMIN_ONLY_TABS = ['users', 'whatsapp', 'settings'];
+
   // ----------------------------------------------------
   // ROUTING & TAB NAVIGATION SWAPPING
   // ----------------------------------------------------
   function showTab(tabId) {
+    // Role-based hash guard: prevent authority users from accessing admin-only tabs
+    const role = typeof getUserRole === 'function' ? getUserRole() : null;
+    if (role !== 'admin' && ADMIN_ONLY_TABS.includes(tabId)) {
+      console.warn(`[Admin.js] Role "${role}" denied access to tab "${tabId}". Falling back to dashboard.`);
+      window.location.hash = '#dashboard';
+      return;
+    }
+
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
     document.querySelectorAll('.app-sidebar-link').forEach(l => l.classList.remove('active'));
 
@@ -1707,12 +1721,6 @@
     else if (tabId === 'whatsapp') window.WhatsAppService.init();
     else if (tabId === 'settings') window.SettingsService.init();
   }
-
-  // Handle hash navigation
-  window.addEventListener('hashchange', () => {
-    const hash = window.location.hash.replace('#', '') || 'dashboard';
-    showTab(hash);
-  });
 
   // ----------------------------------------------------
   // REPORT EXPORT TRIGGERS BINDING
@@ -1834,6 +1842,45 @@
   }
 
   // ----------------------------------------------------
+  // LIVE CLOCK WIDGET
+  // ----------------------------------------------------
+  function initLiveClock() {
+    const dateEl = document.getElementById('widget-date');
+    const timeEl = document.getElementById('widget-time');
+    if (!dateEl || !timeEl) return;
+
+    function tick() {
+      const now = new Date();
+      dateEl.textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      timeEl.textContent = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  // ----------------------------------------------------
+  // MOBILE SIDEBAR TOGGLE
+  // ----------------------------------------------------
+  function initMobileSidebar() {
+    const toggleBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.querySelector('.app-sidebar');
+    if (!toggleBtn || !sidebar) return;
+
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('sidebar-open');
+    });
+
+    // Close sidebar when clicking a nav link on mobile
+    document.querySelectorAll('.app-sidebar-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) {
+          sidebar.classList.remove('sidebar-open');
+        }
+      });
+    });
+  }
+
+  // ----------------------------------------------------
   // INITIALIZATION ON LOAD
   // ----------------------------------------------------
   window.addEventListener('DOMContentLoaded', () => {
@@ -1850,6 +1897,12 @@
       }
     });
 
+    // Register hashchange listener AFTER DOM is ready
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '') || 'dashboard';
+      showTab(hash);
+    });
+
     // Boot current route hash
     const startHash = window.location.hash.replace('#', '') || 'dashboard';
     showTab(startHash);
@@ -1857,6 +1910,8 @@
     // Bind other global setups
     bindReportExporter();
     initWeatherWidget();
+    initLiveClock();
+    initMobileSidebar();
   });
 
 })();
