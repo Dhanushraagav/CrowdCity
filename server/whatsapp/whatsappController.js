@@ -20,7 +20,8 @@ export const getStatus = async (req, res, next) => {
 
 export const triggerReconnect = async (req, res, next) => {
   try {
-    // Fire-and-forget init, runs in background to prevent request timeouts
+    // Purge old session credentials & disconnect previous instance to guarantee a fresh QR code
+    await whatsappService.disconnect();
     whatsappService.initialize();
     res.status(200).json({
       success: true,
