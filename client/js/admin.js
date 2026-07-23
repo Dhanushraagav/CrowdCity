@@ -47,34 +47,32 @@ async function loadAnalytics() {
   const staffEl = document.getElementById('kpi-staff');
 
   try {
-    // 1. Fetch Analytics data
-    const analyticsRes = await API.getAdminAnalytics();
-    if (analyticsRes.error) {
-      showToast("Failed to fetch analytics statistics: " + analyticsRes.error, "error");
-      return;
-    }
-    const analytics = analyticsRes.data;
-
-    // 2. Fetch users list to count authorities
-    const usersRes = await API.getAllUsers();
-    let authorityCount = 0;
-    if (!usersRes.error && usersRes.data) {
-      authorityCount = usersRes.data.filter(u => u.role === 'authority' || u.role === 'admin').length;
-    }
-
-    // 3. Update KPI values
-    if (totalEl) totalEl.textContent = analytics.totalComplaints;
-    if (pendingEl) pendingEl.textContent = analytics.byStatus.pending || 0;
-    if (resolvedEl) resolvedEl.textContent = analytics.byStatus.resolved || 0;
-    if (staffEl) staffEl.textContent = authorityCount;
-
-    // 4. Render Charts
-    renderCharts(analytics);
-
-  } catch (err) {
-    console.error("loadAnalytics error:", err);
-    showToast("Server error loading admin analytics", "error");
-  }
+    const analyticsPromise = API.getAdminAnalytics();
+    const usersPromise = API.getAllUsers();
+    
+    analyticsPromise.then(analyticsRes => {
+      if (analyticsRes.error) throw new Error(analyticsRes.error);
+      const analytics = analyticsRes.data;
+      if (totalEl) totalEl.textContent = analytics.totalComplaints;
+      if (pendingEl) pendingEl.textContent = analytics.byStatus.pending || 0;
+      if (resolvedEl) resolvedEl.textContent = analytics.byStatus.resolved || 0;
+      renderCharts(analytics);
+    }).catch(err => {
+      console.error("loadAnalytics stats error:", err);
+      showToast("Failed to fetch analytics statistics", "error");
+      if (totalEl) totalEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
+      if (pendingEl) pendingEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
+      if (resolvedEl) resolvedEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
+    });
+    
+    usersPromise.then(usersRes => {
+      if (usersRes.error) throw new Error(usersRes.error);
+      let authorityCount = usersRes.data.filter(u => u.role === 'authority' || u.role === 'admin').length;
+      if (staffEl) staffEl.textContent = authorityCount;
+    }).catch(err => {
+      console.error("loadAnalytics users error:", err);
+      if (staffEl) staffEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
+    });
 }
 
 function renderCharts(analytics) {
@@ -248,32 +246,30 @@ async function loadUsers() {
     </tr>
   `;
 
-  try {
-    const [usersRes, deptsRes] = await Promise.all([
-      API.getAllUsers(),
-      API.getDepartments()
-    ]);
-
-    if (usersRes.error) {
-      showToast("Failed to load users: " + usersRes.error, "error");
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-            <i class="fa-solid fa-triangle-exclamation" style="color:var(--status-duplicate);"></i> Failed to load users.
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    currentUsers = usersRes.data || [];
-    allDepartments = deptsRes.data || [];
-    filterAndRenderUsers();
-
-  } catch (err) {
+  API.getAllUsers().then(usersRes => {
+    if (usersRes.error) throw new Error(usersRes.error);
+    API.getDepartments().then(deptsRes => {
+      if (deptsRes.error) throw new Error(deptsRes.error);
+      currentUsers = usersRes.data || [];
+      allDepartments = deptsRes.data || [];
+      filterAndRenderUsers();
+    }).catch(err => { throw err; });
+  }).catch(err => {
     console.error("loadUsers error:", err);
-    showToast("Server error loading users list", "error");
-  }
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 2rem;">
+          <div class="error-retry-card" style="display:inline-block; background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; max-width:400px;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+            <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load users</p>
+            <button onclick="loadUsers()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+              <i class="fa-solid fa-rotate-right"></i> Retry
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
 }
 
 function filterAndRenderUsers() {
@@ -485,33 +481,28 @@ async function loadComplaints() {
     </div>
   `;
 
-  try {
-    // Fetch issues and users concurrently
-    const [issuesRes, usersRes] = await Promise.all([
-      API.getIssues(),
-      API.getAllUsers()
-    ]);
-
-    if (issuesRes.error) {
-      showToast("Failed to load complaints: " + issuesRes.error, "error");
-      listEl.innerHTML = `
-        <div style="text-align: center; padding: 3rem; color: var(--text-muted); background-color:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md);">
-          <i class="fa-solid fa-triangle-exclamation" style="color:var(--status-duplicate); font-size:1.5rem; margin-bottom:0.5rem;"></i><br>
-          Failed to load complaints list.
-        </div>
-      `;
-      return;
-    }
-
-    currentComplaints = issuesRes.data || [];
-    const authorities = (usersRes.data || []).filter(u => u.role === 'authority' || u.role === 'admin');
-
-    filterAndRenderComplaints(authorities);
-
-  } catch (err) {
+  API.getIssues().then(issuesRes => {
+    if (issuesRes.error) throw new Error(issuesRes.error);
+    API.getAllUsers().then(usersRes => {
+      if (usersRes.error) throw new Error(usersRes.error);
+      currentComplaints = issuesRes.data || [];
+      const authorities = (usersRes.data || []).filter(u => u.role === 'authority' || u.role === 'admin');
+      filterAndRenderComplaints(authorities);
+    }).catch(err => { throw err; });
+  }).catch(err => {
     console.error("loadComplaints error:", err);
-    showToast("Server error loading complaints list", "error");
-  }
+    listEl.innerHTML = `
+      <div style="text-align: center; padding: 3rem;">
+        <div class="error-retry-card" style="display:inline-block; background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; max-width:400px;">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+          <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load complaints</p>
+          <button onclick="loadComplaints()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+            <i class="fa-solid fa-rotate-right"></i> Retry
+          </button>
+        </div>
+      </div>
+    `;
+  });
 }
 
 function filterAndRenderComplaints(authorities) {
@@ -819,39 +810,37 @@ async function loadAiDecisions() {
     </tr>
   `;
 
-  try {
-    const [decisionsRes, deptsRes] = await Promise.all([
-      API.getAiDecisions(),
-      API.getDepartments()
-    ]);
+  API.getAiDecisions().then(decisionsRes => {
+    if (decisionsRes.error) throw new Error(decisionsRes.error);
+    API.getDepartments().then(deptsRes => {
+      if (deptsRes.error) throw new Error(deptsRes.error);
+      aiDecisionsList = decisionsRes.data || [];
+      allDepartments = deptsRes.data || [];
 
-    if (decisionsRes.error) {
-      showToast("Failed to load AI decisions: " + decisionsRes.error, "error");
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-            <i class="fa-solid fa-triangle-exclamation" style="color:var(--status-duplicate);"></i> Failed to load AI decisions.
-          </td>
-        </tr>
-      `;
-      return;
-    }
+      // Populate department list dropdown inside AI override block
+      const overrideDeptSelect = document.getElementById('override-department');
+      if (overrideDeptSelect) {
+        overrideDeptSelect.innerHTML = allDepartments.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+      }
 
-    aiDecisionsList = decisionsRes.data || [];
-    allDepartments = deptsRes.data || [];
-
-    // Populate department list dropdown inside AI override block
-    const overrideDeptSelect = document.getElementById('override-department');
-    if (overrideDeptSelect) {
-      overrideDeptSelect.innerHTML = allDepartments.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
-    }
-
-    renderAiDecisions();
-
-  } catch (err) {
+      renderAiDecisions();
+    }).catch(err => { throw err; });
+  }).catch(err => {
     console.error("loadAiDecisions error:", err);
-    showToast("Server error loading AI decisions", "error");
-  }
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 2rem;">
+          <div class="error-retry-card" style="display:inline-block; background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; max-width:400px;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+            <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load AI decisions</p>
+            <button onclick="loadAiDecisions()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+              <i class="fa-solid fa-rotate-right"></i> Retry
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
 }
 
 function renderAiDecisions() {

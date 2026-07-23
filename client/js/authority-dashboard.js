@@ -33,12 +33,10 @@ if (document.readyState === 'loading') {
 }
 
 async function loadDashboardTelemetry() {
-  await Promise.all([
-    loadStats(),
-    loadRecentAssigned(),
-    loadPriorityCases(),
-    loadActivityLog()
-  ]);
+  loadStats().catch(err => console.error(err));
+  loadRecentAssigned().catch(err => console.error(err));
+  loadPriorityCases().catch(err => console.error(err));
+  loadActivityLog().catch(err => console.error(err));
   
   initRealtimeAuthDashboard();
 }
@@ -110,7 +108,15 @@ async function loadRecentAssigned() {
   });
 
   if (error || !issues) {
-    container.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Failed to load active assignments.</div>`;
+    container.innerHTML = `
+      <div class="error-retry-card" style="background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+        <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load assignments</p>
+        <button onclick="loadRecentAssigned()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+          <i class="fa-solid fa-rotate-right"></i> Retry
+        </button>
+      </div>
+    `;
     return;
   }
 
@@ -169,7 +175,15 @@ async function loadPriorityCases() {
     const { data: issues, error } = await window.API.getIssues({ status: 'pending' });
 
     if (error || !issues) {
-      container.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Failed to load priority cases.</div>`;
+      container.innerHTML = `
+        <div class="error-retry-card" style="background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+          <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load priority cases</p>
+          <button onclick="loadPriorityCases()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+            <i class="fa-solid fa-rotate-right"></i> Retry
+          </button>
+        </div>
+      `;
       return;
     }
 
@@ -233,7 +247,15 @@ async function loadActivityLog() {
     }
     const { data: notifications, error } = await window.API.getNotifications();
     if (error || !notifications) {
-      container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0; text-align: center;">No activity logged yet.</div>`;
+      container.innerHTML = `
+        <div class="error-retry-card" style="background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.2rem; margin-bottom: 0.5rem;"></i>
+          <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load activity</p>
+          <button onclick="loadActivityLog()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+            <i class="fa-solid fa-rotate-right"></i> Retry
+          </button>
+        </div>
+      `;
       return;
     }
 

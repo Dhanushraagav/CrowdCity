@@ -1515,6 +1515,113 @@ function updateAuthUI() {
   initNewsTicker();
   injectWhatsAppGatewayLink();
 
+  const injectPortalBadge = () => {
+    const path = window.location.pathname;
+    
+    let badgeText = '';
+    let badgeClass = '';
+    if (path.includes('services-admin.html')) {
+      badgeText = 'Govt Services Admin';
+      badgeClass = 'services';
+    } else if (path.includes('admin.html') || path.includes('analytics.html') || path.includes('whatsapp-admin.html')) {
+      badgeText = 'System Administration';
+      badgeClass = 'system';
+    } else if (path.includes('authority-')) {
+      badgeText = 'Operations Portal';
+      badgeClass = 'operations';
+    }
+    
+    if (badgeText) {
+      // Add to sidebar
+      const sidebarLogos = document.querySelectorAll('.app-sidebar-logo');
+      sidebarLogos.forEach(logo => {
+        if (logo.parentElement.querySelector('.portal-badge')) return;
+        const badge = document.createElement('div');
+        badge.className = `portal-badge ${badgeClass}`;
+        badge.textContent = badgeText;
+        badge.style.marginTop = '8px';
+        badge.style.marginBottom = '12px';
+        badge.style.marginLeft = '12px';
+        badge.style.fontSize = '0.75rem';
+        badge.style.fontWeight = '700';
+        badge.style.padding = '4px 8px';
+        badge.style.borderRadius = '4px';
+        badge.style.display = 'inline-block';
+        if (badgeClass === 'operations') {
+          badge.style.backgroundColor = 'rgba(13, 148, 136, 0.15)';
+          badge.style.color = '#0d9488';
+        } else if (badgeClass === 'system') {
+          badge.style.backgroundColor = 'rgba(79, 70, 229, 0.15)';
+          badge.style.color = '#4f46e5';
+        } else if (badgeClass === 'services') {
+          badge.style.backgroundColor = 'rgba(217, 119, 6, 0.15)';
+          badge.style.color = '#d97706';
+        }
+        logo.after(badge);
+      });
+
+      // Add to mobile headers
+      const mobileLogos = document.querySelectorAll('.app-header-logo-mobile');
+      mobileLogos.forEach(logo => {
+        if (logo.parentElement.querySelector('.portal-badge')) return;
+        const badge = document.createElement('div');
+        badge.className = `portal-badge ${badgeClass}`;
+        badge.textContent = badgeText;
+        badge.style.marginLeft = '8px';
+        badge.style.fontSize = '0.65rem';
+        badge.style.fontWeight = '700';
+        badge.style.padding = '2px 6px';
+        badge.style.borderRadius = '4px';
+        badge.style.display = 'inline-block';
+        if (badgeClass === 'operations') {
+          badge.style.backgroundColor = 'rgba(13, 148, 136, 0.15)';
+          badge.style.color = '#0d9488';
+        } else if (badgeClass === 'system') {
+          badge.style.backgroundColor = 'rgba(79, 70, 229, 0.15)';
+          badge.style.color = '#4f46e5';
+        } else if (badgeClass === 'services') {
+          badge.style.backgroundColor = 'rgba(217, 119, 6, 0.15)';
+          badge.style.color = '#d97706';
+        }
+        logo.after(badge);
+      });
+    }
+  };
+
+  const injectSwitchPortals = () => {
+    const role = getUserRole();
+    if (role !== 'admin') return;
+    
+    const sidebarNav = document.querySelector('.app-sidebar-nav');
+    if (!sidebarNav || document.getElementById('switch-portals-nav')) return;
+    
+    const path = window.location.pathname;
+    const isAuthority = path.includes('authority-') || path.includes('admin.html') || path.includes('whatsapp-admin.html') || path.includes('services-admin.html');
+    if (!isAuthority) return;
+
+    const switchSection = document.createElement('div');
+    switchSection.id = 'switch-portals-nav';
+    switchSection.style.marginTop = '2rem';
+    switchSection.style.paddingTop = '1rem';
+    switchSection.style.borderTop = '1px solid var(--border-color)';
+    switchSection.innerHTML = \`
+      <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem; padding-left: 0.75rem;">Switch Portals</div>
+      <a href="authority-dashboard.html" class="app-sidebar-link \${path.includes('authority-') ? 'active' : ''}">
+        <i class="fa-solid fa-users-gear"></i> <span>Operations Portal</span>
+      </a>
+      <a href="admin.html" class="app-sidebar-link \${path.includes('admin.html') || path.includes('whatsapp-admin.html') ? 'active' : ''}">
+        <i class="fa-solid fa-server"></i> <span>System Administration</span>
+      </a>
+      <a href="services-admin.html" class="app-sidebar-link \${path.includes('services-admin.html') ? 'active' : ''}">
+        <i class="fa-solid fa-building-columns"></i> <span>Govt Services Admin</span>
+      </a>
+    \`;
+    sidebarNav.appendChild(switchSection);
+  };
+
+  injectPortalBadge();
+  injectSwitchPortals();
+
   const container = document.getElementById('auth-nav-container');
   const navMenu = document.getElementById('nav-menu');
 

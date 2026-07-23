@@ -3597,6 +3597,131 @@
 .badge-category.streetlight { background-color: rgba(234, 88, 12, 0.08) !important; color: #c2410c !important; border-color: rgba(234, 88, 12, 0.25) !important; }
 .badge-category.road { background-color: rgba(71, 85, 105, 0.08) !important; color: #334155 !important; border-color: rgba(71, 85, 105, 0.25) !important; }
 
+/* Skeleton Shimmer Loaders */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--bg-surface-hover, #f1f5f9) 25%, var(--border-color, #e2e8f0) 50%, var(--bg-surface-hover, #f1f5f9) 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite ease-in-out;
+  border-radius: var(--radius-sm, 6px);
+}
+
+@keyframes loading-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 0.85rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+.skeleton-text.short {
+  width: 60%;
+}
+.skeleton-text.heading {
+  height: 1.25rem;
+  margin-bottom: 0.75rem;
+  width: 45%;
+}
+.skeleton-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.skeleton-chart {
+  height: 260px;
+  width: 100%;
+}
+.skeleton-card {
+  height: 90px;
+  width: 100%;
+}
+.skeleton-table-row {
+  height: 2.75rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+/* Portal Mode Banner Styles */
+.portal-badge {
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  margin: 0.5rem 0.85rem 0.75rem 0.85rem;
+  text-align: center;
+  display: inline-block;
+}
+.portal-badge.operations {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #3b82f6 !important;
+  border: 1px solid rgba(59, 130, 246, 0.25) !important;
+}
+.portal-badge.system {
+  background: rgba(236, 72, 153, 0.12) !important;
+  color: #ec4899 !important;
+  border: 1px solid rgba(236, 72, 153, 0.25) !important;
+}
+.portal-badge.services {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #f59e0b !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+/* Retry Card Component */
+.error-retry-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--bg-surface);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-main);
+  height: 100%;
+  min-height: 200px;
+}
+.error-retry-card i {
+  font-size: 2.25rem;
+  color: #ef4444;
+  margin-bottom: 0.75rem;
+}
+.error-retry-card h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+.error-retry-card p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0 0 1.25rem 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+.error-retry-card .btn-retry {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.error-retry-card .btn-retry:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+
 
 
 
