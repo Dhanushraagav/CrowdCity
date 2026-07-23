@@ -1414,11 +1414,14 @@
           
           try {
             const headers = await this.getAuthHeaders();
-            const res = await fetch('/api/whatsapp/test-send', {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({ phone: recipient, recipient, message })
-            });
+            const body = JSON.stringify({ phone: recipient, recipient, message });
+            
+            // Try /api/whatsapp/test first, fall back to /api/whatsapp/test-send
+            let res = await fetch('/api/whatsapp/test', { method: 'POST', headers, body });
+            if (res.status === 404) {
+              res = await fetch('/api/whatsapp/test-send', { method: 'POST', headers, body });
+            }
+
             const result = await res.json();
             if (result.success) {
               showToast("Test notification sent successfully!");
