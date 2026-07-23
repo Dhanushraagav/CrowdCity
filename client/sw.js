@@ -1,7 +1,7 @@
 // CrowdCity AI - Service Worker
 // Production-ready service worker focusing on lightweight fetch handling, offline support, and client claims.
 
-const OFFLINE_CACHE_NAME = 'crowdcity-offline-v3';
+const OFFLINE_CACHE_NAME = 'crowdcity-offline-v4';
 const OFFLINE_URL = 'offline.html';
 
 // 1. Install Event: Cache the offline fallback page
