@@ -73,6 +73,9 @@ async function loadAnalytics() {
       console.error("loadAnalytics users error:", err);
       if (staffEl) staffEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
     });
+  } catch (err) {
+    console.error("loadAnalytics general error:", err);
+  }
 }
 
 function renderCharts(analytics) {

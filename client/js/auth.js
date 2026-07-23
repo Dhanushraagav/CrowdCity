@@ -1604,18 +1604,18 @@ function updateAuthUI() {
     switchSection.style.marginTop = '2rem';
     switchSection.style.paddingTop = '1rem';
     switchSection.style.borderTop = '1px solid var(--border-color)';
-    switchSection.innerHTML = \`
+    switchSection.innerHTML = `
       <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem; padding-left: 0.75rem;">Switch Portals</div>
-      <a href="authority-dashboard.html" class="app-sidebar-link \${path.includes('authority-') ? 'active' : ''}">
+      <a href="authority-dashboard.html" class="app-sidebar-link ${path.includes('authority-') ? 'active' : ''}">
         <i class="fa-solid fa-users-gear"></i> <span>Operations Portal</span>
       </a>
-      <a href="admin.html" class="app-sidebar-link \${path.includes('admin.html') || path.includes('whatsapp-admin.html') ? 'active' : ''}">
+      <a href="admin.html" class="app-sidebar-link ${path.includes('admin.html') || path.includes('whatsapp-admin.html') ? 'active' : ''}">
         <i class="fa-solid fa-server"></i> <span>System Administration</span>
       </a>
-      <a href="services-admin.html" class="app-sidebar-link \${path.includes('services-admin.html') ? 'active' : ''}">
+      <a href="services-admin.html" class="app-sidebar-link ${path.includes('services-admin.html') ? 'active' : ''}">
         <i class="fa-solid fa-building-columns"></i> <span>Govt Services Admin</span>
       </a>
-    \`;
+    `;
     sidebarNav.appendChild(switchSection);
   };
 
