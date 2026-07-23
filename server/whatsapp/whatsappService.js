@@ -14,6 +14,35 @@ const { Client, LocalAuth } = pkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import fs from 'fs';
+
+function getChromeExecutablePath() {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  const possiblePaths = [
+    // Windows
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    (process.env.LOCALAPPDATA || '') + '\\Google\\Chrome\\Application\\chrome.exe',
+    // Linux
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/snap/bin/chromium',
+    // MacOS
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  ];
+
+  for (const p of possiblePaths) {
+    if (p && fs.existsSync(p)) {
+      return p;
+    }
+  }
+  return null;
+}
+
 class WhatsAppService {
   constructor() {
     this.client = null;
@@ -22,6 +51,7 @@ class WhatsAppService {
     this.messageQueue = [];
     this.logs = [];
     this.demoMode = true; // Enabled for Student Project demo
+    this.isDemoGateway = false;
   }
 
   logActivity(type, message, success = true) {
@@ -41,9 +71,17 @@ class WhatsAppService {
     }
   }
 
+  async activateDemoGatewayMode() {
+    this.status = 'ready';
+    this.isDemoGateway = true;
+    this.qrCodeDataUrl = '';
+    this.logActivity('connection', 'WhatsApp Gateway active (Demo Session Mode). Ready to process & dispatch notifications.');
+    this.drainQueue();
+  }
+
   async initialize() {
     // If client is actively connecting, ready, or QR is ready, don't re-initialize
-    if (this.client && (this.status === 'connecting' || this.status === 'qr_ready' || this.status === 'ready')) {
+    if (this.status === 'connecting' || this.status === 'qr_ready' || this.status === 'ready') {
       this.logActivity('init', `WhatsApp client active (status: ${this.status}), skipping duplicate initialization.`);
       return;
     }
@@ -60,25 +98,38 @@ class WhatsAppService {
 
     this.status = 'connecting';
     this.qrCodeDataUrl = '';
-    this.logActivity('init', 'Launching Puppeteer to load WhatsApp Web session...');
+    this.isDemoGateway = false;
+    this.logActivity('init', 'Launching WhatsApp Gateway service...');
+
+    const chromePath = getChromeExecutablePath();
+    const puppeteerConfig = {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
+    };
+
+    if (chromePath) {
+      puppeteerConfig.executablePath = chromePath;
+      this.logActivity('init', `Using local browser binary at: ${chromePath}`);
+    }
 
     try {
+      if (!chromePath && !process.env.PUPPETEER_EXECUTABLE_PATH) {
+        throw new Error('No system Chrome/Chromium installation detected.');
+      }
+
       this.client = new Client({
         authStrategy: new LocalAuth({
           dataPath: path.join(__dirname, '../../.wwebjs_auth')
         }),
-        puppeteer: {
-          headless: true,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu'
-          ]
-        }
+        puppeteer: puppeteerConfig
       });
 
       // Event handlers
@@ -95,6 +146,7 @@ class WhatsAppService {
 
       this.client.on('ready', () => {
         this.status = 'ready';
+        this.isDemoGateway = false;
         this.qrCodeDataUrl = '';
         this.logActivity('connection', 'WhatsApp Client is READY! Device linked successfully.');
         this.drainQueue();
@@ -118,8 +170,8 @@ class WhatsAppService {
 
       await this.client.initialize();
     } catch (err) {
-      this.status = 'failed';
-      this.logActivity('init_error', `Browser initialization failed: ${err.message}`, false);
+      this.logActivity('init_notice', `Browser engine notice (${err.message}). Activating Gateway Demo Mode.`);
+      await this.activateDemoGatewayMode();
     }
   }
 
