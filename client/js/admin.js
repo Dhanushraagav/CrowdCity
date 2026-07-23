@@ -1264,7 +1264,7 @@
       if (queueEl) queueEl.textContent = data.queueCount || 0;
 
       if (stateEl) {
-        stateEl.textContent = data.status.toUpperCase();
+        stateEl.textContent = data.status === 'qr_ready' ? 'QR READY' : data.status.toUpperCase();
         if (data.status === 'ready') stateEl.style.color = '#10b981';
         else if (data.status === 'connecting' || data.status === 'qr_ready') stateEl.style.color = '#f59e0b';
         else stateEl.style.color = '#ef4444';
@@ -1280,13 +1280,15 @@
         } else if (data.status === 'connecting') {
           badgeClass = 'status-disconnected'; icon = 'fa-spinner fa-spin'; text = 'Connecting...';
         } else if (data.status === 'qr_ready') {
-          badgeClass = 'status-disconnected'; icon = 'fa-qrcode'; text = 'QR Code Ready';
+          badgeClass = 'status-ready'; icon = 'fa-qrcode'; text = 'QR Code Ready';
+        } else if (data.status === 'failed') {
+          badgeClass = 'status-disconnected'; icon = 'fa-circle-xmark'; text = 'Failed - Click Initialize';
         }
 
         badgeContainer.innerHTML = `<span class="status-badge ${badgeClass}"><i class="fa-solid ${icon}"></i> ${text}</span>`;
       }
 
-      if (data.status === 'qr_ready' && data.qrCode) {
+      if ((data.status === 'qr_ready' || data.qrCode) && data.qrCode) {
         if (qrPlaceholder) qrPlaceholder.classList.add('hidden');
         if (qrImg) {
           qrImg.src = data.qrCode;
@@ -1314,7 +1316,7 @@
         container.innerHTML = logs.map(l => {
           const timestamp = new Date(l.timestamp).toLocaleTimeString();
           let color = 'var(--text-main)';
-          if (l.level === 'error') color = '#ef4444';
+          if (l.level === 'error' || l.success === false) color = '#ef4444';
           else if (l.level === 'warn') color = '#f59e0b';
           return `<div style="color: ${color}; margin-bottom: 0.25rem;">[${timestamp}] ${escapeHTML(l.message)}</div>`;
         }).join('');
@@ -1325,10 +1327,10 @@
           return;
         }
         container.innerHTML = queue.map(m => {
-          const added = new Date(m.addedAt).toLocaleTimeString();
+          const added = new Date(m.addedAt || m.timestamp || Date.now()).toLocaleTimeString();
           return `<div style="margin-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">
-            <div style="font-weight: 700;">To: +${m.recipient} [Added: ${added}]</div>
-            <div style="color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${escapeHTML(m.message)}</div>
+            <div style="font-weight: 700;">To: +${m.recipient || m.phone} [Added: ${added}]</div>
+            <div style="color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${escapeHTML(m.message || m.text)}</div>
           </div>`;
         }).join('');
       }
@@ -1348,8 +1350,13 @@
             const headers = await this.getAuthHeaders();
             const res = await fetch('/api/whatsapp/reconnect', { method: 'POST', headers });
             const result = await res.json();
-            if (result.success) showToast("WhatsApp connection initialized! Awaiting scan...");
-            else showToast("Failed to initialize gateway.", "error");
+            if (result.success) {
+              showToast("WhatsApp connection initialized! Awaiting scan...");
+              setTimeout(() => this.fetchGatewayStatus(), 400);
+              setTimeout(() => this.fetchGatewayStatus(), 1500);
+            } else {
+              showToast("Failed to initialize gateway.", "error");
+            }
           } catch (e) {
             showToast("Error connecting gateway", "error");
           } finally {
