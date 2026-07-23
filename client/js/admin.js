@@ -46,6 +46,20 @@ async function loadAnalytics() {
   const resolvedEl = document.getElementById('kpi-resolved');
   const staffEl = document.getElementById('kpi-staff');
 
+  const catContainer = document.getElementById('chart-categories-container');
+  const statContainer = document.getElementById('chart-statuses-container');
+  const perfContainer = document.getElementById('chart-performance-container');
+
+  // Reset to skeletons at the start of loading
+  if (totalEl) totalEl.innerHTML = '<div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div>';
+  if (pendingEl) pendingEl.innerHTML = '<div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div>';
+  if (resolvedEl) resolvedEl.innerHTML = '<div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div>';
+  if (staffEl) staffEl.innerHTML = '<div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div>';
+
+  if (catContainer) catContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
+  if (statContainer) statContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
+  if (perfContainer) perfContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
+
   try {
     const analyticsPromise = API.getAdminAnalytics();
     const usersPromise = API.getAllUsers();
@@ -56,10 +70,30 @@ async function loadAnalytics() {
       if (totalEl) totalEl.textContent = analytics.totalComplaints;
       if (pendingEl) pendingEl.textContent = analytics.byStatus.pending || 0;
       if (resolvedEl) resolvedEl.textContent = analytics.byStatus.resolved || 0;
+
+      // Restore canvases before rendering charts
+      if (catContainer) catContainer.innerHTML = '<canvas id="chart-categories"></canvas>';
+      if (statContainer) statContainer.innerHTML = '<canvas id="chart-statuses"></canvas>';
+      if (perfContainer) perfContainer.innerHTML = '<canvas id="chart-performance"></canvas>';
+
       renderCharts(analytics);
     }).catch(err => {
       console.error("loadAnalytics stats error:", err);
-      showToast("Failed to fetch analytics statistics", "error");
+      
+      const retryCardHtml = `
+        <div class="error-retry-card" style="background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+          <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Analytics temporarily unavailable</p>
+          <button onclick="loadAnalytics()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+            <i class="fa-solid fa-rotate-right"></i> Retry
+          </button>
+        </div>
+      `;
+
+      if (catContainer) catContainer.innerHTML = retryCardHtml;
+      if (statContainer) statContainer.innerHTML = retryCardHtml;
+      if (perfContainer) perfContainer.innerHTML = retryCardHtml;
+
       if (totalEl) totalEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
       if (pendingEl) pendingEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
       if (resolvedEl) resolvedEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';

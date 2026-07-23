@@ -3598,7 +3598,7 @@
 .badge-category.road { background-color: rgba(71, 85, 105, 0.08) !important; color: #334155 !important; border-color: rgba(71, 85, 105, 0.25) !important; }
 
 /* Skeleton Shimmer Loaders */
-.skeleton-shimmer {
+.skeleton-shimmer, .skeleton {
   background: linear-gradient(90deg, var(--bg-surface-hover, #f1f5f9) 25%, var(--border-color, #e2e8f0) 50%, var(--bg-surface-hover, #f1f5f9) 75%);
   background-size: 200% 100%;
   animation: loading-shimmer 1.5s infinite ease-in-out;
