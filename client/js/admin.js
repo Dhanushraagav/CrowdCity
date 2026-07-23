@@ -1417,14 +1417,15 @@
             const res = await fetch('/api/whatsapp/test-send', {
               method: 'POST',
               headers,
-              body: JSON.stringify({ recipient, message })
+              body: JSON.stringify({ phone: recipient, recipient, message })
             });
             const result = await res.json();
             if (result.success) {
               showToast("Test notification sent successfully!");
               document.getElementById('test-message-input').value = '';
+              setTimeout(() => this.fetchGatewayStatus(), 300);
             } else {
-              showToast("Failed to send test: " + result.error, "error");
+              showToast("Failed to send test: " + (result.error || result.message || "Server error"), "error");
             }
           } catch (err) {
             showToast("Error sending test message", "error");

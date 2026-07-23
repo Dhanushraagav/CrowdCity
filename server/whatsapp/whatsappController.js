@@ -45,7 +45,8 @@ export const triggerDisconnect = async (req, res, next) => {
 };
 
 export const sendTestMessage = async (req, res, next) => {
-  const { phone, message } = req.body;
+  const phone = req.body.phone || req.body.recipient;
+  const message = req.body.message;
   if (!phone || !message) {
     return res.status(400).json({ error: 'Parameters phone and message are required.' });
   }

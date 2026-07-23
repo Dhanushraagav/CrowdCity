@@ -24,6 +24,7 @@ router.get('/status', getStatus);
 router.post('/reconnect', triggerReconnect);
 router.post('/disconnect', triggerDisconnect);
 router.post('/test', sendTestMessage);
+router.post('/test-send', sendTestMessage);
 router.post('/notify', triggerNotification);
 router.get('/logs', getLogs);
 router.get('/queue', getQueue);
