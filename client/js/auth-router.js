@@ -216,7 +216,7 @@ window.authRouter = {
   redirectToDashboard: function(role) {
     let target = null;
     if (role === 'citizen') target = 'citizen-dashboard.html';
-    else if (role === 'authority') target = 'authority-dashboard.html';
+    else if (role === 'authority') target = 'admin.html';
     else if (role === 'admin') target = 'admin.html';
     
     if (!target) {
@@ -302,7 +302,7 @@ window.authRouter = {
 
   // 2. Define route targets
   const CITIZEN_DASHBOARD = 'citizen-dashboard.html';
-  const AUTHORITY_DASHBOARD = 'authority-dashboard.html';
+  const AUTHORITY_DASHBOARD = 'admin.html';
   const ADMIN_DASHBOARD = 'admin.html';
   const CITIZEN_LOGIN = 'auth.html';
   const AUTHORITY_LOGIN = 'authority-login.html';
