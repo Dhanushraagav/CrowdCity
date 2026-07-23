@@ -8,14 +8,14 @@
   <meta name="theme-color" content="#0D9488">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity Portal">
   <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=1.0.6"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Municipal administrative console for CrowdCity AI. Oversee complaints, manage roles, view city performance metrics.">
-  <title>Admin Dashboard - CrowdCity AI</title>
+  <meta name="description" content="Municipal administration portal for CrowdCity AI. Oversee caseloads, delegate complaints, manage system settings.">
+  <title>Authority Portal - CrowdCity AI</title>
   
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
@@ -36,7 +36,21 @@
   </script>
 
   <style>
-    /* Premium Stats Dashboard Layout */
+    /* Tab panes logic */
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active-pane {
+      display: block;
+    }
+    .admin-only-section {
+      display: none;
+    }
+    body.is-admin .admin-only-section {
+      display: block;
+    }
+
+    /* Grid layouts */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -88,67 +102,13 @@
       letter-spacing: 0.05em;
     }
 
-    /* Tabs Control */
-    .tabs-nav {
-      display: flex;
-      gap: 1rem;
-      border-bottom: 2px solid var(--border-color);
-      margin-bottom: 2rem;
-      padding-bottom: 0.1rem;
-      overflow-x: auto;
-      flex-wrap: nowrap;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    .tabs-nav::-webkit-scrollbar {
-      display: none;
-    }
-    
-    .tab-btn {
-      background: none;
-      border: none;
-      font-family: var(--font-heading);
-      font-weight: 600;
-      font-size: 1rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 0.75rem 1.25rem;
-      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-      transition: var(--transition-fast);
-      position: relative;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    
-    .tab-btn:hover {
-      color: var(--primary);
-    }
-    
-    .tab-btn.active {
-      color: var(--primary);
-      background-color: var(--primary-light-alpha);
-    }
-    
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background-color: var(--primary);
-      border-radius: var(--radius-round);
-    }
-    
-    /* Charts Layout */
     .charts-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2rem;
       margin-top: 1.5rem;
     }
-    
+
     .chart-card {
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -159,7 +119,7 @@
       flex-direction: column;
       gap: 1rem;
     }
-    
+
     .chart-card h3 {
       font-size: 1.1rem;
       color: var(--text-main);
@@ -169,7 +129,7 @@
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 0.75rem;
     }
-    
+
     .chart-container {
       position: relative;
       width: 100%;
@@ -178,8 +138,7 @@
       align-items: center;
       justify-content: center;
     }
-    
-    /* Users Table Layout */
+
     .table-container {
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -188,13 +147,13 @@
       box-shadow: var(--shadow-sm);
       margin-top: 1rem;
     }
-    
+
     .admin-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
     }
-    
+
     .admin-table th {
       background-color: var(--slate-100);
       color: var(--slate-700);
@@ -205,25 +164,18 @@
       letter-spacing: 0.05em;
       border-bottom: 1px solid var(--border-color);
     }
-    
 
-    
     .admin-table td {
       padding: 1rem;
       border-bottom: 1px solid var(--border-color);
       font-size: 0.9rem;
       vertical-align: middle;
     }
-    
-    .admin-table tr:last-child td {
-      border-bottom: none;
-    }
-    
+
     .admin-table tr:hover {
       background-color: var(--bg-surface-hover);
     }
-    
-    /* Badges */
+
     .badge-role {
       padding: 0.25rem 0.5rem;
       border-radius: var(--radius-sm);
@@ -232,23 +184,11 @@
       text-transform: uppercase;
       display: inline-block;
     }
-    
-    .badge-role.citizen {
-      background-color: var(--primary-light-alpha);
-      color: var(--primary);
-    }
-    
-    .badge-role.authority {
-      background-color: rgba(139, 92, 246, 0.1);
-      color: #8b5cf6;
-    }
-    
-    .badge-role.admin {
-      background-color: rgba(236, 72, 153, 0.1);
-      color: #ec4899;
-    }
-    
-    /* Search row controls */
+
+    .badge-role.citizen { background-color: var(--primary-light-alpha); color: var(--primary); }
+    .badge-role.authority { background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+    .badge-role.admin { background-color: rgba(236, 72, 153, 0.1); color: #ec4899; }
+
     .controls-row {
       display: flex;
       gap: 1rem;
@@ -256,15 +196,14 @@
       margin-bottom: 1.5rem;
       flex-wrap: wrap;
     }
-    
-    /* Complaints list layout */
+
     .complaints-list {
       display: flex;
       flex-direction: column;
       gap: 1rem;
       margin-top: 1rem;
     }
-    
+
     .complaint-admin-card {
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -276,446 +215,871 @@
       box-shadow: var(--shadow-sm);
       transition: var(--transition-normal);
     }
-    
+
     .complaint-admin-card:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
-    
-    .complaint-admin-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .complaint-admin-body {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      background-color: var(--slate-50);
-      padding: 0.75rem 1.25rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-    }
 
-    
-    .delegation-control {
+    /* Weather widget */
+    .weather-widget {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .action-row {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
+      background: var(--slate-100);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
     }
 
-    /* Notification / Toast Alert banner */
-    .toast-banner {
-      padding: 1rem;
-      border-radius: var(--radius-md);
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-weight: 500;
-      transition: var(--transition-normal);
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
     }
-    .toast-banner.success {
-      background-color: #d1fae5;
-      color: #065f46;
-      border: 1px solid #10b981;
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
     }
-    .toast-banner.error {
-      background-color: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #ef4444;
+
+    .modal-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 550px;
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(20px);
+      transition: transform var(--transition-normal);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    /* Custom form styling for CMS */
+    .form-group-custom {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+    .form-label-custom {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .form-input-custom, .form-select-custom {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      background: var(--bg-surface);
+      color: var(--text-main);
+    }
+
+    /* CMS Sub-tabs style */
+    .admin-nav-tab {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    /* WhatsApp Gateway grid styling */
+    .gateway-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+    .gateway-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .status-badge.status-ready { background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+    .status-badge.status-disconnected { background: rgba(239, 68, 68, 0.12); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
+
+    /* Admin badge tags */
+    .badge-emergency {
+      background-color: #ef4444;
+      color: white;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      animation: pulse-red 1.5s infinite;
+    }
+    @keyframes pulse-red {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
-<body>
+<body class="protected-page">
 
-  <!-- App Header -->
-  <header class="app-header">
-    <div class="logo-container" onclick="window.location.href='admin.html'" style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer;">
-        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 30px; height: 30px; flex-shrink: 0; object-fit: contain;" />
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <a href="admin.html" class="app-sidebar-logo">
+        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 34px; height: 34px; flex-shrink: 0; object-fit: contain;" />
         <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
           <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
           <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
-        </div></div>
-      <span class="logo-text">CrowdCity AI</span>
-    </div>
-
-    <!-- Live Date and Time Widget -->
-    <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 1.5rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
-      <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
-      <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2; transition: opacity 0.15s ease-in-out;"></span>
-    </div>
-
-    <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-
-    <nav class="nav-links" id="nav-menu">
-      <a href="admin.html" class="nav-link active" id="nav-admin-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="admin_panel">Admin Panel</span></a>
-      <div id="auth-nav-container">
-        <!-- Dynamic header actions populated by auth.js -->
-      </div>
-    </nav>
-  </header>
-
-  <!-- Main Container -->
-  <main class="app-container">
-    <div class="content-wrapper">
+        </div>
+      </a>
       
-      <!-- Page Header -->
-      <section style="margin-bottom: 2rem;">
-        <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.25rem;" data-i18n="admin_panel_title">CrowdCity AI Administration Center</h1>
-        <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="admin_panel_desc">View city metrics overview, delegate complaints, and manage system roles.</p>
-      </section>
-
-      <!-- Toast Feedback Area -->
-      <div id="toast-container" class="hidden"></div>
-
-      <!-- Navigation Tabs -->
-      <nav class="tabs-nav" role="tablist">
-        <button class="tab-btn active" id="tab-btn-analytics" role="tab" aria-selected="true" aria-controls="pane-analytics">
-          <i class="fa-solid fa-chart-simple"></i> <span data-i18n="analytics_overview">Analytics Overview</span>
-        </button>
-        <button class="tab-btn" id="tab-btn-users" role="tab" aria-selected="false" aria-controls="pane-users">
+      <!-- Badges injected dynamically by auth.js -->
+      <nav class="app-sidebar-nav" id="sidebar-navigation">
+        <a href="#dashboard" class="app-sidebar-link active" data-target="pane-dashboard">
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">Dashboard</span>
+        </a>
+        <a href="#complaints" class="app-sidebar-link" data-target="pane-complaints">
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="complaints">Complaints</span>
+        </a>
+        <a href="#services" class="app-sidebar-link" data-target="pane-services">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="govt_services">Govt Services</span>
+        </a>
+        <a href="#users" class="app-sidebar-link admin-only-section" data-target="pane-users">
           <i class="fa-solid fa-users-gear"></i> <span data-i18n="user_management">User Management</span>
-        </button>
-        <button class="tab-btn" id="tab-btn-complaints" role="tab" aria-selected="false" aria-controls="pane-complaints">
-          <i class="fa-solid fa-folder-open"></i> <span data-i18n="complaint_queue">Complaint Queue</span>
-        </button>
-        <button class="tab-btn" id="tab-btn-departments" role="tab" aria-selected="false" aria-controls="pane-departments">
-          <i class="fa-solid fa-building-flag"></i> <span data-i18n="departments">Departments</span>
-        </button>
-        <button class="tab-btn" id="tab-btn-ai-decisions" role="tab" aria-selected="false" aria-controls="pane-ai-decisions">
-          <i class="fa-solid fa-robot"></i> <span data-i18n="ai_monitor">AI Monitor</span>
-        </button>
-        <button class="tab-btn" id="tab-btn-reports" role="tab" aria-selected="false" aria-controls="pane-reports">
-          <i class="fa-solid fa-file-invoice"></i> <span data-i18n="reports_center">Reports Center</span>
-        </button>
+        </a>
+        <a href="#reports" class="app-sidebar-link" data-target="pane-reports">
+          <i class="fa-solid fa-file-invoice"></i> <span data-i18n="reports">Reports</span>
+        </a>
+        <a href="#whatsapp" class="app-sidebar-link admin-only-section" data-target="pane-whatsapp">
+          <i class="fa-solid fa-comments"></i> <span data-i18n="whatsapp_gateway">WhatsApp Gateway</span>
+        </a>
+        <a href="#settings" class="app-sidebar-link admin-only-section" data-target="pane-settings">
+          <i class="fa-solid fa-gear"></i> <span data-i18n="system_settings">System Settings</span>
+        </a>
       </nav>
-
-      <!-- Tab Panes -->
       
-      <!-- Tab 1: Analytics -->
-      <section id="pane-analytics" class="tab-pane" role="tabpanel">
-        <!-- Metric Cards -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon" style="background-color: var(--slate-600);"><i class="fa-solid fa-database"></i></div>
-            <div>
-              <div class="stat-number" id="kpi-total"><div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div></div>
-              <div class="stat-label" data-i18n="total_reports">Total Reports</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background-color: #f59e0b;"><i class="fa-solid fa-clock"></i></div>
-            <div>
-              <div class="stat-number" id="kpi-pending"><div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div></div>
-              <div class="stat-label" data-i18n="pending_cases">Pending Cases</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background-color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
-            <div>
-              <div class="stat-number" id="kpi-resolved"><div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div></div>
-              <div class="stat-label" data-i18n="status_resolved">Resolved</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background-color: var(--primary);"><i class="fa-solid fa-user-shield"></i></div>
-            <div>
-              <div class="stat-number" id="kpi-staff"><div class="skeleton" style="width: 50px; height: 1.75rem; border-radius: 4px; display: inline-block;"></div></div>
-              <div class="stat-label" data-i18n="authorities">Authorities</div>
-            </div>
-          </div>
-        </div>
+      <div class="app-sidebar-footer">
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
 
-        <!-- Charts Layout Grid -->
-        <div class="charts-grid">
-          <!-- Chart 1: Categories -->
-          <div class="chart-card">
-            <h3><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> <span data-i18n="complaints_by_category">Complaints by Category</span></h3>
-            <div class="chart-container" id="chart-categories-container">
-              <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
-            </div>
-          </div>
-          <!-- Chart 2: Statuses -->
-          <div class="chart-card">
-            <h3><i class="fa-solid fa-chart-bar" style="color:#8b5cf6;"></i> <span data-i18n="complaints_by_status">Complaints by Status</span></h3>
-            <div class="chart-container" id="chart-statuses-container">
-              <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
-            </div>
-          </div>
-          <!-- Chart 3: Department Performance -->
-          <div class="chart-card">
-            <h3><i class="fa-solid fa-ranking-stars" style="color:#ec4899;"></i> <span data-i18n="inspector_resolution_performance">Inspector Resolution Performance</span></h3>
-            <div class="chart-container" id="chart-performance-container">
-              <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tab 2: User Management -->
-      <section id="pane-users" class="tab-pane hidden" role="tabpanel">
-        <div class="controls-row">
-          <div style="flex: 1; min-width: 250px; position: relative;">
-            <input type="text" id="user-search-input" class="form-input" data-i18n-placeholder="search_users_placeholder" placeholder="Search users by name or email..." style="padding-left: 2.25rem;">
-            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-          </div>
-          <div style="min-width: 150px;">
-            <select id="user-role-filter" class="form-select" style="margin:0;">
-              <option value="" data-i18n="all_roles">All Roles</option>
-              <option value="citizen" data-i18n="role_citizen">Citizen</option>
-              <option value="authority" data-i18n="role_authority">Authority</option>
-              <option value="admin" data-i18n="role_admin">Admin</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Users Table -->
-        <div class="table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th data-i18n="full_name">Name</th>
-                <th data-i18n="email_address">Email</th>
-                <th data-i18n="registration_date">Registration Date</th>
-                <th data-i18n="role">Role</th>
-                <th data-i18n="verify_authority">Verify Authority</th>
-                <th data-i18n="department_assignment">Department Assignment</th>
-                <th data-i18n="status_suspension">Status / Suspension</th>
-              </tr>
-            </thead>
-            <tbody id="users-table-body">
-              <!-- Dynamically rendered rows -->
-              <tr>
-                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                  <i class="fa-solid fa-spinner fa-spin" style="margin-right:0.5rem;"></i> Loading user list...
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Tab 3: Complaint Queue -->
-      <section id="pane-complaints" class="tab-pane hidden" role="tabpanel">
-        <div class="controls-row" style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.5rem; justify-content: space-between;">
-          <h3 style="font-size: 1.1rem; font-family: var(--font-heading);"><i class="fa-solid fa-list-check"></i> <span data-i18n="overall_complaints_queue">Overall complaints queue</span></h3>
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
           
-          <!-- Filter Pills -->
-          <div class="filter-pills" id="admin-status-filters" style="margin: 0;">
-            <button class="filter-pill active" data-status="" data-i18n="all_cases">All</button>
-            <button class="filter-pill" data-status="pending" data-i18n="status_pending">Pending</button>
-            <button class="filter-pill" data-status="assigned" data-i18n="status_assigned">Assigned</button>
-            <button class="filter-pill" data-status="in_progress" data-i18n="status_in_progress">In Progress</button>
-            <button class="filter-pill" data-status="resolved" data-i18n="status_resolved">Resolved</button>
-            <button class="filter-pill" data-status="rejected" data-i18n="status_rejected">Rejected</button>
+          <!-- Breadcrumbs -->
+          <div class="breadcrumbs" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); color: var(--text-main); font-size: 0.9rem;">
+            <span style="font-weight: 700; color: var(--text-muted);">Authority Portal</span>
+            <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem; color: var(--text-muted);"></i>
+            <span id="breadcrumb-active-tab" style="font-weight: 800; color: var(--primary);">Dashboard</span>
           </div>
         </div>
 
-        <!-- Complaint List Queue -->
-        <div id="admin-complaints-list" class="complaints-list">
-          <!-- Dynamically rendered cards -->
-          <div style="text-align: center; padding: 3rem; color: var(--text-muted); background-color:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md);">
-            <i class="fa-solid fa-spinner fa-spin" style="margin-right:0.5rem; font-size:1.5rem;"></i> Loading complaints queue...
+        <div style="display: flex; align-items: center; gap: 1rem; margin-left: auto;">
+          <!-- Weather Widget -->
+          <div class="weather-widget loading" id="weather-widget" title="Auto-detected location weather">
+            <span id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></span>
+            <span id="weather-city">Detecting...</span>
+            <span id="weather-temp">--&deg;C</span>
+          </div>
+
+          <!-- Live Clock -->
+          <div style="display: flex; flex-direction: column; font-family: monospace; text-align: right; line-height: 1.1;">
+            <span id="widget-date" style="font-size: 0.65rem; color: var(--text-muted);"></span>
+            <span id="widget-time" class="time-tick" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);"></span>
+          </div>
+
+          <div id="auth-nav-container"></div>
+        </div>
+      </header>
+
+      <!-- Toast Alerts -->
+      <div id="toast-container" class="hidden" style="margin: 1.5rem 1.5rem 0 1.5rem;"></div>
+
+      <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 1200px; margin: 0 auto;">
+        
+        <!-- ============================================== -->
+        <!-- VIEW 1: DASHBOARD                              -->
+        <!-- ============================================== -->
+        <section id="pane-dashboard" class="tab-pane active-pane">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="background-color: var(--slate-600);"><i class="fa-solid fa-database"></i></div>
+              <div>
+                <div class="stat-number" id="kpi-total"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
+                <div class="stat-label" data-i18n="total_reports">Total Reports</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background-color: #f59e0b;"><i class="fa-solid fa-clock"></i></div>
+              <div>
+                <div class="stat-number" id="kpi-pending"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
+                <div class="stat-label" data-i18n="pending_cases">Pending Cases</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background-color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
+              <div>
+                <div class="stat-number" id="kpi-resolved"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
+                <div class="stat-label" data-i18n="status_resolved">Resolved</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background-color: var(--primary);"><i class="fa-solid fa-user-shield"></i></div>
+              <div>
+                <div class="stat-number" id="kpi-staff"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
+                <div class="stat-label" data-i18n="authorities">Authorities</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Layout Grid -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> <span data-i18n="complaints_by_category">Complaints by Category</span></h3>
+              <div class="chart-container" id="chart-categories-container">
+                <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h3><i class="fa-solid fa-chart-bar" style="color:#8b5cf6;"></i> <span data-i18n="complaints_by_status">Complaints by Status</span></h3>
+              <div class="chart-container" id="chart-statuses-container">
+                <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h3><i class="fa-solid fa-ranking-stars" style="color:#ec4899;"></i> <span data-i18n="inspector_resolution_performance">Inspector Resolution Performance</span></h3>
+              <div class="chart-container" id="chart-performance-container">
+                <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split Layout: Recent Assignments & Activity Logs -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 2rem; align-items: start;">
+            <div>
+              <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin-bottom: 1rem;"><i class="fa-solid fa-clipboard-user"></i> Recent Operational Assignments</h3>
+              <div id="recent-assigned-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <div class="skeleton-shimmer skeleton-card"></div>
+                <div class="skeleton-shimmer skeleton-card"></div>
+              </div>
+
+              <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin-top: 2rem; margin-bottom: 1rem;"><i class="fa-solid fa-arrow-trend-up"></i> Priority Cases (Unassigned & Upvoted)</h3>
+              <div id="priority-cases-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <div class="skeleton-shimmer skeleton-card"></div>
+              </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="chart-card">
+              <h3 style="border: none; padding: 0;"><i class="fa-solid fa-timeline"></i> Activity Timeline</h3>
+              <div id="activity-log-timeline" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; border-left: 2px solid var(--border-color); padding-left: 1.5rem;">
+                <!-- Dynamically loaded timeline elements -->
+                <div class="skeleton-shimmer" style="height: 60px; width: 100%;"></div>
+                <div class="skeleton-shimmer" style="height: 60px; width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: COMPLAINTS QUEUE                       -->
+        <!-- ============================================== -->
+        <section id="pane-complaints" class="tab-pane">
+          <div class="controls-row" style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.5rem; justify-content: space-between;">
+            <h3 style="font-size: 1.1rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-list-check"></i> Overall complaints queue</h3>
+            <div class="filter-pills" id="admin-status-filters" style="margin: 0;">
+              <button class="filter-pill active" data-status="">All</button>
+              <button class="filter-pill" data-status="pending">Pending</button>
+              <button class="filter-pill" data-status="assigned">Assigned</button>
+              <button class="filter-pill" data-status="in_progress">In Progress</button>
+              <button class="filter-pill" data-status="resolved">Resolved</button>
+              <button class="filter-pill" data-status="rejected">Rejected</button>
+            </div>
+          </div>
+
+          <div id="admin-complaints-list" class="complaints-list">
+            <div class="skeleton-shimmer skeleton-card"></div>
+            <div class="skeleton-shimmer skeleton-card"></div>
+            <div class="skeleton-shimmer skeleton-card"></div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 3: GOVERNMENT SERVICES CMS                -->
+        <!-- ============================================== -->
+        <section id="pane-services" class="tab-pane">
+          <!-- Stats Summary Grid -->
+          <div class="admin-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
+              <div id="stat-total-schemes" style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">0</div>
+              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Schemes</div>
+            </div>
+            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
+              <div id="stat-total-offices" style="font-size: 1.5rem; font-weight: 800; color: #6366f1;">0</div>
+              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Registered Offices</div>
+            </div>
+            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
+              <div id="stat-total-announcements" style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">0</div>
+              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Announcements</div>
+            </div>
+            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
+              <div id="stat-total-faqs" style="font-size: 1.5rem; font-weight: 800; color: #10b981;">0</div>
+              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">AI FAQs</div>
+            </div>
+          </div>
+
+          <!-- CMS Sub Navigation Tabs -->
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.35rem; border-radius: 14px; flex-wrap: wrap;">
+            <button type="button" class="admin-nav-tab active-sub-tab" data-tab="schemes" style="background: var(--primary); color: #ffffff;">
+              <i class="fa-solid fa-award"></i> Schemes
+            </button>
+            <button type="button" class="admin-nav-tab" data-tab="offices" style="background: transparent; color: var(--text-muted);">
+              <i class="fa-solid fa-building-columns"></i> Offices
+            </button>
+            <button type="button" class="admin-nav-tab" data-tab="announcements" style="background: transparent; color: var(--text-muted);">
+              <i class="fa-solid fa-bullhorn"></i> Announcements
+            </button>
+            <button type="button" class="admin-nav-tab" data-tab="faqs" style="background: transparent; color: var(--text-muted);">
+              <i class="fa-solid fa-circle-question"></i> AI FAQs
+            </button>
+          </div>
+
+          <div id="admin-tab-content" style="min-height: 250px;">
+            <!-- Dynamically populated schemes list -->
+            <div class="skeleton-shimmer skeleton-card"></div>
+            <div class="skeleton-shimmer skeleton-card"></div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 4: USER MANAGEMENT                        -->
+        <!-- ============================================== -->
+        <section id="pane-users" class="tab-pane">
+          <div class="controls-row">
+            <div style="flex: 1; min-width: 250px; position: relative;">
+              <input type="text" id="user-search-input" class="form-input" placeholder="Search users by name or email..." style="padding-left: 2.25rem;">
+              <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+            </div>
+            <div style="min-width: 150px;">
+              <select id="user-role-filter" class="form-select" style="margin:0;">
+                <option value="">All Roles</option>
+                <option value="citizen">Citizen</option>
+                <option value="authority">Authority</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Registration Date</th>
+                  <th>Role</th>
+                  <th>Verify Authority</th>
+                  <th>Department Assignment</th>
+                  <th>Status / Suspension</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr class="skeleton-table-row"></tr>
+                <tr class="skeleton-table-row"></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 5: REPORTS CENTER                         -->
+        <!-- ============================================== -->
+        <section id="pane-reports" class="tab-pane">
+          <div class="glass-panel" style="padding: 2.5rem; max-width: 600px; margin: 2rem auto; display: flex; flex-direction: column; gap: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px;">
+            <h2 style="font-size: 1.5rem; font-family: var(--font-heading); color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-file-invoice"></i> System Reports Export Center
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;">
+              Download municipal operations and citizen involvement reports. Select report timeframe parameters and preferred output layout format.
+            </p>
+
+            <hr style="border:0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+
+            <div class="form-group">
+              <label for="export-range" class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Report Timeframe Range</label>
+              <select id="export-range" class="form-select" style="font-size: 0.95rem; padding: 0.5rem;">
+                <option value="daily">Daily Report (Past 24 Hours)</option>
+                <option value="weekly" selected>Weekly Operations Report (Past 7 Days)</option>
+                <option value="monthly">Monthly Civic Report (Past 30 Days)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Output Layout Format</label>
+              <div style="display: flex; gap: 2rem; align-items: center; padding: 0.25rem 0;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; cursor: pointer;">
+                  <input type="radio" name="export-format" value="csv" checked style="width:18px; height:18px; accent-color:var(--primary);">
+                  <span>Excel Spreadsheet (.CSV)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; cursor: pointer;">
+                  <input type="radio" name="export-format" value="pdf" style="width:18px; height:18px; accent-color:var(--primary);">
+                  <span>Printable PDF Report (.HTML)</span>
+                </label>
+              </div>
+            </div>
+
+            <button id="btn-export-report" class="btn btn-primary" style="margin-top: 1.5rem; font-size: 1rem; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+              <i class="fa-solid fa-download"></i> Generate & Export Report
+            </button>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 6: WHATSAPP GATEWAY                       -->
+        <!-- ============================================== -->
+        <section id="pane-whatsapp" class="tab-pane">
+          <!-- Summary Stats Grid -->
+          <div class="admin-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
+              <div id="stat-connection-state" style="font-size: 1.6rem; font-weight: 800; color: #ef4444; line-height: 1;">Offline</div>
+              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 0.35rem;">Connection Status</div>
+            </div>
+            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
+              <div id="stat-queue-count" style="font-size: 1.6rem; font-weight: 800; color: #6366f1; line-height: 1;">0</div>
+              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 0.35rem;">Queued Messages</div>
+            </div>
+            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
+              <div style="font-size: 1.6rem; font-weight: 800; color: var(--primary); line-height: 1;">LocalAuth</div>
+              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 0.35rem;">Session Mode</div>
+            </div>
+          </div>
+
+          <div class="gateway-grid">
+            <!-- Left Column: Status and QR Code -->
+            <div class="gateway-card">
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-link" style="color: var(--primary);"></i> Device Association
+              </h3>
+              
+              <div id="status-badge-container">
+                <span class="status-badge status-disconnected"><i class="fa-solid fa-circle"></i> Offline</span>
+              </div>
+
+              <!-- QR code container -->
+              <div id="qr-code-box" style="width: 100%; aspect-ratio: 1; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); display: flex; align-items: center; justify-content: center; position: relative;">
+                <div id="qr-placeholder" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">
+                  <i class="fa-solid fa-qrcode" style="font-size: 3rem; margin-bottom: 0.75rem; display: block;"></i>
+                  Scan QR code when prompted to associate device.
+                </div>
+                <img id="qr-img" class="hidden" style="width: 85%; height: 85%; object-fit: contain;" alt="WhatsApp Scan QR">
+              </div>
+
+              <!-- Action Controls -->
+              <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <button type="button" id="btn-reconnect" class="btn btn-primary" style="flex: 1; padding: 0.65rem; font-weight: 700; border-radius: 10px;">
+                  <i class="fa-solid fa-play"></i> Initialize
+                </button>
+                <button type="button" id="btn-disconnect" class="btn btn-secondary" style="flex: 1; padding: 0.65rem; font-weight: 700; border-radius: 10px; color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">
+                  <i class="fa-solid fa-power-off"></i> Disconnect
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Column: Send Test & System Logs/Queues -->
+            <div class="gateway-card">
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Send Test Notification
+              </h3>
+
+              <form id="form-test-message" style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <div class="form-group-custom">
+                  <label class="form-label-custom">Recipient Number (WhatsApp format, e.g. 919876543210)</label>
+                  <input type="text" id="test-phone-input" class="form-input-custom" placeholder="e.g. 919876543210" required style="width: 95%;">
+                </div>
+                <div class="form-group-custom">
+                  <label class="form-label-custom">Message Content</label>
+                  <textarea id="test-message-input" class="form-input-custom" style="min-height: 60px; width: 95%;" placeholder="Hello, this is a test notification from CrowdCity AI!" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="padding: 0.65rem; font-weight: 700; border-radius: 10px;">
+                  <i class="fa-solid fa-paper-plane"></i> Dispatch Message
+                </button>
+              </form>
+
+              <!-- Logger Sub-tabs -->
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                <button type="button" id="tab-logs-btn" class="admin-nav-tab active-sub-tab" style="background: var(--primary); color: #ffffff;">Logs</button>
+                <button type="button" id="tab-queue-btn" class="admin-nav-tab" style="background: transparent; color: var(--text-muted);">Queue</button>
+              </div>
+
+              <!-- List logs -->
+              <div id="logs-container" style="max-height: 180px; overflow-y: auto; font-family: monospace; font-size: 0.78rem; background: var(--bg-app); border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 8px;">
+                <div style="color: var(--text-muted);">System idle...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 7: SYSTEM SETTINGS                        -->
+        <!-- ============================================== -->
+        <section id="pane-settings" class="tab-pane">
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.35rem; border-radius: 14px; flex-wrap: wrap;">
+            <button type="button" class="admin-nav-tab active-sub-tab" data-setting-tab="departments" style="background: var(--primary); color: #ffffff;">
+              <i class="fa-solid fa-building-flag"></i> Departments
+            </button>
+            <button type="button" class="admin-nav-tab" data-setting-tab="ai-decisions" style="background: transparent; color: var(--text-muted);">
+              <i class="fa-solid fa-robot"></i> AI Monitor
+            </button>
+          </div>
+
+          <div id="settings-tab-content">
+            <!-- Subpane A: Departments -->
+            <div id="subpane-departments" class="sub-tab-pane">
+              <div class="controls-row" style="justify-content: space-between; align-items: center; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+                <div>
+                  <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-building-flag" style="color:var(--primary);"></i> City Departments Manager</h3>
+                  <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0 0 0;">Create, edit, and delete municipal departments for routing complaints.</p>
+                </div>
+                <button id="btn-add-department" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                  <i class="fa-solid fa-plus"></i> Add New Department
+                </button>
+              </div>
+
+              <!-- Department CRUD Form (Initially hidden) -->
+              <div id="department-form-card" class="glass-panel hidden" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--primary-light-alpha); background: var(--bg-surface); border-radius: 12px;">
+                <h4 id="dept-form-title" style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem;"><i class="fa-solid fa-square-plus"></i> Create Department</h4>
+                <form id="department-crud-form">
+                  <input type="hidden" id="dept-edit-id">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group-custom">
+                      <label class="form-label-custom">Department Name *</label>
+                      <input type="text" id="dept-name-input" class="form-input-custom" placeholder="e.g. Roads & Transport Dept" required>
+                    </div>
+                    <div class="form-group-custom">
+                      <label class="form-label-custom">Unique Code (Uppercase) *</label>
+                      <input type="text" id="dept-code-input" class="form-input-custom" placeholder="e.g. ROAD" required>
+                    </div>
+                  </div>
+                  <div class="form-group-custom" style="margin-bottom: 1rem;">
+                    <label class="form-label-custom">Description</label>
+                    <textarea id="dept-desc-input" class="form-input-custom" style="min-height: 50px;" placeholder="Explain the responsibilities of this department..."></textarea>
+                  </div>
+                  <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button type="button" id="btn-cancel-dept" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">Cancel</button>
+                    <button type="submit" id="btn-submit-dept" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">Save Department</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Departments List Table -->
+              <div class="table-container">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Department Name</th>
+                      <th>Description</th>
+                      <th style="width: 150px; text-align: right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="departments-table-body">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Subpane B: AI Decisions Auditor -->
+            <div id="subpane-ai-decisions" class="sub-tab-pane" style="display: none;">
+              <div class="controls-row" style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+                <div>
+                  <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-microchip" style="color:var(--primary);"></i> AI Decisions Auditor</h3>
+                  <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0 0 0;">Audit predictions made by Groq Llama AI models and execute overrides.</p>
+                </div>
+              </div>
+
+              <!-- Overrides form popup card (Initially hidden) -->
+              <div id="ai-override-card" class="glass-panel hidden" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #f59e0b; background: var(--bg-surface); border-radius: 12px;">
+                <h4 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem; color:#f59e0b;"><i class="fa-solid fa-pen-nib"></i> Override AI Prediction</h4>
+                <form id="ai-override-form">
+                  <input type="hidden" id="override-issue-id">
+                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group-custom">
+                      <label class="form-label-custom">Category</label>
+                      <select id="override-category" class="form-select-custom">
+                        <option value="roads">Roads</option>
+                        <option value="streetlights">Streetlights</option>
+                        <option value="water_supply">Water Supply</option>
+                        <option value="drainage">Drainage</option>
+                        <option value="garbage">Garbage</option>
+                        <option value="traffic">Traffic</option>
+                        <option value="public_property">Public Property</option>
+                        <option value="parks">Parks</option>
+                        <option value="sanitation">Sanitation</option>
+                        <option value="safety_hazard">Safety Hazard</option>
+                        <option value="environment">Environment</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div class="form-group-custom">
+                      <label class="form-label-custom">Assigned Department</label>
+                      <select id="override-department" class="form-select-custom">
+                        <!-- Dynamically rendered options -->
+                      </select>
+                    </div>
+                    <div class="form-group-custom">
+                      <label class="form-label-custom">Priority Severity</label>
+                      <select id="override-priority" class="form-select-custom">
+                        <option value="low">LOW</option>
+                        <option value="medium">MEDIUM</option>
+                        <option value="high">HIGH</option>
+                        <option value="critical">CRITICAL</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button type="button" id="btn-cancel-override" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem; background-color:#f59e0b; border-color:#f59e0b;">Apply Override</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- AI Decisions Table -->
+              <div class="table-container">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Complaint</th>
+                      <th>Selected Category</th>
+                      <th>AI Predicted Category</th>
+                      <th>AI Assigned Department</th>
+                      <th>AI Priority</th>
+                      <th>Audit Match</th>
+                      <th style="width: 140px; text-align: right;">Auditing</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ai-decisions-table-body">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Eligibility Rules Modal -->
+  <div id="modal-edit-eligibility" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.85rem; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0;">Edit Eligibility Conditions</h3>
+        <button type="button" id="btn-close-modal" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-eligibility">
+        <input type="hidden" id="edit-scheme-id">
+        
+        <div class="form-group-custom" style="margin-bottom: 1rem;">
+          <label class="form-label-custom" style="font-weight: 800;">Scheme Name</label>
+          <input type="text" id="edit-scheme-name" class="form-input-custom" disabled style="background: var(--bg-app); cursor: not-allowed; width: 95%;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-min-age">Minimum Age</label>
+            <input type="number" id="edit-min-age" class="form-input-custom" placeholder="None">
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-max-age">Maximum Age</label>
+            <input type="number" id="edit-max-age" class="form-input-custom" placeholder="None">
           </div>
         </div>
-      </section>
 
-      <!-- Tab 4: Department Management -->
-      <section id="pane-departments" class="tab-pane hidden" role="tabpanel">
-        <div class="controls-row" style="justify-content: space-between; align-items: center; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-          <div>
-            <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-building-flag" style="color:var(--primary);"></i> <span data-i18n="city_departments_manager">City Departments Manager</span></h3>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0 0 0;" data-i18n="city_departments_desc">Create, edit, and delete municipal departments for routing complaints.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-max-income">Max Annual Income (₹)</label>
+            <input type="number" id="edit-max-income" class="form-input-custom" placeholder="None">
           </div>
-          <button id="btn-add-department" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-            <i class="fa-solid fa-plus"></i> <span data-i18n="add_new_department">Add New Department</span>
-          </button>
-        </div>
-
-        <!-- Department Creation/Edition modal inline card (Initially hidden) -->
-        <div id="department-form-card" class="glass-panel hidden" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--primary-light-alpha);">
-          <h4 id="dept-form-title" style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem;"><i class="fa-solid fa-square-plus"></i> <span data-i18n="create_department">Create Department</span></h4>
-          <form id="department-crud-form">
-            <input type="hidden" id="dept-edit-id">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-              <div class="form-group">
-                <label for="dept-name-input" class="form-label" style="font-size: 0.8rem; font-weight: 600;" data-i18n="dept_name_required">Department Name *</label>
-                <input type="text" id="dept-name-input" class="form-input" data-i18n-placeholder="dept_name_placeholder" placeholder="e.g. Roads & Transport Dept" required style="font-size:0.85rem; padding:0.4rem 0.75rem;">
-              </div>
-              <div class="form-group">
-                <label for="dept-code-input" class="form-label" style="font-size: 0.8rem; font-weight: 600;" data-i18n="dept_code_required">Unique Code (Uppercase) *</label>
-                <input type="text" id="dept-code-input" class="form-input" data-i18n-placeholder="dept_code_placeholder" placeholder="e.g. ROAD" required style="font-size:0.85rem; padding:0.4rem 0.75rem;">
-              </div>
-            </div>
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label for="dept-desc-input" class="form-label" style="font-size: 0.8rem; font-weight: 600;" data-i18n="description">Description</label>
-              <textarea id="dept-desc-input" class="form-textarea" data-i18n-placeholder="dept_desc_placeholder" placeholder="Explain the responsibilities of this department..." style="min-height: 50px; font-size:0.85rem; padding:0.4rem 0.75rem;"></textarea>
-            </div>
-            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-              <button type="button" id="btn-cancel-dept" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;" data-i18n="cancel">Cancel</button>
-              <button type="submit" id="btn-submit-dept" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;" data-i18n="save_department">Save Department</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Departments List Table -->
-        <div class="table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th data-i18n="code">Code</th>
-                <th data-i18n="department_name">Department Name</th>
-                <th data-i18n="description">Description</th>
-                <th style="width: 150px; text-align: right;" data-i18n="actions">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="departments-table-body">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Tab 5: AI Decision Monitor -->
-      <section id="pane-ai-decisions" class="tab-pane hidden" role="tabpanel">
-        <div class="controls-row" style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-          <div>
-            <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-microchip" style="color:var(--primary);"></i> <span data-i18n="ai_decisions_auditor">AI Decisions Auditor</span></h3>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0 0 0;" data-i18n="ai_decisions_desc">Audit predictions made by Groq Llama AI models and execute category or department overrides.</p>
-          </div>
-        </div>
-
-        <!-- Overrides form popup card (Initially hidden) -->
-        <div id="ai-override-card" class="glass-panel hidden" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #f59e0b;">
-          <h4 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem; color:#f59e0b;"><i class="fa-solid fa-pen-nib"></i> <span data-i18n="override_ai_prediction">Override AI Prediction</span></h4>
-          <form id="ai-override-form">
-            <input type="hidden" id="override-issue-id">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-              <div class="form-group">
-                <label for="override-category" class="form-label" style="font-size: 0.8rem; font-weight: 600;" data-i18n="category">Category</label>
-                <select id="override-category" class="form-select" style="font-size:0.85rem; padding:0.4rem;">
-                  <option value="roads" data-i18n="category_roads">Roads</option>
-                  <option value="streetlights" data-i18n="category_streetlights">Streetlights</option>
-                  <option value="water_supply" data-i18n="category_water_supply">Water Supply</option>
-                  <option value="drainage" data-i18n="category_drainage">Drainage</option>
-                  <option value="garbage" data-i18n="category_garbage">Garbage</option>
-                  <option value="traffic" data-i18n="category_traffic">Traffic</option>
-                  <option value="public_property" data-i18n="category_public_property">Public Property</option>
-                  <option value="parks" data-i18n="category_parks">Parks</option>
-                  <option value="sanitation" data-i18n="category_sanitation">Sanitation</option>
-                  <option value="safety_hazard" data-i18n="category_safety_hazard">Safety Hazard</option>
-                  <option value="environment" data-i18n="category_environment">Environment</option>
-                  <option value="other" data-i18n="category_other">Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="override-department" class="form-label" style="font-size: 0.8rem; font-weight: 600;" data-i18n="assigned_department">Assigned Department</label>
-                <select id="override-department" class="form-select" style="font-size:0.85rem; padding:0.4rem;">
-                  <!-- Dynamically rendered -->
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="override-priority" class="form-label" style="font-size: 0.8rem; font-weight: 600;" data-i18n="priority_severity">Priority Severity</label>
-                <select id="override-priority" class="form-select" style="font-size:0.85rem; padding:0.4rem;">
-                  <option value="low" data-i18n="low">LOW</option>
-                  <option value="medium" data-i18n="medium">MEDIUM</option>
-                  <option value="high" data-i18n="high">HIGH</option>
-                  <option value="critical" data-i18n="critical">CRITICAL</option>
-                </select>
-              </div>
-            </div>
-            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-              <button type="button" id="btn-cancel-override" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;" data-i18n="cancel">Cancel</button>
-              <button type="submit" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem; background-color:#f59e0b; border-color:#f59e0b;" data-i18n="apply_override">Apply Override</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- AI Decisions Table -->
-        <div class="table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th data-i18n="complaint">Complaint</th>
-                <th data-i18n="selected_category">Selected Category</th>
-                <th data-i18n="ai_predicted_category">AI Predicted Category</th>
-                <th data-i18n="ai_assigned_department">AI Assigned Department</th>
-                <th data-i18n="ai_priority">AI Priority</th>
-                <th data-i18n="audit_match">Audit Match</th>
-                <th style="width: 140px; text-align: right;" data-i18n="auditing">Auditing</th>
-              </tr>
-            </thead>
-            <tbody id="ai-decisions-table-body">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Tab 6: System Reports Center -->
-      <section id="pane-reports" class="tab-pane hidden" role="tabpanel">
-        <div class="glass-panel" style="padding: 2.5rem; max-width: 600px; margin: 2rem auto; display: flex; flex-direction: column; gap: 1.5rem;">
-          <h2 style="font-size: 1.5rem; font-family: var(--font-heading); color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fa-solid fa-file-invoice"></i> <span data-i18n="reports_export_center">System Reports Export Center</span>
-          </h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;" data-i18n="reports_export_desc">
-            Download municipal operations and citizen involvement reports. Select report timeframe parameters and preferred output layout format.
-          </p>
-
-          <hr style="border:0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
-
-          <div class="form-group">
-            <label for="export-range" class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;" data-i18n="report_timeframe_range">Report Timeframe Range</label>
-            <select id="export-range" class="form-select" style="font-size: 0.95rem; padding: 0.5rem;">
-              <option value="daily" data-i18n="daily_report">Daily Report (Past 24 Hours)</option>
-              <option value="weekly" selected data-i18n="weekly_report">Weekly Operations Report (Past 7 Days)</option>
-              <option value="monthly" data-i18n="monthly_report">Monthly Civic Report (Past 30 Days)</option>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-gender">Gender</label>
+            <select id="edit-gender" class="form-select-custom">
+              <option value="all">All / Any</option>
+              <option value="female">Female Only</option>
+              <option value="male">Male Only</option>
             </select>
           </div>
-
-          <div class="form-group" style="margin-top: 0.5rem;">
-            <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;" data-i18n="output_layout_format">Output Layout Format</label>
-            <div style="display: flex; gap: 2rem; align-items: center; padding: 0.25rem 0;">
-              <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; cursor: pointer;">
-                <input type="radio" name="export-format" value="csv" checked style="width:18px; height:18px; accent-color:var(--primary);">
-                <span data-i18n="excel_format">Excel Spreadsheet (.CSV)</span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; cursor: pointer;">
-                <input type="radio" name="export-format" value="pdf" style="width:18px; height:18px; accent-color:var(--primary);">
-                <span data-i18n="pdf_format">Printable PDF Report (.HTML)</span>
-              </label>
-            </div>
-          </div>
-
-          <button id="btn-export-report" class="btn btn-primary" style="margin-top: 1.5rem; font-size: 1rem; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-            <i class="fa-solid fa-download"></i> <span data-i18n="generate_export_report">Generate & Export Report</span>
-          </button>
         </div>
-      </section>
 
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-student-req">Student Required</label>
+            <select id="edit-student-req" class="form-select-custom">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-gov-school">Gov School Required</label>
+            <select id="edit-gov-school" class="form-select-custom">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-gov-college">Gov College Required</label>
+            <select id="edit-gov-college" class="form-select-custom">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-disability">Disability Required</label>
+            <select id="edit-disability" class="form-select-custom">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-widow">Widow Required</label>
+            <select id="edit-widow" class="form-select-custom">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-farmer">Farmer Required</label>
+            <select id="edit-farmer" class="form-select-custom">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group-custom" style="margin-bottom: 1rem;">
+          <label class="form-label-custom" for="edit-native-state">Native State Requirement</label>
+          <input type="text" id="edit-native-state" class="form-input-custom" placeholder="e.g. Tamil Nadu" style="width: 95%;">
+        </div>
+
+        <div class="form-group-custom" style="margin-bottom: 1rem;">
+          <label class="form-label-custom" for="edit-certificates">Required Certificates (comma separated)</label>
+          <input type="text" id="edit-certificates" class="form-input-custom" placeholder="e.g. Income Certificate, Community Certificate" style="width: 95%;">
+        </div>
+
+        <!-- Trust and Verification Section -->
+        <h4 style="font-size: 1rem; font-weight: 800; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1.25rem; margin-bottom: 0.75rem; color: var(--primary);">Official Source Verification</h4>
+
+        <div class="form-group-custom" style="margin-bottom: 1rem;">
+          <label class="form-label-custom" for="edit-official-url">Official Scheme Website URL</label>
+          <input type="url" id="edit-official-url" class="form-input-custom" placeholder="https://..." style="width: 95%;">
+        </div>
+
+        <div class="form-group-custom" style="margin-bottom: 1rem;">
+          <label class="form-label-custom" for="edit-dept-name">Official Government Department Name</label>
+          <input type="text" id="edit-dept-name" class="form-input-custom" placeholder="e.g. Department of Social Welfare" style="width: 95%;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-notif-number">Official Notification Number</label>
+            <input type="text" id="edit-notif-number" class="form-input-custom" placeholder="e.g. G.O. Ms No. 45">
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-pdf-link">Official PDF / GO Document Link</label>
+            <input type="url" id="edit-pdf-link" class="form-input-custom" placeholder="https://...">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-verified-date">Last Verified Date</label>
+            <input type="date" id="edit-verified-date" class="form-input-custom">
+          </div>
+          <div class="form-group-custom" style="margin: 0;">
+            <label class="form-label-custom" for="edit-data-source">Data Source Label</label>
+            <input type="text" id="edit-data-source" class="form-input-custom" placeholder="e.g. Tamil Nadu Government Portal">
+          </div>
+        </div>
+
+        <!-- Change Log Verification Reason -->
+        <h4 style="font-size: 1rem; font-weight: 800; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1.25rem; margin-bottom: 0.75rem; color: #ef4444;">Change Log Audit Requirement</h4>
+        <div class="form-group-custom" style="margin-bottom: 1.5rem;">
+          <label class="form-label-custom" for="edit-change-reason" style="color: #ef4444;">Reason for modifying rules * (Required for audit trails)</label>
+          <textarea id="edit-change-reason" class="form-input-custom" style="min-height: 60px; border-color: rgba(239, 68, 68, 0.4); width: 95%;" placeholder="Provide justification or G.O. citation for this rule update..." required></textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" id="btn-cancel-modal" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">Save Rules</button>
+        </div>
+      </form>
     </div>
-  </main>
-
-  <!-- Footers -->
-  <footer class="app-footer">
-    <p data-i18n="admin_footer_text">&copy; 2026 CrowdCity AI - Administrative Operations Console. All rights reserved.</p>
-  </footer>
+  </div>
 
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

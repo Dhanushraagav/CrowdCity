@@ -878,7 +878,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   let redirectTarget = null;
   if (role === 'authority') {
     if (profile.is_verified === true) {
-      redirectTarget = 'authority-dashboard.html';
+      redirectTarget = 'admin.html';
     } else {
       console.warn("Authority user is not verified");
       window.cc_routing_in_progress = false;
@@ -1388,7 +1388,7 @@ function updateAuthUI() {
     if (!contentBody || document.getElementById('tn-govt-bulletin')) return;
     
     const path = window.location.pathname;
-    const isDashboard = path.includes('citizen-dashboard.html') || path.includes('authority-dashboard.html');
+    const isDashboard = path.includes('citizen-dashboard.html') || path.includes('authority-dashboard.html') || path.includes('admin.html');
     if (!isDashboard) return;
     
     const role = getUserRole();
@@ -1592,11 +1592,13 @@ function updateAuthUI() {
     const role = getUserRole();
     if (role !== 'admin') return;
     
+    const path = window.location.pathname;
+    if (path.includes('admin.html')) return;
+    
     const sidebarNav = document.querySelector('.app-sidebar-nav');
     if (!sidebarNav || document.getElementById('switch-portals-nav')) return;
     
-    const path = window.location.pathname;
-    const isAuthority = path.includes('authority-') || path.includes('admin.html') || path.includes('whatsapp-admin.html') || path.includes('services-admin.html');
+    const isAuthority = path.includes('authority-') || path.includes('whatsapp-admin.html') || path.includes('services-admin.html');
     if (!isAuthority) return;
 
     const switchSection = document.createElement('div');
@@ -1641,23 +1643,15 @@ function updateAuthUI() {
       const tMap = window.i18n ? window.i18n.t('nav_map') : 'Map';
 
       if (role === 'authority' || role === 'admin') {
-        const isDashboard = path.includes('authority-dashboard.html');
-        const isReports = path.includes('authority-reports.html') || path.includes('authority-issue-details.html');
-        const isNotifications = path.includes('authority-notifications.html');
+        const isDashboard = path.includes('admin.html') && (window.location.hash === '#dashboard' || !window.location.hash);
+        const isComplaints = path.includes('admin.html') && window.location.hash === '#complaints';
+        const isReports = path.includes('admin.html') && window.location.hash === '#reports';
 
         linksHtml = `
-          <a href="authority-dashboard.html" class="nav-link ${isDashboard ? 'active' : ''}"><i class="fa-solid fa-house-chimney"></i> ${tDashboard}</a>
-          <a href="authority-reports.html" class="nav-link ${isReports ? 'active' : ''}"><i class="fa-solid fa-clipboard-list"></i> ${tCases}</a>
-          <a href="authority-notifications.html" class="nav-link ${isNotifications ? 'active' : ''}"><i class="fa-regular fa-bell"></i> ${tNotifications}</a>
+          <a href="admin.html#dashboard" class="nav-link ${isDashboard ? 'active' : ''}"><i class="fa-solid fa-house-chimney"></i> ${tDashboard}</a>
+          <a href="admin.html#complaints" class="nav-link ${isComplaints ? 'active' : ''}"><i class="fa-solid fa-clipboard-list"></i> ${tCases}</a>
+          <a href="admin.html#reports" class="nav-link ${isReports ? 'active' : ''}"><i class="fa-solid fa-file-invoice"></i> Reports</a>
         `;
-        if (role === 'admin') {
-          const isAdmin = path.includes('admin.html');
-          const isGateway = path.includes('whatsapp-admin.html');
-          linksHtml += `
-            <a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''}"><i class="fa-solid fa-chart-line"></i> ${tAdminPanel}</a>
-            <a href="whatsapp-admin.html" class="nav-link ${isGateway ? 'active' : ''}"><i class="fa-solid fa-comments"></i> WhatsApp Gateway</a>
-          `;
-        }
       } else {
         const isDashboard = path.includes('citizen-dashboard.html') || path.endsWith('/') || path.endsWith('/index.html');
         const isReport = path.includes('report.html');
@@ -2197,10 +2191,9 @@ function initResponsiveSidebar() {
     
     const isAuth = role === 'authority' || role === 'admin';
     const links = isAuth ? [
-      { href: 'authority-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
-      { href: 'authority-reports.html', icon: 'fa-clipboard-list', label: 'Cases', key: 'nav_cases' },
-      { href: 'authority-notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
-      { href: 'authority-settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
+      { href: 'admin.html#dashboard', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
+      { href: 'admin.html#complaints', icon: 'fa-clipboard-list', label: 'Complaints', key: 'nav_cases' },
+      { href: 'admin.html#reports', icon: 'fa-file-invoice', label: 'Reports', key: 'nav_reports' }
     ] : [
       { href: 'citizen-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
       { href: 'report.html', icon: 'fa-plus', label: 'Report Issue', key: 'nav_report' },
