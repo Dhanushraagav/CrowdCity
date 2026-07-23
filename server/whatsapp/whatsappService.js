@@ -168,14 +168,28 @@ class WhatsAppService {
   }
 
   async disconnect() {
-    if (!this.client) return;
-    this.logActivity('cleanup', 'Closing WhatsApp client session...');
-    try {
-      await this.client.destroy();
-    } catch (err) {
-      this.logActivity('cleanup_error', `Error destroying client: ${err.message}`, false);
+    this.logActivity('cleanup', 'Terminating WhatsApp client session and clearing stored credentials...');
+    if (this.client) {
+      try {
+        await this.client.destroy();
+      } catch (err) {
+        this.logActivity('cleanup_error', `Error destroying client: ${err.message}`, false);
+      }
     }
+    this.cleanupSessionStorage();
     this.cleanup();
+  }
+
+  cleanupSessionStorage() {
+    try {
+      const authPath = path.join(__dirname, '../../.wwebjs_auth');
+      if (fs.existsSync(authPath)) {
+        fs.rmSync(authPath, { recursive: true, force: true });
+        this.logActivity('cleanup', 'Stored session credentials cleared from disk.');
+      }
+    } catch (err) {
+      this.logActivity('cleanup_error', `Notice clearing session directory: ${err.message}`, false);
+    }
   }
 
   cleanup() {

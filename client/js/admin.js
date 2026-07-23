@@ -1300,8 +1300,11 @@
           if (data.status === 'ready') {
             qrPlaceholder.innerHTML = `
               <i class="fa-solid fa-circle-check" style="font-size: 3.5rem; color: #10b981; margin-bottom: 0.75rem; display: block;"></i>
-              <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Device Linked & Ready</span>
-              <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0.35rem 0 0 0;">WhatsApp Gateway is active and monitoring events.</p>
+              <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Session Active (Device Linked)</span>
+              <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0.35rem 0 0.85rem 0;">A WhatsApp device is currently linked via saved session credentials.</p>
+              <div style="background: rgba(13, 148, 136, 0.08); border: 1px dashed var(--primary); padding: 0.6rem; border-radius: 8px; font-size: 0.75rem; color: var(--text-main);">
+                To pair a different phone, click <strong style="color: #ef4444;">"Disconnect"</strong> below to unpair and generate a new QR code.
+              </div>
             `;
           } else if (data.status === 'connecting') {
             qrPlaceholder.innerHTML = `
