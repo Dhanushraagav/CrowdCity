@@ -1222,7 +1222,12 @@
 
     getAuthHeaders: async function() {
       let token = null;
-      if (typeof window.getOrInitSupabaseClient === 'function') {
+      if (typeof window.getOrRefreshAccessToken === 'function') {
+        token = await window.getOrRefreshAccessToken();
+      } else if (typeof getAuthToken === 'function') {
+        token = getAuthToken();
+      }
+      if (!token && typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
           const session = await client.auth.getSession();

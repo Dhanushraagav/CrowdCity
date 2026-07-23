@@ -16,9 +16,9 @@ import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Apply auth middleware and strict admin role restrictions to all endpoints
+// Apply auth middleware to allow admin and authority roles
 router.use(requireAuth);
-router.use(requireRole(['admin']));
+router.use(requireRole(['admin', 'authority']));
 
 router.get('/status', getStatus);
 router.post('/reconnect', triggerReconnect);
