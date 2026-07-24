@@ -132,12 +132,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Initialize UI components
+  // Initialize Map & Load Responders immediately on DOM ready
+  EmergencyMap.initMap('emergency-map', currentLat, currentLng);
+  loadNearbyResponders();
+
   initGPSLocation();
   bindCopyHelplineButtons();
   bindShareLocationButton();
   bindCategoryTabs();
-  renderSafetyGuides('flood');
 
   /**
    * Request GPS Geolocation from Browser
@@ -157,24 +159,21 @@ document.addEventListener('DOMContentLoaded', () => {
             gpsStatusEl.textContent = `GPS Active: ${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
           }
 
-          // Initialize Map and load nearby emergency responders
-          EmergencyMap.initMap('emergency-map', currentLat, currentLng);
+          // Update Map and re-fetch responders with live GPS
+          EmergencyMap.setUserLocation(currentLat, currentLng);
+          EmergencyMap.centerMap(currentLat, currentLng);
           loadNearbyResponders();
         },
         (error) => {
           console.warn('[Emergency] Geolocation permission denied or failed:', error.message);
           if (gpsStatusEl) {
-            gpsStatusEl.textContent = 'Default Region (Chennai Center). GPS Permission Prompt Dismissed.';
+            gpsStatusEl.textContent = 'Default Region (Chennai Center).';
           }
-          EmergencyMap.initMap('emergency-map', currentLat, currentLng);
-          loadNearbyResponders();
         },
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
       );
     } else {
       if (gpsStatusEl) gpsStatusEl.textContent = 'Geolocation not supported by browser.';
-      EmergencyMap.initMap('emergency-map', currentLat, currentLng);
-      loadNearbyResponders();
     }
   }
 
