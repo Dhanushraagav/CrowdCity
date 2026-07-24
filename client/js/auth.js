@@ -1591,8 +1591,41 @@ function updateAuthUI() {
     sidebarNav.appendChild(switchSection);
   };
 
+  const injectTopNavSwitcher = () => {
+    if (document.body.classList.contains('admin-portal-body')) return;
+
+    const header = document.querySelector('.topnav, .app-header-main, .app-header');
+    if (!header) return;
+
+    let linksContainer = header.querySelector('.topnav-links');
+    if (!linksContainer) {
+      linksContainer = document.createElement('div');
+      linksContainer.className = 'topnav-links';
+      linksContainer.id = 'topnav-links';
+
+      const rightContainer = header.querySelector('.topnav-right, .app-header-actions, #auth-nav-container');
+      if (rightContainer && rightContainer.parentNode === header) {
+        header.insertBefore(linksContainer, rightContainer);
+      } else {
+        header.appendChild(linksContainer);
+      }
+    }
+
+    const currentPath = window.location.pathname.toLowerCase();
+
+    linksContainer.innerHTML = `
+      <a href="citizen-dashboard.html" class="topnav-link ${currentPath.includes('citizen-dashboard') ? 'active' : ''}" data-i18n="dashboard">Dashboard</a>
+      <a href="report.html" class="topnav-link ${currentPath.includes('report') ? 'active' : ''}" data-i18n="report_issue">Report Issue</a>
+      <a href="my-complaints.html" class="topnav-link ${currentPath.includes('my-complaints') ? 'active' : ''}" data-i18n="my_complaints">My Complaints</a>
+      <a href="map.html" class="topnav-link ${currentPath.includes('map') ? 'active' : ''}" data-i18n="map">Map</a>
+      <a href="helplines.html" class="topnav-link ${currentPath.includes('helplines') ? 'active' : ''}" data-i18n="district_helplines">District Helplines</a>
+      <a href="ministers.html" class="topnav-link ${currentPath.includes('ministers') ? 'active' : ''}" data-i18n="nav_ministers">Council of Ministers</a>
+    `;
+  };
+
   injectPortalBadge();
   injectSwitchPortals();
+  injectTopNavSwitcher();
 
   const container = document.getElementById('auth-nav-container');
   const navMenu = document.getElementById('nav-menu');

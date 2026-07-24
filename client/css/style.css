@@ -977,26 +977,58 @@ body.loader-active {
   height: 100vh !important;
 }
 
-/* Show left sidebar on citizen-dashboard and admin portal; hide on inner subpages so subpages expand 100% full-width */
-body:not(.show-sidebar):not(.admin-portal-body) .app-sidebar {
+/* Remove left sidebar on all citizen portal pages so pages expand 100% full-width */
+body:not(.admin-portal-body) .app-sidebar {
   display: none !important;
 }
 
-body:not(.show-sidebar):not(.admin-portal-body) .mobile-menu-toggle {
+body:not(.admin-portal-body) .mobile-menu-toggle {
   display: none !important;
 }
 
-body:not(.show-sidebar):not(.admin-portal-body) .app-main,
-body:not(.show-sidebar):not(.admin-portal-body) .app-content,
-body:not(.show-sidebar):not(.admin-portal-body) .app-content-body {
+body:not(.admin-portal-body) .app-main,
+body:not(.admin-portal-body) .app-content,
+body:not(.admin-portal-body) .app-content-body,
+body:not(.admin-portal-body) .content-wrapper,
+body:not(.admin-portal-body) .page-wrapper,
+body:not(.admin-portal-body) .page-inner {
   width: 100% !important;
   max-width: 100% !important;
+  margin: 0 !important;
   margin-left: 0 !important;
+  margin-right: 0 !important;
   flex: 1 !important;
+  box-sizing: border-box !important;
 }
 
-body.show-sidebar .app-sidebar,
-body.admin-portal-body .app-sidebar {
-  display: flex !important;
+/* Global Topnav Page Switcher Styles */
+.topnav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 1.5rem;
+  margin-right: auto;
+}
+
+.topnav-link {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: color 0.15s ease, background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.topnav-link:hover {
+  color: var(--text-main);
+  background-color: var(--bg-surface-hover, rgba(255, 255, 255, 0.06));
+}
+
+.topnav-link.active {
+  color: var(--text-main);
+  font-weight: 700;
+  background-color: var(--bg-surface-hover, rgba(255, 255, 255, 0.08));
 }
 
