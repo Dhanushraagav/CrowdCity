@@ -122,21 +122,21 @@
     <div class="app-main">
       <!-- Top Header inside main content -->
       <header class="app-header-main">
-        <a href="citizen-dashboard.html" class="app-header-logo-mobile"><img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 26px; height: 26px; object-fit: contain; margin-right: 0.5rem;" /> CrowdCity AI</a>
-        
-        <!-- Weather Widget -->
-        <div class="weather-widget loading" id="weather-widget" title="Auto-detected from your location">
-          <div class="weather-icon" id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
-          <div class="weather-info">
-            <span class="weather-city" id="weather-city">Detecting...</span>
-            <span class="weather-temp" id="weather-temp">--&deg;C</span>
+        <div style="display: flex; align-items: center; gap: 1.25rem; margin-right: auto;">
+          <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+              <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+              <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+              <span style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); letter-spacing: -0.2px; margin-left: 0.15rem;">CrowdCity AI</span>
+            </div>
+          </a>
+          
+          <!-- Live Date and Time Widget -->
+          <div class="header-datetime-widget" id="header-datetime-widget" style="display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
+            <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
+            <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
           </div>
-        </div>
-
-        <!-- Live Date and Time Widget -->
-        <div class="header-datetime-widget" id="header-datetime-widget" style="margin-right: auto; margin-left: 0.75rem; display: flex; flex-direction: column; justify-content: center; font-family: var(--font-heading); color: var(--text-main);">
-          <span id="widget-date" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted); line-height: 1.2;"></span>
-          <span id="widget-time" class="time-tick" style="font-size: 0.9rem; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; line-height: 1.2;"></span>
         </div>
 
         <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
@@ -160,7 +160,7 @@
         </div>
 
         <!-- Stitch Hero card -->
-        <div class="stitch-hero">
+        <div class="stitch-hero" style="position: relative;">
           <div class="stitch-hero-container">
             <div class="stitch-hero-details-wrap">
               <h1 id="hero-greeting" class="stitch-hero-title"></h1>
@@ -175,6 +175,15 @@
               </div>
             </div>
             
+            <!-- Floating Coimbatore Weather Widget -->
+            <div class="floating-weather-widget weather-widget loading" id="weather-widget" title="Auto-detected live weather">
+              <div class="weather-icon" id="weather-icon" style="font-size: 1.5rem; color: #f59e0b;"><i class="fa-solid fa-cloud-sun"></i></div>
+              <div class="weather-info" style="display: flex; flex-direction: column;">
+                <span class="weather-city" id="weather-city" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Coimbatore</span>
+                <span class="weather-temp" id="weather-temp" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Detecting...</span>
+              </div>
+            </div>
+
             <!-- User level progression bar -->
             <div class="stitch-hero-progress-card">
               <h3 style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;" data-i18n="your_progress">Your Progress</h3>
