@@ -1479,41 +1479,11 @@ function updateAuthUI() {
     }, 6000);
   };
 
-  const injectWhatsAppGatewayLink = () => {
-    const sidebarNav = document.querySelector('.app-sidebar-nav');
-    if (!sidebarNav) return;
-    
-    const path = window.location.pathname;
-    const isAuthorityPage = path.includes('authority-') || path.includes('whatsapp-admin.html');
-    if (!isAuthorityPage) return;
-
-    const role = getUserRole();
-    if (user && role === 'admin') {
-      if (document.getElementById('sidebar-whatsapp-gateway-link')) return;
-
-      const gatewayLink = document.createElement('a');
-      gatewayLink.id = 'sidebar-whatsapp-gateway-link';
-      gatewayLink.href = 'whatsapp-admin.html';
-      gatewayLink.className = 'app-sidebar-link';
-      
-      const isGatewayActive = path.includes('whatsapp-admin.html');
-      if (isGatewayActive) {
-        gatewayLink.classList.add('active');
-      }
-
-      gatewayLink.innerHTML = `
-        <i class="fa-solid fa-comments"></i> <span>WhatsApp Gateway</span>
-      `;
-      sidebarNav.appendChild(gatewayLink);
-    }
-  };
-
   // Run dynamic branding injections
   injectGovtBranding();
   injectGovtBanner();
   injectHelplineWidget();
   initNewsTicker();
-  injectWhatsAppGatewayLink();
 
   const injectPortalBadge = () => {
     const path = window.location.pathname;
@@ -1523,7 +1493,7 @@ function updateAuthUI() {
     if (path.includes('services-admin.html')) {
       badgeText = 'Govt Services Admin';
       badgeClass = 'services';
-    } else if (path.includes('admin.html') || path.includes('analytics.html') || path.includes('whatsapp-admin.html')) {
+    } else if (path.includes('admin.html') || path.includes('analytics.html')) {
       badgeText = 'System Administration';
       badgeClass = 'system';
     } else if (path.includes('authority-')) {
@@ -1598,7 +1568,7 @@ function updateAuthUI() {
     const sidebarNav = document.querySelector('.app-sidebar-nav');
     if (!sidebarNav || document.getElementById('switch-portals-nav')) return;
     
-    const isAuthority = path.includes('authority-') || path.includes('whatsapp-admin.html') || path.includes('services-admin.html');
+    const isAuthority = path.includes('authority-') || path.includes('services-admin.html');
     if (!isAuthority) return;
 
     const switchSection = document.createElement('div');
@@ -1611,7 +1581,7 @@ function updateAuthUI() {
       <a href="authority-dashboard.html" class="app-sidebar-link ${path.includes('authority-') ? 'active' : ''}">
         <i class="fa-solid fa-users-gear"></i> <span>Operations Portal</span>
       </a>
-      <a href="admin.html" class="app-sidebar-link ${path.includes('admin.html') || path.includes('whatsapp-admin.html') ? 'active' : ''}">
+      <a href="admin.html" class="app-sidebar-link ${path.includes('admin.html') ? 'active' : ''}">
         <i class="fa-solid fa-server"></i> <span>System Administration</span>
       </a>
       <a href="services-admin.html" class="app-sidebar-link ${path.includes('services-admin.html') ? 'active' : ''}">
@@ -2306,7 +2276,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Also run setup whenever auth UI renders
   window.addEventListener('auth-change', () => {
     setTimeout(setupToggleListeners, 50);
-    setTimeout(injectWhatsAppGatewayLink, 50);
   });
 
   // Dynamic password visibility toggle listener

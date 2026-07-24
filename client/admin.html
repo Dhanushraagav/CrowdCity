@@ -322,7 +322,6 @@
       transition: all 0.2s;
     }
 
-    /* WhatsApp Gateway grid styling */
     .gateway-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -422,9 +421,6 @@
         </a>
         <a href="#reports" class="app-sidebar-link" data-target="pane-reports">
           <i class="fa-solid fa-file-invoice"></i> <span data-i18n="reports">Reports</span>
-        </a>
-        <a href="#whatsapp" class="app-sidebar-link admin-only-section" data-target="pane-whatsapp">
-          <i class="fa-solid fa-comments"></i> <span data-i18n="whatsapp_gateway">WhatsApp Gateway</span>
         </a>
         <a href="#settings" class="app-sidebar-link admin-only-section" data-target="pane-settings">
           <i class="fa-solid fa-gear"></i> <span data-i18n="system_settings">System Settings</span>
@@ -707,91 +703,6 @@
             <button id="btn-export-report" class="btn btn-primary" style="margin-top: 1.5rem; font-size: 1rem; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
               <i class="fa-solid fa-download"></i> Generate & Export Report
             </button>
-          </div>
-        </section>
-
-        <!-- ============================================== -->
-        <!-- VIEW 6: WHATSAPP GATEWAY                       -->
-        <!-- ============================================== -->
-        <section id="pane-whatsapp" class="tab-pane">
-          <!-- Summary Stats Grid -->
-          <div class="admin-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
-              <div id="stat-connection-state" style="font-size: 1.6rem; font-weight: 800; color: #ef4444; line-height: 1;">Offline</div>
-              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 0.35rem;">Connection Status</div>
-            </div>
-            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
-              <div id="stat-queue-count" style="font-size: 1.6rem; font-weight: 800; color: #6366f1; line-height: 1;">0</div>
-              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 0.35rem;">Queued Messages</div>
-            </div>
-            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
-              <div style="font-size: 1.6rem; font-weight: 800; color: var(--primary); line-height: 1;">LocalAuth</div>
-              <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 0.35rem;">Session Mode</div>
-            </div>
-          </div>
-
-          <div class="gateway-grid">
-            <!-- Left Column: Status and QR Code -->
-            <div class="gateway-card">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fa-solid fa-link" style="color: var(--primary);"></i> Device Association
-              </h3>
-              
-              <div id="status-badge-container">
-                <span class="status-badge status-disconnected"><i class="fa-solid fa-circle"></i> Offline</span>
-              </div>
-
-              <!-- QR code container -->
-              <div id="qr-code-box" style="width: 100%; aspect-ratio: 1; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); display: flex; align-items: center; justify-content: center; position: relative;">
-                <div id="qr-placeholder" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">
-                  <i class="fa-solid fa-qrcode" style="font-size: 3rem; margin-bottom: 0.75rem; display: block;"></i>
-                  Scan QR code when prompted to associate device.
-                </div>
-                <img id="qr-img" class="hidden" style="width: 85%; height: 85%; object-fit: contain;" alt="WhatsApp Scan QR">
-              </div>
-
-              <!-- Action Controls -->
-              <div style="display: flex; gap: 0.5rem; width: 100%;">
-                <button type="button" id="btn-reconnect" class="btn btn-primary" style="flex: 1; padding: 0.65rem; font-weight: 700; border-radius: 10px;">
-                  <i class="fa-solid fa-play"></i> Initialize
-                </button>
-                <button type="button" id="btn-disconnect" class="btn btn-secondary" style="flex: 1; padding: 0.65rem; font-weight: 700; border-radius: 10px; color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">
-                  <i class="fa-solid fa-power-off"></i> Disconnect
-                </button>
-              </div>
-            </div>
-
-            <!-- Right Column: Send Test & System Logs/Queues -->
-            <div class="gateway-card">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Send Test Notification
-              </h3>
-
-              <form id="form-test-message" style="display: flex; flex-direction: column; gap: 0.85rem;">
-                <div class="form-group-custom">
-                  <label class="form-label-custom">Recipient Number (WhatsApp format, e.g. 919876543210)</label>
-                  <input type="text" id="test-phone-input" class="form-input-custom" placeholder="e.g. 919876543210" required style="width: 95%;">
-                </div>
-                <div class="form-group-custom">
-                  <label class="form-label-custom">Message Content</label>
-                  <textarea id="test-message-input" class="form-input-custom" style="min-height: 60px; width: 95%;" placeholder="Hello, this is a test notification from CrowdCity AI!" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="padding: 0.65rem; font-weight: 700; border-radius: 10px;">
-                  <i class="fa-solid fa-paper-plane"></i> Dispatch Message
-                </button>
-              </form>
-
-              <!-- Logger Sub-tabs -->
-              <div style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
-                <button type="button" id="tab-logs-btn" class="admin-nav-tab active-sub-tab" style="background: var(--primary); color: #ffffff;">Logs</button>
-                <button type="button" id="tab-queue-btn" class="admin-nav-tab" style="background: transparent; color: var(--text-muted);">Queue</button>
-              </div>
-
-              <!-- List logs -->
-              <div id="logs-container" style="max-height: 180px; overflow-y: auto; font-family: monospace; font-size: 0.78rem; background: var(--bg-app); border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 8px;">
-                <div style="color: var(--text-muted);">System idle...</div>
-              </div>
-            </div>
           </div>
         </section>
 

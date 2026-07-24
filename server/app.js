@@ -15,7 +15,6 @@ import aiRoutes from './routes/aiRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
-import whatsappRoutes from './whatsapp/whatsappRoutes.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
 // ES Module dirname workaround
@@ -105,7 +104,6 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/departments', departmentRoutes);
-app.use('/api/whatsapp', whatsappRoutes);
 
 // Static client file server with caching
 app.use(express.static(path.join(__dirname, '../client'), {

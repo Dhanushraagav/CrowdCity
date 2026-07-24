@@ -2,7 +2,6 @@ import { supabase, supabaseAdmin, getSupabaseClient } from '../config/supabase.j
 import { createNotification } from './notificationController.js';
 import { awardPointsAndCheckBadges } from './gamificationController.js';
 import logger from '../config/logger.js';
-import { whatsappService } from '../whatsapp/whatsappService.js';
 import { analyzeComplaint } from '../services/groqService.js';
 import { validateServiceArea } from '../services/serviceAreaService.js';
 import { getUserEmail, sendIssueCreatedEmail, sendIssueStatusUpdateEmail, sendIssueWithdrawnEmail, sendNewChatMessageEmail } from '../services/emailService.js';
@@ -393,11 +392,7 @@ export const createIssue = async (req, res) => {
       if (email) sendIssueCreatedEmail(email, req.user.user_metadata?.full_name || 'Citizen', issue);
     }).catch(err => logger.error('Background email error:', err));
 
-    // Send WhatsApp notification (background)
-    whatsappService.sendNotification(req.user.id, 'complaint_created', {
-      complaint_id: issue.id,
-      category: issue.category
-    }).catch(err => logger.error('Background WhatsApp notification error:', err));
+
 
     return res.status(201).json(issue);
   } catch (err) {
@@ -604,13 +599,7 @@ export const updateIssueStatus = async (req, res) => {
       if (email) sendIssueStatusUpdateEmail(email, '', issue, status, notes);
     }).catch(err => logger.error('Background email error:', err));
 
-    // Send WhatsApp notification (background)
-    const eventName = targetStatus === 'resolved' ? 'complaint_resolved' : 'complaint_status_updated';
-    whatsappService.sendNotification(issue.reporter_id, eventName, {
-      complaint_id: issue.id,
-      status: targetStatus,
-      remarks: notes || updates.completion_notes
-    }).catch(err => logger.error('Background WhatsApp notification error:', err));
+
 
     return res.status(200).json({ message: 'Status updated successfully', issue });
   } catch (err) {
