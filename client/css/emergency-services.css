@@ -743,3 +743,55 @@ body.emergency-body .emergency-page-container {
   .responders-grid { grid-template-columns: 1fr; }
   .emergency-contacts-table th, .emergency-contacts-table td { padding: 0.75rem 0.85rem; }
 }
+
+/* Sticky Mobile Emergency Bar */
+.sticky-mobile-emergency-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid var(--border-subtle);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 9998;
+  gap: 0.75rem;
+  box-sizing: border-box;
+}
+
+.sticky-mobile-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: none;
+}
+
+.sticky-mobile-btn.btn-call {
+  background: var(--emergency-red);
+  color: #ffffff;
+}
+
+.sticky-mobile-btn.btn-share {
+  background: var(--bg-surface-gray);
+  color: var(--text-dark);
+  border: 1px solid var(--border-strong);
+}
+
+@media (max-width: 768px) {
+  .sticky-mobile-emergency-bar {
+    display: flex;
+  }
+  body.emergency-body {
+    padding-bottom: 70px !important;
+  }
+}

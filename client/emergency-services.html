@@ -6,7 +6,7 @@
   <script src="js/auth-router.js?v=1.0.6"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emergency Services Center - Government of Tamil Nadu | CrowdCity AI</title>
+  <title>Emergency Help Center - Government of Tamil Nadu | CrowdCity AI</title>
   
   <!-- Inter Font from Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <!-- Global Application CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=1.0.5" />
   <link rel="stylesheet" href="css/components.css" />
   
-  <!-- Emergency Services Center Dedicated CSS -->
+  <!-- Dedicated Emergency Help Center CSS -->
   <link rel="stylesheet" href="css/emergency-services.css" />
 </head>
 <body class="protected-page emergency-body">
@@ -31,7 +31,7 @@
   <!-- Government Official Top Banner -->
   <div class="emergency-gov-header-banner">
     <span class="emergency-gov-badge">Official Service</span>
-    <span>Government of Tamil Nadu &bull; State Emergency Response Network</span>
+    <span>Government of Tamil Nadu &bull; State Emergency Help Center Network</span>
   </div>
 
   <div class="app-layout">
@@ -64,7 +64,7 @@
       <!-- HERO SECTION -->
       <section class="emergency-hero-section">
         <div class="emergency-hero-content">
-          <h1 class="emergency-hero-title">Emergency Services Center</h1>
+          <h1 class="emergency-hero-title">Emergency Help Center</h1>
           <p class="emergency-hero-subtitle">
             Find nearby emergency responders, access verified emergency contacts, and prepare for emergencies.
           </p>
@@ -103,7 +103,7 @@
                 <i class="fa-solid fa-hospital"></i>
               </div>
               <div>
-                <h3 class="quick-action-title">Find Hospital</h3>
+                <h3 class="quick-action-title">Find Nearby Hospital</h3>
                 <p class="quick-action-subtitle">Medical & Trauma Centers</p>
               </div>
             </a>
@@ -113,7 +113,7 @@
                 <i class="fa-solid fa-shield-halved"></i>
               </div>
               <div>
-                <h3 class="quick-action-title">Find Police</h3>
+                <h3 class="quick-action-title">Find Police Station</h3>
                 <p class="quick-action-subtitle">Stations & Control Rooms</p>
               </div>
             </a>
@@ -124,7 +124,7 @@
               </div>
               <div>
                 <h3 class="quick-action-title">Find Fire Station</h3>
-                <p class="quick-action-subtitle">Fire & Rescue Services</p>
+                <p class="quick-action-subtitle">Fire & Rescue Units</p>
               </div>
             </a>
 
@@ -133,7 +133,7 @@
                 <i class="fa-solid fa-share-nodes"></i>
               </div>
               <div>
-                <h3 class="quick-action-title">Share Location</h3>
+                <h3 class="quick-action-title">Share My Location</h3>
                 <p class="quick-action-subtitle">Send GPS to Responders</p>
               </div>
             </button>
@@ -143,7 +143,7 @@
                 <i class="fa-solid fa-location-crosshairs"></i>
               </div>
               <div>
-                <h3 class="quick-action-title">Nearest Responders</h3>
+                <h3 class="quick-action-title">Nearest Emergency Services</h3>
                 <p class="quick-action-subtitle">Auto-Detected Responders</p>
               </div>
             </a>
@@ -155,7 +155,7 @@
       <section class="emergency-section emergency-section-alt">
         <div class="emergency-section-inner">
           <div class="emergency-section-header">
-            <h2 class="emergency-section-title">Verified Emergency Numbers</h2>
+            <h2 class="emergency-section-title">Emergency Contacts</h2>
             <p class="emergency-section-desc">Official toll-free helplines verified by the Government of Tamil Nadu.</p>
           </div>
 
@@ -164,9 +164,10 @@
               <thead>
                 <tr>
                   <th>Service</th>
-                  <th>Number</th>
+                  <th>Phone Number</th>
                   <th>Availability</th>
-                  <th>Actions</th>
+                  <th>Call</th>
+                  <th>Copy</th>
                 </tr>
               </thead>
               <tbody id="emergency-contacts-tbody">
@@ -181,7 +182,7 @@
       <section class="emergency-section" id="map-section">
         <div class="emergency-section-inner">
           <div class="emergency-section-header">
-            <h2 class="emergency-section-title">Live Nearby Emergency Services</h2>
+            <h2 class="emergency-section-title">Live Nearby Emergency Map</h2>
             <p class="emergency-section-desc">Interactive Leaflet map powered by OpenStreetMap & Overpass API.</p>
           </div>
 
@@ -189,11 +190,11 @@
           <div class="map-filter-bar">
             <div class="search-input-group">
               <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
-              <input type="text" id="emergency-search-input" placeholder="Search by city, area, pincode, or district..." />
+              <input type="text" id="emergency-search-input" placeholder="Search by city, area, district, or pincode..." />
             </div>
 
             <div class="radius-selector-group">
-              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Radius:</span>
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Search Radius:</span>
               <button class="radius-btn" data-radius="5">5 km</button>
               <button class="radius-btn active" data-radius="10">10 km</button>
               <button class="radius-btn" data-radius="20">20 km</button>
@@ -221,7 +222,7 @@
       <section class="emergency-section emergency-section-alt" id="responders-section">
         <div class="emergency-section-inner">
           <div class="emergency-section-header">
-            <h2 class="emergency-section-title">Nearby Responders List</h2>
+            <h2 class="emergency-section-title">Nearby Emergency Responders</h2>
             <p class="emergency-section-desc">Nearest verified hospitals, police stations, and fire units sorted by distance.</p>
           </div>
 
@@ -231,7 +232,7 @@
         </div>
       </section>
 
-      <!-- EMERGENCY PREPAREDNESS ACCORDIONS -->
+      <!-- EMERGENCY PREPAREDNESS GUIDES -->
       <section class="emergency-section">
         <div class="emergency-section-inner">
           <div class="emergency-section-header">
@@ -362,22 +363,38 @@
           <div class="medical-ref-grid">
             <div class="medical-ref-card">
               <h3 class="medical-ref-title"><i class="fa-solid fa-heart-pulse" style="color: var(--emergency-red);"></i> CPR Basics</h3>
-              <p class="medical-ref-desc">Push hard and fast in the center of the chest (100–120 compressions per minute) until medical help arrives.</p>
+              <ul class="prep-list">
+                <li>Check for responsiveness and breathing.</li>
+                <li>Push hard and fast in center of chest (100–120 bpm).</li>
+                <li>Continue until professional medical help arrives.</li>
+              </ul>
             </div>
 
             <div class="medical-ref-card">
               <h3 class="medical-ref-title"><i class="fa-solid fa-droplet" style="color: var(--emergency-red);"></i> Severe Bleeding</h3>
-              <p class="medical-ref-desc">Apply firm, continuous direct pressure using a clean cloth or bandage. Elevate the wounded limb above heart level.</p>
+              <ul class="prep-list">
+                <li>Apply firm, continuous direct pressure with clean cloth.</li>
+                <li>Elevate the wounded limb above heart level.</li>
+                <li>Do not remove soaked bandages; add more layers.</li>
+              </ul>
             </div>
 
             <div class="medical-ref-card">
-              <h3 class="medical-ref-title"><i class="fa-solid fa-fire" style="color: var(--gov-orange);"></i> Burns Care</h3>
-              <p class="medical-ref-desc">Cool the burn with cool running water for at least 10 minutes. Cover loosely with a clean, dry sterile bandage.</p>
+              <h3 class="medical-ref-title"><i class="fa-solid fa-fire" style="color: var(--gov-orange);"></i> Burns</h3>
+              <ul class="prep-list">
+                <li>Cool burn with cool running water for 10–20 minutes.</li>
+                <li>Cover loosely with a clean, sterile bandage.</li>
+                <li>Do not apply ice, butter, or ointments.</li>
+              </ul>
             </div>
 
             <div class="medical-ref-card">
               <h3 class="medical-ref-title"><i class="fa-solid fa-bone" style="color: var(--gov-blue);"></i> Fractures</h3>
-              <p class="medical-ref-desc">Immobilize the injured area. Do not attempt to realign broken bones or force movement.</p>
+              <ul class="prep-list">
+                <li>Immobilize the injured limb immediately.</li>
+                <li>Do not attempt to realign broken bones.</li>
+                <li>Apply ice pack wrapped in cloth to reduce swelling.</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -387,8 +404,10 @@
       <footer style="background: var(--text-dark); color: #94a3b8; padding: 2.5rem 2rem; border-top: 1px solid #334155; font-size: 0.85rem;">
         <div style="max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
           <div>
-            <strong style="color: #ffffff; font-size: 1rem;">CrowdCity AI v3.0 Emergency Services Center</strong>
-            <p style="margin: 0.35rem 0 0 0; color: #64748b;">Government of Tamil Nadu Emergency Integration Unit.</p>
+            <strong style="color: #ffffff; font-size: 1rem;">Emergency Help Center</strong>
+            <p style="margin: 0.35rem 0 0 0; color: #64748b;">
+              Powered by <strong>CrowdCity AI</strong>. Connecting citizens with verified emergency services and public safety resources.
+            </p>
           </div>
           <div>
             <span>For Life-Threatening Emergencies, Always Call <strong>112</strong> or <strong>108</strong> Directly.</span>
@@ -396,6 +415,16 @@
         </div>
       </footer>
     </main>
+  </div>
+
+  <!-- Sticky Mobile Emergency Action Bar -->
+  <div class="sticky-mobile-emergency-bar">
+    <a href="tel:112" class="sticky-mobile-btn btn-call">
+      <i class="fa-solid fa-phone"></i> Call 112
+    </a>
+    <button onclick="openShareLocationModal()" class="sticky-mobile-btn btn-share">
+      <i class="fa-solid fa-location-arrow"></i> Share Location
+    </button>
   </div>
 
   <!-- Leaflet Map JS Library -->
@@ -407,7 +436,7 @@
   <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
 
-  <!-- Dedicated Emergency Services Modules -->
+  <!-- Dedicated Emergency Help Center Modules -->
   <script src="js/EmergencyLocation.js"></script>
   <script src="js/EmergencySearch.js"></script>
   <script src="js/EmergencyMap.js"></script>

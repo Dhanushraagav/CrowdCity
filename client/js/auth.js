@@ -1589,7 +1589,7 @@ function updateAuthUI() {
       <a href="my-complaints.html" class="topnav-link ${currentPath.includes('my-complaints') ? 'active' : ''}" data-i18n="my_complaints">My Complaints</a>
       <a href="map.html" class="topnav-link ${currentPath.includes('map') ? 'active' : ''}" data-i18n="map">Map</a>
       <a href="services.html" class="topnav-link ${isServices ? 'active' : ''}" data-i18n="govt_services">Govt Services</a>
-      <a href="emergency-services.html" class="topnav-link ${isEmergency ? 'active' : ''}" style="color: #dc2626; font-weight: 700;">Emergency SOS</a>
+      <a href="emergency-services.html" class="topnav-link ${isEmergency ? 'active' : ''}" style="color: #dc2626; font-weight: 700;">Emergency Help Center</a>
       <a href="helplines.html" class="topnav-link ${currentPath.includes('helplines') ? 'active' : ''}" data-i18n="district_helplines">District Helplines</a>
       <a href="ministers.html" class="topnav-link ${currentPath.includes('ministers') ? 'active' : ''}" data-i18n="nav_ministers">Council of Ministers</a>
     `;

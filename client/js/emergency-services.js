@@ -48,10 +48,10 @@ async function loadResponders(lat, lng, radiusKm, type) {
   // Render Responder Cards
   if (!responders || responders.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; padding: 2rem; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); text-align: center; color: var(--text-muted);">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; color: var(--gov-orange); margin-bottom: 0.75rem;"></i>
-        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-dark);">No Emergency Responders Found Nearby</h4>
-        <p style="margin: 0; font-size: 0.9rem;">Try expanding your search radius to 20 km or 50 km using the buttons above.</p>
+      <div style="grid-column: 1 / -1; padding: 2.5rem; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); text-align: center; color: var(--text-muted);">
+        <i class="fa-solid fa-compass" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
+        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-dark); font-weight: 700;">Unable to find nearby services</h4>
+        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Try searching another location or increase the search radius.</p>
       </div>
     `;
     return;
