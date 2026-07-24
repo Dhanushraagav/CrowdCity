@@ -1644,6 +1644,137 @@ body:not(.admin-portal-body) .page-inner {
   left: 100%;
 }
 
+/* ==========================================================================
+   CrowdCity AI v3.2 - Quick Services Grid Dashboard System
+   ========================================================================== */
+
+.citizen-services-container {
+  width: 100%;
+  padding: 2.25rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.service-category-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.service-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.service-category-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #64748b);
+  margin: 0;
+}
+
+.service-grid-4col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.service-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.35rem 1.25rem;
+  text-decoration: none;
+  color: var(--text-main, #0f172a);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--primary, #0d9488);
+  border-color: var(--primary, #0d9488);
+}
+
+.service-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.service-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: var(--bg-surface-hover, #f8fafc);
+  color: var(--primary, #0d9488);
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.service-card-arrow {
+  font-size: 0.85rem;
+  color: var(--text-muted, #94a3b8);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.service-card:hover .service-card-arrow {
+  transform: translateX(4px);
+  color: var(--primary, #0d9488);
+}
+
+.service-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.service-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.service-card-desc {
+  font-size: 0.83rem;
+  color: var(--text-muted, #64748b);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Tablet: 2 columns */
+@media (max-width: 1024px) {
+  .service-grid-4col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 640px) {
+  .service-grid-4col {
+    grid-template-columns: 1fr;
+  }
+  .citizen-services-container {
+    padding: 1.5rem 0;
+    gap: 1.75rem;
+  }
+}
+
 /* Touch active pulse */
 .topnav-link:active {
   transform: translateY(0) scale(0.97);

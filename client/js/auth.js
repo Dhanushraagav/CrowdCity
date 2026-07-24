@@ -1565,34 +1565,25 @@ function updateAuthUI() {
       }
     });
 
-    let linksContainer = header.querySelector('.topnav-links');
-    if (!linksContainer) {
-      linksContainer = document.createElement('div');
-      linksContainer.className = 'topnav-links';
-      linksContainer.id = 'topnav-links';
+    // Remove old horizontal switcher tabs if present
+    const oldLinks = header.querySelectorAll('.topnav-links, #topnav-links');
+    oldLinks.forEach(el => el.remove());
+
+    // Inject clean header city indicator in middle
+    let cityIndicator = header.querySelector('.header-city-indicator');
+    if (!cityIndicator) {
+      cityIndicator = document.createElement('div');
+      cityIndicator.className = 'header-city-indicator';
+      cityIndicator.style.cssText = 'display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-main, #0f172a); margin: 0 auto; background: var(--bg-surface-hover, #f8fafc); padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid var(--border-color, #e2e8f0);';
+      cityIndicator.innerHTML = `<i class="fa-solid fa-location-dot" style="color: #0d9488; font-size: 0.85rem;"></i> <span>Coimbatore, Tamil Nadu</span>`;
 
       const rightContainer = header.querySelector('.topnav-right, .app-header-actions, #auth-nav-container');
       if (rightContainer && rightContainer.parentNode === header) {
-        header.insertBefore(linksContainer, rightContainer);
+        header.insertBefore(cityIndicator, rightContainer);
       } else {
-        header.appendChild(linksContainer);
+        header.appendChild(cityIndicator);
       }
     }
-
-    const currentPath = window.location.pathname.toLowerCase();
-    const isEmergency = currentPath.includes('emergency-services');
-    const isServices = currentPath.includes('services.html') || (currentPath.includes('services') && !isEmergency);
-
-    linksContainer.innerHTML = `
-      <a href="citizen-dashboard.html" class="topnav-link ${currentPath.includes('citizen-dashboard') ? 'active' : ''}" data-i18n="dashboard">Dashboard</a>
-      <a href="report.html" class="topnav-link ${currentPath.includes('report') ? 'active' : ''}" data-i18n="report_issue">Report Issue</a>
-      <a href="my-complaints.html" class="topnav-link ${currentPath.includes('my-complaints') ? 'active' : ''}" data-i18n="my_complaints">My Complaints</a>
-      <a href="map.html" class="topnav-link ${currentPath.includes('map') ? 'active' : ''}" data-i18n="map">Map</a>
-      <a href="services.html" class="topnav-link ${isServices ? 'active' : ''}" data-i18n="govt_services">Govt Services</a>
-      <a href="emergency-services.html" class="topnav-link ${isEmergency ? 'active' : ''}" style="color: #dc2626; font-weight: 700;">Emergency Help Center</a>
-      <a href="helplines.html" class="topnav-link ${currentPath.includes('helplines') ? 'active' : ''}" data-i18n="district_helplines">District Helplines</a>
-      <a href="ministers.html" class="topnav-link ${currentPath.includes('ministers') ? 'active' : ''}" data-i18n="nav_ministers">Council of Ministers</a>
-    `;
   };
 
   injectPortalBadge();
