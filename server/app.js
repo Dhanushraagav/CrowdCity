@@ -105,9 +105,10 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/departments', departmentRoutes);
 
-// Static client file server with caching
+// Static client file server with caching and html extension resolution
 app.use(express.static(path.join(__dirname, '../client'), {
-  maxAge: isProduction ? '1d' : '0'
+  maxAge: isProduction ? '1d' : '0',
+  extensions: ['html', 'htm']
 }));
 
 // Health check endpoint
