@@ -1254,48 +1254,33 @@ function updateAuthUI() {
 
   // Inject Tamil Nadu Government & CrowdCity partnership branding globally
   const injectGovtBranding = () => {
+    // 0. Replace datetime widgets (clock text words) with clean logos
+    const datetimeWidgets = document.querySelectorAll('.header-datetime-widget');
+    datetimeWidgets.forEach(widget => {
+      widget.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.55rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 32px; height: 32px; object-fit: contain;" />
+          <div style="width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 24px; height: 24px; object-fit: contain;" />
+          <span style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); letter-spacing: -0.2px;">CrowdCity AI</span>
+        </div>
+      `;
+    });
+
     // 1. Sidebar Logos (Desktop Sidebar Layout)
     const sidebarLogos = document.querySelectorAll('.app-sidebar-logo');
     sidebarLogos.forEach(logo => {
       if (logo.dataset.tnBranded) return;
       logo.dataset.tnBranded = "true";
       
-      const role = getUserRole();
-      const subtitleText = role === 'authority' || role === 'admin' ? 'Authority Portal' : 'Citizen Portal';
-      
-      const tnEmblem = document.createElement('img');
-      tnEmblem.src = "https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg";
-      tnEmblem.alt = "Govt. of Tamil Nadu";
-      tnEmblem.className = "brand-emblem";
-      tnEmblem.style.cssText = "width: 38px; height: 38px; flex-shrink: 0; object-fit: contain;";
-      
-      const divider = document.createElement('div');
-      divider.style.cssText = "width: 1px; height: 26px; background: var(--border-color); margin: 0 0.1rem;";
-      
-      const ccEmblem = logo.querySelector('.brand-emblem');
-      if (ccEmblem) {
-        ccEmblem.style.width = "28px";
-        ccEmblem.style.height = "28px";
-      }
-      
-      logo.insertBefore(divider, logo.firstChild);
-      logo.insertBefore(tnEmblem, logo.firstChild);
-      
-      const brandText = logo.querySelector('.brand-text-container');
-      if (brandText) {
-        brandText.style.gap = "0.05rem";
-        const title = brandText.querySelector('.brand-title');
-        if (title) {
-          title.style.fontSize = "0.95rem";
-          title.style.color = "var(--text-main)";
-        }
-        const subtitle = brandText.querySelector('.brand-subtitle');
-        if (subtitle) {
-          subtitle.style.fontSize = "0.58rem";
-          subtitle.style.color = "var(--brand-subtitle-color)";
-          subtitle.textContent = subtitleText;
-        }
-      }
+      logo.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.55rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 34px; height: 34px; object-fit: contain;" />
+          <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2); margin: 0 0.1rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+          <span style="font-size: 1.05rem; font-weight: 800; color: #ffffff; font-family: var(--font-heading); letter-spacing: -0.2px;">CrowdCity AI</span>
+        </div>
+      `;
     });
 
     // 2. Mobile Header Logos
@@ -1304,18 +1289,12 @@ function updateAuthUI() {
       if (logo.dataset.tnBranded) return;
       logo.dataset.tnBranded = "true";
       
-      const role = getUserRole();
-      const subtitleText = role === 'authority' || role === 'admin' ? 'Govt. of Tamil Nadu' : 'Tamil Nadu Portal';
-      
       logo.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 26px; height: 26px; object-fit: contain;" />
-          <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 0.05rem;"></div>
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 20px; height: 20px; object-fit: contain;" />
-          <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
-            <span>CrowdCity AI</span>
-            <span style="font-size: 0.52rem; font-weight: 700; color: var(--brand-subtitle-color, #fbbf24); text-transform: uppercase; letter-spacing: 0.3px;">${subtitleText}</span>
-          </span>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+          <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.05rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 22px; height: 22px; object-fit: contain;" />
+          <span style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); letter-spacing: -0.2px;">CrowdCity AI</span>
         </div>
       `;
     });
@@ -1327,14 +1306,11 @@ function updateAuthUI() {
       logo.dataset.tnBranded = "true";
       
       logo.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 30px; height: 30px; object-fit: contain;" />
-          <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 24px; height: 24px; object-fit: contain;" />
-          <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); display: flex; flex-direction: column; line-height: 1.1; text-align: left;">
-            <span>CrowdCity AI</span>
-            <span style="font-size: 0.55rem; font-weight: 700; color: var(--brand-subtitle-color, #fbbf24); text-transform: uppercase; letter-spacing: 0.3px;">Tamil Nadu Portal</span>
-          </span>
+        <div style="display: flex; align-items: center; gap: 0.55rem;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 32px; height: 32px; object-fit: contain;" />
+          <div style="width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;"></div>
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 24px; height: 24px; object-fit: contain;" />
+          <span style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); letter-spacing: -0.2px;">CrowdCity AI</span>
         </div>
       `;
     });
