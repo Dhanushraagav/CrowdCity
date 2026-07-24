@@ -1580,14 +1580,16 @@ function updateAuthUI() {
     }
 
     const currentPath = window.location.pathname.toLowerCase();
+    const isEmergency = currentPath.includes('emergency-services');
+    const isServices = currentPath.includes('services.html') || (currentPath.includes('services') && !isEmergency);
 
     linksContainer.innerHTML = `
       <a href="citizen-dashboard.html" class="topnav-link ${currentPath.includes('citizen-dashboard') ? 'active' : ''}" data-i18n="dashboard">Dashboard</a>
       <a href="report.html" class="topnav-link ${currentPath.includes('report') ? 'active' : ''}" data-i18n="report_issue">Report Issue</a>
       <a href="my-complaints.html" class="topnav-link ${currentPath.includes('my-complaints') ? 'active' : ''}" data-i18n="my_complaints">My Complaints</a>
       <a href="map.html" class="topnav-link ${currentPath.includes('map') ? 'active' : ''}" data-i18n="map">Map</a>
-      <a href="services.html" class="topnav-link ${currentPath.includes('services') ? 'active' : ''}" data-i18n="govt_services">Govt Services</a>
-      <a href="emergency-services.html" class="topnav-link ${currentPath.includes('emergency-services') ? 'active' : ''}" style="color: #dc2626; font-weight: 700;">Emergency SOS</a>
+      <a href="services.html" class="topnav-link ${isServices ? 'active' : ''}" data-i18n="govt_services">Govt Services</a>
+      <a href="emergency-services.html" class="topnav-link ${isEmergency ? 'active' : ''}" style="color: #dc2626; font-weight: 700;">Emergency SOS</a>
       <a href="helplines.html" class="topnav-link ${currentPath.includes('helplines') ? 'active' : ''}" data-i18n="district_helplines">District Helplines</a>
       <a href="ministers.html" class="topnav-link ${currentPath.includes('ministers') ? 'active' : ''}" data-i18n="nav_ministers">Council of Ministers</a>
     `;
