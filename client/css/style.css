@@ -977,21 +977,26 @@ body.loader-active {
   height: 100vh !important;
 }
 
-/* Remove left sidebar on all citizen portal pages so pages expand 100% full-width */
-body:not(.admin-portal-body) .app-sidebar {
+/* Show left sidebar on citizen-dashboard and admin portal; hide on inner subpages so subpages expand 100% full-width */
+body:not(.show-sidebar):not(.admin-portal-body) .app-sidebar {
   display: none !important;
 }
 
-body:not(.admin-portal-body) .mobile-menu-toggle {
+body:not(.show-sidebar):not(.admin-portal-body) .mobile-menu-toggle {
   display: none !important;
 }
 
-body:not(.admin-portal-body) .app-main,
-body:not(.admin-portal-body) .app-content,
-body:not(.admin-portal-body) .app-content-body {
+body:not(.show-sidebar):not(.admin-portal-body) .app-main,
+body:not(.show-sidebar):not(.admin-portal-body) .app-content,
+body:not(.show-sidebar):not(.admin-portal-body) .app-content-body {
   width: 100% !important;
   max-width: 100% !important;
   margin-left: 0 !important;
   flex: 1 !important;
+}
+
+body.show-sidebar .app-sidebar,
+body.admin-portal-body .app-sidebar {
+  display: flex !important;
 }
 
