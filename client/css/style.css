@@ -1001,34 +1001,89 @@ body:not(.admin-portal-body) .page-inner {
   box-sizing: border-box !important;
 }
 
-/* Global Topnav Page Switcher Styles */
+/* ==========================================================================
+   Ultra-Premium Magnetic Glassmorphic Topnav Page Switcher Tabs
+   ========================================================================== */
 .topnav-links {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   margin-left: 1.5rem;
   margin-right: auto;
+  padding: 4px 6px;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.25);
+  position: relative;
 }
 
 .topnav-link {
-  padding: 0.45rem 0.85rem;
-  font-size: 0.82rem;
+  position: relative;
+  padding: 0.5rem 1rem;
+  font-size: 0.83rem;
   font-weight: 600;
   color: var(--text-muted);
   text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: color 0.15s ease, background-color 0.15s ease;
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
+  overflow: hidden;
+  z-index: 1;
+  transform-origin: center center;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
 }
 
+/* Subtle glowing aura indicator on hover & touch */
+.topnav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.6s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Magnetic Lift & Glow Effect when approaching/hovering */
 .topnav-link:hover {
-  color: var(--text-main);
-  background-color: var(--bg-surface-hover, rgba(255, 255, 255, 0.06));
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
 }
 
+.topnav-link:hover::before {
+  left: 100%;
+}
+
+/* Touch active pulse */
+.topnav-link:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4) !important;
+}
+
+/* Ultra-Premium Active Tab Pill */
 .topnav-link.active {
-  color: var(--text-main);
+  color: #ffffff !important;
   font-weight: 700;
-  background-color: var(--bg-surface-hover, rgba(255, 255, 255, 0.08));
+  background: linear-gradient(135deg, var(--primary, #0d9488) 0%, #0f766e 100%) !important;
+  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  animation: activeTabPulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes activeTabPulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 6px 22px rgba(13, 148, 136, 0.65), 0 0 12px rgba(13, 148, 136, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
 }
 
