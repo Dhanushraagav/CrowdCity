@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency SOS Hub | CrowdCity AI</title>
+  <meta name="description" content="Quick emergency SOS hub for citizens to locate nearby hospitals, police stations, fire services, and share live location.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Design System & Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/emergency.css">
+</head>
+<body class="theme-dark">
+
+  <div class="app-layout">
+    <!-- Main Content Container -->
+    <div class="app-content" style="width: 100%;">
+      
+      <!-- Top Navigation Header -->
+      <header class="app-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <a href="index.html" class="app-brand-title" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.55rem;">
+            <div style="width: 32px; height: 32px; background: var(--sos-red); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+              <i class="fa-solid fa-truck-medical"></i>
+            </div>
+            <span style="font-weight: 800; font-family: var(--font-heading);">CrowdCity <span style="color: var(--sos-red);">SOS Hub</span></span>
+          </a>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <a href="citizen-dashboard.html" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700;">
+            <i class="fa-solid fa-house"></i> Dashboard
+          </a>
+          <a href="tel:112" class="btn btn-primary" style="background: var(--sos-red); border-color: var(--sos-red); font-weight: 800; padding: 0.45rem 0.95rem;">
+            <i class="fa-solid fa-phone"></i> Call 112
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Page Body -->
+      <main class="app-content-body" style="padding: 1.5rem 1rem 3rem 1rem; max-width: 1200px; margin: 0 auto;">
+        
+        <!-- Emergency Banner -->
+        <div class="sos-header-banner">
+          <div class="sos-pulse-ring"></div>
+          <div style="position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                <i class="fa-solid fa-shield-cat" style="font-size: 1.4rem;"></i>
+                <h1 style="font-size: 1.5rem; font-weight: 900; margin: 0; font-family: var(--font-heading);">Emergency Response Hub</h1>
+              </div>
+              <p style="margin: 0; font-size: 0.88rem; opacity: 0.95; line-height: 1.4;">
+                Instant one-tap dispatch, nearby hospital & responder finder, and live GPS location sharing.
+              </p>
+            </div>
+            <div id="gps-status-text" style="background: rgba(0,0,0,0.25); padding: 0.4rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.2);">
+              <i class="fa-solid fa-location-crosshairs fa-spin"></i> Initializing GPS...
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. One-Tap Emergency Helplines Grid -->
+        <div style="margin-bottom: 0.75rem;">
+          <h2 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem; font-family: var(--font-heading);">
+            <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> One-Tap Emergency Responders
+          </h2>
+        </div>
+
+        <div class="quick-sos-grid">
+          <a href="tel:112" class="quick-sos-card national">
+            <div class="sos-icon"><i class="fa-solid fa-phone-volume"></i></div>
+            <div class="sos-number">112</div>
+            <div class="sos-label">National SOS</div>
+          </a>
+
+          <a href="tel:108" class="quick-sos-card ambulance">
+            <div class="sos-icon"><i class="fa-solid fa-truck-medical"></i></div>
+            <div class="sos-number">108</div>
+            <div class="sos-label">Ambulance</div>
+          </a>
+
+          <a href="tel:100" class="quick-sos-card police">
+            <div class="sos-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="sos-number">100</div>
+            <div class="sos-label">Police</div>
+          </a>
+
+          <a href="tel:101" class="quick-sos-card fire">
+            <div class="sos-icon"><i class="fa-solid fa-fire-extinguisher"></i></div>
+            <div class="sos-number">101</div>
+            <div class="sos-label">Fire Rescue</div>
+          </a>
+
+          <a href="tel:1091" class="quick-sos-card women">
+            <div class="sos-icon"><i class="fa-solid fa-person-breastfeeding"></i></div>
+            <div class="sos-number">1091</div>
+            <div class="sos-label">Women Helpline</div>
+          </a>
+
+          <a href="tel:1098" class="quick-sos-card national">
+            <div class="sos-icon"><i class="fa-solid fa-child"></i></div>
+            <div class="sos-number">1098</div>
+            <div class="sos-label">Child Helpline</div>
+          </a>
+        </div>
+
+        <!-- 2. Live Location Sharing Banner -->
+        <div class="share-location-card">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+              <i class="fa-solid fa-share-nodes"></i>
+            </div>
+            <div>
+              <div style="font-weight: 800; font-size: 1rem; color: var(--text-main);">Share Live Emergency GPS Location</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">Generate an instant Google Maps pin to send to family or emergency responders.</div>
+            </div>
+          </div>
+          <button id="btn-share-location" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-weight: 800; font-size: 0.85rem;">
+            <i class="fa-solid fa-location-arrow"></i> Share My Location
+          </button>
+        </div>
+
+        <!-- 3. Interactive Emergency Map -->
+        <div class="emergency-map-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading); display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fa-solid fa-map-location-dot" style="color: var(--primary);"></i> Nearby Emergency Facilities Map
+            </h2>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">
+              <span style="color: #ef4444; font-weight: 700;">● Hospitals</span> &nbsp;
+              <span style="color: #2563eb; font-weight: 700;">● Police</span> &nbsp;
+              <span style="color: #f97316; font-weight: 700;">● Fire</span>
+            </div>
+          </div>
+
+          <div id="emergency-map"></div>
+        </div>
+
+        <!-- 4. Nearby Responders Grid with Category Tabs -->
+        <div style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading);">
+              <i class="fa-solid fa-building-circle-check" style="color: var(--primary);"></i> Nearest Emergency Responders
+            </h2>
+
+            <div class="responder-category-tabs" style="margin-bottom: 0;">
+              <button class="category-pill active" data-category="all">
+                <i class="fa-solid fa-layer-group"></i> All
+              </button>
+              <button class="category-pill" data-category="hospital">
+                <i class="fa-solid fa-hospital" style="color: #ef4444;"></i> Hospitals
+              </button>
+              <button class="category-pill" data-category="police">
+                <i class="fa-solid fa-shield-halved" style="color: #2563eb;"></i> Police
+              </button>
+              <button class="category-pill" data-category="fire">
+                <i class="fa-solid fa-fire-extinguisher" style="color: #f97316;"></i> Fire Stations
+              </button>
+            </div>
+          </div>
+
+          <div id="responders-container" class="responders-grid">
+            <!-- Dynamic Responder Cards will be rendered here -->
+          </div>
+        </div>
+
+        <!-- 5. Disaster & Emergency Safety Guides -->
+        <div class="safety-tips-section">
+          <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.85rem 0; font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-book-medical" style="color: var(--primary);"></i> Disaster & Emergency Action Guides
+          </h2>
+
+          <div class="safety-category-nav">
+            <button class="safety-tab-btn active" data-safety="flood"><i class="fa-solid fa-water"></i> Flood</button>
+            <button class="safety-tab-btn" data-safety="fire"><i class="fa-solid fa-fire"></i> Building Fire</button>
+            <button class="safety-tab-btn" data-safety="earthquake"><i class="fa-solid fa-house-crack"></i> Earthquake</button>
+            <button class="safety-tab-btn" data-safety="cyclone"><i class="fa-solid fa-hurricane"></i> Cyclone</button>
+            <button class="safety-tab-btn" data-safety="heatwave"><i class="fa-solid fa-sun"></i> Heatwave</button>
+            <button class="safety-tab-btn" data-safety="accident"><i class="fa-solid fa-car-burst"></i> Road Accident</button>
+            <button class="safety-tab-btn" data-safety="medical"><i class="fa-solid fa-heart-pulse"></i> Medical</button>
+          </div>
+
+          <div id="safety-guide-container">
+            <!-- Dynamic Safety Instructions rendered here -->
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Footer -->
+      <footer class="app-footer" style="text-align: center; padding: 1.5rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.82rem;">
+        <p>CrowdCity AI Emergency Response Network &bull; OpenStreetMap Powered &bull; Free Civic Service</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Client Script Modules -->
+  <script src="js/auth.js"></script>
+  <script src="js/EmergencyService.js"></script>
+  <script src="js/EmergencyMap.js"></script>
+  <script src="js/emergency.js"></script>
+</body>
+</html>
