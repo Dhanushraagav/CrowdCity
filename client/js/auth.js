@@ -1254,19 +1254,6 @@ function updateAuthUI() {
 
   // Inject Tamil Nadu Government & CrowdCity partnership branding globally
   const injectGovtBranding = () => {
-    // 0. Replace datetime widgets (clock text words) with clean logos
-    const datetimeWidgets = document.querySelectorAll('.header-datetime-widget');
-    datetimeWidgets.forEach(widget => {
-      widget.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.55rem;">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 32px; height: 32px; object-fit: contain;" />
-          <div style="width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;"></div>
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 24px; height: 24px; object-fit: contain;" />
-          <span style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading); letter-spacing: -0.2px;">CrowdCity AI</span>
-        </div>
-      `;
-    });
-
     // 1. Sidebar Logos (Desktop Sidebar Layout)
     const sidebarLogos = document.querySelectorAll('.app-sidebar-logo');
     sidebarLogos.forEach(logo => {
