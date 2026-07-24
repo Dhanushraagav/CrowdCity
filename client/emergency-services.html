@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emergency Services Center - Government of Tamil Nadu | CrowdCity AI</title>
+  
+  <!-- Inter Font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Leaflet CSS for OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Global Application CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  
+  <!-- Emergency Services Center Dedicated CSS -->
+  <link rel="stylesheet" href="css/emergency-services.css" />
+</head>
+<body class="protected-page emergency-body">
+
+  <!-- Government Official Top Banner -->
+  <div class="emergency-gov-header-banner">
+    <span class="emergency-gov-badge">Official Service</span>
+    <span>Government of Tamil Nadu &bull; State Emergency Response Network</span>
+  </div>
+
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="app-header-main topnav" id="app-header">
+      <div class="topnav-left" style="display: flex; align-items: center; gap: 0.5rem;">
+        <a href="citizen-dashboard.html" class="topnav-logo app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 30px; height: 30px; object-fit: contain;" />
+          </div>
+        </a>
+      </div>
+
+      <!-- Top Navigation Page Switcher Tabs -->
+      <div class="topnav-links" id="topnav-links">
+        <!-- Dynamically sync'd by auth.js -->
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="app-header-actions topnav-right" id="auth-nav-container">
+        <!-- Dynamically populated by auth.js -->
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="app-main emergency-page-container">
+      
+      <!-- HERO SECTION -->
+      <section class="emergency-hero-section">
+        <div class="emergency-hero-content">
+          <h1 class="emergency-hero-title">Emergency Services Center</h1>
+          <p class="emergency-hero-subtitle">
+            Find nearby emergency responders, access verified emergency contacts, and prepare for emergencies.
+          </p>
+          <div class="emergency-hero-actions">
+            <a href="#map-section" class="btn-emergency-primary">
+              <i class="fa-solid fa-compass"></i> Find Nearby Services
+            </a>
+            <button onclick="openShareLocationModal()" class="btn-emergency-secondary">
+              <i class="fa-solid fa-location-arrow"></i> Share My Location
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK EMERGENCY ACTIONS -->
+      <section class="emergency-section">
+        <div class="emergency-section-inner">
+          <div class="emergency-section-header">
+            <h2 class="emergency-section-title">Quick Emergency Actions</h2>
+            <p class="emergency-section-desc">Instant access to primary emergency dispatch lines and responder search.</p>
+          </div>
+
+          <div class="quick-actions-grid">
+            <a href="tel:112" class="quick-action-card">
+              <div class="quick-action-icon-wrap icon-red">
+                <i class="fa-solid fa-phone"></i>
+              </div>
+              <div>
+                <h3 class="quick-action-title">Call 112</h3>
+                <p class="quick-action-subtitle">National Emergency Line</p>
+              </div>
+            </a>
+
+            <a href="#map-section" onclick="document.querySelector('[data-type=\'hospital\']').click()" class="quick-action-card">
+              <div class="quick-action-icon-wrap icon-red">
+                <i class="fa-solid fa-hospital"></i>
+              </div>
+              <div>
+                <h3 class="quick-action-title">Find Hospital</h3>
+                <p class="quick-action-subtitle">Medical & Trauma Centers</p>
+              </div>
+            </a>
+
+            <a href="#map-section" onclick="document.querySelector('[data-type=\'police\']').click()" class="quick-action-card">
+              <div class="quick-action-icon-wrap icon-blue">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <h3 class="quick-action-title">Find Police</h3>
+                <p class="quick-action-subtitle">Stations & Control Rooms</p>
+              </div>
+            </a>
+
+            <a href="#map-section" onclick="document.querySelector('[data-type=\'fire\']').click()" class="quick-action-card">
+              <div class="quick-action-icon-wrap icon-orange">
+                <i class="fa-solid fa-fire-extinguisher"></i>
+              </div>
+              <div>
+                <h3 class="quick-action-title">Find Fire Station</h3>
+                <p class="quick-action-subtitle">Fire & Rescue Services</p>
+              </div>
+            </a>
+
+            <button onclick="openShareLocationModal()" class="quick-action-card" style="cursor: pointer;">
+              <div class="quick-action-icon-wrap icon-blue">
+                <i class="fa-solid fa-share-nodes"></i>
+              </div>
+              <div>
+                <h3 class="quick-action-title">Share Location</h3>
+                <p class="quick-action-subtitle">Send GPS to Responders</p>
+              </div>
+            </button>
+
+            <a href="#responders-section" class="quick-action-card">
+              <div class="quick-action-icon-wrap icon-orange">
+                <i class="fa-solid fa-location-crosshairs"></i>
+              </div>
+              <div>
+                <h3 class="quick-action-title">Nearest Responders</h3>
+                <p class="quick-action-subtitle">Auto-Detected Responders</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- VERIFIED EMERGENCY CONTACTS TABLE -->
+      <section class="emergency-section emergency-section-alt">
+        <div class="emergency-section-inner">
+          <div class="emergency-section-header">
+            <h2 class="emergency-section-title">Verified Emergency Numbers</h2>
+            <p class="emergency-section-desc">Official toll-free helplines verified by the Government of Tamil Nadu.</p>
+          </div>
+
+          <div class="emergency-contacts-table-wrapper">
+            <table class="emergency-contacts-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Number</th>
+                  <th>Availability</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="emergency-contacts-tbody">
+                <!-- Populated dynamically by EmergencyContacts.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE NEARBY MAP & RESPONDERS -->
+      <section class="emergency-section" id="map-section">
+        <div class="emergency-section-inner">
+          <div class="emergency-section-header">
+            <h2 class="emergency-section-title">Live Nearby Emergency Services</h2>
+            <p class="emergency-section-desc">Interactive Leaflet map powered by OpenStreetMap & Overpass API.</p>
+          </div>
+
+          <!-- Controls & Search Bar -->
+          <div class="map-filter-bar">
+            <div class="search-input-group">
+              <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+              <input type="text" id="emergency-search-input" placeholder="Search by city, area, pincode, or district..." />
+            </div>
+
+            <div class="radius-selector-group">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Radius:</span>
+              <button class="radius-btn" data-radius="5">5 km</button>
+              <button class="radius-btn active" data-radius="10">10 km</button>
+              <button class="radius-btn" data-radius="20">20 km</button>
+              <button class="radius-btn" data-radius="50">50 km</button>
+            </div>
+          </div>
+
+          <!-- Type Filter Pills -->
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <button class="btn-emergency-secondary type-filter-btn active" data-type="all" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">All Services</button>
+            <button class="btn-emergency-secondary type-filter-btn" data-type="hospital" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">Hospitals</button>
+            <button class="btn-emergency-secondary type-filter-btn" data-type="police" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">Police</button>
+            <button class="btn-emergency-secondary type-filter-btn" data-type="fire" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">Fire Stations</button>
+            <button onclick="recenterMap()" class="btn-emergency-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.82rem; margin-left: auto;">
+              <i class="fa-solid fa-crosshairs"></i> Locate Me
+            </button>
+          </div>
+
+          <!-- Leaflet Map Container -->
+          <div id="emergency-map" class="emergency-map-container"></div>
+        </div>
+      </section>
+
+      <!-- NEARBY RESPONDERS CARDS GRID -->
+      <section class="emergency-section emergency-section-alt" id="responders-section">
+        <div class="emergency-section-inner">
+          <div class="emergency-section-header">
+            <h2 class="emergency-section-title">Nearby Responders List</h2>
+            <p class="emergency-section-desc">Nearest verified hospitals, police stations, and fire units sorted by distance.</p>
+          </div>
+
+          <div class="responders-grid" id="responders-grid">
+            <!-- Populated dynamically by emergency-services.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- EMERGENCY PREPAREDNESS ACCORDIONS -->
+      <section class="emergency-section">
+        <div class="emergency-section-inner">
+          <div class="emergency-section-header">
+            <h2 class="emergency-section-title">Emergency Preparedness Guides</h2>
+            <p class="emergency-section-desc">Official disaster preparedness protocols and immediate action steps.</p>
+          </div>
+
+          <div class="accordion-wrapper">
+            <!-- Flood -->
+            <div class="accordion-item active">
+              <div class="accordion-header">
+                <span>Flood & Severe Waterlogging</span>
+                <i class="fa-solid fa-chevron-down accordion-icon-toggle"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="prep-grid">
+                  <div class="prep-box">
+                    <h4 class="prep-box-title do">Immediate Actions</h4>
+                    <ul class="prep-list">
+                      <li>Move to upper floors or higher ground immediately.</li>
+                      <li>Switch off main electrical power and gas supply.</li>
+                      <li>Keep emergency helpline 1070/1077 saved on your phone.</li>
+                    </ul>
+                  </div>
+                  <div class="prep-box">
+                    <h4 class="prep-box-title dont">Things to Avoid</h4>
+                    <ul class="prep-list">
+                      <li>Do not walk or drive through moving flood water.</li>
+                      <li>Do not touch electrical poles or fallen power lines.</li>
+                      <li>Avoid consuming unboiled or contaminated tap water.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fire -->
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <span>Fire & Building Evacuation</span>
+                <i class="fa-solid fa-chevron-down accordion-icon-toggle"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="prep-grid">
+                  <div class="prep-box">
+                    <h4 class="prep-box-title do">Immediate Actions</h4>
+                    <ul class="prep-list">
+                      <li>Call 101 immediately and raise fire alarm.</li>
+                      <li>Crawl low under smoke to reach the nearest safe exit.</li>
+                      <li>Close doors behind you to confine the fire.</li>
+                    </ul>
+                  </div>
+                  <div class="prep-box">
+                    <h4 class="prep-box-title dont">Things to Avoid</h4>
+                    <ul class="prep-list">
+                      <li>Never use elevators during a fire evacuation.</li>
+                      <li>Do not attempt to re-enter a burning structure.</li>
+                      <li>Do not use water on electrical or grease fires.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Earthquake -->
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <span>Earthquake Protocols</span>
+                <i class="fa-solid fa-chevron-down accordion-icon-toggle"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="prep-grid">
+                  <div class="prep-box">
+                    <h4 class="prep-box-title do">Immediate Actions</h4>
+                    <ul class="prep-list">
+                      <li>Drop, Cover, and Hold On under sturdy furniture.</li>
+                      <li>If outdoors, stay in an open area away from buildings.</li>
+                      <li>Protect your head and neck with your arms.</li>
+                    </ul>
+                  </div>
+                  <div class="prep-box">
+                    <h4 class="prep-box-title dont">Things to Avoid</h4>
+                    <ul class="prep-list">
+                      <li>Do not rush for staircases or exit doors while shaking.</li>
+                      <li>Avoid standing near glass windows or heavy shelves.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cyclone -->
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <span>Cyclone & Storm Preparedness</span>
+                <i class="fa-solid fa-chevron-down accordion-icon-toggle"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="prep-grid">
+                  <div class="prep-box">
+                    <h4 class="prep-box-title do">Immediate Actions</h4>
+                    <ul class="prep-list">
+                      <li>Secure loose roof sheets and window shutters.</li>
+                      <li>Keep battery-powered radio and emergency lights ready.</li>
+                    </ul>
+                  </div>
+                  <div class="prep-box">
+                    <h4 class="prep-box-title dont">Things to Avoid</h4>
+                    <ul class="prep-list">
+                      <li>Do not venture outside during the eye of the storm.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEDICAL FIRST-AID INFORMATION -->
+      <section class="emergency-section emergency-section-alt">
+        <div class="emergency-section-inner">
+          <div class="emergency-section-header">
+            <h2 class="emergency-section-title">Medical First-Aid Reference</h2>
+            <p class="emergency-section-desc">Basic emergency reference instructions while awaiting medical response.</p>
+          </div>
+
+          <div class="medical-ref-grid">
+            <div class="medical-ref-card">
+              <h3 class="medical-ref-title"><i class="fa-solid fa-heart-pulse" style="color: var(--emergency-red);"></i> CPR Basics</h3>
+              <p class="medical-ref-desc">Push hard and fast in the center of the chest (100–120 compressions per minute) until medical help arrives.</p>
+            </div>
+
+            <div class="medical-ref-card">
+              <h3 class="medical-ref-title"><i class="fa-solid fa-droplet" style="color: var(--emergency-red);"></i> Severe Bleeding</h3>
+              <p class="medical-ref-desc">Apply firm, continuous direct pressure using a clean cloth or bandage. Elevate the wounded limb above heart level.</p>
+            </div>
+
+            <div class="medical-ref-card">
+              <h3 class="medical-ref-title"><i class="fa-solid fa-fire" style="color: var(--gov-orange);"></i> Burns Care</h3>
+              <p class="medical-ref-desc">Cool the burn with cool running water for at least 10 minutes. Cover loosely with a clean, dry sterile bandage.</p>
+            </div>
+
+            <div class="medical-ref-card">
+              <h3 class="medical-ref-title"><i class="fa-solid fa-bone" style="color: var(--gov-blue);"></i> Fractures</h3>
+              <p class="medical-ref-desc">Immobilize the injured area. Do not attempt to realign broken bones or force movement.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer style="background: var(--text-dark); color: #94a3b8; padding: 2.5rem 2rem; border-top: 1px solid #334155; font-size: 0.85rem;">
+        <div style="max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
+          <div>
+            <strong style="color: #ffffff; font-size: 1rem;">CrowdCity AI v3.0 Emergency Services Center</strong>
+            <p style="margin: 0.35rem 0 0 0; color: #64748b;">Government of Tamil Nadu Emergency Integration Unit.</p>
+          </div>
+          <div>
+            <span>For Life-Threatening Emergencies, Always Call <strong>112</strong> or <strong>108</strong> Directly.</span>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Leaflet Map JS Library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Global Application Auth & i18n Scripts -->
+  <script src="js/i18n.js"></script>
+  <script src="js/auth.js"></script>
+
+  <!-- Dedicated Emergency Services Modules -->
+  <script src="js/EmergencyLocation.js"></script>
+  <script src="js/EmergencySearch.js"></script>
+  <script src="js/EmergencyMap.js"></script>
+  <script src="js/EmergencyContacts.js"></script>
+  <script src="js/emergency-services.js"></script>
+
+</body>
+</html>
