@@ -84,14 +84,9 @@ window.EmergencyContacts = {
           </span>
         </td>
         <td>
-          <div class="table-action-btns">
-            <a href="tel:${item.number}" class="btn-table-call">
-              <i class="fa-solid fa-phone"></i> Call ${item.number}
-            </a>
-            <button class="btn-table-copy" onclick="EmergencyContacts.copyNumber('${item.number}', '${item.service}')">
-              <i class="fa-regular fa-copy"></i> Copy
-            </button>
-          </div>
+          <a href="tel:${item.number}" class="btn-table-call">
+            <i class="fa-solid fa-phone"></i> Call ${item.number}
+          </a>
         </td>
       </tr>
     `).join('');
