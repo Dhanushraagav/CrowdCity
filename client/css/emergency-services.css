@@ -101,8 +101,10 @@ body.emergency-body .emergency-page-container {
 }
 
 .emergency-hero-content {
-  max-width: 1000px;
-  margin: 0 auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .emergency-hero-title {
@@ -183,9 +185,10 @@ body.emergency-body .emergency-page-container {
 }
 
 .emergency-section-inner {
-  width: 100%;
-  max-width: 1300px;
-  margin: 0 auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .emergency-section-header {
@@ -209,8 +212,9 @@ body.emergency-body .emergency-page-container {
 /* Quick Actions Grid */
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.25rem;
+  width: 100%;
 }
 
 .quick-action-card {
