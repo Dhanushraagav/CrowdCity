@@ -213,10 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
       : allResponders.filter(r => r.type === activeCategory);
 
     if (filtered.length === 0) {
+      const categoryLabel = activeCategory === 'hospital' ? 'hospitals' : activeCategory === 'police' ? 'police stations' : activeCategory === 'fire' ? 'fire stations' : 'emergency services';
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">
-          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; color: #f59e0b;"></i>
-          No emergency ${activeCategory} locations found nearby. Call <strong>112</strong> for immediate dispatch.
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <i class="fa-solid fa-circle-info" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; color: var(--text-muted);"></i>
+          <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.25rem;">No nearby ${categoryLabel} found.</div>
+          <div style="font-size: 0.82rem; color: var(--text-muted);">For immediate assistance call <strong style="color: var(--sos-red);">112</strong>.</div>
         </div>
       `;
       return;
@@ -286,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     shareBtn.addEventListener('click', async () => {
       const mapsUrl = `https://maps.google.com/?q=${currentLat},${currentLng}`;
       const shareData = {
-        title: '🚨 Emergency SOS Location Alert',
+        title: 'Emergency SOS Location Alert',
         text: `EMERGENCY ALERT: I need assistance. My current GPS location coordinates: ${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`,
         url: mapsUrl
       };

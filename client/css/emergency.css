@@ -1,184 +1,190 @@
-/* CrowdCity AI v2.5 - Emergency SOS Hub Styling */
+/* CrowdCity AI v2.5 - Emergency SOS Hub Styling (Government-Grade Refinement) */
 
 :root {
-  --sos-red: #ef4444;
-  --sos-red-dark: #dc2626;
-  --sos-red-light: rgba(239, 68, 68, 0.12);
-  --police-blue: #2563eb;
-  --police-blue-light: rgba(37, 99, 235, 0.12);
-  --fire-orange: #f97316;
-  --fire-orange-light: rgba(249, 115, 22, 0.12);
-  --medical-green: #10b981;
-  --medical-green-light: rgba(16, 185, 129, 0.12);
+  --sos-red: #dc2626;
+  --sos-red-hover: #b91c1c;
+  --sos-red-light: rgba(220, 38, 38, 0.08);
+  --police-blue: #1d4ed8;
+  --fire-orange: #ea580c;
+  --medical-green: #059669;
 }
 
-/* Quick Emergency Bar */
+/* Header Offset & Compact Banner */
 .sos-header-banner {
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  background: var(--sos-red);
   color: #ffffff;
-  padding: 1.25rem 1rem;
-  border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
-  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.4);
-  position: relative;
-  overflow: hidden;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-.sos-pulse-ring {
-  position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  animation: sosPulse 2s infinite ease-out;
+.sos-header-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--font-heading);
+  letter-spacing: -0.2px;
 }
 
-@keyframes sosPulse {
-  0% { transform: scale(0.8); opacity: 0.8; }
-  100% { transform: scale(1.6); opacity: 0; }
+.sos-header-subtitle {
+  font-size: 0.85rem;
+  margin: 0.2rem 0 0 0;
+  opacity: 0.92;
 }
 
-/* One-Tap Emergency Grid */
+.gps-badge {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Emergency Number Cards Grid (Mobile 2 columns, Desktop 6 columns) */
 .quick-sos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 0.85rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .quick-sos-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
 
 .quick-sos-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 1rem 0.75rem;
+  padding: 0.85rem 0.6rem;
   text-align: center;
   text-decoration: none;
   color: var(--text-main);
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.25rem;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .quick-sos-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.quick-sos-card.police { border-top: 4px solid var(--police-blue); }
-.quick-sos-card.police .sos-icon { color: var(--police-blue); background: var(--police-blue-light); }
-
-.quick-sos-card.fire { border-top: 4px solid var(--fire-orange); }
-.quick-sos-card.fire .sos-icon { color: var(--fire-orange); background: var(--fire-orange-light); }
-
-.quick-sos-card.ambulance { border-top: 4px solid var(--sos-red); }
-.quick-sos-card.ambulance .sos-icon { color: var(--sos-red); background: var(--sos-red-light); }
-
-.quick-sos-card.women { border-top: 4px solid #ec4899; }
-.quick-sos-card.women .sos-icon { color: #ec4899; background: rgba(236, 72, 153, 0.12); }
-
-.quick-sos-card.national { border-top: 4px solid var(--primary); }
-.quick-sos-card.national .sos-icon { color: var(--primary); background: rgba(13, 148, 136, 0.12); }
-
-.sos-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
+  border-color: var(--sos-red);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .sos-number {
-  font-size: 1.3rem;
-  font-weight: 900;
-  line-height: 1;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
   color: var(--text-main);
 }
 
 .sos-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
-/* Share GPS Card */
+.btn-sos-call {
+  margin-top: 0.35rem;
+  width: 100%;
+  padding: 0.3rem 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 6px;
+  background: var(--sos-red-light);
+  color: var(--sos-red);
+  border: none;
+  cursor: pointer;
+}
+
+/* Share GPS Section */
 .share-location-card {
-  background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%);
-  border: 1px dashed var(--primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Emergency Map Styling */
+/* Segmented Control Category Tabs */
+.segmented-control {
+  display: inline-flex;
+  background: var(--bg-app);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.segmented-btn {
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.segmented-btn.active {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Map Section */
 .emergency-map-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 #emergency-map {
   width: 100%;
-  height: 380px;
-  border-radius: var(--radius-md);
+  height: 420px;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
   z-index: 1;
 }
 
-/* Category Nav Filter Pills */
-.responder-category-tabs {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-  scrollbar-width: none;
-}
-.responder-category-tabs::-webkit-scrollbar { display: none; }
-
-.category-pill {
-  padding: 0.5rem 1.1rem;
-  border-radius: 20px;
-  background: var(--bg-app);
-  border: 1px solid var(--border-color);
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.category-pill.active {
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
-}
-
-/* Nearby Responders Cards List */
+/* Responders Grid (Mobile 1 column, Desktop 3 columns) */
 .responders-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .responders-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .responder-card {
@@ -190,33 +196,8 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 0.75rem;
-  transition: border-color 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
-
-.responder-card:hover {
-  border-color: var(--primary);
-}
-
-.responder-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.responder-badge-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-
-.responder-badge-icon.hospital { background: var(--sos-red-light); color: var(--sos-red); }
-.responder-badge-icon.police { background: var(--police-blue-light); color: var(--police-blue); }
-.responder-badge-icon.fire { background: var(--fire-orange-light); color: var(--fire-orange); }
 
 .responder-actions {
   display: flex;
@@ -225,10 +206,10 @@
 
 .responder-actions .btn {
   flex: 1;
-  padding: 0.45rem 0.75rem;
+  padding: 0.45rem 0.5rem;
   font-size: 0.78rem;
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,87 +217,86 @@
   text-decoration: none;
 }
 
-/* Emergency Safety Tips Accordion */
+/* Safety Guides Accordions */
 .safety-tips-section {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.safety-category-nav {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.75rem;
+.accordion-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+  background: var(--bg-surface);
 }
 
-.safety-tab-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 0.85rem;
+.accordion-item summary {
+  padding: 0.85rem 1rem;
   font-weight: 700;
-  padding: 0.4rem 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-main);
   cursor: pointer;
-  border-radius: 6px;
-  white-space: nowrap;
-  transition: all 0.2s;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  background: var(--bg-app);
 }
 
-.safety-tab-btn.active {
-  background: var(--primary-light);
-  color: var(--primary);
+.accordion-item summary::-webkit-details-marker {
+  display: none;
 }
 
-.safety-guide-content {
+.accordion-content {
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 
 .safety-phase-box {
   background: var(--bg-app);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1rem;
+  border-radius: 6px;
+  padding: 0.85rem;
 }
 
 .safety-phase-title {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
-  margin-bottom: 0.6rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.4px;
 }
 
-.safety-phase-title.before { color: #f59e0b; }
-.safety-phase-title.during { color: #ef4444; }
-.safety-phase-title.after { color: #10b981; }
+.safety-phase-title.before { color: #d97706; }
+.safety-phase-title.during { color: #dc2626; }
+.safety-phase-title.after { color: #059669; }
 
 .safety-list {
   padding-left: 1.1rem;
   margin: 0;
   font-size: 0.82rem;
   color: var(--text-main);
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .safety-list li {
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
 }
 
-/* Skeleton Shimmer Loaders */
+/* Skeleton Loaders */
 .skeleton-card {
   background: linear-gradient(90deg, var(--bg-app) 25%, var(--border-color) 50%, var(--bg-app) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: var(--radius-md);
-  height: 110px;
+  border-radius: 8px;
+  height: 100px;
 }
 
 @keyframes shimmer {

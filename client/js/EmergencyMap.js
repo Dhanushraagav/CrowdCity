@@ -104,8 +104,7 @@ window.EmergencyMap = (function() {
         iconAnchor: [16, 16]
       });
 
-      userMarker = L.marker([lat, lng], { icon }).addTo(mapInstance);
-      userMarker.bindPopup('<strong style="font-size: 0.9rem;">📍 Your Current Location</strong>');
+      userMarker.bindPopup('<strong style="font-size: 0.88rem;"><i class="fa-solid fa-location-crosshairs" style="color: #2563eb;"></i> Your Current Location</strong>');
     }
   }
 

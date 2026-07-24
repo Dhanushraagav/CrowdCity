@@ -147,7 +147,7 @@ window.EmergencyService = (function() {
         );
 
         const address = [tags['addr:street'], tags['addr:suburb'], tags['addr:city']]
-          .filter(Boolean).join(', ') || 'Address details available on map';
+          .filter(Boolean).join(', ') || 'Address unavailable';
 
         const phone = tags.phone || tags['contact:phone'] || (
           type === 'hospital' ? '108' :
