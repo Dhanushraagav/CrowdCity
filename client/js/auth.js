@@ -1887,68 +1887,12 @@ window.addEventListener('click', (e) => {
 
 // Mobile navbar toggle support
 function initHeaderClock() {
-  const dateEl = document.getElementById('widget-date');
-  const timeEl = document.getElementById('widget-time');
-  if (!dateEl || !timeEl) return;
-
-  // Clear any existing clock interval to prevent conflicting multiple timers when language is toggled
   if (window.headerClockInterval) {
     clearInterval(window.headerClockInterval);
     window.headerClockInterval = null;
   }
-
-  function updateClock() {
-    const now = new Date();
-    
-    const days = [
-      window.i18n ? window.i18n.t('day_0') : "Sunday",
-      window.i18n ? window.i18n.t('day_1') : "Monday",
-      window.i18n ? window.i18n.t('day_2') : "Tuesday",
-      window.i18n ? window.i18n.t('day_3') : "Wednesday",
-      window.i18n ? window.i18n.t('day_4') : "Thursday",
-      window.i18n ? window.i18n.t('day_5') : "Friday",
-      window.i18n ? window.i18n.t('day_6') : "Saturday"
-    ];
-
-    const months = [
-      window.i18n ? window.i18n.t('month_0') : "January",
-      window.i18n ? window.i18n.t('month_1') : "February",
-      window.i18n ? window.i18n.t('month_2') : "March",
-      window.i18n ? window.i18n.t('month_3') : "April",
-      window.i18n ? window.i18n.t('month_4') : "May",
-      window.i18n ? window.i18n.t('month_5') : "June",
-      window.i18n ? window.i18n.t('month_6') : "July",
-      window.i18n ? window.i18n.t('month_7') : "August",
-      window.i18n ? window.i18n.t('month_8') : "September",
-      window.i18n ? window.i18n.t('month_9') : "October",
-      window.i18n ? window.i18n.t('month_10') : "November",
-      window.i18n ? window.i18n.t('month_11') : "December"
-    ];
-
-    // Format Date: Sunday, 14 June 2026
-    const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    
-    // Format Time: 10:25:31 AM
-    let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const timeStr = `${hours}:${minutes}:${seconds} ${ampm}`;
-
-    if (timeEl.textContent !== timeStr) {
-      timeEl.style.opacity = '0.5';
-      setTimeout(() => {
-        dateEl.textContent = dateStr;
-        timeEl.textContent = timeStr;
-        timeEl.style.opacity = '1';
-      }, 100);
-    }
-  }
-
-  updateClock();
-  window.headerClockInterval = setInterval(updateClock, 1000);
+  const widget = document.getElementById('header-datetime-widget');
+  if (widget) widget.remove();
 }
 
 function initAuthModule() {

@@ -1614,17 +1614,8 @@
   // LIVE CLOCK WIDGET
   // ----------------------------------------------------
   function initLiveClock() {
-    const dateEl = document.getElementById('widget-date');
-    const timeEl = document.getElementById('widget-time');
-    if (!dateEl || !timeEl) return;
-
-    function tick() {
-      const now = new Date();
-      dateEl.textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-      timeEl.textContent = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    }
-    tick();
-    setInterval(tick, 1000);
+    const widget = document.getElementById('header-datetime-widget');
+    if (widget) widget.remove();
   }
 
   // ----------------------------------------------------
