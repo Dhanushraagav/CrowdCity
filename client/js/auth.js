@@ -1557,6 +1557,14 @@ function updateAuthUI() {
     const header = document.querySelector('.topnav, .app-header-main, .app-header');
     if (!header) return;
 
+    // Remove loose stray notification buttons placed outside auth-nav-container
+    const strayBellBtns = header.querySelectorAll('.notification-btn, #notification-btn');
+    strayBellBtns.forEach(btn => {
+      if (!btn.closest('#auth-nav-container')) {
+        btn.remove();
+      }
+    });
+
     let linksContainer = header.querySelector('.topnav-links');
     if (!linksContainer) {
       linksContainer = document.createElement('div');

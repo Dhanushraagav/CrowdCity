@@ -1591,9 +1591,10 @@ body:not(.admin-portal-body) .page-inner {
 .topnav-links {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  margin-left: 1.5rem;
-  margin-right: auto;
+  margin: 0 auto;
+  flex: 1;
   padding: 0;
   background: transparent !important;
   border: none !important;
