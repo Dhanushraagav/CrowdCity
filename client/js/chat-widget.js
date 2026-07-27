@@ -8,26 +8,25 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
+      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+      border: 2px solid #ffffff;
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.35rem;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 24px rgba(13, 148, 136, 0.45);
       z-index: 9999;
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, opacity 0.2s ease;
     }
 
     #cc-chat-trigger:hover {
-      transform: scale(1.05);
-      border-color: var(--primary);
-      background: var(--bg-surface-hover);
+      transform: scale(1.08);
+      box-shadow: 0 8px 30px rgba(13, 148, 136, 0.6);
     }
 
     #cc-chat-trigger.active {
@@ -40,18 +39,88 @@
 
     /* Pulse Animation */
     #cc-chat-trigger.pulse {
-      animation: cc-trigger-pulse 2s infinite;
+      animation: cc-trigger-pulse 2.5s infinite;
     }
 
     @keyframes cc-trigger-pulse {
       0% {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(79, 70, 229, 0.45);
+        box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4), 0 0 0 0 rgba(13, 148, 136, 0.5);
       }
       70% {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 12px rgba(79, 70, 229, 0);
+        box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4), 0 0 0 14px rgba(13, 148, 136, 0);
       }
       100% {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(79, 70, 229, 0);
+        box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4), 0 0 0 0 rgba(13, 148, 136, 0);
+      }
+    }
+
+    /* Floating Callout Popup Bubble for High Visibility */
+    #cc-chat-callout {
+      position: fixed;
+      bottom: 86px;
+      right: 24px;
+      background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
+      color: #ffffff;
+      padding: 0.6rem 0.95rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.45), 0 4px 10px rgba(0, 0, 0, 0.12);
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      animation: cc-callout-bounce 3s infinite ease-in-out;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    #cc-chat-callout:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 14px 30px -4px rgba(13, 148, 136, 0.55);
+    }
+
+    #cc-chat-callout::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      right: 20px;
+      width: 12px;
+      height: 12px;
+      background: #0284c7;
+      transform: rotate(45deg);
+      border-radius: 2px;
+    }
+
+    .cc-callout-close {
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      color: #ffffff;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      cursor: pointer;
+      margin-left: 0.2rem;
+      transition: background 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .cc-callout-close:hover {
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    @keyframes cc-callout-bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-6px);
       }
     }
 
@@ -483,6 +552,29 @@
     triggerBtn.addEventListener('click', toggleChatWindow);
     document.body.appendChild(triggerBtn);
 
+    // 2.5 Create AI Callout Popup Bubble
+    const calloutEl = document.createElement('div');
+    calloutEl.id = 'cc-chat-callout';
+    calloutEl.innerHTML = `
+      <i class="fa-solid fa-robot" style="font-size: 1.15rem; color: #fbbf24;"></i>
+      <span>Need Help? Chat with AI!</span>
+      <button type="button" class="cc-callout-close" aria-label="Dismiss">&times;</button>
+    `;
+
+    calloutEl.addEventListener('click', (e) => {
+      if (e.target.classList.contains('cc-callout-close')) {
+        e.stopPropagation();
+        calloutEl.style.display = 'none';
+        localStorage.setItem('cc_callout_dismissed', 'true');
+        return;
+      }
+      toggleChatWindow();
+    });
+
+    if (!localStorage.getItem('cc_callout_dismissed')) {
+      document.body.appendChild(calloutEl);
+    }
+
     // 3. Create Chat Drawer
     const chatWindow = document.createElement('div');
     chatWindow.id = 'cc-chat-window';
@@ -630,6 +722,13 @@
 
     if (chatWin.classList.contains('open')) {
       trigger.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+      
+      const callout = document.getElementById('cc-chat-callout');
+      if (callout) {
+        callout.style.display = 'none';
+        localStorage.setItem('cc_callout_dismissed', 'true');
+      }
+
       // Auto-focus input box with slight timeout to let slide-up animate smoothly
       const input = document.getElementById('cc-chat-input-box');
       if (input) {
