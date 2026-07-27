@@ -2078,21 +2078,23 @@ body:not(.admin-portal-body) .page-inner {
 }
 
 /* ==========================================================================
-   CrowdCity AI v3.4 - Ultra-Premium Permanent Sidebar System
+   CrowdCity AI v3.5 - Ultra-Premium Floating Sidebar System
    ========================================================================== */
 
 body:not(.admin-portal-body) .app-sidebar {
   width: 280px;
   background: var(--bg-surface, #ffffff);
-  border-right: 1px solid var(--border-color, #e2e8f0);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   padding: 1.25rem 0.85rem;
   flex-shrink: 0;
-  height: 100vh;
+  height: calc(100vh - 2rem);
   position: sticky;
-  top: 0;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+  top: 1rem;
+  margin: 1rem 0 1rem 1rem;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.03);
   transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 1000;
   user-select: none;
@@ -2100,6 +2102,34 @@ body:not(.admin-portal-body) .app-sidebar {
 
 body:not(.admin-portal-body) .app-sidebar.collapsed {
   width: 72px;
+}
+
+.brand-emblems-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.brand-emblem-tn {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.sidebar-group-header {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.85rem 0.85rem 0.35rem 0.85rem;
+  transition: opacity 0.2s ease;
+}
+
+body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
+  opacity: 0;
+  display: none;
 }
 
 .sidebar-header {
@@ -2238,9 +2268,15 @@ body:not(.admin-portal-body) .app-sidebar.collapsed {
 }
 
 .app-sidebar-link.active {
-  color: var(--primary, #0d9488) !important;
-  background-color: rgba(13, 148, 136, 0.1) !important;
+  color: #ffffff !important;
+  background-color: var(--primary, #0d9488) !important;
   font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+}
+
+.app-sidebar-link.active i {
+  color: #ffffff !important;
 }
 
 .app-sidebar-link.active::before {
@@ -2250,7 +2286,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed {
   top: 15%;
   height: 70%;
   width: 3px;
-  background: var(--primary, #0d9488);
+  background: #ffffff;
   border-radius: 0 4px 4px 0;
 }
 
