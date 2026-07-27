@@ -1834,12 +1834,6 @@ function updateAuthUI() {
 
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
-        <!-- Services App Launcher Button -->
-        <button class="app-launcher-btn" id="app-launcher-btn" onclick="toggleAppLauncher(event)" aria-label="Services App Launcher">
-          <i class="fa-solid fa-grip"></i>
-          <span>Services</span>
-        </button>
-
         <!-- Notification Bell Container -->
         <div class="notification-bell-wrapper" id="bell-wrapper">
           <button class="bell-btn" id="bell-btn" aria-label="${tNotifications}" onclick="toggleNotificationDropdown(event)">
