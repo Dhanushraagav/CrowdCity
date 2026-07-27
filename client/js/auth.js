@@ -1644,15 +1644,6 @@ function updateAuthUI() {
           <i class="fa-solid fa-user-tie"></i> <span>Council of Ministers</span>
         </a>
       </nav>
-
-      <!-- TN State Helpline Card -->
-      <div class="sidebar-helpline-card" style="margin: 1.25rem 0.75rem 1rem 0.75rem; padding: 0.9rem 1rem; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 16px;">
-        <div style="color: #c2410c; font-weight: 800; display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">
-          <i class="fa-solid fa-phone" style="font-size: 0.75rem;"></i> <span>TN STATE HELPLINE</span>
-        </div>
-        <div style="font-size: 1.4rem; font-weight: 800; color: #9a3412; margin: 0.3rem 0 0.2rem 0; line-height: 1;">1913</div>
-        <div style="color: #9a3412; font-size: 0.75rem; font-weight: 600;">Municipal Corporation Support</div>
-      </div>
     `;
   };
 
