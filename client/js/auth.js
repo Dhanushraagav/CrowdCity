@@ -1828,18 +1828,8 @@ function updateAuthUI() {
     const tSettings = window.i18n ? window.i18n.t('nav_settings') : 'Settings';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
 
-    const currentLang = (window.i18n && window.i18n.currentLang) || localStorage.getItem('cc_language') || 'en';
-
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
-        <!-- Language Switcher -->
-        <div class="lang-switcher-header">
-          <i class="fa-solid fa-globe"></i>
-          <button type="button" onclick="window.i18n && window.i18n.setLanguage('en')" class="lang-btn ${currentLang === 'en' ? 'active' : ''}">EN</button>
-          <span class="lang-sep">|</span>
-          <button type="button" onclick="window.i18n && window.i18n.setLanguage('ta')" class="lang-btn ${currentLang === 'ta' ? 'active' : ''}">தமிழ்</button>
-        </div>
-
         <!-- Services App Launcher Button -->
         <button class="app-launcher-btn" id="app-launcher-btn" onclick="toggleAppLauncher(event)" aria-label="Services App Launcher">
           <i class="fa-solid fa-grip"></i>

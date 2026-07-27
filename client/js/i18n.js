@@ -161,38 +161,42 @@ class I18nService {
       .lang-toggle {
         display: inline-flex;
         align-items: center;
-        font-family: var(--font-heading, system-ui, -apple-system, sans-serif);
-        font-size: 0.85rem;
-        color: var(--text-muted, #94a3b8);
-        margin-right: 0.75rem;
+        gap: 0.35rem;
+        font-family: inherit;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-muted, #64748b);
+        background: var(--bg-surface-hover, #f8fafc);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 10px;
+        padding: 0.42rem 0.75rem;
+        height: 38px;
+        box-sizing: border-box;
         user-select: none;
       }
       .lang-globe-icon {
-        margin-right: 6px;
-        font-size: 0.95rem;
-        color: var(--text-muted, #94a3b8);
+        font-size: 0.85rem;
+        color: var(--text-muted, #64748b);
       }
       .lang-option {
         cursor: pointer;
-        opacity: 0.65;
+        opacity: 0.7;
         transition: opacity 0.15s ease, color 0.15s ease;
-        font-weight: 600;
-        padding: 2px 4px;
-        border-radius: var(--radius-sm, 4px);
+        font-weight: 700;
+        padding: 0 2px;
       }
       .lang-option:hover {
-        opacity: 0.9;
-        color: var(--text-main, #f8fafc);
-        background-color: var(--bg-surface-hover, rgba(255,255,255,0.05));
+        opacity: 1;
+        color: var(--primary, #0d9488);
       }
       .lang-option.active {
         opacity: 1;
-        color: var(--primary, #10b981) !important;
-        font-weight: 700;
+        color: var(--primary, #0d9488) !important;
+        font-weight: 800;
       }
       .lang-separator {
         opacity: 0.3;
-        margin: 0 4px;
+        margin: 0 2px;
       }
       .lang-toggle-fixed {
         position: fixed;
@@ -202,7 +206,7 @@ class I18nService {
         background-color: var(--bg-surface, #1e293b);
         border: 1px solid var(--border-color, #334155);
         padding: 0.4rem 0.75rem;
-        border-radius: var(--radius-md, 6px);
+        border-radius: 10px;
         box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
         margin-right: 0 !important;
       }
