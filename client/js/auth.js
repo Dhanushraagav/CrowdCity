@@ -1604,28 +1604,11 @@ function updateAuthUI() {
     const isServices = path.includes('services.html') || (path.includes('services') && !isEmergency);
     const isHelplines = path.includes('helplines.html');
     const isMinisters = path.includes('ministers.html');
-    const isDocuments = path.includes('documents');
-    const isNotifications = path.includes('notifications.html');
-    const isProfile = path.includes('profile.html');
-    const isSettings = path.includes('settings.html');
 
-    // Default collapsed state on desktop, expands smoothly on hover
-    if (window.innerWidth >= 1024) {
-      sidebar.classList.add('collapsed');
-      sidebar.classList.remove('expanded');
-    }
-
-    sidebar.onmouseenter = () => {
-      if (window.innerWidth >= 1024) {
-        sidebar.classList.add('expanded');
-      }
-    };
-
-    sidebar.onmouseleave = () => {
-      if (window.innerWidth >= 1024) {
-        sidebar.classList.remove('expanded');
-      }
-    };
+    // Sidebar remains PERMANENTLY EXPANDED (No auto-collapse / hover-expand)
+    sidebar.classList.remove('collapsed', 'expanded');
+    sidebar.onmouseenter = null;
+    sidebar.onmouseleave = null;
 
     sidebar.innerHTML = `
       <div class="sidebar-header">
@@ -1647,9 +1630,6 @@ function updateAuthUI() {
         <a href="citizen-dashboard.html" class="app-sidebar-link ${isDashboard ? 'active' : ''}" title="Dashboard">
           <i class="fa-solid fa-house-chimney"></i> <span>Dashboard</span>
         </a>
-        <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
-          <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>
-        </a>
         <a href="report.html" class="app-sidebar-link ${isReport ? 'active' : ''}" title="Report Issue">
           <i class="fa-solid fa-triangle-exclamation"></i> <span>Report Issue</span>
         </a>
@@ -1658,6 +1638,9 @@ function updateAuthUI() {
         </a>
         <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
           <i class="fa-solid fa-map-location-dot"></i> <span>Map</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
+          <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>
         </a>
         <a href="emergency-services.html" class="app-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
           <i class="fa-solid fa-truck-medical"></i> <span>Emergency Help Center</span>
@@ -1668,25 +1651,7 @@ function updateAuthUI() {
         <a href="ministers.html" class="app-sidebar-link ${isMinisters ? 'active' : ''}" title="Council of Ministers">
           <i class="fa-solid fa-user-tie"></i> <span>Council of Ministers</span>
         </a>
-        <a href="my-documents.html" class="app-sidebar-link ${isDocuments ? 'active' : ''}" title="Documents">
-          <i class="fa-solid fa-file-contract"></i> <span>Documents</span>
-        </a>
-        <a href="notifications.html" class="app-sidebar-link ${isNotifications ? 'active' : ''}" title="Notifications">
-          <i class="fa-regular fa-bell"></i> <span>Notifications</span>
-        </a>
-        <a href="profile.html" class="app-sidebar-link ${isProfile ? 'active' : ''}" title="Profile">
-          <i class="fa-regular fa-user"></i> <span>Profile</span>
-        </a>
-        <a href="settings.html" class="app-sidebar-link ${isSettings ? 'active' : ''}" title="Settings">
-          <i class="fa-solid fa-gear"></i> <span>Settings</span>
-        </a>
       </nav>
-
-      <div class="app-sidebar-footer">
-        <button onclick="logoutUser()" class="app-sidebar-link logout-link" title="Logout">
-          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
-        </button>
-      </div>
     `;
   };
 
@@ -1910,19 +1875,26 @@ function updateAuthUI() {
           <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
           
           <!-- Dropdown Menu -->
-          <div id="user-dropdown" class="hidden" style="position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); width: 170px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 1100;">
+          <div id="user-dropdown" class="hidden" style="position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); width: 180px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 1100;">
             <div style="font-size: 0.75rem; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
               ${roleDisplayHtml}
             </div>
             <a href="profile.html" class="nav-dropdown-item">
-              <i class="fa-regular fa-user" style="width: 16px; color: var(--text-muted);"></i> ${tProfile}
+              <i class="fa-regular fa-user" style="width: 16px; color: var(--text-muted);"></i> My Profile
             </a>
             <a href="notifications.html" class="nav-dropdown-item">
-              <i class="fa-regular fa-bell" style="width: 16px; color: var(--text-muted);"></i> ${tNotifications}
+              <i class="fa-regular fa-bell" style="width: 16px; color: var(--text-muted);"></i> Notifications
+            </a>
+            <a href="my-documents.html" class="nav-dropdown-item">
+              <i class="fa-solid fa-file-contract" style="width: 16px; color: var(--text-muted);"></i> Documents
             </a>
             <a href="settings.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> ${tSettings}
+              <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> Settings
             </a>
+            <div style="border-top: 1px solid var(--border-color); margin: 0.15rem 0;"></div>
+            <button onclick="logoutUser()" class="nav-dropdown-item btn-logout" style="width: 100%; text-align: left; background: none; border: none; padding: 0.4rem 0.5rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+              <i class="fa-solid fa-right-from-bracket" style="width: 16px; color: #ef4444;"></i> Logout
+            </button>
           </div>
         </div>
       </div>
