@@ -596,7 +596,11 @@
 
     // 2.5 Create Civic Helpdesk Welcome Popup — shows after auth loads
     function showCivicHelpPopup() {
-      if (sessionStorage.getItem('cc_callout_dismissed')) return;
+      // Clear any stale old localStorage key from previous versions
+      localStorage.removeItem('cc_callout_dismissed');
+
+      // If already dismissed this session or already visible, skip
+      if (sessionStorage.getItem('cc_callout_dismissed_v2')) return;
       if (document.getElementById('cc-chat-callout')) return;
 
       // Get logged-in user name
@@ -629,10 +633,11 @@
 
       calloutEl.querySelector('.cc-callout-close').addEventListener('click', (e) => {
         e.stopPropagation();
+        calloutEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         calloutEl.style.opacity = '0';
         calloutEl.style.transform = 'translateY(10px)';
-        setTimeout(() => { calloutEl.style.display = 'none'; }, 300);
-        sessionStorage.setItem('cc_callout_dismissed', 'true');
+        setTimeout(() => { if (calloutEl.parentNode) calloutEl.parentNode.removeChild(calloutEl); }, 350);
+        sessionStorage.setItem('cc_callout_dismissed_v2', 'true');
       });
 
       calloutEl.querySelector('.cc-callout-action').addEventListener('click', () => {
@@ -640,10 +645,11 @@
       });
 
       document.body.appendChild(calloutEl);
+      console.log('[ChatWidget] Civic Helpdesk popup shown for:', userName);
     }
 
     // Delay popup to allow auth to finish loading the user session
-    setTimeout(showCivicHelpPopup, 1800);
+    setTimeout(showCivicHelpPopup, 2000);
 
     // 3. Create Chat Drawer
     const chatWindow = document.createElement('div');
@@ -795,10 +801,11 @@
       
       const callout = document.getElementById('cc-chat-callout');
       if (callout) {
+        callout.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         callout.style.opacity = '0';
-        callout.style.transform = 'translateY(10px) scale(0.96)';
-        setTimeout(() => { callout.style.display = 'none'; }, 300);
-        sessionStorage.setItem('cc_callout_dismissed', 'true');
+        callout.style.transform = 'translateY(10px)';
+        setTimeout(() => { if (callout.parentNode) callout.parentNode.removeChild(callout); }, 350);
+        sessionStorage.setItem('cc_callout_dismissed_v2', 'true');
       }
 
       // Auto-focus input box with slight timeout to let slide-up animate smoothly
