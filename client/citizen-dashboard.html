@@ -13,6 +13,7 @@
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=1.0.6"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/app-launcher.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="CrowdCity AI is an AI-powered civic issue reporting platform helping citizens report potholes, garbage, water leaks, and streetlights.">
@@ -179,162 +180,171 @@
           </div>
         </div>
 
-        <!-- Quick Services Dashboard Grid (CITY SERVICES, GOVERNMENT SERVICES, CITIZEN SERVICES) -->
-        <div class="citizen-services-container">
+        <!-- Compact Emergency Banner (Section 6) -->
+        <div class="compact-emergency-banner" style="margin-top: 1.5rem;">
+          <div class="compact-emergency-text">
+            <div class="compact-emergency-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div>
+              <h4 class="compact-emergency-title">Need Emergency Assistance?</h4>
+              <p class="compact-emergency-sub">Access verified 24/7 helplines (112, 108, 100), dispatch teams, and medical guides.</p>
+            </div>
+          </div>
+          <a href="emergency-services.html" class="btn-compact-emergency">
+            <i class="fa-solid fa-phone"></i> Open Emergency Help Center
+          </a>
+        </div>
+
+        <!-- Dashboard Main Sections Wrapper -->
+        <div class="dash-sections-wrapper">
           
-          <!-- CITY SERVICES -->
-          <div class="service-category-block">
-            <div class="service-category-header">
-              <h3 class="service-category-title">City Services</h3>
+          <!-- SECTION 1 & 2: Recent Complaint Activity & My Active Complaints -->
+          <div class="dash-two-col">
+            
+            <!-- Section 1: Recent Complaint Activity Feed -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3 class="dash-card-title"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Complaint Activity</h3>
+                <a href="my-complaints.html" class="dash-card-link">View All <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i></a>
+              </div>
+              <div class="activity-list" id="dash-recent-activity-list">
+                <div class="activity-item">
+                  <div class="activity-item-details">
+                    <h4 class="activity-item-title">Pothole Repair on Avinashi Road</h4>
+                    <div class="activity-item-meta">
+                      <span>#CMP-2026-8902</span> &bull; 
+                      <span>Highways Dept</span> &bull; 
+                      <span>2 hrs ago</span>
+                    </div>
+                  </div>
+                  <span class="status-badge-sm badge-progress">In Progress</span>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-item-details">
+                    <h4 class="activity-item-title">Streetlight Failure at RS Puram 4th Street</h4>
+                    <div class="activity-item-meta">
+                      <span>#CMP-2026-8891</span> &bull; 
+                      <span>Electrical Dept</span> &bull; 
+                      <span>5 hrs ago</span>
+                    </div>
+                  </div>
+                  <span class="status-badge-sm badge-pending">Under Review</span>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-item-details">
+                    <h4 class="activity-item-title">Water Pipeline Leakage in Gandhipuram Ward 12</h4>
+                    <div class="activity-item-meta">
+                      <span>#CMP-2026-8874</span> &bull; 
+                      <span>TWAD Board</span> &bull; 
+                      <span>Yesterday</span>
+                    </div>
+                  </div>
+                  <span class="status-badge-sm badge-resolved">Resolved</span>
+                </div>
+              </div>
             </div>
-            <div class="service-grid-4col">
-              <a href="report.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
-                </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Report Issue</h4>
-                  <p class="service-card-desc">Report potholes, broken lights, garbage, and water leaks.</p>
-                </div>
-              </a>
 
-              <a href="my-complaints.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
+            <!-- Section 2: My Active Complaints Summary -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3 class="dash-card-title"><i class="fa-solid fa-list-check" style="color: #2563eb;"></i> My Active Complaints</h3>
+                <a href="my-complaints.html" class="dash-card-link">Track Details</a>
+              </div>
+              <div class="activity-list" id="dash-my-active-list">
+                <div class="activity-item" style="background: #ffffff;">
+                  <div class="activity-item-details">
+                    <h4 class="activity-item-title">Garbage Accumulation near Town Hall</h4>
+                    <div class="activity-item-meta">
+                      <span>Assigned: Ward Inspector R. Kumar</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+                      <i class="fa-regular fa-calendar-check"></i> Expected completion: Tomorrow, 5:00 PM
+                    </div>
+                  </div>
+                  <span class="status-badge-sm badge-progress">In Progress</span>
                 </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Track Complaints</h4>
-                  <p class="service-card-desc">View real-time status and resolution of reported issues.</p>
-                </div>
-              </a>
-
-              <a href="map.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
-                </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">City Map</h4>
-                  <p class="service-card-desc">Interactive map of civic reports and infrastructure.</p>
-                </div>
-              </a>
-
-              <a href="emergency-services.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon" style="color: #dc2626; background: rgba(220, 38, 38, 0.08);"><i class="fa-solid fa-truck-medical"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
-                </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Emergency Help Center</h4>
-                  <p class="service-card-desc">Verified emergency dispatch, numbers, and first-aid.</p>
-                </div>
-              </a>
+              </div>
             </div>
+
           </div>
 
-          <!-- GOVERNMENT SERVICES -->
-          <div class="service-category-block">
-            <div class="service-category-header">
-              <h3 class="service-category-title">Government Services</h3>
+          <!-- SECTION 3 & 5: City Announcements & Government Updates -->
+          <div class="dash-two-col">
+            
+            <!-- Section 3: City Announcements & Bulletins -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3 class="dash-card-title"><i class="fa-solid fa-bullhorn" style="color: #ea580c;"></i> City Announcements & Notices</h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Coimbatore City Corp</span>
+              </div>
+              <div class="announcements-list">
+                <div class="announcement-card" style="border-left-color: #dc2626;">
+                  <h4 class="announcement-title">Road Traffic Diversion on Trichy Road Overbridge</h4>
+                  <p class="announcement-desc">Maintenance works scheduled tonight from 11:00 PM to 5:00 AM. Commuters are advised to use Sungam Bypass route.</p>
+                  <span class="announcement-meta">Traffic Police Advisory &bull; Effective Today</span>
+                </div>
+                <div class="announcement-card" style="border-left-color: #0284c7;">
+                  <h4 class="announcement-title">Scheduled Water Supply Disruption in North Zone</h4>
+                  <p class="announcement-desc">Pilloor pipeline tie-in work in progress. Water supply paused tomorrow for Wards 14-22.</p>
+                  <span class="announcement-meta">Coimbatore Corporation &bull; 1 day notice</span>
+                </div>
+              </div>
             </div>
-            <div class="service-grid-4col">
-              <a href="services.html#schemes" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-building-columns"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
-                </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Welfare Schemes</h4>
-                  <p class="service-card-desc">Check eligibility for Tamil Nadu state welfare schemes.</p>
-                </div>
-              </a>
 
-              <a href="helplines.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-phone-volume"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
+            <!-- Section 5: Government Schemes & Welfare Updates -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3 class="dash-card-title"><i class="fa-solid fa-building-columns" style="color: #7c3aed;"></i> Govt Welfare Updates</h3>
+                <a href="services.html#schemes" class="dash-card-link">Explore Schemes</a>
+              </div>
+              <div class="announcements-list">
+                <div class="announcement-card" style="border-left-color: #7c3aed;">
+                  <h4 class="announcement-title">Kalaignar Magalir Urimai Thittam</h4>
+                  <p class="announcement-desc">Monthly financial assistance for eligible women heads of households. Verification portal open.</p>
+                  <span class="announcement-meta">Social Welfare Dept &bull; Active Scheme</span>
                 </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">District Helplines</h4>
-                  <p class="service-card-desc">Direct contact numbers for collectorates and municipal officers.</p>
+                <div class="announcement-card" style="border-left-color: #059669;">
+                  <h4 class="announcement-title">Chief Minister's Breakfast Scheme Expansion</h4>
+                  <p class="announcement-desc">Extended to all government primary school students across urban civic bodies.</p>
+                  <span class="announcement-meta">School Education Dept &bull; Updated</span>
                 </div>
-              </a>
-
-              <a href="office-locator.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-location-dot"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
-                </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Public Offices</h4>
-                  <p class="service-card-desc">Locate nearby taluk offices, collectorates, and e-Sevai centers.</p>
-                </div>
-              </a>
-
-              <a href="my-documents.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-file-contract"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
-                </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Documents & Certs</h4>
-                  <p class="service-card-desc">Store and verify official state certificates and identity records.</p>
-                </div>
-              </a>
+              </div>
             </div>
+
           </div>
 
-          <!-- CITIZEN SERVICES -->
-          <div class="service-category-block">
-            <div class="service-category-header">
-              <h3 class="service-category-title">Citizen Services</h3>
+          <!-- SECTION 4: Nearby Issues & City Map Link -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3 class="dash-card-title"><i class="fa-solid fa-map-location-dot" style="color: #059669;"></i> Nearby Community Issues</h3>
+              <a href="map.html" class="dash-card-link">Open Full City Map <i class="fa-solid fa-arrow-right" style="font-size: 0.75rem;"></i></a>
             </div>
-            <div class="service-grid-4col">
-              <a href="profile.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-regular fa-user"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
+            <div class="nearby-preview-grid">
+              <div class="nearby-issue-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="status-badge-sm badge-pending">Roads</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-location-arrow"></i> 0.4 km away</span>
                 </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">My Profile</h4>
-                  <p class="service-card-desc">Manage your citizen contact details and verified profile.</p>
-                </div>
-              </a>
+                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin: 0;">Damaged Stormwater Drain Grate</h4>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Opposite Lakshmi Complex &bull; 4 hrs ago</span>
+              </div>
 
-              <a href="notifications.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-regular fa-bell"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
+              <div class="nearby-issue-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="status-badge-sm badge-progress">Electrical</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-location-arrow"></i> 0.8 km away</span>
                 </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Notifications</h4>
-                  <p class="service-card-desc">View official municipal alerts and complaint status updates.</p>
-                </div>
-              </a>
+                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin: 0;">Transformer Oil Leakage Notice</h4>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Cross Cut Road &bull; 6 hrs ago</span>
+              </div>
 
-              <a href="ministers.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-user-tie"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
+              <div class="nearby-issue-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="status-badge-sm badge-resolved">Sanitation</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-location-arrow"></i> 1.2 km away</span>
                 </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Council of Ministers</h4>
-                  <p class="service-card-desc">Directory of Cabinet Ministers and government portfolios.</p>
-                </div>
-              </a>
-
-              <a href="settings.html" class="service-card">
-                <div class="service-card-top">
-                  <div class="service-card-icon"><i class="fa-solid fa-gear"></i></div>
-                  <i class="fa-solid fa-arrow-right service-card-arrow"></i>
-                </div>
-                <div class="service-card-body">
-                  <h4 class="service-card-title">Settings</h4>
-                  <p class="service-card-desc">App preferences, language settings, and privacy options.</p>
-                </div>
-              </a>
+                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin: 0;">Overflowing Public Bin Cleared</h4>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">DB Road Junction &bull; Resolved</span>
+              </div>
             </div>
           </div>
 
