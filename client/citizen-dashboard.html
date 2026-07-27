@@ -193,39 +193,7 @@
                 <a href="my-complaints.html" class="dash-card-link">View All <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i></a>
               </div>
               <div class="activity-list" id="dash-recent-activity-list">
-                <div class="activity-item">
-                  <div class="activity-item-details">
-                    <h4 class="activity-item-title">Pothole Repair on Avinashi Road</h4>
-                    <div class="activity-item-meta">
-                      <span>#CMP-2026-8902</span> &bull; 
-                      <span>Highways Dept</span> &bull; 
-                      <span>2 hrs ago</span>
-                    </div>
-                  </div>
-                  <span class="status-badge-sm badge-progress">In Progress</span>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-item-details">
-                    <h4 class="activity-item-title">Streetlight Failure at RS Puram 4th Street</h4>
-                    <div class="activity-item-meta">
-                      <span>#CMP-2026-8891</span> &bull; 
-                      <span>Electrical Dept</span> &bull; 
-                      <span>5 hrs ago</span>
-                    </div>
-                  </div>
-                  <span class="status-badge-sm badge-pending">Under Review</span>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-item-details">
-                    <h4 class="activity-item-title">Water Pipeline Leakage in Gandhipuram Ward 12</h4>
-                    <div class="activity-item-meta">
-                      <span>#CMP-2026-8874</span> &bull; 
-                      <span>TWAD Board</span> &bull; 
-                      <span>Yesterday</span>
-                    </div>
-                  </div>
-                  <span class="status-badge-sm badge-resolved">Resolved</span>
-                </div>
+                <!-- Dynamically Populated by citizen-dashboard.js -->
               </div>
             </div>
 
@@ -236,18 +204,7 @@
                 <a href="my-complaints.html" class="dash-card-link">Track Details</a>
               </div>
               <div class="activity-list" id="dash-my-active-list">
-                <div class="activity-item" style="background: #ffffff;">
-                  <div class="activity-item-details">
-                    <h4 class="activity-item-title">Garbage Accumulation near Town Hall</h4>
-                    <div class="activity-item-meta">
-                      <span>Assigned: Ward Inspector R. Kumar</span>
-                    </div>
-                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
-                      <i class="fa-regular fa-calendar-check"></i> Expected completion: Tomorrow, 5:00 PM
-                    </div>
-                  </div>
-                  <span class="status-badge-sm badge-progress">In Progress</span>
-                </div>
+                <!-- Dynamically Populated by citizen-dashboard.js -->
               </div>
             </div>
 
@@ -260,19 +217,10 @@
             <div class="dash-card">
               <div class="dash-card-header">
                 <h3 class="dash-card-title"><i class="fa-solid fa-bullhorn" style="color: #ea580c;"></i> City Announcements & Notices</h3>
-                <span style="font-size: 0.78rem; color: var(--text-muted);">Coimbatore City Corp</span>
+                <span style="font-size: 0.78rem; color: var(--text-muted);" id="city-corp-name">City Corporation</span>
               </div>
-              <div class="announcements-list">
-                <div class="announcement-card" style="border-left-color: #dc2626;">
-                  <h4 class="announcement-title">Road Traffic Diversion on Trichy Road Overbridge</h4>
-                  <p class="announcement-desc">Maintenance works scheduled tonight from 11:00 PM to 5:00 AM. Commuters are advised to use Sungam Bypass route.</p>
-                  <span class="announcement-meta">Traffic Police Advisory &bull; Effective Today</span>
-                </div>
-                <div class="announcement-card" style="border-left-color: #0284c7;">
-                  <h4 class="announcement-title">Scheduled Water Supply Disruption in North Zone</h4>
-                  <p class="announcement-desc">Pilloor pipeline tie-in work in progress. Water supply paused tomorrow for Wards 14-22.</p>
-                  <span class="announcement-meta">Coimbatore Corporation &bull; 1 day notice</span>
-                </div>
+              <div class="announcements-list" id="dash-announcements-list">
+                <!-- Dynamically Populated by citizen-dashboard.js -->
               </div>
             </div>
 
@@ -282,17 +230,8 @@
                 <h3 class="dash-card-title"><i class="fa-solid fa-building-columns" style="color: #7c3aed;"></i> Govt Welfare Updates</h3>
                 <a href="services.html#schemes" class="dash-card-link">Explore Schemes</a>
               </div>
-              <div class="announcements-list">
-                <div class="announcement-card" style="border-left-color: #7c3aed;">
-                  <h4 class="announcement-title">Kalaignar Magalir Urimai Thittam</h4>
-                  <p class="announcement-desc">Monthly financial assistance for eligible women heads of households. Verification portal open.</p>
-                  <span class="announcement-meta">Social Welfare Dept &bull; Active Scheme</span>
-                </div>
-                <div class="announcement-card" style="border-left-color: #059669;">
-                  <h4 class="announcement-title">Chief Minister's Breakfast Scheme Expansion</h4>
-                  <p class="announcement-desc">Extended to all government primary school students across urban civic bodies.</p>
-                  <span class="announcement-meta">School Education Dept &bull; Updated</span>
-                </div>
+              <div class="announcements-list" id="dash-schemes-list">
+                <!-- Dynamically Populated by citizen-dashboard.js -->
               </div>
             </div>
 
@@ -304,33 +243,8 @@
               <h3 class="dash-card-title"><i class="fa-solid fa-map-location-dot" style="color: #059669;"></i> Nearby Community Issues</h3>
               <a href="map.html" class="dash-card-link">Open Full City Map <i class="fa-solid fa-arrow-right" style="font-size: 0.75rem;"></i></a>
             </div>
-            <div class="nearby-preview-grid">
-              <div class="nearby-issue-item">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span class="status-badge-sm badge-pending">Roads</span>
-                  <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-location-arrow"></i> 0.4 km away</span>
-                </div>
-                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin: 0;">Damaged Stormwater Drain Grate</h4>
-                <span style="font-size: 0.78rem; color: var(--text-muted);">Opposite Lakshmi Complex &bull; 4 hrs ago</span>
-              </div>
-
-              <div class="nearby-issue-item">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span class="status-badge-sm badge-progress">Electrical</span>
-                  <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-location-arrow"></i> 0.8 km away</span>
-                </div>
-                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin: 0;">Transformer Oil Leakage Notice</h4>
-                <span style="font-size: 0.78rem; color: var(--text-muted);">Cross Cut Road &bull; 6 hrs ago</span>
-              </div>
-
-              <div class="nearby-issue-item">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span class="status-badge-sm badge-resolved">Sanitation</span>
-                  <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-location-arrow"></i> 1.2 km away</span>
-                </div>
-                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin: 0;">Overflowing Public Bin Cleared</h4>
-                <span style="font-size: 0.78rem; color: var(--text-muted);">DB Road Junction &bull; Resolved</span>
-              </div>
+            <div class="nearby-preview-grid" id="dash-nearby-issues-grid">
+              <!-- Dynamically Populated by citizen-dashboard.js -->
             </div>
           </div>
 
@@ -518,6 +432,7 @@
   <script src="js/notifications.js"></script>
   <script src="js/app.js"></script>
   <script src="js/chat-widget.js"></script>
+  <script src="js/citizen-dashboard.js"></script>
 
   <!-- Weather Widget Logic -->
   <script>
