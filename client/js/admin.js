@@ -1537,10 +1537,9 @@
 
       try {
         const res = await window.API.getTransportationReports({ category, status, priority, search });
-        if (res && res.reports) {
-          this.reports = res.reports;
-          this.renderTable(this.reports);
-        }
+        const reports = (res && res.data && res.data.reports) ? res.data.reports : ((res && res.reports) ? res.reports : []);
+        this.reports = reports;
+        this.renderTable(this.reports);
       } catch (err) {
         console.error('Error loading admin transportation reports:', err);
         tbody.innerHTML = `<tr><td colspan="7" style="padding: 1.5rem; text-align: center; color: #ef4444;">Failed to load reports. Please try again.</td></tr>`;

@@ -198,12 +198,11 @@
       const search = document.getElementById('transport-search-input')?.value || '';
 
       const res = await window.API.getTransportationReports({ category, priority, status, search });
-      if (res && res.reports) {
-        currentReports = res.reports;
-        renderReportsFeed(currentReports);
-        renderMapMarkers(currentReports);
-        updateStats(currentReports);
-      }
+      const reports = (res && res.data && res.data.reports) ? res.data.reports : ((res && res.reports) ? res.reports : []);
+      currentReports = reports;
+      renderReportsFeed(currentReports);
+      renderMapMarkers(currentReports);
+      updateStats(currentReports);
     } catch (err) {
       console.error('Error loading transportation reports:', err);
     }
@@ -223,8 +222,8 @@
         previewTextEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Running AI Triage analysis...`;
         try {
           const res = await window.API.analyzeTransportationIssue({ title, description: desc, category });
-          if (res && res.analysis) {
-            const a = res.analysis;
+          const a = (res && res.data && res.data.analysis) ? res.data.analysis : (res && res.analysis ? res.analysis : null);
+          if (a) {
             previewTextEl.innerHTML = `
               <strong>Category:</strong> ${escapeHtml(a.category)} &bull; 
               <strong>Priority:</strong> <span class="priority-pill priority-${(a.priority || 'Medium').toLowerCase()}">${escapeHtml(a.priority)}</span> &bull; 
@@ -307,9 +306,10 @@
         user_id: user ? user.id : 'anonymous'
       });
 
-      if (res && res.success) {
+      const reportData = (res && res.data && res.data.report) ? res.data.report : (res && res.report ? res.report : null);
+      if (reportData) {
         if (window.showToast) {
-          window.showToast(`Report ${res.report.report_number} submitted! AI assigned to ${res.report.responsible_department}.`, 'success');
+          window.showToast(`Report ${reportData.report_number || reportData.id} submitted! AI assigned to ${reportData.responsible_department}.`, 'success');
         }
         closeReportModal();
         document.getElementById('transport-report-form')?.reset();
