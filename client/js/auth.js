@@ -1584,14 +1584,14 @@ function updateAuthUI() {
     if (!sidebar) return;
 
     const path = window.location.pathname.toLowerCase();
-    const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index.html');
-    const isReport = path.includes('report.html');
+    const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index') || path.endsWith('/index.html') || path.endsWith('/client') || path.endsWith('/client/');
+    const isReport = path.includes('report') && !path.includes('reports');
     const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
-    const isMap = path.includes('map.html');
+    const isMap = path.includes('map');
     const isEmergency = path.includes('emergency-services');
-    const isServices = path.includes('services.html') || (path.includes('services') && !isEmergency);
-    const isHelplines = path.includes('helplines.html');
-    const isMinisters = path.includes('ministers.html');
+    const isServices = path.includes('services') && !isEmergency && !path.includes('services-admin');
+    const isHelplines = path.includes('helplines');
+    const isMinisters = path.includes('ministers');
 
     // Sidebar remains PERMANENTLY EXPANDED (No auto-collapse / hover-expand)
     sidebar.classList.remove('collapsed', 'expanded');
@@ -1690,10 +1690,10 @@ function updateAuthUI() {
           <a href="admin.html#reports" class="nav-link ${isReports ? 'active' : ''}"><i class="fa-solid fa-file-invoice"></i> Reports</a>
         `;
       } else {
-        const isDashboard = path.includes('citizen-dashboard.html') || path.endsWith('/') || path.endsWith('/index.html');
-        const isReport = path.includes('report.html');
-        const isComplaints = path.includes('my-complaints.html') || path.includes('issue-details.html');
-        const isMap = path.includes('map.html');
+        const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index') || path.endsWith('/index.html') || path.endsWith('/client') || path.endsWith('/client/');
+        const isReport = path.includes('report') && !path.includes('reports');
+        const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
+        const isMap = path.includes('map');
 
         linksHtml = `
           <a href="citizen-dashboard.html" class="nav-link ${isDashboard ? 'active' : ''}"><i class="fa-solid fa-house-chimney"></i> ${tDashboard}</a>
