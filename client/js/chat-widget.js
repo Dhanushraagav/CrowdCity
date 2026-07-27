@@ -54,74 +54,164 @@
       }
     }
 
-    /* Floating Callout Popup Bubble for High Visibility */
+    /* AI Assistant Welcome Popup - Professional Card */
     #cc-chat-callout {
       position: fixed;
-      bottom: 86px;
+      bottom: 90px;
       right: 24px;
-      background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
+      width: 300px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.92) 0%, rgba(13, 71, 67, 0.95) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       color: #ffffff;
-      padding: 0.6rem 0.95rem;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.45), 0 4px 10px rgba(0, 0, 0, 0.12);
+      padding: 1.25rem 1.1rem 1rem 1.1rem;
+      border-radius: 18px;
+      box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
       z-index: 9998;
       display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 0.84rem;
-      font-weight: 700;
-      cursor: pointer;
-      animation: cc-callout-bounce 3s infinite ease-in-out;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-direction: column;
+      gap: 0.65rem;
+      cursor: default;
+      animation: cc-callout-slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
       user-select: none;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-    }
-
-    #cc-chat-callout:hover {
-      transform: translateY(-4px) scale(1.03);
-      box-shadow: 0 14px 30px -4px rgba(13, 148, 136, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     #cc-chat-callout::after {
       content: '';
       position: absolute;
-      bottom: -6px;
-      right: 20px;
-      width: 12px;
-      height: 12px;
-      background: #0284c7;
+      bottom: -7px;
+      right: 22px;
+      width: 14px;
+      height: 14px;
+      background: rgba(13, 71, 67, 0.95);
       transform: rotate(45deg);
-      border-radius: 2px;
+      border-radius: 3px;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
-    .cc-callout-close {
-      background: rgba(255, 255, 255, 0.25);
-      border: none;
-      color: #ffffff;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
+    .cc-callout-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cc-callout-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0d9488, #06b6d4);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.72rem;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.35);
+    }
+
+    .cc-callout-title-block {
+      flex: 1;
+      margin-left: 0.65rem;
+    }
+
+    .cc-callout-title-block h4 {
+      margin: 0;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: var(--font-heading, 'Outfit', sans-serif);
+    }
+
+    .cc-callout-title-block .cc-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .cc-callout-title-block .cc-status .cc-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      animation: cc-dot-pulse 2s infinite;
+    }
+
+    .cc-callout-close {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #94a3b8;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
       cursor: pointer;
-      margin-left: 0.2rem;
-      transition: background 0.15s ease;
+      transition: all 0.15s ease;
       flex-shrink: 0;
     }
 
     .cc-callout-close:hover {
-      background: rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
     }
 
-    @keyframes cc-callout-bounce {
-      0%, 100% {
-        transform: translateY(0);
+    .cc-callout-body {
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    .cc-callout-body strong {
+      color: #5eead4;
+    }
+
+    .cc-callout-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.6rem 0;
+      background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+    }
+
+    .cc-callout-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
+    }
+
+    @keyframes cc-callout-slideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
       }
-      50% {
-        transform: translateY(-6px);
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
       }
+    }
+
+    @keyframes cc-dot-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
     }
 
     /* Notification Badge */
@@ -552,26 +642,42 @@
     triggerBtn.addEventListener('click', toggleChatWindow);
     document.body.appendChild(triggerBtn);
 
-    // 2.5 Create AI Callout Popup Bubble
+    // 2.5 Create AI Assistant Welcome Popup Card
     const calloutEl = document.createElement('div');
     calloutEl.id = 'cc-chat-callout';
     calloutEl.innerHTML = `
-      <i class="fa-solid fa-robot" style="font-size: 1.15rem; color: #fbbf24;"></i>
-      <span>Need Help? Chat with AI!</span>
-      <button type="button" class="cc-callout-close" aria-label="Dismiss">&times;</button>
+      <div class="cc-callout-header">
+        <div class="cc-callout-avatar"><i class="fa-solid fa-robot"></i></div>
+        <div class="cc-callout-title-block">
+          <h4>CrowdCity AI Assistant</h4>
+          <div class="cc-status"><span class="cc-dot"></span> Online &bull; Ready to help</div>
+        </div>
+        <button type="button" class="cc-callout-close" aria-label="Dismiss">&times;</button>
+      </div>
+      <div class="cc-callout-body">
+        Hi there! 👋 I can help you <strong>report civic issues</strong>, <strong>track complaints</strong>, or find <strong>government services</strong> instantly.
+      </div>
+      <button type="button" class="cc-callout-action">
+        <i class="fa-solid fa-comments"></i> Start a Conversation
+      </button>
     `;
 
-    calloutEl.addEventListener('click', (e) => {
-      if (e.target.classList.contains('cc-callout-close')) {
-        e.stopPropagation();
-        calloutEl.style.display = 'none';
-        localStorage.setItem('cc_callout_dismissed', 'true');
-        return;
-      }
+    // Close button - session only dismiss (shows again on next login)
+    calloutEl.querySelector('.cc-callout-close').addEventListener('click', (e) => {
+      e.stopPropagation();
+      calloutEl.style.opacity = '0';
+      calloutEl.style.transform = 'translateY(10px) scale(0.96)';
+      setTimeout(() => { calloutEl.style.display = 'none'; }, 300);
+      sessionStorage.setItem('cc_callout_dismissed', 'true');
+    });
+
+    // Action button opens chat
+    calloutEl.querySelector('.cc-callout-action').addEventListener('click', () => {
       toggleChatWindow();
     });
 
-    if (!localStorage.getItem('cc_callout_dismissed')) {
+    // Always show on every login session (sessionStorage clears on tab close)
+    if (!sessionStorage.getItem('cc_callout_dismissed')) {
       document.body.appendChild(calloutEl);
     }
 
@@ -725,8 +831,10 @@
       
       const callout = document.getElementById('cc-chat-callout');
       if (callout) {
-        callout.style.display = 'none';
-        localStorage.setItem('cc_callout_dismissed', 'true');
+        callout.style.opacity = '0';
+        callout.style.transform = 'translateY(10px) scale(0.96)';
+        setTimeout(() => { callout.style.display = 'none'; }, 300);
+        sessionStorage.setItem('cc_callout_dismissed', 'true');
       }
 
       // Auto-focus input box with slight timeout to let slide-up animate smoothly
