@@ -1640,7 +1640,136 @@ function updateAuthUI() {
           <i class="fa-solid fa-user-tie"></i> <span>Council of Ministers</span>
         </a>
       </nav>
+
+      <!-- Sidebar Helpline Card (Matching Authority Portal) -->
+      <div class="sidebar-helpline-card" style="margin: 1.25rem 0.75rem 0.5rem 0.75rem; padding: 0.85rem; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 12px; font-size: 0.78rem;">
+        <div style="color: #c2410c; font-weight: 800; display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">
+          <i class="fa-solid fa-phone" style="font-size: 0.75rem;"></i> TN STATE HELPLINE
+        </div>
+        <div style="font-size: 1.1rem; font-weight: 800; color: #9a3412; margin: 0.2rem 0;">1913</div>
+        <div style="color: #9a3412; font-size: 0.72rem; font-weight: 600;">Municipal Corporation Support</div>
+      </div>
+
+      <div class="sidebar-footer" style="padding: 0.25rem 0.75rem 1rem 0.75rem;">
+        <button onclick="logoutUser()" class="app-sidebar-link" style="border: none; background: none; text-align: left; width: 100%; cursor: pointer;">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+        </button>
+      </div>
     `;
+  };
+
+  const injectHeaderBreadcrumbsAndWeather = () => {
+    if (document.body.classList.contains('admin-portal-body')) return;
+    const header = document.querySelector('.app-header-main');
+    if (!header) return;
+
+    const path = window.location.pathname.toLowerCase();
+    let currentPage = 'Dashboard';
+    if (path.includes('report') && !path.includes('reports')) currentPage = 'Report Issue';
+    else if (path.includes('my-complaints') || path.includes('issue-details')) currentPage = 'My Complaints';
+    else if (path.includes('map')) currentPage = 'Map';
+    else if (path.includes('emergency-services')) currentPage = 'Emergency Help Center';
+    else if (path.includes('services') && !path.includes('services-admin')) currentPage = 'Government Services';
+    else if (path.includes('helplines')) currentPage = 'District Helplines';
+    else if (path.includes('ministers')) currentPage = 'Council of Ministers';
+    else if (path.includes('profile')) currentPage = 'My Profile';
+    else if (path.includes('my-documents')) currentPage = 'My Documents Wallet';
+    else if (path.includes('settings')) currentPage = 'Settings';
+    else if (path.includes('notifications')) currentPage = 'Notifications';
+
+    // 1. Inject Breadcrumbs on left of header if not already present
+    if (!header.querySelector('.breadcrumbs')) {
+      const breadcrumbDiv = document.createElement('div');
+      breadcrumbDiv.className = 'breadcrumbs';
+      breadcrumbDiv.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); color: var(--text-main); font-size: 0.9rem; margin-left: 0.5rem;';
+      breadcrumbDiv.innerHTML = `
+        <span style="font-weight: 700; color: var(--text-muted);">Citizen Portal</span>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem; color: var(--text-muted);"></i>
+        <span style="font-weight: 800; color: var(--primary, #0d9488);">${currentPage}</span>
+      `;
+
+      const mobileLogo = header.querySelector('.app-header-logo-mobile');
+      const mobileBtn = header.querySelector('.mobile-menu-toggle');
+      if (mobileLogo) {
+        mobileLogo.after(breadcrumbDiv);
+      } else if (mobileBtn) {
+        mobileBtn.after(breadcrumbDiv);
+      } else {
+        header.insertBefore(breadcrumbDiv, header.firstChild);
+      }
+    }
+
+    // 2. Inject Weather Widget Pill in header right action area if not already present
+    const actions = header.querySelector('.app-header-actions');
+    if (actions && !actions.querySelector('#weather-widget')) {
+      const weatherDiv = document.createElement('div');
+      weatherDiv.className = 'weather-widget loading';
+      weatherDiv.id = 'weather-widget';
+      weatherDiv.title = 'Auto-detected location weather';
+      weatherDiv.innerHTML = `
+        <span id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></span>
+        <span id="weather-city">Detecting...</span>
+        <span id="weather-temp">--&deg;C</span>
+      `;
+      actions.insertBefore(weatherDiv, actions.firstChild);
+    }
+
+    initSharedWeather();
+  };
+
+  const initSharedWeather = () => {
+    const cityEl = document.getElementById('weather-city');
+    const tempEl = document.getElementById('weather-temp');
+    const iconEl = document.getElementById('weather-icon');
+    const widget = document.getElementById('weather-widget');
+    if (!cityEl || !tempEl || !widget) return;
+
+    function getWeatherIcon(code) {
+      if (code === 0) return 'fa-sun';
+      if (code <= 3) return 'fa-cloud-sun';
+      if (code <= 48) return 'fa-smog';
+      if (code <= 57) return 'fa-cloud-rain';
+      if (code <= 67) return 'fa-cloud-showers-heavy';
+      if (code <= 77) return 'fa-snowflake';
+      if (code <= 82) return 'fa-cloud-showers-heavy';
+      if (code <= 99) return 'fa-bolt';
+      return 'fa-cloud';
+    }
+
+    async function fetchWeather(lat, lon) {
+      try {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`);
+        const geoData = await geoRes.json();
+        const addr = geoData.address || {};
+        const district = (addr.state_district || addr.county || addr.city || addr.town || 'Coimbatore').replace(/ district$/i, '').replace(/ taluk$/i, '');
+
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const weatherData = await weatherRes.json();
+        const current = weatherData.current_weather;
+        const temp = Math.round(current.temperature);
+        const code = current.weathercode;
+
+        cityEl.textContent = district;
+        tempEl.textContent = `${temp}°C`;
+        iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code)}"></i>`;
+        widget.classList.remove('loading');
+      } catch (e) {
+        cityEl.textContent = 'Coimbatore';
+        tempEl.textContent = '31°C';
+        iconEl.innerHTML = `<i class="fa-solid fa-cloud-sun"></i>`;
+        widget.classList.remove('loading');
+      }
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+        () => fetchWeather(11.0168, 76.9558),
+        { timeout: 5000 }
+      );
+    } else {
+      fetchWeather(11.0168, 76.9558);
+    }
   };
 
   window.toggleSidebarCollapse = function() {
@@ -1660,6 +1789,7 @@ function updateAuthUI() {
   injectSwitchPortals();
   injectTopNavSwitcher();
   injectCitizenSidebar();
+  injectHeaderBreadcrumbsAndWeather();
 
   const container = document.getElementById('auth-nav-container');
   const navMenu = document.getElementById('nav-menu');

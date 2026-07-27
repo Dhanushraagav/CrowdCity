@@ -2287,23 +2287,18 @@ body:not(.admin-portal-body) .app-sidebar {
 .app-sidebar-link.active {
   color: #ffffff !important;
   background-color: var(--primary, #0d9488) !important;
-  font-weight: 700;
-  border-radius: 8px;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
 }
 
-.app-sidebar-link.active i {
+.app-sidebar-link.active i,
+.app-sidebar-link.active span {
   color: #ffffff !important;
 }
 
 .app-sidebar-link.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 15%;
-  height: 70%;
-  width: 3px;
-  background: #ffffff;
-  border-radius: 0 4px 4px 0;
+  display: none !important;
 }
 
 .emergency-sidebar-link {
