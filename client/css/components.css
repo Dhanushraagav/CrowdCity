@@ -2077,32 +2077,102 @@ body:not(.admin-portal-body) .page-inner {
   }
 }
 
-.app-sidebar {
-  width: 250px;
-  background-color: var(--bg-sidebar, #0b0d0e);
-  border-right: 1px solid var(--border-color);
+/* ==========================================================================
+   CrowdCity AI v3.4 - Ultra-Premium Permanent Sidebar System
+   ========================================================================== */
+
+body:not(.admin-portal-body) .app-sidebar {
+  width: 280px;
+  background: var(--bg-surface, #ffffff);
+  border-right: 1px solid var(--border-color, #e2e8f0);
   display: flex;
   flex-direction: column;
-  padding: 2rem 1rem 1.5rem 1rem;
+  padding: 1.25rem 0.85rem;
   flex-shrink: 0;
-  transition: transform var(--transition-normal);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 1000;
+  user-select: none;
+}
+
+body:not(.admin-portal-body) .app-sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.5rem 0.75rem 0.5rem;
 }
 
 .app-sidebar-logo {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--primary);
-  margin-bottom: 2.5rem;
-  padding: 0 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   text-decoration: none;
+  overflow: hidden;
 }
 
-.app-sidebar-logo i {
-  color: var(--primary);
+.app-sidebar-logo .brand-emblem {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.app-sidebar-logo .brand-text-container {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.app-sidebar-logo .brand-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.app-sidebar-logo .brand-subtitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--primary, #0d9488);
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-collapse-btn {
+  background: var(--bg-surface-hover, #f8fafc);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--primary-light-alpha, rgba(13, 148, 136, 0.1));
+  color: var(--primary, #0d9488);
+  border-color: var(--primary, #0d9488);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border-color, #e2e8f0);
+  margin: 0.25rem 0 0.85rem 0;
 }
 
 .app-sidebar-nav {
@@ -2110,39 +2180,57 @@ body:not(.admin-portal-body) .page-inner {
   flex-direction: column;
   gap: 0.35rem;
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.15rem;
+}
+
+.app-sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.app-sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--border-color, #cbd5e1);
+  border-radius: 4px;
 }
 
 .app-sidebar-link {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  color: var(--text-muted);
+  gap: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  color: var(--text-muted, #64748b);
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-radius: var(--radius-md);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, color 0.2s ease;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: var(--radius-md, 10px);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   background: transparent;
   border: none;
   width: 100%;
   text-align: left;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .app-sidebar-link i {
-  font-size: 0.95rem;
-  width: 16px;
+  font-size: 1.05rem;
+  width: 22px;
   text-align: center;
-  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.app-sidebar-link span {
+  transition: opacity 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-sidebar-link:hover {
-  color: var(--text-main);
-  background-color: var(--bg-surface-hover);
-  transform: translateX(4px);
+  color: var(--primary, #0d9488);
+  background-color: var(--bg-surface-hover, #f8fafc);
+  transform: translateX(4px) scale(1.02);
 }
 
 .app-sidebar-link:hover i {
@@ -2150,42 +2238,69 @@ body:not(.admin-portal-body) .page-inner {
 }
 
 .app-sidebar-link.active {
-  color: var(--text-inverse) !important;
-  background-color: var(--primary) !important;
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
-}
-
-
-.app-sidebar-btn {
-  margin: 1.5rem 0.5rem;
-  padding: 0.8rem 1rem;
-  background-color: var(--primary);
-  color: var(--text-inverse);
-  border-radius: var(--radius-md);
-  text-align: center;
+  color: var(--primary, #0d9488) !important;
+  background-color: rgba(13, 148, 136, 0.1) !important;
   font-weight: 700;
-  text-decoration: none;
-  font-size: 0.82rem;
-  display: flex;
-  align-items: center;
+}
+
+.app-sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  height: 70%;
+  width: 3px;
+  background: var(--primary, #0d9488);
+  border-radius: 0 4px 4px 0;
+}
+
+.emergency-sidebar-link {
+  color: #dc2626 !important;
+}
+
+.emergency-sidebar-link:hover {
+  background-color: rgba(220, 38, 38, 0.08) !important;
+  color: #b91c1c !important;
+}
+
+.emergency-sidebar-link.active {
+  background-color: rgba(220, 38, 38, 0.12) !important;
+}
+
+.emergency-sidebar-link.active::before {
+  background: #dc2626;
+}
+
+.logout-link:hover {
+  color: #dc2626 !important;
+  background-color: rgba(220, 38, 38, 0.08) !important;
+}
+
+/* Collapsed Sidebar Rules */
+body:not(.admin-portal-body) .app-sidebar.collapsed .brand-text-container,
+body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link span {
+  opacity: 0;
+  display: none;
+}
+
+body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-logo {
   justify-content: center;
-  gap: 0.5rem;
-  transition: var(--transition-fast);
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.app-sidebar-btn:hover {
-  background-color: var(--primary-hover);
+body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link {
+  justify-content: center;
+  padding: 0.75rem 0;
 }
 
-.app-sidebar-footer {
-  display: flex;
+body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-header {
   flex-direction: column;
-  gap: 0.35rem;
-  border-top: 1px solid var(--border-color);
-  padding-top: 1.25rem;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.25rem 0 0.75rem 0;
+}
+
+body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::before {
+  left: 0;
 }
 
 .app-main {

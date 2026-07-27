@@ -1586,9 +1586,112 @@ function updateAuthUI() {
     }
   };
 
+  const injectCitizenSidebar = () => {
+    if (document.body.classList.contains('admin-portal-body')) return;
+    const sidebar = document.querySelector('.app-sidebar');
+    if (!sidebar) return;
+
+    const path = window.location.pathname.toLowerCase();
+    const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index.html');
+    const isReport = path.includes('report.html');
+    const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
+    const isMap = path.includes('map.html');
+    const isEmergency = path.includes('emergency-services');
+    const isServices = path.includes('services.html') || (path.includes('services') && !isEmergency);
+    const isHelplines = path.includes('helplines.html');
+    const isMinisters = path.includes('ministers.html');
+    const isDocuments = path.includes('documents');
+    const isNotifications = path.includes('notifications.html');
+    const isProfile = path.includes('profile.html');
+    const isSettings = path.includes('settings.html');
+
+    const isCollapsed = localStorage.getItem('cc_sidebar_collapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+    }
+
+    const toggleIcon = isCollapsed ? 'fa-angles-right' : 'fa-angles-left';
+
+    sidebar.innerHTML = `
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" />
+          <div class="brand-text-container">
+            <span class="brand-title">CrowdCity AI</span>
+            <span class="brand-subtitle">Coimbatore, TN</span>
+          </div>
+        </a>
+        <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar">
+          <i class="fa-solid ${toggleIcon}"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link ${isDashboard ? 'active' : ''}" title="Dashboard">
+          <i class="fa-solid fa-house-chimney"></i> <span>Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link ${isReport ? 'active' : ''}" title="Report Issue">
+          <i class="fa-solid fa-triangle-exclamation"></i> <span>Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link ${isComplaints ? 'active' : ''}" title="My Complaints">
+          <i class="fa-solid fa-clipboard-list"></i> <span>My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="City Map">
+          <i class="fa-solid fa-map-location-dot"></i> <span>City Map</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Govt Services">
+          <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
+          <i class="fa-solid fa-truck-medical"></i> <span>Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
+          <i class="fa-solid fa-phone-volume"></i> <span>District Helplines</span>
+        </a>
+        <a href="ministers.html" class="app-sidebar-link ${isMinisters ? 'active' : ''}" title="Council of Ministers">
+          <i class="fa-solid fa-user-tie"></i> <span>Council of Ministers</span>
+        </a>
+        <a href="my-documents.html" class="app-sidebar-link ${isDocuments ? 'active' : ''}" title="Documents">
+          <i class="fa-solid fa-file-contract"></i> <span>Documents</span>
+        </a>
+        <a href="notifications.html" class="app-sidebar-link ${isNotifications ? 'active' : ''}" title="Notifications">
+          <i class="fa-regular fa-bell"></i> <span>Notifications</span>
+        </a>
+        <a href="profile.html" class="app-sidebar-link ${isProfile ? 'active' : ''}" title="Profile">
+          <i class="fa-regular fa-user"></i> <span>Profile</span>
+        </a>
+        <a href="settings.html" class="app-sidebar-link ${isSettings ? 'active' : ''}" title="Settings">
+          <i class="fa-solid fa-gear"></i> <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="app-sidebar-footer">
+        <button onclick="logoutUser()" class="app-sidebar-link logout-link" title="Logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+        </button>
+      </div>
+    `;
+  };
+
+  window.toggleSidebarCollapse = function() {
+    const sidebar = document.querySelector('.app-sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    localStorage.setItem('cc_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    
+    const toggleBtn = document.getElementById('sidebar-collapse-btn');
+    if (toggleBtn) {
+      toggleBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-angles-right"></i>' : '<i class="fa-solid fa-angles-left"></i>';
+    }
+  };
+
   injectPortalBadge();
   injectSwitchPortals();
   injectTopNavSwitcher();
+  injectCitizenSidebar();
 
   const container = document.getElementById('auth-nav-container');
   const navMenu = document.getElementById('nav-menu');

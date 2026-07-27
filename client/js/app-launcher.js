@@ -25,6 +25,10 @@ window.AppLauncher = {
       if (e.key === 'Escape') {
         this.close();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        this.toggle();
+      }
     });
   },
 
