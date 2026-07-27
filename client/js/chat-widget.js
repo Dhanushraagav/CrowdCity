@@ -54,164 +54,116 @@
       }
     }
 
-    /* AI Assistant Welcome Popup - Professional Card */
+    /* AI Civic Helpdesk Popup - Clean Government Style */
     #cc-chat-callout {
       position: fixed;
       bottom: 90px;
       right: 24px;
-      width: 300px;
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.92) 0%, rgba(13, 71, 67, 0.95) 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      color: #ffffff;
-      padding: 1.25rem 1.1rem 1rem 1.1rem;
-      border-radius: 18px;
-      box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
+      width: 280px;
+      background: #ffffff;
+      color: #1e293b;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0,0,0,0.06);
       z-index: 9998;
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
       cursor: default;
-      animation: cc-callout-slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: cc-callout-slideIn 0.45s ease forwards;
       opacity: 0;
-      transform: translateY(20px) scale(0.96);
+      transform: translateY(12px);
       user-select: none;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
     }
 
     #cc-chat-callout::after {
       content: '';
       position: absolute;
-      bottom: -7px;
+      bottom: -6px;
       right: 22px;
-      width: 14px;
-      height: 14px;
-      background: rgba(13, 71, 67, 0.95);
+      width: 12px;
+      height: 12px;
+      background: #ffffff;
       transform: rotate(45deg);
-      border-radius: 3px;
-      border-right: 1px solid rgba(255,255,255,0.1);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.06);
     }
 
-    .cc-callout-header {
+    .cc-callout-topbar {
+      background: #0d9488;
+      padding: 0.7rem 0.85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .cc-callout-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #0d9488, #06b6d4);
+    .cc-callout-topbar-left {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.35);
+      gap: 0.5rem;
     }
 
-    .cc-callout-title-block {
-      flex: 1;
-      margin-left: 0.65rem;
-    }
-
-    .cc-callout-title-block h4 {
-      margin: 0;
-      font-size: 0.88rem;
-      font-weight: 800;
+    .cc-callout-topbar-left i {
+      font-size: 0.95rem;
       color: #ffffff;
-      font-family: var(--font-heading, 'Outfit', sans-serif);
     }
 
-    .cc-callout-title-block .cc-status {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.68rem;
-      color: #94a3b8;
-      font-weight: 600;
-      margin-top: 1px;
-    }
-
-    .cc-callout-title-block .cc-status .cc-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #34d399;
-      animation: cc-dot-pulse 2s infinite;
+    .cc-callout-topbar-left span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.2px;
     }
 
     .cc-callout-close {
-      background: rgba(255, 255, 255, 0.1);
+      background: none;
       border: none;
-      color: #94a3b8;
-      width: 24px;
-      height: 24px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.78rem;
+      color: rgba(255,255,255,0.7);
+      font-size: 1rem;
       cursor: pointer;
-      transition: all 0.15s ease;
-      flex-shrink: 0;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s ease;
     }
 
     .cc-callout-close:hover {
-      background: rgba(255, 255, 255, 0.2);
       color: #ffffff;
     }
 
     .cc-callout-body {
+      padding: 0.85rem;
       font-size: 0.82rem;
-      line-height: 1.5;
-      color: #cbd5e1;
+      line-height: 1.55;
+      color: #475569;
       font-weight: 500;
-    }
-
-    .cc-callout-body strong {
-      color: #5eead4;
     }
 
     .cc-callout-action {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.45rem;
-      padding: 0.6rem 0;
-      background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+      gap: 0.4rem;
+      margin: 0 0.85rem 0.85rem 0.85rem;
+      padding: 0.55rem 0;
+      background: #0d9488;
       color: #ffffff;
       border: none;
-      border-radius: 10px;
-      font-size: 0.82rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
       font-weight: 700;
       font-family: inherit;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+      transition: background 0.15s ease;
     }
 
     .cc-callout-action:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
+      background: #0f766e;
     }
 
     @keyframes cc-callout-slideIn {
-      0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.96);
-      }
-      100% {
+      to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
       }
-    }
-
-    @keyframes cc-dot-pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
     }
 
     /* Notification Badge */
@@ -646,19 +598,18 @@
     const calloutEl = document.createElement('div');
     calloutEl.id = 'cc-chat-callout';
     calloutEl.innerHTML = `
-      <div class="cc-callout-header">
-        <div class="cc-callout-avatar"><i class="fa-solid fa-robot"></i></div>
-        <div class="cc-callout-title-block">
-          <h4>CrowdCity AI Assistant</h4>
-          <div class="cc-status"><span class="cc-dot"></span> Online &bull; Ready to help</div>
+      <div class="cc-callout-topbar">
+        <div class="cc-callout-topbar-left">
+          <i class="fa-solid fa-headset"></i>
+          <span>Civic Helpdesk</span>
         </div>
         <button type="button" class="cc-callout-close" aria-label="Dismiss">&times;</button>
       </div>
       <div class="cc-callout-body">
-        Hi there! 👋 I can help you <strong>report civic issues</strong>, <strong>track complaints</strong>, or find <strong>government services</strong> instantly.
+        Have a question or need to report an issue? Our AI assistant can help you with complaints, services, and more.
       </div>
       <button type="button" class="cc-callout-action">
-        <i class="fa-solid fa-comments"></i> Start a Conversation
+        <i class="fa-solid fa-comment-dots"></i> Chat with AI Assistant
       </button>
     `;
 
