@@ -2447,7 +2447,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 .app-content-body {
-  padding: 2rem 2.5rem;
+  padding: 1.25rem 2rem 2.5rem 2rem;
   flex: 1;
 }
 
