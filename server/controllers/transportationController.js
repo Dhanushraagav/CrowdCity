@@ -1,6 +1,6 @@
 import { analyzeTransportationIssue } from '../services/groqService.js';
 import logger from '../config/logger.js';
-import supabase from '../config/supabaseClient.js';
+import { supabase } from '../config/supabase.js';
 
 // In-memory fallback store when Supabase connection is offline
 let memoryReports = [
