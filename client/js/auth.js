@@ -1569,29 +1569,13 @@ function updateAuthUI() {
       }
     });
 
-    // Remove old location pill if present
-    const oldLocationPill = header.querySelector('.header-city-indicator');
-    if (oldLocationPill) oldLocationPill.remove();
+    // Remove location pill and portal title badge from top header
+    const headerPills = header.querySelectorAll('.header-city-indicator, .header-portal-title');
+    headerPills.forEach(pill => pill.remove());
 
     // Remove old horizontal switcher tabs if present
     const oldLinks = header.querySelectorAll('.topnav-links, #topnav-links');
     oldLinks.forEach(el => el.remove());
-
-    // Inject clean, balanced Government Portal Title Badge on left/center
-    let portalTitle = header.querySelector('.header-portal-title');
-    if (!portalTitle) {
-      portalTitle = document.createElement('div');
-      portalTitle.className = 'header-portal-title';
-      portalTitle.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 700; color: var(--text-main, #0f172a); margin-right: auto; background: var(--bg-surface-hover, #f8fafc); padding: 0.4rem 0.95rem; border-radius: 12px; border: 1px solid var(--border-color, #e2e8f0);';
-      portalTitle.innerHTML = `<i class="fa-solid fa-building-columns" style="color: #0d9488; font-size: 0.9rem;"></i> <span>Citizen Portal</span>`;
-
-      const rightContainer = header.querySelector('.topnav-right, .app-header-actions, #auth-nav-container');
-      if (rightContainer && rightContainer.parentNode === header) {
-        header.insertBefore(portalTitle, rightContainer);
-      } else {
-        header.insertBefore(portalTitle, header.firstChild);
-      }
-    }
   };
 
   const injectCitizenSidebar = () => {
