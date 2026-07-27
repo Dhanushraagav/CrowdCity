@@ -1557,6 +1557,10 @@ function updateAuthUI() {
     const header = document.querySelector('.topnav, .app-header-main, .app-header');
     if (!header) return;
 
+    // Remove duplicate logos from top header (keep logo ONLY inside sidebar)
+    const headerLogos = header.querySelectorAll('.app-header-logo-mobile, .logo-container');
+    headerLogos.forEach(logo => logo.remove());
+
     // Remove loose stray notification buttons placed outside auth-nav-container
     const strayBellBtns = header.querySelectorAll('.notification-btn, #notification-btn');
     strayBellBtns.forEach(btn => {
@@ -1569,19 +1573,19 @@ function updateAuthUI() {
     const oldLinks = header.querySelectorAll('.topnav-links, #topnav-links');
     oldLinks.forEach(el => el.remove());
 
-    // Inject clean header city indicator in middle
+    // Inject clean header city indicator on left/middle
     let cityIndicator = header.querySelector('.header-city-indicator');
     if (!cityIndicator) {
       cityIndicator = document.createElement('div');
       cityIndicator.className = 'header-city-indicator';
-      cityIndicator.style.cssText = 'display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-main, #0f172a); margin: 0 auto; background: var(--bg-surface-hover, #f8fafc); padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid var(--border-color, #e2e8f0);';
+      cityIndicator.style.cssText = 'display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-main, #0f172a); margin-right: auto; background: var(--bg-surface-hover, #f8fafc); padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid var(--border-color, #e2e8f0);';
       cityIndicator.innerHTML = `<i class="fa-solid fa-location-dot" style="color: #0d9488; font-size: 0.85rem;"></i> <span>Coimbatore, Tamil Nadu</span>`;
 
       const rightContainer = header.querySelector('.topnav-right, .app-header-actions, #auth-nav-container');
       if (rightContainer && rightContainer.parentNode === header) {
         header.insertBefore(cityIndicator, rightContainer);
       } else {
-        header.appendChild(cityIndicator);
+        header.insertBefore(cityIndicator, header.firstChild);
       }
     }
   };
@@ -1605,12 +1609,23 @@ function updateAuthUI() {
     const isProfile = path.includes('profile.html');
     const isSettings = path.includes('settings.html');
 
-    const isCollapsed = localStorage.getItem('cc_sidebar_collapsed') === 'true';
-    if (isCollapsed) {
+    // Default collapsed state on desktop, expands smoothly on hover
+    if (window.innerWidth >= 1024) {
       sidebar.classList.add('collapsed');
+      sidebar.classList.remove('expanded');
     }
 
-    const toggleIcon = isCollapsed ? 'fa-angles-right' : 'fa-angles-left';
+    sidebar.onmouseenter = () => {
+      if (window.innerWidth >= 1024) {
+        sidebar.classList.add('expanded');
+      }
+    };
+
+    sidebar.onmouseleave = () => {
+      if (window.innerWidth >= 1024) {
+        sidebar.classList.remove('expanded');
+      }
+    };
 
     sidebar.innerHTML = `
       <div class="sidebar-header">
@@ -1624,9 +1639,6 @@ function updateAuthUI() {
             <span class="brand-subtitle">Citizen Portal &bull; Coimbatore</span>
           </div>
         </a>
-        <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar">
-          <i class="fa-solid ${toggleIcon}"></i>
-        </button>
       </div>
 
       <div class="sidebar-divider"></div>
@@ -1671,7 +1683,7 @@ function updateAuthUI() {
       </nav>
 
       <div class="app-sidebar-footer">
-        <button onclick="logoutUser()" class="app-sidebar-link logout-link" title="Logout" data-title="Logout">
+        <button onclick="logoutUser()" class="app-sidebar-link logout-link" title="Logout">
           <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
         </button>
       </div>

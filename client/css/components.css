@@ -2064,11 +2064,11 @@ body:not(.admin-portal-body) .page-inner {
 }
 
 /* ==========================================================================
-   CrowdCity AI - Version 1 Official Government Fixed Left Sidebar
+   CrowdCity AI v3.6 - Auto-Expanding 60FPS Sidebar System
    ========================================================================== */
 
 body:not(.admin-portal-body) .app-sidebar {
-  width: 260px;
+  width: 270px;
   background: var(--bg-surface, #ffffff);
   border-right: 1px solid var(--border-color, #e2e8f0);
   border-left: none;
@@ -2080,18 +2080,37 @@ body:not(.admin-portal-body) .app-sidebar {
   padding: 1.25rem 0.85rem;
   flex-shrink: 0;
   height: 100vh;
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
   margin: 0;
-  box-shadow: none;
-  transition: width 0.25s ease, transform 0.25s ease;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
+  transition: width 220ms ease-in-out, transform 220ms ease-in-out, box-shadow 220ms ease-in-out;
   z-index: 1000;
   user-select: none;
 }
 
 body:not(.admin-portal-body) .app-sidebar.collapsed {
   width: 72px;
+}
+
+@media (min-width: 1024px) {
+  body:not(.admin-portal-body) .app-sidebar.collapsed.expanded {
+    width: 270px !important;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.08);
+  }
+
+  body:not(.admin-portal-body) .app-sidebar.collapsed.expanded .brand-text-container,
+  body:not(.admin-portal-body) .app-sidebar.collapsed.expanded .app-sidebar-link span {
+    opacity: 1 !important;
+    display: inline-block !important;
+    width: auto !important;
+  }
+
+  body:not(.admin-portal-body) .app-main {
+    margin-left: 72px;
+    transition: margin-left 220ms ease-in-out;
+  }
 }
 
 .brand-emblems-wrap {
