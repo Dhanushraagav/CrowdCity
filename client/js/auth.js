@@ -1608,7 +1608,7 @@ function updateAuthUI() {
           </div>
           <div class="brand-text-container">
             <span class="brand-title">CrowdCity AI</span>
-            <span class="brand-subtitle">Citizen Portal &bull; Coimbatore</span>
+            <span class="brand-subtitle">Citizen Portal</span>
           </div>
         </a>
       </div>
