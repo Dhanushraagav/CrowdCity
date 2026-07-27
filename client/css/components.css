@@ -1847,19 +1847,20 @@ body:not(.admin-portal-body) .page-inner {
 /* Dashboard Two-Column Grid */
 .dash-two-col {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
   width: 100%;
+  align-items: start;
 }
 
 .dash-card {
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-md, 12px);
-  padding: 1.5rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
