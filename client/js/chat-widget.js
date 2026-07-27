@@ -594,43 +594,56 @@
     triggerBtn.addEventListener('click', toggleChatWindow);
     document.body.appendChild(triggerBtn);
 
-    // 2.5 Create AI Assistant Welcome Popup Card
-    const calloutEl = document.createElement('div');
-    calloutEl.id = 'cc-chat-callout';
-    calloutEl.innerHTML = `
-      <div class="cc-callout-topbar">
-        <div class="cc-callout-topbar-left">
-          <i class="fa-solid fa-headset"></i>
-          <span>Civic Helpdesk</span>
+    // 2.5 Create Civic Helpdesk Welcome Popup — shows after auth loads
+    function showCivicHelpPopup() {
+      if (sessionStorage.getItem('cc_callout_dismissed')) return;
+      if (document.getElementById('cc-chat-callout')) return;
+
+      // Get logged-in user name
+      let userName = 'Citizen';
+      try {
+        const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+        if (user) {
+          const cachedProfile = typeof window.cc_cached_profile !== 'undefined' ? window.cc_cached_profile : null;
+          userName = cachedProfile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Citizen';
+        }
+      } catch(e) {}
+
+      const calloutEl = document.createElement('div');
+      calloutEl.id = 'cc-chat-callout';
+      calloutEl.innerHTML = `
+        <div class="cc-callout-topbar">
+          <div class="cc-callout-topbar-left">
+            <i class="fa-solid fa-headset"></i>
+            <span>Civic Helpdesk</span>
+          </div>
+          <button type="button" class="cc-callout-close" aria-label="Dismiss">&times;</button>
         </div>
-        <button type="button" class="cc-callout-close" aria-label="Dismiss">&times;</button>
-      </div>
-      <div class="cc-callout-body">
-        Have a question or need to report an issue? Our AI assistant can help you with complaints, services, and more.
-      </div>
-      <button type="button" class="cc-callout-action">
-        <i class="fa-solid fa-comment-dots"></i> Chat with AI Assistant
-      </button>
-    `;
+        <div class="cc-callout-body">
+          Hi <strong>${userName}</strong>, welcome to CrowdCity! Need help reporting an issue or tracking a complaint? Our AI assistant is here for you.
+        </div>
+        <button type="button" class="cc-callout-action">
+          <i class="fa-solid fa-comment-dots"></i> Chat with AI Assistant
+        </button>
+      `;
 
-    // Close button - session only dismiss (shows again on next login)
-    calloutEl.querySelector('.cc-callout-close').addEventListener('click', (e) => {
-      e.stopPropagation();
-      calloutEl.style.opacity = '0';
-      calloutEl.style.transform = 'translateY(10px) scale(0.96)';
-      setTimeout(() => { calloutEl.style.display = 'none'; }, 300);
-      sessionStorage.setItem('cc_callout_dismissed', 'true');
-    });
+      calloutEl.querySelector('.cc-callout-close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        calloutEl.style.opacity = '0';
+        calloutEl.style.transform = 'translateY(10px)';
+        setTimeout(() => { calloutEl.style.display = 'none'; }, 300);
+        sessionStorage.setItem('cc_callout_dismissed', 'true');
+      });
 
-    // Action button opens chat
-    calloutEl.querySelector('.cc-callout-action').addEventListener('click', () => {
-      toggleChatWindow();
-    });
+      calloutEl.querySelector('.cc-callout-action').addEventListener('click', () => {
+        toggleChatWindow();
+      });
 
-    // Always show on every login session (sessionStorage clears on tab close)
-    if (!sessionStorage.getItem('cc_callout_dismissed')) {
       document.body.appendChild(calloutEl);
     }
+
+    // Delay popup to allow auth to finish loading the user session
+    setTimeout(showCivicHelpPopup, 1800);
 
     // 3. Create Chat Drawer
     const chatWindow = document.createElement('div');
