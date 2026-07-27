@@ -2266,16 +2266,29 @@ body:not(.admin-portal-body) .app-sidebar {
 }
 
 .emergency-sidebar-link {
-  color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid rgba(220, 38, 38, 0.2) !important;
+  font-weight: 700 !important;
 }
 
-.emergency-sidebar-link:hover {
-  background-color: rgba(220, 38, 38, 0.08) !important;
+.emergency-sidebar-link i {
   color: #b91c1c !important;
 }
 
+.emergency-sidebar-link:hover {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
 .emergency-sidebar-link.active {
-  background-color: rgba(220, 38, 38, 0.12) !important;
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+}
+
+.emergency-sidebar-link.active i {
+  color: #ffffff !important;
 }
 
 .emergency-sidebar-link.active::before {

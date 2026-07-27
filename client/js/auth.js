@@ -1557,7 +1557,7 @@ function updateAuthUI() {
     const header = document.querySelector('.topnav, .app-header-main, .app-header');
     if (!header) return;
 
-    // Remove duplicate logos from top header (keep logo ONLY inside sidebar)
+    // Remove duplicate logos from top header
     const headerLogos = header.querySelectorAll('.app-header-logo-mobile, .logo-container');
     headerLogos.forEach(logo => logo.remove());
 
@@ -1569,23 +1569,27 @@ function updateAuthUI() {
       }
     });
 
+    // Remove old location pill if present
+    const oldLocationPill = header.querySelector('.header-city-indicator');
+    if (oldLocationPill) oldLocationPill.remove();
+
     // Remove old horizontal switcher tabs if present
     const oldLinks = header.querySelectorAll('.topnav-links, #topnav-links');
     oldLinks.forEach(el => el.remove());
 
-    // Inject clean header city indicator on left/middle
-    let cityIndicator = header.querySelector('.header-city-indicator');
-    if (!cityIndicator) {
-      cityIndicator = document.createElement('div');
-      cityIndicator.className = 'header-city-indicator';
-      cityIndicator.style.cssText = 'display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-main, #0f172a); margin-right: auto; background: var(--bg-surface-hover, #f8fafc); padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid var(--border-color, #e2e8f0);';
-      cityIndicator.innerHTML = `<i class="fa-solid fa-location-dot" style="color: #0d9488; font-size: 0.85rem;"></i> <span>Coimbatore, Tamil Nadu</span>`;
+    // Inject clean, balanced Government Portal Title Badge on left/center
+    let portalTitle = header.querySelector('.header-portal-title');
+    if (!portalTitle) {
+      portalTitle = document.createElement('div');
+      portalTitle.className = 'header-portal-title';
+      portalTitle.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 700; color: var(--text-main, #0f172a); margin-right: auto; background: var(--bg-surface-hover, #f8fafc); padding: 0.4rem 0.95rem; border-radius: 12px; border: 1px solid var(--border-color, #e2e8f0);';
+      portalTitle.innerHTML = `<i class="fa-solid fa-building-columns" style="color: #0d9488; font-size: 0.9rem;"></i> <span>Citizen Portal</span>`;
 
       const rightContainer = header.querySelector('.topnav-right, .app-header-actions, #auth-nav-container');
       if (rightContainer && rightContainer.parentNode === header) {
-        header.insertBefore(cityIndicator, rightContainer);
+        header.insertBefore(portalTitle, rightContainer);
       } else {
-        header.insertBefore(cityIndicator, header.firstChild);
+        header.insertBefore(portalTitle, header.firstChild);
       }
     }
   };
@@ -1642,7 +1646,7 @@ function updateAuthUI() {
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
           <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>
         </a>
-        <a href="emergency-services.html" class="app-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
           <i class="fa-solid fa-truck-medical"></i> <span>Emergency Help Center</span>
         </a>
         <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
