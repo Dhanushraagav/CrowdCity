@@ -590,58 +590,37 @@
 </head>
 <body>
 
-  <!-- ============================
-       Top Navigation Bar (Stitch)
-       ============================ -->
-  <nav class="topnav" id="topnav">
-    <a href="citizen-dashboard.html" style="display: flex; align-items: center; gap: 0.65rem; text-decoration: none;" class="topnav-logo">
-        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 30px; height: 30px; flex-shrink: 0; object-fit: contain;" />
-        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
-          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
-          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
-        </div></a>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar"></aside>
 
-    <!-- Desktop nav links -->
-    <div class="topnav-links" id="topnav-links">
-      <a href="citizen-dashboard.html" class="topnav-link" id="nav-dashboard" data-i18n="dashboard">Dashboard</a>
-      <a href="report.html" class="topnav-link active" id="nav-report" data-i18n="report_issue">Report Issue</a>
-      <a href="my-complaints.html" class="topnav-link" id="nav-complaints" data-i18n="my_complaints">My Complaints</a>
-      <a href="map.html" class="topnav-link" id="nav-map" data-i18n="map">Map</a>
-      <a href="helplines.html" class="topnav-link" id="nav-helplines" data-i18n="district_helplines">District Helplines</a>
-      <a href="ministers.html" class="topnav-link" id="nav-ministers" data-i18n="nav_ministers">Council of Ministers</a>
-    </div>
+    <!-- Main Content -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+          </div>
+        </a>
 
-    <!-- Right icons -->
-    <div class="topnav-right">
-      <!-- User Avatar, Bell & Auth (populated dynamically by auth.js) -->
-      <div id="auth-nav-container"></div>
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
 
-      <!-- Mobile hamburger -->
-      <button class="topnav-hamburger" id="topnav-hamburger" aria-label="Toggle menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </div>
-  </nav>
+        <div class="app-header-actions" style="margin-left: auto;">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
 
-  <!-- Mobile drawer (populated by JS below) -->
-  <div class="topnav-mobile-drawer" id="topnav-mobile-drawer">
-    <a href="citizen-dashboard.html" class="topnav-link" data-i18n="dashboard">Dashboard</a>
-    <a href="report.html" class="topnav-link active" data-i18n="report_issue">Report Issue</a>
-    <a href="my-complaints.html" class="topnav-link" data-i18n="my_complaints">My Complaints</a>
-    <a href="map.html" class="topnav-link" data-i18n="map">Map</a>
-    <a href="helplines.html" class="topnav-link" data-i18n="district_helplines">District Helplines</a>
-    <a href="ministers.html" class="topnav-link" data-i18n="nav_ministers">Council of Ministers</a>
-    <div style="border-top: 1px solid var(--border-color); margin-top: 0.75rem; padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem;">
-      <a href="settings.html" class="topnav-link" data-i18n="settings">Settings</a>
-      <button onclick="logoutUser()" class="topnav-link" style="border: none; background: none; text-align: left; cursor: pointer; color: #ef4444;" data-i18n="logout">Logout</button>
-    </div>
-  </div>
-
-  <!-- ============================
-       Page Content
-       ============================ -->
-  <div class="page-wrapper">
-    <div class="page-inner">
+      <!-- Page Content -->
+      <div class="app-content-body">
+        <div class="page-wrapper">
+          <div class="page-inner">
 
       <!-- Page Header -->
       <div class="report-page-header">
@@ -923,6 +902,9 @@
         </p>
       </div>
 
+    </div>
+  </div>
+      </div>
     </div>
   </div>
 

@@ -2393,6 +2393,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   display: flex;
   align-items: center;
   gap: 1.25rem;
+  margin-left: auto;
 }
 
 .app-header-icon-btn {

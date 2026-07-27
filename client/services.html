@@ -119,57 +119,39 @@
     <!-- Main Content Area -->
     <main class="app-main">
       <header class="app-header-main">
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <a href="citizen-dashboard.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
-              <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <h1 data-i18n="citizen_services_dashboard" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Citizen Services Dashboard</h1>
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
           </div>
+        </a>
 
-          <!-- Notification Bell -->
-          <div style="position: relative;">
-            <button id="btn-notification-bell" type="button" class="btn btn-secondary" style="width: 40px; height: 40px; border-radius: 10px; padding: 0; display: flex; align-items: center; justify-content: center;">
-              <i class="fa-solid fa-bell"></i>
-            </button>
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
 
-            <!-- Notification Dropdown Menu -->
-            <div id="notification-dropdown-menu" style="display: none; position: absolute; right: 0; top: 50px; width: 300px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 999;">
-              <div data-i18n="nav_notifications" style="padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; font-weight: 800; color: var(--text-main);">
-                Notifications
-              </div>
-              <!-- Dynamically populated -->
-            </div>
+        <div class="app-header-actions" style="margin-left: auto;">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
           </div>
         </div>
       </header>
 
       <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%;">
         
-        <!-- Profile Summary Hero Banner -->
-        <div class="dash-hero-banner">
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <span data-i18n="citizen_portal" style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
-                Citizen Portal
-              </span>
-              <h2 id="dash-user-name" style="font-size: 1.7rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui);">
-                Citizen User
-              </h2>
-              <p id="dash-user-location" style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">
-                Chennai District, Tamil Nadu
-              </p>
-            </div>
-
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem 1.4rem; min-width: 200px;">
-              <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.4rem;">
-                <span data-i18n="profile_status">Profile Status</span>
-                <span id="dash-profile-completion" style="color: var(--primary);">85% Complete</span>
-              </div>
-              <div style="background: var(--bg-app); border-radius: 999px; height: 8px; overflow: hidden; border: 1px solid var(--border-color);">
-                <div id="dash-profile-progress-bar" style="background: var(--primary); height: 100%; width: 85%; transition: width 0.3s ease;"></div>
-              </div>
-            </div>
+        <!-- Hero Banner -->
+        <div class="dash-hero-banner" style="padding: 1.5rem 2rem; margin-bottom: 1.5rem;">
+          <div>
+            <span data-i18n="citizen_portal" style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
+              Citizen Portal
+            </span>
+            <h2 id="dash-user-name" style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui);">
+              Government Services
+            </h2>
+            <p id="dash-user-location" style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
+              Access government welfare schemes, document verification, and AI assistance.
+            </p>
           </div>
         </div>
 
