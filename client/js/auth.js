@@ -1588,6 +1588,7 @@ function updateAuthUI() {
     const isReport = path.includes('report') && !path.includes('reports');
     const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
     const isMap = path.includes('map');
+    const isTransportation = path.includes('transportation');
     const isEmergency = path.includes('emergency-services');
     const isServices = path.includes('services') && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
@@ -1626,6 +1627,9 @@ function updateAuthUI() {
         </a>
         <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
           <i class="fa-solid fa-map-location-dot"></i> <span>Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link ${isTransportation ? 'active' : ''}" title="Transportation">
+          <i class="fa-solid fa-car-side"></i> <span>Transportation</span>
         </a>
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
           <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>

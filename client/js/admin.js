@@ -1486,10 +1486,147 @@
     // Lazy load initialization
     if (tabId === 'dashboard') window.DashboardService.init();
     else if (tabId === 'complaints') window.ComplaintService.init();
+    else if (tabId === 'transportation') window.TransportationService.init();
     else if (tabId === 'services') window.GovernmentService.init();
     else if (tabId === 'users') window.UserService.init();
     else if (tabId === 'settings') window.SettingsService.init();
   }
+
+  // ----------------------------------------------------
+  // TRANSPORTATION MODULE SERVICE (v3.2)
+  // ----------------------------------------------------
+  window.TransportationService = {
+    initialized: false,
+    reports: [],
+
+    async init() {
+      if (!this.initialized) {
+        this.bindListeners();
+        this.initialized = true;
+      }
+      await this.loadReports();
+    },
+
+    bindListeners() {
+      const searchInput = document.getElementById('admin-trans-search');
+      const catFilter = document.getElementById('admin-trans-filter-category');
+      const statusFilter = document.getElementById('admin-trans-filter-status');
+      const priorityFilter = document.getElementById('admin-trans-filter-priority');
+
+      let debounce = null;
+      if (searchInput) {
+        searchInput.oninput = () => {
+          clearTimeout(debounce);
+          debounce = setTimeout(() => this.loadReports(), 300);
+        };
+      }
+
+      if (catFilter) catFilter.onchange = () => this.loadReports();
+      if (statusFilter) statusFilter.onchange = () => this.loadReports();
+      if (priorityFilter) priorityFilter.onchange = () => this.loadReports();
+    },
+
+    async loadReports() {
+      const tbody = document.getElementById('admin-trans-table-body');
+      if (!tbody) return;
+
+      const category = document.getElementById('admin-trans-filter-category')?.value || 'All';
+      const status = document.getElementById('admin-trans-filter-status')?.value || 'All';
+      const priority = document.getElementById('admin-trans-filter-priority')?.value || 'All';
+      const search = document.getElementById('admin-trans-search')?.value || '';
+
+      try {
+        const res = await window.API.getTransportationReports({ category, status, priority, search });
+        if (res && res.reports) {
+          this.reports = res.reports;
+          this.renderTable(this.reports);
+        }
+      } catch (err) {
+        console.error('Error loading admin transportation reports:', err);
+        tbody.innerHTML = `<tr><td colspan="7" style="padding: 1.5rem; text-align: center; color: #ef4444;">Failed to load reports. Please try again.</td></tr>`;
+      }
+    },
+
+    renderTable(reports) {
+      const tbody = document.getElementById('admin-trans-table-body');
+      if (!tbody) return;
+
+      if (!reports || reports.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">No transportation reports match current filters.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = reports.map(r => `
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 0.85rem 1rem; font-weight: 800; color: var(--primary);">${escapeHTML(r.report_number || r.id)}</td>
+          <td style="padding: 0.85rem 1rem;">
+            <div style="font-weight: 700; color: var(--text-main);">${escapeHTML(r.title)}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(r.category)}</div>
+          </td>
+          <td style="padding: 0.85rem 1rem;">
+            <span class="priority-pill priority-${(r.priority || 'Medium').toLowerCase()}">${escapeHTML(r.priority || 'Medium')}</span>
+          </td>
+          <td style="padding: 0.85rem 1rem; font-size: 0.78rem; font-weight: 600;">${escapeHTML(r.responsible_department || 'Roads Dept')}</td>
+          <td style="padding: 0.85rem 1rem; font-size: 0.78rem;">${escapeHTML(r.assigned_to || 'Unassigned')}</td>
+          <td style="padding: 0.85rem 1rem;">
+            <span class="status-badge status-${(r.status || 'submitted').toLowerCase().replace(' ', '-')}">${escapeHTML(r.status)}</span>
+          </td>
+          <td style="padding: 0.85rem 1rem; text-align: right;">
+            <button onclick="openTransModal('${escapeHTML(r.id)}')" class="btn btn-outline" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 6px;">
+              <i class="fa-solid fa-pen-to-square"></i> Manage
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  };
+
+  window.openTransModal = function(id) {
+    const report = window.TransportationService.reports.find(r => r.id === id || r.report_number === id);
+    if (!report) return;
+
+    document.getElementById('trans-report-id-input').value = report.id;
+    document.getElementById('trans-modal-id').textContent = '#' + (report.report_number || report.id);
+    document.getElementById('trans-update-status').value = report.status || 'Submitted';
+    document.getElementById('trans-update-engineer').value = report.assigned_to || '';
+    document.getElementById('trans-update-remarks').value = '';
+    document.getElementById('trans-update-photo').value = '';
+
+    const modal = document.getElementById('modal-update-transportation');
+    if (modal) modal.classList.add('active');
+  };
+
+  window.closeTransModal = function() {
+    const modal = document.getElementById('modal-update-transportation');
+    if (modal) modal.classList.remove('active');
+  };
+
+  window.handleTransUpdateSubmit = async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('trans-report-id-input').value;
+    const status = document.getElementById('trans-update-status').value;
+    const assigned_to = document.getElementById('trans-update-engineer').value;
+    const remarks = document.getElementById('trans-update-remarks').value;
+    const photo = document.getElementById('trans-update-photo').value;
+
+    try {
+      const res = await window.API.updateTransportationReportStatus(id, {
+        status,
+        assigned_to,
+        remarks,
+        completion_photo_url: photo
+      });
+
+      if (res && res.success) {
+        showToast(`Transportation report ${res.report.report_number || id} updated successfully!`, 'success');
+        closeTransModal();
+        await window.TransportationService.loadReports();
+      }
+    } catch (err) {
+      console.error('Error updating transportation report:', err);
+      showToast('Failed to update report status.', 'error');
+    }
+  };
 
   // ----------------------------------------------------
   // REPORT EXPORT TRIGGERS BINDING

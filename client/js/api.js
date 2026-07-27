@@ -281,6 +281,37 @@ const API = {
     });
   },
 
+  // 32. Transportation Module APIs (v3.2)
+  getTransportationReports: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/transportation/reports${query ? '?' + query : ''}`, { method: 'GET' });
+  },
+
+  getTransportationReportById: async (id) => {
+    return request(`/transportation/reports/${id}`, { method: 'GET' });
+  },
+
+  createTransportationReport: async (reportData) => {
+    return request('/transportation/reports', {
+      method: 'POST',
+      body: JSON.stringify(reportData)
+    });
+  },
+
+  updateTransportationReportStatus: async (id, updateData) => {
+    return request(`/transportation/reports/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData)
+    });
+  },
+
+  analyzeTransportationIssue: async (data) => {
+    return request('/transportation/analyze', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
   // 32. Get AI decisions data comparison (Admin Only)
   getAiDecisions: async () => {
     return request('/issues/admin/ai-decisions', { method: 'GET' });
