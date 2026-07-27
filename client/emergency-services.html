@@ -35,32 +35,32 @@
   </div>
 
   <div class="app-layout">
-    <!-- Top Header -->
-    <header class="app-header-main topnav" id="app-header">
-      <div class="topnav-left" style="display: flex; align-items: center; gap: 0.5rem;">
-        <a href="citizen-dashboard.html" class="topnav-logo app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
-          <div style="display: flex; align-items: center; gap: 0.45rem;">
-            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
-            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 30px; height: 30px; object-fit: contain;" />
-          </div>
-        </a>
-      </div>
-
-      <!-- Top Navigation Page Switcher Tabs -->
-      <div class="topnav-links" id="topnav-links">
-        <!-- Dynamically sync'd by auth.js -->
-      </div>
-
-      <!-- Right Header Actions -->
-      <div class="app-header-actions topnav-right" id="auth-nav-container">
-        <!-- Dynamically populated by auth.js -->
-      </div>
-    </header>
+    <!-- Sidebar -->
+    <aside class="app-sidebar"></aside>
 
     <!-- Main Content Container -->
-    <main class="app-main emergency-page-container">
-      
+    <div class="app-main emergency-page-container">
+      <!-- Top Header -->
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+          </div>
+        </a>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions" style="margin-left: auto;">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
       <!-- HERO SECTION -->
       <section class="emergency-hero-section">
         <div class="emergency-hero-content">
