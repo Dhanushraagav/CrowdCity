@@ -4418,6 +4418,47 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   border-color: #94a3b8;
 }
 
+/* ==========================================================================
+   Report Issue Map Selector Styles
+   ========================================================================== */
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  min-height: 280px;
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  border: 1px solid var(--border-color, #e2e8f0);
+  margin-top: 0.75rem;
+  margin-bottom: 0.85rem;
+  background: var(--bg-surface-hover, #f8fafc);
+  z-index: 1;
+}
+
+#map-selector {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  z-index: 1;
+}
+
+.map-pin-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 1000;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
 
 
 

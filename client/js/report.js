@@ -152,6 +152,13 @@ function initReportMap() {
     setCoordinates(e.latlng.lat, e.latlng.lng);
   });
 
+  // Force Leaflet map to redraw after container height is set
+  setTimeout(() => {
+    if (reportMap) {
+      reportMap.invalidateSize();
+    }
+  }, 200);
+
   // Resize handling to ensure Leaflet maps redraw correctly on mobile/window resize
   window.addEventListener('resize', () => {
     if (reportMap) {
