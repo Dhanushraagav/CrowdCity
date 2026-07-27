@@ -1632,48 +1632,40 @@ function updateAuthUI() {
       <div class="sidebar-divider"></div>
 
       <nav class="app-sidebar-nav">
-        <!-- MAIN GROUP -->
-        <div class="sidebar-group-header">Main</div>
-        <a href="citizen-dashboard.html" class="app-sidebar-link ${isDashboard ? 'active' : ''}" title="Dashboard" data-title="Dashboard">
+        <a href="citizen-dashboard.html" class="app-sidebar-link ${isDashboard ? 'active' : ''}" title="Dashboard">
           <i class="fa-solid fa-house-chimney"></i> <span>Dashboard</span>
         </a>
-        <a href="report.html" class="app-sidebar-link ${isReport ? 'active' : ''}" title="Report Issue" data-title="Report Issue">
-          <i class="fa-solid fa-triangle-exclamation"></i> <span>Report Issue</span>
-        </a>
-        <a href="my-complaints.html" class="app-sidebar-link ${isComplaints ? 'active' : ''}" title="My Complaints" data-title="My Complaints">
-          <i class="fa-solid fa-clipboard-list"></i> <span>My Complaints</span>
-        </a>
-        <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="City Map" data-title="City Map">
-          <i class="fa-solid fa-map-location-dot"></i> <span>City Map</span>
-        </a>
-
-        <!-- SERVICES GROUP -->
-        <div class="sidebar-group-header">Services</div>
-        <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Govt Services" data-title="Government Services">
+        <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
           <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>
         </a>
-        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center" data-title="Emergency Help Center">
+        <a href="report.html" class="app-sidebar-link ${isReport ? 'active' : ''}" title="Report Issue">
+          <i class="fa-solid fa-triangle-exclamation"></i> <span>Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link ${isComplaints ? 'active' : ''}" title="My Complaints">
+          <i class="fa-solid fa-clipboard-list"></i> <span>My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
+          <i class="fa-solid fa-map-location-dot"></i> <span>Map</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
           <i class="fa-solid fa-truck-medical"></i> <span>Emergency Help Center</span>
         </a>
-        <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines" data-title="District Helplines">
+        <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
           <i class="fa-solid fa-phone-volume"></i> <span>District Helplines</span>
         </a>
-        <a href="ministers.html" class="app-sidebar-link ${isMinisters ? 'active' : ''}" title="Council of Ministers" data-title="Council of Ministers">
+        <a href="ministers.html" class="app-sidebar-link ${isMinisters ? 'active' : ''}" title="Council of Ministers">
           <i class="fa-solid fa-user-tie"></i> <span>Council of Ministers</span>
         </a>
-        <a href="my-documents.html" class="app-sidebar-link ${isDocuments ? 'active' : ''}" title="Documents" data-title="Documents">
+        <a href="my-documents.html" class="app-sidebar-link ${isDocuments ? 'active' : ''}" title="Documents">
           <i class="fa-solid fa-file-contract"></i> <span>Documents</span>
         </a>
-
-        <!-- ACCOUNT GROUP -->
-        <div class="sidebar-group-header">Account</div>
-        <a href="notifications.html" class="app-sidebar-link ${isNotifications ? 'active' : ''}" title="Notifications" data-title="Notifications">
+        <a href="notifications.html" class="app-sidebar-link ${isNotifications ? 'active' : ''}" title="Notifications">
           <i class="fa-regular fa-bell"></i> <span>Notifications</span>
         </a>
-        <a href="profile.html" class="app-sidebar-link ${isProfile ? 'active' : ''}" title="Profile" data-title="Profile">
+        <a href="profile.html" class="app-sidebar-link ${isProfile ? 'active' : ''}" title="Profile">
           <i class="fa-regular fa-user"></i> <span>Profile</span>
         </a>
-        <a href="settings.html" class="app-sidebar-link ${isSettings ? 'active' : ''}" title="Settings" data-title="Settings">
+        <a href="settings.html" class="app-sidebar-link ${isSettings ? 'active' : ''}" title="Settings">
           <i class="fa-solid fa-gear"></i> <span>Settings</span>
         </a>
       </nav>

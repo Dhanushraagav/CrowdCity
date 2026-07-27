@@ -2078,24 +2078,28 @@ body:not(.admin-portal-body) .page-inner {
 }
 
 /* ==========================================================================
-   CrowdCity AI v3.5 - Ultra-Premium Floating Sidebar System
+   CrowdCity AI - Version 1 Official Government Fixed Left Sidebar
    ========================================================================== */
 
 body:not(.admin-portal-body) .app-sidebar {
-  width: 280px;
+  width: 260px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 16px;
+  border-right: 1px solid var(--border-color, #e2e8f0);
+  border-left: none;
+  border-top: none;
+  border-bottom: none;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   padding: 1.25rem 0.85rem;
   flex-shrink: 0;
-  height: calc(100vh - 2rem);
+  height: 100vh;
   position: sticky;
-  top: 1rem;
-  margin: 1rem 0 1rem 1rem;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.03);
-  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  top: 0;
+  left: 0;
+  margin: 0;
+  box-shadow: none;
+  transition: width 0.25s ease, transform 0.25s ease;
   z-index: 1000;
   user-select: none;
 }
@@ -2117,21 +2121,6 @@ body:not(.admin-portal-body) .app-sidebar.collapsed {
   object-fit: contain;
 }
 
-.sidebar-group-header {
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: var(--text-muted, #94a3b8);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.85rem 0.85rem 0.35rem 0.85rem;
-  transition: opacity 0.2s ease;
-}
-
-body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
-  opacity: 0;
-  display: none;
-}
-
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -2148,8 +2137,8 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
 }
 
 .app-sidebar-logo .brand-emblem {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -2180,13 +2169,13 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
 .sidebar-collapse-btn {
   background: var(--bg-surface-hover, #f8fafc);
   border: 1px solid var(--border-color, #cbd5e1);
-  border-radius: 8px;
-  width: 28px;
-  height: 28px;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted, #64748b);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -2194,7 +2183,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
 }
 
 .sidebar-collapse-btn:hover {
-  background: var(--primary-light-alpha, rgba(13, 148, 136, 0.1));
+  background: rgba(13, 148, 136, 0.1);
   color: var(--primary, #0d9488);
   border-color: var(--primary, #0d9488);
 }
@@ -2229,12 +2218,12 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
   align-items: center;
   gap: 0.85rem;
   padding: 0.7rem 0.85rem;
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted, #475569);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.88rem;
-  border-radius: var(--radius-md, 10px);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
   background: transparent;
   border: none;
   width: 100%;
@@ -2248,7 +2237,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
   width: 22px;
   text-align: center;
   flex-shrink: 0;
-  transition: transform 0.18s ease, color 0.18s ease;
+  transition: transform 0.15s ease;
 }
 
 .app-sidebar-link span {
@@ -2258,21 +2247,19 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .sidebar-group-header {
 }
 
 .app-sidebar-link:hover {
-  color: var(--primary, #0d9488);
+  color: var(--text-main, #0f172a);
   background-color: var(--bg-surface-hover, #f8fafc);
-  transform: translateX(4px) scale(1.02);
 }
 
 .app-sidebar-link:hover i {
-  transform: scale(1.15);
+  transform: translateX(2px);
 }
 
 .app-sidebar-link.active {
   color: #ffffff !important;
   background-color: var(--primary, #0d9488) !important;
   font-weight: 700;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+  border-radius: 8px;
 }
 
 .app-sidebar-link.active i {
