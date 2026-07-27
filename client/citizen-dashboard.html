@@ -180,78 +180,8 @@
           </div>
         </div>
 
-        <!-- Dashboard Main Sections Wrapper -->
-        <div class="dash-sections-wrapper">
-          
-          <!-- SECTION 1 & 2: Recent Complaint Activity & My Active Complaints -->
-          <div class="dash-two-col">
-            
-            <!-- Section 1: Recent Complaint Activity Feed -->
-            <div class="dash-card">
-              <div class="dash-card-header">
-                <h3 class="dash-card-title"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Complaint Activity</h3>
-                <a href="my-complaints.html" class="dash-card-link">View All <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i></a>
-              </div>
-              <div class="activity-list" id="dash-recent-activity-list">
-                <!-- Dynamically Populated by citizen-dashboard.js -->
-              </div>
-            </div>
-
-            <!-- Section 2: My Active Complaints Summary -->
-            <div class="dash-card">
-              <div class="dash-card-header">
-                <h3 class="dash-card-title"><i class="fa-solid fa-list-check" style="color: #2563eb;"></i> My Active Complaints</h3>
-                <a href="my-complaints.html" class="dash-card-link">Track Details</a>
-              </div>
-              <div class="activity-list" id="dash-my-active-list">
-                <!-- Dynamically Populated by citizen-dashboard.js -->
-              </div>
-            </div>
-
-          </div>
-
-          <!-- SECTION 3 & 5: City Announcements & Government Updates -->
-          <div class="dash-two-col">
-            
-            <!-- Section 3: City Announcements & Bulletins -->
-            <div class="dash-card">
-              <div class="dash-card-header">
-                <h3 class="dash-card-title"><i class="fa-solid fa-bullhorn" style="color: #ea580c;"></i> City Announcements & Notices</h3>
-                <span style="font-size: 0.78rem; color: var(--text-muted);" id="city-corp-name">City Corporation</span>
-              </div>
-              <div class="announcements-list" id="dash-announcements-list">
-                <!-- Dynamically Populated by citizen-dashboard.js -->
-              </div>
-            </div>
-
-            <!-- Section 5: Government Schemes & Welfare Updates -->
-            <div class="dash-card">
-              <div class="dash-card-header">
-                <h3 class="dash-card-title"><i class="fa-solid fa-building-columns" style="color: #7c3aed;"></i> Govt Welfare Updates</h3>
-                <a href="services.html#schemes" class="dash-card-link">Explore Schemes</a>
-              </div>
-              <div class="announcements-list" id="dash-schemes-list">
-                <!-- Dynamically Populated by citizen-dashboard.js -->
-              </div>
-            </div>
-
-          </div>
-
-          <!-- SECTION 4: Nearby Issues & City Map Link -->
-          <div class="dash-card">
-            <div class="dash-card-header">
-              <h3 class="dash-card-title"><i class="fa-solid fa-map-location-dot" style="color: #059669;"></i> Nearby Community Issues</h3>
-              <a href="map.html" class="dash-card-link">Open Full City Map <i class="fa-solid fa-arrow-right" style="font-size: 0.75rem;"></i></a>
-            </div>
-            <div class="nearby-preview-grid" id="dash-nearby-issues-grid">
-              <!-- Dynamically Populated by citizen-dashboard.js -->
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Stitch Stats Grid -->
-        <div class="stitch-stats-grid">
+        <!-- Stitch Stats Grid (Core Dashboard Statistics) -->
+        <div class="stitch-stats-grid" style="margin-bottom: 1.5rem;">
           <div class="stitch-stat-card">
             <span class="stitch-stat-label" data-i18n="reports_submitted">Reports Submitted</span>
             <div class="stitch-stat-value-row">
@@ -277,6 +207,35 @@
             <div class="stitch-stat-value-row">
               <span class="stitch-stat-value" id="stat-community-rank"></span>
             </div>
+          </div>
+        </div>
+
+        <!-- Operational Core Cards: Recent Complaint Activity & My Active Complaints -->
+        <div class="dash-sections-wrapper" style="margin-bottom: 1.5rem;">
+          <div class="dash-two-col">
+            
+            <!-- Section 1: Recent Complaint Activity Feed -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3 class="dash-card-title"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Complaint Activity</h3>
+                <a href="my-complaints.html" class="dash-card-link">View All <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i></a>
+              </div>
+              <div class="activity-list" id="dash-recent-activity-list">
+                <!-- Dynamically Populated by citizen-dashboard.js -->
+              </div>
+            </div>
+
+            <!-- Section 2: My Active Complaints Summary -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3 class="dash-card-title"><i class="fa-solid fa-list-check" style="color: #2563eb;"></i> My Active Complaints</h3>
+                <a href="my-complaints.html" class="dash-card-link">Track Details</a>
+              </div>
+              <div class="activity-list" id="dash-my-active-list">
+                <!-- Dynamically Populated by citizen-dashboard.js -->
+              </div>
+            </div>
+
           </div>
         </div>
 
