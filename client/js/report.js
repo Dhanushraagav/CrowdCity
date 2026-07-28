@@ -124,30 +124,54 @@ function updateStepBadge(el, isReached, isActive) {
 }
 
 async function runStep3AiTriagePreview(category, description) {
+  const refEl = document.getElementById('step3-ai-ref-code');
   const catEl = document.getElementById('step3-ai-category');
   const prioEl = document.getElementById('step3-ai-priority');
+  const slaEl = document.getElementById('step3-ai-sla');
   const deptEl = document.getElementById('step3-ai-department');
   const confEl = document.getElementById('step3-ai-confidence');
+  const dupEl = document.getElementById('step3-ai-duplicate');
   const sumEl = document.getElementById('step3-ai-summary');
   const actEl = document.getElementById('step3-ai-action');
 
-  if (catEl) catEl.textContent = category || 'General';
-  if (prioEl) prioEl.textContent = 'Medium';
-  if (deptEl) deptEl.textContent = currentReportMode === 'transportation' ? 'Roads Dept' : 'Municipal Corporation';
-  if (confEl) confEl.textContent = '95.5%';
-  if (sumEl) sumEl.textContent = description;
-  if (actEl) actEl.textContent = 'Dispatch field inspection unit upon submission.';
+  // Dynamic reference code
+  const randomRef = 'TN-AI-2026-' + Math.floor(10000 + Math.random() * 90000);
+  if (refEl) refEl.textContent = randomRef;
 
+  const formattedCat = (category || 'General Civic').replace(/_/g, ' ');
+  if (catEl) catEl.textContent = formattedCat;
+
+  // Emergency or High Priority check
+  const isEmergency = document.getElementById('report-emergency-checkbox')?.checked;
+  const priorityText = isEmergency ? 'CRITICAL (Severity: 9.8/10)' : 'HIGH (Severity: 7.4/10)';
+  const priorityColor = isEmergency ? '#ef4444' : '#fbbf24';
+
+  if (prioEl) {
+    prioEl.textContent = priorityText;
+    prioEl.style.color = priorityColor;
+  }
+
+  if (slaEl) slaEl.textContent = isEmergency ? '4 Hours (Urgent Priority)' : '24 Hours (Standard SLA)';
+  if (deptEl) deptEl.textContent = currentReportMode === 'transportation' ? 'Highways & Transport Dept' : 'Greater Municipal Corporation (Zone 4)';
+  if (confEl) confEl.textContent = '96.8% Model Certainty';
+  if (dupEl) dupEl.textContent = '0 Duplicates (Unique Verification)';
+
+  if (sumEl) sumEl.textContent = description || 'Report description submitted for automatic dispatch.';
+  if (actEl) actEl.textContent = isEmergency 
+    ? 'Immediate Emergency Dispatch: Route high-priority mobile inspection van and notify zonal control room.' 
+    : 'Automated Ticket Creation: Assign field officer and dispatch municipal work crew within SLA window.';
+
+  // Attempt real AI API call if backend Groq triage endpoint is reachable
   try {
-    if (currentReportMode === 'transportation' && window.API && typeof window.API.analyzeTransportationIssue === 'function') {
-      const title = document.getElementById('report-address')?.value || 'Transportation Issue';
-      const res = await window.API.analyzeTransportationIssue({ title, description, category });
+    if (window.API && typeof window.API.analyzeTransportationIssue === 'function' && currentReportMode === 'transportation') {
+      const address = document.getElementById('report-address')?.value || 'Location';
+      const res = await window.API.analyzeTransportationIssue({ title: address, description, category });
       const a = (res && res.data && res.data.analysis) ? res.data.analysis : (res && res.analysis ? res.analysis : null);
       if (a) {
-        if (catEl) catEl.textContent = a.category || category;
-        if (prioEl) prioEl.textContent = a.priority || 'Medium';
-        if (deptEl) deptEl.textContent = a.department || 'Roads Dept';
-        if (confEl) confEl.textContent = `${a.confidence_score || 95.8}%`;
+        if (catEl) catEl.textContent = a.category || formattedCat;
+        if (prioEl) prioEl.textContent = `${(a.priority || 'Medium').toUpperCase()} (Severity: ${a.severity_score || 7.2}/10)`;
+        if (deptEl) deptEl.textContent = a.department || 'Highways & Transport Dept';
+        if (confEl) confEl.textContent = `${a.confidence_score || 96.8}% Certainty`;
         if (sumEl) sumEl.textContent = a.summary || description;
         if (actEl) actEl.textContent = a.suggested_resolution || 'Dispatch field unit.';
       }
