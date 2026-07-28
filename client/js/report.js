@@ -144,7 +144,7 @@ async function runStep3AiTriagePreview(category, description) {
   // Emergency or High Priority check
   const isEmergency = document.getElementById('report-emergency-checkbox')?.checked;
   const priorityText = isEmergency ? 'CRITICAL (Severity: 9.8/10)' : 'HIGH (Severity: 7.4/10)';
-  const priorityColor = isEmergency ? '#ef4444' : '#fbbf24';
+  const priorityColor = isEmergency ? '#dc2626' : '#b45309';
 
   if (prioEl) {
     prioEl.textContent = priorityText;

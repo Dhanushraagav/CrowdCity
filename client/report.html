@@ -737,88 +737,88 @@
     <div class="wizard-step-pane hidden" id="wizard-step-3" style="background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: var(--radius-lg, 16px); padding: 2.25rem 2rem; box-shadow: var(--shadow-sm);">
       
       <!-- Official Header Banner -->
-      <div style="text-align: center; margin-bottom: 1.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.85rem;">
+      <div style="text-align: center; margin-bottom: 1.75rem; border-bottom: 2px dashed var(--border-color, #cbd5e1); padding-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.85rem; margin-bottom: 0.85rem;">
           <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="width: 38px; height: 38px; object-fit: contain;" />
-          <div style="width: 1px; height: 28px; background: var(--border-color);"></div>
+          <div style="width: 2px; height: 30px; background: var(--border-color, #cbd5e1);"></div>
           <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" style="width: 38px; height: 38px; object-fit: contain;" />
         </div>
 
-        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(13, 148, 136, 0.1); color: #0d9488; font-size: 0.75rem; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.65rem; border: 1px solid rgba(13, 148, 136, 0.2);">
-          <i class="fa-solid fa-brain"></i> Groq AI Llama-3 Neural Classifier Active
+        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #e0f2fe; color: #0369a1; font-size: 0.75rem; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.65rem; border: 1px solid #bae6fd;">
+          <i class="fa-solid fa-shield-halved"></i> Official Government AI Verification Report
         </div>
 
-        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.35rem 0;">
-          Government AI Triage & Verification Hub
+        <h2 style="font-family: var(--font-heading); font-size: 1.55rem; font-weight: 800; color: var(--text-main, #0f172a); margin: 0 0 0.35rem 0;">
+          AI Triage & Department Dispatch Preview
         </h2>
-        <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; max-width: 620px; margin-left: auto; margin-right: auto;">
+        <p style="font-size: 0.88rem; color: var(--text-muted, #64748b); margin: 0; max-width: 620px; margin-left: auto; margin-right: auto;">
           Automated classification, SLA assignment, zonal department routing, and priority verification for Tamil Nadu Smart Cities.
         </p>
       </div>
 
-      <!-- Government AI Insight Card -->
-      <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-radius: 18px; padding: 1.75rem; margin-bottom: 1.75rem; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);">
+      <!-- Government Document Card (Clean Formal White/Light Gray UI) -->
+      <div style="background: #ffffff; color: var(--text-main, #0f172a); border-radius: 16px; padding: 1.75rem; margin-bottom: 1.75rem; box-shadow: var(--shadow-sm, 0 4px 12px rgba(0,0,0,0.05)); border: 1px solid var(--border-color, #cbd5e1);">
         
         <!-- Live AI Status Line -->
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
-          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; color: #34d399;">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #34d399; display: inline-block; animation: pulse-green 2s infinite;"></span>
-            AI NEURAL CLASSIFICATION VERIFIED
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color, #e2e8f0); padding-bottom: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 700; color: #0d9488;">
+            <i class="fa-solid fa-circle-check" style="color: #0d9488;"></i>
+            GROQ AI NEURAL CLASSIFICATION VERIFIED
           </div>
-          <div style="font-size: 0.75rem; color: #94a3b8; font-family: monospace;">
-            Ref Code: <span id="step3-ai-ref-code" style="color: #fbbf24; font-weight: 700;">TN-AI-2026-98412</span>
+          <div style="font-size: 0.78rem; color: var(--text-muted, #64748b); font-weight: 700; background: var(--bg-surface-hover, #f8fafc); padding: 0.25rem 0.65rem; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);">
+            Ref Code: <span id="step3-ai-ref-code" style="color: var(--primary, #0d9488); font-weight: 800;">TN-AI-2026-98412</span>
           </div>
         </div>
 
         <!-- 6-Metric AI Breakdown Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
-          <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.25rem;">Detected Category</span>
-            <span id="step3-ai-category" style="font-weight: 800; color: #38bdf8; font-size: 1rem; text-transform: capitalize;">Analyzing...</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.25rem;">Detected Category</span>
+            <span id="step3-ai-category" style="font-weight: 800; color: var(--text-main, #0f172a); font-size: 1rem; text-transform: capitalize;">Analyzing...</span>
           </div>
 
-          <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.25rem;">Priority & Severity</span>
-            <span id="step3-ai-priority" style="font-weight: 800; color: #fbbf24; font-size: 1rem;">Medium (6.5/10)</span>
+          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.25rem;">Priority & Severity</span>
+            <span id="step3-ai-priority" style="font-weight: 800; color: #b45309; font-size: 1rem;">Medium (6.5/10)</span>
           </div>
 
-          <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.25rem;">Target SLA Resolution</span>
-            <span id="step3-ai-sla" style="font-weight: 800; color: #34d399; font-size: 1rem;">24 Hours</span>
+          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.25rem;">Target SLA Resolution</span>
+            <span id="step3-ai-sla" style="font-weight: 800; color: #0d9488; font-size: 1rem;">24 Hours</span>
           </div>
 
-          <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.25rem;">Zonal Department</span>
-            <span id="step3-ai-department" style="font-weight: 800; color: #f472b6; font-size: 0.95rem;">Municipal Corporation</span>
+          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.25rem;">Zonal Department</span>
+            <span id="step3-ai-department" style="font-weight: 800; color: var(--text-main, #0f172a); font-size: 0.95rem;">Municipal Corporation</span>
           </div>
 
-          <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.25rem;">Model Certainty</span>
-            <span id="step3-ai-confidence" style="font-weight: 800; color: #a78bfa; font-size: 1rem;">96.8%</span>
+          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.25rem;">Model Certainty</span>
+            <span id="step3-ai-confidence" style="font-weight: 800; color: #0369a1; font-size: 1rem;">96.8%</span>
           </div>
 
-          <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.25rem;">Spatial Duplicate Check</span>
-            <span id="step3-ai-duplicate" style="font-weight: 800; color: #38bdf8; font-size: 0.95rem;">0 Duplicates (Unique)</span>
+          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.25rem;">Spatial Duplicate Check</span>
+            <span id="step3-ai-duplicate" style="font-weight: 800; color: #0d9488; font-size: 0.95rem;">0 Duplicates (Unique)</span>
           </div>
         </div>
 
         <!-- AI Executive Summary & Recommended Action -->
-        <div style="background: rgba(0,0,0,0.25); border-radius: 12px; padding: 1.25rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 1rem;">
+        <div style="background: var(--bg-surface-hover, #f8fafc); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border-color, #cbd5e1); display: flex; flex-direction: column; gap: 1rem;">
           <div>
-            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.35rem;">
-              <i class="fa-solid fa-file-lines" style="color: #38bdf8; margin-right: 0.35rem;"></i> AI Executive Summary
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.35rem;">
+              <i class="fa-solid fa-file-lines" style="color: #0369a1; margin-right: 0.35rem;"></i> AI Executive Summary
             </span>
-            <p id="step3-ai-summary" style="margin: 0; font-size: 0.9rem; color: #e2e8f0; line-height: 1.55; font-style: italic;">
+            <p id="step3-ai-summary" style="margin: 0; font-size: 0.9rem; color: var(--text-main, #0f172a); line-height: 1.55; font-weight: 500;">
               Analyzing issue description...
             </p>
           </div>
 
-          <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.85rem;">
-            <span style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.35rem;">
-              <i class="fa-solid fa-user-gear" style="color: #34d399; margin-right: 0.35rem;"></i> Recommended Dispatch & Action Plan
+          <div style="border-top: 1px dashed var(--border-color, #cbd5e1); padding-top: 0.85rem;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.35rem;">
+              <i class="fa-solid fa-user-gear" style="color: #0d9488; margin-right: 0.35rem;"></i> Recommended Dispatch & Action Plan
             </span>
-            <p id="step3-ai-action" style="margin: 0; font-size: 0.9rem; color: #34d399; font-weight: 700; line-height: 1.55;">
+            <p id="step3-ai-action" style="margin: 0; font-size: 0.9rem; color: #0f766e; font-weight: 700; line-height: 1.55;">
               Dispatch field inspection unit upon submission.
             </p>
           </div>
