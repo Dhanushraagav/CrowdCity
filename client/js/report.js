@@ -62,14 +62,12 @@ window.selectReportMode = function(mode) {
 function updateFormModeUI() {
   const pageTitle = document.getElementById('report-page-title');
   const pageDesc = document.getElementById('report-page-desc');
-  const modeIcon = document.getElementById('mode-badge-icon');
   const modeName = document.getElementById('mode-badge-name');
   const categorySelect = document.getElementById('report-category');
 
   if (currentReportMode === 'transportation') {
     if (pageTitle) pageTitle.textContent = 'Report a Transportation Issue';
     if (pageDesc) pageDesc.textContent = 'Report road hazards, damaged pavements, traffic signal outages, or transit infrastructure concerns.';
-    if (modeIcon) modeIcon.textContent = '🚗';
     if (modeName) {
       modeName.textContent = 'Transportation Issue';
       modeName.style.color = '#0284c7';
@@ -84,7 +82,6 @@ function updateFormModeUI() {
   } else {
     if (pageTitle) pageTitle.textContent = 'Report a Civic Issue';
     if (pageDesc) pageDesc.textContent = 'Provide details about the infrastructure or safety concern in your area. Our AI will route it to the appropriate department.';
-    if (modeIcon) modeIcon.textContent = '🏛️';
     if (modeName) {
       modeName.textContent = 'Civic Issue';
       modeName.style.color = 'var(--primary)';
