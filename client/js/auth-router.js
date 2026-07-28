@@ -1100,23 +1100,26 @@ window.authRouter = {
 window.MOBILE_MAINTENANCE = true;
 
 (function initMobileMaintenanceCheck() {
-  function checkAndRenderMobileMaintenance() {
-    if (window.MOBILE_MAINTENANCE === false) {
-      removeMobileMaintenanceUI();
-      return;
-    }
+  function isMobileDevice() {
+    if (window.MOBILE_MAINTENANCE === false) return false;
 
     // Check query parameter override: ?bypass_mobile=true
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('bypass_mobile') === 'true') {
-      removeMobileMaintenanceUI();
-      return;
-    }
+    if (urlParams.get('bypass_mobile') === 'true') return false;
 
-    // Detect mobile viewport (screen width <= 768px in portrait/mobile mode)
-    const isMobileViewport = window.innerWidth <= 768 || (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && window.innerWidth < 1024);
+    // Comprehensive Mobile Detection:
+    // 1. Mobile User-Agent matching
+    // 2. Screen or Viewport width <= 992px
+    // 3. Touch capabilities on screen width <= 1024px
+    const userAgentMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(navigator.userAgent);
+    const screenMobile = window.innerWidth <= 992 || (window.screen && window.screen.width <= 992);
+    const touchMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0) && (window.innerWidth <= 1024);
 
-    if (isMobileViewport) {
+    return userAgentMobile || screenMobile || touchMobile;
+  }
+
+  function checkAndRenderMobileMaintenance() {
+    if (isMobileDevice()) {
       injectMobileMaintenanceUI();
     } else {
       removeMobileMaintenanceUI();
@@ -1124,32 +1127,37 @@ window.MOBILE_MAINTENANCE = true;
   }
 
   function injectMobileMaintenanceUI() {
-    if (!document.body) return;
     if (document.getElementById('mobile-maintenance-overlay')) return;
+    if (!document.body) {
+      setTimeout(injectMobileMaintenanceUI, 50);
+      return;
+    }
 
     const overlay = document.createElement('div');
     overlay.id = 'mobile-maintenance-overlay';
     overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      z-index: 9999999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.5rem;
-      box-sizing: border-box;
-      text-align: center;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      overflow-y: auto;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+      z-index: 99999999 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 2rem 1.5rem !important;
+      box-sizing: border-box !important;
+      text-align: center !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+      overflow-y: auto !important;
     `;
 
     overlay.innerHTML = `
-      <div style="max-width: 440px; width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 24px; padding: 2.25rem 1.75rem; box-shadow: 0 20px 40px rgba(15,23,42,0.12); display: flex; flex-direction: column; align-items: center;">
+      <div style="max-width: 440px; width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 24px; padding: 2.25rem 1.75rem; box-shadow: 0 20px 40px rgba(15,23,42,0.12); display: flex; flex-direction: column; align-items: center; box-sizing: border-box;">
         
         <!-- Logo & Emblems -->
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
@@ -1207,12 +1215,14 @@ window.MOBILE_MAINTENANCE = true;
     if (overlay) overlay.remove();
   }
 
+  // Run initial check immediately & retry on DOM readiness
+  checkAndRenderMobileMaintenance();
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkAndRenderMobileMaintenance);
-  } else {
-    checkAndRenderMobileMaintenance();
   }
-
+  window.addEventListener('load', checkAndRenderMobileMaintenance);
   window.addEventListener('resize', checkAndRenderMobileMaintenance);
+  window.addEventListener('orientationchange', checkAndRenderMobileMaintenance);
 })();
 
