@@ -1,4 +1,6 @@
 let currentComplaintsTab = 'civic'; // 'civic' or 'transportation'
+let lastLoadId = 0;
+let lastLoadedState = { userId: undefined, category: undefined, status: undefined };
 
 window.switchComplaintsTab = function(tab) {
   currentComplaintsTab = tab;
