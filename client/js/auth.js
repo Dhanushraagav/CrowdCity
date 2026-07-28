@@ -1590,7 +1590,10 @@ function updateAuthUI() {
     const isMap = path.includes('map');
     const isTransOverview = path.includes('transportation.html') || (path.includes('transportation') && !path.includes('transportation-report') && !path.includes('my-transportation'));
     const isTransReport = path.includes('transportation-report');
-    const isMyTransReports = path.includes('my-transportation-reports');
+    const isMyTransCases = path.includes('my-transportation-cases') || path.includes('my-transportation-reports');
+    const isTransModule = isTransOverview || isTransReport || isMyTransCases;
+    const isTransExpanded = isTransModule || sessionStorage.getItem('cc_trans_submenu_expanded') === 'true';
+
     const isEmergency = path.includes('emergency-services');
     const isServices = path.includes('services') && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
@@ -1630,15 +1633,30 @@ function updateAuthUI() {
         <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
           <i class="fa-solid fa-map-location-dot"></i> <span>Map</span>
         </a>
-        <a href="transportation.html" class="app-sidebar-link ${isTransOverview ? 'active' : ''}" title="Transportation">
-          <i class="fa-solid fa-car-side"></i> <span>Transportation</span>
-        </a>
-        <a href="transportation-report.html" class="app-sidebar-link ${isTransReport ? 'active' : ''}" title="Report Transportation Issue">
-          <i class="fa-solid fa-road"></i> <span>Report Transport Issue</span>
-        </a>
-        <a href="my-transportation-reports.html" class="app-sidebar-link ${isMyTransReports ? 'active' : ''}" title="My Transportation Reports">
-          <i class="fa-solid fa-list-check"></i> <span>My Transport Cases</span>
-        </a>
+
+        <!-- Parent Transportation Module Dropdown -->
+        <div class="sidebar-dropdown ${isTransExpanded ? 'expanded' : ''}" id="trans-sidebar-dropdown">
+          <div class="sidebar-dropdown-toggle ${isTransModule ? 'active' : ''}">
+            <a href="transportation.html" class="app-sidebar-link ${isTransModule ? 'active' : ''}" style="flex: 1;" title="Transportation">
+              <i class="fa-solid fa-car-side"></i> <span>Transportation</span>
+            </a>
+            <button type="button" class="sidebar-dropdown-arrow" onclick="toggleTransportationSubmenu(event)" title="Expand Transportation Submenu">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+          <div class="sidebar-submenu">
+            <a href="transportation.html" class="app-sidebar-sublink ${isTransOverview ? 'active' : ''}" title="Transportation Dashboard">
+              <i class="fa-solid fa-gauge-high"></i> <span>Transportation Dashboard</span>
+            </a>
+            <a href="transportation-report.html" class="app-sidebar-sublink ${isTransReport ? 'active' : ''}" title="Report Transportation Issue">
+              <i class="fa-solid fa-road"></i> <span>Report Transportation Issue</span>
+            </a>
+            <a href="my-transportation-cases.html" class="app-sidebar-sublink ${isMyTransCases ? 'active' : ''}" title="My Transportation Cases">
+              <i class="fa-solid fa-list-check"></i> <span>My Transportation Cases</span>
+            </a>
+          </div>
+        </div>
+
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
           <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>
         </a>
@@ -1653,6 +1671,24 @@ function updateAuthUI() {
         </a>
       </nav>
     `;
+  };
+
+  window.toggleTransportationSubmenu = function(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const dropdown = document.getElementById('trans-sidebar-dropdown');
+    if (!dropdown) return;
+
+    const isExpanded = dropdown.classList.contains('expanded');
+    if (isExpanded) {
+      dropdown.classList.remove('expanded');
+      sessionStorage.setItem('cc_trans_submenu_expanded', 'false');
+    } else {
+      dropdown.classList.add('expanded');
+      sessionStorage.setItem('cc_trans_submenu_expanded', 'true');
+    }
   };
 
   window.toggleSidebarCollapse = function() {

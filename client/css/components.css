@@ -2322,6 +2322,116 @@ body:not(.admin-portal-body) .app-sidebar {
   color: #991b1b !important;
 }
 
+/* Sidebar Parent Dropdown Item for Transportation Module */
+.sidebar-dropdown {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.sidebar-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.sidebar-dropdown-toggle.active {
+  background-color: rgba(13, 148, 136, 0.12);
+  color: var(--primary, #0d9488);
+}
+
+.sidebar-dropdown-toggle.active .app-sidebar-link {
+  color: var(--primary, #0d9488);
+  font-weight: 700;
+  background: transparent !important;
+}
+
+.sidebar-dropdown-toggle.active .app-sidebar-link i {
+  color: var(--primary, #0d9488) !important;
+}
+
+.sidebar-dropdown-arrow {
+  background: none;
+  border: none;
+  color: var(--text-muted, #475569);
+  padding: 0.7rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-dropdown-arrow:hover {
+  color: var(--text-main, #0f172a);
+}
+
+.sidebar-dropdown.expanded .sidebar-dropdown-arrow i {
+  transform: rotate(180deg);
+}
+
+.sidebar-submenu {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, margin 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-left: 0.85rem;
+  margin-top: 0;
+}
+
+.sidebar-dropdown.expanded .sidebar-submenu {
+  max-height: 250px;
+  opacity: 1;
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.app-sidebar-sublink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-muted, #64748b);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border-left: 2.5px solid var(--border-color, #cbd5e1);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.app-sidebar-sublink i {
+  font-size: 0.85rem;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.app-sidebar-sublink:hover {
+  color: var(--text-main, #0f172a);
+  border-left-color: var(--primary, #0d9488);
+  background-color: var(--bg-surface-hover, #f8fafc);
+}
+
+.app-sidebar-sublink.active {
+  color: var(--primary, #0d9488) !important;
+  border-left-color: var(--primary, #0d9488) !important;
+  background-color: rgba(13, 148, 136, 0.1) !important;
+  font-weight: 700;
+}
+
+.app-sidebar-sublink.active i {
+  color: var(--primary, #0d9488) !important;
+}
+
 .emergency-sidebar-link.active {
   background-color: #dc2626 !important;
   color: #ffffff !important;
