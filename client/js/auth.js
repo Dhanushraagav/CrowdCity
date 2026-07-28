@@ -1599,34 +1599,6 @@ function updateAuthUI() {
     sidebar.onmouseenter = null;
     sidebar.onmouseleave = null;
 
-    // Helper to update active link state without DOM teardown
-    const updateActiveState = (nav) => {
-      const links = nav.querySelectorAll('.app-sidebar-link');
-      links.forEach(link => {
-        const href = (link.getAttribute('href') || '').toLowerCase();
-        let isActive = false;
-        if (href.includes('citizen-dashboard') && isDashboard) isActive = true;
-        else if (href.includes('report.html') && isReport) isActive = true;
-        else if (href.includes('my-complaints') && isComplaints) isActive = true;
-        else if (href.includes('map.html') && isMap) isActive = true;
-        else if (href.includes('transportation.html') && isTransportation) isActive = true;
-        else if (href.includes('services.html') && isServices) isActive = true;
-        else if (href.includes('emergency-services') && isEmergency) isActive = true;
-        else if (href.includes('helplines') && isHelplines) isActive = true;
-        else if (href.includes('ministers') && isMinisters) isActive = true;
-
-        link.classList.toggle('active', isActive);
-      });
-    };
-
-    // If sidebar nav already exists, just sync active state without rewriting innerHTML!
-    const existingNav = sidebar.querySelector('.app-sidebar-nav');
-    if (existingNav) {
-      updateActiveState(existingNav);
-      return;
-    }
-
-    // Build sidebar innerHTML once
     sidebar.innerHTML = `
       <div class="sidebar-header">
         <a href="citizen-dashboard.html" class="app-sidebar-logo">
@@ -1675,21 +1647,6 @@ function updateAuthUI() {
       </nav>
     `;
   };
-
-  // Delegated instant click feedback for single-click responsiveness & zero delay
-  if (!window._sidebarClickDelegated) {
-    window._sidebarClickDelegated = true;
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('.app-sidebar-link');
-      if (link) {
-        const nav = link.closest('.app-sidebar-nav');
-        if (nav) {
-          nav.querySelectorAll('.app-sidebar-link').forEach(l => l.classList.remove('active'));
-          link.classList.add('active');
-        }
-      }
-    }, true);
-  }
 
   window.toggleTransportationSubmenu = function(e) {
     if (e) {
