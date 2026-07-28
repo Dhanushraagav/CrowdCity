@@ -1093,3 +1093,126 @@ window.authRouter = {
   }
 })();
 
+/* ==========================================================================
+   MOBILE MAINTENANCE MODE MODULE (Desktop Fully Functional)
+   Bypass flag: window.MOBILE_MAINTENANCE = false;
+   ========================================================================== */
+window.MOBILE_MAINTENANCE = true;
+
+(function initMobileMaintenanceCheck() {
+  function checkAndRenderMobileMaintenance() {
+    if (window.MOBILE_MAINTENANCE === false) {
+      removeMobileMaintenanceUI();
+      return;
+    }
+
+    // Check query parameter override: ?bypass_mobile=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('bypass_mobile') === 'true') {
+      removeMobileMaintenanceUI();
+      return;
+    }
+
+    // Detect mobile viewport (screen width <= 768px in portrait/mobile mode)
+    const isMobileViewport = window.innerWidth <= 768 || (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && window.innerWidth < 1024);
+
+    if (isMobileViewport) {
+      injectMobileMaintenanceUI();
+    } else {
+      removeMobileMaintenanceUI();
+    }
+  }
+
+  function injectMobileMaintenanceUI() {
+    if (!document.body) return;
+    if (document.getElementById('mobile-maintenance-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'mobile-maintenance-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      z-index: 9999999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      box-sizing: border-box;
+      text-align: center;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-y: auto;
+    `;
+
+    overlay.innerHTML = `
+      <div style="max-width: 440px; width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 24px; padding: 2.25rem 1.75rem; box-shadow: 0 20px 40px rgba(15,23,42,0.12); display: flex; flex-direction: column; align-items: center;">
+        
+        <!-- Logo & Emblems -->
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="width: 42px; height: 42px; object-fit: contain;" />
+          <div style="width: 1px; height: 32px; background: #e2e8f0;"></div>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" style="width: 42px; height: 42px; object-fit: contain;" />
+        </div>
+
+        <div style="font-size: 0.75rem; font-weight: 800; background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem; border: 1px solid #fde68a;">
+          🚧 Mobile Version Under Development
+        </div>
+
+        <h1 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0 0 0.75rem 0; line-height: 1.35; font-family: 'Outfit', sans-serif;">
+          Mobile Maintenance Mode
+        </h1>
+
+        <p style="font-size: 0.88rem; color: #475569; margin: 0 0 1.5rem 0; line-height: 1.55;">
+          CrowdCity AI is currently being enhanced with new Smart City and Transportation features.
+          The desktop version is fully available while we complete the mobile experience. We appreciate your patience.
+        </p>
+
+        <!-- Progress Indicator & Badge -->
+        <div style="width: 100%; background: #f1f5f9; border-radius: 12px; padding: 1.1rem 1rem; margin-bottom: 1.5rem; text-align: left; border: 1px solid #e2e8f0; box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.5rem;">
+            <span>Mobile System Upgrade</span>
+            <span style="color: #0d9488;">85% Completed</span>
+          </div>
+          <div style="width: 100%; height: 8px; background: #cbd5e1; border-radius: 4px; overflow: hidden; margin-bottom: 0.75rem;">
+            <div style="width: 85%; height: 100%; background: linear-gradient(90deg, #0d9488, #0284c7); border-radius: 4px;"></div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: #64748b;">
+            <i class="fa-solid fa-desktop" style="color: #0d9488;"></i>
+            <span><strong>Desktop Version:</strong> Fully Functional & Ready</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+          <button onclick="window.location.reload()" style="width: 100%; padding: 0.8rem; background: #0d9488; color: #ffffff; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);">
+            <i class="fa-solid fa-rotate-right"></i> Refresh Page
+          </button>
+          <a href="helplines.html" style="width: 100%; padding: 0.75rem; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-sizing: border-box;">
+            <i class="fa-solid fa-headset"></i> Contact Support / Helplines
+          </a>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+  }
+
+  function removeMobileMaintenanceUI() {
+    const overlay = document.getElementById('mobile-maintenance-overlay');
+    if (overlay) overlay.remove();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkAndRenderMobileMaintenance);
+  } else {
+    checkAndRenderMobileMaintenance();
+  }
+
+  window.addEventListener('resize', checkAndRenderMobileMaintenance);
+})();
+
