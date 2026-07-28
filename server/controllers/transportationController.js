@@ -3,85 +3,8 @@ import logger from '../config/logger.js';
 import { supabase } from '../config/supabase.js';
 
 // In-memory fallback store when Supabase connection is offline
-let memoryReports = [
-  {
-    id: 'trp-001',
-    report_number: 'TRP-2026-1001',
-    user_id: 'c101',
-    title: 'Severe Pothole on DB Road Junction',
-    description: 'Deep asphalt crater near RS Puram signal causing sudden braking and axle damage to vehicles.',
-    category: 'Potholes',
-    priority: 'High',
-    severity: 'High',
-    status: 'In Progress',
-    address: 'Diwan Bahadur Road, RS Puram, Coimbatore, Tamil Nadu',
-    latitude: 11.0065,
-    longitude: 76.9520,
-    photo_urls: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop'],
-    responsible_department: 'Roads Department',
-    suggested_resolution: 'Deploy hot-mix asphalt patching crew and roller compaction team.',
-    confidence_score: 95.8,
-    summary: 'Deep asphalt crater near RS Puram signal causing vehicle damage and traffic bottleneck.',
-    assigned_to: 'Eng. K. Rajan (Roads Dept)',
-    created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 12).toISOString()
-  },
-  {
-    id: 'trp-002',
-    report_number: 'TRP-2026-1002',
-    user_id: 'c102',
-    title: 'Traffic Light Power Failure at Gandhipuram Flyover',
-    description: 'All four traffic signal heads are unlit creating dangerous gridlock during peak hours.',
-    category: 'Traffic Signal Not Working',
-    priority: 'Critical',
-    severity: 'Critical',
-    status: 'Assigned',
-    address: 'Gandhipuram Signal Junction, Coimbatore, Tamil Nadu',
-    latitude: 11.0183,
-    longitude: 76.9644,
-    photo_urls: [],
-    responsible_department: 'Traffic Police',
-    suggested_resolution: 'Deploy traffic police constable for manual control and dispatch signal electrician.',
-    confidence_score: 97.4,
-    summary: 'Complete traffic light outage at Gandhipuram intersection causing severe congestion.',
-    assigned_to: 'Insp. S. Murugan (Traffic Police)',
-    created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 18).toISOString()
-  },
-  {
-    id: 'trp-003',
-    report_number: 'TRP-2026-1003',
-    user_id: 'c103',
-    title: 'Waterlogging Under Avinashi Road Railway Underpass',
-    description: '3 feet of stagnant storm water accumulated under the underpass following heavy rain.',
-    category: 'Waterlogging',
-    priority: 'High',
-    severity: 'High',
-    status: 'Submitted',
-    address: 'Avinashi Road Railway Bridge, Coimbatore, Tamil Nadu',
-    latitude: 11.0118,
-    longitude: 76.9691,
-    photo_urls: [],
-    responsible_department: 'Municipal Corporation',
-    suggested_resolution: 'Position mobile dewatering pump and clear blocked storm drain inlet.',
-    confidence_score: 93.2,
-    summary: 'Waterlogging under Avinashi Road underpass stalling light vehicles.',
-    assigned_to: 'Unassigned',
-    created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 6).toISOString()
-  }
-];
-
-let memoryUpdates = [
-  {
-    id: 'u001',
-    report_id: 'trp-001',
-    updated_by: 'Eng. K. Rajan',
-    status: 'In Progress',
-    remarks: 'Field inspection completed. Asphalt patching unit dispatched to site.',
-    created_at: new Date(Date.now() - 3600000 * 12).toISOString()
-  }
-];
+let memoryReports = [];
+let memoryUpdates = [];
 
 // Helper to generate unique report numbers
 function generateReportNumber() {

@@ -34,44 +34,8 @@ async function loadMyTransportationReports() {
       reports = (res && res.reports) ? res.reports : ((res && res.data && res.data.reports) ? res.data.reports : []);
     }
 
-    if (!reports || reports.length === 0) {
-      // Fallback sample reports for demo
-      reports = [
-        {
-          id: 'trp-101',
-          report_number: 'TRP-2026-1001',
-          title: 'Deep Pothole near RS Puram Signal',
-          category: 'Potholes',
-          priority: 'High',
-          responsible_department: 'Roads Department',
-          status: 'In Progress',
-          road_name: 'DB Road',
-          landmark: 'RS Puram Signal',
-          address: 'Diwan Bahadur Road, RS Puram, Coimbatore',
-          assigned_to: 'Eng. K. Rajan',
-          created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-          updated_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-          summary: 'Deep asphalt crater near RS Puram signal causing vehicle damage and traffic bottleneck.',
-          suggested_resolution: 'Deploy hot-mix asphalt patching crew and roller compaction team.'
-        },
-        {
-          id: 'trp-102',
-          report_number: 'TRP-2026-1002',
-          title: 'Traffic Signal Power Outage',
-          category: 'Traffic Signal Not Working',
-          priority: 'Critical',
-          responsible_department: 'Traffic Police',
-          status: 'Assigned',
-          road_name: 'Avinashi Road',
-          landmark: 'Gandhipuram Junction',
-          address: 'Gandhipuram Signal Junction, Coimbatore',
-          assigned_to: 'Insp. S. Murugan',
-          created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
-          updated_at: new Date(Date.now() - 86400000 * 1).toISOString(),
-          summary: 'Complete traffic light outage at Gandhipuram intersection causing severe congestion.',
-          suggested_resolution: 'Deploy traffic police constable for manual control and dispatch signal electrician.'
-        }
-      ];
+    if (!reports) {
+      reports = [];
     }
 
     allMyReports = reports;

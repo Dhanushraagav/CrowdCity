@@ -129,10 +129,19 @@
 
     if (!reports || reports.length === 0) {
       gridEl.innerHTML = `
-        <div style="grid-column: 1 / -1; padding: 3rem 1.5rem; text-align: center; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: var(--radius-lg, 16px);">
-          <i class="fa-solid fa-car-side" style="font-size: 2.2rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
-          <h3 style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; margin: 0 0 0.25rem 0; color: var(--text-main);">No Transportation Reports Found</h3>
-          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Try adjusting your category or status filters, or submit a new report.</p>
+        <div style="grid-column: 1 / -1; padding: 3.5rem 2rem; text-align: center; background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: var(--radius-lg, 16px); box-shadow: var(--shadow-sm);">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(13, 148, 136, 0.1); color: var(--primary, #0d9488); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1.25rem;">
+            <i class="fa-solid fa-road"></i>
+          </div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; margin: 0 0 0.4rem 0; color: var(--text-main, #0f172a);">
+            No transportation issues have been reported yet.
+          </h3>
+          <p style="margin: 0 0 1.5rem 0; font-size: 0.9rem; color: var(--text-muted, #64748b); max-width: 480px; margin-left: auto; margin-right: auto;">
+            Be the first to report a road hazard, traffic signal outage, waterlogging, or transit infrastructure issue in your area.
+          </p>
+          <a href="transportation-report.html" class="btn btn-primary" style="padding: 0.7rem 1.5rem; font-weight: 700; border-radius: 10px;">
+            <i class="fa-solid fa-plus"></i> Report Transportation Issue
+          </a>
         </div>
       `;
       return;
@@ -142,29 +151,32 @@
       const conf = categoryConfig[r.category] || { color: '#0d9488', icon: 'fa-road' };
       const photoHtml = (r.photo_urls && r.photo_urls.length > 0)
         ? `<div style="height: 140px; border-radius: 12px; overflow: hidden; margin-bottom: 0.85rem; background: #f8fafc;"><img src="${escapeHtml(r.photo_urls[0])}" alt="Issue Photo" style="width: 100%; height: 100%; object-fit: cover;" /></div>`
-        : '';
+        : `<div style="height: 110px; border-radius: 12px; margin-bottom: 0.85rem; background: var(--bg-surface-hover, #f8fafc); border: 1px dashed var(--border-color, #cbd5e1); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 0.35rem;">
+            <i class="fa-solid ${conf.icon}" style="font-size: 1.5rem; color: ${conf.color};"></i>
+            <span style="font-size: 0.75rem; font-weight: 600;">Transportation Infrastructure Report</span>
+           </div>`;
 
       return `
         <div class="transport-card">
           ${photoHtml}
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.4rem;">
             <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 800; color: ${conf.color}; background: #f8fafc; padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);">
               <i class="fa-solid ${conf.icon}"></i> ${escapeHtml(r.category)}
             </span>
             ${getPriorityPill(r.priority)}
           </div>
 
-          <h3 style="font-family: var(--font-heading); font-size: 1rem; font-weight: 800; margin: 0; color: var(--text-main); line-height: 1.3;">
+          <h3 style="font-family: var(--font-heading); font-size: 1rem; font-weight: 800; margin: 0 0 0.35rem 0; color: var(--text-main); line-height: 1.3;">
             ${escapeHtml(r.title)}
           </h3>
 
-          <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0 0 0.6rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
             ${escapeHtml(r.description)}
           </p>
 
-          <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+          <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
             <i class="fa-solid fa-location-dot" style="color: var(--primary, #0d9488);"></i>
-            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(r.address || 'Coimbatore')}</span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(r.road_name || r.address || 'Coimbatore')}</span>
           </div>
 
           <div style="padding-top: 0.75rem; border-top: 1px solid var(--border-color, #e2e8f0); display: flex; justify-content: space-between; align-items: center;">
