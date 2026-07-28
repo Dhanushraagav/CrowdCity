@@ -66,10 +66,16 @@ window.EmergencyMap = {
       this.map.remove();
     }
 
+    const isMobile = window.innerWidth <= 768;
+
     this.map = L.map(containerId, {
       center: [centerLat, centerLng],
       zoom: zoom,
-      zoomControl: true
+      zoomControl: !isMobile,
+      dragging: !isMobile, // Disable dragging by default on mobile so page scroll is 100% smooth
+      scrollWheelZoom: false,
+      tap: !isMobile,
+      touchZoom: false
     });
 
     // OpenStreetMap Tile Layer (FREE)
@@ -82,6 +88,58 @@ window.EmergencyMap = {
 
     // Set User Location Marker
     this.setUserLocation(centerLat, centerLng);
+
+    // Mobile map interaction toggle button
+    if (isMobile) {
+      this.setupMobileMapToggle(container);
+    }
+  },
+
+  setupMobileMapToggle: function(container) {
+    let toggleBtn = container.querySelector('.mobile-map-toggle-btn');
+    if (!toggleBtn) {
+      toggleBtn = document.createElement('button');
+      toggleBtn.className = 'mobile-map-toggle-btn';
+      toggleBtn.innerHTML = '<i class="fa-solid fa-hand"></i> Tap to Interact';
+      toggleBtn.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: #ffffff;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        cursor: pointer;
+      `;
+      container.style.position = 'relative';
+      container.appendChild(toggleBtn);
+    }
+
+    let isEnabled = false;
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isEnabled = !isEnabled;
+      if (isEnabled) {
+        this.map.dragging.enable();
+        this.map.touchZoom.enable();
+        toggleBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Lock Map';
+        toggleBtn.style.background = '#dc2626';
+        toggleBtn.style.color = '#ffffff';
+        toggleBtn.style.borderColor = '#dc2626';
+      } else {
+        this.map.dragging.disable();
+        this.map.touchZoom.disable();
+        toggleBtn.innerHTML = '<i class="fa-solid fa-hand"></i> Tap to Interact';
+        toggleBtn.style.background = '#ffffff';
+        toggleBtn.style.color = '#0f172a';
+        toggleBtn.style.borderColor = '#cbd5e1';
+      }
+    });
   },
 
   /**

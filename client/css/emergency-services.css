@@ -739,8 +739,30 @@ body.emergency-body .emergency-page-container {
   gap: 0.5rem;
 }
 
-/* Responsive Overrides & Mobile Layout Optimization */
+/* Responsive Overrides & Native Mobile App Performance */
 @media (max-width: 768px) {
+  html, body.emergency-body {
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth !important;
+  }
+
+  .emergency-page-container,
+  .emergency-section,
+  .quick-action-card,
+  .responder-card,
+  .accordion-item {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    contain: layout style paint;
+  }
+
+  .emergency-map-container {
+    height: 280px !important;
+    border-radius: var(--radius-md);
+    touch-action: pan-y !important;
+  }
+
   .emergency-gov-header-banner {
     padding: 0.45rem 0.85rem;
     font-size: 0.72rem;
@@ -755,13 +777,13 @@ body.emergency-body .emergency-page-container {
   }
 
   .emergency-hero-title {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     line-height: 1.2;
     margin-bottom: 0.5rem;
   }
 
   .emergency-hero-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     line-height: 1.5;
     margin-bottom: 1.25rem;
   }
@@ -804,6 +826,7 @@ body.emergency-body .emergency-page-container {
   .quick-action-card {
     padding: 0.9rem 0.75rem !important;
     gap: 0.4rem !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
   }
 
   .quick-action-icon-wrap {
@@ -854,18 +877,19 @@ body.emergency-body .emergency-page-container {
   }
 }
 
-/* Sticky Mobile Emergency Bar */
+/* Sticky Mobile Emergency Bar with Safe-Area Insets */
 .sticky-mobile-emergency-bar {
   display: none;
   position: fixed;
   bottom: 0;
   left: 0;
+  right: 0;
   width: 100%;
   background: #ffffff;
   border-top: 1px solid var(--border-subtle);
   padding: 0.75rem 1rem;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-  z-index: 9998;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 99999;
   gap: 0.75rem;
   box-sizing: border-box;
 }
@@ -874,7 +898,7 @@ body.emergency-body .emergency-page-container {
   flex: 1;
   padding: 0.75rem;
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
   text-align: center;
   text-decoration: none;
@@ -900,8 +924,9 @@ body.emergency-body .emergency-page-container {
 @media (max-width: 768px) {
   .sticky-mobile-emergency-bar {
     display: flex !important;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)) !important;
   }
   body.emergency-body {
-    padding-bottom: 75px !important;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
