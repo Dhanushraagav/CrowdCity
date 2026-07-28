@@ -739,13 +739,119 @@ body.emergency-body .emergency-page-container {
   gap: 0.5rem;
 }
 
-/* Responsive Overrides */
+/* Responsive Overrides & Mobile Layout Optimization */
 @media (max-width: 768px) {
-  .emergency-hero-title { font-size: 2rem; }
-  .emergency-hero-section { padding: 1.25rem 1rem 2rem 1rem; }
-  .emergency-section { padding: 2rem 1.25rem; }
-  .responders-grid { grid-template-columns: 1fr; }
-  .emergency-contacts-table th, .emergency-contacts-table td { padding: 0.75rem 0.85rem; }
+  .emergency-gov-header-banner {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.72rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 0.35rem;
+  }
+
+  .emergency-hero-section {
+    padding: 1.25rem 1rem 1.75rem 1rem;
+  }
+
+  .emergency-hero-title {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .emergency-hero-subtitle {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+
+  .emergency-hero-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    width: 100%;
+  }
+
+  .btn-emergency-primary,
+  .btn-emergency-secondary {
+    width: 100%;
+    padding: 0.7rem 0.6rem;
+    font-size: 0.8rem;
+    justify-content: center;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .emergency-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .emergency-section-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .emergency-section-title {
+    font-size: 1.35rem;
+  }
+
+  /* Compact 2-Column Grid on Mobile for Emergency Call Cards */
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .quick-action-card {
+    padding: 0.9rem 0.75rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .quick-action-icon-wrap {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+  }
+
+  .quick-action-number {
+    font-size: 1.15rem !important;
+  }
+
+  .quick-action-label {
+    font-size: 0.78rem !important;
+  }
+
+  /* Search & Filter Controls on Mobile */
+  .responder-search-box {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .responder-search-input,
+  .responder-filter-select {
+    width: 100% !important;
+  }
+
+  /* Responders Cards Grid on Mobile */
+  .responders-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* Responsive Table Container */
+  .emergency-contacts-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .emergency-contacts-table th,
+  .emergency-contacts-table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
 }
 
 /* Sticky Mobile Emergency Bar */
@@ -793,9 +899,9 @@ body.emergency-body .emergency-page-container {
 
 @media (max-width: 768px) {
   .sticky-mobile-emergency-bar {
-    display: flex;
+    display: flex !important;
   }
   body.emergency-body {
-    padding-bottom: 70px !important;
+    padding-bottom: 75px !important;
   }
 }
