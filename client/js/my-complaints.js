@@ -61,11 +61,15 @@ async function loadAndRenderMyIssues() {
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   const currentUserId = user ? user.id : null;
 
+  const activeCategory = document.getElementById('my-issues-category-filter')?.value || '';
+  const activeStatus = document.getElementById('my-issues-status-filter')?.value || '';
+
   // Deduplicate: if parameters match the last successfully loaded state, exit
   if (
     lastLoadedState.userId === currentUserId &&
     lastLoadedState.category === activeCategory &&
-    lastLoadedState.status === activeStatus
+    lastLoadedState.status === activeStatus &&
+    lastLoadedState.tab === currentComplaintsTab
   ) {
     return;
   }
