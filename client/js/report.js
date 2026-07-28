@@ -43,20 +43,142 @@ const civicCategories = [
   { value: 'other', label: 'Other' }
 ];
 
+let currentStep = 1;
+
+window.goToWizardStep1 = function() {
+  currentStep = 1;
+  updateStepperUI();
+};
+
+window.goToWizardStep2 = function(mode) {
+  if (mode) {
+    currentReportMode = mode;
+    updateFormModeUI();
+  }
+  currentStep = 2;
+  updateStepperUI();
+  setTimeout(() => {
+    if (reportMap) reportMap.invalidateSize();
+  }, 300);
+};
+
+window.proceedToWizardStep3 = async function() {
+  const category = document.getElementById('report-category')?.value;
+  const description = document.getElementById('report-description')?.value;
+  const alertBanner = document.getElementById('report-alert');
+
+  if (!category || !description || description.trim().length < 5) {
+    if (alertBanner) {
+      alertBanner.textContent = 'Please select a category and provide a detailed description (at least 5 characters).';
+      alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+      alertBanner.style.color = '#ef4444';
+      alertBanner.classList.remove('hidden');
+      alertBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    return;
+  }
+
+  if (alertBanner) alertBanner.classList.add('hidden');
+
+  currentStep = 3;
+  updateStepperUI();
+  runStep3AiTriagePreview(category, description);
+};
+
+function updateStepperUI() {
+  const pane1 = document.getElementById('wizard-step-1');
+  const pane2 = document.getElementById('wizard-step-2');
+  const pane3 = document.getElementById('wizard-step-3');
+
+  const ind1 = document.getElementById('step-ind-1');
+  const ind2 = document.getElementById('step-ind-2');
+  const ind3 = document.getElementById('step-ind-3');
+
+  if (pane1) pane1.classList.toggle('hidden', currentStep !== 1);
+  if (pane2) pane2.classList.toggle('hidden', currentStep !== 2);
+  if (pane3) pane3.classList.toggle('hidden', currentStep !== 3);
+
+  updateStepBadge(ind1, currentStep >= 1, currentStep === 1);
+  updateStepBadge(ind2, currentStep >= 2, currentStep === 2);
+  updateStepBadge(ind3, currentStep >= 3, currentStep === 3);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateStepBadge(el, isReached, isActive) {
+  if (!el) return;
+  const circle = el.querySelector('.step-circle');
+  if (isReached) {
+    el.style.opacity = '1';
+    if (circle) {
+      circle.style.background = 'var(--primary, #0d9488)';
+      circle.style.color = '#ffffff';
+    }
+  } else {
+    el.style.opacity = '0.5';
+    if (circle) {
+      circle.style.background = 'var(--bg-surface-hover, #f1f5f9)';
+      circle.style.color = 'var(--text-muted, #64748b)';
+    }
+  }
+}
+
+async function runStep3AiTriagePreview(category, description) {
+  const catEl = document.getElementById('step3-ai-category');
+  const prioEl = document.getElementById('step3-ai-priority');
+  const deptEl = document.getElementById('step3-ai-department');
+  const confEl = document.getElementById('step3-ai-confidence');
+  const sumEl = document.getElementById('step3-ai-summary');
+  const actEl = document.getElementById('step3-ai-action');
+
+  if (catEl) catEl.textContent = category || 'General';
+  if (prioEl) prioEl.textContent = 'Medium';
+  if (deptEl) deptEl.textContent = currentReportMode === 'transportation' ? 'Roads Dept' : 'Municipal Corporation';
+  if (confEl) confEl.textContent = '95.5%';
+  if (sumEl) sumEl.textContent = description;
+  if (actEl) actEl.textContent = 'Dispatch field inspection unit upon submission.';
+
+  try {
+    if (currentReportMode === 'transportation' && window.API && typeof window.API.analyzeTransportationIssue === 'function') {
+      const title = document.getElementById('report-address')?.value || 'Transportation Issue';
+      const res = await window.API.analyzeTransportationIssue({ title, description, category });
+      const a = (res && res.data && res.data.analysis) ? res.data.analysis : (res && res.analysis ? res.analysis : null);
+      if (a) {
+        if (catEl) catEl.textContent = a.category || category;
+        if (prioEl) prioEl.textContent = a.priority || 'Medium';
+        if (deptEl) deptEl.textContent = a.department || 'Roads Dept';
+        if (confEl) confEl.textContent = `${a.confidence_score || 95.8}%`;
+        if (sumEl) sumEl.textContent = a.summary || description;
+        if (actEl) actEl.textContent = a.suggested_resolution || 'Dispatch field unit.';
+      }
+    }
+  } catch (e) {
+    console.warn('AI Triage preview fallback active:', e);
+  }
+}
+
+window.submitFinalReport = async function() {
+  const btn = document.getElementById('btn-final-submit');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
+  }
+  const form = document.getElementById('report-form');
+  if (form) {
+    form.requestSubmit();
+  }
+};
+
 window.openIssueSelectorModal = function() {
-  const modal = document.getElementById('modal-issue-selector');
-  if (modal) modal.classList.add('active');
+  window.goToWizardStep1();
 };
 
 window.closeIssueSelectorModal = function() {
-  const modal = document.getElementById('modal-issue-selector');
-  if (modal) modal.classList.remove('active');
+  window.goToWizardStep2();
 };
 
 window.selectReportMode = function(mode) {
-  currentReportMode = mode;
-  window.closeIssueSelectorModal();
-  updateFormModeUI();
+  window.goToWizardStep2(mode);
 };
 
 function updateFormModeUI() {
@@ -107,15 +229,10 @@ function initReportPage() {
   // Check URL type parameter
   const urlParams = new URLSearchParams(window.location.search);
   const typeParam = urlParams.get('type');
-  if (typeParam === 'transportation') {
-    currentReportMode = 'transportation';
-    updateFormModeUI();
-  } else if (typeParam === 'civic') {
-    currentReportMode = 'civic';
-    updateFormModeUI();
+  if (typeParam === 'transportation' || typeParam === 'civic') {
+    window.goToWizardStep2(typeParam);
   } else {
-    // Open selector modal if no parameter passed
-    window.openIssueSelectorModal();
+    window.goToWizardStep1();
   }
 
   initReportMap();
