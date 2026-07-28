@@ -224,6 +224,9 @@ window.authRouter = {
       return;
     }
     
+    // Set flag to display mandatory Demo Notice disclaimer on dashboard arrival
+    sessionStorage.setItem('cc_show_demo_notice', 'true');
+
     console.log(`[Auth Router] ROLE: ${role} | TARGET PAGE: ${target}`);
     window.location.href = target;
   },
@@ -399,17 +402,11 @@ window.authRouter = {
   // C. Logged-in Session Restricting (Prevent accessing login pages)
   if (sessionActive) {
     if (isCitizenLoginPage || isAuthorityLoginPage) {
-      if (role) {
-        console.log("[Auth Router] Already logged in. Redirecting to respective dashboard.");
-        if (role === 'authority') {
-          window.location.href = AUTHORITY_DASHBOARD;
-        } else if (role === 'admin') {
-          window.location.href = ADMIN_DASHBOARD;
-        } else if (role === 'citizen') {
-          window.location.href = CITIZEN_DASHBOARD;
-        }
-        return;
-      } else {
+        if (role) {
+          console.log("[Auth Router] Already logged in. Redirecting to respective dashboard.");
+          window.authRouter.redirectToDashboard(role);
+          return;
+        } else {
         console.log("[Auth Router] Session active but role not cached yet. Waiting for page auth logic to route...");
       }
     }
