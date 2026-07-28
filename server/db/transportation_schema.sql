@@ -17,7 +17,8 @@ INSERT INTO transportation_departments (name, name_ta, code) VALUES
   ('Municipal Corporation', 'மாநகராட்சி', 'MUNICIPAL'),
   ('Highways Department', 'நெடுஞ்சாலைத் துறை', 'HIGHWAYS'),
   ('Street Lighting Department', 'தெருவிளக்குகள் துறை', 'LIGHTING'),
-  ('Transport Department', 'போக்குவரத்து துறை', 'TRANSPORT')
+  ('Transport Department', 'போக்குவரத்து துறை', 'TRANSPORT'),
+  ('Public Works Department', 'பொதுப்பணித் துறை', 'PWD')
 ON CONFLICT (name) DO NOTHING;
 
 -- 2. Transportation Reports Table
@@ -30,8 +31,12 @@ CREATE TABLE IF NOT EXISTS transportation_reports (
   category VARCHAR(100) NOT NULL,
   priority VARCHAR(20) DEFAULT 'Medium', -- Critical, High, Medium, Low
   severity VARCHAR(20) DEFAULT 'Medium',
-  status VARCHAR(30) DEFAULT 'Submitted', -- Submitted, Under Review, Assigned, In Progress, Resolved, Closed
+  severity_score INTEGER DEFAULT 5, -- 1 to 10
+  status VARCHAR(30) DEFAULT 'Submitted', -- Submitted, AI Reviewed, Assigned, In Progress, Resolved, Closed
   address TEXT,
+  road_name VARCHAR(255),
+  landmark VARCHAR(255),
+  ward VARCHAR(50),
   latitude NUMERIC(10, 7),
   longitude NUMERIC(10, 7),
   photo_urls TEXT[],
@@ -49,6 +54,7 @@ CREATE INDEX IF NOT EXISTS idx_trans_reports_category ON transportation_reports(
 CREATE INDEX IF NOT EXISTS idx_trans_reports_status ON transportation_reports(status);
 CREATE INDEX IF NOT EXISTS idx_trans_reports_priority ON transportation_reports(priority);
 CREATE INDEX IF NOT EXISTS idx_trans_reports_dept ON transportation_reports(responsible_department);
+CREATE INDEX IF NOT EXISTS idx_trans_reports_road ON transportation_reports(road_name);
 
 -- 3. Transportation Updates / History Log
 CREATE TABLE IF NOT EXISTS transportation_updates (
@@ -69,3 +75,18 @@ CREATE TABLE IF NOT EXISTS transportation_attachments (
   file_type VARCHAR(50) DEFAULT 'image',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- 5. Transportation AI Analysis Table
+CREATE TABLE IF NOT EXISTS transportation_ai_analysis (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  report_id UUID REFERENCES transportation_reports(id) ON DELETE CASCADE,
+  verified_category VARCHAR(100) NOT NULL,
+  priority VARCHAR(20) NOT NULL,
+  severity_score INTEGER DEFAULT 5,
+  responsible_department VARCHAR(100) NOT NULL,
+  summary TEXT,
+  suggested_action TEXT,
+  confidence_score NUMERIC(5, 2),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+

@@ -445,7 +445,7 @@ export const analyzeTransportationIssue = async (title, description, userCategor
   const validPriorities = ['Critical', 'High', 'Medium', 'Low'];
   const validDepartments = [
     'Roads Department', 'Traffic Police', 'Municipal Corporation', 
-    'Highways Department', 'Street Lighting Department', 'Transport Department'
+    'Highways Department', 'Street Lighting Department', 'Transport Department', 'Public Works Department'
   ];
 
   if (!groq) {
@@ -459,9 +459,10 @@ Analyze the citizen's transportation issue report and output ONLY raw valid JSON
 2) "category": Exactly one of ["Potholes", "Damaged Roads", "Traffic Signal Not Working", "Waterlogging", "Broken Street Lights", "Illegal Parking", "Missing Road Signs", "Bus Stop Issues", "Road Block", "Construction Work", "Accident", "Heavy Traffic", "Other Transportation Issue"].
 3) "priority": Exactly one of ["Critical", "High", "Medium", "Low"].
 4) "severity": Exactly one of ["Critical", "High", "Medium", "Low"].
-5) "department": Exactly one of ["Roads Department", "Traffic Police", "Municipal Corporation", "Highways Department", "Street Lighting Department", "Transport Department"].
-6) "suggested_resolution": Concise 1-2 sentence technical recommendation for site inspection and repair engineers.
-7) "confidence_score": A number between 88.0 and 98.5 representing classification confidence score.
+5) "severity_score": An integer from 1 to 10 (10 being most critical/severe).
+6) "department": Exactly one of ["Roads Department", "Traffic Police", "Municipal Corporation", "Highways Department", "Street Lighting Department", "Transport Department", "Public Works Department"].
+7) "suggested_resolution": Concise 1-2 sentence technical recommendation for site inspection and repair engineers.
+8) "confidence_score": A number between 88.0 and 98.5 representing classification confidence score.
 
 Priority Rules:
 - "Critical": Traffic signal failure, major multi-vehicle accident, open sinkhole/deep crater, severe road flooding, complete road block on main arterial corridor.
@@ -475,6 +476,7 @@ Department Rules:
 - Waterlogging, Road Block, General Transit -> "Municipal Corporation"
 - Broken Street Lights -> "Street Lighting Department"
 - Bus Stop Issues -> "Transport Department"
+- Bridge, Flyover, Storm Drain Structure -> "Public Works Department"
 
 Output ONLY raw valid JSON matching this schema without markdown block formatting.`;
 
@@ -490,11 +492,21 @@ Output ONLY raw valid JSON matching this schema without markdown block formattin
     });
 
     const parsed = JSON.parse(response.choices[0]?.message?.content || '{}');
+    const priority = validPriorities.includes(parsed.priority) ? parsed.priority : 'Medium';
+    let defaultSevScore = 5;
+    if (priority === 'Critical') defaultSevScore = 9;
+    else if (priority === 'High') defaultSevScore = 7;
+    else if (priority === 'Medium') defaultSevScore = 5;
+    else defaultSevScore = 3;
+
+    const sevScore = typeof parsed.severity_score === 'number' ? Math.min(10, Math.max(1, Math.round(parsed.severity_score))) : defaultSevScore;
+
     return {
       summary: parsed.summary || `${title} reported under ${parsed.category || 'Transportation'}.`,
       category: validCategories.includes(parsed.category) ? parsed.category : (userCategory || 'Other Transportation Issue'),
-      priority: validPriorities.includes(parsed.priority) ? parsed.priority : 'Medium',
-      severity: validPriorities.includes(parsed.severity) ? parsed.severity : 'Medium',
+      priority,
+      severity: validPriorities.includes(parsed.severity) ? parsed.severity : priority,
+      severity_score: sevScore,
       department: validDepartments.includes(parsed.department) ? parsed.department : 'Roads Department',
       suggested_resolution: parsed.suggested_resolution || 'Inspect location and dispatch road maintenance team for repairs.',
       confidence_score: typeof parsed.confidence_score === 'number' ? parsed.confidence_score : 94.5
@@ -509,6 +521,7 @@ function getLocalTransportationFallback(title, description, userCategory) {
   const text = `${title} ${description}`.toLowerCase();
   let category = userCategory || 'Damaged Roads';
   let priority = 'Medium';
+  let severityScore = 5;
   let department = 'Roads Department';
   let resolution = 'Dispatch field inspector to conduct physical assessment and issue work order.';
   let confidence = 91.0;
@@ -516,36 +529,43 @@ function getLocalTransportationFallback(title, description, userCategory) {
   if (text.includes('signal') || text.includes('traffic light')) {
     category = 'Traffic Signal Not Working';
     priority = 'Critical';
+    severityScore = 9;
     department = 'Traffic Police';
     resolution = 'Deploy traffic control personnel and dispatch signal electrician to reset controller.';
   } else if (text.includes('accident') || text.includes('crash')) {
     category = 'Accident';
     priority = 'Critical';
+    severityScore = 10;
     department = 'Traffic Police';
     resolution = 'Dispatch emergency patrol and clear road obstruction.';
   } else if (text.includes('pothole') || text.includes('crater') || text.includes('road broken')) {
     category = 'Potholes';
     priority = text.includes('deep') || text.includes('big') ? 'High' : 'Medium';
+    severityScore = priority === 'High' ? 8 : 5;
     department = 'Roads Department';
     resolution = 'Deploy asphalt patch compaction crew to fill pothole.';
   } else if (text.includes('water') || text.includes('flood') || text.includes('drain')) {
     category = 'Waterlogging';
     priority = 'High';
+    severityScore = 8;
     department = 'Municipal Corporation';
     resolution = 'Deploy high-capacity dewatering pumps to clear stagnant water.';
   } else if (text.includes('light') || text.includes('dark')) {
     category = 'Broken Street Lights';
     priority = 'Medium';
+    severityScore = 4;
     department = 'Street Lighting Department';
     resolution = 'Replace faulty LED luminaire and verify underground cable wiring.';
   } else if (text.includes('parking') || text.includes('parked')) {
     category = 'Illegal Parking';
     priority = 'Medium';
+    severityScore = 5;
     department = 'Traffic Police';
     resolution = 'Issue traffic violation citations and dispatch tow truck if obstructing traffic.';
   } else if (text.includes('bus') || text.includes('stop')) {
     category = 'Bus Stop Issues';
     priority = 'Low';
+    severityScore = 3;
     department = 'Transport Department';
     resolution = 'Schedule shelter maintenance and update bus route signage.';
   }
@@ -555,6 +575,7 @@ function getLocalTransportationFallback(title, description, userCategory) {
     category,
     priority,
     severity: priority,
+    severity_score: severityScore,
     department,
     suggested_resolution: resolution,
     confidence_score: confidence

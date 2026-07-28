@@ -1588,7 +1588,9 @@ function updateAuthUI() {
     const isReport = path.includes('report') && !path.includes('reports');
     const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
     const isMap = path.includes('map');
-    const isTransportation = path.includes('transportation');
+    const isTransOverview = path.includes('transportation.html') || (path.includes('transportation') && !path.includes('transportation-report') && !path.includes('my-transportation'));
+    const isTransReport = path.includes('transportation-report');
+    const isMyTransReports = path.includes('my-transportation-reports');
     const isEmergency = path.includes('emergency-services');
     const isServices = path.includes('services') && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
@@ -1628,8 +1630,14 @@ function updateAuthUI() {
         <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
           <i class="fa-solid fa-map-location-dot"></i> <span>Map</span>
         </a>
-        <a href="transportation.html" class="app-sidebar-link ${isTransportation ? 'active' : ''}" title="Transportation">
+        <a href="transportation.html" class="app-sidebar-link ${isTransOverview ? 'active' : ''}" title="Transportation">
           <i class="fa-solid fa-car-side"></i> <span>Transportation</span>
+        </a>
+        <a href="transportation-report.html" class="app-sidebar-link ${isTransReport ? 'active' : ''}" title="Report Transportation Issue">
+          <i class="fa-solid fa-road"></i> <span>Report Transport Issue</span>
+        </a>
+        <a href="my-transportation-reports.html" class="app-sidebar-link ${isMyTransReports ? 'active' : ''}" title="My Transportation Reports">
+          <i class="fa-solid fa-list-check"></i> <span>My Transport Cases</span>
         </a>
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
           <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>

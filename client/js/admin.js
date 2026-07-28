@@ -1591,6 +1591,24 @@
     document.getElementById('trans-update-remarks').value = '';
     document.getElementById('trans-update-photo').value = '';
 
+    const aiBox = document.getElementById('trans-modal-ai-details');
+    if (aiBox) {
+      aiBox.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8rem;">
+          <div><strong>Category:</strong> ${escapeHTML(report.category)}</div>
+          <div><strong>Priority:</strong> <span style="font-weight: 800; color: #fbbf24;">${escapeHTML(report.priority || 'Medium')}</span></div>
+          <div><strong>Severity Score:</strong> ${report.severity_score || 5} / 10</div>
+          <div><strong>Dept:</strong> ${escapeHTML(report.responsible_department || 'Roads Dept')}</div>
+        </div>
+        <div style="font-size: 0.78rem; color: #cbd5e1; font-style: italic;">
+          "${escapeHTML(report.summary || report.description || 'No summary')}"
+        </div>
+        <div style="margin-top: 0.4rem; font-size: 0.78rem; color: #34d399; font-weight: 600;">
+          Suggested Action: ${escapeHTML(report.suggested_resolution || 'Inspect location and assign repair unit.')}
+        </div>
+      `;
+    }
+
     const modal = document.getElementById('modal-update-transportation');
     if (modal) modal.classList.add('active');
   };

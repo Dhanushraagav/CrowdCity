@@ -117,6 +117,9 @@ export const createReport = async (req, res) => {
       description,
       category,
       address,
+      road_name,
+      landmark,
+      ward,
       latitude,
       longitude,
       photo_urls,
@@ -137,6 +140,7 @@ export const createReport = async (req, res) => {
         category: category || 'Damaged Roads',
         priority: 'Medium',
         severity: 'Medium',
+        severity_score: 5,
         department: 'Roads Department',
         suggested_resolution: 'Inspect site and assign maintenance crew.',
         confidence_score: 89.0,
@@ -154,8 +158,12 @@ export const createReport = async (req, res) => {
       category: aiTriage.category || category || 'Damaged Roads',
       priority: aiTriage.priority || 'Medium',
       severity: aiTriage.severity || 'Medium',
+      severity_score: aiTriage.severity_score || 5,
       status: 'Submitted',
       address: address || 'Coimbatore, Tamil Nadu',
+      road_name: road_name || '',
+      landmark: landmark || '',
+      ward: ward || '',
       latitude: latitude ? parseFloat(latitude) : 11.0168,
       longitude: longitude ? parseFloat(longitude) : 76.9558,
       photo_urls: Array.isArray(photo_urls) ? photo_urls : [],
@@ -195,7 +203,7 @@ export const createReport = async (req, res) => {
  */
 export const getReports = async (req, res) => {
   try {
-    const { category, priority, department, status, search } = req.query;
+    const { category, priority, department, status, search, user_id, road_name } = req.query;
 
     let reports = [...memoryReports];
 
@@ -208,6 +216,7 @@ export const getReports = async (req, res) => {
         if (priority && priority !== 'All') query = query.eq('priority', priority);
         if (department && department !== 'All') query = query.eq('responsible_department', department);
         if (status && status !== 'All') query = query.eq('status', status);
+        if (user_id) query = query.eq('user_id', user_id);
 
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
@@ -221,6 +230,9 @@ export const getReports = async (req, res) => {
     // Apply filtering & searching on local collection
     let filtered = reports;
 
+    if (user_id) {
+      filtered = filtered.filter(r => r.user_id === user_id || user_id === 'all');
+    }
     if (category && category !== 'All') {
       filtered = filtered.filter(r => (r.category || '').toLowerCase() === category.toLowerCase());
     }
@@ -233,6 +245,10 @@ export const getReports = async (req, res) => {
     if (status && status !== 'All') {
       filtered = filtered.filter(r => (r.status || '').toLowerCase() === status.toLowerCase());
     }
+    if (road_name && road_name.trim() !== '') {
+      const rn = road_name.trim().toLowerCase();
+      filtered = filtered.filter(r => (r.road_name || '').toLowerCase().includes(rn) || (r.address || '').toLowerCase().includes(rn));
+    }
 
     if (search && search.trim() !== '') {
       const q = search.trim().toLowerCase();
@@ -240,6 +256,8 @@ export const getReports = async (req, res) => {
         (r.title || '').toLowerCase().includes(q) ||
         (r.description || '').toLowerCase().includes(q) ||
         (r.address || '').toLowerCase().includes(q) ||
+        (r.road_name || '').toLowerCase().includes(q) ||
+        (r.landmark || '').toLowerCase().includes(q) ||
         (r.report_number || '').toLowerCase().includes(q) ||
         (r.category || '').toLowerCase().includes(q)
       );
