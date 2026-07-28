@@ -1,6 +1,7 @@
 let currentComplaintsTab = 'civic'; // 'civic' or 'transportation'
 let lastLoadId = 0;
 let lastLoadedState = { userId: undefined, category: undefined, status: undefined };
+let myComplaintsRealtimeChannel = null;
 
 window.switchComplaintsTab = function(tab) {
   currentComplaintsTab = tab;
@@ -290,7 +291,7 @@ async function loadAndRenderMyIssues() {
         <div class="issue-card-header">
           <span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span>
           <div style="display: flex; gap: 0.5rem; align-items: center;">
-            ${issue.is_emergency ? `<span class="badge badge-status critical" style="background-color: #ef4444; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
+            ${issue.is_emergency ? `<span class="badge badge-status critical" style="background-color: #dc2626 !important; color: #ffffff !important; font-weight: 900 !important; font-size: 0.75rem !important; padding: 0.35rem 0.75rem !important; border-radius: 6px !important; letter-spacing: 0.5px !important; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4) !important; display: inline-flex !important; align-items: center !important; gap: 0.4rem !important;"><i class="fa-solid fa-triangle-exclamation" style="color: #ffffff !important;"></i> EMERGENCY</span>` : ''}
             <span class="badge badge-status ${issue.status}">${tStatus}</span>
           </div>
         </div>
