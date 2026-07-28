@@ -1,17 +1,42 @@
-// CrowdCity - Personal Complaints Controller
+let currentComplaintsTab = 'civic'; // 'civic' or 'transportation'
 
-let activeCategory = '';
-let activeStatus = '';
-let lastLoadId = 0;
-let lastLoadedState = {
-  userId: undefined,
-  category: undefined,
-  status: undefined
+window.switchComplaintsTab = function(tab) {
+  currentComplaintsTab = tab;
+  const civicBtn = document.getElementById('tab-btn-civic');
+  const transBtn = document.getElementById('tab-btn-transportation');
+
+  if (tab === 'transportation') {
+    if (civicBtn) {
+      civicBtn.style.background = 'transparent';
+      civicBtn.style.color = 'var(--text-muted, #64748b)';
+    }
+    if (transBtn) {
+      transBtn.style.background = 'var(--primary, #0d9488)';
+      transBtn.style.color = '#ffffff';
+    }
+  } else {
+    if (civicBtn) {
+      civicBtn.style.background = 'var(--primary, #0d9488)';
+      civicBtn.style.color = '#ffffff';
+    }
+    if (transBtn) {
+      transBtn.style.background = 'transparent';
+      transBtn.style.color = 'var(--text-muted, #64748b)';
+    }
+  }
+
+  // Reset state to force reload for selected tab
+  lastLoadedState = { userId: undefined, category: undefined, status: undefined };
+  loadAndRenderMyIssues();
 };
-let myComplaintsRealtimeChannel = null;
 
 async function initMyComplaints() {
   setupFilterListeners();
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam === 'transportation') {
+    window.switchComplaintsTab('transportation');
+  }
 }
 
 // Fetch only user reported complaints
@@ -109,11 +134,47 @@ async function loadAndRenderMyIssues() {
     return;
   }
 
-  const { data: issues, error } = await window.API.getIssues({
-    reporter_id: user.id,
-    category: activeCategory,
-    status: activeStatus
-  });
+  let issues = [];
+  let error = null;
+
+  if (currentComplaintsTab === 'transportation') {
+    try {
+      const res = await window.API.getTransportationReports({
+        user_id: user.id,
+        category: activeCategory,
+        status: activeStatus
+      });
+      const reports = (res && res.data && res.data.reports) ? res.data.reports : ((res && res.reports) ? res.reports : []);
+      // Map transportation reports to normalized card format
+      issues = reports.map(r => ({
+        id: r.id,
+        tracking_number: r.report_number || r.id,
+        title: r.title,
+        description: r.description,
+        category: r.category,
+        status: r.status,
+        priority: r.priority || 'Medium',
+        address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : r.address,
+        created_at: r.created_at,
+        assigned_department: r.responsible_department || 'Roads Dept',
+        assigned_officer: r.assigned_to,
+        photo_urls: r.photo_urls,
+        ai_summary: r.summary,
+        suggested_resolution: r.suggested_resolution,
+        is_transportation: true
+      }));
+    } catch (err) {
+      error = err.message || 'Failed to fetch transportation reports';
+    }
+  } else {
+    const res = await window.API.getIssues({
+      reporter_id: user.id,
+      category: activeCategory,
+      status: activeStatus
+    });
+    issues = res.data || [];
+    error = res.error;
+  }
 
   // If a newer load has started, discard this render
   if (loadId !== lastLoadId) {

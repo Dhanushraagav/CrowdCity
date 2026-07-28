@@ -10,12 +10,115 @@ let selectedFiles = [];
 const DEFAULT_CENTER = [11.0168, 76.9558]; // Coimbatore, India
 const DEFAULT_ZOOM = 13;
 
+let currentReportMode = 'civic'; // 'civic' or 'transportation'
+
+const transportationCategories = [
+  { value: 'Potholes', label: 'Potholes' },
+  { value: 'Damaged Roads', label: 'Damaged Roads' },
+  { value: 'Traffic Signal Not Working', label: 'Traffic Signal Failure' },
+  { value: 'Waterlogging', label: 'Road Waterlogging' },
+  { value: 'Broken Street Lights', label: 'Broken Street Lights' },
+  { value: 'Illegal Parking', label: 'Illegal Parking' },
+  { value: 'Missing Road Signs', label: 'Missing Road Signs' },
+  { value: 'Bus Stop Issues', label: 'Bus Stop Issues' },
+  { value: 'Road Block', label: 'Road Block' },
+  { value: 'Construction Work', label: 'Construction Work' },
+  { value: 'Accident', label: 'Accident' },
+  { value: 'Heavy Traffic', label: 'Heavy Traffic' },
+  { value: 'Other Transportation Issue', label: 'Other Transportation Issue' }
+];
+
+const civicCategories = [
+  { value: 'roads', label: 'Roads' },
+  { value: 'streetlights', label: 'Streetlights' },
+  { value: 'water_supply', label: 'Water Supply' },
+  { value: 'drainage', label: 'Drainage' },
+  { value: 'garbage', label: 'Garbage' },
+  { value: 'traffic', label: 'Traffic' },
+  { value: 'public_property', label: 'Public Property' },
+  { value: 'parks', label: 'Parks' },
+  { value: 'sanitation', label: 'Sanitation' },
+  { value: 'safety_hazard', label: 'Safety Hazard' },
+  { value: 'environment', label: 'Environment' },
+  { value: 'other', label: 'Other' }
+];
+
+window.openIssueSelectorModal = function() {
+  const modal = document.getElementById('modal-issue-selector');
+  if (modal) modal.classList.add('active');
+};
+
+window.closeIssueSelectorModal = function() {
+  const modal = document.getElementById('modal-issue-selector');
+  if (modal) modal.classList.remove('active');
+};
+
+window.selectReportMode = function(mode) {
+  currentReportMode = mode;
+  window.closeIssueSelectorModal();
+  updateFormModeUI();
+};
+
+function updateFormModeUI() {
+  const pageTitle = document.getElementById('report-page-title');
+  const pageDesc = document.getElementById('report-page-desc');
+  const modeIcon = document.getElementById('mode-badge-icon');
+  const modeName = document.getElementById('mode-badge-name');
+  const categorySelect = document.getElementById('report-category');
+
+  if (currentReportMode === 'transportation') {
+    if (pageTitle) pageTitle.textContent = 'Report a Transportation Issue';
+    if (pageDesc) pageDesc.textContent = 'Report road hazards, damaged pavements, traffic signal outages, or transit infrastructure concerns.';
+    if (modeIcon) modeIcon.textContent = '🚗';
+    if (modeName) {
+      modeName.textContent = 'Transportation Issue';
+      modeName.style.color = '#0284c7';
+    }
+
+    if (categorySelect) {
+      categorySelect.innerHTML = `
+        <option value="" disabled selected>Select a transportation category...</option>
+        ${transportationCategories.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}
+      `;
+    }
+  } else {
+    if (pageTitle) pageTitle.textContent = 'Report a Civic Issue';
+    if (pageDesc) pageDesc.textContent = 'Provide details about the infrastructure or safety concern in your area. Our AI will route it to the appropriate department.';
+    if (modeIcon) modeIcon.textContent = '🏛️';
+    if (modeName) {
+      modeName.textContent = 'Civic Issue';
+      modeName.style.color = 'var(--primary)';
+    }
+
+    if (categorySelect) {
+      categorySelect.innerHTML = `
+        <option value="" disabled selected>Select a category...</option>
+        ${civicCategories.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}
+      `;
+    }
+  }
+}
+
 // Initialize Report Page
 function initReportPage() {
   if (typeof getCurrentUser === 'function' && !getCurrentUser()) {
     window.showToast("You must be logged in to report civic issues. Redirecting to sign in...", "warning");
     window.authRouter.redirectToLogin('citizen');
     return;
+  }
+
+  // Check URL type parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const typeParam = urlParams.get('type');
+  if (typeParam === 'transportation') {
+    currentReportMode = 'transportation';
+    updateFormModeUI();
+  } else if (typeParam === 'civic') {
+    currentReportMode = 'civic';
+    updateFormModeUI();
+  } else {
+    // Open selector modal if no parameter passed
+    window.openIssueSelectorModal();
   }
 
   initReportMap();
@@ -762,7 +865,40 @@ function setupFormSubmit() {
       resultsStage.classList.add('hidden');
     }
 
-    const { data, error } = await window.API.createIssue(formData);
+    let data = null;
+    let error = null;
+
+    if (currentReportMode === 'transportation') {
+      const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+      try {
+        const transRes = await window.API.createTransportationReport({
+          title,
+          category,
+          description,
+          address: finalAddress,
+          latitude: finalLat,
+          longitude: finalLng,
+          user_id: user ? user.id : 'anonymous'
+        });
+        const rep = (transRes && transRes.data && transRes.data.report) ? transRes.data.report : (transRes && transRes.report ? transRes.report : null);
+        if (rep) {
+          data = {
+            ai_summary: rep.summary || rep.description,
+            ai_category: rep.category,
+            ai_department: rep.responsible_department || 'Roads Department',
+            ai_priority: rep.priority || 'Medium'
+          };
+        } else {
+          error = 'Transportation report creation failed.';
+        }
+      } catch (e) {
+        error = e.message || 'Transportation report submission error.';
+      }
+    } else {
+      const res = await window.API.createIssue(formData);
+      data = res.data;
+      error = res.error;
+    }
 
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
