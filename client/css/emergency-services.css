@@ -955,5 +955,16 @@ body.emergency-body .emergency-page-container {
   }
   body.emergency-body {
     padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+  .emergency-map-container {
+    touch-action: pan-y !important;
+  }
+  .emergency-contacts-table-wrapper {
+    touch-action: pan-x pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 }
