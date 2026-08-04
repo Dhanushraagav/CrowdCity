@@ -2151,10 +2151,13 @@ body:not(.admin-portal-body) .app-sidebar {
 }
 
 .sidebar-header {
+  height: 70px;
+  min-height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem 0.5rem 0.75rem 0.5rem;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
 
 .app-sidebar-logo {
