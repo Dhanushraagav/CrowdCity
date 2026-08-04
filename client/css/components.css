@@ -4569,6 +4569,16 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
+/* Authority Portal Active Sidebar Link */
+.app-sidebar-link.active {
+  background-color: #0d9488 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+.app-sidebar-link.active i {
+  color: #ffffff !important;
+}
+
 
 
 
