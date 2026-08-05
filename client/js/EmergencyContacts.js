@@ -84,12 +84,40 @@ window.EmergencyContacts = {
           </span>
         </td>
         <td>
-          <a href="tel:${item.number}" class="btn-table-call">
-            <i class="fa-solid fa-phone"></i> Call ${item.number}
-          </a>
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+            <a href="tel:${item.number}" class="btn-table-call">
+              <i class="fa-solid fa-phone"></i> Call ${item.number}
+            </a>
+            <button onclick="window.EmergencyContacts.saveToContacts('${item.service}', '${item.number}')" class="btn-table-call" style="background: #0f172a; color: #ffffff; border: none; font-weight: 700; font-size: 0.78rem; border-radius: 6px; padding: 0.4rem 0.7rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <i class="fa-solid fa-address-book"></i> Save Contact
+            </button>
+          </div>
         </td>
       </tr>
     `).join('');
+  },
+
+  /**
+   * Save contact as vCard (.vcf) for instant mobile address book import
+   */
+  saveToContacts: function(serviceName, phoneNumber) {
+    const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${serviceName} (Emergency)
+TEL;TYPE=CELL,VOICE:${phoneNumber}
+NOTE:Verified Emergency Helpline - CrowdCity AI Government Service
+END:VCARD`;
+
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${serviceName.replace(/\s+/g, '_')}_${phoneNumber}.vcf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    this.showToast(`Contact card downloaded for ${serviceName}`);
   },
 
   /**

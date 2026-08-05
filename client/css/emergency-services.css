@@ -949,6 +949,13 @@ body.emergency-body .emergency-page-container {
 }
 
 @media (max-width: 768px) {
+  /* Hide non-essential desktop text blocks on mobile for 100% clean emergency focus */
+  .emergency-hero-section,
+  .accordion-wrapper,
+  footer {
+    display: none !important;
+  }
+
   .sticky-mobile-emergency-bar {
     display: flex !important;
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)) !important;
