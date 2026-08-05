@@ -548,59 +548,106 @@ body.emergency-body .app-sidebar {
    PURE SCRATCH MOBILE VIEW OVERRIDES (@media max-width: 768px)
    ========================================================================== */
 @media (max-width: 768px) {
-  /* Hide non-essential desktop hero & disaster text blocks for pure mobile focus */
+  /* Hide non-essential text blocks and preparedness guides on mobile */
   .emergency-hero-section,
+  .emergency-prep-guides-section,
   .accordion-wrapper,
+  .prep-grid,
+  .medical-ref-card,
   footer {
     display: none !important;
   }
 
-  /* Single Column Linear Stack */
+  /* Compact Sleek Mobile Typography */
   .emergency-section {
-    padding: 1.25rem 1rem !important;
+    padding: 0.85rem 0.75rem !important;
     border-bottom: 1px solid var(--border-subtle) !important;
   }
 
   .emergency-section-header {
-    margin-bottom: 1rem !important;
+    margin-bottom: 0.75rem !important;
   }
 
   .emergency-section-title {
-    font-size: 1.25rem !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+  }
+
+  .emergency-section-desc {
+    font-size: 0.75rem !important;
   }
 
   .quick-actions-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.65rem !important;
-  }
-
-  .quick-action-card {
-    padding: 0.85rem 0.65rem !important;
     gap: 0.5rem !important;
   }
 
-  .quick-action-icon-wrap {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 1rem !important;
+  .quick-action-card {
+    padding: 0.65rem 0.5rem !important;
+    gap: 0.4rem !important;
+    border-radius: 8px !important;
   }
 
+  .quick-action-icon-wrap {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .quick-action-title {
+    font-size: 0.8rem !important;
+    font-weight: 800 !important;
+  }
+
+  .quick-action-subtitle {
+    font-size: 0.68rem !important;
+  }
+
+  /* Table Compact Layout */
+  .emergency-contacts-table-wrapper {
+    border-radius: 8px !important;
+  }
+
+  .emergency-contacts-table th {
+    padding: 0.5rem 0.65rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .emergency-contacts-table td {
+    padding: 0.55rem 0.65rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .phone-number-badge {
+    font-size: 0.95rem !important;
+  }
+
+  /* Map Container */
   .emergency-map-container {
-    height: 260px !important;
-    touch-action: pan-y !important;
+    height: 280px !important;
+    border-radius: 8px !important;
   }
 
   .responders-grid {
     grid-template-columns: 1fr !important;
-    gap: 0.85rem !important;
+    gap: 0.65rem !important;
+  }
+
+  .responder-card {
+    padding: 0.85rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .responder-name {
+    font-size: 0.92rem !important;
   }
 
   .sticky-mobile-emergency-bar {
     display: flex !important;
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   body.emergency-body {
-    padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }

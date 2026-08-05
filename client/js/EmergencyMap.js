@@ -66,16 +66,14 @@ window.EmergencyMap = {
       this.map.remove();
     }
 
-    const isMobile = window.innerWidth <= 768;
-
     this.map = L.map(containerId, {
       center: [centerLat, centerLng],
       zoom: zoom,
-      zoomControl: !isMobile,
-      dragging: !isMobile, // Disable dragging by default on mobile so page scroll is 100% smooth
+      zoomControl: true,
+      dragging: true,
       scrollWheelZoom: false,
-      tap: !isMobile,
-      touchZoom: false
+      tap: true,
+      touchZoom: true
     });
 
     // OpenStreetMap Tile Layer (FREE)
@@ -88,11 +86,6 @@ window.EmergencyMap = {
 
     // Set User Location Marker
     this.setUserLocation(centerLat, centerLng);
-
-    // Mobile map interaction toggle button
-    if (isMobile) {
-      this.setupMobileMapToggle(container);
-    }
   },
 
   setupMobileMapToggle: function(container) {

@@ -72,24 +72,19 @@ window.EmergencyContacts = {
     tbody.innerHTML = this.directory.map(item => `
       <tr>
         <td>
-          <strong style="color: var(--text-dark); font-size: 0.95rem;">${item.service}</strong>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">${item.description}</div>
+          <strong style="color: var(--text-dark); font-size: 0.88rem;">${item.service}</strong>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.1rem;">${item.description}</div>
         </td>
         <td>
           <span class="phone-number-badge">${item.number}</span>
         </td>
         <td>
-          <span class="availability-badge">
-            <i class="fa-solid fa-circle" style="font-size: 0.45rem;"></i> ${item.availability}
-          </span>
-        </td>
-        <td>
-          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+          <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
             <a href="tel:${item.number}" class="btn-table-call">
               <i class="fa-solid fa-phone"></i> Call ${item.number}
             </a>
-            <button onclick="window.EmergencyContacts.saveToContacts('${item.service}', '${item.number}')" class="btn-table-call" style="background: #0f172a; color: #ffffff; border: none; font-weight: 700; font-size: 0.78rem; border-radius: 6px; padding: 0.4rem 0.7rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
-              <i class="fa-solid fa-address-book"></i> Save Contact
+            <button onclick="window.EmergencyContacts.saveToContacts('${item.service}', '${item.number}')" class="btn-table-call" style="background: #0f172a; color: #ffffff; border: none; font-weight: 700; font-size: 0.75rem; border-radius: 6px; padding: 0.35rem 0.65rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
+              <i class="fa-solid fa-address-book"></i> Save
             </button>
           </div>
         </td>
