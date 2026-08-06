@@ -582,6 +582,119 @@ function getLocalTransportationFallback(title, description, userCategory) {
   };
 }
 
+/**
+ * Analyzes weather parameters (from Open-Meteo API) and nearby CrowdCity waterlogging complaints
+ * to generate a Smart City Risk Assessment (Low, Medium, High, Critical) and safety recommendations.
+ */
+export const analyzeSmartCityAlerts = async (weatherData = {}, waterloggingCount = 0) => {
+  const rainMm = parseFloat(weatherData.rain || weatherData.precipitation || 0);
+  const tempC = weatherData.temperature || weatherData.temperature_2m || 28;
+  const weatherCode = weatherData.weather_code || 0;
+  const rainProb = weatherData.precipitation_probability_max || 0;
+
+  if (!groq) {
+    logger.info('Groq SDK client unconfigured, using local Smart City Alerts fallback analyzer.');
+    return getLocalSmartAlertsFallback(rainMm, waterloggingCount, tempC, weatherCode, rainProb);
+  }
+
+  const systemPrompt = `You are a Smart City Meteorological & Flood Safety Triage AI for CrowdCity AI.
+Analyze current live weather parameters and nearby waterlogging grievances to issue an AI-powered Safety Recommendation.
+
+Output MUST be a single raw JSON object matching:
+{
+  "riskLevel": "Low" | "Medium" | "High" | "Critical",
+  "safetyRecommendation": "2 to 3 concise, highly actionable safety sentences for citizens based on current weather and road conditions.",
+  "alertBannerRequired": true | false,
+  "alertHeadline": "Concise 3-6 word risk headline",
+  "precautionarySteps": ["Step 1", "Step 2", "Step 3"]
+}
+
+Risk Guidelines:
+- "Critical": Rain > 25mm/hr OR waterlogging complaints >= 5 OR active flood warning.
+- "High": Rain 10-25mm/hr OR waterlogging complaints 2-4 OR heavy showers.
+- "Medium": Rain 2-10mm/hr OR rain probability > 60% OR 1 waterlogging report.
+- "Low": Light rain < 2mm/hr, clear sky, or mild weather with 0 complaints.
+
+Safety Recommendation must be exactly 2-3 sentences. Never include technical debug data. Provide real advice (e.g. avoiding subways, elevated parking, commute precautions).`;
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Current Weather: ${rainMm}mm precipitation, Temp: ${tempC}°C, WeatherCode: ${weatherCode}, Max Rain Prob: ${rainProb}%\nNearby Waterlogging Complaints: ${waterloggingCount}` }
+      ],
+      model: model,
+      response_format: { type: 'json_object' }
+    });
+
+    const responseText = chatCompletion.choices[0].message.content;
+    const aiData = JSON.parse(responseText);
+
+    return {
+      riskLevel: aiData.riskLevel || 'Low',
+      safetyRecommendation: aiData.safetyRecommendation || 'Weather conditions are normal. Drive safely and stay updated with city alerts.',
+      alertBannerRequired: typeof aiData.alertBannerRequired === 'boolean' ? aiData.alertBannerRequired : (aiData.riskLevel === 'High' || aiData.riskLevel === 'Critical'),
+      alertHeadline: aiData.alertHeadline || `${aiData.riskLevel || 'Low'} Risk Weather Alert`,
+      precautionarySteps: Array.isArray(aiData.precautionarySteps) ? aiData.precautionarySteps : ["Stay updated with official municipal bulletins", "Keep emergency contacts accessible", "Exercise caution during commute"]
+    };
+  } catch (err) {
+    logger.error('Groq SDK Smart City Alerts analysis failed: %O. Using fallback.', err);
+    return getLocalSmartAlertsFallback(rainMm, waterloggingCount, tempC, weatherCode, rainProb);
+  }
+};
+
+export function getLocalSmartAlertsFallback(rainMm, waterloggingCount, tempC, weatherCode, rainProb) {
+  let riskLevel = 'Low';
+  let alertHeadline = 'Favorable City Weather';
+  let alertBannerRequired = false;
+  let safetyRecommendation = 'Current weather conditions are favorable across the municipal area. Drive safely and enjoy your day.';
+  let precautionarySteps = [
+    'Drive within speed limits on municipal roads',
+    'Keep your vehicle headlights functional for nighttime commuting',
+    'Report any newly observed civic issues via the Report Issue tab'
+  ];
+
+  if (rainMm >= 25 || waterloggingCount >= 5) {
+    riskLevel = 'Critical';
+    alertHeadline = 'Critical Flood & Heavy Inundation Warning';
+    alertBannerRequired = true;
+    safetyRecommendation = `Heavy rainfall (${rainMm}mm) and multiple nearby waterlogging reports detected. Avoid low-lying subways and underpasses. Please postpone non-essential travel until stormwater drainage clears.`;
+    precautionarySteps = [
+      'Avoid traveling through flooded underpasses and subways',
+      'Park vehicles on elevated ground away from low-lying drains',
+      'Contact municipal disaster helpline (1913) for emergency rescue'
+    ];
+  } else if (rainMm >= 10 || waterloggingCount >= 2) {
+    riskLevel = 'High';
+    alertHeadline = 'Heavy Rainfall & Waterlogging Caution';
+    alertBannerRequired = true;
+    safetyRecommendation = `Significant precipitation (${rainMm}mm) detected along with active waterlogging reports nearby. Expect commuter delays along major arterial corridors. Drive at reduced speeds with headlights on.`;
+    precautionarySteps = [
+      'Use major elevated bypass routes instead of interior roads',
+      'Maintain extra braking distance on wet asphalt roads',
+      'Watch out for exposed manholes or inundated road edges'
+    ];
+  } else if (rainMm >= 2 || rainProb >= 60 || waterloggingCount >= 1) {
+    riskLevel = 'Medium';
+    alertHeadline = 'Moderate Rain & Wet Road Caution';
+    alertBannerRequired = false;
+    safetyRecommendation = `Light to moderate rainfall observed in your sector. Road surfaces may be slippery, so exercise standard caution during evening commute hours.`;
+    precautionarySteps = [
+      'Carry umbrellas and protective rain covers',
+      'Reduce speed on turns to prevent skidding',
+      'Report localized drainage blockages on CrowdCity'
+    ];
+  }
+
+  return {
+    riskLevel,
+    safetyRecommendation,
+    alertBannerRequired,
+    alertHeadline,
+    precautionarySteps
+  };
+}
+
 
 
 

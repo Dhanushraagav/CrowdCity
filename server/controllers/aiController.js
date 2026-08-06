@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, analyzeSmartCityAlerts } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
@@ -310,6 +310,22 @@ export const recommendationController = async (req, res) => {
   } catch (err) {
     logger.error('recommendationController Error: %O', err);
     return res.status(500).json({ error: 'Server error generating personalized recommendations' });
+  }
+};
+
+/**
+ * POST /api/ai/smart-alerts
+ * Dedicated endpoint for Real-Time Smart City Weather & Flood AI Risk Assessment.
+ */
+export const smartAlertsController = async (req, res) => {
+  const { weatherData, waterloggingCount } = req.body;
+
+  try {
+    const data = await analyzeSmartCityAlerts(weatherData || {}, waterloggingCount || 0);
+    return res.status(200).json(data);
+  } catch (err) {
+    logger.error('smartAlertsController Error: %O', err);
+    return res.status(500).json({ error: 'Server error generating Smart City AI Risk Assessment' });
   }
 };
 
