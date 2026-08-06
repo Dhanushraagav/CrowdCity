@@ -144,7 +144,7 @@ async function runGroqAiTriage(force = false) {
   if (!title || !description) {
     container.innerHTML = `
       <p style="margin: 0; color: #cbd5e1; font-style: italic;">
-        Fill in the Issue Title and Description above to automatically run Groq AI triage analysis...
+        Fill in the Issue Title and Description above to automatically run AI triage analysis...
       </p>
     `;
     return;
@@ -153,7 +153,7 @@ async function runGroqAiTriage(force = false) {
   container.innerHTML = `
     <div style="display: flex; align-items: center; gap: 0.6rem; color: #fbbf24;">
       <i class="fa-solid fa-circle-notch fa-spin"></i>
-      <span>Groq AI Triage Engine Analyzing Issue...</span>
+      <span>State AI Triage Engine Analyzing Issue...</span>
     </div>
   `;
 

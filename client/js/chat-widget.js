@@ -678,7 +678,7 @@
             <button type="submit" class="cc-chat-send-btn" id="cc-chat-submit-btn"><i class="fa-solid fa-arrow-up"></i></button>
           </div>
         </form>
-        <div class="cc-chat-footnote">CrowdCity AI Civic Assistant &bull; Powered by Groq AI</div>
+        <div class="cc-chat-footnote">CrowdCity AI Civic Assistant &bull; Tamil Nadu Smart City Portal</div>
       </div>
     `;
     document.body.appendChild(chatWindow);

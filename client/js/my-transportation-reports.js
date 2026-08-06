@@ -186,7 +186,7 @@ function openDetailsModal(reportId) {
 
     ${report.summary ? `
       <div>
-        <strong style="display: block; margin-bottom: 4px; color: var(--primary);">Groq AI Executive Summary:</strong>
+        <strong style="display: block; margin-bottom: 4px; color: var(--primary);">State AI Executive Summary:</strong>
         <div style="background: rgba(13, 148, 136, 0.08); padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-main); border: 1px solid rgba(13, 148, 136, 0.2);">
           ${escapeHtml(report.summary)}
         </div>
