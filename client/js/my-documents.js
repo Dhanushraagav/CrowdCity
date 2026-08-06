@@ -532,19 +532,35 @@
   }
 
   async function generateAndSendEmailOTP() {
-    activeEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     const userEmail = await getUserEmail();
 
     try {
-      fetch('/api/auth/send-otp', {
+      const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail, type: 'mpin_change' })
-      }).catch(e => console.warn("Background OTP email dispatch warning:", e));
-    } catch (err) {}
+      });
+      const data = await res.json();
+      if (res.ok) {
+        activeEmailOTP = ''; // Reset dev fallback so canonical server OTP is verified
+        if (typeof window.showToast === 'function') {
+          window.showToast(`🔒 Security Verification OTP sent to ${userEmail}! Check your email inbox.`, 'success');
+        }
+        return;
+      } else {
+        if (typeof window.showToast === 'function') {
+          window.showToast(data.error || 'Please wait a moment before requesting another code.', 'warning');
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn("Backend send-otp unreachable, activating dev fallback mode:", err);
+    }
 
+    // Dev/Offline Fallback mode if backend API server is unreachable
+    activeEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     if (typeof window.showToast === 'function') {
-      window.showToast(`🔒 Security Verification OTP sent to ${userEmail}! (Code: ${activeEmailOTP})`, 'success');
+      window.showToast(`🔒 Dev Fallback: OTP sent to ${userEmail}! (Code: ${activeEmailOTP})`, 'info');
     }
   }
 
@@ -557,15 +573,19 @@
         body: JSON.stringify({ email: userEmail, code: enteredOTP, type: 'mpin_change' })
       });
       const data = await res.json();
-      if (res.ok) return true;
+      if (res.ok) {
+        return { valid: true };
+      } else {
+        return { valid: false, error: data.error || 'Invalid OTP code. Please check your email and try again.' };
+      }
     } catch (err) {
-      console.warn("Backend verify-otp failed, checking active email OTP:", err);
+      console.warn("Backend verify-otp unreachable, checking dev fallback OTP:", err);
     }
 
     if (activeEmailOTP && enteredOTP === activeEmailOTP) {
-      return true;
+      return { valid: true };
     }
-    return false;
+    return { valid: false, error: 'Invalid OTP code. Please check your email and try again.' };
   }
 
   async function openMPINModal(mode = 'verify') {
@@ -674,9 +694,11 @@
         return;
       }
 
-      const isValid = await verifyEmailOTP(enteredOTP);
-      if (!isValid) {
-        showMPINError('Invalid OTP code. Please check your email and try again.');
+      const result = await verifyEmailOTP(enteredOTP);
+      if (!result.valid) {
+        showMPINError(result.error || 'Invalid OTP code. Please check your email and try again.');
+        const otpInp = document.getElementById('mpin-input-otp');
+        if (otpInp) { otpInp.value = ''; syncPinBoxes('mpin-input-otp'); otpInp.focus(); }
         return;
       }
 
