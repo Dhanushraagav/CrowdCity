@@ -1450,6 +1450,7 @@ function updateAuthUI() {
 
   const injectPortalBadge = () => {
     const path = window.location.pathname;
+    if (path.includes('admin.html')) return;
     
     let badgeText = '';
     let badgeClass = '';
