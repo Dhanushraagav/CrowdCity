@@ -3195,19 +3195,30 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     order: 1 !important;
     display: flex !important;
     align-items: center !important;
-    font-size: 0.95rem !important;
-    font-weight: 800 !important;
-    color: var(--text-main) !important;
+    gap: 0.4rem !important;
     text-decoration: none !important;
     flex-shrink: 0 !important;
     height: 100% !important;
+    margin-right: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .app-header-logo-mobile div {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    visibility: visible !important;
   }
 
   .app-header-logo-mobile img {
-    width: 22px !important;
-    height: 22px !important;
-    margin-right: 0.35rem !important;
+    width: 26px !important;
+    height: 26px !important;
+    margin-right: 0 !important;
     object-fit: contain !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .header-datetime-widget,

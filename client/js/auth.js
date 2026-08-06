@@ -1557,10 +1557,6 @@ function updateAuthUI() {
     const header = document.querySelector('.topnav, .app-header-main, .app-header');
     if (!header) return;
 
-    // Remove duplicate logos from top header
-    const headerLogos = header.querySelectorAll('.app-header-logo-mobile, .logo-container');
-    headerLogos.forEach(logo => logo.remove());
-
     // Remove loose stray notification buttons placed outside auth-nav-container
     const strayBellBtns = header.querySelectorAll('.notification-btn, #notification-btn');
     strayBellBtns.forEach(btn => {
