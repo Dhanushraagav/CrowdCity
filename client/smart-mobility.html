@@ -19,6 +19,13 @@
   <link rel="stylesheet" href="css/components.css" />
 
   <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Outfit', 'Inter', system-ui, sans-serif !important;
+    }
+
     .mobility-tab-btn {
       padding: 0.65rem 1.1rem;
       font-size: 0.84rem;
@@ -90,105 +97,110 @@
       }
     }
   </style>
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
 </head>
-<body class="app-layout">
+<body class="protected-page">
 
-  <!-- Desktop App Sidebar -->
-  <aside class="app-sidebar" id="app-sidebar">
-    <!-- Populated by auth.js -->
-  </aside>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar"></aside>
 
-  <!-- Main Workspace -->
-  <div class="app-main-wrapper">
-    
-    <!-- Header Topbar -->
-    <header class="app-topbar">
-      <div class="topbar-left">
-        <button type="button" class="mobile-nav-toggle" id="mobile-drawer-toggle" aria-label="Toggle navigation">
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+          </div>
+        </a>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <div class="page-title-badge">
-          <i class="fa-solid fa-route" style="color: var(--primary);"></i>
-          <span>Smart Mobility Portal</span>
-        </div>
-      </div>
 
-      <div class="topbar-right">
-        <div id="auth-nav-container">
-          <!-- Populated by auth.js -->
+        <div class="app-header-actions" style="margin-left: auto;">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <!-- Page Body -->
-    <div class="app-content-body" style="padding: 1.5rem 2rem 3rem 2rem;">
-      
-      <!-- Page Title Header -->
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
-        <div>
-          <h1 style="font-size: 1.65rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading);">
-            Smart Mobility & Intelligent Transit Portal 🚗⚡
-          </h1>
-          <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
-            Live traffic heat maps, real-time bus tracking, EV charging hubs, smart parking telemetry, and Groq AI route planning.
-          </p>
+      <div class="app-content-body" style="padding: 1.5rem 2rem 3rem 2rem; width: 100%; max-width: 100%; box-sizing: border-box;">
+        
+        <!-- Page Title Header Row -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <h1 style="font-size: 1.65rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: 'Outfit', sans-serif;">
+              Smart Mobility & Intelligent Transit Portal 🚗⚡
+            </h1>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
+              Live traffic heat maps, real-time bus tracking, EV charging hubs, smart parking telemetry, and Groq AI route planning.
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <select id="select-city-sector" class="form-control" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
+              <option value="chennai">Chennai Metropolitan</option>
+              <option value="coimbatore" selected>Coimbatore City</option>
+              <option value="madurai">Madurai Smart City</option>
+              <option value="trichy">Tiruchirappalli (Trichy)</option>
+              <option value="salem">Salem Corporation</option>
+            </select>
+            <button type="button" onclick="window.refreshMobilityData()" class="btn btn-secondary" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px;">
+              <i class="fa-solid fa-arrows-rotate"></i> Sync Live Data
+            </button>
+          </div>
         </div>
 
-        <div style="display: flex; gap: 0.6rem; align-items: center;">
-          <select id="select-city-sector" class="form-control" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
-            <option value="chennai">Chennai Metropolitan</option>
-            <option value="coimbatore" selected>Coimbatore City</option>
-            <option value="madurai">Madurai Smart City</option>
-            <option value="trichy">Tiruchirappalli (Trichy)</option>
-            <option value="salem">Salem Corporation</option>
-          </select>
-          <button type="button" onclick="window.refreshMobilityData()" class="btn btn-secondary" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px;">
-            <i class="fa-solid fa-arrows-rotate"></i> Sync Live Data
+        <!-- Feature Tabs Selector -->
+        <div style="display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.75rem; margin-bottom: 1.25rem; scrollbar-width: none;" id="mobility-tabs">
+          <button class="mobility-tab-btn active" data-tab="traffic">
+            <i class="fa-solid fa-traffic-light"></i> <span>Live Traffic & Heat Map</span>
+          </button>
+          <button class="mobility-tab-btn" data-tab="ev">
+            <i class="fa-solid fa-charging-station"></i> <span>EV Charging Stations</span>
+          </button>
+          <button class="mobility-tab-btn" data-tab="bus">
+            <i class="fa-solid fa-bus"></i> <span>Live Bus Tracking</span>
+          </button>
+          <button class="mobility-tab-btn" data-tab="hotspots">
+            <i class="fa-solid fa-triangle-exclamation"></i> <span>Accident Hotspots (AI)</span>
+          </button>
+          <button class="mobility-tab-btn" data-tab="parking">
+            <i class="fa-solid fa-square-parking"></i> <span>Smart Parking</span>
+          </button>
+          <button class="mobility-tab-btn" data-tab="closures">
+            <i class="fa-solid fa-road-barrier"></i> <span>Road Closures</span>
+          </button>
+          <button class="mobility-tab-btn" data-tab="route">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> <span>AI Route Planner</span>
           </button>
         </div>
-      </div>
 
-      <!-- Feature Tabs Selector -->
-      <div style="display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.75rem; margin-bottom: 1.25rem; scrollbar-width: none;" id="mobility-tabs">
-        <button class="mobility-tab-btn active" data-tab="traffic">
-          <i class="fa-solid fa-traffic-light"></i> <span>Live Traffic & Heat Map</span>
-        </button>
-        <button class="mobility-tab-btn" data-tab="ev">
-          <i class="fa-solid fa-charging-station"></i> <span>EV Charging Stations</span>
-        </button>
-        <button class="mobility-tab-btn" data-tab="bus">
-          <i class="fa-solid fa-bus"></i> <span>Live Bus Tracking</span>
-        </button>
-        <button class="mobility-tab-btn" data-tab="hotspots">
-          <i class="fa-solid fa-triangle-exclamation"></i> <span>Accident Hotspots (AI)</span>
-        </button>
-        <button class="mobility-tab-btn" data-tab="parking">
-          <i class="fa-solid fa-square-parking"></i> <span>Smart Parking</span>
-        </button>
-        <button class="mobility-tab-btn" data-tab="closures">
-          <i class="fa-solid fa-road-barrier"></i> <span>Road Closures</span>
-        </button>
-        <button class="mobility-tab-btn" data-tab="route">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> <span>AI Route Planner</span>
-        </button>
-      </div>
-
-      <!-- Interactive Leaflet Map -->
-      <div style="position: relative; margin-bottom: 1.75rem;">
-        <div id="mobility-map"></div>
-        <div id="map-legend-overlay" style="position: absolute; bottom: 16px; right: 16px; z-index: 1000; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); border: 1px solid #cbd5e1; border-radius: 12px; padding: 0.5rem 0.85rem; font-size: 0.75rem; font-weight: 700; color: #334155; display: flex; gap: 0.75rem; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-          <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span> Smooth</span>
-          <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span> Moderate</span>
-          <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></span> Heavy</span>
+        <!-- Interactive Leaflet Map -->
+        <div style="position: relative; margin-bottom: 1.75rem;">
+          <div id="mobility-map"></div>
+          <div id="map-legend-overlay" style="position: absolute; bottom: 16px; right: 16px; z-index: 1000; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); border: 1px solid #cbd5e1; border-radius: 12px; padding: 0.5rem 0.85rem; font-size: 0.75rem; font-weight: 700; color: #334155; display: flex; gap: 0.75rem; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span> Smooth</span>
+            <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span> Moderate</span>
+            <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></span> Heavy</span>
+          </div>
         </div>
-      </div>
 
-      <!-- Tab Feature Content Container -->
-      <div id="mobility-tab-content">
-        <!-- Injected dynamically by smart-mobility.js -->
-      </div>
+        <!-- Tab Feature Content Container -->
+        <div id="mobility-tab-content">
+          <!-- Injected dynamically by smart-mobility.js -->
+        </div>
 
-    </div>
+      </div>
+    </main>
   </div>
 
   <!-- Leaflet Map JS -->
