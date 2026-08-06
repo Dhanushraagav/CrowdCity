@@ -104,11 +104,46 @@
 }
 
 
-/* Base Resets */
-* {
+/* Base Resets & Mobile Tap Highlight Removal */
+*,
+*:before,
+*:after,
+html,
+body,
+a,
+button,
+input,
+select,
+textarea,
+div,
+span,
+label,
+li,
+td,
+th {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  -webkit-touch-callout: none;
+}
+
+*:focus,
+*:focus-visible,
+*:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Micro-press visual response instead of native browser blue flash */
+a:active,
+button:active,
+.quick-action-card:active,
+.btn:active,
+.app-sidebar-link:active {
+  transform: scale(0.97) !important;
+  transition: transform 0.08s ease !important;
 }
 
 body {

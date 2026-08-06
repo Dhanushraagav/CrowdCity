@@ -1,3 +1,9 @@
+/* Mobile Tap Highlight Removal */
+*, *:before, *:after, a, button, input, select, textarea, div, span, label {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+}
+
 /* 1. Buttons */
 .btn {
   display: inline-flex;
