@@ -482,7 +482,7 @@ function initVoiceGrievanceReporter() {
         const aiBtn = document.getElementById('btn-ai-assist');
         if (aiBtn) aiBtn.click();
       } else if (statusText) {
-        statusText.textContent = 'Tap mic & speak naturally in Tamil or English. AI will transcribe & translate into English!';
+        statusText.textContent = 'Tap mic to speak in Tamil or English.';
       }
     };
   }
