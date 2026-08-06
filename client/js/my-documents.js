@@ -832,10 +832,10 @@
     });
   }
 
-  window.triggerMPINSetupOrChange = async function() {
+  window.triggerMPINSetupOrChange = function() {
     if (getStoredMPIN()) {
-      await generateAndSendEmailOTP();
-      openMPINModal('otp');
+      openMPINModal('otp'); // Instant 0ms modal popup
+      generateAndSendEmailOTP(); // Asynchronous email dispatch in background
     } else {
       openMPINModal('set');
     }
