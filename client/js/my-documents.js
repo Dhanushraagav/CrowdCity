@@ -473,6 +473,12 @@
           syncPinBoxes(id);
           checkAutoSubmit(id);
         });
+        el.addEventListener('focus', () => {
+          allPinInputIds.forEach(otherId => syncPinBoxes(otherId));
+        });
+        el.addEventListener('blur', () => {
+          syncPinBoxes(id);
+        });
         el.addEventListener('keypress', (e) => {
           if (e.key === 'Enter') submitMPIN();
         });
@@ -519,6 +525,7 @@
 
     const boxes = group.querySelectorAll('.pin-box');
     const val = input.value.trim();
+    const isFocused = (document.activeElement === input);
 
     boxes.forEach((box, idx) => {
       if (idx < val.length) {
@@ -528,7 +535,7 @@
       } else {
         box.textContent = '';
         box.classList.remove('filled');
-        if (idx === val.length) {
+        if (isFocused && idx === val.length) {
           box.classList.add('active');
         } else {
           box.classList.remove('active');
