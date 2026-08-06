@@ -336,27 +336,61 @@
     window.cc_initWeather = initWeather;
     const currentLang = localStorage.getItem('cc_lang') || 'en';
 
+    // Apply weather theme class & particle animation
+    function applyWeatherTheme(code, temp) {
+      widget.classList.remove('weather-rain', 'weather-thunder', 'weather-sun', 'weather-snow', 'weather-clouds');
+      
+      const oldParticles = widget.querySelector('.weather-particle-rain');
+      if (oldParticles) oldParticles.remove();
+
+      if (code >= 95 || code === 96 || code === 99) {
+        widget.classList.add('weather-thunder');
+      } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
+        widget.classList.add('weather-rain');
+        injectRainParticles();
+      } else if ((code >= 71 && code <= 77) || temp <= 16) {
+        widget.classList.add('weather-snow');
+      } else if (code === 0 || code === 1 || temp >= 32) {
+        widget.classList.add('weather-sun');
+      } else {
+        widget.classList.add('weather-clouds');
+      }
+    }
+
+    function injectRainParticles() {
+      const particleWrap = document.createElement('div');
+      particleWrap.className = 'weather-particle-rain';
+      for (let i = 0; i < 8; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'rain-drop';
+        drop.style.left = `${8 + i * 11}%`;
+        drop.style.animationDelay = `${(i * 0.12).toFixed(2)}s`;
+        particleWrap.appendChild(drop);
+      }
+      widget.appendChild(particleWrap);
+    }
+
     // WMO weather code to icon mapping
     function getWeatherIcon(code) {
       if (code === 0) return 'fa-sun';
       if (code <= 3) return 'fa-cloud-sun';
       if (code <= 48) return 'fa-smog';
       if (code <= 57) return 'fa-cloud-rain';
-      if (code <= 67) return 'fa-cloud-showers-heavy';
+      if (code <= 67) return 'fa-cloud-showers-water';
       if (code <= 77) return 'fa-snowflake';
       if (code <= 82) return 'fa-cloud-showers-heavy';
-      if (code <= 99) return 'fa-bolt';
+      if (code <= 99) return 'fa-bolt-lightning';
       return 'fa-cloud';
     }
 
     function getWeatherColor(code) {
-      if (code === 0) return '#f59e0b';      // sunny yellow
-      if (code <= 3) return '#fbbf24';        // partly cloudy
-      if (code <= 48) return '#94a3b8';       // fog/mist grey
-      if (code <= 67) return '#60a5fa';       // rain blue
-      if (code <= 77) return '#c4b5fd';       // snow purple
-      if (code <= 99) return '#f472b6';       // thunderstorm pink
-      return '#94a3b8';
+      if (code === 0) return '#d97706';      // sunny amber
+      if (code <= 3) return '#f59e0b';        // partly cloudy
+      if (code <= 48) return '#64748b';       // fog/mist grey
+      if (code <= 67) return '#0284c7';       // rain blue
+      if (code <= 77) return '#38bdf8';       // snow cyan
+      if (code <= 99) return '#fbbf24';       // thunderstorm yellow
+      return '#64748b';
     }
 
     async function fetchWeather(lat, lon) {
@@ -382,6 +416,7 @@
         tempEl.textContent = `${temp}\u00B0C`;
         iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code)}"></i>`;
         iconEl.style.color = getWeatherColor(code);
+        applyWeatherTheme(code, temp);
         widget.classList.remove('loading');
         widget.title = `${cleanDistrict} — ${temp}\u00B0C`;
 
@@ -408,6 +443,7 @@
           tempEl.textContent = `${c.temp}\u00B0C`;
           iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code)}"></i>`;
           iconEl.style.color = getWeatherColor(c.code);
+          applyWeatherTheme(c.code, c.temp);
           widget.classList.remove('loading');
           widget.title = `${c.district} — ${c.temp}\u00B0C`;
           return; // Use cached data
