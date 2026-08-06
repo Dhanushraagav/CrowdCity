@@ -212,20 +212,20 @@
         <div>
           <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Enter New 4-Digit MPIN</label>
           <div class="pin-box-group" data-input-id="mpin-input-set">
-            <span class="pin-box active">_</span>
-            <span class="pin-box">_</span>
-            <span class="pin-box">_</span>
-            <span class="pin-box">_</span>
+            <span class="pin-box active"></span>
+            <span class="pin-box"></span>
+            <span class="pin-box"></span>
+            <span class="pin-box"></span>
           </div>
           <input type="password" id="mpin-input-set" maxlength="4" inputmode="numeric" class="hidden-pin-input" />
         </div>
         <div>
           <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Confirm New 4-Digit MPIN</label>
           <div class="pin-box-group" data-input-id="mpin-input-confirm">
-            <span class="pin-box">_</span>
-            <span class="pin-box">_</span>
-            <span class="pin-box">_</span>
-            <span class="pin-box">_</span>
+            <span class="pin-box"></span>
+            <span class="pin-box"></span>
+            <span class="pin-box"></span>
+            <span class="pin-box"></span>
           </div>
           <input type="password" id="mpin-input-confirm" maxlength="4" inputmode="numeric" class="hidden-pin-input" />
         </div>
@@ -235,10 +235,10 @@
       <div id="mpin-verify-container" style="margin-bottom: 1.5rem;">
         <label style="display: block; text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.6rem;">Enter 4-Digit Security MPIN</label>
         <div class="pin-box-group" data-input-id="mpin-input-verify">
-          <span class="pin-box active">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
+          <span class="pin-box active"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
         </div>
         <input type="password" id="mpin-input-verify" maxlength="4" inputmode="numeric" class="hidden-pin-input" />
       </div>
@@ -247,10 +247,10 @@
       <div id="mpin-old-container" style="display: none; margin-bottom: 1.5rem;">
         <label style="display: block; text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.6rem;">Enter Current 4-Digit MPIN</label>
         <div class="pin-box-group" data-input-id="mpin-input-old">
-          <span class="pin-box active">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
+          <span class="pin-box active"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
         </div>
         <input type="password" id="mpin-input-old" maxlength="4" inputmode="numeric" class="hidden-pin-input" />
       </div>
@@ -259,12 +259,12 @@
       <div id="mpin-otp-container" style="display: none; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
         <label style="display: block; text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Enter 6-Digit Email Verification OTP</label>
         <div class="pin-box-group six-slots" data-input-id="mpin-input-otp">
-          <span class="pin-box active">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
-          <span class="pin-box">_</span>
+          <span class="pin-box active"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
+          <span class="pin-box"></span>
         </div>
         <input type="text" id="mpin-input-otp" maxlength="6" inputmode="numeric" class="hidden-pin-input" />
         <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
@@ -273,15 +273,18 @@
       </div>
 
       <!-- Error Message Box -->
-      <div id="mpin-modal-error" style="display: none; padding: 0.6rem 0.85rem; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; font-size: 0.82rem; font-weight: 700; margin-bottom: 1.25rem;"></div>
-
-      <div style="display: flex; gap: 0.75rem; justify-content: center;">
-        <button type="button" class="btn btn-secondary" id="mpin-cancel-btn" style="flex: 1; padding: 0.7rem; border-radius: 12px; font-weight: 700; font-size: 0.88rem;">Cancel</button>
-        <button type="button" class="btn btn-primary" id="mpin-submit-btn" style="flex: 1; padding: 0.7rem; border-radius: 12px; font-weight: 700; font-size: 0.88rem;">Submit</button>
+      <div id="mpin-modal-error" style="display: none; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-size: 0.8rem; font-weight: 600; padding: 0.65rem 0.85rem; border-radius: 10px; margin-bottom: 1.25rem; line-height: 1.4;">
       </div>
 
-      <div style="margin-top: 1.1rem;" id="mpin-reset-wrap">
-        <button type="button" id="mpin-reset-btn" style="background: none; border: none; color: var(--primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; text-decoration: underline;">Change / Reset MPIN</button>
+      <!-- Footer Buttons -->
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+        <button type="button" id="mpin-cancel-btn" class="btn btn-secondary" style="flex: 1; padding: 0.65rem 1rem; border-radius: 10px; font-weight: 700; font-size: 0.88rem;">Cancel</button>
+        <button type="button" id="mpin-submit-btn" class="btn btn-primary" style="flex: 1.2; padding: 0.65rem 1.25rem; border-radius: 10px; font-weight: 700; font-size: 0.88rem;">Submit</button>
+      </div>
+
+      <!-- Password Reset Fallback Link -->
+      <div id="mpin-reset-wrap" style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-muted);">
+        Forgot your Security MPIN? <button type="button" id="mpin-reset-btn" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;">Reset via Email OTP</button>
       </div>
     </div>
   </div>

@@ -522,11 +522,11 @@
 
     boxes.forEach((box, idx) => {
       if (idx < val.length) {
-        box.textContent = val[idx];
+        box.textContent = (inputId === 'mpin-input-otp') ? val[idx] : '●';
         box.classList.add('filled');
         box.classList.remove('active');
       } else {
-        box.textContent = '_';
+        box.textContent = '';
         box.classList.remove('filled');
         if (idx === val.length) {
           box.classList.add('active');

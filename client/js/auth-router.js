@@ -98,23 +98,49 @@
       100% { transform: translateX(100%); }
     }
     .gov-loader-spinner {
-      width: 42px;
-      height: 42px;
-      border: 3px solid rgba(15, 118, 110, 0.15);
-      border-top-color: #0f766e;
+      width: 44px;
+      height: 44px;
+      border: 3.5px solid rgba(13, 148, 136, 0.15);
+      border-top-color: #0d9488;
+      border-right-color: #0d9488;
       border-radius: 50%;
-      animation: govSpinnerRotate 0.8s linear infinite;
+      animation: govSpinnerRotate 0.75s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+      box-shadow: 0 0 15px rgba(13, 148, 136, 0.2);
     }
     @keyframes govSpinnerRotate {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    .gov-loader-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #0f172a;
-      letter-spacing: 0.05em;
+    .gov-loader-branding {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
       margin-top: 1.25rem;
+    }
+    .gov-loader-logo-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .gov-loader-icon {
+      height: 28px;
+      width: 28px;
+      object-fit: contain;
+    }
+    .gov-loader-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0d9488;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    .gov-loader-subtext {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #ea580c;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
   `;
@@ -128,7 +154,14 @@
     loader.innerHTML = `
       <div id="gov-top-loader-bar"></div>
       <div class="gov-loader-spinner"></div>
-      <div class="gov-loader-title">Government Services Portal</div>
+      <div class="gov-loader-branding">
+        <div class="gov-loader-logo-row">
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="gov-loader-icon" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Govt." class="gov-loader-icon" />
+        </div>
+        <div class="gov-loader-title">CROWDCITY AI CITIZEN PORTAL</div>
+        <div class="gov-loader-subtext">Initializing Secure Government Services...</div>
+      </div>
     `;
     document.body.insertBefore(loader, document.body.firstChild);
   }
