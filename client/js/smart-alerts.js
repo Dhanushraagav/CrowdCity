@@ -1,5 +1,5 @@
 // CrowdCity AI v2.0 - Smart City Alerts & Weather Risk Assessment Module
-// Displays a sleek floating pill badge on the bottom-left that expands into a full Groq AI Weather & Flood Risk Assessment modal.
+// Embeds a sleek weather alert card directly inside the Left Sidebar Navigation, which expands into a full Groq AI Risk Assessment modal.
 
 (function() {
   'use strict';
@@ -13,8 +13,8 @@
   let isModalOpen = false;
 
   async function initSmartCityAlerts() {
-    ensureFloatingContainer();
-    renderSkeletonPill();
+    const root = ensureFloatingContainer();
+    renderSkeletonSidebarWidget();
 
     // Acquire browser geolocation if permitted
     if (navigator.geolocation) {
@@ -45,12 +45,21 @@
     return container;
   }
 
-  function renderSkeletonPill() {
-    const root = ensureFloatingContainer();
-    root.innerHTML = `
-      <div id="smart-alerts-pill" style="position: fixed; bottom: 24px; left: 24px; z-index: 9980; background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 999px; padding: 0.55rem 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.55rem; cursor: pointer; backdrop-filter: blur(8px);">
-        <i class="fa-solid fa-spinner fa-spin" style="color: var(--primary, #0d9488); font-size: 0.95rem;"></i>
-        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-main, #1e293b);">Analyzing Weather & Risk...</span>
+  function renderSkeletonSidebarWidget() {
+    const sidebarNav = document.querySelector('.app-sidebar-nav') || document.querySelector('.app-sidebar') || document.querySelector('.sidebar');
+    if (!sidebarNav) return;
+
+    let widget = document.getElementById('smart-alerts-sidebar-widget');
+    if (!widget) {
+      widget = document.createElement('div');
+      widget.id = 'smart-alerts-sidebar-widget';
+      sidebarNav.appendChild(widget);
+    }
+
+    widget.innerHTML = `
+      <div style="margin: 1.25rem 0.75rem 0.75rem 0.75rem; padding: 0.75rem 0.85rem; border-radius: 14px; background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #e2e8f0); display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-spinner fa-spin" style="color: var(--primary, #0d9488); font-size: 0.85rem;"></i>
+        <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted, #64748b);">Checking weather alerts...</span>
       </div>
     `;
   }
@@ -103,14 +112,14 @@
 
       cachedAlertData = aiResult;
 
-      // 4. Render Floating Pill & Modal
-      renderFloatingUI(root, cachedAlertData, cachedWeatherData, currentCoords);
+      // 4. Render Sidebar Card & Modal
+      renderSidebarAndModalUI(root, cachedAlertData, cachedWeatherData, currentCoords);
 
     } catch (err) {
       console.warn("Weather API unreachable, rendering safe default alert:", err);
       cachedAlertData = getClientLocalAlertsFallback(0, 0, 28);
       cachedWeatherData = { temperature: 28, rain: 0 };
-      renderFloatingUI(root, cachedAlertData, cachedWeatherData, currentCoords);
+      renderSidebarAndModalUI(root, cachedAlertData, cachedWeatherData, currentCoords);
     }
   }
 
@@ -119,7 +128,7 @@
     if (rain >= 25 || waterloggingCount >= 5) {
       return {
         riskLevel: 'Critical',
-        alertHeadline: 'Critical Flood & Inundation Warning',
+        alertHeadline: 'Critical Flood Warning',
         alertBannerRequired: true,
         safetyRecommendation: `Heavy rainfall (${rain}mm) and multiple waterlogging reports detected. Avoid low-lying subways and underpasses. Postpone non-essential commute until drainage clears.`,
         precautionarySteps: ['Avoid flooded subways & underpasses', 'Park vehicles on elevated ground', 'Dial 1913 for municipal assistance']
@@ -127,7 +136,7 @@
     } else if (rain >= 10 || waterloggingCount >= 2) {
       return {
         riskLevel: 'High',
-        alertHeadline: 'Heavy Rainfall & Drainage Caution',
+        alertHeadline: 'Heavy Rainfall Caution',
         alertBannerRequired: true,
         safetyRecommendation: `Significant rainfall (${rain}mm) and active waterlogging reports detected nearby. Drive cautiously with headlights on and use elevated bypass routes.`,
         precautionarySteps: ['Use elevated bypass corridors', 'Maintain extra braking distance', 'Watch out for submerged manholes']
@@ -135,7 +144,7 @@
     } else if (rain >= 2 || waterloggingCount >= 1) {
       return {
         riskLevel: 'Medium',
-        alertHeadline: 'Moderate Rain & Wet Road Caution',
+        alertHeadline: 'Moderate Rain Caution',
         alertBannerRequired: false,
         safetyRecommendation: `Light to moderate rainfall in progress. Road surfaces may be slick; exercise standard caution during travel.`,
         precautionarySteps: ['Keep umbrella accessible', 'Reduce speed on sharp turns', 'Report blocked drains on CrowdCity']
@@ -143,14 +152,14 @@
     }
     return {
       riskLevel: 'Low',
-      alertHeadline: 'Favorable City Weather',
+      alertHeadline: 'Favorable Weather',
       alertBannerRequired: false,
       safetyRecommendation: 'Live weather conditions are favorable across the municipal sector. Drive safely and enjoy your day.',
       precautionarySteps: ['Drive within municipal speed limits', 'Ensure vehicle headlights are functional', 'Report civic hazards via the Report tab']
     };
   }
 
-  function renderFloatingUI(root, alertData, weatherData, coords) {
+  function renderSidebarAndModalUI(root, alertData, weatherData, coords) {
     const risk = alertData.riskLevel || 'Low';
     
     let badgeBg = 'rgba(16, 185, 129, 0.14)';
@@ -184,44 +193,47 @@
       </li>
     `).join('');
 
-    root.innerHTML = `
-      <!-- Floating Capsule Pill Button -->
-      <div id="smart-alerts-pill" onclick="window.toggleSmartAlertsModal()" 
-           style="position: fixed; bottom: 24px; left: 24px; z-index: 9980; background: var(--bg-surface, #ffffff); border: 1.5px solid ${badgeBorder}; border-left: 4px solid ${badgeColor}; border-radius: 999px; padding: 0.5rem 0.95rem; box-shadow: 0 10px 25px rgba(0,0,0,0.12); display: flex; align-items: center; gap: 0.6rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); user-select: none;">
-        
-        <div style="width: 26px; height: 26px; border-radius: 50%; background: ${badgeBg}; color: ${badgeColor}; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">
-          <i class="${riskIcon}"></i>
-        </div>
+    // Inject into Sidebar Nav Container
+    const sidebarNav = document.querySelector('.app-sidebar-nav') || document.querySelector('.app-sidebar') || document.querySelector('.sidebar');
+    
+    if (sidebarNav) {
+      let existingWidget = document.getElementById('smart-alerts-sidebar-widget');
+      if (!existingWidget) {
+        existingWidget = document.createElement('div');
+        existingWidget.id = 'smart-alerts-sidebar-widget';
+        sidebarNav.appendChild(existingWidget);
+      }
 
-        <div style="display: flex; flex-direction: column;">
-          <div style="display: flex; align-items: center; gap: 0.4rem;">
-            <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-main, #0f172a);">${alertData.alertHeadline || 'City Alert'}</span>
-            <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 0.1rem 0.45rem; border-radius: 999px; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeBorder};">
-              ${risk} Risk
-            </span>
+      existingWidget.innerHTML = `
+        <div onclick="window.toggleSmartAlertsModal()" 
+             style="margin: 1.25rem 0.75rem 0.75rem 0.75rem; padding: 0.75rem 0.85rem; border-radius: 14px; background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-left: 4px solid ${badgeColor}; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease; user-select: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.45rem;">
+              <i class="${riskIcon}" style="color: ${badgeColor}; font-size: 0.85rem;"></i>
+              <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-main, #0f172a);">${alertData.alertHeadline || 'City Alert'}</span>
+            </div>
+            <span style="font-size: 0.62rem; font-weight: 800; text-transform: uppercase; padding: 0.1rem 0.4rem; border-radius: 999px; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeBorder};">${risk} Risk</span>
           </div>
-          <span style="font-size: 0.7rem; color: var(--text-muted, #64748b); font-weight: 600;">
-            ${temp}&deg;C &bull; ${rain}mm Rain &bull; Click to Expand
-          </span>
+          <div style="font-size: 0.72rem; color: var(--text-muted, #64748b); font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+            <span>${temp}&deg;C &bull; ${rain}mm Rain</span>
+            <span style="color: var(--primary, #0d9488); font-size: 0.68rem; font-weight: 700;">AI Guide &rarr;</span>
+          </div>
         </div>
+      `;
+    }
 
-        <i class="fa-solid fa-chevron-up" style="font-size: 0.72rem; color: var(--text-muted, #64748b); margin-left: 0.25rem;"></i>
-      </div>
-
-      <!-- Expandable Alert Details Modal Backdrop -->
+    // Always render Expandable Detail Modal Backdrop on body
+    root.innerHTML = `
       <div id="smart-alerts-modal-backdrop" onclick="if(event.target === this) window.toggleSmartAlertsModal(false)" 
            style="position: fixed; inset: 0; z-index: 9995; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 1rem;">
         
-        <!-- Modal Card -->
         <div style="background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-left: 5px solid ${badgeColor}; border-radius: 20px; width: 100%; max-width: 500px; padding: 1.35rem 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.18); position: relative; animation: alertModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
           
-          <!-- Close Button -->
           <button type="button" onclick="window.toggleSmartAlertsModal(false)" 
                   style="position: absolute; top: 1.1rem; right: 1.1rem; background: var(--bg-app, #f1f5f9); border: none; width: 30px; height: 30px; border-radius: 50%; color: var(--text-muted, #64748b); font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">
             &times;
           </button>
 
-          <!-- Modal Header -->
           <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem; padding-right: 2rem;">
             <div style="width: 42px; height: 42px; border-radius: 12px; background: ${badgeBg}; color: ${badgeColor}; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
               <i class="${riskIcon}"></i>
@@ -239,7 +251,6 @@
             </div>
           </div>
 
-          <!-- AI Recommendation Box -->
           <div style="background: var(--bg-app, #f8fafc); border-radius: 14px; padding: 0.95rem 1.1rem; margin-bottom: 1rem; border: 1px solid var(--border-color, #e2e8f0);">
             <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
               <i class="fa-solid fa-wand-magic-sparkles" style="color: #8b5cf6; font-size: 0.85rem;"></i>
@@ -250,7 +261,6 @@
             </p>
           </div>
 
-          <!-- Actionable Precautionary Checklist -->
           <div style="margin-bottom: 1.25rem;">
             <h4 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); margin: 0 0 0.5rem 0;">Key Safety Precautions</h4>
             <ul style="margin: 0; padding-left: 0; list-style: none;">
@@ -258,7 +268,6 @@
             </ul>
           </div>
 
-          <!-- Action Footer -->
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color, #e2e8f0); padding-top: 0.85rem;">
             <button type="button" onclick="window.refreshSmartCityAlerts()" style="background: var(--bg-app, #f8fafc); border: 1px solid var(--border-color, #cbd5e1); color: var(--text-muted, #64748b); padding: 0.4rem 0.85rem; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
               <i class="fa-solid fa-arrows-rotate"></i> Update Location
@@ -271,17 +280,6 @@
 
         </div>
       </div>
-
-      <style>
-        @keyframes alertModalPop {
-          0% { transform: scale(0.92); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        #smart-alerts-pill:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 14px 30px rgba(0,0,0,0.18) !important;
-        }
-      </style>
     `;
 
     // Trigger toast notification for High or Critical risk

@@ -1585,6 +1585,7 @@ function updateAuthUI() {
     const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
     const isMap = path.includes('map');
     const isTransportation = path.includes('transportation') && !path.includes('transportation-report') && !path.includes('my-transportation');
+    const isSmartMobility = path.includes('smart-mobility');
     const isEmergency = path.includes('emergency-services');
     const isServices = path.includes('services') && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
@@ -1626,6 +1627,9 @@ function updateAuthUI() {
         </a>
         <a href="transportation.html" class="app-sidebar-link ${isTransportation ? 'active' : ''}" title="Transportation">
           <i class="fa-solid fa-car-side"></i> <span>Transportation</span>
+        </a>
+        <a href="smart-mobility.html" class="app-sidebar-link ${isSmartMobility ? 'active' : ''}" title="Smart Mobility">
+          <i class="fa-solid fa-route"></i> <span>Smart Mobility</span>
         </a>
 
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
@@ -2275,6 +2279,7 @@ function initResponsiveSidebar() {
       { href: 'citizen-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
       { href: 'report.html', icon: 'fa-plus', label: 'Report Issue', key: 'nav_report' },
       { href: 'my-complaints.html', icon: 'fa-clipboard-list', label: 'My Complaints', key: 'nav_my_complaints' },
+      { href: 'smart-mobility.html', icon: 'fa-route', label: 'Smart Mobility', key: 'nav_smart_mobility' },
       { href: 'my-documents.html', icon: 'fa-folder-closed', label: 'Documents', key: 'nav_documents' },
       { href: 'notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
       { href: 'settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }

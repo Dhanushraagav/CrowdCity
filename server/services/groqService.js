@@ -695,6 +695,84 @@ export function getLocalSmartAlertsFallback(rainMm, waterloggingCount, tempC, we
   };
 }
 
+/**
+ * Groq AI Smart Mobility Route Planner
+ * Recommends optimal transit route, traffic avoidance strategy, and safety notes.
+ */
+export const planSmartMobilityRoute = async (origin = '', destination = '', travelMode = 'Car') => {
+  if (!origin || !destination) {
+    throw new Error('Origin and destination are required for AI route planning.');
+  }
+
+  if (!groq) {
+    logger.info('Groq SDK client unconfigured, using local Smart Mobility Route Planner fallback.');
+    return getLocalRoutePlannerFallback(origin, destination, travelMode);
+  }
+
+  const systemPrompt = `You are a Smart City Intelligent Mobility & Route Navigation AI for CrowdCity AI.
+Analyze origin, destination, and travel mode to output a smart route recommendation.
+
+Output MUST be a single raw JSON object matching:
+{
+  "recommendedRouteName": "e.g. Outer Ring Road via Elevated Expressway",
+  "estimatedTimeMinutes": 22,
+  "distanceKm": 14.5,
+  "trafficCondition": "Smooth" | "Moderate" | "Congested",
+  "avoidanceAdvice": "Short 1-sentence tip on bottlenecks or roadwork to avoid",
+  "turnDirections": ["Step 1", "Step 2", "Step 3", "Step 4"],
+  "safetyNote": "1-sentence safety or EV/transit note"
+}`;
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Origin: ${origin}\nDestination: ${destination}\nTravel Mode: ${travelMode}` }
+      ],
+      model: model,
+      response_format: { type: 'json_object' }
+    });
+
+    const responseText = chatCompletion.choices[0].message.content;
+    const aiData = JSON.parse(responseText);
+
+    return {
+      recommendedRouteName: aiData.recommendedRouteName || `${origin} to ${destination} Direct Corridor`,
+      estimatedTimeMinutes: aiData.estimatedTimeMinutes || 25,
+      distanceKm: aiData.distanceKm || 12.0,
+      trafficCondition: aiData.trafficCondition || 'Moderate',
+      avoidanceAdvice: aiData.avoidanceAdvice || 'Bypass interior market bottlenecks during peak hours.',
+      turnDirections: Array.isArray(aiData.turnDirections) ? aiData.turnDirections : [
+        `Head towards arterial road from ${origin}`,
+        `Continue along main city bypass corridor`,
+        `Take exit towards ${destination}`,
+        `Arrive safely at ${destination}`
+      ],
+      safetyNote: aiData.safetyNote || 'Drive safely within city speed limits and observe signal timings.'
+    };
+  } catch (err) {
+    logger.error('Groq SDK Route Planner failed: %O. Using local fallback.', err);
+    return getLocalRoutePlannerFallback(origin, destination, travelMode);
+  }
+};
+
+export function getLocalRoutePlannerFallback(origin, destination, travelMode) {
+  return {
+    recommendedRouteName: `${origin} &rarr; ${destination} Smart Expressway Route`,
+    estimatedTimeMinutes: 20,
+    distanceKm: 11.8,
+    trafficCondition: 'Smooth',
+    avoidanceAdvice: 'Bypass interior commercial zones to avoid signals during peak hours.',
+    turnDirections: [
+      `Depart from ${origin} onto main arterial road`,
+      `Merge onto City Outer Elevated Flyover`,
+      `Follow signs towards ${destination} West Junction`,
+      `Arrive at ${destination}`
+    ],
+    safetyNote: `Recommended for ${travelMode} transit. Maintain safe distance on wet road segments.`
+  };
+}
+
 
 
 

@@ -1,5 +1,5 @@
 import express from 'express';
-import { analyzeIssue, chatWithAi, analyzeComplaintController, testGroqConnectivity, explainSchemeController, assistantChatController, verifyDocumentController, formGuidanceController, recommendationController, smartAlertsController } from '../controllers/aiController.js';
+import { analyzeIssue, chatWithAi, analyzeComplaintController, testGroqConnectivity, explainSchemeController, assistantChatController, verifyDocumentController, formGuidanceController, recommendationController, smartAlertsController, routePlannerController } from '../controllers/aiController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateAnalyzeIssue, validateChatPayload } from '../middlewares/validationMiddleware.js';
 
@@ -14,6 +14,7 @@ router.post('/verify-document', verifyDocumentController);
 router.post('/form-guidance', formGuidanceController);
 router.post('/recommendations', recommendationController);
 router.post('/smart-alerts', smartAlertsController);
+router.post('/route-planner', routePlannerController);
 router.post('/chat', requireAuth, validateChatPayload, chatWithAi);
 router.get('/test-groq', testGroqConnectivity);
 
