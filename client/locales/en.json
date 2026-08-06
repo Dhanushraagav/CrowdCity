@@ -376,7 +376,7 @@
   "code": "Code",
   "department_name": "Department Name",
   "ai_decisions_auditor": "AI Decisions Auditor",
-  "ai_decisions_desc": "Audit predictions made by Groq Llama AI models and execute category or department overrides.",
+  "ai_decisions_desc": "Audit predictions made by CrowdCity AI models and execute category or department overrides.",
   "override_ai_prediction": "Override AI Prediction",
   "assigned_department": "Assigned Department",
   "priority_severity": "Priority Severity",

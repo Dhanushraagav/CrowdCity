@@ -462,7 +462,7 @@ function initVoiceGrievanceReporter() {
           statusText.innerHTML = `<span style="color: #0d9488; font-weight: 700;"><i class="fa-solid fa-spinner fa-spin"></i> Translating to English & Auto-Categorizing...</span>`;
         }
 
-        // Call Groq AI to translate Tamil script / Tanglish / English speech into perfect English
+        // Call AI to translate Tamil script / Tanglish / English speech into perfect English
         if (window.API && typeof window.API.translateVoiceText === 'function') {
           try {
             const { data, error } = await window.API.translateVoiceText(rawText);
@@ -482,7 +482,7 @@ function initVoiceGrievanceReporter() {
         const aiBtn = document.getElementById('btn-ai-assist');
         if (aiBtn) aiBtn.click();
       } else if (statusText) {
-        statusText.textContent = 'Tap mic & speak naturally in Tamil or English. Groq AI will transcribe & translate into English!';
+        statusText.textContent = 'Tap mic & speak naturally in Tamil or English. AI will transcribe & translate into English!';
       }
     };
   }

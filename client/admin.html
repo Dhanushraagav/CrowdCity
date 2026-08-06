@@ -1122,14 +1122,14 @@
       <form id="form-update-transportation" onsubmit="handleTransUpdateSubmit(event)">
         <input type="hidden" id="trans-report-id-input" />
 
-        <!-- Groq AI Analysis Inspection Panel -->
-        <div id="trans-modal-ai-box" style="background: linear-gradient(135deg, #0f172a 0%, #0f766e 100%); color: #ffffff; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.82rem;">
-          <div style="font-weight: 800; color: #fbbf24; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
-            <i class="fa-solid fa-microchip"></i> Groq AI Triage Verification
-          </div>
-          <div id="trans-modal-ai-details" style="line-height: 1.45; color: #e2e8f0;">
-            Loading AI triage report...
-          </div>
+        <!-- AI Analysis Inspection Panel -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 0.9rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-microchip"></i> CrowdCity AI Triage Verification
+          </h4>
+        </div>
+        <div id="trans-modal-ai-details" style="line-height: 1.45; color: var(--text-muted); font-size: 0.85rem; background: var(--bg-app); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+          Loading AI triage report...
         </div>
         
         <div style="display: flex; flex-direction: column; gap: 1rem;">
