@@ -83,12 +83,13 @@ body.emergency-body .app-sidebar {
   text-transform: uppercase;
 }
 
-/* Section Containers - Pure Linear Flow with Laptop Spacing */
+/* Section Containers - 100% Full-Width Layout (Zero Gaps) */
 .emergency-section {
   display: block !important;
   position: relative !important;
   width: 100% !important;
-  padding: 2.5rem 3rem !important;
+  max-width: 100% !important;
+  padding: 2rem 2rem !important;
   border-bottom: 1px solid var(--border-subtle) !important;
   box-sizing: border-box !important;
   float: none !important;
@@ -104,8 +105,9 @@ body.emergency-body .app-sidebar {
   display: block !important;
   position: relative !important;
   width: 100% !important;
-  max-width: 1280px !important;
-  margin: 0 auto !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
 }
 
@@ -130,17 +132,21 @@ body.emergency-body .app-sidebar {
   margin: 0;
 }
 
-/* Hero Desktop Section */
+/* Hero Desktop Section - 100% Full Width */
 .emergency-hero-section {
   background-color: var(--bg-surface-gray);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 2.5rem 3rem;
+  padding: 2rem 2rem;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   display: block;
 }
 
 .emergency-hero-content {
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
 }
 
 /* Desktop Only Button Overrides */
