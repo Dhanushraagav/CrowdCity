@@ -658,7 +658,7 @@
     let targetInput = null;
 
     if (mode === 'set') {
-      if (title) title.textContent = getStoredMPIN() ? 'Step 3: Set New Security MPIN' : 'Set Security MPIN';
+      if (title) title.textContent = getStoredMPIN() ? 'Set New Security MPIN' : 'Set Security MPIN';
       if (desc) desc.textContent = 'Create a 4-digit PIN to protect viewing, downloading, and deleting confidential wallet documents.';
       if (icon) icon.className = 'fa-solid fa-key';
       if (setContainer) setContainer.style.display = 'flex';
@@ -666,7 +666,7 @@
       targetInput = document.getElementById('mpin-input-set');
 
     } else if (mode === 'old') {
-      if (title) title.textContent = 'Step 2: Verify Current MPIN';
+      if (title) title.textContent = 'Verify Current MPIN';
       if (desc) desc.textContent = 'Enter your current 4-digit Security MPIN to authorize changing your PIN.';
       if (icon) icon.className = 'fa-solid fa-shield-halved';
       if (oldContainer) oldContainer.style.display = 'block';
@@ -675,7 +675,7 @@
 
     } else if (mode === 'otp') {
       const userEmail = await getUserEmail();
-      if (title) title.textContent = 'Step 1: Email OTP Verification';
+      if (title) title.textContent = 'Email OTP Verification';
       if (desc) desc.textContent = `We sent a 6-digit Security Verification OTP to your registered email address (${userEmail}).`;
       if (icon) icon.className = 'fa-solid fa-envelope-circle-check';
       if (otpContainer) otpContainer.style.display = 'flex';
