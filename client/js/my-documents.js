@@ -525,7 +525,20 @@
 
     const boxes = group.querySelectorAll('.pin-box');
     const val = input.value.trim();
-    const isFocused = (document.activeElement === input);
+
+    let isCurrentlyActive = (document.activeElement === input);
+    if (!isCurrentlyActive && currentMPINMode === 'set') {
+      const setVal = (document.getElementById('mpin-input-set')?.value || '').trim();
+      if (inputId === 'mpin-input-set' && setVal.length < 4) {
+        isCurrentlyActive = true;
+      } else if (inputId === 'mpin-input-confirm' && setVal.length === 4) {
+        isCurrentlyActive = true;
+      }
+    } else if (!isCurrentlyActive) {
+      if (currentMPINMode === 'verify' && inputId === 'mpin-input-verify') isCurrentlyActive = true;
+      if (currentMPINMode === 'old' && inputId === 'mpin-input-old') isCurrentlyActive = true;
+      if (currentMPINMode === 'otp' && inputId === 'mpin-input-otp') isCurrentlyActive = true;
+    }
 
     boxes.forEach((box, idx) => {
       if (idx < val.length) {
@@ -535,7 +548,7 @@
       } else {
         box.textContent = '';
         box.classList.remove('filled');
-        if (isFocused && idx === val.length) {
+        if (isCurrentlyActive && idx === val.length) {
           box.classList.add('active');
         } else {
           box.classList.remove('active');
