@@ -46,6 +46,9 @@
             return;
           }
 
+          // Fetch and sync MPIN from account cloud metadata across devices
+          fetchUserMPINCloud();
+
           const { data, error } = await client
             .from('user_document_wallet')
             .select('*')
@@ -494,16 +497,78 @@
     });
   });
 
-  // MPIN Security Manager Core Functions
+  // MPIN Security Manager Core Functions (Cross-Device Cloud Synced)
   const MPIN_STORAGE_KEY = 'cc_doc_wallet_mpin';
   const MPIN_SESSION_UNLOCKED_KEY = 'cc_doc_wallet_unlocked';
 
   let pendingActionAfterMPIN = null;
   let currentMPINMode = 'verify'; // 'set', 'verify', 'old', 'otp'
   let activeEmailOTP = '';
+  let cachedUserMPIN = '';
+
+  async function fetchUserMPINCloud() {
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const session = await client.auth.getSession();
+          const user = session?.data?.session?.user;
+          if (user) {
+            const cloudPin = user.user_metadata?.wallet_mpin || '';
+            const userKey = `cc_doc_wallet_mpin_${user.id}`;
+            const localUserPin = localStorage.getItem(userKey) || '';
+            const fallbackPin = localStorage.getItem(MPIN_STORAGE_KEY) || '';
+
+            const activePin = cloudPin || localUserPin || fallbackPin;
+            if (activePin) {
+              cachedUserMPIN = activePin;
+              localStorage.setItem(userKey, activePin);
+              localStorage.setItem(MPIN_STORAGE_KEY, activePin);
+              updateMPINHeaderButton();
+
+              // If cloud metadata didn't have it but local did, sync to cloud account metadata
+              if (!cloudPin && activePin) {
+                client.auth.updateUser({ data: { wallet_mpin: activePin } })
+                  .then(() => console.log('[MPIN Sync] Synchronized local MPIN to cloud account metadata'))
+                  .catch(e => console.warn('[MPIN Sync Warning]', e));
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("MPIN cloud fetch error:", e);
+    }
+  }
 
   function getStoredMPIN() {
+    if (cachedUserMPIN) return cachedUserMPIN;
     return localStorage.getItem(MPIN_STORAGE_KEY) || '';
+  }
+
+  async function saveStoredMPIN(pin) {
+    cachedUserMPIN = pin;
+    localStorage.setItem(MPIN_STORAGE_KEY, pin);
+
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const session = await client.auth.getSession();
+          const userId = session?.data?.session?.user?.id;
+          if (userId) {
+            localStorage.setItem(`cc_doc_wallet_mpin_${userId}`, pin);
+          }
+          // Sync across all devices (Desktop, Mobile, Tablet) via Supabase User Metadata
+          await client.auth.updateUser({
+            data: { wallet_mpin: pin }
+          });
+          console.log('[MPIN Sync] Successfully saved MPIN to cloud account across all devices');
+        }
+      }
+    } catch (err) {
+      console.warn('[MPIN Sync Error] Cloud sync fallback:', err);
+    }
   }
 
   function isSessionUnlocked() {
@@ -801,7 +866,7 @@
         return;
       }
 
-      localStorage.setItem(MPIN_STORAGE_KEY, pin);
+      saveStoredMPIN(pin);
       sessionStorage.setItem(MPIN_SESSION_UNLOCKED_KEY, 'true');
       updateMPINHeaderButton();
       
