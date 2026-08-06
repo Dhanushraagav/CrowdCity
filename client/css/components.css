@@ -2780,12 +2780,18 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   box-shadow: var(--shadow-sm);
 }
 
-/* Animated Glassmorphic KPI Cards */
+/* Animated Glassmorphic KPI Cards (3-Column Layout) */
 .stitch-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .stitch-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
 }
 
 .kpi-animated-card {
