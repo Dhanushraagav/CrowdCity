@@ -2855,29 +2855,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   .icon-blue { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
   .icon-amber { background: rgba(245, 158, 11, 0.12); color: #d97706; }
 
-  /* Ambient Shimmer Glow on Desktop */
-  .kpi-ambient-glow {
-    position: absolute;
-    top: -25px;
-    right: -25px;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    filter: blur(32px);
-    opacity: 0.28;
-    pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    animation: ambientPulse 4s ease-in-out infinite alternate;
-  }
 
-  @keyframes ambientPulse {
-    0% { transform: scale(1); opacity: 0.25; }
-    100% { transform: scale(1.35); opacity: 0.48; }
-  }
-
-  .teal-glow { background: #0d9488; }
-  .blue-glow { background: #2563eb; }
-  .amber-glow { background: #f59e0b; }
 
   .stitch-stat-card {
     background: rgba(255, 255, 255, 0.95);
