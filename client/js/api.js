@@ -37,15 +37,26 @@ async function request(endpoint, options = {}) {
 
   try {
     const response = await fetch(url, config);
-    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+      let errorMessage = `HTTP error ${response.status}`;
+      try {
+        const errData = await response.json();
+        if (errData && errData.error) errorMessage = errData.error;
+      } catch (e) {
+        // Non-JSON error response
+      }
+      return { data: null, error: errorMessage };
     }
 
-    return { data, error: null };
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      return { data, error: null };
+    } else {
+      return { data: null, error: 'Server returned non-JSON response' };
+    }
   } catch (error) {
-    console.error(`API Request failed for ${endpoint}:`, error);
     return { data: null, error: error.message || 'API request failed' };
   }
 }
