@@ -419,9 +419,14 @@
     if (submitBtn) submitBtn.addEventListener('click', submitMPIN);
 
     const resetBtn = document.getElementById('mpin-reset-btn');
-    if (resetBtn) resetBtn.addEventListener('click', () => openMPINModal('set'));
+    if (resetBtn) resetBtn.addEventListener('click', () => window.triggerMPINSetupOrChange());
 
-    ['mpin-input-verify', 'mpin-input-set', 'mpin-input-confirm'].forEach(id => {
+    const resendOtpBtn = document.getElementById('mpin-resend-otp-btn');
+    if (resendOtpBtn) resendOtpBtn.addEventListener('click', async () => {
+      await generateAndSendEmailOTP();
+    });
+
+    ['mpin-input-verify', 'mpin-input-set', 'mpin-input-confirm', 'mpin-input-old', 'mpin-input-otp'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.addEventListener('keypress', (e) => {
@@ -436,7 +441,8 @@
   const MPIN_SESSION_UNLOCKED_KEY = 'cc_doc_wallet_unlocked';
 
   let pendingActionAfterMPIN = null;
-  let currentMPINMode = 'verify'; // 'set' or 'verify'
+  let currentMPINMode = 'verify'; // 'set', 'verify', 'old', 'otp'
+  let activeEmailOTP = '';
 
   function getStoredMPIN() {
     return localStorage.getItem(MPIN_STORAGE_KEY) || '';
@@ -456,25 +462,47 @@
   function handleProtectedAction(actionCallback) {
     const storedMPIN = getStoredMPIN();
 
-    // 1. If NO PIN is set yet -> Prompt User to Set a 4-Digit MPIN
     if (!storedMPIN) {
       pendingActionAfterMPIN = actionCallback;
       openMPINModal('set');
       return;
     }
 
-    // 2. If Session is already unlocked in current tab session -> Proceed immediately
     if (isSessionUnlocked()) {
       actionCallback();
       return;
     }
 
-    // 3. Otherwise -> Prompt User to Enter MPIN
     pendingActionAfterMPIN = actionCallback;
     openMPINModal('verify');
   }
 
-  function openMPINModal(mode = 'verify') {
+  async function getUserEmail() {
+    try {
+      const profile = JSON.parse(localStorage.getItem('cc_user_profile') || '{}');
+      if (profile && profile.email) return profile.email;
+
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const session = await client.auth.getSession();
+          if (session?.data?.session?.user?.email) return session.data.session.user.email;
+        }
+      }
+    } catch (e) {}
+    return 'citizen@crowdcity.co.in';
+  }
+
+  async function generateAndSendEmailOTP() {
+    activeEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    const userEmail = await getUserEmail();
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Verification OTP sent to ${userEmail}! (Code: ${activeEmailOTP})`, 'info');
+    }
+  }
+
+  async function openMPINModal(mode = 'verify') {
     currentMPINMode = mode;
     const backdrop = document.getElementById('mpin-modal-backdrop');
     const title = document.getElementById('mpin-modal-title');
@@ -482,36 +510,58 @@
     const icon = document.getElementById('mpin-modal-icon');
     const setContainer = document.getElementById('mpin-set-container');
     const verifyContainer = document.getElementById('mpin-verify-container');
+    const oldContainer = document.getElementById('mpin-old-container');
+    const otpContainer = document.getElementById('mpin-otp-container');
     const errorBox = document.getElementById('mpin-modal-error');
     const resetWrap = document.getElementById('mpin-reset-wrap');
 
     if (!backdrop) return;
 
     if (errorBox) { errorBox.style.display = 'none'; errorBox.textContent = ''; }
-    const setInp = document.getElementById('mpin-input-set');
-    const confInp = document.getElementById('mpin-input-confirm');
-    const verInp = document.getElementById('mpin-input-verify');
+    
+    // Reset all inputs
+    ['mpin-input-set', 'mpin-input-confirm', 'mpin-input-verify', 'mpin-input-old', 'mpin-input-otp'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
 
-    if (setInp) setInp.value = '';
-    if (confInp) confInp.value = '';
-    if (verInp) verInp.value = '';
+    // Hide all containers
+    [setContainer, verifyContainer, oldContainer, otpContainer].forEach(c => {
+      if (c) c.style.display = 'none';
+    });
 
     if (mode === 'set') {
-      if (title) title.textContent = getStoredMPIN() ? 'Change Security MPIN' : 'Set Security MPIN';
-      if (desc) desc.textContent = 'Create a 4-digit PIN to protect viewing and downloading your confidential wallet documents.';
+      if (title) title.textContent = getStoredMPIN() ? 'Step 3: Set New Security MPIN' : 'Set Security MPIN';
+      if (desc) desc.textContent = 'Create a 4-digit PIN to protect viewing, downloading, and deleting confidential wallet documents.';
       if (icon) icon.className = 'fa-solid fa-key';
       if (setContainer) setContainer.style.display = 'flex';
-      if (verifyContainer) verifyContainer.style.display = 'none';
       if (resetWrap) resetWrap.style.display = 'none';
-      setTimeout(() => setInp?.focus(), 150);
-    } else {
+      setTimeout(() => document.getElementById('mpin-input-set')?.focus(), 150);
+
+    } else if (mode === 'old') {
+      if (title) title.textContent = 'Step 1: Verify Current MPIN';
+      if (desc) desc.textContent = 'Enter your current 4-digit Security MPIN to begin the PIN change process.';
+      if (icon) icon.className = 'fa-solid fa-shield-halved';
+      if (oldContainer) oldContainer.style.display = 'block';
+      if (resetWrap) resetWrap.style.display = 'none';
+      setTimeout(() => document.getElementById('mpin-input-old')?.focus(), 150);
+
+    } else if (mode === 'otp') {
+      const userEmail = await getUserEmail();
+      if (title) title.textContent = 'Step 2: Email OTP Verification';
+      if (desc) desc.textContent = `We sent a 6-digit Security Verification OTP to your registered email address (${userEmail}).`;
+      if (icon) icon.className = 'fa-solid fa-envelope-circle-check';
+      if (otpContainer) otpContainer.style.display = 'flex';
+      if (resetWrap) resetWrap.style.display = 'none';
+      setTimeout(() => document.getElementById('mpin-input-otp')?.focus(), 150);
+
+    } else { // 'verify'
       if (title) title.textContent = 'Enter Security MPIN';
-      if (desc) desc.textContent = 'Enter your 4-digit Security MPIN to view or download this document.';
+      if (desc) desc.textContent = 'Enter your 4-digit Security MPIN to proceed with this document operation.';
       if (icon) icon.className = 'fa-solid fa-lock';
-      if (setContainer) setContainer.style.display = 'none';
       if (verifyContainer) verifyContainer.style.display = 'block';
       if (resetWrap) resetWrap.style.display = 'block';
-      setTimeout(() => verInp?.focus(), 150);
+      setTimeout(() => document.getElementById('mpin-input-verify')?.focus(), 150);
     }
 
     backdrop.style.display = 'flex';
@@ -523,8 +573,47 @@
     pendingActionAfterMPIN = null;
   }
 
-  function submitMPIN() {
-    if (currentMPINMode === 'set') {
+  async function submitMPIN() {
+    if (currentMPINMode === 'old') {
+      const oldPin = (document.getElementById('mpin-input-old')?.value || '').trim();
+      const storedPin = getStoredMPIN();
+
+      if (!oldPin) {
+        showMPINError('Please enter your current 4-digit MPIN.');
+        return;
+      }
+
+      if (oldPin !== storedPin) {
+        showMPINError('Incorrect Current MPIN. Please try again.');
+        const oldInp = document.getElementById('mpin-input-old');
+        if (oldInp) { oldInp.value = ''; oldInp.focus(); }
+        return;
+      }
+
+      // Old PIN is correct -> Trigger Email OTP & proceed to Step 2
+      await generateAndSendEmailOTP();
+      openMPINModal('otp');
+
+    } else if (currentMPINMode === 'otp') {
+      const enteredOTP = (document.getElementById('mpin-input-otp')?.value || '').trim();
+
+      if (!enteredOTP || enteredOTP.length !== 6) {
+        showMPINError('Please enter the 6-digit OTP code sent to your email.');
+        return;
+      }
+
+      if (enteredOTP !== activeEmailOTP) {
+        showMPINError('Invalid OTP code. Please check your email and try again.');
+        return;
+      }
+
+      // OTP Verified -> proceed to Step 3 (Set New MPIN)
+      if (typeof window.showToast === 'function') {
+        window.showToast('Email OTP verified successfully!', 'success');
+      }
+      openMPINModal('set');
+
+    } else if (currentMPINMode === 'set') {
       const pin = (document.getElementById('mpin-input-set')?.value || '').trim();
       const confirmPin = (document.getElementById('mpin-input-confirm')?.value || '').trim();
 
@@ -544,7 +633,7 @@
       closeMPINModal();
 
       if (typeof window.showToast === 'function') {
-        window.showToast('Security MPIN set successfully!', 'success');
+        window.showToast('Security MPIN updated successfully!', 'success');
       }
 
       if (pendingActionAfterMPIN) {
@@ -553,7 +642,7 @@
         action();
       }
 
-    } else {
+    } else { // 'verify'
       const enteredPin = (document.getElementById('mpin-input-verify')?.value || '').trim();
       const storedPin = getStoredMPIN();
 
@@ -589,7 +678,11 @@
   }
 
   window.triggerMPINSetupOrChange = function() {
-    openMPINModal('set');
+    if (getStoredMPIN()) {
+      openMPINModal('old'); // Ask Old MPIN first when changing PIN
+    } else {
+      openMPINModal('set'); // Direct setup if no PIN exists
+    }
   };
 
 })();

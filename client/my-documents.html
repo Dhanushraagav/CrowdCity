@@ -203,14 +203,14 @@
         Enter your 4-digit Security MPIN to view confidential wallet documents.
       </p>
 
-      <!-- Mode 1: Set MPIN Inputs -->
+      <!-- Mode 1: Set New MPIN Inputs -->
       <div id="mpin-set-container" style="display: none; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
         <div>
-          <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">Enter 4-Digit MPIN</label>
-          <input type="password" id="mpin-input-set" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 100%; padding: 0.75rem; font-size: 1.3rem; text-align: center; letter-spacing: 0.6em; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); box-sizing: border-border-box;" />
+          <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">Enter New 4-Digit MPIN</label>
+          <input type="password" id="mpin-input-set" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 100%; padding: 0.75rem; font-size: 1.3rem; text-align: center; letter-spacing: 0.6em; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); box-sizing: border-box;" />
         </div>
         <div>
-          <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">Confirm 4-Digit MPIN</label>
+          <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">Confirm New 4-Digit MPIN</label>
           <input type="password" id="mpin-input-confirm" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 100%; padding: 0.75rem; font-size: 1.3rem; text-align: center; letter-spacing: 0.6em; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); box-sizing: border-box;" />
         </div>
       </div>
@@ -218,6 +218,21 @@
       <!-- Mode 2: Verify MPIN Input -->
       <div id="mpin-verify-container" style="margin-bottom: 1.5rem;">
         <input type="password" id="mpin-input-verify" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 200px; padding: 0.75rem; font-size: 1.6rem; text-align: center; letter-spacing: 0.6em; border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); margin: 0 auto; display: block;" />
+      </div>
+
+      <!-- Mode 3: Verify Old MPIN (Step 1 of Changing PIN) -->
+      <div id="mpin-old-container" style="display: none; margin-bottom: 1.5rem;">
+        <label style="display: block; text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Enter Current 4-Digit MPIN</label>
+        <input type="password" id="mpin-input-old" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 200px; padding: 0.75rem; font-size: 1.6rem; text-align: center; letter-spacing: 0.6em; border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); margin: 0 auto; display: block;" />
+      </div>
+
+      <!-- Mode 4: Verify Email OTP (Step 2 of Changing PIN) -->
+      <div id="mpin-otp-container" style="display: none; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <label style="display: block; text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Enter 6-Digit Email Verification OTP</label>
+        <input type="text" id="mpin-input-otp" maxlength="6" placeholder="123456" inputmode="numeric" style="width: 220px; padding: 0.75rem; font-size: 1.5rem; text-align: center; letter-spacing: 0.4em; border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); margin: 0 auto; display: block;" />
+        <div style="font-size: 0.78rem; color: var(--text-muted);">
+          Didn't receive code? <button type="button" id="mpin-resend-otp-btn" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;">Resend OTP</button>
+        </div>
       </div>
 
       <!-- Error Message Box -->
