@@ -2275,6 +2275,7 @@ function initResponsiveSidebar() {
       { href: 'citizen-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
       { href: 'report.html', icon: 'fa-plus', label: 'Report Issue', key: 'nav_report' },
       { href: 'my-complaints.html', icon: 'fa-clipboard-list', label: 'My Complaints', key: 'nav_my_complaints' },
+      { href: 'my-documents.html', icon: 'fa-folder-closed', label: 'Documents', key: 'nav_documents' },
       { href: 'notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
       { href: 'settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
     ];
