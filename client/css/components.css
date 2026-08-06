@@ -2902,17 +2902,22 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 @media (max-width: 1024px) {
   .app-sidebar {
     position: fixed;
-    top: 64px;
+    top: 56px;
     left: 0;
     bottom: 0;
     transform: translateX(-100%);
-    width: 250px;
-    background-color: var(--bg-sidebar, #0b0d0e);
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+    width: 260px;
+    background-color: var(--bg-sidebar, #0f172a);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+    z-index: 99999 !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
   
   .app-sidebar.active {
-    transform: translateX(0);
+    transform: translateX(0) !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .app-header-logo-mobile {

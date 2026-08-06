@@ -56,8 +56,19 @@ body.emergency-body .emergency-page-container {
   position: relative !important;
 }
 
-body.emergency-body .app-sidebar {
-  display: none !important;
+/* Sidebar desktop hidden for standalone emergency page, but active mobile slide-out allowed */
+@media (min-width: 1024px) {
+  body.emergency-body .app-sidebar {
+    display: none !important;
+  }
+}
+
+body.emergency-body .app-sidebar.active {
+  display: flex !important;
+  transform: translateX(0) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 99999 !important;
 }
 
 /* Header Banner Badge */
