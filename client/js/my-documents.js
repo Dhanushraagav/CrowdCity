@@ -166,21 +166,25 @@
       `;
     }).join('');
 
-    // Attach View Listeners
+    // Attach View Listeners (Protected by MPIN)
     container.querySelectorAll('.btn-view-doc').forEach(btn => {
       btn.addEventListener('click', () => {
         const docId = btn.dataset.id;
         const target = userDocuments.find(d => d.id === docId);
-        if (target) openDocumentView(target.file_url, target.doc_name);
+        if (target) {
+          handleProtectedAction(() => openDocumentView(target.file_url, target.doc_name));
+        }
       });
     });
 
-    // Attach Download Listeners
+    // Attach Download Listeners (Protected by MPIN)
     container.querySelectorAll('.btn-download-doc').forEach(btn => {
       btn.addEventListener('click', () => {
         const docId = btn.dataset.id;
         const target = userDocuments.find(d => d.id === docId);
-        if (target) downloadDocumentFile(target.file_url, target.doc_name);
+        if (target) {
+          handleProtectedAction(() => downloadDocumentFile(target.file_url, target.doc_name));
+        }
       });
     });
 
@@ -395,6 +399,188 @@
         renderDocumentsList();
       });
     }
+
+    // MPIN Security Listeners & Initializer
+    updateMPINHeaderButton();
+
+    const cancelBtn = document.getElementById('mpin-cancel-btn');
+    if (cancelBtn) cancelBtn.addEventListener('click', closeMPINModal);
+
+    const submitBtn = document.getElementById('mpin-submit-btn');
+    if (submitBtn) submitBtn.addEventListener('click', submitMPIN);
+
+    const resetBtn = document.getElementById('mpin-reset-btn');
+    if (resetBtn) resetBtn.addEventListener('click', () => openMPINModal('set'));
+
+    ['mpin-input-verify', 'mpin-input-set', 'mpin-input-confirm'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') submitMPIN();
+        });
+      }
+    });
   });
+
+  // MPIN Security Manager Core Functions
+  const MPIN_STORAGE_KEY = 'cc_doc_wallet_mpin';
+  const MPIN_SESSION_UNLOCKED_KEY = 'cc_doc_wallet_unlocked';
+
+  let pendingActionAfterMPIN = null;
+  let currentMPINMode = 'verify'; // 'set' or 'verify'
+
+  function getStoredMPIN() {
+    return localStorage.getItem(MPIN_STORAGE_KEY) || '';
+  }
+
+  function isSessionUnlocked() {
+    return sessionStorage.getItem(MPIN_SESSION_UNLOCKED_KEY) === 'true';
+  }
+
+  function updateMPINHeaderButton() {
+    const label = document.getElementById('mpin-btn-label');
+    if (label) {
+      label.textContent = getStoredMPIN() ? 'Change MPIN' : 'Set MPIN';
+    }
+  }
+
+  function handleProtectedAction(actionCallback) {
+    const storedMPIN = getStoredMPIN();
+
+    // 1. If NO PIN is set yet -> Prompt User to Set a 4-Digit MPIN
+    if (!storedMPIN) {
+      pendingActionAfterMPIN = actionCallback;
+      openMPINModal('set');
+      return;
+    }
+
+    // 2. If Session is already unlocked in current tab session -> Proceed immediately
+    if (isSessionUnlocked()) {
+      actionCallback();
+      return;
+    }
+
+    // 3. Otherwise -> Prompt User to Enter MPIN
+    pendingActionAfterMPIN = actionCallback;
+    openMPINModal('verify');
+  }
+
+  function openMPINModal(mode = 'verify') {
+    currentMPINMode = mode;
+    const backdrop = document.getElementById('mpin-modal-backdrop');
+    const title = document.getElementById('mpin-modal-title');
+    const desc = document.getElementById('mpin-modal-desc');
+    const icon = document.getElementById('mpin-modal-icon');
+    const setContainer = document.getElementById('mpin-set-container');
+    const verifyContainer = document.getElementById('mpin-verify-container');
+    const errorBox = document.getElementById('mpin-modal-error');
+    const resetWrap = document.getElementById('mpin-reset-wrap');
+
+    if (!backdrop) return;
+
+    if (errorBox) { errorBox.style.display = 'none'; errorBox.textContent = ''; }
+    const setInp = document.getElementById('mpin-input-set');
+    const confInp = document.getElementById('mpin-input-confirm');
+    const verInp = document.getElementById('mpin-input-verify');
+
+    if (setInp) setInp.value = '';
+    if (confInp) confInp.value = '';
+    if (verInp) verInp.value = '';
+
+    if (mode === 'set') {
+      if (title) title.textContent = getStoredMPIN() ? 'Change Security MPIN' : 'Set Security MPIN';
+      if (desc) desc.textContent = 'Create a 4-digit PIN to protect viewing and downloading your confidential wallet documents.';
+      if (icon) icon.className = 'fa-solid fa-key';
+      if (setContainer) setContainer.style.display = 'flex';
+      if (verifyContainer) verifyContainer.style.display = 'none';
+      if (resetWrap) resetWrap.style.display = 'none';
+      setTimeout(() => setInp?.focus(), 150);
+    } else {
+      if (title) title.textContent = 'Enter Security MPIN';
+      if (desc) desc.textContent = 'Enter your 4-digit Security MPIN to view or download this document.';
+      if (icon) icon.className = 'fa-solid fa-lock';
+      if (setContainer) setContainer.style.display = 'none';
+      if (verifyContainer) verifyContainer.style.display = 'block';
+      if (resetWrap) resetWrap.style.display = 'block';
+      setTimeout(() => verInp?.focus(), 150);
+    }
+
+    backdrop.style.display = 'flex';
+  }
+
+  function closeMPINModal() {
+    const backdrop = document.getElementById('mpin-modal-backdrop');
+    if (backdrop) backdrop.style.display = 'none';
+    pendingActionAfterMPIN = null;
+  }
+
+  function submitMPIN() {
+    if (currentMPINMode === 'set') {
+      const pin = (document.getElementById('mpin-input-set')?.value || '').trim();
+      const confirmPin = (document.getElementById('mpin-input-confirm')?.value || '').trim();
+
+      if (!/^\d{4}$/.test(pin)) {
+        showMPINError('MPIN must be exactly 4 numeric digits.');
+        return;
+      }
+
+      if (pin !== confirmPin) {
+        showMPINError('MPIN confirmation does not match. Please re-enter.');
+        return;
+      }
+
+      localStorage.setItem(MPIN_STORAGE_KEY, pin);
+      sessionStorage.setItem(MPIN_SESSION_UNLOCKED_KEY, 'true');
+      updateMPINHeaderButton();
+      closeMPINModal();
+
+      if (typeof window.showToast === 'function') {
+        window.showToast('Security MPIN set successfully!', 'success');
+      }
+
+      if (pendingActionAfterMPIN) {
+        const action = pendingActionAfterMPIN;
+        pendingActionAfterMPIN = null;
+        action();
+      }
+
+    } else {
+      const enteredPin = (document.getElementById('mpin-input-verify')?.value || '').trim();
+      const storedPin = getStoredMPIN();
+
+      if (!enteredPin) {
+        showMPINError('Please enter your 4-digit MPIN.');
+        return;
+      }
+
+      if (enteredPin !== storedPin) {
+        showMPINError('Incorrect Security MPIN. Please try again.');
+        const verInp = document.getElementById('mpin-input-verify');
+        if (verInp) { verInp.value = ''; verInp.focus(); }
+        return;
+      }
+
+      sessionStorage.setItem(MPIN_SESSION_UNLOCKED_KEY, 'true');
+      closeMPINModal();
+
+      if (pendingActionAfterMPIN) {
+        const action = pendingActionAfterMPIN;
+        pendingActionAfterMPIN = null;
+        action();
+      }
+    }
+  }
+
+  function showMPINError(msg) {
+    const errorBox = document.getElementById('mpin-modal-error');
+    if (errorBox) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+  }
+
+  window.triggerMPINSetupOrChange = function() {
+    openMPINModal('set');
+  };
 
 })();

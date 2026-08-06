@@ -101,13 +101,20 @@
       <div class="app-content-body" style="padding: 1rem 2rem 3rem 2rem; width: 100%; max-width: 100%; box-sizing: border-box;">
         
         <!-- Page Title Row -->
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 1.25rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
           <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0;">My Documents Wallet</h1>
-          <a href="scheme-checker.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-            <i class="fa-solid fa-award"></i> <span>Check Schemes</span>
-          </a>
+          
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <button type="button" class="btn btn-secondary" onclick="window.triggerMPINSetupOrChange()" style="padding: 0.5rem 0.95rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+              <i class="fa-solid fa-key" style="color: var(--primary);"></i> <span id="mpin-btn-label">Set MPIN</span>
+            </button>
+
+            <a href="scheme-checker.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+              <i class="fa-solid fa-award"></i> <span>Check Schemes</span>
+            </a>
+          </div>
         </div>
-        
+
         <!-- Hero Header -->
         <div class="docs-hero-card">
           <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.85rem; border-radius: 999px; background: rgba(13, 148, 136, 0.15); border: 1px solid rgba(13, 148, 136, 0.3); color: var(--primary); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
@@ -117,7 +124,7 @@
             Secure Citizen Document Wallet
           </h2>
           <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0; max-width: 650px; line-height: 1.5;">
-            Upload and organize your official certificates, Ration Card, Aadhaar, and Bank Passbook to automatically cross-reference document readiness for government schemes.
+            Upload and organize your official certificates, Ration Card, Aadhaar, and Bank Passbook. Viewing stored documents is protected by your private 4-digit Security MPIN.
           </p>
         </div>
 
@@ -133,7 +140,7 @@
             Drag & Drop Files Here or Click to Browse
           </h3>
           <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
-            Supports PDF, JPG, JPEG, and PNG files up to 5MB.
+            Supports PDF, JPG, JPEG, and PNG files up to 5MB. (No MPIN required for uploading)
           </p>
 
           <div style="display: flex; gap: 0.85rem; max-width: 500px; margin: 0 auto; flex-wrap: wrap;">
@@ -176,6 +183,59 @@
       </div>
     </main>
   </div>
+
+  <!-- Security MPIN Modal Backdrop -->
+  <div id="mpin-modal-backdrop" class="emergency-modal-backdrop" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="emergency-modal-content" style="background: var(--bg-surface); border: 1px solid var(--border-color); max-width: 420px; width: 100%; border-radius: 24px; padding: 2rem 1.75rem; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: mpinPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+      
+      <div style="width: 60px; height: 60px; border-radius: 20px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1.25rem auto;">
+        <i class="fa-solid fa-lock" id="mpin-modal-icon"></i>
+      </div>
+
+      <h3 id="mpin-modal-title" style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.4rem 0;">
+        Enter Security MPIN
+      </h3>
+      <p id="mpin-modal-desc" style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 1.5rem 0; line-height: 1.5;">
+        Enter your 4-digit Security MPIN to view confidential wallet documents.
+      </p>
+
+      <!-- Mode 1: Set MPIN Inputs -->
+      <div id="mpin-set-container" style="display: none; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
+        <div>
+          <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">Enter 4-Digit MPIN</label>
+          <input type="password" id="mpin-input-set" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 100%; padding: 0.75rem; font-size: 1.3rem; text-align: center; letter-spacing: 0.6em; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); box-sizing: border-border-box;" />
+        </div>
+        <div>
+          <label style="display: block; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">Confirm 4-Digit MPIN</label>
+          <input type="password" id="mpin-input-confirm" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 100%; padding: 0.75rem; font-size: 1.3rem; text-align: center; letter-spacing: 0.6em; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); box-sizing: border-box;" />
+        </div>
+      </div>
+
+      <!-- Mode 2: Verify MPIN Input -->
+      <div id="mpin-verify-container" style="margin-bottom: 1.5rem;">
+        <input type="password" id="mpin-input-verify" maxlength="4" placeholder="••••" inputmode="numeric" style="width: 200px; padding: 0.75rem; font-size: 1.6rem; text-align: center; letter-spacing: 0.6em; border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-app); font-weight: 800; color: var(--text-main); margin: 0 auto; display: block;" />
+      </div>
+
+      <!-- Error Message Box -->
+      <div id="mpin-modal-error" style="display: none; padding: 0.6rem 0.85rem; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; font-size: 0.82rem; font-weight: 700; margin-bottom: 1.25rem;"></div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: center;">
+        <button type="button" class="btn btn-secondary" id="mpin-cancel-btn" style="flex: 1; padding: 0.7rem; border-radius: 12px; font-weight: 700; font-size: 0.88rem;">Cancel</button>
+        <button type="button" class="btn btn-primary" id="mpin-submit-btn" style="flex: 1; padding: 0.7rem; border-radius: 12px; font-weight: 700; font-size: 0.88rem;">Submit</button>
+      </div>
+
+      <div style="margin-top: 1.1rem;" id="mpin-reset-wrap">
+        <button type="button" id="mpin-reset-btn" style="background: none; border: none; color: var(--primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; text-decoration: underline;">Change / Reset MPIN</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes mpinPopIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  </style>
 
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
