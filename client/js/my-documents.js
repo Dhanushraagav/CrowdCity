@@ -188,11 +188,13 @@
       });
     });
 
-    // Attach Delete Listeners
+    // Attach Delete Listeners (Protected by MPIN)
     container.querySelectorAll('.btn-delete-doc').forEach(btn => {
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', () => {
         const docId = btn.dataset.id;
-        await deleteDocument(docId);
+        handleProtectedAction(async () => {
+          await deleteDocument(docId);
+        });
       });
     });
   }
@@ -402,6 +404,13 @@
 
     // MPIN Security Listeners & Initializer
     updateMPINHeaderButton();
+
+    // If MPIN is NOT set yet, automatically show popup to set MPIN on entering page
+    if (!getStoredMPIN()) {
+      setTimeout(() => {
+        openMPINModal('set');
+      }, 400);
+    }
 
     const cancelBtn = document.getElementById('mpin-cancel-btn');
     if (cancelBtn) cancelBtn.addEventListener('click', closeMPINModal);
