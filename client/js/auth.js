@@ -1395,6 +1395,9 @@ function updateAuthUI() {
 
   // Inject dynamic helpline widget to the sidebar footer
   const injectHelplineWidget = () => {
+    const path = window.location.pathname;
+    if (path.includes('admin.html') || path.includes('services-admin.html') || path.includes('authority-')) return;
+    
     const sidebarFooter = document.querySelector('.app-sidebar-footer');
     if (!sidebarFooter || document.getElementById('sidebar-helpline')) return;
     
