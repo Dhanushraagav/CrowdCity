@@ -4393,11 +4393,11 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     flex-shrink: 0 !important;
   }
 
-  /* Location Section: Stack address input full width and place GPS/Search buttons side-by-side */
+  /* Location Section Mobile Layout: Map 100% full width, Lat/Lng 2-column row */
   .location-group {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   .location-group .location-header,
@@ -4408,6 +4408,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   .location-group label {
     grid-column: 1 / span 2 !important;
     margin-bottom: 0 !important;
+    font-size: 0.68rem !important;
   }
 
   .location-group .address-input-wrapper {
@@ -4420,17 +4421,17 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     grid-column: 1 !important;
     grid-row: 3 !important;
     width: 100% !important;
-    height: 48px !important;
+    height: 42px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     margin: 0 !important;
-    padding: 0 12px !important;
+    padding: 0 10px !important;
     border-radius: var(--radius-md) !important;
     background-color: var(--bg-surface-hover) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
     box-sizing: border-box !important;
   }
@@ -4439,16 +4440,79 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     grid-column: 2 !important;
     grid-row: 3 !important;
     width: 100% !important;
-    height: 48px !important;
+    height: 42px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     margin: 0 !important;
-    padding: 0 12px !important;
+    padding: 0 10px !important;
     border-radius: var(--radius-md) !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
     box-sizing: border-box !important;
+  }
+
+  .location-group .map-container {
+    grid-column: 1 / span 2 !important;
+    width: 100% !important;
+    height: 200px !important;
+    min-height: 200px !important;
+    margin: 0.5rem 0 !important;
+  }
+
+  .location-group #map-selector {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 200px !important;
+  }
+
+  .location-group .coords-row {
+    grid-column: 1 / span 2 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  /* Mobile Stepper Header & Card Refinements */
+  .wizard-stepper-header {
+    padding: 0.75rem 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .wizard-stepper-header .step-indicator-item > div:last-child {
+    display: none !important;
+  }
+
+  .wizard-stepper-header .step-circle {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .report-form-card {
+    padding: 1.1rem 1rem !important;
+    gap: 1.1rem !important;
+  }
+
+  .voice-reporter-bar {
+    padding: 0.75rem 0.85rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .voice-reporter-bar h4 {
+    font-size: 0.85rem !important;
+  }
+
+  .voice-reporter-bar p {
+    font-size: 0.73rem !important;
+    line-height: 1.35 !important;
+  }
+
+  #btn-voice-record {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1rem !important;
   }
 
   /* Search Input Overlap fix */
