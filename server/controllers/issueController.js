@@ -1014,60 +1014,79 @@ export const getAdminAnalytics = async (req, res) => {
     if (issuesError) throw issuesError;
     const issues = dbIssues || [];
 
-    // Fetch profiles that are authorities or admins
+    // Fetch profiles that are authorities or admins (exclude generic 'Citizen' names)
     const { data: dbProfiles, error: profilesError } = await activeClient
       .from('profiles')
-      .select('id, full_name')
+      .select('id, full_name, role')
       .in('role', ['authority', 'admin']);
 
     if (profilesError) throw profilesError;
-    const profiles = dbProfiles || [];
+    const profiles = (dbProfiles || []).filter(p => p.full_name && p.full_name.trim().toLowerCase() !== 'citizen');
 
-    // 1. Group by category
-    const categories = ['roads', 'streetlights', 'water_supply', 'drainage', 'garbage', 'traffic', 'public_property', 'parks', 'sanitation', 'safety_hazard', 'environment', 'other'];
-    const categoryCounts = {};
-    categories.forEach(c => categoryCounts[c] = 0);
+    // 1. Group by category with case-insensitive normalization
+    const categoryCounts = {
+      roads: 0, streetlights: 0, water_supply: 0, drainage: 0, garbage: 0,
+      traffic: 0, public_property: 0, parks: 0, sanitation: 0, safety_hazard: 0,
+      environment: 0, other: 0
+    };
+
     issues.forEach(issue => {
-      const cat = issue.category;
-      if (categories.includes(cat)) {
-        categoryCounts[cat]++;
+      let rawCat = (issue.category || '').toLowerCase().trim().replace(/ /g, '_');
+      if (rawCat === 'pothole' || rawCat === 'road') rawCat = 'roads';
+      if (rawCat === 'leakage' || rawCat === 'water') rawCat = 'water_supply';
+      if (rawCat === 'street_light' || rawCat === 'streetlight') rawCat = 'streetlights';
+
+      if (categoryCounts.hasOwnProperty(rawCat)) {
+        categoryCounts[rawCat]++;
       } else {
-        categoryCounts['other'] = (categoryCounts['other'] || 0) + 1;
+        categoryCounts['other']++;
       }
     });
 
-    // 2. Group by status
-    const statuses = ['pending', 'assigned', 'in_progress', 'resolved', 'rejected'];
-    const statusCounts = {};
-    statuses.forEach(s => statusCounts[s] = 0);
+    // 2. Group by status with robust normalization so status sum === total complaints
+    const statusCounts = {
+      pending: 0,
+      assigned: 0,
+      in_progress: 0,
+      resolved: 0,
+      rejected: 0
+    };
+
     issues.forEach(issue => {
-      const stat = issue.status;
-      if (statuses.includes(stat)) {
-        statusCounts[stat]++;
+      const rawStatus = (issue.status || '').toLowerCase().trim();
+      if (rawStatus === 'resolved' || rawStatus === 'completed' || rawStatus === 'closed') {
+        statusCounts.resolved++;
+      } else if (rawStatus === 'assigned') {
+        statusCounts.assigned++;
+      } else if (rawStatus === 'in_progress' || rawStatus === 'in progress' || rawStatus === 'under_review') {
+        statusCounts.in_progress++;
+      } else if (rawStatus === 'rejected' || rawStatus === 'cancelled' || rawStatus === 'dismissed') {
+        statusCounts.rejected++;
+      } else {
+        // Fallback for pending, open, new, submitted, or unclassified
+        statusCounts.pending++;
       }
     });
 
-    // 3. Authority Resolution Performance
+    // 3. Authority Resolution Performance (only actual inspectors/authorities)
     const performance = {};
     profiles.forEach(p => {
       performance[p.full_name] = 0;
     });
 
     issues.forEach(issue => {
-      if (issue.status === 'resolved' && issue.assigned_to) {
+      const rawStatus = (issue.status || '').toLowerCase().trim();
+      if ((rawStatus === 'resolved' || rawStatus === 'completed') && issue.assigned_to) {
         const profile = profiles.find(p => p.id === issue.assigned_to);
         if (profile) {
           performance[profile.full_name] = (performance[profile.full_name] || 0) + 1;
-        } else {
-          performance['Other Inspector'] = (performance['Other Inspector'] || 0) + 1;
         }
       }
     });
 
-    const performanceData = Object.keys(performance).map(name => ({
-      name,
-      resolvedCount: performance[name]
-    }));
+    const performanceData = Object.keys(performance)
+      .map(name => ({ name, resolvedCount: performance[name] }))
+      .filter(p => p.resolvedCount > 0 || Object.keys(performance).length <= 5);
 
     return res.status(200).json({
       byCategory: categoryCounts,
