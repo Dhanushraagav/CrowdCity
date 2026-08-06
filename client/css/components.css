@@ -2782,62 +2782,103 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 
 .stitch-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.25rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .stitch-stat-card {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-top: 4px solid var(--primary);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
+  position: relative;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 16px;
+  padding: 1.25rem 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  justify-content: space-between;
+  gap: 0.85rem;
+  box-shadow: 0 4px 16px -2px rgba(15, 118, 110, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  overflow: hidden;
 }
+
+.stitch-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+}
+
+.stat-card-teal::before { background: linear-gradient(90deg, #0d9488, #0f766e); }
+.stat-card-blue::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+.stat-card-amber::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.stat-card-purple::before { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
 
 .stitch-stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary);
+  box-shadow: 0 12px 30px -4px rgba(15, 118, 110, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
 }
 
-.stitch-stat-card:nth-child(1) { border-top-color: var(--primary); }
-.stitch-stat-card:nth-child(2) { border-top-color: #2563EB; }
-.stitch-stat-card:nth-child(3) { border-top-color: #F59E0B; }
-.stitch-stat-card:nth-child(4) { border-top-color: #16A34A; }
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
 
 .stitch-stat-label {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-muted, #64748b);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
+
+.stat-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.icon-teal { background: rgba(13, 148, 136, 0.1); color: #0d9488; }
+.icon-blue { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+.icon-amber { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+.icon-purple { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
 
 .stitch-stat-value-row {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
+  margin-top: auto;
 }
 
 .stitch-stat-value {
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 800;
-  color: var(--text-main);
+  color: var(--text-main, #0f172a);
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .stitch-stat-change {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--primary);
-  display: flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #15803d;
+  display: inline-flex;
   align-items: center;
+  white-space: nowrap;
+}
   gap: 0.25rem;
 }
 
