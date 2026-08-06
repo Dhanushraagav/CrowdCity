@@ -2259,14 +2259,16 @@ body:not(.admin-portal-body) .app-sidebar {
 .brand-emblems-wrap {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.45rem;
   flex-shrink: 0;
 }
 
-.brand-emblem-tn {
-  width: 26px;
-  height: 26px;
-  object-fit: contain;
+.brand-emblem-tn,
+.app-sidebar-logo .brand-emblem {
+  height: 34px !important;
+  width: 34px !important;
+  object-fit: contain !important;
+  flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -2282,16 +2284,9 @@ body:not(.admin-portal-body) .app-sidebar {
 .app-sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   text-decoration: none;
   overflow: hidden;
-}
-
-.app-sidebar-logo .brand-emblem {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  flex-shrink: 0;
 }
 
 .app-sidebar-logo .brand-text-container {
@@ -2301,42 +2296,21 @@ body:not(.admin-portal-body) .app-sidebar {
 }
 
 .app-sidebar-logo .brand-title {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: var(--text-main, #0f172a);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0d9488;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  background: linear-gradient(135deg, #0f172a 0%, #0d9488 45%, #2563eb 90%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: brandShimmer 5s ease-in-out infinite alternate;
 }
 
 .app-sidebar-logo .brand-subtitle {
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  color: var(--primary, #0d9488);
+  color: #ea580c;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   white-space: nowrap;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes brandShimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
-}
-
-.app-sidebar-logo:hover .brand-title {
-  transform: translateX(2px) scale(1.02);
-}
-
-.app-sidebar-logo:hover .brand-subtitle {
-  letter-spacing: 0.16em;
-  color: #d97706;
 }
 
 .sidebar-collapse-btn {

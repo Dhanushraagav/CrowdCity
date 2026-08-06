@@ -1603,7 +1603,7 @@ function updateAuthUI() {
             <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" />
           </div>
           <div class="brand-text-container">
-            <span class="brand-title">CROWDCITY AI</span>
+            <span class="brand-title">CROWDCITY</span>
             <span class="brand-subtitle">CITIZEN PORTAL</span>
           </div>
         </a>
