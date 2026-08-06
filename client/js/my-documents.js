@@ -532,12 +532,49 @@
   }
 
   async function generateAndSendEmailOTP() {
-    activeEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     const userEmail = await getUserEmail();
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, type: 'mpin_change' })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Verification OTP sent to ${userEmail}! Check your inbox.`, 'success');
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn("Backend send-otp failed, fallback OTP active:", err);
+    }
 
+    // Fallback OTP for dev/offline environment
+    activeEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     if (typeof window.showToast === 'function') {
       window.showToast(`Verification OTP sent to ${userEmail}! (Code: ${activeEmailOTP})`, 'info');
     }
+  }
+
+  async function verifyEmailOTP(enteredOTP) {
+    const userEmail = await getUserEmail();
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, code: enteredOTP, type: 'mpin_change' })
+      });
+      const data = await res.json();
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn("Backend verify-otp failed, checking active email OTP:", err);
+    }
+
+    if (activeEmailOTP && enteredOTP === activeEmailOTP) {
+      return true;
+    }
+    return false;
   }
 
   async function openMPINModal(mode = 'verify') {
@@ -646,7 +683,8 @@
         return;
       }
 
-      if (enteredOTP !== activeEmailOTP) {
+      const isValid = await verifyEmailOTP(enteredOTP);
+      if (!isValid) {
         showMPINError('Invalid OTP code. Please check your email and try again.');
         return;
       }

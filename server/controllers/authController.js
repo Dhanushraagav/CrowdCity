@@ -382,8 +382,9 @@ export const sendWelcomeEmailAfterSignup = async (req, res) => {
  */
 export const sendOtpCode = async (req, res) => {
   const { email, type } = req.body;
-  if (!email || !type || !['login', 'signup'].includes(type)) {
-    return res.status(400).json({ error: 'Email address and valid verification type (login/signup) are required.' });
+  const validTypes = ['login', 'signup', 'mpin_change', 'verify'];
+  if (!email || !type || !validTypes.includes(type)) {
+    return res.status(400).json({ error: 'Email address and valid verification type are required.' });
   }
 
   const emailLower = email.toLowerCase().trim();
@@ -393,47 +394,49 @@ export const sendOtpCode = async (req, res) => {
     return res.status(429).json({ error: 'Please wait 30 seconds before requesting another code.' });
   }
 
-  try {
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database service is temporarily unavailable. Please contact the administrator.' });
-    }
-
-    // Check user existence in Supabase auth
-    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    if (listError) {
-      logger.error(`[authController] Failed to list users during OTP request: ${listError.message}`);
-      return res.status(500).json({ error: 'Database verification failed' });
-    }
-
-    const existingUser = users.find(u => u.email && u.email.toLowerCase() === emailLower);
-
-    if (type === 'login') {
-      if (!existingUser) {
-        return res.status(404).json({ error: 'Account not found. Please register first.' });
+  if (type === 'login' || type === 'signup') {
+    try {
+      if (!supabaseAdmin) {
+        return res.status(503).json({ error: 'Database service is temporarily unavailable. Please contact the administrator.' });
       }
-      // Check if suspended
-      const { data: profile, error: profileErr } = await supabaseAdmin
-        .from('profiles')
-        .select('is_suspended')
-        .eq('id', existingUser.id)
-        .maybeSingle();
 
-      if (profileErr) {
-        logger.error(`[authController] Profile fetch error during OTP request: ${profileErr.message}`);
+      // Check user existence in Supabase auth
+      const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      if (listError) {
+        logger.error(`[authController] Failed to list users during OTP request: ${listError.message}`);
         return res.status(500).json({ error: 'Database verification failed' });
       }
 
-      if (profile && profile.is_suspended) {
-        return res.status(403).json({ error: 'This account has been suspended by administration.' });
+      const existingUser = users.find(u => u.email && u.email.toLowerCase() === emailLower);
+
+      if (type === 'login') {
+        if (!existingUser) {
+          return res.status(404).json({ error: 'Account not found. Please register first.' });
+        }
+        // Check if suspended
+        const { data: profile, error: profileErr } = await supabaseAdmin
+          .from('profiles')
+          .select('is_suspended')
+          .eq('id', existingUser.id)
+          .maybeSingle();
+
+        if (profileErr) {
+          logger.error(`[authController] Profile fetch error during OTP request: ${profileErr.message}`);
+          return res.status(500).json({ error: 'Database verification failed' });
+        }
+
+        if (profile && profile.is_suspended) {
+          return res.status(403).json({ error: 'This account has been suspended by administration.' });
+        }
+      } else if (type === 'signup') {
+        if (existingUser) {
+          return res.status(409).json({ error: 'Email address is already registered. Please sign in.' });
+        }
       }
-    } else if (type === 'signup') {
-      if (existingUser) {
-        return res.status(409).json({ error: 'Email address is already registered. Please sign in.' });
-      }
+    } catch (dbErr) {
+      logger.error(`[authController] Error validating user in DB: %O`, dbErr);
+      return res.status(500).json({ error: 'Internal server error verifying account' });
     }
-  } catch (dbErr) {
-    logger.error(`[authController] Error validating user in DB: %O`, dbErr);
-    return res.status(500).json({ error: 'Internal server error verifying account' });
   }
 
   // 2. Generate and Send OTP
@@ -460,7 +463,8 @@ export const sendOtpCode = async (req, res) => {
  */
 export const verifyOtpCode = async (req, res) => {
   const { email, code, type } = req.body;
-  if (!email || !code || !type || !['login', 'signup'].includes(type)) {
+  const validTypes = ['login', 'signup', 'mpin_change', 'verify'];
+  if (!email || !code || !type || !validTypes.includes(type)) {
     return res.status(400).json({ error: 'Email, valid 6-digit code, and verification type are required.' });
   }
 
@@ -470,6 +474,9 @@ export const verifyOtpCode = async (req, res) => {
   const result = otpService.verifyOTP(emailLower, code, type);
 
   if (result.valid) {
+    if (type === 'mpin_change' || type === 'verify') {
+      return res.status(200).json({ message: 'OTP verified successfully.', email: emailLower });
+    }
     if (type === 'login') {
       try {
         if (!supabaseAdmin) {
