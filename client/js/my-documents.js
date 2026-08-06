@@ -157,10 +157,10 @@
           </div>
 
           <div style="display: flex; gap: 0.5rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
-            <button type="button" class="btn btn-secondary btn-view-doc" data-id="${doc.id}" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-align: center; cursor: pointer;">
+            <button type="button" class="btn btn-secondary btn-view-doc" data-id="${doc.id}" style="flex: 1; padding: 0.5rem 0.35rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-align: center; cursor: pointer; white-space: nowrap;">
               <i class="fa-solid fa-eye"></i> View
             </button>
-            <button type="button" class="btn btn-secondary btn-download-doc" data-id="${doc.id}" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-align: center; cursor: pointer;">
+            <button type="button" class="btn btn-secondary btn-download-doc" data-id="${doc.id}" style="flex: 1; padding: 0.5rem 0.35rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; text-align: center; cursor: pointer; white-space: nowrap;">
               <i class="fa-solid fa-download"></i> Download
             </button>
           </div>

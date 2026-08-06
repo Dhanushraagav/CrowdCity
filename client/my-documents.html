@@ -140,8 +140,9 @@
             <i class="fa-solid fa-cloud-arrow-up"></i>
           </div>
 
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.35rem 0;">
-            Drag & Drop Files Here or Click to Browse
+          <h3 class="upload-title" style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.35rem 0;">
+            <span class="desktop-text">Drag & Drop Files Here or Click to Browse</span>
+            <span class="mobile-text">Tap or Browse Files to Upload</span>
           </h3>
           <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
             Supports PDF, JPG, JPEG, and PNG files up to 5MB. (No MPIN required for uploading)
@@ -374,6 +375,24 @@
       pointer-events: none;
       width: 1px;
       height: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .upload-title .desktop-text { display: none; }
+      .upload-title .mobile-text { display: inline; }
+      #select-upload-doc-type, #input-doc-search, #select-filter-doc-type {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .btn-view-doc, .btn-download-doc {
+        font-size: 0.76rem !important;
+        padding: 0.55rem 0.25rem !important;
+        white-space: nowrap !important;
+      }
+    }
+    @media (min-width: 769px) {
+      .upload-title .desktop-text { display: inline; }
+      .upload-title .mobile-text { display: none; }
     }
   </style>
 
