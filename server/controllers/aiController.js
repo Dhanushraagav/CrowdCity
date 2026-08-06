@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
@@ -310,6 +310,26 @@ export const recommendationController = async (req, res) => {
   } catch (err) {
     logger.error('recommendationController Error: %O', err);
     return res.status(500).json({ error: 'Server error generating personalized recommendations' });
+  }
+};
+
+/**
+ * POST /api/ai/translate-voice
+ * Dedicated endpoint for Speech-to-Text Tamil & Tanglish translation to clear English.
+ */
+export const translateVoiceController = async (req, res) => {
+  const { text } = req.body;
+
+  if (!text) {
+    return res.status(400).json({ error: 'Text is required for voice translation.' });
+  }
+
+  try {
+    const data = await translateAndCleanVoiceText(text);
+    return res.status(200).json(data);
+  } catch (err) {
+    logger.error('translateVoiceController Error: %O', err);
+    return res.status(500).json({ error: 'Server error translating voice text' });
   }
 };
 

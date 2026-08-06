@@ -454,18 +454,35 @@ function initVoiceGrievanceReporter() {
       }
     };
 
-    recognition.onend = () => {
+    recognition.onend = async () => {
       stopRecordingUI();
-      const text = descTextarea.value.trim();
-      if (text.length >= 5) {
+      const rawText = descTextarea.value.trim();
+      if (rawText.length >= 2) {
         if (statusText) {
-          statusText.innerHTML = `<span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Transcribed! Groq AI auto-categorizing your issue...</span>`;
+          statusText.innerHTML = `<span style="color: #0d9488; font-weight: 700;"><i class="fa-solid fa-spinner fa-spin"></i> Translating to English & Auto-Categorizing...</span>`;
         }
-        if (typeof handleAiAssist === 'function') {
-          handleAiAssist();
+
+        // Call Groq AI to translate Tamil script / Tanglish / English speech into perfect English
+        if (window.API && typeof window.API.translateVoiceText === 'function') {
+          try {
+            const { data, error } = await window.API.translateVoiceText(rawText);
+            if (data && data.englishText) {
+              descTextarea.value = data.englishText;
+            }
+          } catch (err) {
+            console.warn("Voice translation API fallback:", err);
+          }
         }
+
+        if (statusText) {
+          statusText.innerHTML = `<span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Transcribed into English! AI auto-categorizing...</span>`;
+        }
+
+        // Auto-trigger AI categorization on translated text
+        const aiBtn = document.getElementById('btn-ai-assist');
+        if (aiBtn) aiBtn.click();
       } else if (statusText) {
-        statusText.textContent = 'Tap mic & speak naturally in Tamil or English. Groq AI will transcribe & auto-fill fields!';
+        statusText.textContent = 'Tap mic & speak naturally in Tamil or English. Groq AI will transcribe & translate into English!';
       }
     };
   }

@@ -25,11 +25,17 @@ export const analyzeComplaint = async (title, description) => {
     return getLocalFallbackAnalysis(title, description);
   }
 
-  const systemPrompt = `You are a municipal hazard triage AI for CrowdCity AI. Analyze the user's civic issue report. You MUST output exactly one JSON object with:
-1) "summary": a concise 1-sentence summary of the hazard.
-2) "category": exactly one of ["Roads", "Streetlights", "Water Supply", "Drainage", "Garbage", "Traffic", "Public Property", "Parks", "Sanitation", "Safety Hazard", "Environment", "Other"].
-3) "priority": exactly one of ["Low", "Medium", "High", "Critical"].
-4) "department": exactly one of ["Road Department", "Sanitation Department", "Water Department", "Electrical Department", "General Department"].
+  const systemPrompt = `You are a municipal hazard triage AI for CrowdCity AI. Analyze the user's civic issue report.
+CRITICAL TRANSLATION INSTRUCTION:
+The user description may be spoken Tamil script (e.g. "ரோட்டில் பெரிய குழி உள்ளது"), Tanglish / Tamil written in English letters (e.g. "roattil periya kuzhi irukku"), or English with speech-to-text acoustic errors (e.g. "were is a").
+You MUST translate/correct the description into clear, grammatically perfect, professional ENGLISH and return it in "translatedDescription".
+
+You MUST output exactly one JSON object with:
+1) "translatedDescription": The description translated or corrected into clear, grammatically perfect, professional English.
+2) "summary": a concise 1-sentence summary of the hazard in English.
+3) "category": exactly one of ["Roads", "Streetlights", "Water Supply", "Drainage", "Garbage", "Traffic", "Public Property", "Parks", "Sanitation", "Safety Hazard", "Environment", "Other"].
+4) "priority": exactly one of ["Low", "Medium", "High", "Critical"].
+5) "department": exactly one of ["Road Department", "Sanitation Department", "Water Department", "Electrical Department", "General Department"].
 
 Strict category rules and examples:
 - Roads: Broken Footpath, Road Crack, Large Pothole, sidewalk damage, asphalt craters. Footpaths and sidewalks MUST map to Roads.
@@ -75,6 +81,7 @@ Output ONLY valid raw JSON matching this schema. Do not output markdown, comment
 
     // Enforce fallbacks for missing properties in AI JSON output
     return {
+      translatedDescription: aiData.translatedDescription || description,
       summary: aiData.summary || `Summarized report: ${title}`,
       category: aiData.category || 'Other',
       priority: aiData.priority || 'Medium',
@@ -84,6 +91,53 @@ Output ONLY valid raw JSON matching this schema. Do not output markdown, comment
   } catch (err) {
     logger.error('Groq SDK analysis request failed: %O. Using local fallback.', err);
     return getLocalFallbackAnalysis(title, description);
+  }
+};
+
+/**
+ * Groq AI Multi-Lingual Speech Translator & Polisher
+ * Translates Tamil script / Tanglish / English speech into clear, flawless English.
+ */
+export const translateAndCleanVoiceText = async (rawText = '') => {
+  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
+    return { englishText: '' };
+  }
+
+  if (!groq) {
+    return { englishText: rawText.trim() };
+  }
+
+  const systemPrompt = `You are a professional Tamil-to-English and English speech correction AI for CrowdCity AI municipal portal.
+
+Task instructions:
+1. Input text may be spoken Tamil script (e.g. "ரோட்டில் பெரிய குழி உள்ளது"), Tanglish / Tamil in Roman letters (e.g. "roattil periya kuzhi irukku"), or English with speech recognition acoustic errors (e.g. "were is a", "water leak in road").
+2. Translate Tamil script or Tanglish into clear, natural, grammatically flawless ENGLISH.
+3. If input is already in English, correct any speech recognition typos or misheard words into perfect professional ENGLISH.
+4. Output MUST ALWAYS be exclusively in clear, professional ENGLISH.
+5. Output MUST be a single raw JSON object matching:
+{
+  "englishText": "The translated or corrected clear English sentence."
+}`;
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Spoken Input Text: "${rawText}"` }
+      ],
+      model: model,
+      response_format: { type: 'json_object' }
+    });
+
+    const responseText = chatCompletion.choices[0].message.content;
+    const aiData = JSON.parse(responseText);
+
+    return {
+      englishText: aiData.englishText || rawText
+    };
+  } catch (err) {
+    logger.error('translateAndCleanVoiceText Error: %O', err);
+    return { englishText: rawText };
   }
 };
 

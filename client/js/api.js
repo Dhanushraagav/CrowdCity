@@ -142,6 +142,14 @@ const API = {
     });
   },
 
+  // Translate & clean voice text (Tamil/Tanglish/English -> Perfect English)
+  translateVoiceText: async (text) => {
+    return request('/ai/translate-voice', {
+      method: 'POST',
+      body: JSON.stringify({ text })
+    });
+  },
+
   // 12. Get all users (Admin Only)
   getAllUsers: async () => {
     return request('/auth/users', {
