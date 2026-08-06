@@ -2302,19 +2302,41 @@ body:not(.admin-portal-body) .app-sidebar {
 
 .app-sidebar-logo .brand-title {
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 900;
   color: var(--text-main, #0f172a);
-  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   white-space: nowrap;
-  transition: opacity 0.2s ease;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  background: linear-gradient(135deg, #0f172a 0%, #0d9488 45%, #2563eb 90%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brandShimmer 5s ease-in-out infinite alternate;
 }
 
 .app-sidebar-logo .brand-subtitle {
-  font-size: 0.68rem;
-  font-weight: 600;
+  font-size: 0.66rem;
+  font-weight: 800;
   color: var(--primary, #0d9488);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   white-space: nowrap;
-  transition: opacity 0.2s ease;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes brandShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.app-sidebar-logo:hover .brand-title {
+  transform: translateX(2px) scale(1.02);
+}
+
+.app-sidebar-logo:hover .brand-subtitle {
+  letter-spacing: 0.16em;
+  color: #d97706;
 }
 
 .sidebar-collapse-btn {
