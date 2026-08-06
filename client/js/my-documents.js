@@ -426,13 +426,25 @@
       await generateAndSendEmailOTP();
     });
 
-    ['mpin-input-verify', 'mpin-input-set', 'mpin-input-confirm', 'mpin-input-old', 'mpin-input-otp'].forEach(id => {
+    // Wire Segmented PIN Box Synchronizer & Focus Handlers
+    const allPinInputIds = ['mpin-input-verify', 'mpin-input-set', 'mpin-input-confirm', 'mpin-input-old', 'mpin-input-otp'];
+
+    allPinInputIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
+        el.addEventListener('input', () => syncPinBoxes(id));
         el.addEventListener('keypress', (e) => {
           if (e.key === 'Enter') submitMPIN();
         });
       }
+    });
+
+    document.querySelectorAll('.pin-box-group').forEach(group => {
+      group.addEventListener('click', () => {
+        const inputId = group.dataset.inputId;
+        const input = document.getElementById(inputId);
+        if (input) input.focus();
+      });
     });
   });
 
@@ -457,6 +469,32 @@
     if (label) {
       label.textContent = getStoredMPIN() ? 'Change MPIN' : 'Set MPIN';
     }
+  }
+
+  function syncPinBoxes(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const group = document.querySelector(`.pin-box-group[data-input-id="${inputId}"]`);
+    if (!group) return;
+
+    const boxes = group.querySelectorAll('.pin-box');
+    const val = input.value.trim();
+
+    boxes.forEach((box, idx) => {
+      if (idx < val.length) {
+        box.textContent = val[idx];
+        box.classList.add('filled');
+        box.classList.remove('active');
+      } else {
+        box.textContent = '_';
+        box.classList.remove('filled');
+        if (idx === val.length) {
+          box.classList.add('active');
+        } else {
+          box.classList.remove('active');
+        }
+      }
+    });
   }
 
   function handleProtectedAction(actionCallback) {
@@ -519,10 +557,14 @@
 
     if (errorBox) { errorBox.style.display = 'none'; errorBox.textContent = ''; }
     
-    // Reset all inputs
-    ['mpin-input-set', 'mpin-input-confirm', 'mpin-input-verify', 'mpin-input-old', 'mpin-input-otp'].forEach(id => {
+    // Reset all inputs & sync box displays
+    const inputIds = ['mpin-input-set', 'mpin-input-confirm', 'mpin-input-verify', 'mpin-input-old', 'mpin-input-otp'];
+    inputIds.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.value = '';
+      if (el) {
+        el.value = '';
+        syncPinBoxes(id);
+      }
     });
 
     // Hide all containers
@@ -530,13 +572,15 @@
       if (c) c.style.display = 'none';
     });
 
+    let targetInput = null;
+
     if (mode === 'set') {
       if (title) title.textContent = getStoredMPIN() ? 'Step 3: Set New Security MPIN' : 'Set Security MPIN';
       if (desc) desc.textContent = 'Create a 4-digit PIN to protect viewing, downloading, and deleting confidential wallet documents.';
       if (icon) icon.className = 'fa-solid fa-key';
       if (setContainer) setContainer.style.display = 'flex';
       if (resetWrap) resetWrap.style.display = 'none';
-      setTimeout(() => document.getElementById('mpin-input-set')?.focus(), 150);
+      targetInput = document.getElementById('mpin-input-set');
 
     } else if (mode === 'old') {
       if (title) title.textContent = 'Step 1: Verify Current MPIN';
@@ -544,7 +588,7 @@
       if (icon) icon.className = 'fa-solid fa-shield-halved';
       if (oldContainer) oldContainer.style.display = 'block';
       if (resetWrap) resetWrap.style.display = 'none';
-      setTimeout(() => document.getElementById('mpin-input-old')?.focus(), 150);
+      targetInput = document.getElementById('mpin-input-old');
 
     } else if (mode === 'otp') {
       const userEmail = await getUserEmail();
@@ -553,7 +597,7 @@
       if (icon) icon.className = 'fa-solid fa-envelope-circle-check';
       if (otpContainer) otpContainer.style.display = 'flex';
       if (resetWrap) resetWrap.style.display = 'none';
-      setTimeout(() => document.getElementById('mpin-input-otp')?.focus(), 150);
+      targetInput = document.getElementById('mpin-input-otp');
 
     } else { // 'verify'
       if (title) title.textContent = 'Enter Security MPIN';
@@ -561,10 +605,11 @@
       if (icon) icon.className = 'fa-solid fa-lock';
       if (verifyContainer) verifyContainer.style.display = 'block';
       if (resetWrap) resetWrap.style.display = 'block';
-      setTimeout(() => document.getElementById('mpin-input-verify')?.focus(), 150);
+      targetInput = document.getElementById('mpin-input-verify');
     }
 
     backdrop.style.display = 'flex';
+    setTimeout(() => targetInput?.focus(), 150);
   }
 
   function closeMPINModal() {
@@ -586,11 +631,10 @@
       if (oldPin !== storedPin) {
         showMPINError('Incorrect Current MPIN. Please try again.');
         const oldInp = document.getElementById('mpin-input-old');
-        if (oldInp) { oldInp.value = ''; oldInp.focus(); }
+        if (oldInp) { oldInp.value = ''; syncPinBoxes('mpin-input-old'); oldInp.focus(); }
         return;
       }
 
-      // Old PIN is correct -> Trigger Email OTP & proceed to Step 2
       await generateAndSendEmailOTP();
       openMPINModal('otp');
 
@@ -607,7 +651,6 @@
         return;
       }
 
-      // OTP Verified -> proceed to Step 3 (Set New MPIN)
       if (typeof window.showToast === 'function') {
         window.showToast('Email OTP verified successfully!', 'success');
       }
@@ -654,7 +697,7 @@
       if (enteredPin !== storedPin) {
         showMPINError('Incorrect Security MPIN. Please try again.');
         const verInp = document.getElementById('mpin-input-verify');
-        if (verInp) { verInp.value = ''; verInp.focus(); }
+        if (verInp) { verInp.value = ''; syncPinBoxes('mpin-input-verify'); verInp.focus(); }
         return;
       }
 
@@ -675,13 +718,21 @@
       errorBox.textContent = msg;
       errorBox.style.display = 'block';
     }
+
+    const visibleGroups = document.querySelectorAll('.pin-box-group');
+    visibleGroups.forEach(group => {
+      if (group.closest('div[style*="display: none"]') === null) {
+        group.classList.add('shake-error');
+        setTimeout(() => group.classList.remove('shake-error'), 450);
+      }
+    });
   }
 
   window.triggerMPINSetupOrChange = function() {
     if (getStoredMPIN()) {
-      openMPINModal('old'); // Ask Old MPIN first when changing PIN
+      openMPINModal('old');
     } else {
-      openMPINModal('set'); // Direct setup if no PIN exists
+      openMPINModal('set');
     }
   };
 
