@@ -2503,13 +2503,15 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 .app-header-logo-mobile {
-  display: none;
+  display: flex !important;
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--primary);
   text-decoration: none;
   align-items: center;
   gap: 0.5rem;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .app-header-nav-desktop {

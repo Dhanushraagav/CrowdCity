@@ -54,7 +54,7 @@
   // Record start time to ensure minimum loader duration
   window.authLoaderStartTime = Date.now();
 
-  // Inject loader CSS
+  // Inject premium government top progress bar loader (ZERO LOGOS)
   const loaderStyle = document.createElement('style');
   loaderStyle.id = 'global-page-loader-style';
   loaderStyle.innerHTML = `
@@ -64,132 +64,71 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(3, 7, 18, 0.9);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 999999;
-      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
       opacity: 1;
       visibility: visible;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     #global-page-loader.fade-out {
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
     }
-    html.loader-active, body.loader-active {
-      overflow: hidden !important;
-      width: 100vw !important;
-      height: 100vh !important;
+    #gov-top-loader-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #0f766e, #2dd4bf, #0f766e);
+      z-index: 1000000;
+      animation: govTopLoaderProgress 1.5s linear infinite;
+      box-shadow: 0 0 10px rgba(15, 118, 110, 0.5);
     }
-    .loader-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      width: 90%;
-      max-width: 400px;
+    @keyframes govTopLoaderProgress {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
-    .loader-spinner-ring {
-      position: relative;
-      width: 80px;
-      height: 80px;
-    }
-    .loader-spinner-ring div {
-      box-sizing: border-box;
-      display: block;
-      position: absolute;
-      width: 64px;
-      height: 64px;
-      margin: 8px;
-      border: 4px solid transparent;
+    .gov-loader-spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(15, 118, 110, 0.15);
+      border-top-color: #0f766e;
       border-radius: 50%;
-      animation: spinner-ring-rotate 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-      border-top-color: #0d9488;
+      animation: govSpinnerRotate 0.8s linear infinite;
     }
-    .loader-spinner-ring div:nth-child(1) { animation-delay: -0.45s; }
-    .loader-spinner-ring div:nth-child(2) { animation-delay: -0.3s; }
-    .loader-spinner-ring div:nth-child(3) { animation-delay: -0.15s; }
-    @keyframes spinner-ring-rotate {
+    @keyframes govSpinnerRotate {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    .loader-logo {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 0.8rem;
-      font-size: 1.35rem;
+    .gov-loader-title {
+      font-size: 0.85rem;
       font-weight: 700;
-      color: #ffffff;
+      color: #0f172a;
       letter-spacing: 0.05em;
-    }
-    .loader-logo-divider,
-    .loader-logo div[style*="width: 1px"],
-    .loader-logo div[style*="width:1px"] {
-      display: none !important;
-    }
-    .loader-logo div[style*="line-height"] {
-      text-align: center !important;
-      align-items: center !important;
-    }
-    .loader-text {
-      font-size: 0.78rem;
-      color: rgba(255, 255, 255, 0.5);
-      letter-spacing: 0.08em;
-      font-weight: 600;
+      margin-top: 1.25rem;
       text-transform: uppercase;
-    }
-    @media (min-width: 1024px) {
-      .loader-logo {
-        flex-direction: row !important;
-        text-align: left !important;
-        gap: 0.6rem !important;
-      }
-      .loader-logo-divider,
-      .loader-logo div[style*="width: 1px"],
-      .loader-logo div[style*="width:1px"] {
-        display: block !important;
-        width: 1px !important;
-        height: 32px !important;
-        background: rgba(255, 255, 255, 0.2) !important;
-        margin: 0 0.1rem !important;
-      }
-      .loader-logo div[style*="line-height"] {
-        text-align: left !important;
-        align-items: flex-start !important;
-      }
     }
   `;
   (document.head || document.documentElement).appendChild(loaderStyle);
 
-  // Inject loader HTML as soon as body is available
+  // Inject loader HTML strictly during real browser page loading
   function injectLoaderHTML() {
     if (document.getElementById('global-page-loader')) return;
-    document.documentElement.classList.add('loader-active');
     const loader = document.createElement('div');
     loader.id = 'global-page-loader';
     loader.innerHTML = `
-      <div class="loader-container">
-        <div class="loader-spinner-ring">
-          <div></div><div></div><div></div><div></div>
-        </div>
-        <div class="loader-logo">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="height: 48px; object-fit: contain;" />
-          <div class="loader-logo-divider"></div>
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="height: 38px; object-fit: contain;" />
-          <div style="display: flex; flex-direction: column; line-height: 1.1; font-family: var(--font-heading, sans-serif);">
-            <span style="font-size: 1.25rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px;">CrowdCity AI</span>
-            <span style="font-size: 0.62rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px;">TN Government Partnership</span>
-          </div>
-        </div>
-        <div class="loader-text">Loading Portal...</div>
-      </div>
+      <div id="gov-top-loader-bar"></div>
+      <div class="gov-loader-spinner"></div>
+      <div class="gov-loader-title">Government Services Portal</div>
     `;
     document.body.insertBefore(loader, document.body.firstChild);
   }

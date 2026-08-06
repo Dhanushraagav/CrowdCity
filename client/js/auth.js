@@ -2353,19 +2353,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('global-page-loader');
     if (!loader || loader.classList.contains('fade-out')) return;
 
-    const elapsed = Date.now() - startTime;
-    const delay = Math.max(0, 800 - elapsed);
-
+    loader.classList.add('fade-out');
+    document.documentElement.classList.remove('loader-active');
     setTimeout(() => {
-      loader.classList.add('fade-out');
-      document.documentElement.classList.remove('loader-active');
-      // Remove from DOM after transition completes
-      setTimeout(() => {
-        if (loader.parentNode) {
-          loader.parentNode.removeChild(loader);
-        }
-      }, 400);
-    }, delay);
+      if (loader.parentNode) {
+        loader.parentNode.removeChild(loader);
+      }
+    }, 250);
   }
 
   // Safety fail-safe timeout (3.5s) to guarantee user access
