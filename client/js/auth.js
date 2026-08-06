@@ -1943,7 +1943,7 @@ function updateAuthUI() {
   }
 
   // Trigger Document Wallet Promo Banner once per login session
-  if (user && role === 'citizen') {
+  if (user && getUserRole() === 'citizen') {
     setTimeout(injectDocumentWalletBanner, 600);
   }
 }
