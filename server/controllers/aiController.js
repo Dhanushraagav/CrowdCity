@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, planSmartMobilityRoute } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
@@ -315,25 +315,7 @@ export const recommendationController = async (req, res) => {
 
 
 
-/**
- * POST /api/ai/route-planner
- * Dedicated endpoint for Smart Mobility AI Route Navigation.
- */
-export const routePlannerController = async (req, res) => {
-  const { origin, destination, travelMode } = req.body;
 
-  if (!origin || !destination) {
-    return res.status(400).json({ error: 'Origin and destination are required for AI route planning.' });
-  }
-
-  try {
-    const data = await planSmartMobilityRoute(origin, destination, travelMode || 'Car');
-    return res.status(200).json(data);
-  } catch (err) {
-    logger.error('routePlannerController Error: %O', err);
-    return res.status(500).json({ error: 'Server error planning AI route' });
-  }
-};
 
 
 
