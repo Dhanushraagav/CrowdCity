@@ -2794,6 +2794,41 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   }
 }
 
+/* Mobile Clean State (No animations & no background colors on mobile) */
+@media (max-width: 768px) {
+  .kpi-animated-card {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    padding: 1rem 1.1rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .kpi-animated-card:hover {
+    transform: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .kpi-ambient-glow {
+    display: none !important;
+  }
+
+  .floating-icon i {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .stat-icon-wrap {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+  }
+}
+
 .kpi-animated-card {
   position: relative;
   background: rgba(255, 255, 255, 0.95);
