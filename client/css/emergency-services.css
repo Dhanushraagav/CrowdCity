@@ -691,50 +691,41 @@ body.emergency-body .app-sidebar.active {
     display: none !important; /* Hide long 5-line descriptions on mobile to eliminate vertical crowding */
   }
 
-  .emergency-contacts-table td:nth-child(2) {
-    margin-right: 0.4rem !important;
-  }
-
+  .emergency-contacts-table td:nth-child(2),
   .phone-number-badge {
-    font-size: 0.88rem !important;
+    display: none !important; /* Hide duplicate standalone red numbers on mobile to remove clutter */
   }
 
   .btn-table-call {
-    padding: 0.3rem 0.55rem !important;
-    font-size: 0.72rem !important;
+    padding: 0.35rem 0.65rem !important;
+    font-size: 0.75rem !important;
     border-radius: 6px !important;
   }
 
-  /* Sleek Compact Map Controls */
+  /* Straight Clean Full-Width Map Search Bar */
   .map-filter-bar {
-    flex-direction: column !important;
-    gap: 0.35rem !important;
-    margin-bottom: 0.45rem !important;
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .search-input-group {
-    padding: 0.35rem 0.6rem !important;
-    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--border-strong) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
   }
 
   .search-input-group input {
-    font-size: 0.75rem !important;
-  }
-
-  .radius-selector-group {
-    gap: 0.25rem !important;
-    justify-content: flex-start !important;
+    font-size: 0.8rem !important;
     width: 100% !important;
-  }
-
-  .radius-selector-group span {
-    display: none !important; /* Hide redundant label text on mobile */
-  }
-
-  .radius-btn {
-    padding: 0.22rem 0.45rem !important;
-    font-size: 0.7rem !important;
-    border-radius: 4px !important;
+    border: none !important;
+    outline: none !important;
   }
 
   .type-filter-pills-row {
