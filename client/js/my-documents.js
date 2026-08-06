@@ -705,7 +705,6 @@
   function closeMPINModal() {
     const backdrop = document.getElementById('mpin-modal-backdrop');
     if (backdrop) backdrop.style.display = 'none';
-    pendingActionAfterMPIN = null;
   }
 
   async function submitMPIN() {
@@ -784,15 +783,16 @@
       localStorage.setItem(MPIN_STORAGE_KEY, pin);
       sessionStorage.setItem(MPIN_SESSION_UNLOCKED_KEY, 'true');
       updateMPINHeaderButton();
+      
+      const action = pendingActionAfterMPIN;
+      pendingActionAfterMPIN = null;
       closeMPINModal();
 
       if (typeof window.showToast === 'function') {
         window.showToast('Security MPIN updated successfully!', 'success');
       }
 
-      if (pendingActionAfterMPIN) {
-        const action = pendingActionAfterMPIN;
-        pendingActionAfterMPIN = null;
+      if (action) {
         action();
       }
 
@@ -813,11 +813,12 @@
       }
 
       sessionStorage.setItem(MPIN_SESSION_UNLOCKED_KEY, 'true');
+      
+      const action = pendingActionAfterMPIN;
+      pendingActionAfterMPIN = null;
       closeMPINModal();
 
-      if (pendingActionAfterMPIN) {
-        const action = pendingActionAfterMPIN;
-        pendingActionAfterMPIN = null;
+      if (action) {
         action();
       }
     }
