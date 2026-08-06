@@ -4521,6 +4521,45 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     gap: 1.1rem !important;
   }
 
+  #reporting-mode-banner {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    background: rgba(13, 148, 136, 0.06) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    padding: 0.5rem 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  #reporting-mode-banner > div {
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    color: var(--text-main) !important;
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+
+  #reporting-mode-banner button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: auto !important;
+    height: 28px !important;
+    padding: 0 0.6rem !important;
+    margin: 0 0 0 0.5rem !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
   .voice-reporter-bar {
     padding: 0.75rem 0.85rem !important;
     margin-bottom: 0.5rem !important;
