@@ -426,13 +426,41 @@
       await generateAndSendEmailOTP();
     });
 
-    // Wire Segmented PIN Box Synchronizer & Focus Handlers
+    // Wire Segmented PIN Box Synchronizer & Auto-Submit Handlers
     const allPinInputIds = ['mpin-input-verify', 'mpin-input-set', 'mpin-input-confirm', 'mpin-input-old', 'mpin-input-otp'];
+    let autoSubmitTimer = null;
+
+    function checkAutoSubmit(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const val = input.value.trim();
+
+      if (inputId === 'mpin-input-set') {
+        if (val.length === 4) {
+          const confirmInput = document.getElementById('mpin-input-confirm');
+          if (confirmInput) {
+            confirmInput.focus();
+          }
+        }
+        return;
+      }
+
+      const targetLength = (inputId === 'mpin-input-otp') ? 6 : 4;
+      if (val.length === targetLength) {
+        if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
+        autoSubmitTimer = setTimeout(() => {
+          submitMPIN();
+        }, 120);
+      }
+    }
 
     allPinInputIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
-        el.addEventListener('input', () => syncPinBoxes(id));
+        el.addEventListener('input', () => {
+          syncPinBoxes(id);
+          checkAutoSubmit(id);
+        });
         el.addEventListener('keypress', (e) => {
           if (e.key === 'Enter') submitMPIN();
         });
