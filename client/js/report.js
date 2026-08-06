@@ -63,13 +63,15 @@ window.goToWizardStep2 = function(mode) {
 };
 
 window.proceedToWizardStep3 = async function() {
-  const category = document.getElementById('report-category')?.value;
-  const description = document.getElementById('report-description')?.value;
+  const categoryInput = document.getElementById('report-category');
+  const descriptionInput = document.getElementById('report-description');
   const alertBanner = document.getElementById('report-alert');
 
-  if (!category || !description || description.trim().length < 5) {
+  const description = descriptionInput?.value?.trim() || '';
+
+  if (description.length < 5) {
     if (alertBanner) {
-      alertBanner.textContent = 'Please select a category and provide a detailed description (at least 5 characters).';
+      alertBanner.textContent = 'Please provide a detailed description of the issue (at least 5 characters).';
       alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
       alertBanner.style.color = '#ef4444';
       alertBanner.classList.remove('hidden');
@@ -77,6 +79,17 @@ window.proceedToWizardStep3 = async function() {
     }
     return;
   }
+
+  // If category is unselected or empty, auto-assign based on current mode
+  if (!categoryInput?.value) {
+    if (typeof currentReportMode !== 'undefined' && currentReportMode === 'transportation') {
+      categoryInput.value = 'roads';
+    } else {
+      categoryInput.value = 'other';
+    }
+  }
+
+  const category = categoryInput.value;
 
   if (alertBanner) alertBanner.classList.add('hidden');
 
@@ -778,12 +791,57 @@ function setupCategorySelector() {
   // Category selection is handled natively by the HTML select dropdown
 }
 
-// Set category item programmatically
+// Set category item programmatically with normalized option matching
 function setCategoryProgrammatically(categoryName) {
   const categoryInput = document.getElementById('report-category');
-  if (categoryInput) {
-    categoryInput.value = categoryName;
+  if (!categoryInput) return;
+
+  if (!categoryName) {
+    if (typeof currentReportMode !== 'undefined' && currentReportMode === 'transportation') {
+      categoryInput.value = 'roads';
+    } else {
+      categoryInput.value = 'other';
+    }
+    return;
   }
+
+  const rawLower = String(categoryName).toLowerCase().trim().replace(/[\s-]+/g, '_');
+
+  // Try exact or normalized match against option values
+  let matched = false;
+  for (let i = 0; i < categoryInput.options.length; i++) {
+    const opt = categoryInput.options[i];
+    const optValLower = opt.value.toLowerCase().trim();
+
+    if (optValLower && (optValLower === rawLower || rawLower.includes(optValLower) || optValLower.includes(rawLower))) {
+      categoryInput.selectedIndex = i;
+      matched = true;
+      break;
+    }
+  }
+
+  // Fallback keyword mapping
+  if (!matched) {
+    if (rawLower.includes('road') || rawLower.includes('pothole') || rawLower.includes('street') || rawLower.includes('asphalt')) {
+      categoryInput.value = 'roads';
+    } else if (rawLower.includes('light') || rawLower.includes('lamp') || rawLower.includes('bulb')) {
+      categoryInput.value = 'streetlights';
+    } else if (rawLower.includes('water') || rawLower.includes('pipe') || rawLower.includes('leak')) {
+      categoryInput.value = 'water_supply';
+    } else if (rawLower.includes('drain') || rawLower.includes('sewer') || rawLower.includes('gutter')) {
+      categoryInput.value = 'drainage';
+    } else if (rawLower.includes('garbage') || rawLower.includes('trash') || rawLower.includes('waste') || rawLower.includes('litter')) {
+      categoryInput.value = 'garbage';
+    } else if (rawLower.includes('traffic') || rawLower.includes('signal') || rawLower.includes('jam')) {
+      categoryInput.value = 'traffic';
+    } else if (typeof currentReportMode !== 'undefined' && currentReportMode === 'transportation') {
+      categoryInput.value = 'roads';
+    } else {
+      categoryInput.value = 'other';
+    }
+  }
+
+  categoryInput.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 // Image upload and preview rendering
