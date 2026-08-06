@@ -2613,7 +2613,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 .app-header-logo-mobile {
-  display: none;
+  display: none !important;
 }
 
 .app-header-nav-desktop {
