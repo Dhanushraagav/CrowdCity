@@ -1874,7 +1874,7 @@ function updateAuthUI() {
         </div>
 
         <!-- User profile menu -->
-        <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown()">
+        <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown()" style="position: relative; cursor: pointer;">
           <div class="user-avatar">${initial}</div>
           <span style="font-size: 0.9rem; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fullName}</span>
           <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>

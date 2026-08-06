@@ -87,6 +87,12 @@
       letter-spacing: 0.04em;
     }
 
+    @media (min-width: 769px) {
+      .mobile-menu-toggle, #mobile-menu-btn, .app-header-logo-mobile {
+        display: none !important;
+      }
+    }
+
     @media (max-width: 768px) {
       #mobility-map {
         height: 360px;
@@ -95,6 +101,10 @@
         font-size: 0.78rem;
         padding: 0.55rem 0.85rem;
       }
+    }
+
+    select, option, button, input {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
     }
   </style>
   <script>
@@ -140,20 +150,53 @@
             <h1 style="font-size: 1.65rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: 'Outfit', sans-serif;">
               Smart Mobility & Intelligent Transit Portal 🚗⚡
             </h1>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; font-family: 'Inter', sans-serif;">
               Live traffic heat maps, real-time bus tracking, EV charging hubs, smart parking telemetry, and Groq AI route planning.
             </p>
           </div>
 
           <div style="display: flex; gap: 0.6rem; align-items: center;">
-            <select id="select-city-sector" class="form-control" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
+            <select id="select-city-sector" class="form-control" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); font-family: 'Inter', sans-serif;">
+              <option value="ariyalur">Ariyalur District</option>
+              <option value="chengalpattu">Chengalpattu District</option>
               <option value="chennai">Chennai Metropolitan</option>
-              <option value="coimbatore" selected>Coimbatore City</option>
-              <option value="madurai">Madurai Smart City</option>
+              <option value="coimbatore" selected>Coimbatore District</option>
+              <option value="cuddalore">Cuddalore District</option>
+              <option value="dharmapuri">Dharmapuri District</option>
+              <option value="dindigul">Dindigul District</option>
+              <option value="erode">Erode District</option>
+              <option value="kallakurichi">Kallakurichi District</option>
+              <option value="kanchipuram">Kanchipuram District</option>
+              <option value="kanyakumari">Kanyakumari (Nagercoil)</option>
+              <option value="karur">Karur District</option>
+              <option value="krishnagiri">Krishnagiri District</option>
+              <option value="madurai">Madurai District</option>
+              <option value="mayiladuthurai">Mayiladuthurai District</option>
+              <option value="nagapattinam">Nagapattinam District</option>
+              <option value="namakkal">Namakkal District</option>
+              <option value="nilgiris">Nilgiris (Ooty)</option>
+              <option value="perambalur">Perambalur District</option>
+              <option value="pudukkottai">Pudukkottai District</option>
+              <option value="ramanathapuram">Ramanathapuram District</option>
+              <option value="ranipet">Ranipet District</option>
+              <option value="salem">Salem District</option>
+              <option value="sivaganga">Sivaganga District</option>
+              <option value="tenkasi">Tenkasi District</option>
+              <option value="thanjavur">Thanjavur District</option>
+              <option value="theni">Theni District</option>
+              <option value="thoothukudi">Thoothukudi (Tuticorin)</option>
               <option value="trichy">Tiruchirappalli (Trichy)</option>
-              <option value="salem">Salem Corporation</option>
+              <option value="tirunelveli">Tirunelveli District</option>
+              <option value="tirupathur">Tirupathur District</option>
+              <option value="tiruppur">Tiruppur District</option>
+              <option value="tiruvallur">Tiruvallur District</option>
+              <option value="tiruvannamalai">Tiruvannamalai District</option>
+              <option value="tiruvarur">Tiruvarur District</option>
+              <option value="vellore">Vellore District</option>
+              <option value="viluppuram">Viluppuram District</option>
+              <option value="virudhunagar">Virudhunagar District</option>
             </select>
-            <button type="button" onclick="window.refreshMobilityData()" class="btn btn-secondary" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px;">
+            <button type="button" onclick="window.refreshMobilityData()" class="btn btn-secondary" style="padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; font-family: 'Inter', sans-serif;">
               <i class="fa-solid fa-arrows-rotate"></i> Sync Live Data
             </button>
           </div>

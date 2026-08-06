@@ -6,11 +6,44 @@
   'use strict';
 
   const CITY_COORDS = {
-    coimbatore: { lat: 11.0168, lon: 76.9558, name: 'Coimbatore City' },
+    ariyalur: { lat: 11.1401, lon: 79.0786, name: 'Ariyalur District' },
+    chengalpattu: { lat: 12.6841, lon: 79.9836, name: 'Chengalpattu District' },
     chennai: { lat: 13.0827, lon: 80.2707, name: 'Chennai Metropolitan' },
-    madurai: { lat: 9.9252, lon: 78.1198, name: 'Madurai Smart City' },
-    trichy: { lat: 10.7905, lon: 78.7047, name: 'Tiruchirappalli' },
-    salem: { lat: 11.6643, lon: 78.1460, name: 'Salem Corporation' }
+    coimbatore: { lat: 11.0168, lon: 76.9558, name: 'Coimbatore District' },
+    cuddalore: { lat: 11.7480, lon: 79.7714, name: 'Cuddalore District' },
+    dharmapuri: { lat: 12.1357, lon: 78.1560, name: 'Dharmapuri District' },
+    dindigul: { lat: 10.3673, lon: 77.9803, name: 'Dindigul District' },
+    erode: { lat: 11.3410, lon: 77.7172, name: 'Erode District' },
+    kallakurichi: { lat: 11.7384, lon: 78.9639, name: 'Kallakurichi District' },
+    kanchipuram: { lat: 12.8342, lon: 79.7036, name: 'Kanchipuram District' },
+    kanyakumari: { lat: 8.0883, lon: 77.5385, name: 'Kanyakumari (Nagercoil)' },
+    karur: { lat: 10.9601, lon: 78.0766, name: 'Karur District' },
+    krishnagiri: { lat: 12.5186, lon: 78.2137, name: 'Krishnagiri District' },
+    madurai: { lat: 9.9252, lon: 78.1198, name: 'Madurai District' },
+    mayiladuthurai: { lat: 11.1085, lon: 79.6568, name: 'Mayiladuthurai District' },
+    nagapattinam: { lat: 10.7656, lon: 79.8424, name: 'Nagapattinam District' },
+    namakkal: { lat: 11.2189, lon: 78.1674, name: 'Namakkal District' },
+    nilgiris: { lat: 11.4102, lon: 76.6950, name: 'Nilgiris (Ooty)' },
+    perambalur: { lat: 11.2342, lon: 78.8820, name: 'Perambalur District' },
+    pudukkottai: { lat: 10.3833, lon: 78.8000, name: 'Pudukkottai District' },
+    ramanathapuram: { lat: 9.3639, lon: 78.8395, name: 'Ramanathapuram District' },
+    ranipet: { lat: 12.9272, lon: 79.3331, name: 'Ranipet District' },
+    salem: { lat: 11.6643, lon: 78.1460, name: 'Salem District' },
+    sivaganga: { lat: 9.8433, lon: 78.4809, name: 'Sivaganga District' },
+    tenkasi: { lat: 8.9593, lon: 77.3150, name: 'Tenkasi District' },
+    thanjavur: { lat: 10.7870, lon: 79.1378, name: 'Thanjavur District' },
+    theni: { lat: 10.0104, lon: 77.4768, name: 'Theni District' },
+    thoothukudi: { lat: 8.7642, lon: 78.1348, name: 'Thoothukudi (Tuticorin)' },
+    trichy: { lat: 10.7905, lon: 78.7047, name: 'Tiruchirappalli (Trichy)' },
+    tirunelveli: { lat: 8.7139, lon: 77.7567, name: 'Tirunelveli District' },
+    tirupathur: { lat: 12.4925, lon: 78.5678, name: 'Tirupathur District' },
+    tiruppur: { lat: 11.1085, lon: 77.3411, name: 'Tiruppur District' },
+    tiruvallur: { lat: 13.1439, lon: 79.9056, name: 'Tiruvallur District' },
+    tiruvannamalai: { lat: 12.2253, lon: 79.0747, name: 'Tiruvannamalai District' },
+    tiruvarur: { lat: 10.7726, lon: 79.6365, name: 'Tiruvarur District' },
+    vellore: { lat: 12.9165, lon: 79.1325, name: 'Vellore District' },
+    viluppuram: { lat: 11.9401, lon: 79.4861, name: 'Viluppuram District' },
+    virudhunagar: { lat: 9.5872, lon: 77.9570, name: 'Virudhunagar District' }
   };
 
   let activeCity = 'coimbatore';
