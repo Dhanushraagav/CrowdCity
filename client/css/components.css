@@ -4476,18 +4476,44 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 
   /* Mobile Stepper Header & Card Refinements */
   .wizard-stepper-header {
-    padding: 0.75rem 1rem !important;
+    padding: 0.75rem 0.85rem !important;
     margin-bottom: 1rem !important;
   }
 
+  .wizard-stepper-header > div {
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    gap: 0.25rem !important;
+  }
+
+  .wizard-stepper-header .step-indicator-item {
+    gap: 0.35rem !important;
+    flex-shrink: 0 !important;
+  }
+
   .wizard-stepper-header .step-indicator-item > div:last-child {
-    display: none !important;
+    display: block !important;
+  }
+
+  .wizard-stepper-header .step-indicator-item > div:last-child > div:first-child {
+    font-size: 0.58rem !important;
+  }
+
+  .wizard-stepper-header .step-indicator-item > div:last-child > div:last-child {
+    font-size: 0.7rem !important;
+    white-space: nowrap !important;
   }
 
   .wizard-stepper-header .step-circle {
-    width: 30px !important;
-    height: 30px !important;
-    font-size: 0.8rem !important;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.75rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .step-connector-line {
+    min-width: 8px !important;
+    margin: 0 0.2rem !important;
   }
 
   .report-form-card {
