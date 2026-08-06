@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, analyzeSmartCityAlerts, planSmartMobilityRoute } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, planSmartMobilityRoute } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
@@ -313,21 +313,7 @@ export const recommendationController = async (req, res) => {
   }
 };
 
-/**
- * POST /api/ai/smart-alerts
- * Dedicated endpoint for Real-Time Smart City Weather & Flood AI Risk Assessment.
- */
-export const smartAlertsController = async (req, res) => {
-  const { weatherData, waterloggingCount } = req.body;
 
-  try {
-    const data = await analyzeSmartCityAlerts(weatherData || {}, waterloggingCount || 0);
-    return res.status(200).json(data);
-  } catch (err) {
-    logger.error('smartAlertsController Error: %O', err);
-    return res.status(500).json({ error: 'Server error generating Smart City AI Risk Assessment' });
-  }
-};
 
 /**
  * POST /api/ai/route-planner
