@@ -1941,7 +1941,77 @@ function updateAuthUI() {
   if (typeof initResponsiveSidebar === 'function') {
     initResponsiveSidebar();
   }
+
+  // Trigger Document Wallet Promo Banner once per login session
+  if (user && role === 'citizen') {
+    setTimeout(injectDocumentWalletBanner, 600);
+  }
 }
+
+// Prominent Document Wallet Banner displayed on top right under user profile name once per session
+function injectDocumentWalletBanner() {
+  const path = window.location.pathname;
+  if (path.includes('my-documents.html')) return;
+  if (sessionStorage.getItem('cc_doc_banner_shown') === 'true') return;
+  if (document.getElementById('cc-doc-wallet-promo-banner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'cc-doc-wallet-promo-banner';
+  banner.style.position = 'fixed';
+  banner.style.top = '78px';
+  banner.style.right = '24px';
+  banner.style.width = '320px';
+  banner.style.maxWidth = 'calc(100vw - 32px)';
+  banner.style.backgroundColor = 'var(--bg-surface, #ffffff)';
+  banner.style.border = '1px solid var(--border-color, #cbd5e1)';
+  banner.style.borderLeft = '4px solid #0d9488';
+  banner.style.borderRadius = '14px';
+  banner.style.padding = '1rem 1.15rem';
+  banner.style.boxShadow = '0 16px 36px rgba(15, 23, 42, 0.16)';
+  banner.style.zIndex = '9990';
+  banner.style.animation = 'docBannerSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+  banner.style.fontFamily = 'var(--font-body, sans-serif)';
+  banner.style.boxSizing = 'border-box';
+
+  banner.innerHTML = `
+    <style>
+      @keyframes docBannerSlideIn {
+        0% { opacity: 0; transform: translateY(-12px) scale(0.95); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+    </style>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
+      <div style="display: flex; align-items: center; gap: 0.45rem;">
+        <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(13, 148, 136, 0.12); color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0;">
+          <i class="fa-solid fa-folder-closed"></i>
+        </div>
+        <strong style="font-size: 0.88rem; font-weight: 800; color: var(--text-main, #0f172a);">Secure Document Wallet</strong>
+      </div>
+      <button type="button" onclick="closeDocWalletBanner()" aria-label="Close" style="background: none; border: none; color: var(--text-muted, #94a3b8); font-size: 1.1rem; cursor: pointer; padding: 0 0.2rem; line-height: 1;">&times;</button>
+    </div>
+    <p style="margin: 0 0 0.85rem 0; font-size: 0.78rem; color: var(--text-muted, #64748b); line-height: 1.45;">
+      Store & protect your Ration Card, Aadhaar, & Certificates with private 4-digit Security MPIN.
+    </p>
+    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem;">
+      <a href="my-documents.html" onclick="closeDocWalletBanner()" class="btn btn-primary" style="padding: 0.4rem 0.85rem; font-size: 0.78rem; font-weight: 700; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+        Access Wallet <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem;"></i>
+      </a>
+    </div>
+  `;
+
+  document.body.appendChild(banner);
+  sessionStorage.setItem('cc_doc_banner_shown', 'true');
+}
+
+window.closeDocWalletBanner = function() {
+  const banner = document.getElementById('cc-doc-wallet-promo-banner');
+  if (banner) {
+    banner.style.transition = 'all 0.25s ease-out';
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateY(-10px)';
+    setTimeout(() => banner.remove(), 250);
+  }
+};
 
 // Toggle Dropdown Display
 function toggleUserDropdown() {
