@@ -342,16 +342,22 @@
 
     .pin-box.active {
       border-color: var(--primary, #0d9488);
-      background: rgba(13, 148, 136, 0.06);
-      box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15), 0 4px 12px rgba(13, 148, 136, 0.1);
-      transform: translateY(-2px);
+      background: rgba(13, 148, 136, 0.04);
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+      transform: translateY(-1px);
     }
 
     .pin-box.filled {
-      border-color: rgba(13, 148, 136, 0.5);
-      background: var(--bg-surface);
+      border-color: var(--primary, #0d9488);
+      background: rgba(13, 148, 136, 0.06);
       color: var(--primary);
-      animation: mpinDigitPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: mpinDigitPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), mpinTypeGlow 0.4s ease-out;
+      box-shadow: 0 0 10px rgba(13, 148, 136, 0.35);
+    }
+
+    @keyframes mpinTypeGlow {
+      0% { box-shadow: 0 0 22px rgba(13, 148, 136, 0.85), 0 0 0 4px rgba(13, 148, 136, 0.3); transform: scale(1.08); }
+      100% { box-shadow: 0 0 10px rgba(13, 148, 136, 0.35); transform: scale(1); }
     }
 
     .pin-box-group.shake-error {

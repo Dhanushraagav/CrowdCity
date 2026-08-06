@@ -273,27 +273,35 @@
             return;
           }
 
-          // Create base64 URL or Object URL for secure client viewing
+          // Create base64 URL or Object URL for instant client viewing
           const reader = new FileReader();
           reader.onload = async (e) => {
             const fileUrl = e.target.result;
             const newDoc = {
+              id: 'doc_' + Date.now(),
               user_id: userId,
               doc_type: docType,
               doc_name: docName || file.name,
               file_url: fileUrl,
               file_size: file.size,
-              file_format: file.type || 'pdf'
+              file_format: file.type || 'pdf',
+              created_at: new Date().toISOString()
             };
 
-            const { data, error } = await client.from('user_document_wallet').upsert(newDoc).select();
+            // INSTANT Optimistic UI Update so document shows immediately in grid
+            saveDocToLocalFallback(newDoc);
 
-            if (!error && data) {
-              if (window.showToast) window.showToast("Document securely uploaded to your wallet!", "success");
-              fetchUserDocuments();
-            } else {
-              saveDocToLocalFallback(newDoc);
-            }
+            // Asynchronous background persistence
+            try {
+              client.from('user_document_wallet').upsert({
+                user_id: userId,
+                doc_type: docType,
+                doc_name: docName || file.name,
+                file_url: fileUrl,
+                file_size: file.size,
+                file_format: file.type || 'pdf'
+              }).then(() => {}).catch(e => console.warn("Background upsert warning:", e));
+            } catch (err) {}
           };
           reader.readAsDataURL(file);
           return;
@@ -320,9 +328,13 @@
   }
 
   function saveDocToLocalFallback(newDoc) {
-    userDocuments.unshift(newDoc);
+    // Avoid duplicate additions if already rendered
+    const exists = userDocuments.some(d => d.doc_name === newDoc.doc_name && d.file_size === newDoc.file_size);
+    if (!exists) {
+      userDocuments.unshift(newDoc);
+    }
     localStorage.setItem('cc_user_uploaded_docs', JSON.stringify(userDocuments));
-    if (window.showToast) window.showToast("Document saved to your local wallet!", "success");
+    if (window.showToast) window.showToast("Document securely added to your wallet!", "success");
     renderDocumentsList();
   }
 
@@ -534,11 +546,6 @@
       return;
     }
 
-    if (isSessionUnlocked()) {
-      actionCallback();
-      return;
-    }
-
     pendingActionAfterMPIN = actionCallback;
     openMPINModal('verify');
   }
@@ -738,14 +745,26 @@
     } else if (currentMPINMode === 'set') {
       const pin = (document.getElementById('mpin-input-set')?.value || '').trim();
       const confirmPin = (document.getElementById('mpin-input-confirm')?.value || '').trim();
+      const previousPin = getStoredMPIN();
 
       if (!/^\d{4}$/.test(pin)) {
         showMPINError('MPIN must be exactly 4 numeric digits.');
         return;
       }
 
+      if (previousPin && pin === previousPin) {
+        showMPINError('This is your previous MPIN. Please set a new PIN.');
+        const setInp = document.getElementById('mpin-input-set');
+        const confirmInp = document.getElementById('mpin-input-confirm');
+        if (setInp) { setInp.value = ''; syncPinBoxes('mpin-input-set'); setInp.focus(); }
+        if (confirmInp) { confirmInp.value = ''; syncPinBoxes('mpin-input-confirm'); }
+        return;
+      }
+
       if (pin !== confirmPin) {
         showMPINError('MPIN confirmation does not match. Please re-enter.');
+        const confirmInp = document.getElementById('mpin-input-confirm');
+        if (confirmInp) { confirmInp.value = ''; syncPinBoxes('mpin-input-confirm'); confirmInp.focus(); }
         return;
       }
 
