@@ -172,41 +172,35 @@ function updateRadiusButtonsUI(activeRadius) {
 /**
  * Global Share Location Trigger
  */
-window.openShareLocationModal = function() {
-  const loc = window.EmergencyLocation.currentLocation || window.EmergencyLocation.fallbackCoords;
+window.openShareLocationModal = async function() {
+  if (window.EmergencyContacts && window.EmergencyContacts.showToast) {
+    window.EmergencyContacts.showToast('Fetching real-time GPS location...');
+  }
+  
+  const loc = await window.EmergencyLocation.getCurrentPosition();
   const shareUrl = window.EmergencyLocation.getShareableLocationUrl(loc.latitude, loc.longitude);
+  const shareText = `EMERGENCY GPS LOCATION: I need emergency assistance. My live location: ${shareUrl}`;
 
-  const existing = document.getElementById('location-share-modal');
-  if (existing) existing.remove();
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Emergency GPS Location - CrowdCity AI',
+        text: shareText,
+        url: shareUrl
+      });
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
 
-  const modal = document.createElement('div');
-  modal.id = 'location-share-modal';
-  modal.className = 'emergency-modal-backdrop';
-  modal.innerHTML = `
-    <div class="emergency-modal-content">
-      <div class="emergency-modal-header">
-        <h3 class="emergency-modal-title">Share Live Location</h3>
-        <button class="btn-modal-close" onclick="document.getElementById('location-share-modal').remove()">&times;</button>
-      </div>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-        Share your verified GPS position with emergency responders or family members.
-      </p>
-      
-      <div style="background: var(--bg-surface-gray); border: 1px solid var(--border-subtle); padding: 0.85rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.85rem; word-break: break-all; margin-bottom: 1.25rem;">
-        ${shareUrl}
-      </div>
-
-      <div style="display: flex; gap: 0.75rem;">
-        <button onclick="window.EmergencyLocation.copyToClipboard('${shareUrl}'); window.EmergencyContacts.showToast('Location link copied!');" class="btn-emergency-primary" style="flex: 1; justify-content: center;">
-          <i class="fa-regular fa-copy"></i> Copy Link
-        </button>
-        <button onclick="window.EmergencyLocation.shareLocationNative('Emergency GPS Location', 'My live location for emergency assistance:', '${shareUrl}')" class="btn-emergency-secondary" style="flex: 1; justify-content: center;">
-          <i class="fa-solid fa-share-nodes"></i> Share Native
-        </button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
+  // Native share fallback: Copy to clipboard with toast
+  window.EmergencyLocation.copyToClipboard(shareUrl);
+  if (window.EmergencyContacts && window.EmergencyContacts.showToast) {
+    window.EmergencyContacts.showToast('Live GPS Location link copied to clipboard!');
+  } else {
+    alert('Live GPS location link copied to clipboard:\n' + shareUrl);
+  }
 };
 
 window.recenterMap = function() {
