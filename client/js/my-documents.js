@@ -646,6 +646,11 @@
   async function openMPINModal(mode = 'verify') {
     currentMPINMode = mode;
     const backdrop = document.getElementById('mpin-modal-backdrop');
+    if (!backdrop) return;
+
+    // Display modal backdrop immediately (0ms)
+    backdrop.style.display = 'flex';
+
     const title = document.getElementById('mpin-modal-title');
     const desc = document.getElementById('mpin-modal-desc');
     const icon = document.getElementById('mpin-modal-icon');
@@ -655,8 +660,6 @@
     const otpContainer = document.getElementById('mpin-otp-container');
     const errorBox = document.getElementById('mpin-modal-error');
     const resetWrap = document.getElementById('mpin-reset-wrap');
-
-    if (!backdrop) return;
 
     if (errorBox) { errorBox.style.display = 'none'; errorBox.textContent = ''; }
     
@@ -694,13 +697,19 @@
       targetInput = document.getElementById('mpin-input-old');
 
     } else if (mode === 'otp') {
-      const userEmail = await getUserEmail();
       if (title) title.textContent = 'Email OTP Verification';
-      if (desc) desc.textContent = `We sent a 6-digit Security Verification OTP to your registered email address (${userEmail}).`;
+      if (desc) desc.textContent = 'We sent a 6-digit Security Verification OTP to your registered email address.';
       if (icon) icon.className = 'fa-solid fa-envelope-circle-check';
       if (otpContainer) otpContainer.style.display = 'flex';
       if (resetWrap) resetWrap.style.display = 'none';
       targetInput = document.getElementById('mpin-input-otp');
+
+      // Asynchronously update email address in description
+      getUserEmail().then(userEmail => {
+        if (desc && currentMPINMode === 'otp' && userEmail) {
+          desc.textContent = `We sent a 6-digit Security Verification OTP to your registered email address (${userEmail}).`;
+        }
+      }).catch(e => console.warn("Email fetch info warning:", e));
 
     } else { // 'verify'
       if (title) title.textContent = 'Enter Security MPIN';
@@ -711,8 +720,7 @@
       targetInput = document.getElementById('mpin-input-verify');
     }
 
-    backdrop.style.display = 'flex';
-    setTimeout(() => targetInput?.focus(), 150);
+    setTimeout(() => targetInput?.focus(), 50);
   }
 
   function closeMPINModal() {
