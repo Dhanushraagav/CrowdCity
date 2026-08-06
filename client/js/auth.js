@@ -1880,7 +1880,7 @@ function updateAuthUI() {
           <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
           
           <!-- Dropdown Menu -->
-          <div id="user-dropdown" class="hidden" style="position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); width: 180px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 1100;">
+          <div id="user-dropdown" class="hidden" style="position: absolute; top: calc(100% + 8px); right: 0; background: #ffffff !important; border: 1px solid var(--border-color, #cbd5e1) !important; border-radius: var(--radius-md, 12px); box-shadow: 0 12px 30px rgba(0,0,0,0.18) !important; width: 190px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 99999 !important;">
             <div style="font-size: 0.75rem; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
               ${roleDisplayHtml}
             </div>
