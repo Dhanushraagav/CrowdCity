@@ -157,6 +157,35 @@ export const sendVerificationOtpEmail = async (email, code) => {
 };
 
 /**
+ * Dedicated MPIN Security Verification OTP Template
+ */
+export const sendMpinOtpEmail = async (email, code) => {
+  const subject = '🔒 Security Verification OTP - Change MPIN';
+  
+  const contentHtml = `
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: -0.5px; line-height: 1.25;">
+      Security MPIN Verification
+    </h1>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #cbd5e1; text-align: center; line-height: 1.5;">
+      Use the following 6-digit one-time verification code to reset or update your Security MPIN in My Documents Wallet.
+    </p>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 4px; padding: 16px; margin: 24px 0; text-align: center;">
+      <span style="font-family: monospace; font-size: 32px; font-weight: 800; color: #0d9488; letter-spacing: 6px; line-height: 1;">
+        ${code}
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #9AA4B2; text-align: center; line-height: 1.5;">
+      This code is valid for 5 minutes. Do not share this OTP with anyone.
+    </p>
+  `;
+
+  const html = getEmailHtmlWrapper('MPIN Verification', contentHtml);
+  const text = `Security MPIN Verification\n\nUse the following 6-digit one-time verification code to reset or update your Security MPIN:\n\nCode: ${code}\n\nThis code is valid for 5 minutes.`;
+  
+  return sendResendEmail({ to: email, subject, html, text });
+};
+
+/**
  * 2. Login OTP Template
  */
 export const sendLoginOtpEmail = async (email, code) => {

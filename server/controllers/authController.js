@@ -1,6 +1,6 @@
 import { supabase, supabaseAdmin, getSupabaseClient } from '../config/supabase.js';
 import logger from '../config/logger.js';
-import { sendWelcomeEmail, sendVerificationOtpEmail, sendLoginOtpEmail, sendResetPasswordEmail } from '../services/emailService.js';
+import { sendWelcomeEmail, sendVerificationOtpEmail, sendLoginOtpEmail, sendResetPasswordEmail, sendMpinOtpEmail } from '../services/emailService.js';
 import { otpService } from '../services/otpService.js';
 
 // In-memory safeguard to ensure welcome email is triggered at most once per user session/server run
@@ -445,6 +445,8 @@ export const sendOtpCode = async (req, res) => {
   let success = false;
   if (type === 'login') {
     success = await sendLoginOtpEmail(emailLower, code);
+  } else if (type === 'mpin_change') {
+    success = await sendMpinOtpEmail(emailLower, code);
   } else {
     success = await sendVerificationOtpEmail(emailLower, code);
   }

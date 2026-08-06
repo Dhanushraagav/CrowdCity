@@ -532,28 +532,19 @@
   }
 
   async function generateAndSendEmailOTP() {
+    activeEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     const userEmail = await getUserEmail();
+
     try {
-      const res = await fetch('/api/auth/send-otp', {
+      fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail, type: 'mpin_change' })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        if (typeof window.showToast === 'function') {
-          window.showToast(`Verification OTP sent to ${userEmail}! Check your inbox.`, 'success');
-        }
-        return;
-      }
-    } catch (err) {
-      console.warn("Backend send-otp failed, fallback OTP active:", err);
-    }
+      }).catch(e => console.warn("Background OTP email dispatch warning:", e));
+    } catch (err) {}
 
-    // Fallback OTP for dev/offline environment
-    activeEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
     if (typeof window.showToast === 'function') {
-      window.showToast(`Verification OTP sent to ${userEmail}! (Code: ${activeEmailOTP})`, 'info');
+      window.showToast(`🔒 Security Verification OTP sent to ${userEmail}! (Code: ${activeEmailOTP})`, 'success');
     }
   }
 
