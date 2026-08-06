@@ -362,6 +362,123 @@ function updateFormModeUI() {
   }
 }
 
+// ----------------------------------------------------
+// MULTI-LINGUAL VOICE GRIEVANCE REPORTER (TAMIL & ENGLISH)
+// ----------------------------------------------------
+function initVoiceGrievanceReporter() {
+  const voiceBtn = document.getElementById('btn-voice-record');
+  const micIcon = document.getElementById('voice-mic-icon');
+  const statusText = document.getElementById('voice-status-text');
+  const waveContainer = document.getElementById('voice-wave-container');
+  const descTextarea = document.getElementById('report-description');
+
+  if (!voiceBtn || !descTextarea) return;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    if (statusText) {
+      statusText.innerHTML = '<span style="color: #f59e0b;"><i class="fa-solid fa-triangle-exclamation"></i> Speech recognition not supported on this browser. Please type description below.</span>';
+    }
+    voiceBtn.style.opacity = '0.5';
+    voiceBtn.style.cursor = 'not-allowed';
+    return;
+  }
+
+  let recognition = null;
+  let isRecording = false;
+
+  try {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'ta-IN'; // Tamil & English India voice model
+  } catch (err) {
+    console.warn("SpeechRecognition init error:", err);
+  }
+
+  voiceBtn.addEventListener('click', () => {
+    if (!recognition) return;
+
+    if (isRecording) {
+      recognition.stop();
+      return;
+    }
+
+    try {
+      // Toggle language auto-detection between Tamil and English on alternate taps
+      if (!recognition.lang || recognition.lang === 'en-IN') {
+        recognition.lang = 'ta-IN';
+      } else {
+        recognition.lang = 'en-IN';
+      }
+
+      recognition.start();
+      isRecording = true;
+
+      voiceBtn.style.backgroundColor = '#ef4444';
+      voiceBtn.style.transform = 'scale(1.08)';
+      micIcon.className = 'fa-solid fa-square';
+      if (waveContainer) waveContainer.style.display = 'flex';
+
+      if (statusText) {
+        statusText.innerHTML = `<span style="color: #0d9488; font-weight: 700;"><i class="fa-solid fa-circle-dot"></i> Listening in ${recognition.lang === 'ta-IN' ? 'Tamil / தமிழ்' : 'English'}... Speak naturally!</span>`;
+      }
+    } catch (err) {
+      console.error("SpeechRecognition start error:", err);
+      isRecording = false;
+    }
+  });
+
+  if (recognition) {
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        } else {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript.trim()) {
+        descTextarea.value = finalTranscript.trim();
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.warn("Speech recognition error:", event.error);
+      stopRecordingUI();
+      if (statusText) {
+        statusText.innerHTML = `<span style="color: #ef4444;"><i class="fa-solid fa-circle-exclamation"></i> Mic issue (${event.error}). Tap mic or type below.</span>`;
+      }
+    };
+
+    recognition.onend = () => {
+      stopRecordingUI();
+      const text = descTextarea.value.trim();
+      if (text.length >= 5) {
+        if (statusText) {
+          statusText.innerHTML = `<span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Transcribed! Groq AI auto-categorizing your issue...</span>`;
+        }
+        if (typeof handleAiAssist === 'function') {
+          handleAiAssist();
+        }
+      } else if (statusText) {
+        statusText.textContent = 'Tap mic & speak naturally in Tamil or English. Groq AI will transcribe & auto-fill fields!';
+      }
+    };
+  }
+
+  function stopRecordingUI() {
+    isRecording = false;
+    voiceBtn.style.backgroundColor = 'var(--primary, #0d9488)';
+    voiceBtn.style.transform = 'scale(1)';
+    micIcon.className = 'fa-solid fa-microphone';
+    if (waveContainer) waveContainer.style.display = 'none';
+  }
+}
+
 // Initialize Report Page
 function initReportPage() {
   if (typeof getCurrentUser === 'function' && !getCurrentUser()) {
@@ -383,6 +500,7 @@ function initReportPage() {
   setupCategorySelector();
   setupImageUpload();
   setupAiAssistant();
+  initVoiceGrievanceReporter();
   setupFormSubmit();
   setupGPSButton();
   setupSearchButton();
