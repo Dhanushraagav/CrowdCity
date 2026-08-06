@@ -2780,7 +2780,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   box-shadow: var(--shadow-sm);
 }
 
-/* Clean Simple KPI Stat Cards Grid */
+/* Desktop-Only Premium Animated KPI Cards */
 .stitch-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2788,23 +2788,63 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   margin-bottom: 1.75rem;
 }
 
-@media (max-width: 768px) {
-  .stitch-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-}
-
 .stitch-stat-card {
   background: #ffffff;
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 12px;
-  padding: 1.25rem 1.35rem;
+  border-radius: 14px;
+  padding: 1.35rem 1.4rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.65rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  gap: 0.75rem;
+  box-shadow: 0 4px 14px -2px rgba(15, 118, 110, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 1024px) {
+  .stitch-stat-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+    animation: desktopKpiEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    cursor: pointer;
+  }
+
+  .stitch-stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stitch-stat-card:nth-child(2) { animation-delay: 0.15s; }
+  .stitch-stat-card:nth-child(3) { animation-delay: 0.25s; }
+
+  @keyframes desktopKpiEntrance {
+    0% { opacity: 0; transform: translateY(18px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .stitch-stat-card:hover {
+    transform: translateY(-8px) scale(1.025);
+    border-color: var(--primary, #0d9488) !important;
+    box-shadow: 0 18px 38px -8px rgba(13, 148, 136, 0.25), 0 6px 14px rgba(0, 0, 0, 0.04) !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .stitch-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .stitch-stat-card {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .stitch-stat-card:hover {
+    transform: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    border-color: var(--border-color, #e2e8f0) !important;
+  }
 }
 
 .stitch-stat-label {
