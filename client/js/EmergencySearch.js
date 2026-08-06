@@ -102,9 +102,17 @@ window.EmergencySearch = {
    * Free Nominatim Geocoding API for city / area / pincode search
    */
   geocodeQuery: async function(query) {
-    if (!query || query.trim().length < 3) return null;
-    
-    const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Tamil Nadu')}&limit=1`;
+    if (!query || query.trim().length < 2) return null;
+    const cleanQuery = query.trim();
+
+    // If query is a 6-digit Indian Pincode (e.g., 637001 - Namakkal, 641004 - Coimbatore)
+    let searchUrl = '';
+    if (/^\d{6}$/.test(cleanQuery)) {
+      searchUrl = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${cleanQuery}&country=India&limit=1`;
+    } else {
+      searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery + ', Tamil Nadu, India')}&limit=1`;
+    }
+
     try {
       const res = await fetch(searchUrl, {
         headers: { 'User-Agent': 'CrowdCityAI-EmergencyPortal/3.0' }
