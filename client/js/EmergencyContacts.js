@@ -83,7 +83,7 @@ window.EmergencyContacts = {
             <a href="tel:${item.number}" class="btn-table-call">
               <i class="fa-solid fa-phone"></i> Call ${item.number}
             </a>
-            <button onclick="window.EmergencyContacts.saveToContacts('${item.service}', '${item.number}')" class="btn-table-call" style="background: #0f172a; color: #ffffff; border: none; font-weight: 700; font-size: 0.75rem; border-radius: 6px; padding: 0.35rem 0.65rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
+            <button onclick="window.EmergencyContacts.saveToContacts('${item.service}', '${item.number}')" class="btn-table-call btn-table-save" style="background: #0f172a; color: #ffffff; border: none; font-weight: 700; font-size: 0.75rem; border-radius: 6px; padding: 0.35rem 0.65rem; cursor: pointer; align-items: center; gap: 0.3rem;">
               <i class="fa-solid fa-address-book"></i> Save
             </button>
           </div>
