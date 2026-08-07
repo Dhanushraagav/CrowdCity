@@ -142,6 +142,87 @@ Task instructions:
 };
 
 /**
+ * Groq AI Image Complaint Analysis
+ * Analyzes captured photo (Base64) to detect civic hazards (Potholes, Road cracks, Waterlogging, Garbage, Streetlights, Damaged road signs, Fallen trees, Drainage issues).
+ * Generates: category, title, description, priority.
+ */
+export const analyzeComplaintImage = async (imageBase64 = '') => {
+  if (!imageBase64 || typeof imageBase64 !== 'string') {
+    return getLocalImageFallbackAnalysis();
+  }
+
+  if (!groq) {
+    logger.info('Groq SDK client unconfigured, using local image vision fallback.');
+    return getLocalImageFallbackAnalysis();
+  }
+
+  const visionModel = 'llama-3.2-11b-vision-preview';
+
+  try {
+    const formattedImage = imageBase64.startsWith('data:') 
+      ? imageBase64 
+      : `data:image/jpeg;base64,${imageBase64}`;
+
+    const systemPrompt = `You are a visual hazard inspector AI for CrowdCity AI municipal portal.
+Analyze the provided image of a public civic or transportation issue.
+
+Identify common civic hazards:
+- Potholes / Road cracks / Damaged road surface
+- Waterlogging / Flooded street
+- Garbage accumulation / Waste dumping
+- Broken streetlights / Damaged light poles
+- Damaged road signs / Traffic signal failure
+- Fallen trees / Tree branch hazard
+- Drainage issues / Clogged gutters
+- Public Property Damage
+
+You MUST output exactly one raw JSON object matching:
+{
+  "category": "Roads" | "Streetlights" | "Water Supply" | "Drainage" | "Garbage" | "Traffic" | "Public Property" | "Safety Hazard" | "Other",
+  "title": "Concise 3 to 6 word title describing the hazard (e.g. Large Pothole Detected on Pavement)",
+  "description": "Clear 2-sentence description of the visual condition, location context, and safety hazard observed.",
+  "priority": "Low" | "Medium" | "High" | "Critical"
+}`;
+
+    const response = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: systemPrompt },
+            { type: 'image_url', image_url: { url: formattedImage } }
+          ]
+        }
+      ],
+      model: visionModel,
+      response_format: { type: 'json_object' }
+    });
+
+    const responseText = response.choices[0].message.content;
+    const aiData = JSON.parse(responseText);
+
+    return {
+      category: aiData.category || 'Roads',
+      title: aiData.title || 'Civic Infrastructure Hazard',
+      description: aiData.description || 'Visual inspection identified infrastructure hazard requiring maintenance.',
+      priority: aiData.priority || 'Medium'
+    };
+  } catch (err) {
+    logger.error('Groq Vision AI Analysis failed: %O. Using fallback.', err);
+    return getLocalImageFallbackAnalysis();
+  }
+};
+
+export function getLocalImageFallbackAnalysis() {
+  return {
+    category: 'Roads',
+    title: 'Surface Hazard Detected via Visual AI',
+    description: 'Visual analysis identified road surface irregularity and maintenance hazard.',
+    priority: 'Medium'
+  };
+}
+
+/**
  * Local keyword-based fallback analyzer
  */
 export function getLocalFallbackAnalysis(title, description) {

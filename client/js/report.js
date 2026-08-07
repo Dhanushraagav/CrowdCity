@@ -496,6 +496,100 @@ function initVoiceGrievanceReporter() {
   }
 }
 
+/**
+ * AI Camera & Image Detection Controller
+ * Mobile/Tablet: triggers rear camera capture (capture="environment")
+ * Desktop: triggers image file upload
+ * Sends Base64 to Groq Vision AI and auto-fills category, description, and attaches photo.
+ */
+function initAiCameraDetection() {
+  const cameraBtn = document.getElementById('btn-ai-camera-trigger');
+  const uploadBtn = document.getElementById('btn-ai-upload-trigger');
+  const cameraInput = document.getElementById('ai-camera-file-input');
+  const uploadInput = document.getElementById('ai-upload-file-input');
+  const statusText = document.getElementById('ai-camera-status-text');
+  const reviewBanner = document.getElementById('ai-vision-review-banner');
+  const summaryText = document.getElementById('ai-vision-summary-text');
+  const priorityTag = document.getElementById('ai-vision-priority-tag');
+
+  if (cameraBtn && cameraInput) {
+    cameraBtn.addEventListener('click', () => cameraInput.click());
+    cameraInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0]));
+  }
+
+  if (uploadBtn && uploadInput) {
+    uploadBtn.addEventListener('click', () => uploadInput.click());
+    uploadInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0]));
+  }
+
+  async function handleAiImageFile(file) {
+    if (!file) return;
+
+    // Attach file to selectedFiles array so it submits with the complaint form
+    if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+      selectedFiles.push(file);
+      if (typeof renderFilePreviews === 'function') {
+        renderFilePreviews();
+      }
+    }
+
+    if (statusText) {
+      statusText.innerHTML = `<span style="color: #0284c7; font-weight: 700;"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing photo with AI...</span>`;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64Data = e.target.result;
+
+      if (window.API && typeof window.API.analyzeImageWithAi === 'function') {
+        try {
+          const { data, error } = await window.API.analyzeImageWithAi(base64Data);
+          
+          if (data && !error) {
+            // Auto-fill category
+            const categorySelect = document.getElementById('report-category');
+            if (categorySelect && data.category) {
+              const targetVal = data.category.toLowerCase().replace(/\s+/g, '_');
+              let matchOption = Array.from(categorySelect.options).find(o => o.value.toLowerCase() === targetVal || o.value.toLowerCase() === data.category.toLowerCase());
+              if (matchOption) {
+                categorySelect.value = matchOption.value;
+              }
+            }
+
+            // Auto-fill description
+            const descTextarea = document.getElementById('report-description');
+            if (descTextarea && data.description) {
+              descTextarea.value = `${data.title ? data.title + ': ' : ''}${data.description}`;
+            }
+
+            // Unhide review banner
+            if (reviewBanner && summaryText) {
+              reviewBanner.classList.remove('hidden');
+              summaryText.textContent = `Detected Hazard: ${data.title || 'Civic Infrastructure Hazard'}. Category: ${data.category || 'Roads'}. Description and category have been pre-filled below for your review.`;
+              if (priorityTag && data.priority) {
+                priorityTag.textContent = `${data.priority} Priority`;
+              }
+            }
+
+            if (statusText) {
+              statusText.innerHTML = `<span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> AI photo detection complete. Review details below.</span>`;
+            }
+            return;
+          }
+        } catch (err) {
+          console.warn("AI camera vision detection error:", err);
+        }
+      }
+
+      // Fallback
+      if (statusText) {
+        statusText.textContent = 'Photo attached. Please review complaint details below.';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
 // Initialize Report Page
 function initReportPage() {
   if (typeof getCurrentUser === 'function' && !getCurrentUser()) {
@@ -518,6 +612,7 @@ function initReportPage() {
   setupImageUpload();
   setupAiAssistant();
   initVoiceGrievanceReporter();
+  initAiCameraDetection();
   setupFormSubmit();
   setupGPSButton();
   setupSearchButton();

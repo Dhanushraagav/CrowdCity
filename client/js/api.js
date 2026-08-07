@@ -161,6 +161,14 @@ const API = {
     });
   },
 
+  // Analyze image with AI (Camera / Upload Vision Detection)
+  analyzeImageWithAi: async (imageBase64) => {
+    return request('/ai/analyze-image', {
+      method: 'POST',
+      body: JSON.stringify({ image: imageBase64 })
+    });
+  },
+
   // 12. Get all users (Admin Only)
   getAllUsers: async () => {
     return request('/auth/users', {

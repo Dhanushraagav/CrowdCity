@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, analyzeComplaintImage } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
@@ -330,6 +330,26 @@ export const translateVoiceController = async (req, res) => {
   } catch (err) {
     logger.error('translateVoiceController Error: %O', err);
     return res.status(500).json({ error: 'Server error translating voice text' });
+  }
+};
+
+/**
+ * POST /api/ai/analyze-image
+ * Dedicated endpoint for Groq Vision AI camera image complaint detection.
+ */
+export const analyzeImageController = async (req, res) => {
+  const { image } = req.body;
+
+  if (!image) {
+    return res.status(400).json({ error: 'Image data is required for visual AI detection.' });
+  }
+
+  try {
+    const data = await analyzeComplaintImage(image);
+    return res.status(200).json(data);
+  } catch (err) {
+    logger.error('analyzeImageController Error: %O', err);
+    return res.status(500).json({ error: 'Server error analyzing image with AI' });
   }
 };
 
