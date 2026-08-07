@@ -2421,11 +2421,19 @@ body:not(.admin-portal-body) .app-sidebar {
   content: none !important;
 }
 
+/* Emergency Help Center Link: Hidden on Desktop (width >= 768px), Visible only in Mobile View */
 .emergency-sidebar-link {
+  display: none !important;
   background-color: #fef2f2 !important;
   color: #b91c1c !important;
   border: 1px solid rgba(220, 38, 38, 0.2) !important;
   font-weight: 700 !important;
+}
+
+@media (max-width: 767px) {
+  .emergency-sidebar-link {
+    display: flex !important;
+  }
 }
 
 .emergency-sidebar-link i {
