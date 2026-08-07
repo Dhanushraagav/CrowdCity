@@ -497,10 +497,48 @@ function initVoiceGrievanceReporter() {
 }
 
 /**
+ * Resize captured camera photo for lightweight AI Vision payload (~150KB)
+ */
+function resizeImageForAi(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1000;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
  * AI Camera & Image Detection Controller
  * Mobile/Tablet: triggers rear camera capture (capture="environment")
  * Desktop: triggers image file upload
- * Sends Base64 to Groq Vision AI and auto-fills category, description, and attaches photo.
+ * Sends compressed Base64 to Groq Vision AI, validates fake images, auto-fills category & description, and attaches photo.
  */
 function initAiCameraDetection() {
   const cameraBtn = document.getElementById('btn-ai-camera-trigger');
@@ -525,73 +563,69 @@ function initAiCameraDetection() {
       window.showToast("Analyzing photo with AI...", "info");
     }
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Data = e.target.result;
+    try {
+      const resizedBase64 = await resizeImageForAi(file);
 
-      if (window.API && typeof window.API.analyzeImageWithAi === 'function') {
-        try {
-          const { data, error } = await window.API.analyzeImageWithAi(base64Data);
-          
-          if (data && data.isValidCivicIssue === false) {
-            // Toast popup warning for fake/unrelated image
-            if (typeof window.showToast === 'function') {
-              window.showToast("Oops! Please capture a valid civic or road issue image.", "error");
-            } else {
-              alert("Oops! Please capture a valid civic or road issue image.");
+      if (resizedBase64 && window.API && typeof window.API.analyzeImageWithAi === 'function') {
+        const { data, error } = await window.API.analyzeImageWithAi(resizedBase64);
+        
+        if (data && data.isValidCivicIssue === false) {
+          // Toast popup warning for fake/unrelated image (e.g. shirt, selfie)
+          if (typeof window.showToast === 'function') {
+            window.showToast("Oops! Please capture a valid civic or road issue image.", "error");
+          } else {
+            alert("Oops! Please capture a valid civic or road issue image.");
+          }
+          if (inputElem) inputElem.value = '';
+          return;
+        }
+
+        if (data && !error) {
+          // Attach photo evidence to selectedFiles array and trigger preview render
+          if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+            selectedFiles.push(file);
+            if (typeof window.renderFilePreviews === 'function') {
+              window.renderFilePreviews();
             }
-            if (inputElem) inputElem.value = '';
-            return;
           }
 
-          if (data && !error) {
-            // Attach photo evidence to selectedFiles array and trigger preview render
-            if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-              selectedFiles.push(file);
-              if (typeof renderFilePreviews === 'function') {
-                renderFilePreviews();
-              }
+          // Auto-fill category
+          const categorySelect = document.getElementById('report-category');
+          if (categorySelect && data.category) {
+            const targetVal = data.category.toLowerCase().replace(/\s+/g, '_');
+            let matchOption = Array.from(categorySelect.options).find(o => o.value.toLowerCase() === targetVal || o.value.toLowerCase() === data.category.toLowerCase());
+            if (matchOption) {
+              categorySelect.value = matchOption.value;
             }
-
-            // Auto-fill category
-            const categorySelect = document.getElementById('report-category');
-            if (categorySelect && data.category) {
-              const targetVal = data.category.toLowerCase().replace(/\s+/g, '_');
-              let matchOption = Array.from(categorySelect.options).find(o => o.value.toLowerCase() === targetVal || o.value.toLowerCase() === data.category.toLowerCase());
-              if (matchOption) {
-                categorySelect.value = matchOption.value;
-              }
-            }
-
-            // Auto-fill description
-            const descTextarea = document.getElementById('report-description');
-            if (descTextarea && data.description) {
-              descTextarea.value = `${data.title ? data.title + ': ' : ''}${data.description}`;
-            }
-
-            // Success toast popup
-            if (typeof window.showToast === 'function') {
-              window.showToast(`AI Detected: ${data.title || 'Civic Issue'}. Photo attached!`, "success");
-            }
-            return;
           }
-        } catch (err) {
-          console.warn("AI camera vision detection error:", err);
-        }
-      }
 
-      // Fallback
-      if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-        selectedFiles.push(file);
-        if (typeof renderFilePreviews === 'function') {
-          renderFilePreviews();
+          // Auto-fill description
+          const descTextarea = document.getElementById('report-description');
+          if (descTextarea && data.description) {
+            descTextarea.value = `${data.title ? data.title + ': ' : ''}${data.description}`;
+          }
+
+          // Success toast popup
+          if (typeof window.showToast === 'function') {
+            window.showToast(`AI Detected: ${data.title || 'Civic Issue'}. Photo attached!`, "success");
+          }
+          return;
         }
       }
-      if (typeof window.showToast === 'function') {
-        window.showToast("Photo attached. Please review complaint details below.", "success");
+    } catch (err) {
+      console.warn("AI camera vision detection error:", err);
+    }
+
+    // Fallback if AI offline
+    if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+      selectedFiles.push(file);
+      if (typeof window.renderFilePreviews === 'function') {
+        window.renderFilePreviews();
       }
-    };
-    reader.readAsDataURL(file);
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast("Photo attached. Please review complaint details below.", "success");
+    }
   }
 }
 
@@ -1208,6 +1242,9 @@ function setupImageUpload() {
       reader.readAsDataURL(file);
     });
   }
+
+  // Expose preview renderer globally for AI Camera Photo sync
+  window.renderFilePreviews = renderPreviews;
 }
 
 // AI Assistant Action triggers real Groq AI backend analysis API
