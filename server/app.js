@@ -119,15 +119,6 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'CrowdCity Server is running smoothly' });
 });
 
-// System maintenance status endpoint
-app.get('/api/maintenance-status', (req, res) => {
-  res.status(200).json({ 
-    maintenance: true,
-    message: 'System emergency maintenance active across all portal services.',
-    estimatedDurationMinutes: 45
-  });
-});
-
 // Serve public config credentials to client
 app.get('/api/config', (req, res) => {
   res.status(200).json({
