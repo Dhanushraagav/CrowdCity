@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Emergency Maintenance | CrowdCity Citizen Portal</title>
+  <meta name="description" content="CrowdCity is currently undergoing scheduled emergency maintenance for platform upgrade and system optimization." />
+  <link rel="icon" type="image/png" href="/assets/icons/icon-96x96.png" />
+  
+  <!-- FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+
+  <style>
+    :root {
+      --maint-bg: #0f172a;
+      --maint-card-bg: rgba(30, 41, 59, 0.85);
+      --maint-border: rgba(51, 65, 85, 0.7);
+      --maint-text: #f8fafc;
+      --maint-muted: #94a3b8;
+      --maint-primary: #0d9488;
+      --maint-amber: #f59e0b;
+    }
+
+    [data-theme="light"] {
+      --maint-bg: #f8fafc;
+      --maint-card-bg: #ffffff;
+      --maint-border: #e2e8f0;
+      --maint-text: #0f172a;
+      --maint-muted: #64748b;
+      --maint-primary: #0d9488;
+      --maint-amber: #d97706;
+    }
+
+    body {
+      background-color: var(--maint-bg);
+      color: var(--maint-text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      box-sizing: border-box;
+    }
+
+    .maintenance-wrapper {
+      max-width: 680px;
+      width: 100%;
+      background: var(--maint-card-bg);
+      border: 1px solid var(--maint-border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .maintenance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--maint-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--maint-amber);
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+      animation: pulse-ring 1.8s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+      }
+    }
+
+    .maintenance-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 800;
+      margin: 0 0 0.75rem 0;
+      line-height: 1.25;
+      color: var(--maint-text);
+    }
+
+    .maintenance-subtitle {
+      font-size: 0.95rem;
+      color: var(--maint-muted);
+      line-height: 1.6;
+      margin: 0 0 2rem 0;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .service-card {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--maint-border);
+      border-radius: 12px;
+      padding: 0.85rem;
+    }
+
+    [data-theme="light"] .service-card {
+      background: #f1f5f9;
+    }
+
+    .service-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--maint-muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+
+    .service-status {
+      font-size: 0.82rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .status-maintenance {
+      color: var(--maint-amber);
+    }
+
+    .status-online {
+      color: #10b981;
+    }
+
+    .countdown-box {
+      background: rgba(13, 148, 136, 0.08);
+      border: 1px dashed var(--maint-primary);
+      border-radius: 14px;
+      padding: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .countdown-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--maint-primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 0.4rem;
+    }
+
+    .countdown-digits {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--maint-text);
+      letter-spacing: 1px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-maint {
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-maint-primary {
+      background: var(--maint-primary);
+      color: #ffffff;
+    }
+
+    .btn-maint-primary:hover {
+      background: #0f766e;
+    }
+
+    .btn-maint-outline {
+      background: transparent;
+      color: var(--maint-text);
+      border: 1px solid var(--maint-border);
+    }
+
+    .btn-maint-outline:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    @media (max-width: 480px) {
+      .maintenance-wrapper {
+        padding: 1.75rem 1.25rem;
+      }
+      .maintenance-title {
+        font-size: 1.45rem;
+      }
+      .services-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="maintenance-wrapper">
+    <!-- Header Badge -->
+    <div class="maintenance-badge">
+      <span class="pulse-dot"></span>
+      <span>Emergency Maintenance Active</span>
+    </div>
+
+    <!-- Title & Description -->
+    <h1 class="maintenance-title">System Under Maintenance</h1>
+    <p class="maintenance-subtitle">
+      The CrowdCity AI platform is undergoing scheduled emergency infrastructure maintenance to enhance service performance, security, and AI triage reliability.
+    </p>
+
+    <!-- Service Component Status -->
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-name">Portal Core</div>
+        <div class="service-status status-maintenance">
+          <i class="fa-solid fa-screwdriver-wrench"></i> Upgrading
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-name">AI Triage Engine</div>
+        <div class="service-status status-maintenance">
+          <i class="fa-solid fa-microchip"></i> Maintenance
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-name">Database Cluster</div>
+        <div class="service-status status-maintenance">
+          <i class="fa-solid fa-database"></i> Optimizing
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-name">Emergency Helpline</div>
+        <div class="service-status status-online">
+          <i class="fa-solid fa-circle-check"></i> 100 Operational
+        </div>
+      </div>
+    </div>
+
+    <!-- Countdown Timer -->
+    <div class="countdown-box">
+      <div class="countdown-label">Estimated Service Restoration</div>
+      <div class="countdown-digits" id="countdown-timer">00h 45m 00s</div>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="action-buttons">
+      <a href="/emergency-services.html" class="btn-maint btn-maint-primary">
+        <i class="fa-solid fa-phone-flip"></i> Emergency Contacts (100)
+      </a>
+      <button type="button" onclick="checkSystemStatus()" class="btn-maint btn-maint-outline">
+        <i class="fa-solid fa-arrows-rotate"></i> Check Status Now
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Live Countdown Timer
+    let targetTime = new Date().getTime() + (45 * 60 * 1000);
+
+    function updateTimer() {
+      const now = new Date().getTime();
+      const distance = targetTime - now;
+
+      if (distance <= 0) {
+        document.getElementById('countdown-timer').textContent = "Restoration In Progress...";
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      const hStr = hours < 10 ? '0' + hours : hours;
+      const mStr = minutes < 10 ? '0' + minutes : minutes;
+      const sStr = seconds < 10 ? '0' + seconds : seconds;
+
+      document.getElementById('countdown-timer').textContent = `${hStr}h ${mStr}m ${sStr}s`;
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    // Check system status
+    async function checkSystemStatus() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          window.location.href = '/index.html?bypass=1';
+        } else {
+          alert("Emergency maintenance is still active. Please try again shortly.");
+        }
+      } catch (err) {
+        alert("Emergency maintenance is still active. Please try again shortly.");
+      }
+    }
+  </script>
+</body>
+</html>
