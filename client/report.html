@@ -579,40 +579,25 @@
             </div>
 
             <!-- AI CAMERA & IMAGE DETECTION CARD -->
-            <div id="ai-camera-detection-card" style="background: var(--bg-app, #f8fafc); border: 1.5px solid var(--border-color, #e2e8f0); border-left: 4px solid #0284c7; border-radius: 14px; padding: 0.85rem 1rem; margin-bottom: 0.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                  <!-- Hidden File Inputs -->
-                  <input type="file" id="ai-camera-file-input" accept="image/*" capture="environment" style="display: none;">
-                  <input type="file" id="ai-upload-file-input" accept="image/*" style="display: none;">
+            <div id="ai-camera-detection-card" style="background: var(--bg-app, #f8fafc); border: 1.5px solid var(--border-color, #e2e8f0); border-left: 4px solid #0284c7; border-radius: 14px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 0.75rem;">
+                
+                <!-- Hidden File Inputs -->
+                <input type="file" id="ai-camera-file-input" accept="image/*" capture="environment" style="display: none;">
+                <input type="file" id="ai-upload-file-input" accept="image/*" style="display: none;">
 
-                  <!-- Mobile AI Camera Button -->
-                  <button type="button" id="btn-ai-camera-trigger" class="mobile-only" aria-label="Take Photo with AI Camera" style="height: 36px; padding: 0 0.75rem; border-radius: 8px; background: #0284c7; color: #ffffff; border: none; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
-                    <i class="fa-solid fa-camera"></i> <span>AI Camera Report</span>
-                  </button>
+                <!-- Mobile AI Camera Button -->
+                <button type="button" id="btn-ai-camera-trigger" class="mobile-only" aria-label="Take Photo with AI Camera" style="height: 36px; padding: 0 0.8rem; border-radius: 8px; background: #0284c7; color: #ffffff; border: none; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
+                  <i class="fa-solid fa-camera"></i> <span>AI Camera Report</span>
+                </button>
 
-                  <!-- Desktop AI Upload Button -->
-                  <button type="button" id="btn-ai-upload-trigger" class="desktop-only" aria-label="Upload Image for AI Analysis" style="height: 36px; padding: 0 0.75rem; border-radius: 8px; background: #0284c7; color: #ffffff; border: none; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Image for AI Analysis</span>
-                  </button>
+                <!-- Desktop AI Upload Button -->
+                <button type="button" id="btn-ai-upload-trigger" class="desktop-only" aria-label="Upload Image for AI Analysis" style="height: 36px; padding: 0 0.8rem; border-radius: 8px; background: #0284c7; color: #ffffff; border: none; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Image for AI Analysis</span>
+                </button>
 
-                  <div>
-                    <h4 style="font-size: 0.88rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading);">AI Visual Detection</h4>
-                    <p id="ai-camera-status-text" style="font-size: 0.75rem; color: var(--text-muted); margin: 0.15rem 0 0 0; font-weight: 600;">
-                      Capture or upload photo to auto-detect hazard details.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- AI Visual Detection Review Banner -->
-              <div id="ai-vision-review-banner" class="hidden" style="margin-top: 0.75rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.78rem; color: #0369a1;">
-                <div style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; margin-bottom: 0.25rem;">
-                  <span>AI Detection Summary</span>
-                  <span id="ai-vision-priority-tag" style="background: #0284c7; color: #ffffff; padding: 0.1rem 0.45rem; border-radius: 4px; font-size: 0.65rem; text-transform: uppercase;">High Priority</span>
-                </div>
-                <div id="ai-vision-summary-text" style="color: #0c4a6e; line-height: 1.4;">
-                  AI detected hazard. Review and modify auto-filled fields below before submitting.
+                <div style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  Auto-detects civic hazard details
                 </div>
               </div>
             </div>

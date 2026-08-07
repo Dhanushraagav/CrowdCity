@@ -507,34 +507,22 @@ function initAiCameraDetection() {
   const uploadBtn = document.getElementById('btn-ai-upload-trigger');
   const cameraInput = document.getElementById('ai-camera-file-input');
   const uploadInput = document.getElementById('ai-upload-file-input');
-  const statusText = document.getElementById('ai-camera-status-text');
-  const reviewBanner = document.getElementById('ai-vision-review-banner');
-  const summaryText = document.getElementById('ai-vision-summary-text');
-  const priorityTag = document.getElementById('ai-vision-priority-tag');
 
   if (cameraBtn && cameraInput) {
     cameraBtn.addEventListener('click', () => cameraInput.click());
-    cameraInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0]));
+    cameraInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0], cameraInput));
   }
 
   if (uploadBtn && uploadInput) {
     uploadBtn.addEventListener('click', () => uploadInput.click());
-    uploadInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0]));
+    uploadInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0], uploadInput));
   }
 
-  async function handleAiImageFile(file) {
+  async function handleAiImageFile(file, inputElem) {
     if (!file) return;
 
-    // Attach file to selectedFiles array so it submits with the complaint form
-    if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-      selectedFiles.push(file);
-      if (typeof renderFilePreviews === 'function') {
-        renderFilePreviews();
-      }
-    }
-
-    if (statusText) {
-      statusText.innerHTML = `<span style="color: #0284c7; font-weight: 700;"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing photo with AI...</span>`;
+    if (typeof window.showToast === 'function') {
+      window.showToast("Analyzing photo with AI...", "info");
     }
 
     const reader = new FileReader();
@@ -545,7 +533,26 @@ function initAiCameraDetection() {
         try {
           const { data, error } = await window.API.analyzeImageWithAi(base64Data);
           
+          if (data && data.isValidCivicIssue === false) {
+            // Toast popup warning for fake/unrelated image
+            if (typeof window.showToast === 'function') {
+              window.showToast("Oops! Please capture a valid civic or road issue image.", "error");
+            } else {
+              alert("Oops! Please capture a valid civic or road issue image.");
+            }
+            if (inputElem) inputElem.value = '';
+            return;
+          }
+
           if (data && !error) {
+            // Attach photo evidence to selectedFiles array and trigger preview render
+            if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+              selectedFiles.push(file);
+              if (typeof renderFilePreviews === 'function') {
+                renderFilePreviews();
+              }
+            }
+
             // Auto-fill category
             const categorySelect = document.getElementById('report-category');
             if (categorySelect && data.category) {
@@ -562,17 +569,9 @@ function initAiCameraDetection() {
               descTextarea.value = `${data.title ? data.title + ': ' : ''}${data.description}`;
             }
 
-            // Unhide review banner
-            if (reviewBanner && summaryText) {
-              reviewBanner.classList.remove('hidden');
-              summaryText.textContent = `Detected Hazard: ${data.title || 'Civic Infrastructure Hazard'}. Category: ${data.category || 'Roads'}. Description and category have been pre-filled below for your review.`;
-              if (priorityTag && data.priority) {
-                priorityTag.textContent = `${data.priority} Priority`;
-              }
-            }
-
-            if (statusText) {
-              statusText.innerHTML = `<span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> AI photo detection complete. Review details below.</span>`;
+            // Success toast popup
+            if (typeof window.showToast === 'function') {
+              window.showToast(`AI Detected: ${data.title || 'Civic Issue'}. Photo attached!`, "success");
             }
             return;
           }
@@ -582,8 +581,14 @@ function initAiCameraDetection() {
       }
 
       // Fallback
-      if (statusText) {
-        statusText.textContent = 'Photo attached. Please review complaint details below.';
+      if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+        selectedFiles.push(file);
+        if (typeof renderFilePreviews === 'function') {
+          renderFilePreviews();
+        }
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast("Photo attached. Please review complaint details below.", "success");
       }
     };
     reader.readAsDataURL(file);

@@ -163,24 +163,30 @@ export const analyzeComplaintImage = async (imageBase64 = '') => {
       ? imageBase64 
       : `data:image/jpeg;base64,${imageBase64}`;
 
-    const systemPrompt = `You are a visual hazard inspector AI for CrowdCity AI municipal portal.
-Analyze the provided image of a public civic or transportation issue.
+    const systemPrompt = `You are a strict visual hazard inspector AI for CrowdCity AI municipal portal.
+Analyze the provided image to check if it depicts a real public civic or transportation infrastructure issue.
 
-Identify common civic hazards:
-- Potholes / Road cracks / Damaged road surface
-- Waterlogging / Flooded street
-- Garbage accumulation / Waste dumping
-- Broken streetlights / Damaged light poles
-- Damaged road signs / Traffic signal failure
-- Fallen trees / Tree branch hazard
-- Drainage issues / Clogged gutters
-- Public Property Damage
+Valid public civic issues include ONLY:
+- Potholes / Road cracks / Damaged pavements / Sidewalk hazards
+- Waterlogging / Street flooding / Water pipe leaks
+- Overflowing garbage / Trash dumping / Illegal waste
+- Broken streetlights / Damaged light poles / Dark streets
+- Damaged road signs / Traffic signal failures
+- Fallen trees / Tree branches blocking roads or wires
+- Drainage blockages / Clogged gutters
+- Public Property Damage / Bus shelter damage
+
+Unrelated / Invalid / Fake images include:
+- Clothing, shirts, pants, shoes, indoor household items
+- Selfies, human faces, pets, animals, documents, paper
+- Blank, blurry, dark, or indoor private room scenes
 
 You MUST output exactly one raw JSON object matching:
 {
+  "isValidCivicIssue": true | false,
   "category": "Roads" | "Streetlights" | "Water Supply" | "Drainage" | "Garbage" | "Traffic" | "Public Property" | "Safety Hazard" | "Other",
-  "title": "Concise 3 to 6 word title describing the hazard (e.g. Large Pothole Detected on Pavement)",
-  "description": "Clear 2-sentence description of the visual condition, location context, and safety hazard observed.",
+  "title": "Concise 3 to 6 word title describing the hazard if valid",
+  "description": "Clear 2-sentence description of the visual condition if valid",
   "priority": "Low" | "Medium" | "High" | "Critical"
 }`;
 
@@ -201,7 +207,15 @@ You MUST output exactly one raw JSON object matching:
     const responseText = response.choices[0].message.content;
     const aiData = JSON.parse(responseText);
 
+    if (aiData.isValidCivicIssue === false) {
+      return {
+        isValidCivicIssue: false,
+        error: 'Oops! Please capture a valid civic or road issue image.'
+      };
+    }
+
     return {
+      isValidCivicIssue: true,
       category: aiData.category || 'Roads',
       title: aiData.title || 'Civic Infrastructure Hazard',
       description: aiData.description || 'Visual inspection identified infrastructure hazard requiring maintenance.',
@@ -215,6 +229,7 @@ You MUST output exactly one raw JSON object matching:
 
 export function getLocalImageFallbackAnalysis() {
   return {
+    isValidCivicIssue: true,
     category: 'Roads',
     title: 'Surface Hazard Detected via Visual AI',
     description: 'Visual analysis identified road surface irregularity and maintenance hazard.',
