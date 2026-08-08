@@ -460,18 +460,18 @@
 
     .photo-glowing-ring {
       position: absolute;
-      inset: -10px;
+      inset: -2px;
       border-radius: 50%;
-      background: conic-gradient(from 0deg, rgba(13, 148, 136, 0.45), rgba(56, 189, 248, 0.5), transparent 65%, rgba(13, 148, 136, 0.45));
-      filter: blur(8px);
-      opacity: 0.5;
+      background: conic-gradient(from 0deg, rgba(13, 148, 136, 0.3), rgba(56, 189, 248, 0.3), transparent 65%, rgba(13, 148, 136, 0.3));
+      filter: blur(3px);
+      opacity: 0.3;
       animation: rotateHalo 14s linear infinite;
       will-change: transform;
       pointer-events: none;
     }
 
     .story-block.active .photo-glowing-ring {
-      opacity: 0.85;
+      opacity: 0.5;
     }
 
     .online-pulse-dot {
@@ -493,33 +493,33 @@
       justify-content: center;
     }
 
-    /* REDUCED BORDER THICKNESS (Sleek 2.5px Thin Ring) */
+    /* ULTRA THIN REFINED BORDER (Paper-thin 1px Ring) */
     .profile-photo-circle {
       position: relative;
       width: 220px;
       height: 220px;
       border-radius: 50%;
-      padding: 2.5px;
-      border: 2px solid var(--abt-teal);
-      background: linear-gradient(135deg, var(--abt-teal) 0%, var(--abt-accent) 100%);
-      box-shadow: 0 10px 30px rgba(13, 148, 136, 0.25);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+      padding: 1px;
+      border: 1px solid var(--abt-teal);
+      background: var(--abt-teal);
+      box-shadow: 0 4px 15px rgba(13, 148, 136, 0.15);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
       cursor: pointer;
       overflow: hidden;
       will-change: transform;
     }
 
     .story-block.active .profile-photo-circle {
-      box-shadow: 0 0 25px var(--abt-teal-glow);
-      transform: scale(1.02);
+      box-shadow: 0 0 12px var(--abt-teal-glow);
+      transform: scale(1.015);
     }
 
     /* Interactive Mouse Hover Photo Zoom & Edge Glow Effect */
     .profile-photo-circle:hover,
     .story-block.active .profile-photo-circle:hover {
-      transform: scale(1.06) !important;
+      transform: scale(1.04) !important;
       border-color: #38bdf8 !important;
-      box-shadow: 0 0 25px var(--abt-teal), 0 0 45px rgba(13, 148, 136, 0.4) !important;
+      box-shadow: 0 0 15px var(--abt-teal), 0 0 25px rgba(13, 148, 136, 0.25) !important;
     }
 
     .profile-photo-circle img {
