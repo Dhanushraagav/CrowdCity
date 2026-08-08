@@ -1,5 +1,5 @@
 // CrowdCity AI v2.0 - My Documents Wallet JavaScript
-// Manages document uploads, drag-and-drop, preview modal, deletion, and Supabase integration.
+// Manages document uploads, drag-and-drop, preview modal, deletion, IndexedDB binary storage, and Supabase integration.
 
 (function() {
   'use strict';
@@ -22,6 +22,72 @@
     { code: 'driving_licence', name: 'Driving Licence' },
     { code: 'other', name: 'Other Document' }
   ];
+
+  // High-performance IndexedDB engine for multi-megabyte document binary storage (PDFs, PNGs, JPGs)
+  const IndexedDocDB = {
+    dbName: 'CrowdCityDocWalletDB',
+    storeName: 'documents',
+
+    open: function() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(this.dbName, 1);
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(this.storeName)) {
+            db.createObjectStore(this.storeName, { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+      });
+    },
+
+    saveFile: async function(id, blob, metadata) {
+      try {
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(this.storeName, 'readwrite');
+          const store = tx.objectStore(this.storeName);
+          store.put({ id: id, blob: blob, metadata: metadata, updated_at: Date.now() });
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = (e) => reject(e.target.error);
+        });
+      } catch (e) {
+        console.warn("IndexedDB save warning:", e);
+        return false;
+      }
+    },
+
+    getFile: async function(id) {
+      try {
+        const db = await this.open();
+        return new Promise((resolve) => {
+          const tx = db.transaction(this.storeName, 'readonly');
+          const store = tx.objectStore(this.storeName);
+          const req = store.get(id);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return null;
+      }
+    },
+
+    deleteFile: async function(id) {
+      try {
+        const db = await this.open();
+        return new Promise((resolve) => {
+          const tx = db.transaction(this.storeName, 'readwrite');
+          const store = tx.objectStore(this.storeName);
+          store.delete(id);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        });
+      } catch (e) {
+        return false;
+      }
+    }
+  };
 
   async function fetchUserDocuments() {
     const container = document.getElementById('documents-grid-container');
@@ -55,26 +121,27 @@
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 
-          if (!error && data) {
+          if (!error && data && data.length > 0) {
             userDocuments = data;
-            // Store locally for cross-referencing in scheme details page
-            localStorage.setItem('cc_user_uploaded_docs', JSON.stringify(userDocuments));
+            saveLocalDocsIndex(userDocuments);
             renderDocumentsList();
             return;
           }
         }
       }
     } catch (err) {
-      console.warn("Supabase document fetch error, using local fallback:", err);
+      console.warn("Supabase document fetch error, using local index fallback:", err);
     }
 
-    // LocalStorage Fallback if database table is pending
+    // Local Storage Index Fallback if database table is pending
     try {
       const local = localStorage.getItem('cc_user_uploaded_docs');
       if (local) {
         userDocuments = JSON.parse(local);
-        renderDocumentsList();
-        return;
+        if (userDocuments.length > 0) {
+          renderDocumentsList();
+          return;
+        }
       }
     } catch (e) {}
 
@@ -109,7 +176,7 @@
       filtered = filtered.filter(d => d.doc_type === currentFilterType);
     }
     if (currentSearchQuery) {
-      filtered = filtered.filter(d => d.doc_name.toLowerCase().includes(currentSearchQuery) || d.doc_type.toLowerCase().includes(currentSearchQuery));
+      filtered = filtered.filter(d => (d.doc_name || '').toLowerCase().includes(currentSearchQuery) || (d.doc_type || '').toLowerCase().includes(currentSearchQuery));
     }
 
     if (countElem) countElem.textContent = filtered.length;
@@ -124,7 +191,7 @@
     container.innerHTML = filtered.map(doc => {
       const typeInfo = documentTypesList.find(t => t.code === doc.doc_type) || { name: doc.doc_name };
       const formattedDate = new Date(doc.created_at || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-      const sizeStr = doc.file_size ? `${(doc.file_size / 1024).toFixed(0)} KB` : 'PDF Document';
+      const sizeStr = doc.file_size ? `${(doc.file_size / 1024).toFixed(0)} KB` : 'Document File';
 
       return `
         <div class="doc-wallet-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 6px 20px rgba(0,0,0,0.03);">
@@ -175,7 +242,7 @@
         const docId = btn.dataset.id;
         const target = userDocuments.find(d => d.id === docId);
         if (target) {
-          handleProtectedAction(() => openDocumentView(target.file_url, target.doc_name));
+          handleProtectedAction(() => openDocumentView(target));
         }
       });
     });
@@ -186,7 +253,7 @@
         const docId = btn.dataset.id;
         const target = userDocuments.find(d => d.id === docId);
         if (target) {
-          handleProtectedAction(() => downloadDocumentFile(target.file_url, target.doc_name));
+          handleProtectedAction(() => downloadDocumentFile(target));
         }
       });
     });
@@ -202,38 +269,56 @@
     });
   }
 
-  function openDocumentView(fileUrl, docName) {
-    if (!fileUrl) return;
+  async function openDocumentView(doc) {
+    if (!doc) return;
 
-    if (fileUrl.startsWith('data:')) {
-      try {
-        const parts = fileUrl.split(',');
-        const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
-        const bstr = atob(parts[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-          u8arr[n] = bstr.charCodeAt(n);
-        }
-        const blob = new Blob([u8arr], { type: mime });
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, '_blank');
-        return;
-      } catch (e) {
-        console.error("Error creating Blob URL for view:", e);
-      }
+    // 1. Try retrieving binary Blob from IndexedDB
+    const stored = await IndexedDocDB.getFile(doc.id);
+    if (stored && stored.blob) {
+      const blobUrl = URL.createObjectURL(stored.blob);
+      window.open(blobUrl, '_blank');
+      return;
     }
 
-    window.open(fileUrl, '_blank');
+    // 2. Fallback to file_url
+    if (doc.file_url) {
+      if (doc.file_url.startsWith('data:')) {
+        try {
+          const parts = doc.file_url.split(',');
+          const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
+          const bstr = atob(parts[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const blob = new Blob([u8arr], { type: mime });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, '_blank');
+          return;
+        } catch (e) {
+          console.error("Error creating Blob URL for view:", e);
+        }
+      }
+      window.open(doc.file_url, '_blank');
+      return;
+    }
+
+    if (window.showToast) window.showToast("Document preview unavailable.", "warning");
   }
 
-  function downloadDocumentFile(fileUrl, docName) {
-    if (!fileUrl) return;
+  async function downloadDocumentFile(doc) {
+    if (!doc) return;
 
     const a = document.createElement('a');
-    if (fileUrl.startsWith('data:')) {
+
+    // 1. Try retrieving binary Blob from IndexedDB
+    const stored = await IndexedDocDB.getFile(doc.id);
+    if (stored && stored.blob) {
+      a.href = URL.createObjectURL(stored.blob);
+    } else if (doc.file_url && doc.file_url.startsWith('data:')) {
       try {
-        const parts = fileUrl.split(',');
+        const parts = doc.file_url.split(',');
         const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
         const bstr = atob(parts[1]);
         let n = bstr.length;
@@ -244,13 +329,16 @@
         const blob = new Blob([u8arr], { type: mime });
         a.href = URL.createObjectURL(blob);
       } catch (e) {
-        a.href = fileUrl;
+        a.href = doc.file_url;
       }
+    } else if (doc.file_url) {
+      a.href = doc.file_url;
     } else {
-      a.href = fileUrl;
+      if (window.showToast) window.showToast("File data unavailable for download.", "error");
+      return;
     }
 
-    a.download = docName || 'document';
+    a.download = doc.doc_name || 'document';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -259,89 +347,84 @@
   async function uploadDocument(file, docType, docName) {
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      if (window.showToast) window.showToast("File size exceeds 5MB limit. Please upload a smaller PDF or image file.", "error");
+    if (file.size > 10 * 1024 * 1024) {
+      if (window.showToast) window.showToast("File size exceeds 10MB limit.", "error");
       return;
     }
 
+    const docId = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    const cleanDocName = docName || file.name || 'Uploaded Document';
+
+    // Store binary file Blob in IndexedDB (zero size quota errors)
+    await IndexedDocDB.saveFile(docId, file, { docType, docName: cleanDocName });
+
+    const newDoc = {
+      id: docId,
+      doc_type: docType,
+      doc_name: cleanDocName,
+      file_size: file.size,
+      file_format: file.type || 'application/pdf',
+      created_at: new Date().toISOString()
+    };
+
+    // Instant Optimistic UI Update: Render document in grid immediately
+    const exists = userDocuments.some(d => d.id === docId);
+    if (!exists) {
+      userDocuments.unshift(newDoc);
+    }
+    saveLocalDocsIndex(userDocuments);
+
+    // Reset file input so user can select files again immediately
+    const fileInput = document.getElementById('doc-file-input');
+    if (fileInput) fileInput.value = '';
+
+    if (window.showToast) window.showToast(`Document "${cleanDocName}" securely added to your wallet!`, "success");
+    renderDocumentsList();
+
+    // Asynchronous background Cloud Sync for document metadata
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
           const session = await client.auth.getSession();
           const userId = session?.data?.session?.user?.id;
-
-          if (!userId) {
-            if (window.showToast) window.showToast("Please sign in to save documents to your account.", "info");
-            return;
-          }
-
-          // Create base64 URL or Object URL for instant client viewing
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-            const fileUrl = e.target.result;
-            const newDoc = {
-              id: 'doc_' + Date.now(),
+          if (userId) {
+            client.from('user_document_wallet').upsert({
+              id: docId,
               user_id: userId,
               doc_type: docType,
-              doc_name: docName || file.name,
-              file_url: fileUrl,
+              doc_name: cleanDocName,
               file_size: file.size,
-              file_format: file.type || 'pdf',
-              created_at: new Date().toISOString()
-            };
-
-            // INSTANT Optimistic UI Update so document shows immediately in grid
-            saveDocToLocalFallback(newDoc);
-
-            // Asynchronous background persistence
-            try {
-              client.from('user_document_wallet').upsert({
-                user_id: userId,
-                doc_type: docType,
-                doc_name: docName || file.name,
-                file_url: fileUrl,
-                file_size: file.size,
-                file_format: file.type || 'pdf'
-              }).then(() => {}).catch(e => console.warn("Background upsert warning:", e));
-            } catch (err) {}
-          };
-          reader.readAsDataURL(file);
-          return;
+              file_format: file.type || 'pdf'
+            }).then(() => {}).catch(e => console.warn("Background cloud upsert warning:", e));
+          }
         }
       }
-    } catch (e) {
-      console.warn("Database upload fallback:", e);
-    }
-
-    // Fallback if offline
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const newDoc = {
-        id: 'local_' + Date.now(),
-        doc_type: docType,
-        doc_name: docName || file.name,
-        file_url: e.target.result,
-        file_size: file.size,
-        created_at: new Date().toISOString()
-      };
-      saveDocToLocalFallback(newDoc);
-    };
-    reader.readAsDataURL(file);
+    } catch (e) {}
   }
 
-  function saveDocToLocalFallback(newDoc) {
-    // Avoid duplicate additions if already rendered
-    const exists = userDocuments.some(d => d.doc_name === newDoc.doc_name && d.file_size === newDoc.file_size);
-    if (!exists) {
-      userDocuments.unshift(newDoc);
+  function saveLocalDocsIndex(docsArray) {
+    try {
+      const cleanIndex = docsArray.map(d => ({
+        id: d.id,
+        user_id: d.user_id,
+        doc_type: d.doc_type,
+        doc_name: d.doc_name,
+        file_size: d.file_size,
+        file_format: d.file_format,
+        created_at: d.created_at
+      }));
+      localStorage.setItem('cc_user_uploaded_docs', JSON.stringify(cleanIndex));
+    } catch (e) {
+      console.warn("Local storage index error:", e);
     }
-    localStorage.setItem('cc_user_uploaded_docs', JSON.stringify(userDocuments));
-    if (window.showToast) window.showToast("Document securely added to your wallet!", "success");
-    renderDocumentsList();
   }
 
   async function deleteDocument(docId) {
+    // Delete binary file from IndexedDB
+    await IndexedDocDB.deleteFile(docId);
+
+    // Delete from Supabase if online
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
@@ -352,7 +435,7 @@
     } catch (e) {}
 
     userDocuments = userDocuments.filter(d => d.id !== docId);
-    localStorage.setItem('cc_user_uploaded_docs', JSON.stringify(userDocuments));
+    saveLocalDocsIndex(userDocuments);
     if (window.showToast) window.showToast("Document deleted from wallet.", "info");
     renderDocumentsList();
   }
@@ -623,6 +706,12 @@
   }
 
   function handleProtectedAction(actionCallback) {
+    // If MPIN was already unlocked in this session, execute action immediately
+    if (isSessionUnlocked()) {
+      if (typeof actionCallback === 'function') actionCallback();
+      return;
+    }
+
     const storedMPIN = getStoredMPIN();
 
     if (!storedMPIN) {
