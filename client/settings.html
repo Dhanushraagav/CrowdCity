@@ -253,10 +253,10 @@
             <i class="fa-solid fa-chevron-right settings-arrow"></i>
           </div>
 
-          <div class="settings-item clickable" onclick="openAboutModal()">
+          <div class="settings-item clickable" onclick="window.location.href='about.html'">
             <div class="settings-item-info">
-              <span class="settings-item-title" data-i18n="about_crowdcity">About CrowdCity</span>
-              <span class="settings-item-desc">Learn about the AI civic initiative</span>
+              <span class="settings-item-title" data-i18n="about_crowdcity">About CrowdCity AI</span>
+              <span class="settings-item-desc">Meet the engineering, leadership, and founder team</span>
             </div>
             <i class="fa-solid fa-chevron-right settings-arrow"></i>
           </div>
@@ -598,8 +598,7 @@
         if (card) card.classList.remove('open');
       };
       window.openAboutModal = function() {
-        const modal = document.getElementById('about-modal');
-        if (modal) modal.classList.remove('hidden');
+        window.location.href = 'about.html';
       };
       window.closeAboutModal = function() {
         const modal = document.getElementById('about-modal');
