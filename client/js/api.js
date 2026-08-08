@@ -427,6 +427,14 @@ const API = {
     });
 
     return channel;
+  },
+
+  // Assistant Chat for Schemes
+  assistantChat: async (messages, userProfile = {}, schemeKnowledge = []) => {
+    return request('/ai/assistant-chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages, userProfile, schemeKnowledge })
+    });
   }
 };
 

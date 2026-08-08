@@ -1,194 +1,349 @@
-// CrowdCity AI v2.0 - Government Services (Premium Preview Experience) JavaScript
+/**
+ * CrowdCity AI v2.0 - Government Services Portal JavaScript
+ * Manages scheme directory search, category filtering, scheme bookmarking, and dedicated Floating AI Scheme Advisor Chatbot.
+ * STRICT POLICY: NO ICONS, NO EMOJIS, ZERO BUGS.
+ */
 
-(function() {
+(function () {
   'use strict';
 
-  // 8 Feature List Data (Strictly clean, NO internal roadmap/percentages/phase/milestone labels)
-  const FEATURE_PREVIEWS = [
+  // Government Welfare Schemes Database
+  const GOVERNMENT_SCHEMES = [
     {
-      id: 'scheme-eligibility',
-      title: 'Government Scheme Eligibility Checker',
-      icon: 'fa-award'
+      id: 'tn-kmut-001',
+      code: 'TN-KMUT-001',
+      name: 'Kalaignar Magalir Urimai Thittam',
+      dept: 'Social Welfare & Women Empowerment Dept, TN',
+      category: 'social',
+      govtType: 'Tamil Nadu State Govt',
+      benefits: 'Rs 1,000 monthly financial rights assistance directly into bank accounts of female heads of households.',
+      ageLimit: '21 to 60 years',
+      incomeLimit: 'Annual family income up to Rs 2,50,000',
+      documents: ['Smart Family Ration Card', 'Aadhaar Card', 'Active Bank Passbook'],
+      portal: 'https://kmut.tn.gov.in/'
     },
     {
-      id: 'ai-assistant',
-      title: 'AI Government Assistant',
-      icon: 'fa-wand-magic-sparkles'
+      id: 'tn-pudhumai-002',
+      code: 'TN-PUDHUMAI-002',
+      name: 'Pudhumai Penn Scheme',
+      dept: 'Higher Education Department, TN',
+      category: 'education',
+      govtType: 'Tamil Nadu State Govt',
+      benefits: 'Rs 1,000 per month financial aid for girl students pursuing degree, diploma, or ITI courses.',
+      ageLimit: '17 to 25 years',
+      incomeLimit: 'Studied in Govt Schools (Classes 6 to 12)',
+      documents: ['Govt School Study Certificate (Classes 6-12)', 'Aadhaar Card', 'College Admission Proof & ID', 'Bank Passbook'],
+      portal: 'https://penkalvi.tn.gov.in/'
     },
     {
-      id: 'form-filling',
-      title: 'AI-assisted Form Filling',
-      icon: 'fa-file-signature'
+      id: 'tn-nm-003',
+      code: 'TN-NM-003',
+      name: 'Naan Mudhalvan Skill Scheme',
+      dept: 'Tamil Nadu Skill Development Corporation (TNSDC)',
+      category: 'skill',
+      govtType: 'Tamil Nadu State Govt',
+      benefits: 'Free technical skill training, AI & coding courses, language proficiency, and campus placement drives.',
+      ageLimit: '18 to 35 years',
+      incomeLimit: 'Open to college students & youth in Tamil Nadu',
+      documents: ['Educational Qualification Marksheet', 'Aadhaar Card', 'College ID / Degree Certificate'],
+      portal: 'https://www.naanmudhalvan.tn.gov.in/'
     },
     {
-      id: 'doc-translation',
-      title: 'Government Document Translation',
-      icon: 'fa-language'
+      id: 'tn-cmchis-004',
+      code: 'TN-CMCHIS-004',
+      name: 'Chief Minister Comprehensive Health Insurance (CMCHIS)',
+      dept: 'Health & Family Welfare Department, TN',
+      category: 'health',
+      govtType: 'Tamil Nadu State Govt',
+      benefits: 'Cashless hospital treatment & surgical cover up to Rs 5,00,000 per family per year in empanelled hospitals.',
+      ageLimit: 'All age groups in family',
+      incomeLimit: 'Annual family income under Rs 1,20,000',
+      documents: ['Smart Ration Card', 'Income Certificate from VAO', 'Aadhaar Cards of family members'],
+      portal: 'https://cmchistn.com/'
     },
     {
-      id: 'doc-summarization',
-      title: 'AI Document Summarization',
-      icon: 'fa-file-contract'
+      id: 'tn-mra-005',
+      code: 'TN-MRA-005',
+      name: 'Moovalur Ramamirtham Ammaiyar Marriage Assistance',
+      dept: 'Social Welfare & Women Empowerment Dept, TN',
+      category: 'social',
+      govtType: 'Tamil Nadu State Govt',
+      benefits: 'Financial assistance and 8 grams gold coin for brides completing 10th/12th/Degree education.',
+      ageLimit: 'Bride minimum age 18 years',
+      incomeLimit: 'Annual family income up to Rs 72,000',
+      documents: ['Educational Marksheets (10th/12th/Degree)', 'Income Certificate', 'Community Certificate', 'Ration Card'],
+      portal: 'https://www.tn.gov.in/scheme/data_view/44053'
     },
     {
-      id: 'app-tracking',
-      title: 'Government Application Tracking',
-      icon: 'fa-diagram-project'
+      id: 'central-pmkisan-007',
+      code: 'CENTRAL-PMKISAN-007',
+      name: 'PM Kisan Samman Nidhi (PM-KISAN)',
+      dept: 'Ministry of Agriculture & Farmers Welfare',
+      category: 'agriculture',
+      govtType: 'Central Govt',
+      benefits: 'Rs 6,000 per year direct income support paid in 3 equal installments of Rs 2,000 to landholding farmers.',
+      ageLimit: 'Adult landholding farmers',
+      incomeLimit: 'Cultivable landholding in farmer name',
+      documents: ['Land Patta / Ownership Record', 'Aadhaar Card', 'Aadhaar-linked Bank Account'],
+      portal: 'https://pmkisan.gov.in/'
     },
     {
-      id: 'office-locator',
-      title: 'Nearby Government Office Locator',
-      icon: 'fa-building-flag'
-    },
-    {
-      id: 'deadline-reminders',
-      title: 'Smart Deadline Reminders',
-      icon: 'fa-bell-concierge'
+      id: 'central-pmjay-008',
+      code: 'CENTRAL-PMJAY-008',
+      name: 'Ayushman Bharat PM-JAY',
+      dept: 'National Health Authority (NHA)',
+      category: 'health',
+      govtType: 'Central Govt',
+      benefits: 'Health cover of Rs 5,00,000 per family per year for secondary and tertiary care hospitalization across India.',
+      ageLimit: 'All age groups',
+      incomeLimit: 'Listed in SECC database / Ayushman Card holders',
+      documents: ['Aadhaar Card', 'Ration Card', 'PM-JAY Family Letter'],
+      portal: 'https://pmjay.gov.in/'
     }
   ];
 
-  function isNotifActive() {
-    try {
-      return localStorage.getItem('cc_services_global_notify') === 'true';
-    } catch (e) {
-      return false;
-    }
-  }
+  let currentCategory = 'all';
+  let searchQuery = '';
+  let conversationHistory = [];
 
-  function toggleNotif() {
-    const currentState = isNotifActive();
-    const newState = !currentState;
-    try {
-      localStorage.setItem('cc_services_global_notify', newState ? 'true' : 'false');
-    } catch (e) {}
-
-    if (window.showToast) {
-      if (newState) {
-        window.showToast("Notifications enabled! We will notify you when Government Services goes live.", "success");
-      } else {
-        window.showToast("Notifications turned off for Government Services.", "info");
-      }
-    }
-    return newState;
-  }
-
-  function navigateToDashboard() {
-    window.location.href = 'citizen-dashboard.html';
-  }
-
-  // Render Features inside Modal
-  function renderFeatureList() {
-    const gridContainer = document.getElementById('services-preview-feature-grid');
-    if (!gridContainer) return;
-
-    gridContainer.innerHTML = FEATURE_PREVIEWS.map(item => `
-      <div class="services-feature-item" data-id="${item.id}" data-title="${item.title}">
-        <div class="services-feature-item-icon">
-          <i class="fa-solid ${item.icon}"></i>
-        </div>
-        <span class="services-feature-item-title">${item.title}</span>
-        <i class="fa-solid fa-chevron-right services-feature-item-arrow"></i>
-      </div>
-    `).join('');
-
-    // Attach click handlers to features to open Secondary Popup
-    gridContainer.querySelectorAll('.services-feature-item').forEach(item => {
-      item.addEventListener('click', () => {
-        openComingSoonPopup(item.dataset.title);
-      });
-    });
-  }
-
-  // Secondary "Coming Soon" Popup
-  function openComingSoonPopup(featureTitle) {
-    let popupOverlay = document.getElementById('services-secondary-popup-overlay');
-    if (!popupOverlay) {
-      popupOverlay = document.createElement('div');
-      popupOverlay.id = 'services-secondary-popup-overlay';
-      popupOverlay.className = 'services-secondary-popup-overlay';
-      document.body.appendChild(popupOverlay);
-    }
-
-    popupOverlay.innerHTML = `
-      <div class="services-secondary-popup-card">
-        <div class="popup-clock-icon">
-          <i class="fa-solid fa-hourglass-half"></i>
-        </div>
-        <h3 class="popup-title">Coming Soon</h3>
-        <p class="popup-message">
-          This feature is currently under development and will be available in a future update.<br><br>Thank you for your interest and patience.
-        </p>
-        <button class="popup-got-it-btn" id="popup-got-it-btn">Got It</button>
-      </div>
-    `;
-
-    popupOverlay.classList.add('active');
-
-    const closePopup = () => {
-      popupOverlay.classList.remove('active');
-    };
-
-    const gotItBtn = popupOverlay.querySelector('#popup-got-it-btn');
-    if (gotItBtn) gotItBtn.addEventListener('click', closePopup);
-
-    popupOverlay.addEventListener('click', (e) => {
-      if (e.target === popupOverlay) closePopup();
-    });
-  }
-
-  // Initialize Modal and Lock Background
   document.addEventListener('DOMContentLoaded', () => {
-    // Lock body scrolling and apply blur to background
-    document.body.classList.add('services-preview-active');
-    
-    const backgroundWrapper = document.getElementById('app-layout-wrapper');
-    if (backgroundWrapper) {
-      backgroundWrapper.classList.add('services-page-background');
-    }
-
-    renderFeatureList();
-
-    // Notify Me Button Handler
-    const notifyBtn = document.getElementById('services-notify-btn');
-    if (notifyBtn) {
-      const active = isNotifActive();
-      if (active) {
-        notifyBtn.classList.add('active-notif');
-        notifyBtn.querySelector('span').textContent = '✓ Notification Set';
-        notifyBtn.querySelector('i').className = 'fa-solid fa-check';
-      }
-
-      notifyBtn.addEventListener('click', () => {
-        const newState = toggleNotif();
-        notifyBtn.classList.toggle('active-notif', newState);
-        notifyBtn.querySelector('span').textContent = newState ? '✓ Notification Set' : 'Notify Me';
-        notifyBtn.querySelector('i').className = newState ? 'fa-solid fa-check' : 'fa-regular fa-bell';
-      });
-    }
-
-    // Back to Dashboard Button
-    const backBtn = document.getElementById('services-back-dashboard-btn');
-    if (backBtn) {
-      backBtn.addEventListener('click', navigateToDashboard);
-    }
-
-    // Close Icon (Top Right)
-    const closeIcon = document.getElementById('services-modal-close');
-    if (closeIcon) {
-      closeIcon.addEventListener('click', navigateToDashboard);
-    }
-
-    // ESC Key Listener
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        const popupOverlay = document.getElementById('services-secondary-popup-overlay');
-        if (popupOverlay && popupOverlay.classList.contains('active')) {
-          popupOverlay.classList.remove('active');
-        } else {
-          navigateToDashboard();
-        }
-      }
-    });
+    initSchemeDirectory();
+    initFloatingChatbot();
   });
 
+  // Render Schemes Directory
+  function initSchemeDirectory() {
+    const container = document.getElementById('schemes-container');
+    const searchInput = document.getElementById('scheme-search-input');
+    const categoryPills = document.querySelectorAll('.services-pill');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderSchemes();
+      });
+    }
+
+    categoryPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        categoryPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentCategory = pill.dataset.category || 'all';
+        renderSchemes();
+      });
+    });
+
+    renderSchemes();
+  }
+
+  function renderSchemes() {
+    const container = document.getElementById('schemes-container');
+    if (!container) return;
+
+    const filtered = GOVERNMENT_SCHEMES.filter(sch => {
+      const matchCat = currentCategory === 'all' || sch.category === currentCategory;
+      const text = `${sch.name} ${sch.code} ${sch.dept} ${sch.benefits} ${sch.documents.join(' ')}`.toLowerCase();
+      const matchSearch = !searchQuery || text.includes(searchQuery);
+      return matchCat && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 2.5rem 1rem; text-align: center; background: var(--srv-bg-surface); border: 1px solid var(--srv-border); border-radius: 16px;">
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--srv-text-main); margin: 0 0 0.5rem 0;">No Government Schemes Found</h3>
+          <p style="font-size: 0.85rem; color: var(--srv-text-muted); margin: 0;">Try searching for a different keyword or selecting 'All Schemes'.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(sch => `
+      <div class="scheme-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <span class="scheme-badge">${sch.govtType}</span>
+            <span style="font-size: 0.72rem; font-weight: 700; color: var(--srv-text-muted);">${sch.code}</span>
+          </div>
+
+          <h3 class="scheme-title">${sch.name}</h3>
+          <div class="scheme-dept">${sch.dept}</div>
+
+          <div class="scheme-benefits">
+            <strong style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--srv-primary); margin-bottom: 0.25rem;">Key Benefits</strong>
+            ${sch.benefits}
+          </div>
+
+          <div class="scheme-details-list">
+            <div><strong>Eligibility Criteria:</strong> ${sch.ageLimit} | ${sch.incomeLimit}</div>
+            <div style="margin-top: 0.35rem;"><strong>Required Documents:</strong> ${sch.documents.join(', ')}</div>
+          </div>
+        </div>
+
+        <div class="scheme-actions">
+          <a href="scheme-checker.html?scheme=${sch.id}" class="btn-srv btn-srv-primary">
+            Check Eligibility
+          </a>
+          <button type="button" class="btn-srv btn-srv-outline" onclick="bookmarkScheme('${sch.id}', '${sch.name}')">
+            Save Scheme
+          </button>
+          <a href="${sch.portal}" target="_blank" rel="noopener noreferrer" class="btn-srv btn-srv-outline">
+            Official Portal
+          </a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Save / Bookmark Scheme
+  window.bookmarkScheme = function (schemeId, schemeName) {
+    try {
+      let saved = JSON.parse(localStorage.getItem('cc_saved_user_schemes') || '[]');
+      if (!saved.includes(schemeId)) {
+        saved.push(schemeId);
+        localStorage.setItem('cc_saved_user_schemes', JSON.stringify(saved));
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Saved ${schemeName} to your saved schemes.`, 'success');
+        } else {
+          alert(`Saved ${schemeName} to your saved schemes.`);
+        }
+      } else {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`${schemeName} is already saved.`, 'info');
+        } else {
+          alert(`${schemeName} is already saved.`);
+        }
+      }
+    } catch (e) {
+      console.warn('Bookmark error:', e);
+    }
+  };
+
+  // Floating AI Scheme Advisor Chatbot Logic
+  function initFloatingChatbot() {
+    const triggerBtn = document.getElementById('floating-scheme-chat-trigger');
+    const chatWindow = document.getElementById('scheme-ai-chat-window');
+    const closeBtn = document.getElementById('scheme-chat-close-btn');
+    const sendBtn = document.getElementById('scheme-chat-send-btn');
+    const chatInput = document.getElementById('scheme-chat-input');
+
+    if (!triggerBtn || !chatWindow) return;
+
+    triggerBtn.addEventListener('click', () => {
+      chatWindow.classList.toggle('hidden');
+      if (!chatWindow.classList.contains('hidden') && chatInput) {
+        chatInput.focus();
+      }
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        chatWindow.classList.add('hidden');
+      });
+    }
+
+    if (sendBtn && chatInput) {
+      sendBtn.addEventListener('click', () => handleSendUserMessage());
+      chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleSendUserMessage();
+        }
+      });
+    }
+  }
+
+  window.sendQuickPrompt = function (promptText) {
+    const chatInput = document.getElementById('scheme-chat-input');
+    if (chatInput) {
+      chatInput.value = promptText;
+      handleSendUserMessage();
+    }
+  };
+
+  async function handleSendUserMessage() {
+    const chatInput = document.getElementById('scheme-chat-input');
+    const messagesContainer = document.getElementById('scheme-chat-messages');
+
+    if (!chatInput || !messagesContainer) return;
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    // Render User Message (NO ICONS, NO EMOJIS)
+    appendChatMessage('user', text);
+    chatInput.value = '';
+
+    // Add to conversation history
+    conversationHistory.push({ sender: 'user', text: text });
+
+    // Show Typing Indicator
+    const typingElem = document.createElement('div');
+    typingElem.className = 'chat-msg chat-msg-bot';
+    typingElem.id = 'scheme-ai-typing';
+    typingElem.textContent = 'Analyzing government scheme details...';
+    messagesContainer.appendChild(typingElem);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    try {
+      let replyText = '';
+
+      if (window.API && typeof window.API.assistantChat === 'function') {
+        const res = await window.API.assistantChat(conversationHistory);
+        if (res && res.data && res.data.text) {
+          replyText = res.data.text;
+        } else if (res && res.text) {
+          replyText = res.text;
+        }
+      }
+
+      if (!replyText) {
+        replyText = getFallbackSchemeAnswer(text);
+      }
+
+      // Clean emojis from AI response
+      replyText = stripEmojis(replyText);
+
+      // Remove typing indicator & render bot message
+      const typing = document.getElementById('scheme-ai-typing');
+      if (typing) typing.remove();
+
+      appendChatMessage('bot', replyText);
+      conversationHistory.push({ sender: 'bot', text: replyText });
+    } catch (err) {
+      console.warn('AI scheme chat error:', err);
+      const typing = document.getElementById('scheme-ai-typing');
+      if (typing) typing.remove();
+
+      const fallbackText = getFallbackSchemeAnswer(text);
+      appendChatMessage('bot', stripEmojis(fallbackText));
+    }
+  }
+
+  function appendChatMessage(sender, text) {
+    const container = document.getElementById('scheme-chat-messages');
+    if (!container) return;
+
+    const msgElem = document.createElement('div');
+    msgElem.className = `chat-msg ${sender === 'user' ? 'chat-msg-user' : 'chat-msg-bot'}`;
+    msgElem.textContent = text;
+    container.appendChild(msgElem);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function stripEmojis(text) {
+    if (!text) return '';
+    return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+  }
+
+  function getFallbackSchemeAnswer(query) {
+    const q = query.toLowerCase();
+    if (q.includes('magalir') || q.includes('kmut') || q.includes('women right')) {
+      return "Kalaignar Magalir Urimai Thittam provides Rs 1,000 monthly financial rights assistance directly into bank accounts of female heads of households in Tamil Nadu. Required documents: Smart Family Ration Card, Aadhaar Card, and Bank Passbook. Official Portal: https://kmut.tn.gov.in/";
+    } else if (q.includes('pudhumai') || q.includes('penn') || q.includes('girl student')) {
+      return "Pudhumai Penn Scheme provides Rs 1,000 per month financial assistance for female students pursuing higher education (degree, diploma, ITI) who studied from Classes 6 to 12 in Tamil Nadu Government schools. Official Portal: https://penkalvi.tn.gov.in/";
+    } else if (q.includes('cmchis') || q.includes('health') || q.includes('hospital')) {
+      return "Chief Minister Comprehensive Health Insurance Scheme (CMCHIS) provides cashless hospital cover up to Rs 5,00,000 per family per year in empanelled government and private hospitals. Required documents: Ration Card and Income Certificate. Official Portal: https://cmchistn.com/";
+    } else if (q.includes('kisan') || q.includes('farmer') || q.includes('agriculture')) {
+      return "PM Kisan Samman Nidhi is a Central Government scheme providing Rs 6,000 per year direct income support in 3 equal installments of Rs 2,000 to landholding farmers across India. Official Portal: https://pmkisan.gov.in/";
+    }
+    return "I am your AI Scheme Advisor. You can ask me about Tamil Nadu State and Central Government welfare schemes, eligibility rules, required documents, or application steps.";
+  }
 })();

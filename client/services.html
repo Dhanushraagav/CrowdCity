@@ -10,71 +10,426 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="CrowdCity">
   <script src="js/pwa-helper.js" defer></script>
+
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=1.0.6"></script>
   <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Government Services Citizen Dashboard - Central Hub for Welfare Schemes, Document Wallet, AI Assistant, and Office Locator.">
-  <title>Government Services Dashboard - CrowdCity AI</title>
+  <meta name="description" content="Government Services Citizen Portal - Explore Tamil Nadu State & Central Government Welfare Schemes, Document Verification, and AI Scheme Assistant.">
+  <title>Government Services Portal - CrowdCity AI</title>
   
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
   <link rel="stylesheet" href="css/components.css">
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    .dash-hero-banner {
-      background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 2.25rem 2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    :root {
+      --srv-primary: #0d9488;
+      --srv-primary-dark: #0f766e;
+      --srv-bg-surface: #ffffff;
+      --srv-border: #e2e8f0;
+      --srv-text-main: #0f172a;
+      --srv-text-muted: #64748b;
     }
-    .dash-quick-links-grid {
+
+    [data-theme="dark"] {
+      --srv-bg-surface: #1e293b;
+      --srv-border: #334155;
+      --srv-text-main: #f8fafc;
+      --srv-text-muted: #94a3b8;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .services-hero-banner {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+      border: 1px solid var(--srv-border);
+      border-radius: 18px;
+      padding: 2rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .services-nav-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 1rem;
       margin-bottom: 2rem;
     }
-    .dash-quick-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
+
+    .services-nav-card {
+      background: var(--srv-bg-surface);
+      border: 1px solid var(--srv-border);
+      border-radius: 14px;
       padding: 1.25rem;
       text-decoration: none;
-      color: var(--text-main);
+      color: var(--srv-text-main);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .services-nav-card:hover {
+      border-color: var(--srv-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    .services-nav-card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--srv-text-main);
+    }
+
+    .services-nav-card-desc {
+      font-size: 0.78rem;
+      color: var(--srv-text-muted);
+    }
+
+    /* Filter & Search Bar */
+    .services-filter-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .services-search-input {
+      width: 100%;
+      padding: 0.75rem 1.1rem;
+      border-radius: 12px;
+      border: 1.5px solid var(--srv-border);
+      background: var(--srv-bg-surface);
+      color: var(--srv-text-main);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-sizing: border-box;
+    }
+
+    .services-search-input:focus {
+      outline: none;
+      border-color: var(--srv-primary);
+    }
+
+    .services-category-pills {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scrollbar-width: none;
+    }
+
+    .services-category-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .services-pill {
+      background: var(--srv-bg-surface);
+      border: 1px solid var(--srv-border);
+      color: var(--srv-text-muted);
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .services-pill.active,
+    .services-pill:hover {
+      background: var(--srv-primary);
+      color: #ffffff;
+      border-color: var(--srv-primary);
+    }
+
+    /* Scheme Cards Grid */
+    .schemes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .scheme-card {
+      background: var(--srv-bg-surface);
+      border: 1px solid var(--srv-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .scheme-card:hover {
+      border-color: var(--srv-primary);
+      transform: translateY(-2px);
+    }
+
+    .scheme-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(13, 148, 136, 0.12);
+      color: var(--srv-primary);
+      margin-bottom: 0.6rem;
+    }
+
+    .scheme-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--srv-text-main);
+      margin: 0 0 0.25rem 0;
+      line-height: 1.3;
+    }
+
+    .scheme-dept {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--srv-text-muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .scheme-benefits {
+      font-size: 0.85rem;
+      color: var(--srv-text-main);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      background: rgba(15, 23, 42, 0.03);
+      padding: 0.75rem;
+      border-radius: 8px;
+      border-left: 3px solid var(--srv-primary);
+    }
+
+    [data-theme="dark"] .scheme-benefits {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .scheme-details-list {
+      font-size: 0.78rem;
+      color: var(--srv-text-muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+
+    .scheme-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .btn-srv {
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-srv-primary {
+      background: var(--srv-primary);
+      color: #ffffff;
+    }
+
+    .btn-srv-primary:hover {
+      background: var(--srv-primary-dark);
+    }
+
+    .btn-srv-outline {
+      background: transparent;
+      color: var(--srv-text-main);
+      border: 1px solid var(--srv-border);
+    }
+
+    .btn-srv-outline:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Dedicated Floating AI Scheme Chatbot Widget */
+    #floating-scheme-chat-trigger {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: var(--srv-primary);
+      color: #ffffff;
+      border: none;
+      padding: 0.85rem 1.35rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    #floating-scheme-chat-trigger:hover {
+      background: var(--srv-primary-dark);
+      transform: scale(1.04);
+    }
+
+    #scheme-ai-chat-window {
+      position: fixed;
+      bottom: 84px;
+      right: 24px;
+      z-index: 99999;
+      width: 380px;
+      max-width: calc(100vw - 32px);
+      height: 520px;
+      max-height: calc(100vh - 120px);
+      background: var(--srv-bg-surface);
+      border: 1.5px solid var(--srv-border);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    #scheme-ai-chat-window.hidden {
+      display: none !important;
+    }
+
+    .chat-win-header {
+      background: var(--srv-primary);
+      color: #ffffff;
+      padding: 1rem 1.25rem;
       display: flex;
       align-items: center;
-      gap: 0.85rem;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+      justify-content: space-between;
     }
-    .dash-quick-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+
+    .chat-win-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin: 0;
     }
-    .dash-main-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 1.75rem;
+
+    .chat-win-subtitle {
+      font-size: 0.72rem;
+      opacity: 0.9;
+      margin: 0;
     }
-    @media (max-width: 800px) {
-      .dash-main-grid {
-        grid-template-columns: 1fr;
-      }
+
+    .chat-win-close {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
     }
-    .dash-widget-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 1.75rem;
-      margin-bottom: 1.75rem;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.03);
+
+    .chat-win-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .chat-msg {
+      max-width: 85%;
+      padding: 0.75rem 0.95rem;
+      border-radius: 14px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .chat-msg-user {
+      align-self: flex-end;
+      background: var(--srv-primary);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-msg-bot {
+      align-self: flex-start;
+      background: rgba(15, 23, 42, 0.05);
+      color: var(--srv-text-main);
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--srv-border);
+    }
+
+    [data-theme="dark"] .chat-msg-bot {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .chat-win-prompts {
+      padding: 0.5rem 1rem;
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      border-top: 1px solid var(--srv-border);
+      scrollbar-width: none;
+    }
+
+    .chat-prompt-pill {
+      background: rgba(13, 148, 136, 0.08);
+      color: var(--srv-primary);
+      border: 1px solid rgba(13, 148, 136, 0.2);
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .chat-win-input-area {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--srv-border);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chat-win-input {
+      flex: 1;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid var(--srv-border);
+      border-radius: 10px;
+      background: var(--srv-bg-surface);
+      color: var(--srv-text-main);
+      font-size: 0.82rem;
+    }
+
+    .chat-win-input:focus {
+      outline: none;
+      border-color: var(--srv-primary);
+    }
+
+    .chat-win-send-btn {
+      background: var(--srv-primary);
+      color: #ffffff;
+      border: none;
+      padding: 0 1rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
     }
   </style>
 
@@ -88,7 +443,7 @@
 <body class="protected-page">
 
   <div class="app-layout">
-    <!-- Sidebar -->
+    <!-- App Sidebar -->
     <aside class="app-sidebar"></aside>
 
     <!-- Main Content Area -->
@@ -97,13 +452,13 @@
         <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
-            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <div style="width: 1px; height: 20px; background: var(--srv-border); margin: 0 0.1rem;"></div>
             <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
           </div>
         </a>
 
-        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-          <i class="fa-solid fa-bars"></i>
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu" style="font-weight: 800; border: none; background: transparent; cursor: pointer; padding: 0.4rem 0.8rem; color: var(--srv-text-main);">
+          Menu
         </button>
 
         <div class="app-header-actions" style="margin-left: auto;">
@@ -116,149 +471,103 @@
       <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%;">
         
         <!-- Hero Banner -->
-        <div class="dash-hero-banner" style="padding: 1.5rem 2rem; margin-bottom: 1.5rem;">
-          <div>
-            <span data-i18n="citizen_portal" style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
-              Citizen Portal
-            </span>
-            <h2 id="dash-user-name" style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui);">
-              Government Services
-            </h2>
-            <p id="dash-user-location" style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
-              Access government welfare schemes, document verification, and AI assistance.
-            </p>
-          </div>
+        <div class="services-hero-banner">
+          <span style="font-size: 0.75rem; font-weight: 800; color: var(--srv-primary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem;">
+            Government Portal
+          </span>
+          <h1 style="font-family: 'Outfit', sans-serif; font-size: 1.75rem; font-weight: 800; color: var(--srv-text-main); margin: 0 0 0.35rem 0;">
+            Government Services & Welfare Schemes
+          </h1>
+          <p style="font-size: 0.88rem; color: var(--srv-text-muted); margin: 0; line-height: 1.6;">
+            Explore official Tamil Nadu State and Central Government welfare schemes, check eligibility, verify documents, and ask our AI Scheme Advisor.
+          </p>
         </div>
 
         <!-- 4 Quick Modules Grid -->
-        <div class="dash-quick-links-grid">
-          <a href="scheme-checker.html" class="dash-quick-card">
-            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(13, 148, 136, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-              <i class="fa-solid fa-award"></i>
-            </div>
-            <div>
-              <div data-i18n="scheme_eligibility" style="font-size: 0.92rem; font-weight: 800;">Scheme Eligibility</div>
-              <div data-i18n="check_welfare_qualification" style="font-size: 0.75rem; color: var(--text-muted);">Check Welfare Qualification</div>
-            </div>
+        <div class="services-nav-grid">
+          <a href="scheme-checker.html" class="services-nav-card">
+            <span class="services-nav-card-title">Scheme Eligibility Checker</span>
+            <span class="services-nav-card-desc">Check your qualification for state welfare schemes</span>
           </a>
 
-          <a href="my-documents.html" class="dash-quick-card">
-            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-              <i class="fa-solid fa-folder-closed"></i>
-            </div>
-            <div>
-              <div data-i18n="document_wallet" style="font-size: 0.92rem; font-weight: 800;">Document Wallet</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);"><span id="dash-docs-count">0</span> <span data-i18n="files_uploaded">Files Uploaded</span></div>
-            </div>
+          <a href="my-documents.html" class="services-nav-card">
+            <span class="services-nav-card-title">Document Wallet</span>
+            <span class="services-nav-card-desc">Store Ration Card, Aadhaar, and Income certificates</span>
           </a>
 
-          <a href="assistant.html" class="dash-quick-card">
-            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-              <i class="fa-solid fa-robot"></i>
-            </div>
-            <div>
-              <div data-i18n="ai_assistant" style="font-size: 0.92rem; font-weight: 800;">AI Assistant</div>
-              <div data-i18n="ask_scheme_guidance" style="font-size: 0.75rem; color: var(--text-muted);">Ask Scheme Guidance</div>
-            </div>
+          <a href="app-tracker.html" class="services-nav-card">
+            <span class="services-nav-card-title">Application Tracker</span>
+            <span class="services-nav-card-desc">Monitor status of submitted government applications</span>
           </a>
 
-          <a href="office-locator.html" class="dash-quick-card">
-            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-              <i class="fa-solid fa-location-dot"></i>
-            </div>
-            <div>
-              <div data-i18n="office_locator" style="font-size: 0.92rem; font-weight: 800;">Office Locator</div>
-              <div data-i18n="find_esevai_taluk" style="font-size: 0.75rem; color: var(--text-muted);">Find E-Sevai & Taluk</div>
-            </div>
+          <a href="office-locator.html" class="services-nav-card">
+            <span class="services-nav-card-title">Office Locator</span>
+            <span class="services-nav-card-desc">Find nearest E-Sevai centers and Taluk offices</span>
           </a>
         </div>
 
-        <!-- 2 Column Main Widgets Layout -->
-        <div class="dash-main-grid">
-          
-          <!-- Left Column -->
-          <div>
-            <!-- Proactive AI Recommendation Engine Widget -->
-            <div class="dash-widget-box" style="border: 1px solid rgba(99, 102, 241, 0.3); background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(13, 148, 136, 0.05) 100%);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                <h3 data-i18n="proactive_ai_recommendations" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
-                  Proactive AI Recommendations
-                </h3>
-                <a href="assistant.html" data-i18n="ask_ai" style="font-size: 0.8rem; font-weight: 700; color: #6366f1; text-decoration: none;">Ask AI →</a>
-              </div>
+        <!-- Search & Filter Bar -->
+        <div class="services-filter-bar">
+          <input type="text" id="scheme-search-input" class="services-search-input" placeholder="Search schemes by name, department, or keyword (e.g. Magalir Urimai, Pudhumai Penn, Health)..." />
 
-              <div id="dash-ai-recommendations-list">
-                <!-- Dynamically populated by js/services-dashboard.js -->
-              </div>
-            </div>
-
-            <!-- Saved / Matched Schemes Widget -->
-            <div class="dash-widget-box">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
-                  <span data-i18n="saved_welfare_schemes">Saved Welfare Schemes</span> (<span id="dash-saved-count">0</span>)
-                </h3>
-                <a href="saved-schemes.html" data-i18n="view_all" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">View All →</a>
-              </div>
-
-              <div id="dash-saved-schemes-list">
-                <!-- Dynamically populated -->
-              </div>
-            </div>
-
-            <!-- Documents Summary Widget -->
-            <div class="dash-widget-box">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                <h3 data-i18n="document_wallet_readiness" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">
-                  Document Wallet Readiness
-                </h3>
-                <a href="my-documents.html" data-i18n="manage_wallet" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none;">Manage Wallet →</a>
-              </div>
-
-              <div id="dash-recent-docs-list">
-                <!-- Dynamically populated -->
-              </div>
-            </div>
+          <div class="services-category-pills">
+            <button type="button" class="services-pill active" data-category="all">All Schemes</button>
+            <button type="button" class="services-pill" data-category="social">Social Welfare</button>
+            <button type="button" class="services-pill" data-category="education">Education & Youth</button>
+            <button type="button" class="services-pill" data-category="health">Health & Insurance</button>
+            <button type="button" class="services-pill" data-category="agriculture">Agriculture & Farmers</button>
+            <button type="button" class="services-pill" data-category="skill">Skill Development</button>
           </div>
+        </div>
 
-          <!-- Right Sidebar Column -->
-          <div>
-            <!-- Activity Timeline Widget -->
-            <div class="dash-widget-box">
-              <h3 data-i18n="recent_activity" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0; font-family: var(--font-heading, system-ui);">
-                Recent Activity
-              </h3>
-
-              <div id="dash-activity-feed">
-                <!-- Dynamically populated -->
-              </div>
-            </div>
-
-            <!-- AI Assistant Quick Launch Box -->
-            <div class="dash-widget-box" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(99, 102, 241, 0.08));">
-              <h3 data-i18n="need_application_help" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
-                Need Application Help?
-              </h3>
-              <p data-i18n="ask_ai_assistant_desc" style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem 0; line-height: 1.5;">
-                Ask our AI Government Assistant about eligibility rules, document checklists, or application steps.
-              </p>
-              <a href="assistant.html" class="btn btn-primary" style="width: 100%; padding: 0.65rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center;">
-                <span data-i18n="ask_ai_assistant_btn">Ask AI Assistant</span>
-              </a>
-            </div>
-          </div>
-
+        <!-- Scheme Cards Grid -->
+        <div id="schemes-container" class="schemes-grid">
+          <!-- Dynamically rendered by js/services.js -->
         </div>
 
       </div>
     </main>
   </div>
 
+  <!-- Dedicated Floating AI Scheme Chatbot Widget -->
+  <button type="button" id="floating-scheme-chat-trigger">
+    Ask AI Scheme Advisor
+  </button>
+
+  <div id="scheme-ai-chat-window" class="hidden">
+    <div class="chat-win-header">
+      <div>
+        <div class="chat-win-title">AI Scheme Advisor</div>
+        <div class="chat-win-subtitle">Official Government Welfare Schemes AI Guide</div>
+      </div>
+      <button type="button" id="scheme-chat-close-btn" class="chat-win-close">Close</button>
+    </div>
+
+    <div id="scheme-chat-messages" class="chat-win-messages">
+      <div class="chat-msg chat-msg-bot">
+        Hello! I am your AI Scheme Advisor. Ask me anything about Tamil Nadu State and Central Government welfare schemes, eligibility criteria, or required documents.
+      </div>
+    </div>
+
+    <div class="chat-win-prompts">
+      <span class="chat-prompt-pill" onclick="sendQuickPrompt('Who is eligible for Kalaignar Magalir Urimai Thittam?')">Magalir Urimai Eligibility</span>
+      <span class="chat-prompt-pill" onclick="sendQuickPrompt('What documents are needed for Pudhumai Penn Scheme?')">Pudhumai Penn Docs</span>
+      <span class="chat-prompt-pill" onclick="sendQuickPrompt('Tell me about CMCHIS Health Insurance cover limit')">CMCHIS Health Cover</span>
+      <span class="chat-prompt-pill" onclick="sendQuickPrompt('How to apply for PM Kisan Samman Nidhi?')">PM Kisan Steps</span>
+    </div>
+
+    <div class="chat-win-input-area">
+      <input type="text" id="scheme-chat-input" class="chat-win-input" placeholder="Ask about any scheme or required documents..." />
+      <button type="button" id="scheme-chat-send-btn" class="chat-win-send-btn">Send</button>
+    </div>
+  </div>
+
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Application Logic -->
+  <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/services-dashboard.js"></script>
+  <script src="js/services.js"></script>
 </body>
 </html>
