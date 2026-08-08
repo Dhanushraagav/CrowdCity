@@ -2285,6 +2285,7 @@ function initResponsiveSidebar() {
       { href: 'my-complaints.html', icon: 'fa-clipboard-list', label: 'My Complaints', key: 'nav_my_complaints' },
       { href: 'my-documents.html', icon: 'fa-folder-closed', label: 'Documents', key: 'nav_documents' },
       { href: 'notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
+      { href: 'about.html', icon: 'fa-users-gear', label: 'About CrowdCity AI', key: 'nav_about' },
       { href: 'settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
     ];
     
