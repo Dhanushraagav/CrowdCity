@@ -139,11 +139,21 @@
 
     storyBlocks.forEach(block => observer.observe(block));
 
-    // Update vertical timeline progress line smoothly on scroll (throttled with rAF)
+    // Update top progress accent bar and vertical timeline progress line smoothly on scroll (throttled with rAF)
+    const topBar = document.getElementById('scroll-progress-top');
     let ticking = false;
     window.addEventListener('scroll', () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
+          // Top scroll bar calculation
+          if (topBar) {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            topBar.style.width = `${scrollPercent}%`;
+          }
+
+          // Vertical timeline track calculation
           if (progressLine) {
             const track = document.querySelector('.team-story-section');
             if (track) {
