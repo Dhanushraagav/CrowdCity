@@ -39,33 +39,33 @@
       });
     }
 
-    const numNodes = 32;
+    const numNodes = 42;
     const nodes = [];
 
     for (let i = 0; i < numNodes; i++) {
       nodes.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: (Math.random() - 0.5) * 0.45,
-        radius: Math.random() * 2.2 + 1,
-        alpha: Math.random() * 0.5 + 0.3
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        radius: Math.random() * 3.2 + 1.8,
+        alpha: Math.random() * 0.4 + 0.45
       });
     }
 
     function animate() {
       ctx.clearRect(0, 0, width, height);
 
-      // Draw connecting network lines
+      // Draw connecting network lines with high visibility
       for (let i = 0; i < numNodes; i++) {
         for (let j = i + 1; j < numNodes; j++) {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            const lineAlpha = (1 - dist / 150) * 0.25;
+          if (dist < 165) {
+            const lineAlpha = (1 - dist / 165) * 0.42;
             ctx.strokeStyle = `rgba(13, 148, 136, ${lineAlpha})`;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.25;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -74,14 +74,14 @@
         }
       }
 
-      // Draw and update nodes with subtle mouse attraction
+      // Draw and update glowing nodes with active mouse attraction
       nodes.forEach(node => {
         const mdx = mouseX - node.x;
         const mdy = mouseY - node.y;
         const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-        if (mdist < 180) {
-          node.x += (mdx / mdist) * 0.25;
-          node.y += (mdy / mdist) * 0.25;
+        if (mdist < 220) {
+          node.x += (mdx / mdist) * 0.35;
+          node.y += (mdy / mdist) * 0.35;
         }
 
         node.x += node.vx;
