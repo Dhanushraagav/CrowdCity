@@ -1,6 +1,6 @@
 /**
  * CrowdCity AI v2.0 - About Page Interactions & Animations
- * Manages scroll-driven timeline progress, interactive 3D card tilt effects, hero network canvas, and section reveals.
+ * Manages scroll-driven timeline progress, GPU-accelerated 3D card tilt, hero network canvas, and section reveals.
  */
 
 (function () {
@@ -126,7 +126,7 @@
     const observerOptions = {
       root: null,
       rootMargin: '0px 0px -15% 0px',
-      threshold: 0.2
+      threshold: 0.15
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -139,44 +139,58 @@
 
     storyBlocks.forEach(block => observer.observe(block));
 
-    // Update vertical timeline progress line smoothly on scroll
+    // Update vertical timeline progress line smoothly on scroll (throttled with rAF)
+    let ticking = false;
     window.addEventListener('scroll', () => {
-      if (!progressLine) return;
-      const track = document.querySelector('.team-story-section');
-      if (!track) return;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (progressLine) {
+            const track = document.querySelector('.team-story-section');
+            if (track) {
+              const rect = track.getBoundingClientRect();
+              const windowHeight = window.innerHeight;
+              const totalHeight = rect.height;
 
-      const rect = track.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const totalHeight = rect.height;
-
-      let scrollProgress = (windowHeight / 2 - rect.top) / totalHeight;
-      scrollProgress = Math.max(0, Math.min(1, scrollProgress));
-
-      progressLine.style.height = `${scrollProgress * 100}%`;
+              let scrollProgress = (windowHeight / 2 - rect.top) / totalHeight;
+              scrollProgress = Math.max(0, Math.min(1, scrollProgress));
+              progressLine.style.height = `${scrollProgress * 100}%`;
+            }
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
     });
   }
 
-  // Interactive Subtle 3D Card Tilt Effect
+  // Lag-Free GPU-Accelerated 3D Card Tilt Effect
   function initCard3DTilt() {
-    const cards = document.querySelectorAll('.purpose-card, .story-text-wrap');
+    const cards = document.querySelectorAll('.pipeline-card, .purpose-card, .tech-item, .story-text-wrap, .hero-stat-card');
 
     cards.forEach(card => {
+      let rAF = null;
+
       card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        if (rAF) cancelAnimationFrame(rAF);
 
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
+        rAF = requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
 
-        const rotateX = ((y - centerY) / centerY) * -5;
-        const rotateY = ((x - centerX) / centerX) * 5;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
 
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px) scale(1.015)`;
+          const rotateX = ((y - centerY) / centerY) * -4.5;
+          const rotateY = ((x - centerX) / centerX) * 4.5;
+
+          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate3d(0, -5px, 0)`;
+        });
       });
 
       card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)';
+        if (rAF) cancelAnimationFrame(rAF);
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)';
       });
     });
   }
