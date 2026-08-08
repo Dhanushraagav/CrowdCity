@@ -25,9 +25,33 @@
     let mouseX = width / 2;
     let mouseY = height / 2;
 
+    let nodes = [];
+    let isMobile = window.innerWidth < 768;
+
+    function buildNodes() {
+      isMobile = window.innerWidth < 768;
+      const numNodes = isMobile ? 12 : 42;
+      nodes = [];
+      for (let i = 0; i < numNodes; i++) {
+        nodes.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * (isMobile ? 0.35 : 0.6),
+          vy: (Math.random() - 0.5) * (isMobile ? 0.35 : 0.6),
+          radius: isMobile ? (Math.random() * 1.8 + 1.2) : (Math.random() * 3.2 + 1.8),
+          alpha: isMobile ? (Math.random() * 0.3 + 0.25) : (Math.random() * 0.4 + 0.45)
+        });
+      }
+    }
+
+    buildNodes();
+
     window.addEventListener('resize', () => {
       width = canvas.width = canvas.offsetWidth;
       height = canvas.height = canvas.offsetHeight;
+      if ((window.innerWidth < 768) !== isMobile) {
+        buildNodes();
+      }
     });
 
     const heroSection = document.querySelector('.about-hero');
@@ -39,33 +63,22 @@
       });
     }
 
-    const numNodes = 42;
-    const nodes = [];
-
-    for (let i = 0; i < numNodes; i++) {
-      nodes.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: (Math.random() - 0.5) * 0.6,
-        radius: Math.random() * 3.2 + 1.8,
-        alpha: Math.random() * 0.4 + 0.45
-      });
-    }
-
     function animate() {
       ctx.clearRect(0, 0, width, height);
 
-      // Draw connecting network lines with high visibility
-      for (let i = 0; i < numNodes; i++) {
-        for (let j = i + 1; j < numNodes; j++) {
+      const maxDist = isMobile ? 110 : 165;
+      const alphaMult = isMobile ? 0.18 : 0.42;
+
+      // Draw connecting network lines with screen-appropriate density
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 165) {
-            const lineAlpha = (1 - dist / 165) * 0.42;
+          if (dist < maxDist) {
+            const lineAlpha = (1 - dist / maxDist) * alphaMult;
             ctx.strokeStyle = `rgba(13, 148, 136, ${lineAlpha})`;
-            ctx.lineWidth = 1.25;
+            ctx.lineWidth = isMobile ? 0.9 : 1.25;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -79,9 +92,9 @@
         const mdx = mouseX - node.x;
         const mdy = mouseY - node.y;
         const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-        if (mdist < 220) {
-          node.x += (mdx / mdist) * 0.35;
-          node.y += (mdy / mdist) * 0.35;
+        if (mdist < (isMobile ? 120 : 220)) {
+          node.x += (mdx / mdist) * 0.25;
+          node.y += (mdy / mdist) * 0.25;
         }
 
         node.x += node.vx;

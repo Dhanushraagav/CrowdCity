@@ -469,11 +469,24 @@
       font-weight: 500;
       margin: 0 0 2rem 0;
     }
-
     /* Responsive Mobile Layout */
     @media (max-width: 991px) {
       .hero-title {
         font-size: 2.35rem;
+      }
+    @media (max-width: 768px) {
+      #hero-canvas {
+        opacity: 0.4 !important;
+      }
+      .about-hero {
+        padding: 3.5rem 1.25rem 2.5rem 1.25rem;
+      }
+      .hero-title {
+        font-size: 2.15rem !important;
+      }
+      .timeline-track-container {
+        left: 24px;
+        transform: none;
       }
       .purpose-grid {
         grid-template-columns: 1fr;
