@@ -275,15 +275,25 @@
       border-radius: 50%;
       padding: 6px;
       background: linear-gradient(135deg, var(--abt-card-border) 0%, rgba(13, 148, 136, 0.2) 100%);
-      box-shadow: 0 12px 36px rgba(0,0,0,0.25);
-      transition: all 0.5s ease;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.15);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, background 0.4s ease;
+      cursor: pointer;
+      overflow: hidden;
     }
 
     .story-block.active .profile-photo-circle {
       border-color: var(--abt-teal);
       background: linear-gradient(135deg, var(--abt-teal) 0%, var(--abt-accent) 100%);
-      box-shadow: 0 0 40px var(--abt-teal-glow);
-      transform: scale(1.04);
+      box-shadow: 0 0 35px var(--abt-teal-glow);
+      transform: scale(1.02);
+    }
+
+    /* Interactive Mouse Hover Photo Zoom & Edge Glow Effect */
+    .profile-photo-circle:hover,
+    .story-block.active .profile-photo-circle:hover {
+      transform: scale(1.08) !important;
+      background: linear-gradient(135deg, #14b8a6 0%, #38bdf8 100%) !important;
+      box-shadow: 0 0 30px var(--abt-teal), 0 0 60px rgba(13, 148, 136, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.3) !important;
     }
 
     .profile-photo-circle img {
@@ -293,6 +303,12 @@
       object-fit: cover;
       object-position: center top;
       display: block;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+    }
+
+    .profile-photo-circle:hover img {
+      transform: scale(1.14) rotate(1deg);
+      filter: brightness(1.08) contrast(1.04);
     }
 
     /* Center Timeline Node Point */
