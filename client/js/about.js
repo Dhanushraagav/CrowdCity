@@ -165,7 +165,7 @@
 
   // Lag-Free GPU-Accelerated 3D Card Tilt Effect
   function initCard3DTilt() {
-    const cards = document.querySelectorAll('.pipeline-card, .purpose-card, .tech-item, .story-text-wrap, .hero-stat-card');
+    const cards = document.querySelectorAll('.help-card, .purpose-card, .story-text-wrap');
 
     cards.forEach(card => {
       let rAF = null;
