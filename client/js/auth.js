@@ -1817,7 +1817,7 @@ function updateAuthUI() {
                 <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> ${tSettings}
               </a>
               <a href="about.html" class="nav-dropdown-item">
-                <i class="fa-solid fa-users-gear" style="width: 16px; color: var(--primary, #0d9488);"></i> About CrowdCity AI
+                <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> About Us
               </a>
               <div style="border-top: 1px solid var(--border-color); margin: 0.15rem 0;"></div>
               <button onclick="logoutUser()" class="nav-dropdown-item btn-logout">
@@ -1898,7 +1898,7 @@ function updateAuthUI() {
               <i class="fa-solid fa-file-contract" style="width: 16px; color: var(--text-muted);"></i> Documents
             </a>
             <a href="about.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-users-gear" style="width: 16px; color: var(--primary, #0d9488);"></i> About CrowdCity AI
+              <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> About Us
             </a>
             <a href="settings.html" class="nav-dropdown-item">
               <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> Settings
