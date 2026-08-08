@@ -173,8 +173,10 @@
     });
   }
 
-  // Lag-Free GPU-Accelerated 3D Card Tilt Effect
+  // Lag-Free GPU-Accelerated 3D Card Tilt Effect (Desktop & Laptop Pointer Only)
   function initCard3DTilt() {
+    if (window.matchMedia('(hover: none) or (pointer: coarse)').matches) return;
+
     const cards = document.querySelectorAll('.help-card, .purpose-card, .story-text-wrap');
 
     cards.forEach(card => {
