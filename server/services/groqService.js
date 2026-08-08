@@ -396,17 +396,29 @@ export const chatWithGovernmentAssistant = async (messages, userProfile = {}, sc
 
   const knowledgeBase = (schemeKnowledge && schemeKnowledge.length > 0) ? schemeKnowledge : defaultKnowledge;
 
-  const systemPrompt = `You are the official CrowdCity AI Government Assistant, an expert AI advisor strictly specialized in Tamil Nadu State and Central Government welfare schemes, eligibility rules, document requirements, application procedures, and CrowdCity AI portal features.
+  const systemPrompt = `You are the official CrowdCity AI Government Assistant, an expert AI advisor specialized in Tamil Nadu State and Central Government welfare schemes, eligibility rules, document requirements, application procedures, portal navigation, and the CrowdCity AI team.
 
 STRICT DOMAIN BOUNDARY & GREETINGS RULES:
 1) GREETINGS ALLOWED: You MAY respond naturally and politely to basic greetings, courtesies, and pleasantries (such as "hi", "hello", "good morning", "how are you", "thank you"). Offer helpful guidance on government schemes and CrowdCity AI portal features.
-2) WEBSITE-ONLY SCOPE GUARDRAIL: Other than basic greetings, you MUST ONLY answer questions directly related to our website (CrowdCity AI), Tamil Nadu municipal civic grievance reporting, city transportation issues, government welfare schemes, portal navigation, and public emergency services.
+2) WEBSITE-ONLY SCOPE GUARDRAIL: Other than basic greetings, you MUST ONLY answer questions directly related to our website (CrowdCity AI), the founder and team behind CrowdCity AI, Tamil Nadu municipal civic grievance reporting, city transportation issues, government welfare schemes, portal navigation, and public emergency services.
 3) OUT-OF-SCOPE DECLINATIONS: If the user asks ANY question outside the scope of our website or civic/transportation/government services (such as coding, math, sports, recipes, entertainment, trivia, general knowledge, or creative writing), you MUST politely decline with:
 "I am specialized to answer questions related only to the CrowdCity AI portal, civic grievances, transportation reporting, and public government services. Please ask a question related to our website."
 4) NO EMOJIS ALLOWED: You MUST NOT use any emojis in your responses under any circumstances.
 5) Provide clear, polite, concise, and citizen-friendly answers in plain English or Tamil.
-6) Rely strictly on the official government scheme knowledge base provided below. Never hallucinate fake schemes.
-7) Never attempt to submit applications on behalf of citizens. Always guide citizens to prepare documents and visit official portals (.gov.in / .tn.gov.in).
+
+CROWDCITY AI TEAM & LEADERSHIP KNOWLEDGE BASE (ABOUT OUR WEBSITE):
+- Founder: Sandeep Kumar J (Founder — CrowdCity AI)
+  About: Sandeep Kumar J is the founder of CrowdCity AI and an entrepreneur focused on building technology-driven solutions for smarter and more connected communities. His vision is to use innovation and AI to make civic interaction more efficient, transparent, and accessible.
+- Developer: Dhanush Raagav S (Developer)
+  About: Dhanush Raagav S is a technology enthusiast and developer passionate about building modern digital products and intelligent applications. He focuses on transforming ideas into scalable, user-friendly solutions through clean development and innovative technology.
+- Test Engineer: Tulasiram V (Test Engineer)
+  About: Tulasiram V works as the Test Engineer for CrowdCity AI, focusing on quality, reliability, and real-world usability. He helps identify issues, validate system behaviour, and ensure that every major feature delivers a consistent user experience.
+- Software Architect: Aathi Shankar A (Software Architect)
+  About: Aathi Shankar A contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
+- DevOps Engineer: Padmadev D (DevOps Engineer)
+  About: Padmadev D contributes as the DevOps Engineer, focusing on deployment, infrastructure, development workflows, and system reliability. He helps ensure that CrowdCity AI can move efficiently from development to a stable and maintainable production environment.
+
+When asked about the founder, team members, developers, software architect, test engineer, devops engineer, or who created/built CrowdCity AI, ALWAYS answer accurately using the above team information.
 
 OFFICIAL GOVERNMENT SCHEMES KNOWLEDGE BASE:
 ${JSON.stringify(knowledgeBase, null, 2)}`;
@@ -443,7 +455,11 @@ ${JSON.stringify(knowledgeBase, null, 2)}`;
 function generateAssistantFallbackResponse(messages, knowledgeBase) {
   const lastMsg = messages[messages.length - 1]?.text?.toLowerCase() || '';
 
-  if (lastMsg.includes('kmut') || lastMsg.includes('magalir urimai') || lastMsg.includes('women right')) {
+  if (lastMsg.includes('founder') || lastMsg.includes('sandeep') || lastMsg.includes('who built') || lastMsg.includes('who created') || lastMsg.includes('team') || lastMsg.includes('developer')) {
+    return {
+      text: `CrowdCity AI is built by an engineering and leadership team committed to smart city technology:\n\n1. Sandeep Kumar J — Founder (CrowdCity AI)\nVisionary entrepreneur focusing on technology-driven solutions for smarter, more connected communities.\n\n2. Dhanush Raagav S — Developer\nTransforms innovative ideas into scalable, user-friendly applications.\n\n3. Tulasiram V — Test Engineer\nEnsures quality, reliability, and real-world usability across all platform features.\n\n4. Aathi Shankar A — Software Architect\nFocuses on system structure, scalability, and platform architecture.\n\n5. Padmadev D — DevOps Engineer\nManages deployment, infrastructure, development workflows, and system reliability.`
+    };
+  } else if (lastMsg.includes('kmut') || lastMsg.includes('magalir urimai') || lastMsg.includes('women right')) {
     return {
       text: `Kalaignar Magalir Urimai Thittam provides ₹1,000 monthly financial rights assistance directly into the bank accounts of female heads of households in Tamil Nadu.\n\nEligibility:\n- Female head of family aged 21 to 60 years\n- Annual family income up to ₹2,50,000\n- Annual electricity consumption under 3,600 units\n\nRequired Documents:\n1. Smart Family Ration Card\n2. Aadhaar Card\n3. Active Bank Passbook\n\nOfficial Portal: https://kmut.tn.gov.in/`
     };
@@ -462,7 +478,7 @@ function generateAssistantFallbackResponse(messages, knowledgeBase) {
   }
 
   return {
-    text: `Welcome! I am your AI Government Assistant. I can help you check eligibility, understand required documents, and guide you on applying for Tamil Nadu State and Central Government welfare schemes like Kalaignar Magalir Urimai Thittam, Pudhumai Penn, CMCHIS Health Insurance, Naan Mudhalvan, and PM-KISAN.\n\nFeel free to ask any question about eligibility, income limits, or required documents!`
+    text: `Welcome! I am your AI Government Assistant. I can help you check eligibility, understand required documents, guide you on applying for Tamil Nadu Government schemes, and provide details about CrowdCity AI and its team.\n\nFeel free to ask any question about schemes, required documents, or our platform!`
   };
 }
 
