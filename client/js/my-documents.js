@@ -706,12 +706,6 @@
   }
 
   function handleProtectedAction(actionCallback) {
-    // If MPIN was already unlocked in this session, execute action immediately
-    if (isSessionUnlocked()) {
-      if (typeof actionCallback === 'function') actionCallback();
-      return;
-    }
-
     const storedMPIN = getStoredMPIN();
 
     if (!storedMPIN) {
@@ -720,6 +714,7 @@
       return;
     }
 
+    // Always enforce MPIN security verification for confidential document operations (View, Download, Delete)
     pendingActionAfterMPIN = actionCallback;
     openMPINModal('verify');
   }
