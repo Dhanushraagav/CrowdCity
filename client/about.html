@@ -345,6 +345,59 @@
       flex-direction: row-reverse;
     }
 
+    /* Keyframe Animations */
+    @keyframes fadeInUpSmooth {
+      0% { opacity: 0; transform: translate3d(0, 24px, 0); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    @keyframes pulseGlowRing {
+      0% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); }
+      70% { box-shadow: 0 0 0 14px rgba(13, 148, 136, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+    }
+
+    @keyframes rotateHalo {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Photo Aura Ring (Lag-free 60fps GPU Rotation) */
+    .photo-aura-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-glowing-ring {
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(13, 148, 136, 0.45), rgba(56, 189, 248, 0.5), transparent 65%, rgba(13, 148, 136, 0.45));
+      filter: blur(8px);
+      opacity: 0.5;
+      animation: rotateHalo 14s linear infinite;
+      will-change: transform;
+      pointer-events: none;
+    }
+
+    .story-block.active .photo-glowing-ring {
+      opacity: 0.85;
+    }
+
+    .online-pulse-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--abt-teal);
+      box-shadow: 0 0 8px var(--abt-teal);
+      margin-right: 6px;
+      vertical-align: middle;
+      animation: pulseGlowRing 2s infinite ease-out;
+    }
+
     /* Photo Container (Left/Right) */
     .story-image-wrap {
       width: 45%;
@@ -757,13 +810,16 @@
             <div class="timeline-node-point"></div>
 
             <div class="story-image-wrap">
-              <div class="profile-photo-circle">
-                <img src="images/team/sandeep-kumar.jpg" alt="Sandeep Kumar J — Founder" />
+              <div class="photo-aura-wrap">
+                <div class="photo-glowing-ring"></div>
+                <div class="profile-photo-circle">
+                  <img src="images/team/sandeep-kumar.jpg" alt="Sandeep Kumar J — Founder" />
+                </div>
               </div>
             </div>
 
             <div class="story-text-wrap">
-              <span class="member-num-label">01 — FOUNDER</span>
+              <span class="member-num-label"><span class="online-pulse-dot"></span>01 — FOUNDER</span>
               <h3 class="member-name">Sandeep Kumar J</h3>
               <div class="member-role">Founder — CrowdCity AI</div>
               <p class="member-about">
@@ -777,13 +833,16 @@
             <div class="timeline-node-point"></div>
 
             <div class="story-image-wrap">
-              <div class="profile-photo-circle">
-                <img src="images/team/dhanush-raagav.jpg" alt="Dhanush Raagav S — Developer" />
+              <div class="photo-aura-wrap">
+                <div class="photo-glowing-ring"></div>
+                <div class="profile-photo-circle">
+                  <img src="images/team/dhanush-raagav.jpg" alt="Dhanush Raagav S — Developer" />
+                </div>
               </div>
             </div>
 
             <div class="story-text-wrap">
-              <span class="member-num-label">02 — DEVELOPER</span>
+              <span class="member-num-label"><span class="online-pulse-dot"></span>02 — DEVELOPER</span>
               <h3 class="member-name">Dhanush Raagav S</h3>
               <div class="member-role">Developer</div>
               <p class="member-about">
@@ -797,13 +856,16 @@
             <div class="timeline-node-point"></div>
 
             <div class="story-image-wrap">
-              <div class="profile-photo-circle">
-                <img src="images/team/tulasiram-v.jpg" alt="Tulasiram V — Test Engineer" />
+              <div class="photo-aura-wrap">
+                <div class="photo-glowing-ring"></div>
+                <div class="profile-photo-circle">
+                  <img src="images/team/tulasiram-v.jpg" alt="Tulasiram V — Test Engineer" />
+                </div>
               </div>
             </div>
 
             <div class="story-text-wrap">
-              <span class="member-num-label">03 — TEST ENGINEER</span>
+              <span class="member-num-label"><span class="online-pulse-dot"></span>03 — TEST ENGINEER</span>
               <h3 class="member-name">Tulasiram V</h3>
               <div class="member-role">Test Engineer</div>
               <p class="member-about">
@@ -817,13 +879,16 @@
             <div class="timeline-node-point"></div>
 
             <div class="story-image-wrap">
-              <div class="profile-photo-circle">
-                <img src="images/team/aathi-shankar.jpg" alt="Aathi Shankar A — Software Architect" />
+              <div class="photo-aura-wrap">
+                <div class="photo-glowing-ring"></div>
+                <div class="profile-photo-circle">
+                  <img src="images/team/aathi-shankar.jpg" alt="Aathi Shankar A — Software Architect" />
+                </div>
               </div>
             </div>
 
             <div class="story-text-wrap">
-              <span class="member-num-label">04 — SOFTWARE ARCHITECT</span>
+              <span class="member-num-label"><span class="online-pulse-dot"></span>04 — SOFTWARE ARCHITECT</span>
               <h3 class="member-name">Aathi Shankar A</h3>
               <div class="member-role">Software Architect</div>
               <p class="member-about">
@@ -837,13 +902,16 @@
             <div class="timeline-node-point"></div>
 
             <div class="story-image-wrap">
-              <div class="profile-photo-circle">
-                <img src="images/team/padmadev-d.jpg" alt="Padmadev D — DevOps Engineer" />
+              <div class="photo-aura-wrap">
+                <div class="photo-glowing-ring"></div>
+                <div class="profile-photo-circle">
+                  <img src="images/team/padmadev-d.jpg" alt="Padmadev D — DevOps Engineer" />
+                </div>
               </div>
             </div>
 
             <div class="story-text-wrap">
-              <span class="member-num-label">05 — DEVOPS ENGINEER</span>
+              <span class="member-num-label"><span class="online-pulse-dot"></span>05 — DEVOPS ENGINEER</span>
               <h3 class="member-name">Padmadev D</h3>
               <div class="member-role">DevOps Engineer</div>
               <p class="member-about">
