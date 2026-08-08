@@ -1593,6 +1593,7 @@ function updateAuthUI() {
     const isServices = path.includes('services') && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
     const isMinisters = path.includes('ministers');
+    const isAbout = path.includes('about');
 
     // Sidebar remains PERMANENTLY EXPANDED (No auto-collapse / hover-expand)
     sidebar.classList.remove('collapsed', 'expanded');
@@ -1643,6 +1644,9 @@ function updateAuthUI() {
         </a>
         <a href="ministers.html" class="app-sidebar-link ${isMinisters ? 'active' : ''}" title="Council of Ministers">
           <i class="fa-solid fa-user-tie"></i> <span>Council of Ministers</span>
+        </a>
+        <a href="about.html" class="app-sidebar-link ${isAbout ? 'active' : ''}" title="About CrowdCity AI">
+          <i class="fa-solid fa-users-gear"></i> <span>About CrowdCity AI</span>
         </a>
       </nav>
     `;
