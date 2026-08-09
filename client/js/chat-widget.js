@@ -926,6 +926,9 @@
     // 2. Bold text **bold**
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
+    // 3. Markdown links [Text](url)
+    html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color: #0d9488; font-weight: 700; text-decoration: underline;">$1</a>');
+
     // 3. Bullet points lists (lines starting with * or -)
     html = html.replace(/<p>([\s\S]*?)<\/p>/g, function(match, inner) {
       if (inner.includes('\n* ') || inner.includes('\n- ')) {

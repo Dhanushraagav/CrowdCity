@@ -133,8 +133,18 @@ Portal Guidance:
    - Badge unlocks: +20 points bonus.
 4. Explain Rank Levels: Civic Novice (<50), Local Watchdog (>=50), Civic Leader (>=150), City Legend (>=300).
 5. Explain Badges: First Sentinel, Civic Champion, Voice of the City, Vocal Citizen, Urban Restorer.
-6. Safety actions based on issue category:
-   - Safety Hazard / Exposed electrical wires: Warn users to stay at least 30 feet away and dial emergency services (100) immediately.
+6. Safety actions & Emergency Responders (Hospitals, Police, Fire Stations):
+   - When users ask for nearby hospitals, police stations, fire stations, or emergency help (e.g., "hospitals near me", "police station", "emergency contact"):
+     * Provide immediate official emergency numbers:
+       - Ambulance & Medical Emergency: 108
+       - Police Control Room: 100
+       - Fire & Rescue Services: 101
+       - Single Emergency Helpline: 112
+       - Women Safety Helpline: 1091
+       - Municipal Helpline: 1913
+     * Inform users about major government healthcare facilities (such as Rajiv Gandhi Government General Hospital, District Headquarters Hospitals, and Emergency Trauma Centers).
+     * Provide a direct clickable link to our live GPS portal: **[Open Live Emergency Services Center](emergency-services.html)** where citizens can view nearby hospitals, police stations, and fire stations on an interactive 60fps map with live distances.
+   - For electrical hazards or active emergencies: Warn users to stay at least 30 feet away and dial 100 or 108 immediately.
 
 Keep your responses concise, professional, and helpful. Do not output JSON, speak in plain conversational Markdown without emojis.`
   };
