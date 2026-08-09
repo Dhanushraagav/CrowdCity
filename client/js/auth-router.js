@@ -431,9 +431,11 @@ window.authRouter = {
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(3, 7, 18, 0.85);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        height: 100dvh;
+        max-height: 100dvh;
+        background: rgba(3, 7, 18, 0.88);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -441,37 +443,39 @@ window.authRouter = {
         opacity: 1;
         visibility: visible;
         transition: opacity 0.3s ease, visibility 0.3s ease;
-        font-family: system-ui, -apple-system, sans-serif;
-        padding: 1rem;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        padding: calc(1rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
         box-sizing: border-box;
       }
       .demo-notice-card {
         background: linear-gradient(135deg, #111827, #0f172a);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
         border-radius: 20px;
         max-width: 680px;
         width: 100%;
-        max-height: 90vh;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        max-height: 88vh;
+        max-height: 88dvh;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(13, 148, 136, 0.15);
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        animation: demoModalFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: demoModalFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         box-sizing: border-box;
         position: relative;
       }
       @keyframes demoModalFadeIn {
-        from { opacity: 0; transform: scale(0.93) translateY(20px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
+        from { opacity: 0; transform: scale(0.94) translate3d(0, 18px, 0); }
+        to { opacity: 1; transform: scale(1) translate3d(0, 0, 0); }
       }
       .demo-notice-header {
         position: relative;
         z-index: 1;
         padding: 1.25rem 1.5rem 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         display: flex;
         align-items: center;
         justify-content: space-between;
+        background: rgba(15, 23, 42, 0.6);
       }
       .demo-notice-header-left {
         display: flex;
@@ -480,7 +484,7 @@ window.authRouter = {
       }
       .demo-notice-header-icon {
         font-size: 1.75rem;
-        color: #3b82f6;
+        color: #38bdf8;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -493,31 +497,32 @@ window.authRouter = {
         letter-spacing: -0.02em;
       }
       .demo-notice-badge {
-        font-size: 0.7rem;
-        font-weight: 700;
+        font-size: 0.72rem;
+        font-weight: 800;
         text-transform: uppercase;
-        background: rgba(59, 130, 246, 0.15);
-        color: #60a5fa;
-        padding: 0.25rem 0.6rem;
+        background: rgba(20, 184, 166, 0.15);
+        color: #14b8a6;
+        padding: 0.3rem 0.7rem;
         border-radius: 9999px;
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        letter-spacing: 0.05em;
+        border: 1px solid rgba(20, 184, 166, 0.3);
+        letter-spacing: 0.06em;
       }
       .demo-notice-body {
         position: relative;
         z-index: 1;
-        padding: 1.25rem 1.5rem;
+        padding: 1.35rem 1.5rem;
         display: flex;
         flex-direction: column;
         gap: 1.25rem;
         box-sizing: border-box;
         overflow-y: auto;
-        max-height: calc(90vh - 120px);
+        -webkit-overflow-scrolling: touch;
+        max-height: calc(88vh - 130px);
       }
       .demo-notice-banner {
-        background: rgba(3, 7, 18, 0.6);
-        border: 1px solid rgba(59, 130, 246, 0.25);
-        border-radius: 12px;
+        background: rgba(3, 7, 18, 0.65);
+        border: 1.5px solid rgba(56, 189, 248, 0.25);
+        border-radius: 14px;
         padding: 1.25rem 1.5rem;
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -533,7 +538,7 @@ window.authRouter = {
         .demo-notice-banner {
           grid-template-columns: 1fr;
           gap: 1.25rem;
-          padding: 1rem 1.25rem;
+          padding: 1rem 1.15rem;
         }
         .demo-notice-col-left {
           padding-right: 0;
@@ -543,7 +548,7 @@ window.authRouter = {
         }
       }
       .demo-notice-banner-icon {
-        color: #60a5fa;
+        color: #38bdf8;
         font-size: 1.2rem;
         margin-top: 0.15rem;
         flex-shrink: 0;
@@ -551,7 +556,7 @@ window.authRouter = {
       .demo-notice-banner-text {
         font-size: 0.92rem;
         line-height: 1.6;
-        color: #f1f5f9;
+        color: #cbd5e1;
         margin: 0;
       }
       .demo-notice-banner-text strong {
@@ -572,30 +577,32 @@ window.authRouter = {
         gap: 0.85rem;
         cursor: pointer;
         user-select: none;
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1.5px solid rgba(255, 255, 255, 0.08);
         transition: all 0.2s ease;
+        min-height: 48px;
+        box-sizing: border-box;
       }
       .demo-notice-checkbox-wrapper:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.07);
+        background: rgba(20, 184, 166, 0.08);
+        border-color: rgba(20, 184, 166, 0.3);
       }
       .demo-notice-checkbox-input {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         border-radius: 6px;
-        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        border: 1.5px solid rgba(255, 255, 255, 0.3);
         background: rgba(255, 255, 255, 0.05);
         cursor: pointer;
-        accent-color: #0D9488;
+        accent-color: #14b8a6;
         flex-shrink: 0;
         transition: all 0.2s ease;
       }
       .demo-notice-checkbox-label {
-        font-size: 0.88rem;
-        color: #e2e8f0;
+        font-size: 0.9rem;
+        color: #f1f5f9;
         line-height: 1.4;
         font-weight: 600;
       }
@@ -603,18 +610,18 @@ window.authRouter = {
         position: relative;
         z-index: 1;
         padding: 1rem 1.5rem 1.25rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
         display: flex;
         justify-content: flex-end;
         gap: 0.85rem;
-        background: rgba(10, 15, 30, 0.5);
+        background: rgba(10, 15, 30, 0.6);
         box-sizing: border-box;
       }
       .demo-notice-btn {
-        padding: 0.7rem 1.5rem;
-        font-size: 0.9rem;
-        font-weight: 700;
-        border-radius: 10px;
+        padding: 0.75rem 1.6rem;
+        font-size: 0.92rem;
+        font-weight: 800;
+        border-radius: 12px;
         cursor: pointer;
         transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         display: inline-flex;
@@ -624,16 +631,17 @@ window.authRouter = {
         box-sizing: border-box;
       }
       .demo-notice-btn-primary {
-        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+        background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
         color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
       }
       .demo-notice-btn-primary:hover:not(:disabled) {
-        transform: translateY(-1.5px);
-        background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+        transform: translate3d(0, -2px, 0);
+        box-shadow: 0 12px 28px rgba(13, 148, 136, 0.45);
       }
       .demo-notice-btn-primary:active:not(:disabled) {
-        transform: translateY(0);
+        transform: translate3d(0, 0, 0);
       }
       .demo-notice-btn-primary:disabled {
         opacity: 0.35;
@@ -641,33 +649,37 @@ window.authRouter = {
         background: rgba(255, 255, 255, 0.05);
         color: rgba(255, 255, 255, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: none;
       }
       .demo-notice-btn-secondary {
         background: transparent;
         color: #cbd5e1;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
         text-decoration: none;
       }
       .demo-notice-btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.06);
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.25);
-        transform: translateY(-1.5px);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translate3d(0, -2px, 0);
       }
     `;
     document.head.appendChild(modalStyle);
+
+    // Lock body scrolling while Notice Modal is open
+    document.body.style.overflow = 'hidden';
 
     // Build the modal HTML elements dynamically
     const modal = document.createElement('div');
     modal.id = 'demo-notice-modal';
     modal.innerHTML = `
-      <div class="demo-notice-card">
+      <div class="demo-notice-card" role="dialog" aria-modal="true" aria-labelledby="demo-notice-modal-title">
         <div class="demo-notice-header">
           <div class="demo-notice-header-left">
             <div class="demo-notice-header-icon" style="margin-right: 0.25rem;">
-              <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="height: 32px; width: auto; display: block;" />
+              <img src="images/crowdcity_icon_transparent.png" onerror="this.onerror=null; this.src='/images/crowdcity_icon_transparent.png';" alt="CrowdCity Logo" style="height: 32px; width: auto; display: block;" />
             </div>
-            <h3 class="demo-notice-title">${t.title}</h3>
+            <h3 class="demo-notice-title" id="demo-notice-modal-title">${t.title}</h3>
           </div>
           <span class="demo-notice-badge">${t.badge}</span>
         </div>
@@ -675,7 +687,7 @@ window.authRouter = {
           <div class="demo-notice-banner">
             <!-- English Version -->
             <div class="demo-notice-col-left" style="display: flex; gap: 0.75rem; align-items: flex-start;">
-              <div class="demo-notice-banner-icon" style="color: #60a5fa; margin-top: 0.1rem;">
+              <div class="demo-notice-banner-icon">
                 <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                 </svg>
@@ -687,7 +699,7 @@ window.authRouter = {
             
             <!-- Tamil Version -->
             <div class="demo-notice-col-right" style="display: flex; gap: 0.75rem; align-items: flex-start;">
-              <div class="demo-notice-banner-icon" style="color: #60a5fa; margin-top: 0.1rem;">
+              <div class="demo-notice-banner-icon">
                 <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                 </svg>
@@ -697,10 +709,10 @@ window.authRouter = {
               </p>
             </div>
           </div>
-          <label class="demo-notice-checkbox-wrapper" for="demo-notice-checkbox">
+          <div class="demo-notice-checkbox-wrapper" id="demo-notice-checkbox-container">
             <input type="checkbox" id="demo-notice-checkbox" class="demo-notice-checkbox-input" />
-            <span class="demo-notice-checkbox-label">${t.checkbox}</span>
-          </label>
+            <label for="demo-notice-checkbox" class="demo-notice-checkbox-label">${t.checkbox}</label>
+          </div>
         </div>
         <div class="demo-notice-footer">
           <a href="https://github.com/Dhanushraagav/CrowdCity" target="_blank" class="demo-notice-btn demo-notice-btn-secondary">${t.learnMore}</a>
@@ -713,27 +725,45 @@ window.authRouter = {
 
     // Add interactivity
     const checkbox = document.getElementById('demo-notice-checkbox');
+    const container = document.getElementById('demo-notice-checkbox-container');
     const continueBtn = document.getElementById('demo-notice-continue-btn');
 
-    checkbox.addEventListener('change', function() {
-      continueBtn.disabled = !this.checked;
+    function updateContinueState() {
+      continueBtn.disabled = !checkbox.checked;
+    }
+
+    checkbox.addEventListener('change', updateContinueState);
+
+    // Enable clicking anywhere on the wrapper container to toggle checkbox smoothly
+    container.addEventListener('click', function(e) {
+      if (e.target !== checkbox) {
+        checkbox.checked = !checkbox.checked;
+        updateContinueState();
+      }
     });
 
-    continueBtn.addEventListener('click', function() {
+    function closeModal() {
       sessionStorage.removeItem('cc_show_demo_notice');
+      document.body.style.overflow = '';
       modal.style.opacity = '0';
       modal.style.visibility = 'hidden';
       setTimeout(() => {
-        modal.remove();
-        modalStyle.remove();
+        if (modal.parentNode) modal.remove();
+        if (modalStyle.parentNode) modalStyle.remove();
       }, 300);
-    });
+    }
 
-    // Make sure ESC key does not close it
+    continueBtn.addEventListener('click', closeModal);
+
+    // Prevent ESC key from closing, allow Enter key when checked
     window.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.getElementById('demo-notice-modal')) {
+      if (!document.getElementById('demo-notice-modal')) return;
+      if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
+      } else if (e.key === 'Enter' && checkbox.checked) {
+        e.preventDefault();
+        closeModal();
       }
     }, true);
   }
