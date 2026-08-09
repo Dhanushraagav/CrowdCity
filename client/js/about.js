@@ -12,7 +12,7 @@
     initCard3DTilt();
   });
 
-  // Hero Section Ultra-Luxury Fluid Silk Aurora & Quantum Stardust Canvas Animation
+  // Hero Section Ultra-Sleek Glowing Ambient Glass Orbs & Soft Aurora Glow Canvas Animation
   function initHeroCanvas() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas) return;
@@ -21,9 +21,7 @@
 
     let width = (canvas.width = canvas.offsetWidth);
     let height = (canvas.height = canvas.offsetHeight);
-
     let isMobile = window.innerWidth < 768;
-    let time = 0;
 
     let mouse = {
       x: width / 2,
@@ -32,33 +30,20 @@
       targetY: height / 2
     };
 
-    // Responsive Floating Stardust Micro-Particles
-    let particles = [];
-    function initParticles() {
-      isMobile = window.innerWidth < 768;
-      const count = isMobile ? 16 : 42;
-      particles = [];
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          radius: Math.random() * (isMobile ? 1.8 : 3.2) + 0.8,
-          baseAlpha: Math.random() * 0.4 + 0.25,
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: -Math.random() * 0.4 - 0.15,
-          color: i % 3 === 0 ? 'rgba(20, 184, 166,' : (i % 3 === 1 ? 'rgba(56, 189, 248,' : 'rgba(16, 185, 129,')
-        });
-      }
-    }
+    let time = 0;
 
-    initParticles();
+    // Responsive Ambient Floating Light Orbs
+    const orbs = [
+      { color: '20, 184, 166', baseRadius: 180, phaseX: 0, phaseY: 0, speedX: 0.006, speedY: 0.005, orbitX: 0.28, orbitY: 0.25 },
+      { color: '56, 189, 248', baseRadius: 220, phaseX: Math.PI * 0.5, phaseY: Math.PI * 0.7, speedX: 0.004, speedY: 0.007, orbitX: 0.32, orbitY: 0.22 },
+      { color: '16, 185, 129', baseRadius: 160, phaseX: Math.PI * 1.2, phaseY: Math.PI * 0.3, speedX: 0.007, speedY: 0.004, orbitX: 0.25, orbitY: 0.30 },
+      { color: '14, 148, 136', baseRadius: 240, phaseX: Math.PI * 1.8, phaseY: Math.PI * 1.4, speedX: 0.003, speedY: 0.006, orbitX: 0.30, orbitY: 0.28 }
+    ];
 
     window.addEventListener('resize', () => {
       width = canvas.width = canvas.offsetWidth;
       height = canvas.height = canvas.offsetHeight;
-      if ((window.innerWidth < 768) !== isMobile) {
-        initParticles();
-      }
+      isMobile = window.innerWidth < 768;
     });
 
     const heroSection = document.querySelector('.about-hero');
@@ -70,96 +55,47 @@
       });
     }
 
-    // 3 Layered Fluid Aurora Wave Ribbons
-    const waves = [
-      { amplitude: 38, frequency: 0.007, speed: 0.012, color: 'rgba(20, 184, 166, ', offset: 0 },
-      { amplitude: 48, frequency: 0.005, speed: 0.008, color: 'rgba(56, 189, 248, ', offset: Math.PI * 0.6 },
-      { amplitude: 30, frequency: 0.010, speed: 0.014, color: 'rgba(16, 185, 129, ', offset: Math.PI * 1.3 }
-    ];
-
-    function drawAuroraWave(wave, alphaMult) {
-      ctx.beginPath();
-      const step = isMobile ? 10 : 5;
-      ctx.moveTo(0, height);
-
-      for (let x = 0; x <= width + step; x += step) {
-        const yBase = height * 0.52;
-        const sin1 = Math.sin(x * wave.frequency + time * wave.speed + wave.offset);
-        const sin2 = Math.cos(x * wave.frequency * 0.65 - time * wave.speed * 0.75);
-        const distToMouse = Math.abs(x - mouse.x);
-        const mouseRipple = Math.exp(-distToMouse / 220) * (mouse.y - yBase) * 0.12;
-
-        const y = yBase + (sin1 + sin2 * 0.5) * wave.amplitude + mouseRipple;
-
-        if (x === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-
-      // Fluid Gradient Fill
-      const grad = ctx.createLinearGradient(0, height * 0.25, 0, height);
-      grad.addColorStop(0, wave.color + (0.32 * alphaMult) + ')');
-      grad.addColorStop(0.65, wave.color + (0.10 * alphaMult) + ')');
-      grad.addColorStop(1, 'rgba(9, 13, 22, 0)');
-
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      // Glowing Top Edge Line
-      ctx.lineWidth = isMobile ? 1.2 : 1.8;
-      ctx.strokeStyle = wave.color + (0.55 * alphaMult) + ')';
-      ctx.stroke();
-    }
-
     function animate() {
       time += 1;
       ctx.clearRect(0, 0, width, height);
 
-      // Mouse position easing
-      mouse.x += (mouse.targetX - mouse.x) * 0.06;
-      mouse.y += (mouse.targetY - mouse.y) * 0.06;
+      // Smooth mouse position damping
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
 
       const isLight = document.documentElement.classList.contains('light-theme');
-      const alphaMult = isLight ? 0.7 : 1.0;
+      const maxAlpha = isLight ? 0.28 : 0.42;
 
-      // 1. Render Fluid Aurora Waves
-      waves.forEach(w => drawAuroraWave(w, alphaMult));
+      // Render Floating Glowing Ambient Glass Orbs
+      orbs.forEach(orb => {
+        const radiusScale = isMobile ? 0.65 : 1.0;
+        const radius = orb.baseRadius * radiusScale * (1 + Math.sin(time * 0.008 + orb.phaseX) * 0.08);
 
-      // 2. Render Floating Quantum Stardust Particles
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
+        const cx = width * 0.5 + Math.cos(time * orb.speedX + orb.phaseX) * (width * orb.orbitX);
+        const cy = height * 0.5 + Math.sin(time * orb.speedY + orb.phaseY) * (height * orb.orbitY);
 
-        if (p.y < -10) {
-          p.y = height + 10;
-          p.x = Math.random() * width;
-        }
-        if (p.x < -10) p.x = width + 10;
-        if (p.x > width + 10) p.x = -10;
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.8);
+        grad.addColorStop(0, `rgba(${orb.color}, ${maxAlpha})`);
+        grad.addColorStop(0.45, `rgba(${orb.color}, ${maxAlpha * 0.45})`);
+        grad.addColorStop(1, `rgba(${orb.color}, 0)`);
 
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        let alpha = p.baseAlpha;
-        if (dist < 160) {
-          alpha = Math.min(0.95, p.baseAlpha + (1 - dist / 160) * 0.55);
-        }
-
-        const radGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 2.8);
-        radGrad.addColorStop(0, p.color + (alpha * alphaMult) + ')');
-        radGrad.addColorStop(1, p.color + '0)');
-
-        ctx.fillStyle = radGrad;
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius * 2.8, 0, Math.PI * 2);
+        ctx.arc(cx, cy, radius * 1.8, 0, Math.PI * 2);
         ctx.fill();
       });
+
+      // Render Interactive Soft Mouse Spotlight Halo
+      const mouseGradRadius = isMobile ? 120 : 220;
+      const mouseGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouseGradRadius);
+      mouseGrad.addColorStop(0, `rgba(56, 189, 248, ${maxAlpha * 0.35})`);
+      mouseGrad.addColorStop(0.5, `rgba(20, 184, 166, ${maxAlpha * 0.15})`);
+      mouseGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = mouseGrad;
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, mouseGradRadius, 0, Math.PI * 2);
+      ctx.fill();
 
       requestAnimationFrame(animate);
     }
