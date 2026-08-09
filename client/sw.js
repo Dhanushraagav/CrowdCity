@@ -55,9 +55,10 @@ self.addEventListener('fetch', (event) => {
     requestUrl.pathname.startsWith('/api/') ||
     event.request.url.includes('supabase.co') ||
     event.request.url.includes('mapbox.com') ||
-    event.request.url.includes('cloudflare')
+    event.request.url.includes('cloudflare') ||
+    event.request.url.includes('jsdelivr')
   ) {
-    event.respondWith(fetch(event.request));
+    // Return early to let browser perform default fetch natively without Service Worker interception
     return;
   }
 
