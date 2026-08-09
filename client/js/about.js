@@ -12,7 +12,7 @@
     initCard3DTilt();
   });
 
-  // Hero Section Interactive Network Node Canvas Animation
+  // Hero Section Ultra-Luxury Fluid Silk Aurora & Quantum Stardust Canvas Animation
   function initHeroCanvas() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas) return;
@@ -22,35 +22,42 @@
     let width = (canvas.width = canvas.offsetWidth);
     let height = (canvas.height = canvas.offsetHeight);
 
-    let mouseX = width / 2;
-    let mouseY = height / 2;
-
-    let nodes = [];
     let isMobile = window.innerWidth < 768;
+    let time = 0;
 
-    function buildNodes() {
+    let mouse = {
+      x: width / 2,
+      y: height / 2,
+      targetX: width / 2,
+      targetY: height / 2
+    };
+
+    // Responsive Floating Stardust Micro-Particles
+    let particles = [];
+    function initParticles() {
       isMobile = window.innerWidth < 768;
-      const numNodes = isMobile ? 12 : 42;
-      nodes = [];
-      for (let i = 0; i < numNodes; i++) {
-        nodes.push({
+      const count = isMobile ? 16 : 42;
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * (isMobile ? 0.35 : 0.6),
-          vy: (Math.random() - 0.5) * (isMobile ? 0.35 : 0.6),
-          radius: isMobile ? (Math.random() * 1.8 + 1.2) : (Math.random() * 3.2 + 1.8),
-          alpha: isMobile ? (Math.random() * 0.3 + 0.25) : (Math.random() * 0.4 + 0.45)
+          radius: Math.random() * (isMobile ? 1.8 : 3.2) + 0.8,
+          baseAlpha: Math.random() * 0.4 + 0.25,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: -Math.random() * 0.4 - 0.15,
+          color: i % 3 === 0 ? 'rgba(20, 184, 166,' : (i % 3 === 1 ? 'rgba(56, 189, 248,' : 'rgba(16, 185, 129,')
         });
       }
     }
 
-    buildNodes();
+    initParticles();
 
     window.addEventListener('resize', () => {
       width = canvas.width = canvas.offsetWidth;
       height = canvas.height = canvas.offsetHeight;
       if ((window.innerWidth < 768) !== isMobile) {
-        buildNodes();
+        initParticles();
       }
     });
 
@@ -58,54 +65,99 @@
     if (heroSection) {
       heroSection.addEventListener('mousemove', (e) => {
         const rect = heroSection.getBoundingClientRect();
-        mouseX = e.clientX - rect.left;
-        mouseY = e.clientY - rect.top;
+        mouse.targetX = e.clientX - rect.left;
+        mouse.targetY = e.clientY - rect.top;
       });
     }
 
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
+    // 3 Layered Fluid Aurora Wave Ribbons
+    const waves = [
+      { amplitude: 38, frequency: 0.007, speed: 0.012, color: 'rgba(20, 184, 166, ', offset: 0 },
+      { amplitude: 48, frequency: 0.005, speed: 0.008, color: 'rgba(56, 189, 248, ', offset: Math.PI * 0.6 },
+      { amplitude: 30, frequency: 0.010, speed: 0.014, color: 'rgba(16, 185, 129, ', offset: Math.PI * 1.3 }
+    ];
 
-      const maxDist = isMobile ? 110 : 165;
-      const alphaMult = isMobile ? 0.18 : 0.42;
+    function drawAuroraWave(wave, alphaMult) {
+      ctx.beginPath();
+      const step = isMobile ? 10 : 5;
+      ctx.moveTo(0, height);
 
-      // Draw connecting network lines with screen-appropriate density
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < maxDist) {
-            const lineAlpha = (1 - dist / maxDist) * alphaMult;
-            ctx.strokeStyle = `rgba(13, 148, 136, ${lineAlpha})`;
-            ctx.lineWidth = isMobile ? 0.9 : 1.25;
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.stroke();
-          }
+      for (let x = 0; x <= width + step; x += step) {
+        const yBase = height * 0.52;
+        const sin1 = Math.sin(x * wave.frequency + time * wave.speed + wave.offset);
+        const sin2 = Math.cos(x * wave.frequency * 0.65 - time * wave.speed * 0.75);
+        const distToMouse = Math.abs(x - mouse.x);
+        const mouseRipple = Math.exp(-distToMouse / 220) * (mouse.y - yBase) * 0.12;
+
+        const y = yBase + (sin1 + sin2 * 0.5) * wave.amplitude + mouseRipple;
+
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
         }
       }
 
-      // Draw and update glowing nodes with active mouse attraction
-      nodes.forEach(node => {
-        const mdx = mouseX - node.x;
-        const mdy = mouseY - node.y;
-        const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-        if (mdist < (isMobile ? 120 : 220)) {
-          node.x += (mdx / mdist) * 0.25;
-          node.y += (mdy / mdist) * 0.25;
+      ctx.lineTo(width, height);
+      ctx.lineTo(0, height);
+      ctx.closePath();
+
+      // Fluid Gradient Fill
+      const grad = ctx.createLinearGradient(0, height * 0.25, 0, height);
+      grad.addColorStop(0, wave.color + (0.32 * alphaMult) + ')');
+      grad.addColorStop(0.65, wave.color + (0.10 * alphaMult) + ')');
+      grad.addColorStop(1, 'rgba(9, 13, 22, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Glowing Top Edge Line
+      ctx.lineWidth = isMobile ? 1.2 : 1.8;
+      ctx.strokeStyle = wave.color + (0.55 * alphaMult) + ')';
+      ctx.stroke();
+    }
+
+    function animate() {
+      time += 1;
+      ctx.clearRect(0, 0, width, height);
+
+      // Mouse position easing
+      mouse.x += (mouse.targetX - mouse.x) * 0.06;
+      mouse.y += (mouse.targetY - mouse.y) * 0.06;
+
+      const isLight = document.documentElement.classList.contains('light-theme');
+      const alphaMult = isLight ? 0.7 : 1.0;
+
+      // 1. Render Fluid Aurora Waves
+      waves.forEach(w => drawAuroraWave(w, alphaMult));
+
+      // 2. Render Floating Quantum Stardust Particles
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.y < -10) {
+          p.y = height + 10;
+          p.x = Math.random() * width;
+        }
+        if (p.x < -10) p.x = width + 10;
+        if (p.x > width + 10) p.x = -10;
+
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        let alpha = p.baseAlpha;
+        if (dist < 160) {
+          alpha = Math.min(0.95, p.baseAlpha + (1 - dist / 160) * 0.55);
         }
 
-        node.x += node.vx;
-        node.y += node.vy;
+        const radGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 2.8);
+        radGrad.addColorStop(0, p.color + (alpha * alphaMult) + ')');
+        radGrad.addColorStop(1, p.color + '0)');
 
-        if (node.x < 0 || node.x > width) node.vx *= -1;
-        if (node.y < 0 || node.y > height) node.vy *= -1;
-
-        ctx.fillStyle = `rgba(13, 148, 136, ${node.alpha})`;
+        ctx.fillStyle = radGrad;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius * 2.8, 0, Math.PI * 2);
         ctx.fill();
       });
 
