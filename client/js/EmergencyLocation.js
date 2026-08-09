@@ -42,8 +42,8 @@ window.EmergencyLocation = {
         },
         {
           enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000
+          timeout: 3000,
+          maximumAge: 300000
         }
       );
     });
