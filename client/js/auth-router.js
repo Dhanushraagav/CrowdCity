@@ -54,7 +54,7 @@
   // Record start time to ensure minimum loader duration
   window.authLoaderStartTime = Date.now();
 
-  // Inject ultra-sleek Linear Pulse Bar Loader (ZERO CIRCLES, ZERO LOGOS)
+  // Inject Google Material 3 Harmonic 4-Dot Wave Loader (ZERO LOGOS, MINIMAL TEXT)
   const loaderStyle = document.createElement('style');
   loaderStyle.id = 'global-page-loader-style';
   loaderStyle.innerHTML = `
@@ -100,33 +100,48 @@
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
-    .loader-pulse-bar {
-      width: 150px;
-      height: 4px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 15px rgba(13, 148, 136, 0.2);
+    .g-dots-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 36px;
     }
-    .light-theme .loader-pulse-bar {
-      background: rgba(15, 23, 42, 0.08);
+    .g-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      animation: gDotBounce 1.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .loader-pulse-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 40%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #0d9488 0%, #38bdf8 50%, #10b981 100%);
-      animation: pulseBarFlow 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+    .g-dot:nth-child(1) {
+      background: #14b8a6;
+      box-shadow: 0 0 14px rgba(20, 184, 166, 0.65);
+      animation-delay: 0s;
     }
-    @keyframes pulseBarFlow {
-      0% { left: 0%; width: 25%; }
-      50% { width: 55%; }
-      100% { left: 75%; width: 25%; }
+    .g-dot:nth-child(2) {
+      background: #38bdf8;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.65);
+      animation-delay: 0.15s;
+    }
+    .g-dot:nth-child(3) {
+      background: #10b981;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.65);
+      animation-delay: 0.3s;
+    }
+    .g-dot:nth-child(4) {
+      background: #0284c7;
+      box-shadow: 0 0 14px rgba(2, 132, 199, 0.65);
+      animation-delay: 0.45s;
+    }
+    @keyframes gDotBounce {
+      0%, 100% {
+        transform: translateY(0) scale(0.85);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translateY(-13px) scale(1.15);
+        opacity: 1;
+      }
     }
     .gov-loader-title {
       font-size: 0.72rem;
@@ -150,8 +165,11 @@
     loader.id = 'global-page-loader';
     loader.innerHTML = `
       <div id="gov-top-loader-bar"></div>
-      <div class="loader-pulse-bar">
-        <div class="loader-pulse-line"></div>
+      <div class="g-dots-container">
+        <div class="g-dot"></div>
+        <div class="g-dot"></div>
+        <div class="g-dot"></div>
+        <div class="g-dot"></div>
       </div>
       <div class="gov-loader-title">Loading</div>
     `;
