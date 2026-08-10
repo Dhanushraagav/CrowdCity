@@ -392,7 +392,14 @@ window.authRouter = {
     // Avoid showing on login or authentication pages
     const path = window.location.pathname;
     const normalizedPath = path.toLowerCase().replace(/\.html$/, '');
-    if (normalizedPath.endsWith('/auth') || normalizedPath.endsWith('/authority-login') || normalizedPath.includes('auth.html') || normalizedPath.includes('authority-login.html') || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index')) {
+    if (
+      normalizedPath.endsWith('/auth') ||
+      normalizedPath.endsWith('/authority-login') ||
+      normalizedPath.includes('auth.html') ||
+      normalizedPath.includes('authority-login.html') ||
+      normalizedPath.endsWith('/') ||
+      normalizedPath.endsWith('/index')
+    ) {
       return;
     }
 
@@ -404,7 +411,7 @@ window.authRouter = {
     const translations = {
       en: {
         title: "Notice",
-        badge: "Sandbox",
+        badge: "SANDBOX",
         checkbox: "I understand that this is a demonstration application.",
         learnMore: "Learn More",
         continue: "Continue"
@@ -426,349 +433,338 @@ window.authRouter = {
     modalStyle.id = 'demo-notice-modal-style';
     modalStyle.innerHTML = `
       #demo-notice-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        height: 100dvh;
-        max-height: 100dvh;
-        background: rgba(3, 7, 18, 0.88);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999999;
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-        padding: calc(1rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
-        box-sizing: border-box;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        background: rgba(3, 7, 18, 0.85) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 2147483647 !important;
+        padding: calc(1rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+        box-sizing: border-box !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
       }
       .demo-notice-card {
-        background: linear-gradient(135deg, #111827, #0f172a);
-        border: 1.5px solid rgba(255, 255, 255, 0.12);
-        border-radius: 20px;
-        max-width: 680px;
-        width: 100%;
-        max-height: 88vh;
-        max-height: 88dvh;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(13, 148, 136, 0.15);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        animation: demoModalFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-        box-sizing: border-box;
-        position: relative;
+        background: #0b1329 !important;
+        background: linear-gradient(145deg, #0e172e 0%, #080e1e 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 20px !important;
+        max-width: 520px !important;
+        width: 100% !important;
+        max-height: 90vh !important;
+        max-height: 90dvh !important;
+        box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(13, 148, 136, 0.12) !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        animation: demoModalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-sizing: border-box !important;
+        position: relative !important;
       }
-      @keyframes demoModalFadeIn {
-        from { opacity: 0; transform: scale(0.94) translate3d(0, 18px, 0); }
+      @keyframes demoModalPop {
+        from { opacity: 0; transform: scale(0.95) translate3d(0, 12px, 0); }
         to { opacity: 1; transform: scale(1) translate3d(0, 0, 0); }
       }
       .demo-notice-header {
-        position: relative;
-        z-index: 1;
-        padding: 1.25rem 1.5rem 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: rgba(15, 23, 42, 0.6);
+        padding: 1.25rem 1.5rem 1rem !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
       }
       .demo-notice-header-left {
-        display: flex;
-        align-items: center;
-        gap: 0.85rem;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.85rem !important;
       }
-      .demo-notice-header-icon {
-        font-size: 1.75rem;
-        color: #38bdf8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .demo-notice-logo {
+        height: 32px !important;
+        width: auto !important;
+        display: block !important;
       }
       .demo-notice-title {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #ffffff;
-        margin: 0;
-        letter-spacing: -0.02em;
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        margin: 0 !important;
+        letter-spacing: -0.02em !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
       }
       .demo-notice-badge {
-        font-size: 0.72rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        background: rgba(20, 184, 166, 0.15);
-        color: #14b8a6;
-        padding: 0.3rem 0.7rem;
-        border-radius: 9999px;
-        border: 1px solid rgba(20, 184, 166, 0.3);
-        letter-spacing: 0.06em;
+        font-size: 0.7rem !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        background: rgba(13, 148, 136, 0.15) !important;
+        color: #14b8a6 !important;
+        padding: 0.3rem 0.75rem !important;
+        border-radius: 9999px !important;
+        border: 1px solid rgba(13, 148, 136, 0.3) !important;
+        letter-spacing: 0.08em !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
       }
       .demo-notice-body {
-        position: relative;
-        z-index: 1;
-        padding: 1.35rem 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        box-sizing: border-box;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        max-height: calc(88vh - 130px);
+        padding: 1.25rem 1.5rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+        box-sizing: border-box !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-height: calc(90vh - 130px) !important;
+        max-height: calc(90dvh - 130px) !important;
       }
-      .demo-notice-banner {
-        background: rgba(3, 7, 18, 0.65);
-        border: 1.5px solid rgba(56, 189, 248, 0.25);
-        border-radius: 14px;
-        padding: 1.25rem 1.5rem;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        box-sizing: border-box;
-        position: relative;
+      .demo-notice-box {
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.15rem !important;
+        display: flex !important;
+        gap: 0.85rem !important;
+        align-items: flex-start !important;
+        box-sizing: border-box !important;
       }
-      .demo-notice-col-left {
-        padding-right: 1.5rem;
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
+      .demo-notice-info-icon {
+        width: 22px !important;
+        height: 22px !important;
+        background: #0ea5e9 !important;
+        color: #ffffff !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.75rem !important;
+        font-weight: 900 !important;
+        flex-shrink: 0 !important;
+        margin-top: 0.15rem !important;
+        font-family: serif !important;
+        font-style: italic !important;
       }
-      @media (max-width: 768px) {
-        .demo-notice-banner {
-          grid-template-columns: 1fr;
-          gap: 1.25rem;
-          padding: 1rem 1.15rem;
-        }
-        .demo-notice-col-left {
-          padding-right: 0;
-          border-right: none;
-          padding-bottom: 1.25rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
+      .demo-notice-text {
+        font-size: 0.88rem !important;
+        line-height: 1.55 !important;
+        color: #94a3b8 !important;
+        margin: 0 !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
       }
-      .demo-notice-banner-icon {
-        color: #38bdf8;
-        font-size: 1.2rem;
-        margin-top: 0.15rem;
-        flex-shrink: 0;
+      .demo-notice-text strong.red {
+        color: #f87171 !important;
+        font-weight: 800 !important;
       }
-      .demo-notice-banner-text {
-        font-size: 0.92rem;
-        line-height: 1.6;
-        color: #cbd5e1;
-        margin: 0;
+      .demo-notice-text strong.yellow {
+        color: #fbbf24 !important;
+        font-weight: 800 !important;
       }
-      .demo-notice-banner-text strong {
-        color: #ffffff;
-        font-weight: 800;
+      .demo-notice-checkbox-block {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.85rem !important;
+        cursor: pointer !important;
+        padding: 0.85rem 1rem !important;
+        border-radius: 12px !important;
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        transition: all 0.2s ease !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+        box-sizing: border-box !important;
       }
-      .demo-notice-banner-text .alert-strong {
-        color: #f87171;
-        font-weight: 800;
+      .demo-notice-checkbox-block:hover {
+        border-color: rgba(20, 184, 166, 0.3) !important;
+        background: rgba(20, 184, 166, 0.05) !important;
       }
-      .demo-notice-banner-text .alert-highlight {
-        color: #fbbf24;
-        font-weight: 800;
+      .demo-notice-check-box {
+        width: 22px !important;
+        height: 22px !important;
+        border-radius: 6px !important;
+        border: 2px solid rgba(255, 255, 255, 0.25) !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+        flex-shrink: 0 !important;
+        transition: all 0.2s ease !important;
       }
-      .demo-notice-checkbox-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 0.85rem;
-        cursor: pointer;
-        user-select: none;
-        padding: 0.75rem 1rem;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1.5px solid rgba(255, 255, 255, 0.08);
-        transition: all 0.2s ease;
-        min-height: 48px;
-        box-sizing: border-box;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
+      .demo-notice-check-box svg {
+        width: 14px !important;
+        height: 14px !important;
+        opacity: 0 !important;
+        transform: scale(0.5) !important;
+        transition: all 0.2s ease !important;
       }
-      .demo-notice-checkbox-wrapper:hover {
-        background: rgba(20, 184, 166, 0.08);
-        border-color: rgba(20, 184, 166, 0.3);
+      .demo-notice-checkbox-block.checked .demo-notice-check-box {
+        background: #14b8a6 !important;
+        border-color: #14b8a6 !important;
+        box-shadow: 0 0 12px rgba(20, 184, 166, 0.4) !important;
       }
-      .demo-notice-checkbox-input {
-        width: 22px;
-        height: 22px;
-        border-radius: 6px;
-        border: 1.5px solid rgba(255, 255, 255, 0.3);
-        background: rgba(255, 255, 255, 0.05);
-        cursor: pointer;
-        accent-color: #14b8a6;
-        flex-shrink: 0;
-        transition: all 0.2s ease;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
+      .demo-notice-checkbox-block.checked .demo-notice-check-box svg {
+        opacity: 1 !important;
+        transform: scale(1) !important;
       }
       .demo-notice-checkbox-label {
-        font-size: 0.9rem;
-        color: #f1f5f9;
-        line-height: 1.4;
-        font-weight: 600;
-        cursor: pointer;
-        touch-action: manipulation;
+        font-size: 0.88rem !important;
+        color: #ffffff !important;
+        line-height: 1.4 !important;
+        font-weight: 700 !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
       }
       .demo-notice-footer {
-        position: relative;
-        z-index: 1;
-        padding: 1rem 1.5rem 1.25rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.85rem;
-        background: rgba(10, 15, 30, 0.6);
-        box-sizing: border-box;
+        padding: 1rem 1.5rem 1.25rem !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        gap: 0.85rem !important;
+        background: rgba(8, 14, 30, 0.8) !important;
+        box-sizing: border-box !important;
       }
       .demo-notice-btn {
-        padding: 0.75rem 1.6rem;
-        font-size: 0.92rem;
-        font-weight: 800;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        outline: none;
-        box-sizing: border-box;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
+        padding: 0.75rem 1.6rem !important;
+        font-size: 0.92rem !important;
+        font-weight: 800 !important;
+        border-radius: 12px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        outline: none !important;
+        border: none !important;
+        box-sizing: border-box !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
       }
-      .demo-notice-btn-primary {
-        background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
-        color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+      .demo-notice-btn-learn {
+        background: transparent !important;
+        color: #94a3b8 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        text-decoration: none !important;
       }
-      .demo-notice-btn-primary:hover:not(:disabled) {
-        transform: translate3d(0, -2px, 0);
-        box-shadow: 0 12px 28px rgba(13, 148, 136, 0.45);
+      .demo-notice-btn-learn:hover {
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.25) !important;
       }
-      .demo-notice-btn-primary:active:not(:disabled) {
-        transform: translate3d(0, 0, 0);
+      .demo-notice-btn-continue {
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: rgba(255, 255, 255, 0.35) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        cursor: not-allowed !important;
       }
-      .demo-notice-btn-primary:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-        background: rgba(255, 255, 255, 0.05);
-        color: rgba(255, 255, 255, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: none;
-        pointer-events: none;
+      .demo-notice-btn-continue.active {
+        background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 6px 20px rgba(13, 148, 136, 0.35) !important;
+        cursor: pointer !important;
       }
-      .demo-notice-btn-secondary {
-        background: transparent;
-        color: #cbd5e1;
-        border: 1.5px solid rgba(255, 255, 255, 0.15);
-        text-decoration: none;
-      }
-      .demo-notice-btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.06);
-        color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.3);
-        transform: translate3d(0, -2px, 0);
+      .demo-notice-btn-continue.active:hover {
+        transform: translate3d(0, -1.5px, 0) !important;
+        box-shadow: 0 10px 25px rgba(13, 148, 136, 0.5) !important;
       }
     `;
     document.head.appendChild(modalStyle);
 
-    // Lock body scrolling while Notice Modal is open
+    // Lock body scroll
     document.body.style.overflow = 'hidden';
 
-    // Build the modal HTML elements dynamically
+    // Modal DOM Container
     const modal = document.createElement('div');
     modal.id = 'demo-notice-modal';
     modal.innerHTML = `
-      <div class="demo-notice-card" role="dialog" aria-modal="true" aria-labelledby="demo-notice-modal-title">
+      <div class="demo-notice-card" role="dialog" aria-modal="true">
         <div class="demo-notice-header">
           <div class="demo-notice-header-left">
-            <div class="demo-notice-header-icon" style="margin-right: 0.25rem;">
-              <img src="images/crowdcity_icon_transparent.png" onerror="this.onerror=null; this.src='/images/crowdcity_icon_transparent.png';" alt="CrowdCity Logo" style="height: 32px; width: auto; display: block;" />
-            </div>
-            <h3 class="demo-notice-title" id="demo-notice-modal-title">${t.title}</h3>
+            <img src="images/crowdcity_icon_transparent.png" onerror="this.onerror=null; this.src='/images/crowdcity_icon_transparent.png';" alt="CrowdCity Logo" class="demo-notice-logo" />
+            <h3 class="demo-notice-title">${t.title}</h3>
           </div>
           <span class="demo-notice-badge">${t.badge}</span>
         </div>
         <div class="demo-notice-body">
-          <div class="demo-notice-banner">
-            <!-- English Version -->
-            <div class="demo-notice-col-left" style="display: flex; gap: 0.75rem; align-items: flex-start;">
-              <div class="demo-notice-banner-icon">
-                <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                </svg>
-              </div>
-              <p class="demo-notice-banner-text">
-                This is a <strong class="alert-strong">demonstration prototype</strong> for project purposes, <strong class="alert-strong">not an official government service</strong>. All complaints, accounts, and analytics are simulated/sample data. <span class="alert-highlight">Do not submit confidential, personal, financial, or sensitive information</span>. The developers are not liable for actions based on this prototype.
-              </p>
-            </div>
-            
-            <!-- Tamil Version -->
-            <div class="demo-notice-col-right" style="display: flex; gap: 0.75rem; align-items: flex-start;">
-              <div class="demo-notice-banner-icon">
-                <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                </svg>
-              </div>
-              <p class="demo-notice-banner-text">
-                இது ஒரு <strong class="alert-strong">மாதிரி முன்மாதிரி (prototype)</strong> செயலி, <strong class="alert-strong">அதிகாரப்பூர்வ அரசு சேவை அல்ல</strong>. இதில் உள்ள புகார்கள் மற்றும் தரவுகள் அனைத்தும் மாதிரி தகவல்களே. <span class="alert-highlight">ரகசியமான, தனிப்பட்ட, நிதி அல்லது உணர்வுப்பூர்வமான தகவல்களை சமர்ப்பிக்க வேண்டாம்</span>. இதில் காட்டப்படும் தகவல்களால் ஏற்படும் விளைவுகளுக்கு டெவலப்பர்கள் பொறுப்பல்ல.
-              </p>
-            </div>
+          <!-- English Box -->
+          <div class="demo-notice-box">
+            <div class="demo-notice-info-icon">i</div>
+            <p class="demo-notice-text">
+              This is a <strong class="red">demonstration prototype</strong> for project purposes, <strong class="red">not an official government service</strong>. All complaints, accounts, and analytics are simulated/sample data. <strong class="yellow">Do not submit confidential, personal, financial, or sensitive information.</strong> The developers are not liable for actions based on this prototype.
+            </p>
           </div>
-          <label class="demo-notice-checkbox-wrapper" for="demo-notice-checkbox">
-            <input type="checkbox" id="demo-notice-checkbox" class="demo-notice-checkbox-input" />
+          
+          <!-- Tamil Box -->
+          <div class="demo-notice-box">
+            <div class="demo-notice-info-icon">i</div>
+            <p class="demo-notice-text">
+              இது ஒரு <strong class="red">மாதிரி முன்மாதிரி (prototype)</strong> செயலி, <strong class="red">அதிகாரப்பூர்வ அரசு சேவை அல்ல</strong>. இதில் உள்ள புகார்கள் மற்றும் தரவுகள் அனைத்தும் மாதிரி தகவல்களே. <strong class="yellow">ரகசியமான, தனிப்பட்ட, நிதி அல்லது உணர்வுப்பூர்வமான தகவல்களை சமர்ப்பிக்க வேண்டாம்.</strong> இதில் காட்டப்படும் தகவல்களால் ஏற்படும் விளைவுகளுக்கு டெவலப்பர்கள் பொறுப்பல்ல.
+            </p>
+          </div>
+
+          <!-- Checkbox Block -->
+          <div id="demo-notice-checkbox-block" class="demo-notice-checkbox-block">
+            <div class="demo-notice-check-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
             <span class="demo-notice-checkbox-label">${t.checkbox}</span>
-          </label>
+          </div>
         </div>
         <div class="demo-notice-footer">
-          <a href="https://github.com/Dhanushraagav/CrowdCity" target="_blank" class="demo-notice-btn demo-notice-btn-secondary">${t.learnMore}</a>
-          <button type="button" id="demo-notice-continue-btn" class="demo-notice-btn demo-notice-btn-primary" disabled>${t.continue}</button>
+          <a href="https://github.com/Dhanushraagav/CrowdCity" target="_blank" class="demo-notice-btn demo-notice-btn-learn">${t.learnMore}</a>
+          <button type="button" id="demo-notice-continue-btn" class="demo-notice-btn demo-notice-btn-continue">${t.continue}</button>
         </div>
       </div>
     `;
 
     document.body.appendChild(modal);
 
-    // Add interactivity with instant PWA touch support
-    const checkbox = document.getElementById('demo-notice-checkbox');
+    // Interactive State Manager
+    let isChecked = false;
+    const checkboxBlock = document.getElementById('demo-notice-checkbox-block');
     const continueBtn = document.getElementById('demo-notice-continue-btn');
 
-    function updateContinueState() {
-      continueBtn.disabled = !checkbox.checked;
-    }
-
-    checkbox.addEventListener('change', updateContinueState);
-
-    let isClosing = false;
-    function closeModal(e) {
-      if (isClosing) return;
-      if (continueBtn.disabled) return;
-
+    // Toggle Checkbox ON / OFF instantly on 1 tap
+    function toggleCheckbox(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
+      isChecked = !isChecked;
+      if (isChecked) {
+        checkboxBlock.classList.add('checked');
+        continueBtn.classList.add('active');
+      } else {
+        checkboxBlock.classList.remove('checked');
+        continueBtn.classList.remove('active');
+      }
+    }
 
-      isClosing = true;
+    checkboxBlock.addEventListener('click', toggleCheckbox);
+
+    // Continue Action Handler
+    function handleContinue(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!isChecked) return;
+
       sessionStorage.removeItem('cc_show_demo_notice');
       document.body.style.overflow = '';
 
-      modal.style.pointerEvents = 'none';
       modal.style.opacity = '0';
       modal.style.visibility = 'hidden';
-
       setTimeout(() => {
         if (modal.parentNode) modal.remove();
         if (modalStyle.parentNode) modalStyle.remove();
-      }, 200);
+      }, 150);
     }
 
-    // Fast response on both click and touchend for PWA mobile devices
-    continueBtn.addEventListener('click', closeModal);
-    continueBtn.addEventListener('touchend', closeModal);
+    continueBtn.addEventListener('click', handleContinue);
 
     // Prevent ESC key from closing, allow Enter key when checked
     window.addEventListener('keydown', function(e) {
@@ -776,9 +772,9 @@ window.authRouter = {
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
-      } else if (e.key === 'Enter' && checkbox.checked) {
+      } else if (e.key === 'Enter' && isChecked) {
         e.preventDefault();
-        closeModal();
+        handleContinue();
       }
     }, true);
   }
@@ -797,4 +793,5 @@ window.authRouter = {
     document.addEventListener('DOMContentLoaded', injectDemoNotice);
   }
 })();
+
 
