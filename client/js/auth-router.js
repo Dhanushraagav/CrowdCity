@@ -54,7 +54,7 @@
   // Record start time to ensure minimum loader duration
   window.authLoaderStartTime = Date.now();
 
-  // Inject premium government top progress bar loader (ZERO LOGOS)
+  // Inject ultra-premium minimalist dual-ring loader (ZERO LOGOS, MINIMAL TEXT)
   const loaderStyle = document.createElement('style');
   loaderStyle.id = 'global-page-loader-style';
   loaderStyle.innerHTML = `
@@ -64,18 +64,21 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(11, 19, 41, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 999999;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
+      z-index: 2147483646;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       opacity: 1;
       visibility: visible;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+    .light-theme #global-page-loader {
+      background: rgba(255, 255, 255, 0.95);
     }
     #global-page-loader.fade-out {
       opacity: 0;
@@ -88,36 +91,62 @@
       left: 0;
       width: 100%;
       height: 3px;
-      background: linear-gradient(90deg, #0f766e, #2dd4bf, #0f766e);
-      z-index: 1000000;
-      animation: govTopLoaderProgress 1.5s linear infinite;
-      box-shadow: 0 0 10px rgba(15, 118, 110, 0.5);
+      background: linear-gradient(90deg, #0d9488 0%, #38bdf8 50%, #10b981 100%);
+      z-index: 2147483647;
+      animation: govTopLoaderProgress 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      box-shadow: 0 0 12px rgba(13, 148, 136, 0.6);
     }
     @keyframes govTopLoaderProgress {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
-    .gov-loader-spinner {
-      width: 44px;
-      height: 44px;
-      border: 3.5px solid rgba(13, 148, 136, 0.15);
-      border-top-color: #0d9488;
-      border-right-color: #0d9488;
-      border-radius: 50%;
-      animation: govSpinnerRotate 0.75s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
-      box-shadow: 0 0 15px rgba(13, 148, 136, 0.2);
+    .loader-ring-wrapper {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    @keyframes govSpinnerRotate {
+    .loader-outer-ring {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: #14b8a6;
+      border-right-color: #38bdf8;
+      animation: loaderSpin 1.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+      box-shadow: 0 0 20px rgba(20, 184, 166, 0.35);
+    }
+    .loader-inner-core {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #14b8a6 0%, #38bdf8 100%);
+      animation: loaderPulse 1.1s ease-in-out infinite alternate;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+    }
+    @keyframes loaderSpin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    @keyframes loaderPulse {
+      0% { transform: scale(0.7); opacity: 0.6; }
+      100% { transform: scale(1.15); opacity: 1; }
+    }
     .gov-loader-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #0f172a;
-      letter-spacing: 0.04em;
-      margin-top: 1.25rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: 0.25em;
+      margin-top: 1.4rem;
+      text-transform: uppercase;
       text-align: center;
+      opacity: 0.9;
+    }
+    .light-theme .gov-loader-title {
+      color: #0f172a;
     }
   `;
   (document.head || document.documentElement).appendChild(loaderStyle);
@@ -129,8 +158,11 @@
     loader.id = 'global-page-loader';
     loader.innerHTML = `
       <div id="gov-top-loader-bar"></div>
-      <div class="gov-loader-spinner"></div>
-      <div class="gov-loader-title">Initializing Secure Government Services...</div>
+      <div class="loader-ring-wrapper">
+        <div class="loader-outer-ring"></div>
+        <div class="loader-inner-core"></div>
+      </div>
+      <div class="gov-loader-title">Loading</div>
     `;
     document.body.insertBefore(loader, document.body.firstChild);
   }
