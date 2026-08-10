@@ -584,6 +584,8 @@ window.authRouter = {
         transition: all 0.2s ease;
         min-height: 48px;
         box-sizing: border-box;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
       .demo-notice-checkbox-wrapper:hover {
         background: rgba(20, 184, 166, 0.08);
@@ -599,12 +601,16 @@ window.authRouter = {
         accent-color: #14b8a6;
         flex-shrink: 0;
         transition: all 0.2s ease;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
       .demo-notice-checkbox-label {
         font-size: 0.9rem;
         color: #f1f5f9;
         line-height: 1.4;
         font-weight: 600;
+        cursor: pointer;
+        touch-action: manipulation;
       }
       .demo-notice-footer {
         position: relative;
@@ -623,12 +629,14 @@ window.authRouter = {
         font-weight: 800;
         border-radius: 12px;
         cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.2s ease;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         outline: none;
         box-sizing: border-box;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
       .demo-notice-btn-primary {
         background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
@@ -650,6 +658,7 @@ window.authRouter = {
         color: rgba(255, 255, 255, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.05);
         box-shadow: none;
+        pointer-events: none;
       }
       .demo-notice-btn-secondary {
         background: transparent;
@@ -709,10 +718,10 @@ window.authRouter = {
               </p>
             </div>
           </div>
-          <div class="demo-notice-checkbox-wrapper" id="demo-notice-checkbox-container">
+          <label class="demo-notice-checkbox-wrapper" for="demo-notice-checkbox">
             <input type="checkbox" id="demo-notice-checkbox" class="demo-notice-checkbox-input" />
-            <label for="demo-notice-checkbox" class="demo-notice-checkbox-label">${t.checkbox}</label>
-          </div>
+            <span class="demo-notice-checkbox-label">${t.checkbox}</span>
+          </label>
         </div>
         <div class="demo-notice-footer">
           <a href="https://github.com/Dhanushraagav/CrowdCity" target="_blank" class="demo-notice-btn demo-notice-btn-secondary">${t.learnMore}</a>
@@ -723,9 +732,8 @@ window.authRouter = {
 
     document.body.appendChild(modal);
 
-    // Add interactivity
+    // Add interactivity with instant PWA touch support
     const checkbox = document.getElementById('demo-notice-checkbox');
-    const container = document.getElementById('demo-notice-checkbox-container');
     const continueBtn = document.getElementById('demo-notice-continue-btn');
 
     function updateContinueState() {
@@ -734,26 +742,33 @@ window.authRouter = {
 
     checkbox.addEventListener('change', updateContinueState);
 
-    // Enable clicking anywhere on the wrapper container to toggle checkbox smoothly
-    container.addEventListener('click', function(e) {
-      if (e.target !== checkbox) {
-        checkbox.checked = !checkbox.checked;
-        updateContinueState();
-      }
-    });
+    let isClosing = false;
+    function closeModal(e) {
+      if (isClosing) return;
+      if (continueBtn.disabled) return;
 
-    function closeModal() {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      isClosing = true;
       sessionStorage.removeItem('cc_show_demo_notice');
       document.body.style.overflow = '';
+
+      modal.style.pointerEvents = 'none';
       modal.style.opacity = '0';
       modal.style.visibility = 'hidden';
+
       setTimeout(() => {
         if (modal.parentNode) modal.remove();
         if (modalStyle.parentNode) modalStyle.remove();
-      }, 300);
+      }, 200);
     }
 
+    // Fast response on both click and touchend for PWA mobile devices
     continueBtn.addEventListener('click', closeModal);
+    continueBtn.addEventListener('touchend', closeModal);
 
     // Prevent ESC key from closing, allow Enter key when checked
     window.addEventListener('keydown', function(e) {
