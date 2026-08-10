@@ -1,6 +1,6 @@
 /**
  * CrowdCity AI v2.0 - About Page Interactions & Animations
- * Manages scroll-driven timeline progress, GPU-accelerated 3D card tilt, hero network canvas, and section reveals.
+ * Manages scroll-driven timeline progress, GPU-accelerated 3D card tilt, hero ambient canvas, and section reveals.
  */
 
 (function () {
@@ -12,7 +12,7 @@
     initCard3DTilt();
   });
 
-  // Hero Section Ultra-Sleek Glowing Ambient Glass Orbs & Soft Aurora Glow Canvas Animation
+  // Premium Subtle Ambient Light Wave & Stardust Canvas Engine (Cross-Device 60FPS)
   function initHeroCanvas() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas) return;
@@ -32,18 +32,39 @@
 
     let time = 0;
 
-    // Responsive Ambient Floating Light Orbs
+    // 1. Soft Ambient Silk Light Orbs
     const orbs = [
-      { color: '20, 184, 166', baseRadius: 180, phaseX: 0, phaseY: 0, speedX: 0.006, speedY: 0.005, orbitX: 0.28, orbitY: 0.25 },
-      { color: '56, 189, 248', baseRadius: 220, phaseX: Math.PI * 0.5, phaseY: Math.PI * 0.7, speedX: 0.004, speedY: 0.007, orbitX: 0.32, orbitY: 0.22 },
-      { color: '16, 185, 129', baseRadius: 160, phaseX: Math.PI * 1.2, phaseY: Math.PI * 0.3, speedX: 0.007, speedY: 0.004, orbitX: 0.25, orbitY: 0.30 },
-      { color: '14, 148, 136', baseRadius: 240, phaseX: Math.PI * 1.8, phaseY: Math.PI * 1.4, speedX: 0.003, speedY: 0.006, orbitX: 0.30, orbitY: 0.28 }
+      { color: '20, 184, 166', baseRadius: 220, phaseX: 0, phaseY: 0, speedX: 0.004, speedY: 0.003, orbitX: 0.30, orbitY: 0.22 },
+      { color: '56, 189, 248', baseRadius: 260, phaseX: Math.PI * 0.6, phaseY: Math.PI * 0.8, speedX: 0.003, speedY: 0.005, orbitX: 0.35, orbitY: 0.25 },
+      { color: '16, 185, 129', baseRadius: 200, phaseX: Math.PI * 1.4, phaseY: Math.PI * 0.4, speedX: 0.005, speedY: 0.003, orbitX: 0.25, orbitY: 0.28 }
     ];
+
+    // 2. Subtle Micro-Stardust Particles
+    const particleCount = isMobile ? 18 : 36;
+    const particles = [];
+
+    function createParticles() {
+      particles.length = 0;
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 1.4 + 0.6,
+          alpha: Math.random() * 0.4 + 0.1,
+          speedY: -(Math.random() * 0.25 + 0.08),
+          speedX: (Math.random() - 0.5) * 0.15,
+          pulseSpeed: Math.random() * 0.02 + 0.01,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    createParticles();
 
     window.addEventListener('resize', () => {
       width = canvas.width = canvas.offsetWidth;
       height = canvas.height = canvas.offsetHeight;
       isMobile = window.innerWidth < 768;
+      createParticles();
     });
 
     const heroSection = document.querySelector('.about-hero');
@@ -59,24 +80,24 @@
       time += 1;
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth mouse position damping
+      // Mouse damping interpolation
       mouse.x += (mouse.targetX - mouse.x) * 0.05;
       mouse.y += (mouse.targetY - mouse.y) * 0.05;
 
       const isLight = document.documentElement.classList.contains('light-theme');
-      const maxAlpha = isLight ? 0.28 : 0.42;
+      const maxOrbAlpha = isLight ? 0.22 : 0.35;
 
-      // Render Floating Glowing Ambient Glass Orbs
+      // Draw Floating Ambient Light Orbs
       orbs.forEach(orb => {
-        const radiusScale = isMobile ? 0.65 : 1.0;
-        const radius = orb.baseRadius * radiusScale * (1 + Math.sin(time * 0.008 + orb.phaseX) * 0.08);
+        const radiusScale = isMobile ? 0.6 : 1.0;
+        const radius = orb.baseRadius * radiusScale * (1 + Math.sin(time * 0.005 + orb.phaseX) * 0.06);
 
         const cx = width * 0.5 + Math.cos(time * orb.speedX + orb.phaseX) * (width * orb.orbitX);
         const cy = height * 0.5 + Math.sin(time * orb.speedY + orb.phaseY) * (height * orb.orbitY);
 
         const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.8);
-        grad.addColorStop(0, `rgba(${orb.color}, ${maxAlpha})`);
-        grad.addColorStop(0.45, `rgba(${orb.color}, ${maxAlpha * 0.45})`);
+        grad.addColorStop(0, `rgba(${orb.color}, ${maxOrbAlpha})`);
+        grad.addColorStop(0.5, `rgba(${orb.color}, ${maxOrbAlpha * 0.4})`);
         grad.addColorStop(1, `rgba(${orb.color}, 0)`);
 
         ctx.fillStyle = grad;
@@ -85,17 +106,36 @@
         ctx.fill();
       });
 
-      // Render Interactive Soft Mouse Spotlight Halo
-      const mouseGradRadius = isMobile ? 120 : 220;
+      // Draw Interactive Ambient Mouse Spotlight Halo
+      const mouseGradRadius = isMobile ? 130 : 230;
       const mouseGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouseGradRadius);
-      mouseGrad.addColorStop(0, `rgba(56, 189, 248, ${maxAlpha * 0.35})`);
-      mouseGrad.addColorStop(0.5, `rgba(20, 184, 166, ${maxAlpha * 0.15})`);
+      mouseGrad.addColorStop(0, `rgba(56, 189, 248, ${maxOrbAlpha * 0.28})`);
+      mouseGrad.addColorStop(0.5, `rgba(20, 184, 166, ${maxOrbAlpha * 0.12})`);
       mouseGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
       ctx.fillStyle = mouseGrad;
       ctx.beginPath();
       ctx.arc(mouse.x, mouse.y, mouseGradRadius, 0, Math.PI * 2);
       ctx.fill();
+
+      // Draw Delicate Micro-Stardust Particles
+      particles.forEach(p => {
+        p.y += p.speedY;
+        p.x += p.speedX;
+
+        // Wrap particles gracefully around canvas edges
+        if (p.y < -10) p.y = height + 10;
+        if (p.x < -10) p.x = width + 10;
+        if (p.x > width + 10) p.x = -10;
+
+        const pAlpha = (p.alpha * (0.6 + Math.sin(time * p.pulseSpeed + p.phase) * 0.4)) * (isLight ? 0.5 : 1.0);
+        const particleColor = isLight ? `rgba(15, 23, 42, ${pAlpha * 0.4})` : `rgba(255, 255, 255, ${pAlpha})`;
+
+        ctx.fillStyle = particleColor;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
       requestAnimationFrame(animate);
     }
