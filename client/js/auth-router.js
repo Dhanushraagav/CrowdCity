@@ -54,7 +54,7 @@
   // Record start time to ensure minimum loader duration
   window.authLoaderStartTime = Date.now();
 
-  // Inject ultra-premium minimalist dual-ring loader (ZERO LOGOS, MINIMAL TEXT)
+  // Inject ultra-sleek Linear Pulse Bar Loader (ZERO CIRCLES, ZERO LOGOS)
   const loaderStyle = document.createElement('style');
   loaderStyle.id = 'global-page-loader-style';
   loaderStyle.innerHTML = `
@@ -64,7 +64,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(11, 19, 41, 0.94);
+      background: rgba(11, 19, 41, 0.95);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       display: flex;
@@ -72,13 +72,13 @@
       align-items: center;
       justify-content: center;
       z-index: 2147483646;
-      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       opacity: 1;
       visibility: visible;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
     .light-theme #global-page-loader {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.96);
     }
     #global-page-loader.fade-out {
       opacity: 0;
@@ -100,53 +100,45 @@
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
-    .loader-ring-wrapper {
+    .loader-pulse-bar {
+      width: 150px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
       position: relative;
-      width: 58px;
-      height: 58px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(13, 148, 136, 0.2);
     }
-    .loader-outer-ring {
+    .light-theme .loader-pulse-bar {
+      background: rgba(15, 23, 42, 0.08);
+    }
+    .loader-pulse-line {
       position: absolute;
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      border-top-color: #14b8a6;
-      border-right-color: #38bdf8;
-      animation: loaderSpin 1.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-      box-shadow: 0 0 20px rgba(20, 184, 166, 0.35);
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0d9488 0%, #38bdf8 50%, #10b981 100%);
+      animation: pulseBarFlow 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
     }
-    .loader-inner-core {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #14b8a6 0%, #38bdf8 100%);
-      animation: loaderPulse 1.1s ease-in-out infinite alternate;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
-    }
-    @keyframes loaderSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes loaderPulse {
-      0% { transform: scale(0.7); opacity: 0.6; }
-      100% { transform: scale(1.15); opacity: 1; }
+    @keyframes pulseBarFlow {
+      0% { left: 0%; width: 25%; }
+      50% { width: 55%; }
+      100% { left: 75%; width: 25%; }
     }
     .gov-loader-title {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 800;
-      color: #f8fafc;
-      letter-spacing: 0.25em;
-      margin-top: 1.4rem;
+      color: #94a3b8;
+      letter-spacing: 0.28em;
+      margin-top: 1.2rem;
       text-transform: uppercase;
       text-align: center;
-      opacity: 0.9;
     }
     .light-theme .gov-loader-title {
-      color: #0f172a;
+      color: #64748b;
     }
   `;
   (document.head || document.documentElement).appendChild(loaderStyle);
@@ -158,9 +150,8 @@
     loader.id = 'global-page-loader';
     loader.innerHTML = `
       <div id="gov-top-loader-bar"></div>
-      <div class="loader-ring-wrapper">
-        <div class="loader-outer-ring"></div>
-        <div class="loader-inner-core"></div>
+      <div class="loader-pulse-bar">
+        <div class="loader-pulse-line"></div>
       </div>
       <div class="gov-loader-title">Loading</div>
     `;
