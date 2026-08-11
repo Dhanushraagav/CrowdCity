@@ -43,7 +43,7 @@ class I18nService {
   }
 
   async loadLocale(lang) {
-    const res = await fetch(`/locales/${lang}.json?v=1.0.7`);
+    const res = await fetch(`/locales/${lang}.json?v=1.0.8`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     return await res.json();
   }
@@ -62,16 +62,53 @@ class I18nService {
         this.reverseEnglishMap[formattedKey.trim().toLowerCase()] = key;
       }
     });
+
+    // Custom phrase mappings for common navigation & UI labels
+    const customMappings = {
+      "dashboard": "nav_dashboard",
+      "report issue": "nav_report",
+      "my complaints": "nav_my_complaints",
+      "map": "nav_map",
+      "transportation": "nav_transportation",
+      "government services": "nav_services",
+      "district helplines": "district_helplines",
+      "council of ministers": "nav_ministers",
+      "about crowdcity ai": "nav_about",
+      "admin panel": "nav_admin",
+      "cases": "nav_cases",
+      "notifications": "nav_notifications",
+      "profile": "nav_profile",
+      "settings": "nav_settings",
+      "logout": "nav_logout",
+      "sign out": "sign_out",
+      "sign in": "sign_in",
+      "sign up": "sign_up",
+      "step 1": "step_1",
+      "step 2": "step_2",
+      "step 3": "step_3",
+      "choose issue type": "choose_issue_type",
+      "report details": "report_details",
+      "ai review": "ai_review",
+      "civic issue": "civic_issue",
+      "transportation issue": "transportation_issue",
+      "examples:": "examples_label",
+      "all schemes": "all_categories",
+      "social welfare": "category_social_welfare",
+      "education & youth": "category_education",
+      "health & insurance": "category_health",
+      "agriculture & farmers": "category_agriculture",
+      "skill development": "category_skill_dev"
+    };
+
+    Object.keys(customMappings).forEach(phrase => {
+      this.reverseEnglishMap[phrase.toLowerCase()] = customMappings[phrase];
+    });
   }
 
   onDomReady() {
-    // Inject language toggle
     this.injectLanguageToggle();
-    // Perform initial page translation
     this.translatePage();
-    // Setup observer for dynamically rendered JS elements
     this.setupMutationObserver();
-    // Dispatch initial language-change event to update dynamic layouts
     window.dispatchEvent(new CustomEvent('language-change', { detail: { language: this.currentLanguage } }));
   }
 
@@ -91,13 +128,9 @@ class I18nService {
       this.currentLanguage = lang;
       localStorage.setItem('cc_lang', lang);
       
-      // Update UI toggle buttons active status
       this.updateToggleUI();
-
-      // Translate the DOM
       this.translatePage();
-
-      // Dispatch global event for page controllers
+      
       window.dispatchEvent(new CustomEvent('language-change', { detail: { language: lang } }));
     } catch (e) {
       console.error(`Failed to switch language to ${lang}:`, e);
@@ -117,7 +150,6 @@ class I18nService {
     if (!text) {
       text = this.formatFallbackKey(key);
     }
-    // Replace variable placeholders like {name}
     Object.keys(variables).forEach(varName => {
       text = text.replace(new RegExp(`{${varName}}`, 'g'), variables[varName]);
     });
@@ -163,13 +195,12 @@ class I18nService {
       }
     });
 
-    // 4. Smart auto-translation for un-annotated DOM text nodes (when language is Tamil)
+    // 4. Smart auto-translation for DOM text nodes (when language is Tamil)
     if (this.currentLanguage === 'ta') {
-      const targets = document.querySelectorAll(
-        'button, a, h1, h2, h3, h4, h5, h6, label, .nav-text, .nav-item, .status-badge, .badge, .category-tag, th, .btn, .card-title, .header-title'
-      );
+      const selector = 'span, a, button, h1, h2, h3, h4, h5, h6, label, p, small, strong, li, td, th, .nav-link, .app-sidebar-link, .badge, .status-badge, .category-tag';
+      const targets = document.querySelectorAll(selector);
       targets.forEach(el => {
-        if (el.hasAttribute('data-i18n') || el.children.length > 2) return;
+        if (el.hasAttribute('data-i18n')) return;
         
         const directText = Array.from(el.childNodes)
           .filter(n => n.nodeType === Node.TEXT_NODE)
@@ -295,7 +326,6 @@ class I18nService {
       <span class="lang-option" data-lang="ta">தமிழ்</span>
     `;
 
-    // Add click listeners to spans
     container.querySelectorAll('.lang-option').forEach(span => {
       span.addEventListener('click', (e) => {
         const lang = e.target.getAttribute('data-lang');
@@ -310,7 +340,10 @@ class I18nService {
       document.querySelector('.nav-actions') ||
       document.querySelector('.header-right') ||
       document.querySelector('.auth-header') ||
-      document.querySelector('.app-header-main');
+      document.querySelector('.app-header-main') ||
+      document.querySelector('.user-menu-wrapper') ||
+      document.querySelector('.user-profile-menu') ||
+      document.querySelector('.header-container');
 
     if (targetHeader) {
       targetHeader.insertBefore(container, targetHeader.firstChild);
