@@ -1,10 +1,67 @@
+const INLINE_EMBEDDED_TRANSLATIONS = {
+  en: {
+    nav_dashboard: "Dashboard",
+    nav_report: "Report Issue",
+    nav_my_complaints: "My Complaints",
+    nav_map: "Map",
+    nav_transportation: "Transportation",
+    nav_services: "Government Services",
+    district_helplines: "District Helplines",
+    nav_ministers: "Council of Ministers",
+    nav_about: "About CrowdCity AI",
+    nav_admin: "Admin Panel",
+    nav_cases: "Cases",
+    nav_notifications: "Notifications",
+    nav_profile: "Profile",
+    nav_settings: "Settings",
+    nav_logout: "Logout",
+    sign_out: "Sign Out",
+    sign_in: "Sign In",
+    sign_up: "Sign Up"
+  },
+  ta: {
+    nav_dashboard: "டாஷ்போர்ட்",
+    nav_report: "புகார் அளி",
+    nav_my_complaints: "எனது புகார்கள்",
+    nav_map: "வரைபடம்",
+    nav_transportation: "போக்குவரத்து",
+    nav_services: "அரசு சேவைகள்",
+    district_helplines: "மாவட்ட உதவி எண்கள்",
+    nav_ministers: "அமைச்சரவை",
+    nav_about: "CrowdCity AI பற்றி",
+    nav_admin: "நிர்வாகி பேனல்",
+    nav_cases: "வழக்குகள்",
+    nav_notifications: "அறிவிப்புகள்",
+    nav_profile: "சுயவிவரம்",
+    nav_settings: "அமைப்புகள்",
+    nav_logout: "வெளியேறு",
+    sign_out: "வெளியேறு",
+    sign_in: "உள்நுழை",
+    sign_up: "பதிவு செய்"
+  }
+};
+
 class I18nService {
   constructor() {
     this.currentLanguage = localStorage.getItem('cc_lang') || 'en';
-    this.translations = {};
-    this.fallbackTranslations = {};
+    
+    // Synchronous inline initializations (0ms startup delay)
+    this.fallbackTranslations = { ...INLINE_EMBEDDED_TRANSLATIONS.en };
+    this.translations = this.currentLanguage === 'ta' 
+      ? { ...INLINE_EMBEDDED_TRANSLATIONS.ta } 
+      : { ...INLINE_EMBEDDED_TRANSLATIONS.en };
+
     this.reverseEnglishMap = {};
     this.observer = null;
+
+    // Build reverse map synchronously on startup
+    this.buildReverseMap();
+
+    // Perform immediate synchronous DOM translation if DOM is already populated
+    if (document.body) {
+      this.translatePage();
+    }
+
     this.initPromise = this.init();
   }
 
@@ -12,21 +69,21 @@ class I18nService {
     // Inject the custom styles for the toggle dynamically
     this.injectStyles();
 
-    // Load fallback translations first (English)
+    // Load full fallback translations asynchronously (English)
     try {
-      this.fallbackTranslations = await this.loadLocale('en');
+      const fullEn = await this.loadLocale('en');
+      this.fallbackTranslations = { ...this.fallbackTranslations, ...fullEn };
     } catch (e) {
       console.error('Failed to load fallback translations (en):', e);
     }
 
-    // Load selected language translations
+    // Load full selected language translations asynchronously
     if (this.currentLanguage !== 'en') {
       try {
-        this.translations = await this.loadLocale(this.currentLanguage);
+        const fullLang = await this.loadLocale(this.currentLanguage);
+        this.translations = { ...this.translations, ...fullLang };
       } catch (e) {
         console.error(`Failed to load translations for ${this.currentLanguage}, falling back to English.`, e);
-        this.currentLanguage = 'en';
-        this.translations = this.fallbackTranslations;
       }
     } else {
       this.translations = this.fallbackTranslations;
@@ -43,7 +100,7 @@ class I18nService {
   }
 
   async loadLocale(lang) {
-    const res = await fetch(`/locales/${lang}.json?v=1.0.8`);
+    const res = await fetch(`/locales/${lang}.json?v=1.0.9`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     return await res.json();
   }
@@ -123,7 +180,8 @@ class I18nService {
       if (lang === 'en') {
         this.translations = this.fallbackTranslations;
       } else {
-        this.translations = await this.loadLocale(lang);
+        const fullLang = await this.loadLocale(lang);
+        this.translations = { ...INLINE_EMBEDDED_TRANSLATIONS.ta, ...fullLang };
       }
       this.currentLanguage = lang;
       localStorage.setItem('cc_lang', lang);
@@ -195,7 +253,7 @@ class I18nService {
       }
     });
 
-    // 4. Smart auto-translation for DOM text nodes (when language is Tamil)
+    // 4. Smart auto-translation & data-i18n auto-stamping (when language is Tamil)
     if (this.currentLanguage === 'ta') {
       const selector = 'span, a, button, h1, h2, h3, h4, h5, h6, label, p, small, strong, li, td, th, .nav-link, .app-sidebar-link, .badge, .status-badge, .category-tag';
       const targets = document.querySelectorAll(selector);
@@ -215,6 +273,8 @@ class I18nService {
             if (!el.getAttribute('data-orig-en')) {
               el.setAttribute('data-orig-en', directText);
             }
+            // Auto-stamp data-i18n attribute on the element to permanently lock its translation
+            el.setAttribute('data-i18n', mappedKey);
             const tamilText = this.translations[mappedKey];
             el.childNodes.forEach(n => {
               if (n.nodeType === Node.TEXT_NODE && n.textContent.trim().toLowerCase() === lowerText) {
@@ -230,6 +290,7 @@ class I18nService {
       origElements.forEach(el => {
         const origText = el.getAttribute('data-orig-en');
         if (origText) {
+          el.removeAttribute('data-i18n');
           el.childNodes.forEach(n => {
             if (n.nodeType === Node.TEXT_NODE) {
               n.textContent = origText;
@@ -247,7 +308,7 @@ class I18nService {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         this.translatePage();
-      }, 250);
+      }, 150);
     });
     this.observer.observe(document.body, { childList: true, subtree: true });
   }

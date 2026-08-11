@@ -1553,6 +1553,9 @@ function updateAuthUI() {
       </a>
     `;
     sidebarNav.appendChild(switchSection);
+    if (window.i18n && typeof window.i18n.translatePage === 'function') {
+      window.i18n.translatePage();
+    }
   };
 
   const injectTopNavSwitcher = () => {
@@ -1618,35 +1621,39 @@ function updateAuthUI() {
 
       <nav class="app-sidebar-nav">
         <a href="citizen-dashboard.html" class="app-sidebar-link ${isDashboard ? 'active' : ''}" title="Dashboard">
-          <i class="fa-solid fa-house-chimney"></i> <span>Dashboard</span>
+          <i class="fa-solid fa-house-chimney"></i> <span data-i18n="nav_dashboard">Dashboard</span>
         </a>
         <a href="report.html" class="app-sidebar-link ${isReport ? 'active' : ''}" title="Report Issue">
-          <i class="fa-solid fa-triangle-exclamation"></i> <span>Report Issue</span>
+          <i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
         </a>
         <a href="my-complaints.html" class="app-sidebar-link ${isComplaints ? 'active' : ''}" title="My Complaints">
-          <i class="fa-solid fa-clipboard-list"></i> <span>My Complaints</span>
+          <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
         </a>
         <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
-          <i class="fa-solid fa-map-location-dot"></i> <span>Map</span>
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
         </a>
         <a href="transportation.html" class="app-sidebar-link ${isTransportation ? 'active' : ''}" title="Transportation">
-          <i class="fa-solid fa-car-side"></i> <span>Transportation</span>
+          <i class="fa-solid fa-car-side"></i> <span data-i18n="nav_transportation">Transportation</span>
         </a>
 
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
-          <i class="fa-solid fa-building-columns"></i> <span>Government Services</span>
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
         </a>
         <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
-          <i class="fa-solid fa-truck-medical"></i> <span>Emergency Help Center</span>
+          <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
         </a>
         <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
-          <i class="fa-solid fa-phone-volume"></i> <span>District Helplines</span>
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
         </a>
         <a href="ministers.html" class="app-sidebar-link ${isMinisters ? 'active' : ''}" title="Council of Ministers">
-          <i class="fa-solid fa-user-tie"></i> <span>Council of Ministers</span>
+          <i class="fa-solid fa-user-tie"></i> <span data-i18n="nav_ministers">Council of Ministers</span>
         </a>
       </nav>
     `;
+
+    if (window.i18n && typeof window.i18n.translatePage === 'function') {
+      window.i18n.translatePage();
+    }
   };
 
   window.toggleTransportationSubmenu = function(e) {
