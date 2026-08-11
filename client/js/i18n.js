@@ -3,6 +3,8 @@ class I18nService {
     this.currentLanguage = localStorage.getItem('cc_lang') || 'en';
     this.translations = {};
     this.fallbackTranslations = {};
+    this.reverseEnglishMap = {};
+    this.observer = null;
     this.initPromise = this.init();
   }
 
@@ -30,6 +32,8 @@ class I18nService {
       this.translations = this.fallbackTranslations;
     }
 
+    this.buildReverseMap();
+
     // Listen for DOMContentLoaded to set up initial translations and language toggle
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => this.onDomReady());
@@ -39,9 +43,25 @@ class I18nService {
   }
 
   async loadLocale(lang) {
-    const res = await fetch(`/locales/${lang}.json?v=1.0.6`);
+    const res = await fetch(`/locales/${lang}.json?v=1.0.7`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     return await res.json();
+  }
+
+  buildReverseMap() {
+    this.reverseEnglishMap = {};
+    if (!this.fallbackTranslations) return;
+
+    Object.keys(this.fallbackTranslations).forEach(key => {
+      const enVal = this.fallbackTranslations[key];
+      if (typeof enVal === 'string' && enVal.trim()) {
+        this.reverseEnglishMap[enVal.trim().toLowerCase()] = key;
+      }
+      const formattedKey = this.formatFallbackKey(key);
+      if (formattedKey && formattedKey.trim()) {
+        this.reverseEnglishMap[formattedKey.trim().toLowerCase()] = key;
+      }
+    });
   }
 
   onDomReady() {
@@ -49,6 +69,8 @@ class I18nService {
     this.injectLanguageToggle();
     // Perform initial page translation
     this.translatePage();
+    // Setup observer for dynamically rendered JS elements
+    this.setupMutationObserver();
     // Dispatch initial language-change event to update dynamic layouts
     window.dispatchEvent(new CustomEvent('language-change', { detail: { language: this.currentLanguage } }));
   }
@@ -103,7 +125,7 @@ class I18nService {
   }
 
   translatePage() {
-    // 1. Scan and translate static elements
+    // 1. Scan and translate explicit data-i18n elements
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(el => {
       const key = el.getAttribute('data-i18n');
@@ -111,11 +133,8 @@ class I18nService {
         const hasTranslation = this.translations[key] || this.fallbackTranslations[key];
         if (hasTranslation) {
           el.textContent = this.t(key);
-        } else {
-          // If no translation exists, only set formatted fallback key if element is currently empty
-          if (!el.textContent.trim()) {
-            el.textContent = this.t(key);
-          }
+        } else if (!el.textContent.trim()) {
+          el.textContent = this.t(key);
         }
       }
     });
@@ -128,10 +147,6 @@ class I18nService {
         const hasTranslation = this.translations[key] || this.fallbackTranslations[key];
         if (hasTranslation) {
           el.placeholder = this.t(key);
-        } else {
-          if (!el.placeholder) {
-            el.placeholder = this.t(key);
-          }
         }
       }
     });
@@ -144,13 +159,66 @@ class I18nService {
         const hasTranslation = this.translations[key] || this.fallbackTranslations[key];
         if (hasTranslation) {
           el.title = this.t(key);
-        } else {
-          if (!el.title) {
-            el.title = this.t(key);
-          }
         }
       }
     });
+
+    // 4. Smart auto-translation for un-annotated DOM text nodes (when language is Tamil)
+    if (this.currentLanguage === 'ta') {
+      const targets = document.querySelectorAll(
+        'button, a, h1, h2, h3, h4, h5, h6, label, .nav-text, .nav-item, .status-badge, .badge, .category-tag, th, .btn, .card-title, .header-title'
+      );
+      targets.forEach(el => {
+        if (el.hasAttribute('data-i18n') || el.children.length > 2) return;
+        
+        const directText = Array.from(el.childNodes)
+          .filter(n => n.nodeType === Node.TEXT_NODE)
+          .map(n => n.textContent.trim())
+          .join(' ')
+          .trim();
+
+        if (directText) {
+          const lowerText = directText.toLowerCase();
+          const mappedKey = this.reverseEnglishMap[lowerText];
+          if (mappedKey && this.translations[mappedKey]) {
+            if (!el.getAttribute('data-orig-en')) {
+              el.setAttribute('data-orig-en', directText);
+            }
+            const tamilText = this.translations[mappedKey];
+            el.childNodes.forEach(n => {
+              if (n.nodeType === Node.TEXT_NODE && n.textContent.trim().toLowerCase() === lowerText) {
+                n.textContent = tamilText;
+              }
+            });
+          }
+        }
+      });
+    } else if (this.currentLanguage === 'en') {
+      // Restore original English text when toggling back
+      const origElements = document.querySelectorAll('[data-orig-en]');
+      origElements.forEach(el => {
+        const origText = el.getAttribute('data-orig-en');
+        if (origText) {
+          el.childNodes.forEach(n => {
+            if (n.nodeType === Node.TEXT_NODE) {
+              n.textContent = origText;
+            }
+          });
+        }
+      });
+    }
+  }
+
+  setupMutationObserver() {
+    if (this.observer) return;
+    let timeoutId = null;
+    this.observer = new MutationObserver(() => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        this.translatePage();
+      }, 250);
+    });
+    this.observer.observe(document.body, { childList: true, subtree: true });
   }
 
   injectStyles() {
@@ -235,14 +303,18 @@ class I18nService {
       });
     });
 
-    const headerActions = document.querySelector('.app-header-actions');
-    const topnavRight = document.querySelector('.topnav-right');
+    const targetHeader = 
+      document.querySelector('.app-header-actions') ||
+      document.querySelector('.header-actions') ||
+      document.querySelector('.topnav-right') ||
+      document.querySelector('.nav-actions') ||
+      document.querySelector('.header-right') ||
+      document.querySelector('.auth-header') ||
+      document.querySelector('.app-header-main');
 
-    if (headerActions) {
-      headerActions.insertBefore(container, headerActions.firstChild);
-      headerActions.addEventListener('click', (e) => e.stopPropagation());
-    } else if (topnavRight) {
-      topnavRight.insertBefore(container, topnavRight.firstChild);
+    if (targetHeader) {
+      targetHeader.insertBefore(container, targetHeader.firstChild);
+      targetHeader.addEventListener('click', (e) => e.stopPropagation());
     } else {
       container.classList.add('lang-toggle-fixed');
       document.body.appendChild(container);
