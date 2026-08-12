@@ -4627,13 +4627,25 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 @media (max-width: 768px) {
+  .settings-item-version {
+    display: none !important;
+  }
+
   .app-footer {
-    padding: 16px 20px !important;
+    padding: 1.25rem 1rem !important;
+    margin-top: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    overflow-x: hidden !important;
   }
   .app-footer p {
-    font-size: 12px !important;
-    line-height: 1.4 !important;
+    font-size: 0.78rem !important;
+    line-height: 1.5 !important;
     text-align: center !important;
+    margin: 0 auto !important;
+    max-width: 90% !important;
+    word-break: break-word !important;
   }
 
   .stitch-hero-title {

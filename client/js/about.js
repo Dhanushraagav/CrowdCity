@@ -9,7 +9,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     initHeroCanvas();
     initScrollAnimations();
-    initCard3DTilt();
   });
 
   // Premium Subtle Ambient Light Wave & Stardust Canvas Engine (Cross-Device 60FPS)
@@ -198,40 +197,6 @@
         });
         ticking = true;
       }
-    });
-  }
-
-  // Lag-Free GPU-Accelerated 3D Card Tilt Effect (Desktop & Laptop Pointer Only)
-  function initCard3DTilt() {
-    if (window.matchMedia('(hover: none) or (pointer: coarse)').matches) return;
-
-    const cards = document.querySelectorAll('.help-card, .purpose-card, .story-text-wrap');
-
-    cards.forEach(card => {
-      let rAF = null;
-
-      card.addEventListener('mousemove', (e) => {
-        if (rAF) cancelAnimationFrame(rAF);
-
-        rAF = requestAnimationFrame(() => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-
-          const rotateX = ((y - centerY) / centerY) * -4.5;
-          const rotateY = ((x - centerX) / centerX) * 4.5;
-
-          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate3d(0, -5px, 0)`;
-        });
-      });
-
-      card.addEventListener('mouseleave', () => {
-        if (rAF) cancelAnimationFrame(rAF);
-        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)';
-      });
     });
   }
 })();
