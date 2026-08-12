@@ -774,7 +774,28 @@
       }
     }
 
-    /* Touch Device Optimization: Disable 3D Tilt calculations on Touchscreens */
+    /* Mobile & PWA Ultra-Smooth Performance & Zoom Optimization */
+    @media (max-width: 768px) {
+      .ambient-orb {
+        filter: none !important;
+        opacity: 0.15 !important;
+        animation: none !important;
+      }
+      .story-text-wrap,
+      .help-card,
+      .purpose-card {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+      #hero-canvas {
+        display: none !important;
+      }
+      *, ::before, ::after {
+        will-change: auto !important;
+      }
+    }
+
+    /* Touch Device Optimization: Disable heavy calculations on Touchscreens */
     @media (hover: none) or (pointer: coarse) {
       .help-card:hover,
       .purpose-card:hover,
@@ -829,8 +850,8 @@
           </div>
         </a>
 
-        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu" style="font-weight: 800; border: none; background: transparent; cursor: pointer; padding: 0.4rem 0.8rem; color: var(--abt-text-main);">
-          Menu
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
         </button>
 
         <div class="app-header-actions" style="margin-left: auto;">

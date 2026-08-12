@@ -15,6 +15,10 @@
   function initHeroCanvas() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas) return;
+    if (window.innerWidth < 768 || window.matchMedia('(hover: none) or (pointer: coarse)').matches) {
+      canvas.style.display = 'none';
+      return;
+    }
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
