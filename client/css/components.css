@@ -4568,25 +4568,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     flex-shrink: 0 !important;
   }
 
-  .voice-reporter-bar {
-    padding: 0.75rem 0.85rem !important;
-    margin-bottom: 0.5rem !important;
-  }
 
-  .voice-reporter-bar h4 {
-    font-size: 0.85rem !important;
-  }
-
-  .voice-reporter-bar p {
-    font-size: 0.73rem !important;
-    line-height: 1.35 !important;
-  }
-
-  #btn-voice-record {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 1rem !important;
-  }
 
   /* Search Input Overlap fix */
   #report-address,

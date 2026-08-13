@@ -362,139 +362,7 @@ function updateFormModeUI() {
   }
 }
 
-// ----------------------------------------------------
-// MULTI-LINGUAL VOICE GRIEVANCE REPORTER (TAMIL & ENGLISH)
-// ----------------------------------------------------
-function initVoiceGrievanceReporter() {
-  const voiceBtn = document.getElementById('btn-voice-record');
-  const micIcon = document.getElementById('voice-mic-icon');
-  const statusText = document.getElementById('voice-status-text');
-  const waveContainer = document.getElementById('voice-wave-container');
-  const descTextarea = document.getElementById('report-description');
 
-  if (!voiceBtn || !descTextarea) return;
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  if (!SpeechRecognition) {
-    if (statusText) {
-      statusText.innerHTML = '<span style="color: #f59e0b;"><i class="fa-solid fa-triangle-exclamation"></i> Speech recognition not supported on this browser. Please type description below.</span>';
-    }
-    voiceBtn.style.opacity = '0.5';
-    voiceBtn.style.cursor = 'not-allowed';
-    return;
-  }
-
-  let recognition = null;
-  let isRecording = false;
-
-  try {
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'ta-IN'; // Tamil & English India voice model
-  } catch (err) {
-    console.warn("SpeechRecognition init error:", err);
-  }
-
-  voiceBtn.addEventListener('click', () => {
-    if (!recognition) return;
-
-    if (isRecording) {
-      recognition.stop();
-      return;
-    }
-
-    try {
-      // Toggle language auto-detection between Tamil and English on alternate taps
-      if (!recognition.lang || recognition.lang === 'en-IN') {
-        recognition.lang = 'ta-IN';
-      } else {
-        recognition.lang = 'en-IN';
-      }
-
-      recognition.start();
-      isRecording = true;
-
-      voiceBtn.style.backgroundColor = '#ef4444';
-      voiceBtn.style.transform = 'scale(1.08)';
-      micIcon.className = 'fa-solid fa-square';
-      if (waveContainer) waveContainer.style.display = 'flex';
-
-      if (statusText) {
-        statusText.innerHTML = `<span style="color: #0d9488; font-weight: 700;"><i class="fa-solid fa-circle-dot"></i> Listening in ${recognition.lang === 'ta-IN' ? 'Tamil / தமிழ்' : 'English'}... Speak naturally!</span>`;
-      }
-    } catch (err) {
-      console.error("SpeechRecognition start error:", err);
-      isRecording = false;
-    }
-  });
-
-  if (recognition) {
-    recognition.onresult = (event) => {
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + ' ';
-        } else {
-          finalTranscript += event.results[i][0].transcript;
-        }
-      }
-
-      if (finalTranscript.trim()) {
-        descTextarea.value = finalTranscript.trim();
-      }
-    };
-
-    recognition.onerror = (event) => {
-      console.warn("Speech recognition error:", event.error);
-      stopRecordingUI();
-      if (statusText) {
-        statusText.innerHTML = `<span style="color: #ef4444;"><i class="fa-solid fa-circle-exclamation"></i> Mic issue (${event.error}). Tap mic or type below.</span>`;
-      }
-    };
-
-    recognition.onend = async () => {
-      stopRecordingUI();
-      const rawText = descTextarea.value.trim();
-      if (rawText.length >= 2) {
-        if (statusText) {
-          statusText.innerHTML = `<span style="color: #0d9488; font-weight: 700;"><i class="fa-solid fa-spinner fa-spin"></i> Translating to English & Auto-Categorizing...</span>`;
-        }
-
-        // Call AI to translate Tamil script / Tanglish / English speech into perfect English
-        if (window.API && typeof window.API.translateVoiceText === 'function') {
-          try {
-            const { data, error } = await window.API.translateVoiceText(rawText);
-            if (data && data.englishText) {
-              descTextarea.value = data.englishText;
-            }
-          } catch (err) {
-            console.warn("Voice translation API fallback:", err);
-          }
-        }
-
-        if (statusText) {
-          statusText.innerHTML = `<span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Transcribed into English! AI auto-categorizing...</span>`;
-        }
-
-        // Auto-trigger AI categorization on translated text
-        const aiBtn = document.getElementById('btn-ai-assist');
-        if (aiBtn) aiBtn.click();
-      } else if (statusText) {
-        statusText.textContent = 'Tap mic to speak in Tamil or English.';
-      }
-    };
-  }
-
-  function stopRecordingUI() {
-    isRecording = false;
-    voiceBtn.style.backgroundColor = 'var(--primary, #0d9488)';
-    voiceBtn.style.transform = 'scale(1)';
-    micIcon.className = 'fa-solid fa-microphone';
-    if (waveContainer) waveContainer.style.display = 'none';
-  }
-}
 
 /**
  * Resize captured camera photo for lightweight AI Vision payload (~150KB)
@@ -650,7 +518,6 @@ function initReportPage() {
   setupCategorySelector();
   setupImageUpload();
   setupAiAssistant();
-  initVoiceGrievanceReporter();
   initAiCameraDetection();
   setupFormSubmit();
   setupGPSButton();
