@@ -395,13 +395,14 @@ class I18nService {
     });
 
     const targetHeader = 
+      document.querySelector('#auth-nav-container .auth-nav-wrapper') ||
+      document.getElementById('auth-nav-container') ||
       document.querySelector('.app-header-actions') ||
       document.querySelector('.header-actions') ||
       document.querySelector('.topnav-right') ||
       document.querySelector('.nav-actions') ||
       document.querySelector('.header-right') ||
       document.querySelector('.auth-header') ||
-      document.querySelector('.app-header-main') ||
       document.querySelector('.user-menu-wrapper') ||
       document.querySelector('.user-profile-menu') ||
       document.querySelector('.header-container');
