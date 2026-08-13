@@ -621,15 +621,10 @@ export const assignIssue = async (req, res) => {
     authorityId = req.user.id;
   }
 
-  console.log("SELF ASSIGN STARTED");
-  console.log("ISSUE ID: " + id);
-  console.log("AUTHORITY ID: " + authorityId);
+  logger.debug(`[Assign] Self assign initiated - Issue ID: ${id}, Authority ID: ${authorityId}`);
 
   try {
     const activeClient = getSupabaseClient(req);
-
-    // Log parameters
-    console.log(`[Assign] current user id: ${req.user.id}, authorityId: ${authorityId}, issue id: ${id}`);
 
     // Fetch inspector's profile to get name for timeline notes
     let inspectorName = 'Inspector';
@@ -637,17 +632,13 @@ export const assignIssue = async (req, res) => {
       .from('profiles')
       .select('*')
       .eq('id', authorityId);
-    
-    console.log(`[Assign] profile query result:`, profiles, `error:`, profileError);
 
     if (profileError) {
       throw new Error(`Profile query failed: ${profileError.message}`);
     }
 
     if (!profiles || profiles.length === 0) {
-      console.log("UPDATE PAYLOAD: null");
-      console.log("ROWS UPDATED: 0");
-      console.log("Assignment failed reason: profile missing");
+      logger.warn(`[Assign] Authority profile missing for user ID: ${authorityId}`);
       return res.status(404).json({ error: `Authority profile not found for user ID: ${authorityId}` });
     }
 
@@ -658,17 +649,13 @@ export const assignIssue = async (req, res) => {
       .from('issues')
       .select('id, reporter_id, title')
       .eq('id', id);
-    
-    console.log(`[Assign] issue lookup result:`, checkIssue, `error:`, checkError);
 
     if (checkError) {
       throw new Error(`Issue lookup failed: ${checkError.message}`);
     }
 
     if (!checkIssue || checkIssue.length === 0) {
-      console.log("UPDATE PAYLOAD: null");
-      console.log("ROWS UPDATED: 0");
-      console.log("Assignment failed reason: issue missing");
+      logger.warn(`[Assign] Issue missing for ID: ${id}`);
       return res.status(404).json({ error: `Issue not found in database for ID: ${id}` });
     }
 
@@ -677,7 +664,6 @@ export const assignIssue = async (req, res) => {
       status: 'assigned', 
       updated_at: new Date() 
     };
-    console.log("UPDATE PAYLOAD: " + JSON.stringify(updatePayload));
 
     // 1. Update assignment
     const { data: updateData, error: updateError } = await activeClient
@@ -686,14 +672,11 @@ export const assignIssue = async (req, res) => {
       .eq('id', id)
       .select();
 
-    console.log(`[Assign] assignment query result (raw update):`, updateData, `error:`, updateError);
-
     if (updateError) {
       throw updateError;
     }
 
     const rowsUpdated = updateData ? updateData.length : 0;
-    console.log("ROWS UPDATED: " + rowsUpdated);
 
     if (!updateData || updateData.length === 0) {
       return res.status(400).json({ 

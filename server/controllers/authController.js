@@ -141,10 +141,6 @@ export const getProfile = async (req, res) => {
       .select('*')
       .eq('id', userId);
 
-    console.log(`[getProfile] User ID: ${userId}`);
-    console.log(`[getProfile] Query result count: ${profiles ? profiles.length : 0}`);
-    console.log(`[getProfile] Returned profile data:`, profiles ? JSON.stringify(profiles) : null);
-
     if (error) {
       logger.error('getProfile Fetch Error: %O', error);
       return res.status(400).json({ error: error.message });
@@ -154,7 +150,7 @@ export const getProfile = async (req, res) => {
     let justCreated = false;
     if (!profiles || profiles.length === 0) {
       // If profile is not found but authenticated, create it automatically
-      console.log(`[getProfile] No profile found for user ${userId}. Automatically creating profile row...`);
+      logger.info(`[getProfile] No profile found for user ${userId}. Automatically creating profile row...`);
       const { data: createdProfiles, error: createError } = await activeClient
         .from('profiles')
         .insert({
@@ -172,7 +168,6 @@ export const getProfile = async (req, res) => {
 
       profile = createdProfiles && createdProfiles.length > 0 ? createdProfiles[0] : null;
       justCreated = true;
-      console.log(`[getProfile] Created profile data:`, JSON.stringify(profile));
     } else {
       profile = profiles[0];
     }

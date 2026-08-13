@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase.js';
+import logger from '../config/logger.js';
 
 /**
  * Middleware to verify Supabase JWT tokens.
@@ -20,11 +21,10 @@ export const requireAuth = async (req, res, next) => {
 
   try {
     // Verify the token by calling supabase.auth.getUser()
-    console.log(`[Auth Middleware] Verifying token prefix: ${token ? token.substring(0, 15) + '...' : 'none'}`);
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      console.error(`[Auth Middleware] JWT validation failed. Error:`, error);
+      logger.warn(`[Auth Middleware] JWT validation failed: ${error ? error.message : 'No user payload'}`);
       return res.status(401).json({ 
         error: 'Unauthorized: Invalid or expired token',
         details: error ? error.message : 'No user payload returned' 
