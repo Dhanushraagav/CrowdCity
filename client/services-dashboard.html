@@ -119,27 +119,28 @@
     <!-- Main Content Area -->
     <main class="app-main">
       <header class="app-header-main">
-        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
-            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="citizen-dashboard.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
+              <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 data-i18n="citizen_services_dashboard" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Citizen Services Dashboard</h1>
           </div>
-        </a>
 
-        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-          <i class="fa-solid fa-bars"></i>
-        </button>
+          <!-- Notification Bell -->
+          <div style="position: relative;">
+            <button id="btn-notification-bell" type="button" class="btn btn-secondary" style="width: 40px; height: 40px; border-radius: 10px; padding: 0; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-bell"></i>
+            </button>
 
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <a href="citizen-dashboard.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
-            <i class="fa-solid fa-arrow-left"></i>
-          </a>
-          <h1 data-i18n="citizen_services_dashboard" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Citizen Services Dashboard</h1>
-        </div>
-
-        <div class="app-header-actions" style="margin-left: auto;">
-          <div id="auth-nav-container"></div>
+            <!-- Notification Dropdown Menu -->
+            <div id="notification-dropdown-menu" style="display: none; position: absolute; right: 0; top: 50px; width: 300px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 999;">
+              <div data-i18n="nav_notifications" style="padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; font-weight: 800; color: var(--text-main);">
+                Notifications
+              </div>
+              <!-- Dynamically populated -->
+            </div>
+          </div>
         </div>
       </header>
 
