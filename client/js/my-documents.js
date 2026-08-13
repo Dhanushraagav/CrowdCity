@@ -89,6 +89,33 @@
     }
   };
 
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function dataURLToBlob(dataurl) {
+    try {
+      if (!dataurl || typeof dataurl !== 'string' || !dataurl.startsWith('data:')) return null;
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)?.[1] || 'application/pdf';
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    } catch (e) {
+      console.warn("dataURLToBlob warning:", e);
+      return null;
+    }
+  }
+
   async function fetchUserDocuments() {
     const container = document.getElementById('documents-grid-container');
     if (container) {
@@ -105,7 +132,8 @@
         const client = await window.getOrInitSupabaseClient();
         if (client) {
           const session = await client.auth.getSession();
-          const userId = session?.data?.session?.user?.id;
+          const user = session?.data?.session?.user;
+          const userId = user?.id;
 
           if (!userId) {
             renderEmptyState("Please sign in to access your secure document wallet.");
@@ -115,15 +143,46 @@
           // Fetch and sync MPIN from account cloud metadata across devices
           fetchUserMPINCloud();
 
+          let cloudDocs = [];
+
+          // 1. Primary DB Table Query
           const { data, error } = await client
             .from('user_document_wallet')
             .select('*')
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 
-          if (!error && data && data.length > 0) {
-            userDocuments = data;
+          if (!error && Array.isArray(data)) {
+            cloudDocs = data;
+          }
+
+          // 2. Secondary Cloud Metadata Backup Check
+          const userMetaDocs = user?.user_metadata?.user_documents;
+          if (Array.isArray(userMetaDocs) && userMetaDocs.length > 0) {
+            userMetaDocs.forEach(metaDoc => {
+              if (!cloudDocs.some(d => d.id === metaDoc.id)) {
+                cloudDocs.push(metaDoc);
+              }
+            });
+          }
+
+          if (cloudDocs.length > 0) {
+            userDocuments = cloudDocs;
             saveLocalDocsIndex(userDocuments);
+
+            // Auto-cache cloud document binary files to local IndexedDB on this device
+            for (const doc of userDocuments) {
+              if (doc.file_url && doc.file_url.startsWith('data:')) {
+                const existingInDb = await IndexedDocDB.getFile(doc.id);
+                if (!existingInDb) {
+                  const blob = dataURLToBlob(doc.file_url);
+                  if (blob) {
+                    await IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
+                  }
+                }
+              }
+            }
+
             renderDocumentsList();
             return;
           }
@@ -272,7 +331,7 @@
   async function openDocumentView(doc) {
     if (!doc) return;
 
-    // 1. Try retrieving binary Blob from IndexedDB
+    // 1. Try retrieving binary Blob from IndexedDB on current device
     const stored = await IndexedDocDB.getFile(doc.id);
     if (stored && stored.blob) {
       const blobUrl = URL.createObjectURL(stored.blob);
@@ -280,24 +339,16 @@
       return;
     }
 
-    // 2. Fallback to file_url
+    // 2. Fallback to file_url (cloud Base64 Data URL)
     if (doc.file_url) {
       if (doc.file_url.startsWith('data:')) {
-        try {
-          const parts = doc.file_url.split(',');
-          const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
-          const bstr = atob(parts[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          const blob = new Blob([u8arr], { type: mime });
+        const blob = dataURLToBlob(doc.file_url);
+        if (blob) {
+          // Auto-cache to local IndexedDB for instant future views
+          IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
           const blobUrl = URL.createObjectURL(blob);
           window.open(blobUrl, '_blank');
           return;
-        } catch (e) {
-          console.error("Error creating Blob URL for view:", e);
         }
       }
       window.open(doc.file_url, '_blank');
@@ -312,23 +363,17 @@
 
     const a = document.createElement('a');
 
-    // 1. Try retrieving binary Blob from IndexedDB
+    // 1. Try retrieving binary Blob from IndexedDB on current device
     const stored = await IndexedDocDB.getFile(doc.id);
     if (stored && stored.blob) {
       a.href = URL.createObjectURL(stored.blob);
     } else if (doc.file_url && doc.file_url.startsWith('data:')) {
-      try {
-        const parts = doc.file_url.split(',');
-        const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
-        const bstr = atob(parts[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-          u8arr[n] = bstr.charCodeAt(n);
-        }
-        const blob = new Blob([u8arr], { type: mime });
+      const blob = dataURLToBlob(doc.file_url);
+      if (blob) {
+        // Auto-cache to local IndexedDB
+        IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
         a.href = URL.createObjectURL(blob);
-      } catch (e) {
+      } else {
         a.href = doc.file_url;
       }
     } else if (doc.file_url) {
@@ -355,13 +400,22 @@
     const docId = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
     const cleanDocName = docName || file.name || 'Uploaded Document';
 
-    // Store binary file Blob in IndexedDB (zero size quota errors)
+    // Convert file to Base64 Data URL for cross-device cloud sync
+    let fileDataUrl = '';
+    try {
+      fileDataUrl = await fileToDataURL(file);
+    } catch (e) {
+      console.warn("File to DataURL warning:", e);
+    }
+
+    // Store binary file Blob in local IndexedDB
     await IndexedDocDB.saveFile(docId, file, { docType, docName: cleanDocName });
 
     const newDoc = {
       id: docId,
       doc_type: docType,
       doc_name: cleanDocName,
+      file_url: fileDataUrl,
       file_size: file.size,
       file_format: file.type || 'application/pdf',
       created_at: new Date().toISOString()
@@ -381,7 +435,7 @@
     if (window.showToast) window.showToast(`Document "${cleanDocName}" securely added to your wallet!`, "success");
     renderDocumentsList();
 
-    // Asynchronous background Cloud Sync for document metadata
+    // Asynchronous Cloud Sync across all devices (Desktop, Laptop, Mobile, Tablet, PWA)
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
@@ -389,18 +443,42 @@
           const session = await client.auth.getSession();
           const userId = session?.data?.session?.user?.id;
           if (userId) {
+            newDoc.user_id = userId;
+
+            // A. Primary Table Upsert
             client.from('user_document_wallet').upsert({
               id: docId,
               user_id: userId,
               doc_type: docType,
               doc_name: cleanDocName,
+              file_url: fileDataUrl,
               file_size: file.size,
               file_format: file.type || 'pdf'
-            }).then(() => {}).catch(e => console.warn("Background cloud upsert warning:", e));
+            }).then(() => console.log('[Doc Wallet Sync] Document upserted to cloud table'))
+              .catch(e => console.warn('[Doc Wallet Sync Warning]', e));
+
+            // B. Secondary Account User Metadata Cloud Backup
+            const cleanUserDocs = userDocuments.map(d => ({
+              id: d.id,
+              user_id: userId,
+              doc_type: d.doc_type,
+              doc_name: d.doc_name,
+              file_url: d.file_url || fileDataUrl,
+              file_size: d.file_size,
+              file_format: d.file_format,
+              created_at: d.created_at
+            })).slice(0, 15);
+
+            client.auth.updateUser({
+              data: { user_documents: cleanUserDocs }
+            }).then(() => console.log('[Doc Wallet Sync] Document list synced to cloud account metadata'))
+              .catch(e => console.warn('[Doc Wallet Metadata Sync Warning]', e));
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Cloud sync error:", e);
+    }
   }
 
   function saveLocalDocsIndex(docsArray) {
@@ -410,6 +488,7 @@
         user_id: d.user_id,
         doc_type: d.doc_type,
         doc_name: d.doc_name,
+        file_url: d.file_url,
         file_size: d.file_size,
         file_format: d.file_format,
         created_at: d.created_at
@@ -424,18 +503,38 @@
     // Delete binary file from IndexedDB
     await IndexedDocDB.deleteFile(docId);
 
-    // Delete from Supabase if online
+    userDocuments = userDocuments.filter(d => d.id !== docId);
+    saveLocalDocsIndex(userDocuments);
+
+    // Delete from Supabase table & cloud metadata if online
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
-          await client.from('user_document_wallet').delete().eq('id', docId);
+          const session = await client.auth.getSession();
+          const userId = session?.data?.session?.user?.id;
+          if (userId) {
+            await client.from('user_document_wallet').delete().eq('id', docId).eq('user_id', userId);
+
+            const cleanUserDocs = userDocuments.map(d => ({
+              id: d.id,
+              user_id: userId,
+              doc_type: d.doc_type,
+              doc_name: d.doc_name,
+              file_url: d.file_url,
+              file_size: d.file_size,
+              file_format: d.file_format,
+              created_at: d.created_at
+            }));
+
+            await client.auth.updateUser({
+              data: { user_documents: cleanUserDocs }
+            });
+          }
         }
       }
     } catch (e) {}
 
-    userDocuments = userDocuments.filter(d => d.id !== docId);
-    saveLocalDocsIndex(userDocuments);
     if (window.showToast) window.showToast("Document deleted from wallet.", "info");
     renderDocumentsList();
   }

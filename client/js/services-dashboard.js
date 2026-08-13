@@ -8,7 +8,7 @@
   let savedSchemes = [];
   let userDocs = [];
 
-  function loadUserData() {
+  async function loadUserData() {
     try {
       const storedProfile = sessionStorage.getItem('cc_scheme_checker_profile');
       if (storedProfile) userProfile = JSON.parse(storedProfile);
@@ -17,6 +17,39 @@
     try {
       const storedDocs = localStorage.getItem('cc_user_uploaded_docs');
       if (storedDocs) userDocs = JSON.parse(storedDocs);
+    } catch (e) {}
+
+    // Cross-device Cloud sync for Document Wallet widget
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const session = await client.auth.getSession();
+          const user = session?.data?.session?.user;
+          const userId = user?.id;
+          if (userId) {
+            const { data } = await client
+              .from('user_document_wallet')
+              .select('*')
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false });
+
+            let cloudList = data || [];
+            const userMetaDocs = user?.user_metadata?.user_documents;
+            if (Array.isArray(userMetaDocs) && userMetaDocs.length > 0) {
+              userMetaDocs.forEach(d => {
+                if (!cloudList.some(c => c.id === d.id)) cloudList.push(d);
+              });
+            }
+
+            if (cloudList.length > 0) {
+              userDocs = cloudList;
+              renderDocumentsWidget();
+              renderProfileSummary();
+            }
+          }
+        }
+      }
     } catch (e) {}
   }
 
