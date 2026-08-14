@@ -53,6 +53,11 @@ function initMap() {
   const mapElement = document.getElementById('leaflet-map');
   if (!mapElement) return;
 
+  if (map) {
+    map.remove();
+    map = null;
+  }
+
   map = L.map('leaflet-map', {
     zoomControl: false
   }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);

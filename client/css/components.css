@@ -5007,6 +5007,28 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   color: #ffffff !important;
 }
 
+/* ==========================================================================
+   PRODUCTION MOBILE & LOW-END DEVICE HARDWARE PERFORMANCE ACCELERATION
+   ========================================================================== */
+@media (max-width: 768px), (pointer: coarse) {
+  /* Replace expensive hardware compositing backdrop blurs with GPU-light translucent fallbacks */
+  *, ::before, ::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Optimize soft box-shadows to single layer for 60 FPS mobile scrolling */
+  .card, .stitch-stat-card, .stitch-item-card, .quick-action-card, .dash-quick-card, .dash-widget-box {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* Hardware accelerate animated containers */
+  .stitch-item-card, .modal-content, .custom-modal-content, .notification-dropdown {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+}
+
 
 
 

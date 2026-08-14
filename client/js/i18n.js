@@ -303,13 +303,26 @@ class I18nService {
 
   setupMutationObserver() {
     if (this.observer) return;
+    let animationFrameId = null;
     let timeoutId = null;
-    this.observer = new MutationObserver(() => {
+
+    this.observer = new MutationObserver((mutations) => {
+      // Ignore mutations originating from language toggle button itself
+      const isInternalToggle = mutations.every(m => 
+        m.target && m.target.closest && m.target.closest('#lang-toggle-container')
+      );
+      if (isInternalToggle) return;
+
       if (timeoutId) clearTimeout(timeoutId);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
       timeoutId = setTimeout(() => {
-        this.translatePage();
+        animationFrameId = requestAnimationFrame(() => {
+          this.translatePage();
+        });
       }, 150);
     });
+
     this.observer.observe(document.body, { childList: true, subtree: true });
   }
 
