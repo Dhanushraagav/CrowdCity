@@ -23,10 +23,11 @@ function evaluateEligibilityServer(scheme, profile, docs = []) {
   if ((criteria.min_age !== undefined && criteria.min_age !== null) || (criteria.max_age !== undefined && criteria.max_age !== null)) {
     const min = criteria.min_age || 18;
     const max = criteria.max_age || 120;
-    if (!profile.age) {
-      missing.push(`Age information still required (Must be between ${min}–${max})`);
-    } else if (profile.age < min || profile.age > max) {
-      failed.push(`Age must be between ${min}–${max} (Current: ${profile.age})`);
+    const userAge = parseInt(profile.age, 10);
+    if (!profile.age || isNaN(userAge) || userAge <= 0) {
+      missing.push(`Age information required (Must be between ${min}–${max})`);
+    } else if (userAge < min || userAge > max) {
+      failed.push(`Age must be between ${min}–${max} (Current: ${userAge})`);
     } else {
       passed.push(`Age between ${min}–${max}`);
     }

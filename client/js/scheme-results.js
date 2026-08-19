@@ -12,13 +12,12 @@
       if (stored) return JSON.parse(stored);
     } catch (e) {}
 
-    // Default sample profile if accessed directly
     return {
-      age: 25,
-      gender: 'female',
-      income: 120000,
-      occupation: 'student',
-      isStudent: true,
+      age: null,
+      gender: 'all',
+      income: 0,
+      occupation: 'other',
+      isStudent: false,
       isFarmer: false
     };
   }

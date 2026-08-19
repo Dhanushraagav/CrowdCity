@@ -198,12 +198,13 @@
     if ((criteria.min_age !== undefined && criteria.min_age !== null) || (criteria.max_age !== undefined && criteria.max_age !== null)) {
       const min = criteria.min_age || 18;
       const max = criteria.max_age || 120;
-      if (!profile.age) {
-        missing.push(isTamil ? `? வயது விவரம் தேவை (வயது ${min}–${max}க்குள் இருக்க வேண்டும்)` : `? Age information still required (Must be between ${min}–${max})`);
-      } else if (profile.age < min || profile.age > max) {
+      const userAge = parseInt(profile.age, 10);
+      if (!profile.age || isNaN(userAge) || userAge <= 0) {
+        missing.push(isTamil ? `? வயது விவரம் தேவை (வயது ${min}–${max}க்குள் இருக்க வேண்டும்)` : `? Age information required (Must be between ${min}–${max})`);
+      } else if (userAge < min || userAge > max) {
         failed.push(isTamil 
-          ? `✗ வயது வரம்பு ${min}–${max}க்குள் இருக்க வேண்டும் (தற்போதைய வயது: ${profile.age})` 
-          : `✗ Age must be between ${min}–${max} (Current: ${profile.age})`);
+          ? `✗ வயது வரம்பு ${min}–${max}க்குள் இருக்க வேண்டும் (தற்போதைய வயது: ${userAge})` 
+          : `✗ Age must be between ${min}–${max} (Current: ${userAge})`);
       } else {
         passed.push(isTamil 
           ? `✓ வயது ${min}–${max}க்குள் உள்ளது` 
@@ -443,14 +444,15 @@
   }
 
   function getFormData() {
-    const age = parseInt(document.getElementById('check-age')?.value) || 0;
+    const ageRaw = document.getElementById('check-age')?.value?.trim();
+    const age = (ageRaw && /^\d+$/.test(ageRaw)) ? parseInt(ageRaw, 10) : null;
     const gender = document.getElementById('check-gender')?.value || 'all';
     const district = document.getElementById('check-district')?.value || '';
     const occupation = document.getElementById('check-occupation')?.value || 'other';
     const income = parseFloat(document.getElementById('check-income')?.value) || 0;
     const isStudent = document.getElementById('check-student')?.checked || false;
     const isFarmer = document.getElementById('check-farmer')?.checked || false;
-    const isSenior = document.getElementById('check-senior')?.checked || (age >= 60);
+    const isSenior = document.getElementById('check-senior')?.checked || (age !== null && age >= 60);
     const isDisability = document.getElementById('check-disability')?.checked || false;
     const isWidow = document.getElementById('check-widow')?.checked || false;
     const socialCategory = document.getElementById('check-social-category')?.value || 'all';
@@ -478,9 +480,14 @@
 
   function validateStep(step) {
     if (step === 1) {
-      const age = parseInt(document.getElementById('check-age')?.value);
-      if (!age || age < 1 || age > 120) {
-        if (window.showToast) window.showToast("Please enter a valid age between 1 and 120.", "error");
+      const ageRaw = document.getElementById('check-age')?.value?.trim();
+      if (!ageRaw || !/^\d+$/.test(ageRaw)) {
+        if (window.showToast) window.showToast("Please enter a valid whole number for your age.", "error");
+        return false;
+      }
+      const age = parseInt(ageRaw, 10);
+      if (isNaN(age) || age < 1 || age > 120) {
+        if (window.showToast) window.showToast("Please enter a valid age between 1 and 120 years.", "error");
         return false;
       }
       const district = document.getElementById('check-district')?.value;
@@ -898,7 +905,52 @@
     if (window.showToast) window.showToast("Scheme saved to your bookmarks!", "success");
   }
 
+  function restoreSessionProfile() {
+    try {
+      const stored = sessionStorage.getItem('cc_scheme_checker_profile');
+      if (stored) {
+        const profile = JSON.parse(stored);
+        const ageInput = document.getElementById('check-age');
+        if (ageInput && profile.age !== undefined && profile.age !== null && profile.age !== '') {
+          ageInput.value = profile.age;
+        }
+        if (profile.gender) {
+          const genderSelect = document.getElementById('check-gender');
+          if (genderSelect) genderSelect.value = profile.gender;
+        }
+        if (profile.district) {
+          const districtSelect = document.getElementById('check-district');
+          if (districtSelect) districtSelect.value = profile.district;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not restore session profile:", e);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    // Restrict age input to positive whole integers (reject decimals, letters, negatives, exponents)
+    const ageInput = document.getElementById('check-age');
+    if (ageInput) {
+      ageInput.addEventListener('keydown', (e) => {
+        if (['.', ',', '-', '+', 'e', 'E'].includes(e.key)) {
+          e.preventDefault();
+        }
+      });
+
+      ageInput.addEventListener('input', (e) => {
+        let val = e.target.value;
+        val = val.replace(/[^0-9]/g, '');
+        if (val !== '' && parseInt(val, 10) > 120) {
+          val = '120';
+        }
+        e.target.value = val;
+      });
+    }
+
+    // Restore active session entered profile values
+    restoreSessionProfile();
+
     document.querySelectorAll('.btn-next-step').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (validateStep(currentStep)) {
@@ -928,6 +980,10 @@
       resetBtn.addEventListener('click', () => {
         const form = document.getElementById('checker-wizard-form');
         if (form) form.reset();
+        try {
+          sessionStorage.removeItem('cc_scheme_checker_profile');
+        } catch (e) {}
+        if (ageInput) ageInput.value = '';
         currentStep = 1;
         updateStepUI();
         if (window.showToast) window.showToast("Form reset successfully.", "info");
