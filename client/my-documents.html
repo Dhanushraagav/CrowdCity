@@ -95,34 +95,25 @@
           <i class="fa-solid fa-bars"></i>
         </button>
 
-        <div class="app-header-actions" style="margin-left: auto;">
-          <div id="auth-nav-container">
-            <!-- Dynamic header actions populated by auth.js -->
-          </div>
+        <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+          <a href="services.html" class="gov-back-btn" title="Back to Government Services">
+            <i class="fa-solid fa-arrow-left"></i> <span>Back to Government Services</span>
+          </a>
+          <h1 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0; font-family: var(--font-heading, system-ui);">My Documents Wallet</h1>
+        </div>
+
+        <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
+          <button type="button" class="btn btn-secondary" onclick="window.triggerMPINSetupOrChange()" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-key" style="color: var(--primary);"></i> <span id="mpin-btn-label">Set MPIN</span>
+          </button>
+          <a href="scheme-checker.html" class="btn btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-award"></i> <span>Check Schemes</span>
+          </a>
+          <div id="auth-nav-container"></div>
         </div>
       </header>
 
-      <div class="app-content-body" style="max-width: 960px; margin: 0 auto; padding: 1.25rem 1rem 3rem 1rem; width: 100%; box-sizing: border-box;">
-        
-        <!-- Page Title Row -->
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <a href="services.html" class="gov-back-btn" title="Back to Government Services">
-              <i class="fa-solid fa-arrow-left"></i> Back to Government Services
-            </a>
-            <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0;">My Documents Wallet</h1>
-          </div>
-          
-          <div style="display: flex; gap: 0.6rem; align-items: center;">
-            <button type="button" class="btn btn-secondary" onclick="window.triggerMPINSetupOrChange()" style="padding: 0.5rem 0.95rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
-              <i class="fa-solid fa-key" style="color: var(--primary);"></i> <span id="mpin-btn-label">Set MPIN</span>
-            </button>
-
-            <a href="scheme-checker.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-              <i class="fa-solid fa-award"></i> <span>Check Schemes</span>
-            </a>
-          </div>
-        </div>
+      <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%; box-sizing: border-box;">
 
         <!-- Hero Header -->
         <div class="docs-hero-card">
