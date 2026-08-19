@@ -5209,10 +5209,10 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     font-size: 0.8rem !important; /* ~12.8px */
   }
 /* ==========================================================================
-   PAGE-SPECIFIC SCHEME ELIGIBILITY CHECKER MOBILE TYPOGRAPHY & LAYOUT SCALING
+   PAGE-SPECIFIC SCHEME ELIGIBILITY CHECKER & GOVT SERVICES MOBILE TYPOGRAPHY
    ========================================================================== */
 .scheme-checker-page .checker-page-title {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-main);
   margin: 0;
@@ -5228,20 +5228,20 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 .scheme-checker-page .checker-hero-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: var(--primary);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   flex-shrink: 0;
 }
 
 .scheme-checker-page .checker-hero-title {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--text-main);
   margin: 0 0 0.25rem 0;
@@ -5272,127 +5272,190 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 /* Mobile Specific Responsive Scaling (Screens <= 768px) */
 @media (max-width: 768px) {
   .scheme-checker-page .checker-content-body {
-    padding: 1rem !important;
+    padding: 0.85rem !important;
   }
 
-  /* 1. Page Title: "Scheme Eligibility Checker" (~20px, font-weight 700) */
-  .scheme-checker-page .checker-page-title {
-    font-size: 1.15rem !important; /* ~19px-20px */
+  /* 1. Header Title: "Scheme Eligibility Checker" */
+  .scheme-checker-page .checker-page-title,
+  .scheme-checker-page .app-header-main h1 {
+    font-size: 0.98rem !important; /* ~15.5px */
     font-weight: 700 !important;
-    line-height: 1.25 !important;
-    max-width: 240px;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 175px !important;
   }
 
-  /* 2. Hero Heading: "Find Government Schemes You Qualify For" (~18px) */
-  .scheme-checker-page .checker-hero-title {
-    font-size: 1.1rem !important; /* ~18px */
-    font-weight: 700 !important;
-    line-height: 1.3 !important;
-    margin: 0 0 0.25rem 0 !important;
-  }
-
-  /* 3. Hero Description (~14px) */
-  .scheme-checker-page .checker-hero-desc {
-    font-size: 0.875rem !important; /* 14px */
-    line-height: 1.45 !important;
+  /* Hero Section Compact Layout */
+  .scheme-checker-page .checker-hero-flex {
+    gap: 0.75rem !important;
+    align-items: flex-start !important;
   }
 
   .scheme-checker-page .checker-hero-card {
-    padding: 1rem 1.15rem !important;
-    margin-bottom: 1.25rem !important;
-    border-radius: 14px !important;
+    padding: 0.85rem 1rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 12px !important;
   }
 
   .scheme-checker-page .checker-hero-icon {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 1.1rem !important;
-    border-radius: 10px !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.95rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* 2. Hero Heading: "Find Government Schemes You Qualify For" */
+  .scheme-checker-page .checker-hero-title {
+    font-size: 0.98rem !important; /* ~15.5px */
+    font-weight: 800 !important;
+    line-height: 1.3 !important;
+    margin: 0 0 0.2rem 0 !important;
+  }
+
+  /* 3. Hero Description */
+  .scheme-checker-page .checker-hero-desc {
+    font-size: 0.8rem !important; /* ~12.8px */
+    line-height: 1.4 !important;
   }
 
   /* Form Container compact padding */
   .scheme-checker-page #checker-form-card {
-    padding: 1.25rem 1rem !important;
-    border-radius: 14px !important;
+    padding: 1rem 0.85rem !important;
+    border-radius: 12px !important;
   }
 
-  /* 7. Step indicator labels ("DEMOGRAPHICS", "INCOME", etc. ~11px-12px) */
+  /* 7. Step indicator labels ("DEMOGRAPHICS", "INCOME", etc.) */
   .scheme-checker-page .step-progress-tracker {
-    margin-bottom: 1.25rem !important;
+    margin-bottom: 0.85rem !important;
   }
 
   .scheme-checker-page .step-progress-tracker .step-label {
-    font-size: 0.72rem !important; /* ~11.5px */
+    font-size: 0.65rem !important; /* ~10.5px */
     font-weight: 700 !important;
     letter-spacing: 0.02em !important;
-    margin-top: 0.25rem !important;
+    margin-top: 0.2rem !important;
   }
 
   .scheme-checker-page .step-progress-tracker .step-circle {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.78rem !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.72rem !important;
   }
 
-  /* 4. Step Heading: "Step 1 of 3: Basic Profile" (~17px) */
+  /* 4. Step Heading: "Step 1 of 3: Basic Profile" */
   .scheme-checker-page .checker-step-title {
-    font-size: 1.05rem !important; /* ~17px */
+    font-size: 0.92rem !important; /* ~14.8px */
     font-weight: 700 !important;
-    margin: 0 0 1rem 0 !important;
+    margin: 0 0 0.75rem 0 !important;
   }
 
-  /* 5. Form Labels: "Age (Years)", "Gender", etc. (~14px-15px) */
+  /* 5. Form Labels: "Age (Years)", "Gender", etc. */
   .scheme-checker-page .form-label-custom {
-    font-size: 0.88rem !important; /* ~14px */
+    font-size: 0.82rem !important; /* ~13px */
     font-weight: 600 !important;
-    margin-bottom: 0.35rem !important;
+    margin-bottom: 0.25rem !important;
   }
 
-  /* 6. Input / Select text (~14px-15px) */
+  /* 6. Input / Select text */
   .scheme-checker-page .form-input-custom,
   .scheme-checker-page .form-select-custom {
-    font-size: 0.88rem !important; /* ~14px */
-    padding: 0.6rem 0.85rem !important;
-    border-radius: 10px !important;
+    font-size: 0.85rem !important; /* ~13.5px */
+    padding: 0.55rem 0.75rem !important;
+    border-radius: 8px !important;
     height: auto !important;
   }
 
   .scheme-checker-page .form-group-custom {
-    margin-bottom: 1rem !important;
+    margin-bottom: 0.75rem !important; /* Compact vertical gap! */
   }
 
-  /* 8. "Next Step" & "Back" buttons (~14px-15px) */
+  /* 8. "Next Step" & "Back" buttons */
   .scheme-checker-page .btn-next-step,
   .scheme-checker-page .btn-prev-step {
+    font-size: 0.82rem !important; /* ~13px */
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Government Services Portal Compact Styling */
+  .services-hero-banner {
+    padding: 1rem 1.15rem !important;
+    border-radius: 14px !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .services-nav-card {
+    padding: 0.85rem 1rem !important;
+    border-radius: 12px !important;
+  }
+
+  .services-nav-card-title {
     font-size: 0.88rem !important; /* ~14px */
-    padding: 0.6rem 1.25rem !important;
+    font-weight: 800 !important;
+  }
+
+  .services-nav-card-desc {
+    font-size: 0.75rem !important; /* ~12px */
+  }
+
+  .services-search-input {
+    padding: 0.55rem 0.85rem !important;
+    font-size: 0.85rem !important; /* ~13.5px */
     border-radius: 10px !important;
+  }
+
+  .services-pill {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.72rem !important; /* ~11.5px */
+  }
+
+  .scheme-card {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .scheme-title {
+    font-size: 0.98rem !important; /* ~15.5px */
+    line-height: 1.3 !important;
+  }
+
+  .scheme-dept {
+    font-size: 0.75rem !important;
+  }
+
+  .scheme-benefits {
+    font-size: 0.8rem !important;
+    padding: 0.6rem !important;
   }
 }
 
 @media (max-width: 380px) {
   /* Extra-compact viewports (320px - 360px) */
-  .scheme-checker-page .checker-page-title {
-    font-size: 1.05rem !important; /* ~17px */
+  .scheme-checker-page .checker-page-title,
+  .scheme-checker-page .app-header-main h1 {
+    font-size: 0.9rem !important;
+    max-width: 140px !important;
   }
 
   .scheme-checker-page .checker-hero-title {
-    font-size: 1rem !important; /* ~16px */
+    font-size: 0.92rem !important;
   }
 
   .scheme-checker-page .checker-hero-desc {
-    font-size: 0.82rem !important; /* ~13px */
+    font-size: 0.78rem !important;
   }
 
   .scheme-checker-page .checker-step-title {
-    font-size: 0.98rem !important; /* ~15.5px */
+    font-size: 0.88rem !important;
   }
 
   .scheme-checker-page .form-label-custom,
   .scheme-checker-page .form-input-custom,
   .scheme-checker-page .form-select-custom,
   .scheme-checker-page .btn-next-step {
-    font-size: 0.85rem !important; /* ~13.5px */
+    font-size: 0.82rem !important;
   }
 }
 
