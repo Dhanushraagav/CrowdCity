@@ -214,6 +214,32 @@ class I18nService {
     return text;
   }
 
+  setElementTextPreservingChildren(el, text) {
+    if (!el) return;
+
+    const childElements = Array.from(el.children);
+    if (childElements.length === 0) {
+      el.textContent = text;
+      return;
+    }
+
+    // If el has a child <span> that contains text or has data-i18n, update that target span
+    const targetSpan = el.querySelector('span[data-i18n]') || childElements.find(c => c.tagName.toLowerCase() === 'span' && !c.classList.contains('bell-badge') && !c.classList.contains('badge'));
+    if (targetSpan) {
+      targetSpan.textContent = text;
+      return;
+    }
+
+    // Otherwise, update only text nodes without wiping child elements (like <i>, <svg>, <img>, .bell-badge)
+    const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+    if (textNodes.length > 0) {
+      const targetTextNode = textNodes.find(n => n.textContent.trim().length > 0) || textNodes[0];
+      targetTextNode.textContent = text;
+    } else {
+      el.appendChild(document.createTextNode(text));
+    }
+  }
+
   translatePage() {
     // 1. Scan and translate explicit data-i18n elements
     const elements = document.querySelectorAll('[data-i18n]');
@@ -222,9 +248,9 @@ class I18nService {
       if (key) {
         const hasTranslation = this.translations[key] || this.fallbackTranslations[key];
         if (hasTranslation) {
-          el.textContent = this.t(key);
+          this.setElementTextPreservingChildren(el, this.t(key));
         } else if (!el.textContent.trim()) {
-          el.textContent = this.t(key);
+          this.setElementTextPreservingChildren(el, this.t(key));
         }
       }
     });
@@ -260,6 +286,11 @@ class I18nService {
       targets.forEach(el => {
         if (el.hasAttribute('data-i18n')) return;
         
+        // Skip auto-stamping container links/buttons with child icon elements
+        if (el.children.length > 0 && (el.tagName === 'A' || el.tagName === 'BUTTON' || el.classList.contains('app-sidebar-link') || el.classList.contains('bell-btn'))) {
+          return;
+        }
+
         const directText = Array.from(el.childNodes)
           .filter(n => n.nodeType === Node.TEXT_NODE)
           .map(n => n.textContent.trim())

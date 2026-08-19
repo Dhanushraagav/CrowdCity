@@ -701,6 +701,12 @@
   transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
+.bell-btn i {
+  font-size: 1.25rem;
+  color: var(--text-main, #334155);
+  display: inline-block;
+}
+
 .bell-btn:hover {
   background-color: var(--bg-surface-hover);
   color: var(--primary);
