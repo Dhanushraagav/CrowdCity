@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, analyzeComplaintImage } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, analyzeComplaintImage, getGroqModel } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
@@ -90,7 +90,7 @@ export const chatWithAi = async (req, res) => {
                            !groqApiKey.includes('your-groq-api-key') && 
                            groqApiKey !== '';
 
-  const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+  const model = getGroqModel();
 
   const systemMessage = {
     role: 'system',
@@ -218,7 +218,7 @@ export const testGroqConnectivity = async (req, res) => {
 
   try {
     const groq = new Groq({ apiKey: groqApiKey });
-    const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+    const model = getGroqModel();
     
     logger.info('Executing connectivity check on Groq for model: %s', model);
     const start = Date.now();

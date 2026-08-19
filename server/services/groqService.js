@@ -10,7 +10,17 @@ const getGroqClient = () => {
   }
   return new Groq({ apiKey });
 };
-const getGroqModel = () => process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+export const getGroqModel = () => {
+  const envModel = process.env.GROQ_MODEL;
+  if (!envModel || 
+      envModel.includes('llama-3.3') || 
+      envModel.includes('llama3-') || 
+      envModel.includes('llama-3.1') || 
+      envModel.includes('your-groq-model')) {
+    return 'openai/gpt-oss-120b';
+  }
+  return envModel;
+};
 
 /**
  * Send complaint data to Groq to classify, summarize and route to department.

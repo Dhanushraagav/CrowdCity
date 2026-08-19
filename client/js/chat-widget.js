@@ -892,8 +892,13 @@
 
       if (error) {
         console.error('Chat completions error:', error);
-        appendMessage('bot', 'Sorry, I encountered an issue connecting to the AI helper. Please try again.');
-        // Remove last item to prevent corrupting context
+        let userErrStr = 'Sorry, I encountered an issue connecting to the AI helper. Please try again.';
+        if (typeof error === 'string' && (error.toLowerCase().includes('token') || error.toLowerCase().includes('unauthorized'))) {
+          userErrStr = 'Please **Sign In** to chat with the CrowdCity AI Assistant.';
+        } else if (typeof error === 'string' && error.toLowerCase().includes('rate limit')) {
+          userErrStr = 'Groq AI rate limit exceeded. Please wait a moment and try again.';
+        }
+        appendMessage('bot', userErrStr);
         chatHistory.pop();
         return;
       }
