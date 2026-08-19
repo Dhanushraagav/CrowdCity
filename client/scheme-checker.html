@@ -177,7 +177,7 @@
     })();
   </script>
 </head>
-<body class="protected-page">
+<body class="protected-page scheme-checker-page">
 
   <div class="app-layout">
     <!-- Sidebar -->
@@ -224,7 +224,7 @@
         </button>
 
         <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Scheme Eligibility Checker</h1>
+          <h1 class="checker-page-title">Scheme Eligibility Checker</h1>
         </div>
 
         <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
@@ -232,17 +232,17 @@
         </div>
       </header>
 
-      <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%;">
+      <div class="app-content-body checker-content-body">
         
         <!-- Header Introduction Card -->
-        <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(99, 102, 241, 0.08)); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        <div class="checker-hero-card">
           <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 48px; height: 48px; border-radius: 14px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+            <div class="checker-hero-icon">
               <i class="fa-solid fa-award"></i>
             </div>
             <div>
-              <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0;">Find Government Schemes You Qualify For</h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+              <h2 class="checker-hero-title">Find Government Schemes You Qualify For</h2>
+              <p class="checker-hero-desc">
                 Answer a few quick questions to instantly discover Tamil Nadu State and Central Government welfare schemes tailored to your profile.
               </p>
             </div>
@@ -250,7 +250,7 @@
         </div>
 
         <!-- Multi-step Form Card -->
-        <div id="checker-form-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+        <div id="checker-form-card">
           
           <!-- Step Progress Bar -->
           <div class="step-progress-tracker">
@@ -276,7 +276,7 @@
             
             <!-- STEP 1: Basic Demographics -->
             <div class="checker-step-pane active" id="checker-step-1">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 1 of 3: Basic Profile</h3>
+              <h3 class="checker-step-title">Step 1 of 3: Basic Profile</h3>
 
               <div class="form-group-custom">
                 <label class="form-label-custom" for="check-age">Age (Years) <span style="color: #ef4444;">*</span></label>
@@ -347,7 +347,7 @@
 
             <!-- STEP 2: Occupation & Income -->
             <div class="checker-step-pane" id="checker-step-2">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 2 of 3: Income & Occupation</h3>
+              <h3 class="checker-step-title">Step 2 of 3: Income & Occupation</h3>
 
               <div class="form-group-custom">
                 <label class="form-label-custom" for="check-occupation">Primary Occupation</label>
@@ -381,7 +381,7 @@
 
             <!-- STEP 3: Special Categories & Status -->
             <div class="checker-step-pane" id="checker-step-3">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 3 of 3: Special Categories & Schooling</h3>
+              <h3 class="checker-step-title">Step 3 of 3: Special Categories & Schooling</h3>
 
               <div class="form-group-custom">
                 <label class="form-label-custom">Select all that apply to you:</label>
