@@ -514,10 +514,10 @@
         const cStatus = (c.status || 'pending').toLowerCase().trim();
 
         if (filterStatus === 'pending') {
-          return cStatus === 'pending' || cStatus === 'submitted' || cStatus === 'open' || !c.assigned_to;
+          return cStatus === 'pending' || cStatus === 'submitted' || cStatus === 'open';
         }
         if (filterStatus === 'assigned') {
-          return cStatus === 'assigned' || (c.assigned_to && cStatus !== 'resolved' && cStatus !== 'rejected');
+          return cStatus === 'assigned';
         }
         if (filterStatus === 'in_progress') {
           return cStatus === 'in_progress' || cStatus === 'in progress' || cStatus === 'investigating';
