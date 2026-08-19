@@ -26,54 +26,115 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* Wizard Step Progress Tracker */
-    .step-progress-tracker {
+    /* ====================================================
+       RECONSTRUCTED SCHEME CHECKER UI STYLES
+       ==================================================== */
+
+    .checker-hero-card {
+      max-width: 880px;
+      margin: 0 auto 1.5rem auto;
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(99, 102, 241, 0.06) 100%);
+      border: 1px solid rgba(13, 148, 136, 0.2);
+      border-radius: 20px;
+      padding: 1.5rem 1.75rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+    .checker-hero-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--primary, #0d9488);
+      color: #ffffff;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      position: relative;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
     }
-    .step-progress-tracker::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--border-color);
-      z-index: 1;
-      transform: translateY(-50%);
+    .checker-hero-title {
+      font-family: var(--font-heading, 'Outfit', system-ui);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 0.25rem 0;
+      letter-spacing: -0.02em;
+    }
+    .checker-hero-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted, #64748b);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Main Centered Form Card */
+    #checker-form-card {
+      max-width: 880px;
+      margin: 0 auto 3rem auto;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 24px;
+      padding: 2.25rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.05);
+      box-sizing: border-box;
+    }
+
+    /* Segmented Step Progress Tracker */
+    .step-progress-tracker {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color, #e2e8f0);
+    }
+    @media (max-width: 640px) {
+      .step-progress-tracker {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
     .step-progress-item {
-      position: relative;
-      z-index: 2;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
-      background: var(--bg-surface);
-      padding: 0 0.5rem;
+      gap: 0.65rem;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg-app, #f8fafc);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      transition: all 0.25s ease;
+    }
+    [data-theme="dark"] .step-progress-item {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .step-progress-item.active {
+      background: rgba(13, 148, 136, 0.1);
+      border-color: var(--primary, #0d9488);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    }
+    .step-progress-item.completed {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
     }
     .step-circle {
-      width: 38px;
-      height: 38px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      background: var(--bg-app);
-      border: 2px solid var(--border-color);
-      color: var(--text-muted);
+      background: var(--bg-surface, #ffffff);
+      border: 1.5px solid var(--border-color, #cbd5e1);
+      color: var(--text-muted, #64748b);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
     }
     .step-progress-item.active .step-circle {
-      border-color: var(--primary);
-      background: var(--primary);
+      border-color: var(--primary, #0d9488);
+      background: var(--primary, #0d9488);
       color: #ffffff;
-      box-shadow: 0 0 15px rgba(13, 148, 136, 0.35);
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
     }
     .step-progress-item.completed .step-circle {
       border-color: #10b981;
@@ -81,14 +142,18 @@
       color: #ffffff;
     }
     .step-label {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      color: var(--text-muted, #64748b);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .step-progress-item.active .step-label {
-      color: var(--primary);
+      color: var(--primary, #0d9488);
+    }
+    .step-progress-item.completed .step-label {
+      color: #10b981;
     }
 
     /* Step Panes */
@@ -97,14 +162,25 @@
     }
     .checker-step-pane.active {
       display: block;
-      animation: fadeInPane 0.35s ease forwards;
+      animation: fadeInStepPane 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    @keyframes fadeInPane {
-      from { opacity: 0; transform: translateY(8px); }
+    @keyframes fadeInStepPane {
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Touch Friendly Select & Checkbox styling */
+    .checker-step-title {
+      font-family: var(--font-heading, 'Outfit', system-ui);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 1.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Form Controls Styling */
     .form-group-custom {
       margin-bottom: 1.5rem;
     }
@@ -112,61 +188,91 @@
       display: block;
       font-size: 0.88rem;
       font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 0.5rem;
+      color: var(--text-main, #0f172a);
+      margin-bottom: 0.45rem;
     }
     .form-input-custom, .form-select-custom {
       width: 100%;
-      padding: 0.85rem 1rem;
+      padding: 0.8rem 1rem;
       border-radius: 12px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-app);
-      color: var(--text-main);
-      font-size: 0.95rem;
-      transition: border-color 0.2s ease;
+      border: 1.5px solid var(--border-color, #e2e8f0);
+      background: var(--bg-app, #f8fafc);
+      color: var(--text-main, #0f172a);
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+    [data-theme="dark"] .form-input-custom,
+    [data-theme="dark"] .form-select-custom {
+      background: rgba(255, 255, 255, 0.04);
     }
     .form-input-custom:focus, .form-select-custom:focus {
       outline: none;
-      border-color: var(--primary);
+      border-color: var(--primary, #0d9488);
+      background: var(--bg-surface, #ffffff);
+      box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
     }
+
+    /* Interactive Checkbox Tiles */
     .checkbox-tile-group {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 0.85rem;
     }
     .checkbox-tile {
-      background: var(--bg-app);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1rem;
+      position: relative;
+      background: var(--bg-app, #f8fafc);
+      border: 1.5px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 1rem 0.85rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
       text-align: center;
     }
-    .checkbox-tile input[type="checkbox"] {
-      display: none;
+    [data-theme="dark"] .checkbox-tile {
+      background: rgba(255, 255, 255, 0.03);
     }
-    .checkbox-tile:has(input[type="checkbox"]:checked) {
-      border-color: var(--primary);
-      background: rgba(13, 148, 136, 0.08);
-      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    .checkbox-tile input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
     }
     .checkbox-tile i {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-    }
-    .checkbox-tile:has(input[type="checkbox"]:checked) i {
-      color: var(--primary);
+      font-size: 1.35rem;
+      color: var(--text-muted, #64748b);
+      transition: all 0.2s ease;
     }
     .checkbox-tile span {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--text-main, #0f172a);
+    }
+    .checkbox-tile:has(input:checked),
+    .checkbox-tile.active-checked {
+      background: rgba(13, 148, 136, 0.1);
+      border-color: var(--primary, #0d9488);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    }
+    .checkbox-tile:has(input:checked) i,
+    .checkbox-tile.active-checked i {
+      color: var(--primary, #0d9488);
+      transform: scale(1.1);
+    }
+
+    /* Navigation Action Footer */
+    .checker-action-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color, #e2e8f0);
     }
   </style>
 
@@ -212,13 +318,16 @@
 
       <div class="app-content-body checker-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%; box-sizing: border-box;">
         
-        <!-- Header Introduction Card -->
+        <!-- Reconstructed Hero Header Card -->
         <div class="checker-hero-card">
-          <div class="checker-hero-flex" style="display: flex; align-items: center; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;">
             <div class="checker-hero-icon">
               <i class="fa-solid fa-award"></i>
             </div>
-            <div>
+            <div style="flex: 1; min-width: 260px;">
+              <span style="font-size: 0.72rem; font-weight: 800; color: var(--primary, #0d9488); text-transform: uppercase; letter-spacing: 0.06em; display: inline-block; margin-bottom: 0.2rem;">
+                ✨ AI Welfare Scheme Engine
+              </span>
               <h2 class="checker-hero-title">Find Government Schemes You Qualify For</h2>
               <p class="checker-hero-desc">
                 Answer a few quick questions to instantly discover Tamil Nadu State and Central Government welfare schemes tailored to your profile.
@@ -227,10 +336,10 @@
           </div>
         </div>
 
-        <!-- Multi-step Form Card -->
+        <!-- Reconstructed Centered Form Wizard Card -->
         <div id="checker-form-card">
           
-          <!-- Step Progress Bar -->
+          <!-- Segmented Step Progress Bar -->
           <div class="step-progress-tracker">
             <div class="step-progress-item active" id="step-tracker-1">
               <div class="step-circle">1</div>
@@ -242,7 +351,7 @@
             </div>
             <div class="step-progress-item" id="step-tracker-3">
               <div class="step-circle">3</div>
-              <span class="step-label">Status</span>
+              <span class="step-label">Special Status</span>
             </div>
             <div class="step-progress-item" id="step-tracker-4">
               <div class="step-circle"><i class="fa-solid fa-check"></i></div>
@@ -254,7 +363,9 @@
             
             <!-- STEP 1: Basic Demographics -->
             <div class="checker-step-pane active" id="checker-step-1">
-              <h3 class="checker-step-title">Step 1 of 3: Basic Profile</h3>
+              <h3 class="checker-step-title">
+                <i class="fa-solid fa-user" style="color: var(--primary, #0d9488);"></i> Step 1 of 3: Basic Profile
+              </h3>
 
               <div class="form-group-custom">
                 <label class="form-label-custom" for="check-age">Age (Years) <span style="color: #ef4444;">*</span></label>
@@ -316,7 +427,7 @@
                 </select>
               </div>
 
-              <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+              <div class="checker-action-footer" style="justify-content: flex-end;">
                 <button type="button" class="btn btn-primary btn-next-step" style="padding: 0.75rem 1.75rem; font-weight: 700; border-radius: 12px;">
                   <span>Next Step</span> <i class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -325,7 +436,9 @@
 
             <!-- STEP 2: Occupation & Income -->
             <div class="checker-step-pane" id="checker-step-2">
-              <h3 class="checker-step-title">Step 2 of 3: Income & Occupation</h3>
+              <h3 class="checker-step-title">
+                <i class="fa-solid fa-wallet" style="color: var(--primary, #0d9488);"></i> Step 2 of 3: Income & Occupation
+              </h3>
 
               <div class="form-group-custom">
                 <label class="form-label-custom" for="check-occupation">Primary Occupation</label>
@@ -347,7 +460,7 @@
                 <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.35rem;">Used to determine income-based government welfare subsidies.</span>
               </div>
 
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+              <div class="checker-action-footer">
                 <button type="button" class="btn btn-secondary btn-prev-step" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 12px;">
                   <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
                 </button>
@@ -359,7 +472,9 @@
 
             <!-- STEP 3: Special Categories & Status -->
             <div class="checker-step-pane" id="checker-step-3">
-              <h3 class="checker-step-title">Step 3 of 3: Special Categories & Schooling</h3>
+              <h3 class="checker-step-title">
+                <i class="fa-solid fa-sliders" style="color: var(--primary, #0d9488);"></i> Step 3 of 3: Special Categories & Schooling
+              </h3>
 
               <div class="form-group-custom">
                 <label class="form-label-custom">Select all that apply to you:</label>
@@ -433,7 +548,7 @@
                 </select>
               </div>
 
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+              <div class="checker-action-footer">
                 <button type="button" class="btn btn-secondary btn-prev-step" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 12px;">
                   <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
                 </button>
@@ -447,8 +562,8 @@
             <div class="checker-step-pane" id="checker-step-4">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                  <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0;">
-                    You qualify for <span id="matched-count-number" style="color: var(--primary);">0</span> Government Schemes!
+                  <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui);">
+                    You qualify for <span id="matched-count-number" style="color: var(--primary, #0d9488);">0</span> Government Schemes!
                   </h3>
                   <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
                     Based on your age, income, and demographic criteria.
