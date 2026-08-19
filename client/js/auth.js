@@ -1603,25 +1603,6 @@ function updateAuthUI() {
     sidebar.onmouseenter = null;
     sidebar.onmouseleave = null;
 
-    // If static sidebar navigation is already present in HTML, update active state smoothly without destroying DOM
-    const nav = sidebar.querySelector('.app-sidebar-nav');
-    if (nav) {
-      nav.querySelectorAll('.app-sidebar-link').forEach(link => {
-        const href = link.getAttribute('href') || '';
-        link.classList.remove('active');
-        if (isDashboard && href.includes('citizen-dashboard')) link.classList.add('active');
-        else if (isReport && href.includes('report.html')) link.classList.add('active');
-        else if (isComplaints && href.includes('my-complaints')) link.classList.add('active');
-        else if (isMap && href.includes('map.html')) link.classList.add('active');
-        else if (isTransportation && href.includes('transportation.html')) link.classList.add('active');
-        else if (isServices && href.includes('services.html')) link.classList.add('active');
-        else if (isEmergency && href.includes('emergency-services')) link.classList.add('active');
-        else if (isHelplines && href.includes('helplines')) link.classList.add('active');
-        else if (isMinisters && href.includes('ministers')) link.classList.add('active');
-      });
-      return;
-    }
-
     sidebar.innerHTML = `
       <div class="sidebar-header">
         <a href="citizen-dashboard.html" class="app-sidebar-logo">
