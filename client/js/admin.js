@@ -459,8 +459,10 @@
       `;
 
       try {
-        const issuesRes = await API.getIssues();
-        const usersRes = await API.getAllUsers();
+        const [issuesRes, usersRes] = await Promise.all([
+          API.getIssues(),
+          API.getAllUsers()
+        ]);
 
         if (issuesRes.error) throw new Error(issuesRes.error);
         if (usersRes.error) throw new Error(usersRes.error);
@@ -986,8 +988,10 @@
       `;
 
       try {
-        const usersRes = await API.getAllUsers();
-        const deptsRes = await API.getDepartments();
+        const [usersRes, deptsRes] = await Promise.all([
+          API.getAllUsers(),
+          API.getDepartments()
+        ]);
 
         if (usersRes.error) throw new Error(usersRes.error);
         if (deptsRes.error) throw new Error(deptsRes.error);

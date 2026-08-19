@@ -157,6 +157,7 @@ window.showFatalConfigError = showFatalConfigError;
 
 // Initialize Supabase Client dynamically from server config
 async function initAuth() {
+  let initializedFromCache = false;
   // Pre-load from cache for instant CAPTCHA and UI loading
   try {
     const raw = localStorage.getItem('cc_config_cache');
@@ -175,11 +176,25 @@ async function initAuth() {
             window.renderTurnstileWidgets();
           }
           resolveAuthInit();
+          initializedFromCache = true;
         }
       }
     }
   } catch (e) {
     console.warn('[Auth] Pre-init config cache check failed:', e);
+  }
+
+  // If already initialized instantly from cache, do non-blocking background revalidation
+  if (initializedFromCache) {
+    fetch('/api/config')
+      .then(res => res.ok ? res.json() : null)
+      .then(config => {
+        if (config && config.supabaseUrl && config.supabaseAnonKey) {
+          try { localStorage.setItem('cc_config_cache', JSON.stringify(config)); } catch (e) {}
+        }
+      })
+      .catch(() => {});
+    return;
   }
 
   try {
@@ -2524,12 +2539,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Safety fail-safe timeout (3.5s) to guarantee user access
   setTimeout(dismissLoader, 3500);
 
-  // Wait for both authInitPromise and document load complete
+  // Wait for authInitPromise and DOMContentLoaded (interactive DOM) for ultra-fast page presentation
   const docLoaded = new Promise(resolve => {
-    if (document.readyState === 'complete') {
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
       resolve();
     } else {
-      window.addEventListener('load', resolve);
+      document.addEventListener('DOMContentLoaded', resolve);
     }
   });
 
