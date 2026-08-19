@@ -4,6 +4,31 @@
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
 }
 
+/* Permanent Government Services Back Button */
+.gov-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.95rem;
+  background: rgba(13, 148, 136, 0.08);
+  color: var(--primary, #0d9488);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.gov-back-btn:hover {
+  background: var(--primary, #0d9488);
+  color: #ffffff;
+  border-color: var(--primary, #0d9488);
+  transform: translateX(-2px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+}
+
 /* 1. Buttons */
 .btn {
   display: inline-flex;
