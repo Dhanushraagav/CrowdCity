@@ -503,10 +503,31 @@
       }
 
       const activeFilterPill = document.querySelector('#admin-status-filters .filter-pill.active');
-      const filterStatus = activeFilterPill ? activeFilterPill.getAttribute('data-status') : '';
+      const rawFilterStatus = activeFilterPill ? (activeFilterPill.getAttribute('data-status') || '') : '';
+      const filterStatus = rawFilterStatus.toLowerCase().trim();
       if (!listEl) return;
 
-      const filtered = currentComplaints.filter(c => filterStatus === '' || c.status === filterStatus);
+      const filtered = currentComplaints.filter(c => {
+        if (!filterStatus || filterStatus === '' || filterStatus === 'all') return true;
+        const cStatus = (c.status || 'pending').toLowerCase().trim();
+
+        if (filterStatus === 'pending') {
+          return cStatus === 'pending' || cStatus === 'submitted' || cStatus === 'open' || !c.assigned_to;
+        }
+        if (filterStatus === 'assigned') {
+          return cStatus === 'assigned' || (c.assigned_to && cStatus !== 'resolved' && cStatus !== 'rejected');
+        }
+        if (filterStatus === 'in_progress') {
+          return cStatus === 'in_progress' || cStatus === 'in progress' || cStatus === 'investigating';
+        }
+        if (filterStatus === 'resolved') {
+          return cStatus === 'resolved' || cStatus === 'verified' || cStatus === 'closed';
+        }
+        if (filterStatus === 'rejected') {
+          return cStatus === 'rejected' || cStatus === 'declined';
+        }
+        return cStatus === filterStatus;
+      });
 
       if (filtered.length === 0) {
         listEl.innerHTML = `
@@ -603,11 +624,13 @@
 
       document.querySelectorAll('#admin-status-filters .filter-pill').forEach(pill => {
         pill.addEventListener('click', async (e) => {
+          const targetPill = e.target.closest('.filter-pill');
+          if (!targetPill) return;
+
           document.querySelectorAll('#admin-status-filters .filter-pill').forEach(p => p.classList.remove('active'));
-          e.target.classList.add('active');
-          
-          const usersRes = await API.getAllUsers();
-          const authorities = (usersRes.data || []).filter(u => u.role === 'authority' || u.role === 'admin');
+          targetPill.classList.add('active');
+
+          const authorities = this.cachedAuthorities || [];
           this.renderComplaints(authorities);
         });
       });
