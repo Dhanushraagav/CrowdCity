@@ -5029,6 +5029,44 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   }
 }
 
+/* ==========================================================================
+   UNIVERSAL SHARED MOBILE BACK BUTTON STYLING
+   ========================================================================== */
+.universal-mobile-back-btn {
+  display: none; /* Hidden on Desktop (>= 1024px) */
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--bg-surface-hover, rgba(15, 23, 42, 0.05));
+  border: 1px solid var(--border-color, rgba(226, 232, 240, 0.8));
+  color: var(--text-main, #0f172a);
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-right: 0.65rem;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .universal-mobile-back-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+}
+
+.universal-mobile-back-btn:active {
+  transform: scale(0.95);
+  background: var(--primary, #0d9488);
+  color: #ffffff;
+}
+
+@media (max-width: 1023px) {
+  .universal-mobile-back-btn {
+    display: inline-flex !important;
+  }
+}
+
 
 
 

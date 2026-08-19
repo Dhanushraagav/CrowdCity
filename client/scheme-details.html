@@ -184,17 +184,27 @@
     <!-- Main Content Area -->
     <main class="app-main">
       <header class="app-header-main">
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <a href="scheme-results.html" style="color: var(--text-main); font-size: 1.1rem; text-decoration: none;">
-              <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Government Scheme Application Guide</h1>
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
           </div>
-          
-          <a href="saved-schemes.html" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+        </a>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Government Scheme Application Guide</h1>
+        </div>
+
+        <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
+          <a href="saved-schemes.html" class="btn btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
             <i class="fa-solid fa-bookmark"></i> <span>My Saved Schemes</span>
           </a>
+          <div id="auth-nav-container"></div>
         </div>
       </header>
 

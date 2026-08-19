@@ -2388,11 +2388,85 @@ function initResponsiveSidebar() {
 // Bind resize listener
 window.addEventListener('resize', initResponsiveSidebar);
 
+// Global Shared Smart Back Navigation Handler
+window.handleUniversalBack = function() {
+  const currentHost = window.location.host;
+  const referrer = document.referrer;
+  const path = window.location.pathname.toLowerCase();
+
+  let fallbackRoot = 'citizen-dashboard.html';
+  if (path.includes('authority-') || document.body.classList.contains('admin-portal-body')) {
+    fallbackRoot = 'admin.html';
+  }
+
+  if (window.history.length > 1 && referrer && referrer.includes(currentHost) && !referrer.includes(window.location.pathname)) {
+    window.history.back();
+  } else {
+    window.location.href = fallbackRoot;
+  }
+};
+
+// Global Universal Mobile Navigation Setup
+function setupUniversalMobileNavigation() {
+  const path = window.location.pathname.toLowerCase();
+  
+  // Standardize hamburger buttons across all pages (Replace any text "MENU" with 3 clean lines)
+  const menuButtons = document.querySelectorAll('#mobile-menu-btn, .mobile-menu-toggle');
+  menuButtons.forEach(btn => {
+    if (!btn.querySelector('i.fa-bars') && (!btn.textContent || btn.textContent.trim().toLowerCase() === 'menu')) {
+      btn.innerHTML = '<i class="fa-solid fa-bars"></i>';
+      btn.style.fontWeight = 'normal';
+    }
+  });
+
+  // Root Dashboard check: Citizen Dashboard, Admin/Authority Portal Root, Auth Root
+  const isCitizenRoot = path.includes('citizen-dashboard') || path.endsWith('/index') || path.endsWith('/index.html') || path.endsWith('/client') || path.endsWith('/client/');
+  const isAdminRoot = path.endsWith('/admin.html') || path.includes('admin.html#');
+  const isAuthRoot = path.endsWith('/auth.html') || path.endsWith('/authority-login.html');
+  
+  if (isCitizenRoot || isAdminRoot || isAuthRoot) {
+    const existing = document.getElementById('universal-back-btn');
+    if (existing) existing.remove();
+    return;
+  }
+
+  // Secondary Page: Ensure ONE shared universal back button exists in header area
+  const headerMain = document.querySelector('.app-header-main') || document.querySelector('.admin-header-actions') || document.querySelector('.auth-header') || document.querySelector('header.app-header');
+  if (!headerMain) return;
+
+  // Remove legacy/duplicate inline back arrows inside the header
+  const legacyBacks = headerMain.querySelectorAll('.subpage-back-btn, a[href*="services.html"] i.fa-arrow-left, a[href*="services-dashboard"] i.fa-arrow-left, a[href*="scheme-checker"] i.fa-arrow-left, a[href*="citizen-dashboard"] i.fa-arrow-left');
+  legacyBacks.forEach(el => {
+    const parentA = el.closest('a');
+    if (parentA && parentA.children.length === 1 && parentA.children[0].tagName === 'I') {
+      parentA.remove();
+    }
+  });
+
+  if (!document.getElementById('universal-back-btn')) {
+    const backBtn = document.createElement('button');
+    backBtn.id = 'universal-back-btn';
+    backBtn.className = 'universal-mobile-back-btn';
+    backBtn.setAttribute('aria-label', 'Go Back');
+    backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+    backBtn.onclick = window.handleUniversalBack;
+
+    const insertTarget = headerMain.querySelector('.app-header-logo-mobile') || headerMain.querySelector('.mobile-menu-toggle') || headerMain.firstChild;
+    if (insertTarget) {
+      headerMain.insertBefore(backBtn, insertTarget);
+    } else {
+      headerMain.appendChild(backBtn);
+    }
+  }
+}
+
 // Bind toggle action logic
 document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.querySelector('.app-sidebar');
   const topnavDrawer = document.getElementById('topnav-mobile-drawer');
   const setupToggleListeners = () => {
+    setupUniversalMobileNavigation();
+
     const toggles = document.querySelectorAll('#mobile-menu-btn, #topnav-hamburger, .mobile-menu-toggle, .topnav-hamburger');
     toggles.forEach(btn => {
       // Avoid duplicate event listener binding
