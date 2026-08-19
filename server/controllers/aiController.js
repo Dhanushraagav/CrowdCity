@@ -90,7 +90,7 @@ export const chatWithAi = async (req, res) => {
                            !groqApiKey.includes('your-groq-api-key') && 
                            groqApiKey !== '';
 
-  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+  const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 
   const systemMessage = {
     role: 'system',
@@ -176,9 +176,26 @@ Keep your responses concise, professional, and helpful. Do not output JSON, spea
 
   } catch (err) {
     logger.error('Groq Chat Completion Failed: %O', err);
-    return res.status(500).json({
-      error: 'Groq AI chatbot request failed',
-      details: err.message
+
+    let statusCode = 500;
+    let errorMessage = 'Groq AI chatbot request failed';
+    if (err.status === 401 || (err.message && err.message.includes('API key'))) {
+      statusCode = 401;
+      errorMessage = 'Invalid or unauthorized Groq API key';
+    } else if (err.status === 404 || (err.message && err.message.includes('model'))) {
+      statusCode = 404;
+      errorMessage = 'Requested Groq model is invalid or unavailable';
+    } else if (err.status === 429 || (err.message && err.message.includes('rate limit'))) {
+      statusCode = 429;
+      errorMessage = 'Groq AI rate limit exceeded. Please wait a moment and try again';
+    } else if (err.status === 504 || (err.message && err.message.includes('timeout'))) {
+      statusCode = 504;
+      errorMessage = 'Groq AI request timed out';
+    }
+
+    return res.status(statusCode).json({
+      error: errorMessage,
+      details: err.message || 'Unknown error'
     });
   }
 };
@@ -201,7 +218,7 @@ export const testGroqConnectivity = async (req, res) => {
 
   try {
     const groq = new Groq({ apiKey: groqApiKey });
-    const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+    const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
     
     logger.info('Executing connectivity check on Groq for model: %s', model);
     const start = Date.now();
@@ -215,8 +232,6 @@ export const testGroqConnectivity = async (req, res) => {
     const latency = Date.now() - start;
 
     const reply = chatCompletion.choices[0].message.content.trim();
-    logger.info('Groq connectivity check completed successfully in %d ms. Output: %s', latency, reply);
-
     return res.status(200).json({
       status: 'success',
       message: 'Groq API connectivity successfully verified!',

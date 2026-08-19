@@ -3,13 +3,14 @@ import logger from '../config/logger.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const groqApiKey = process.env.GROQ_API_KEY;
-const isGroqConfigured = groqApiKey && 
-                         !groqApiKey.includes('your-groq-api-key') && 
-                         groqApiKey !== '';
-
-const groq = isGroqConfigured ? new Groq({ apiKey: groqApiKey }) : null;
-const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const getGroqClient = () => {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey || apiKey.includes('your-groq-api-key') || apiKey === '') {
+    return null;
+  }
+  return new Groq({ apiKey });
+};
+const getGroqModel = () => process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 
 /**
  * Send complaint data to Groq to classify, summarize and route to department.
@@ -20,6 +21,7 @@ export const analyzeComplaint = async (title, description) => {
     throw new Error('Title and description are required for Groq analysis.');
   }
 
+  const groq = getGroqClient();
   if (!groq) {
     logger.info('Groq SDK client unconfigured, using local rule-based fallback analyzer.');
     return getLocalFallbackAnalysis(title, description);
@@ -103,6 +105,7 @@ export const translateAndCleanVoiceText = async (rawText = '') => {
     return { englishText: '' };
   }
 
+  const groq = getGroqClient();
   if (!groq) {
     return { englishText: rawText.trim() };
   }
@@ -125,7 +128,7 @@ Task instructions:
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Spoken Input Text: "${rawText}"` }
       ],
-      model: model,
+      model: getGroqModel(),
       response_format: { type: 'json_object' }
     });
 
@@ -151,6 +154,7 @@ export const analyzeComplaintImage = async (imageBase64 = '') => {
     return getLocalImageFallbackAnalysis();
   }
 
+  const groq = getGroqClient();
   if (!groq) {
     logger.info('Groq SDK client unconfigured, using local image vision fallback.');
     return getLocalImageFallbackAnalysis();
@@ -318,6 +322,7 @@ export const explainSchemeEligibility = async (scheme, userProfile, lang = 'en')
 
   const isTamil = (lang === 'ta');
 
+  const groq = getGroqClient();
   if (!groq) {
     return generateFallbackSchemeExplanation(scheme, userProfile, isTamil);
   }
@@ -423,6 +428,7 @@ When asked about the founder, team members, developers, software architect, test
 OFFICIAL GOVERNMENT SCHEMES KNOWLEDGE BASE:
 ${JSON.stringify(knowledgeBase, null, 2)}`;
 
+  const groq = getGroqClient();
   if (!groq) {
     logger.info('Groq SDK unconfigured, using rule-based Government Assistant fallback.');
     return generateAssistantFallbackResponse(messages, knowledgeBase);
@@ -439,7 +445,7 @@ ${JSON.stringify(knowledgeBase, null, 2)}`;
 
     const response = await groq.chat.completions.create({
       messages: formattedMessages,
-      model: model,
+      model: getGroqModel(),
       temperature: 0.3,
       max_tokens: 600
     });
@@ -505,6 +511,7 @@ Return ONLY a valid JSON object with the following structure:
   "disclaimer": "Guidance and document quality check only. Does not constitute official government verification."
 }`;
 
+  const groq = getGroqClient();
   if (!groq) {
     logger.info('Groq SDK unconfigured, using fallback document verification analysis.');
     return generateFallbackDocVerification(docMeta, scheme);
@@ -516,7 +523,7 @@ Return ONLY a valid JSON object with the following structure:
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Document Type: ${docMeta.doc_type || 'Unknown'}\nDocument Name: ${docMeta.doc_name || 'Uploaded Document'}\nFile Size: ${docMeta.file_size || 0} bytes\nExtracted Text: ${extractedText.substring(0, 1000)}\nTarget Scheme: ${scheme.scheme_name || scheme.name || 'General Welfare Scheme'}` }
       ],
-      model: model,
+      model: getGroqModel(),
       temperature: 0.2,
       response_format: { type: 'json_object' }
     });
@@ -561,6 +568,7 @@ Return ONLY a valid JSON object with the following structure:
   "exampleValue": "Representative sample input value"
 }`;
 
+  const groq = getGroqClient();
   if (!groq) {
     return generateFallbackFieldGuidance(fieldName);
   }
@@ -571,7 +579,7 @@ Return ONLY a valid JSON object with the following structure:
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Scheme Name: ${schemeName}\nForm Field: ${fieldName}` }
       ],
-      model: model,
+      model: getGroqModel(),
       temperature: 0.2,
       response_format: { type: 'json_object' }
     });
@@ -617,6 +625,7 @@ export const analyzeTransportationIssue = async (title, description, userCategor
     'Highways Department', 'Street Lighting Department', 'Transport Department', 'Public Works Department'
   ];
 
+  const groq = getGroqClient();
   if (!groq) {
     logger.info('Groq SDK unconfigured, using local rules for transportation analysis.');
     return getLocalTransportationFallback(title, description, userCategory);
@@ -655,7 +664,7 @@ Output ONLY raw valid JSON matching this schema without markdown block formattin
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Title: ${title}\nDescription: ${description}\nUser Selected Category: ${userCategory}` }
       ],
-      model: model,
+      model: getGroqModel(),
       temperature: 0.1,
       response_format: { type: 'json_object' }
     });
