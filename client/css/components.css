@@ -2395,14 +2395,14 @@ body:not(.admin-portal-body) .app-sidebar {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  padding: 0.65rem 0.9rem !important;
-  margin-bottom: 0.5rem !important;
-  color: var(--text-muted, #64748b);
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 0.4rem !important;
+  color: var(--text-muted, #475569);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
   border-radius: 12px !important;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
   background: transparent;
   border: 1px solid transparent;
   width: 100%;
@@ -2412,25 +2412,19 @@ body:not(.admin-portal-body) .app-sidebar {
   box-sizing: border-box;
 }
 
-/* Elegant Icon Badge Container */
 .app-sidebar-link i {
-  font-size: 1.05rem;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
   flex-shrink: 0;
-  background: rgba(13, 148, 136, 0.08);
   color: var(--primary, #0d9488);
-  border: 1px solid rgba(13, 148, 136, 0.15);
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .app-sidebar-link i {
-  background: rgba(13, 148, 136, 0.15);
-  border-color: rgba(13, 148, 136, 0.25);
   color: #2dd4bf;
 }
 
@@ -2440,34 +2434,30 @@ body:not(.admin-portal-body) .app-sidebar {
   text-overflow: ellipsis;
 }
 
-/* Hover State: Smooth Color Highlight (Zero popup movement or scaling) */
 .app-sidebar-link:hover {
   color: var(--primary, #0d9488);
-  background: rgba(13, 148, 136, 0.08);
-  border-color: rgba(13, 148, 136, 0.2);
+  background-color: rgba(13, 148, 136, 0.08);
+  border-color: transparent;
 }
 
 .app-sidebar-link:hover i {
-  background: var(--primary, #0d9488);
-  color: #ffffff !important;
-  border-color: var(--primary, #0d9488);
-  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.25);
+  color: var(--primary, #0d9488);
+  background: transparent !important;
 }
 
-/* Active State: Clean Teal Pill Highlight (Steady, no movement) */
 .app-sidebar-link.active {
   color: #ffffff !important;
-  background: var(--primary, #0d9488) !important;
+  background-color: var(--primary, #0d9488) !important;
   font-weight: 700;
   border-radius: 12px !important;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28) !important;
-  border-color: var(--primary, #0d9488) !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25) !important;
+  border-color: transparent !important;
 }
 
 .app-sidebar-link.active i {
-  background: rgba(255, 255, 255, 0.22) !important;
   color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 .app-sidebar-link.active::before {
