@@ -448,15 +448,20 @@
       this.bindFilters();
     },
 
-    loadComplaints: async function() {
+    loadComplaints: async function(forceSpinner = false) {
       const listEl = document.getElementById('admin-complaints-list');
       if (!listEl) return;
 
-      listEl.innerHTML = `
-        <div style="text-align: center; padding: 3rem; color: var(--text-muted); background-color:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md);">
-          <i class="fa-solid fa-spinner fa-spin" style="margin-right:0.5rem; font-size:1.5rem;"></i> Loading complaints queue...
-        </div>
-      `;
+      // Render cached data immediately if available to eliminate loading delays
+      if (currentComplaints && currentComplaints.length > 0 && this.cachedAuthorities) {
+        this.renderComplaints(this.cachedAuthorities);
+      } else if (forceSpinner || !listEl.children.length) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 3rem; color: var(--text-muted); background-color:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md);">
+            <i class="fa-solid fa-spinner fa-spin" style="margin-right:0.5rem; font-size:1.5rem;"></i> Loading complaints queue...
+          </div>
+        `;
+      }
 
       try {
         const [issuesRes, usersRes] = await Promise.all([
@@ -473,17 +478,19 @@
         this.renderComplaints(authorities);
       } catch (err) {
         console.error("ComplaintService load error:", err);
-        listEl.innerHTML = `
-          <div style="text-align: center; padding: 3rem;">
-            <div class="error-retry-card" style="display:inline-block; background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; max-width:400px;">
-              <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-              <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load complaints</p>
-              <button onclick="window.ComplaintService.loadComplaints()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
-                <i class="fa-solid fa-rotate-right"></i> Retry
-              </button>
+        if (!currentComplaints || currentComplaints.length === 0) {
+          listEl.innerHTML = `
+            <div style="text-align: center; padding: 3rem;">
+              <div class="error-retry-card" style="display:inline-block; background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; max-width:400px;">
+                <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Failed to load complaints</p>
+                <button onclick="window.ComplaintService.loadComplaints(true)" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
+                  <i class="fa-solid fa-rotate-right"></i> Retry
+                </button>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       }
     },
 
