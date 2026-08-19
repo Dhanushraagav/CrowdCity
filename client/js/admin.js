@@ -487,6 +487,21 @@
 
     renderComplaints: function(authorities) {
       const listEl = document.getElementById('admin-complaints-list');
+      
+      if (this.pendingFilterStatus !== undefined) {
+        const targetStatus = this.pendingFilterStatus;
+        this.pendingFilterStatus = undefined;
+        const filterPills = document.querySelectorAll('#admin-status-filters .filter-pill');
+        filterPills.forEach(pill => {
+          const statusAttr = pill.getAttribute('data-status') || '';
+          if (statusAttr === targetStatus || (targetStatus === 'all' && statusAttr === '')) {
+            pill.classList.add('active');
+          } else {
+            pill.classList.remove('active');
+          }
+        });
+      }
+
       const activeFilterPill = document.querySelector('#admin-status-filters .filter-pill.active');
       const filterStatus = activeFilterPill ? activeFilterPill.getAttribute('data-status') : '';
       if (!listEl) return;
@@ -1467,25 +1482,28 @@
 
   // Global handler for clicking top metric cards to navigate to complaints tab & filter
   window.filterComplaintsByStatus = function(targetStatus) {
+    if (window.ComplaintService) {
+      window.ComplaintService.pendingFilterStatus = targetStatus;
+    }
+    
+    // Switch active pane & sidebar tab immediately
     window.location.hash = '#complaints';
     showTab('complaints');
 
-    setTimeout(() => {
-      const filterPills = document.querySelectorAll('#admin-status-filters .filter-pill');
-      filterPills.forEach(pill => {
-        const statusAttr = pill.getAttribute('data-status') || '';
-        if (statusAttr === targetStatus || (targetStatus === 'all' && statusAttr === '')) {
-          pill.classList.add('active');
-        } else {
-          pill.classList.remove('active');
-        }
-      });
-
-      if (window.ComplaintService) {
-        const authorities = window.ComplaintService.cachedAuthorities || [];
-        window.ComplaintService.renderComplaints(authorities);
+    // Also update filter pill state in DOM immediately for visual feedback
+    const filterPills = document.querySelectorAll('#admin-status-filters .filter-pill');
+    filterPills.forEach(pill => {
+      const statusAttr = pill.getAttribute('data-status') || '';
+      if (statusAttr === targetStatus || (targetStatus === 'all' && statusAttr === '')) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
       }
-    }, 100);
+    });
+
+    if (window.ComplaintService && window.ComplaintService.cachedAuthorities && window.ComplaintService.cachedAuthorities.length > 0) {
+      window.ComplaintService.renderComplaints(window.ComplaintService.cachedAuthorities);
+    }
   };
 
   // ----------------------------------------------------
