@@ -453,17 +453,11 @@
         <a href="#transportation" class="app-sidebar-link" data-target="pane-transportation">
           <i class="fa-solid fa-car-side"></i> <span>Transportation</span>
         </a>
-        <a href="#services" class="app-sidebar-link" data-target="pane-services">
-          <i class="fa-solid fa-building-columns"></i> <span data-i18n="govt_services">Govt Services</span>
-        </a>
         <a href="#users" class="app-sidebar-link admin-only-section" data-target="pane-users">
-          <i class="fa-solid fa-users-gear"></i> <span data-i18n="user_management">User Management</span>
+          <i class="fa-solid fa-user-shield"></i> <span data-i18n="user_management">User Management</span>
         </a>
         <a href="#reports" class="app-sidebar-link" data-target="pane-reports">
           <i class="fa-solid fa-file-invoice"></i> <span data-i18n="reports">Reports</span>
-        </a>
-        <a href="#settings" class="app-sidebar-link admin-only-section" data-target="pane-settings">
-          <i class="fa-solid fa-gear"></i> <span data-i18n="system_settings">System Settings</span>
         </a>
       </nav>
     </aside>
@@ -478,15 +472,6 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 1rem; margin-left: auto;">
-          <!-- Weather Widget -->
-          <div class="weather-widget loading" id="weather-widget" title="Auto-detected location weather">
-            <span id="weather-icon"><i class="fa-solid fa-cloud-sun"></i></span>
-            <span id="weather-city">Detecting...</span>
-            <span id="weather-temp">--&deg;C</span>
-          </div>
-
-
-
           <div id="auth-nav-container"></div>
         </div>
       </header>
@@ -500,33 +485,26 @@
         <!-- VIEW 1: DASHBOARD                              -->
         <!-- ============================================== -->
         <section id="pane-dashboard" class="tab-pane active-pane">
-          <div class="stats-grid">
-            <div class="stat-card">
+          <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="stat-card stat-card-clickable" onclick="filterComplaintsByStatus('')" title="Click to view all complaints" style="cursor: pointer;">
               <div class="stat-icon" style="background-color: var(--slate-600);"><i class="fa-solid fa-database"></i></div>
               <div>
                 <div class="stat-number" id="kpi-total"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
                 <div class="stat-label" data-i18n="total_reports">Total Reports</div>
               </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card stat-card-clickable" onclick="filterComplaintsByStatus('pending')" title="Click to view & assign pending cases" style="cursor: pointer;">
               <div class="stat-icon" style="background-color: #f59e0b;"><i class="fa-solid fa-clock"></i></div>
               <div>
                 <div class="stat-number" id="kpi-pending"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
                 <div class="stat-label" data-i18n="pending_cases">Pending Cases</div>
               </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card stat-card-clickable" onclick="filterComplaintsByStatus('resolved')" title="Click to view resolved complaints" style="cursor: pointer;">
               <div class="stat-icon" style="background-color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
               <div>
                 <div class="stat-number" id="kpi-resolved"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
                 <div class="stat-label" data-i18n="status_resolved">Resolved</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background-color: var(--primary);"><i class="fa-solid fa-user-shield"></i></div>
-              <div>
-                <div class="stat-number" id="kpi-staff"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
-                <div class="stat-label" data-i18n="authorities">Authorities</div>
               </div>
             </div>
           </div>

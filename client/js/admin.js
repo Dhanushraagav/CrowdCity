@@ -467,6 +467,7 @@
 
         currentComplaints = issuesRes.data || [];
         const authorities = (usersRes.data || []).filter(u => u.role === 'authority' || u.role === 'admin');
+        this.cachedAuthorities = authorities;
         this.renderComplaints(authorities);
       } catch (err) {
         console.error("ComplaintService load error:", err);
@@ -547,12 +548,6 @@
                   ${dropdownOptions}
                 </select>
               </div>
-
-              <div>
-                <button class="btn btn-secondary btn-delete-complaint" data-issue-id="${issue.id}" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: #fca5a5; color: #ef4444; border-radius:6px;">
-                  <i class="fa-solid fa-trash-can"></i> Delete
-                </button>
-              </div>
             </div>
           </div>
         `;
@@ -582,28 +577,6 @@
           }
         });
         select.dataset.oldValue = select.value;
-      });
-
-      document.querySelectorAll('.btn-delete-complaint').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const issueId = btn.getAttribute('data-issue-id');
-          if (!confirm("Are you sure you want to permanently delete this complaint? This cannot be undone.")) return;
-
-          btn.disabled = true;
-          try {
-            // Check if API has deleteIssue or direct client call
-            const activeClient = await window.getOrInitSupabaseClient();
-            const { error } = await activeClient.from('issues').delete().eq('id', issueId);
-            if (error) throw error;
-            showToast("Complaint deleted successfully.");
-            await this.loadComplaints();
-          } catch (err) {
-            console.error("Delete complaint error:", err);
-            showToast("Failed to delete complaint: " + err.message, "error");
-          } finally {
-            btn.disabled = false;
-          }
-        });
       });
     },
 
@@ -1491,6 +1464,29 @@
     else if (tabId === 'users') window.UserService.init();
     else if (tabId === 'settings') window.SettingsService.init();
   }
+
+  // Global handler for clicking top metric cards to navigate to complaints tab & filter
+  window.filterComplaintsByStatus = function(targetStatus) {
+    window.location.hash = '#complaints';
+    showTab('complaints');
+
+    setTimeout(() => {
+      const filterPills = document.querySelectorAll('#admin-status-filters .filter-pill');
+      filterPills.forEach(pill => {
+        const statusAttr = pill.getAttribute('data-status') || '';
+        if (statusAttr === targetStatus || (targetStatus === 'all' && statusAttr === '')) {
+          pill.classList.add('active');
+        } else {
+          pill.classList.remove('active');
+        }
+      });
+
+      if (window.ComplaintService) {
+        const authorities = window.ComplaintService.cachedAuthorities || [];
+        window.ComplaintService.renderComplaints(authorities);
+      }
+    }, 100);
+  };
 
   // ----------------------------------------------------
   // TRANSPORTATION MODULE SERVICE (v3.2)
