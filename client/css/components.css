@@ -5067,6 +5067,149 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   }
 }
 
+/* ==========================================================================
+   MOBILE TYPOGRAPHY CONSISTENCY & RESPONSIVE SCALING (MAX-WIDTH: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Prevent duplicate inner back buttons */
+  .subpage-back-btn,
+  .mobile-only.subpage-back-btn {
+    display: none !important;
+  }
+
+  /* Standardize top-left header back button position */
+  .universal-mobile-back-btn {
+    display: inline-flex !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.85rem !important;
+    margin-right: 0.5rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Page Titles (H1) */
+  h1, 
+  .page-title, 
+  .hero-title,
+  .section-title-lg,
+  .app-header-title h1 {
+    font-size: 1.25rem !important; /* ~20px */
+    line-height: 1.3 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Section Titles (H2) */
+  h2, 
+  .section-title, 
+  .card-header-title,
+  .checker-header-title {
+    font-size: 1.05rem !important; /* ~17px */
+    line-height: 1.35 !important;
+  }
+
+  /* Card Headings / Subheadings (H3) */
+  h3, 
+  .card-title, 
+  .form-section-title,
+  .checker-step-pane h3 {
+    font-size: 0.95rem !important; /* ~15px */
+    line-height: 1.4 !important;
+  }
+
+  /* Subheadings (H4) */
+  h4 {
+    font-size: 0.88rem !important; /* ~14px */
+    line-height: 1.4 !important;
+  }
+
+  /* Body Text & Descriptions */
+  p, 
+  span:not(.badge):not(.btn):not(.brand-title):not(.brand-subtitle), 
+  .text-muted, 
+  .description,
+  .page-subtitle,
+  .hero-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
+  /* Form Labels & Custom Labels */
+  label, 
+  .form-label, 
+  .form-label-custom {
+    font-size: 0.8rem !important; /* ~13px */
+    font-weight: 600 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  /* Inputs, Selects, and Textareas */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  select,
+  textarea,
+  .form-input,
+  .form-select,
+  .form-input-custom,
+  .form-select-custom {
+    font-size: 0.85rem !important; /* ~13.5px */
+    padding: 0.6rem 0.85rem !important;
+    border-radius: 10px !important;
+  }
+
+  /* Button Text */
+  .btn, 
+  button:not(.universal-mobile-back-btn):not(.mobile-menu-toggle) {
+    font-size: 0.85rem !important;
+  }
+
+  /* Specific padding & container adjustments to prevent horizontal overflow & clipping */
+  .app-content-body,
+  .content-wrapper,
+  .checker-card,
+  .checker-form-wrapper,
+  .checker-step-pane,
+  .settings-card,
+  .profile-card,
+  .complaint-card,
+  .history-card {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Checkbox tile groups spacing on small screens */
+  .checkbox-tile-group {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 0.5rem !important;
+  }
+}
+
+@media (max-width: 380px) {
+  /* Ultra-compact screens (320px - 375px) */
+  h1, .page-title, .hero-title {
+    font-size: 1.15rem !important; /* ~18px */
+  }
+
+  h2, .section-title {
+    font-size: 0.98rem !important; /* ~15.5px */
+  }
+
+  h3, .card-title {
+    font-size: 0.9rem !important; /* ~14.5px */
+  }
+
+  body, p, label {
+    font-size: 0.8rem !important; /* ~12.8px */
+  }
+}
+
 
 
 
