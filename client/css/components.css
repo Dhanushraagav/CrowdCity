@@ -2394,62 +2394,99 @@ body:not(.admin-portal-body) .app-sidebar {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  padding: 0.8rem 1.1rem !important;
-  margin-bottom: 0.45rem !important;
-  color: var(--text-muted, #475569);
+  gap: 0.85rem;
+  padding: 0.65rem 0.9rem !important;
+  margin-bottom: 0.5rem !important;
+  color: var(--text-muted, #64748b);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
-  border-radius: 12px !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 14px !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   width: 100%;
   text-align: left;
   cursor: pointer;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
+/* Glassmorphic Icon Badge Container */
 .app-sidebar-link i {
   font-size: 1.05rem;
-  width: 22px;
-  text-align: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.15s ease;
+  background: rgba(13, 148, 136, 0.08);
+  color: var(--primary, #0d9488);
+  border: 1px solid rgba(13, 148, 136, 0.15);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .app-sidebar-link i {
+  background: rgba(13, 148, 136, 0.15);
+  border-color: rgba(13, 148, 136, 0.25);
+  color: #2dd4bf;
 }
 
 .app-sidebar-link span {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, color 0.2s ease;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Hover Animation: Smooth 3D Lift & Spring Glow */
 .app-sidebar-link:hover {
   color: var(--text-main, #0f172a);
-  background-color: var(--bg-surface-hover, #f8fafc);
-  border-radius: 10px !important;
+  background: rgba(13, 148, 136, 0.06);
+  border-color: rgba(13, 148, 136, 0.2);
+  transform: translateX(4px);
 }
 
 .app-sidebar-link:hover i {
-  transform: translateX(2px);
+  background: var(--primary, #0d9488);
+  color: #ffffff !important;
+  border-color: var(--primary, #0d9488);
+  transform: translateY(-2px) scale(1.12) rotate(-3deg);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
 }
 
+/* Active Tab: Vibrant Gradient & Glowing Indicator Accent */
 .app-sidebar-link.active {
   color: #ffffff !important;
-  background-color: var(--primary, #0d9488) !important;
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
   font-weight: 700;
-  border-radius: 10px !important;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.2) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateX(4px);
 }
 
 .app-sidebar-link.active i {
+  background: rgba(255, 255, 255, 0.22) !important;
   color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: scale(1.08);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 .app-sidebar-link.active::before {
-  display: none !important;
-  content: none !important;
+  content: '' !important;
+  display: block !important;
+  position: absolute;
+  left: -8px;
+  top: 22%;
+  height: 56%;
+  width: 4px;
+  background: #ffffff;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
 }
 
 /* Emergency Help Center Link: Hidden on Desktop (width >= 768px), Visible only in Mobile View */
