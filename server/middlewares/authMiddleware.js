@@ -6,13 +6,23 @@ import logger from '../config/logger.js';
  * Enforces production-only Supabase token verification.
  */
 export const requireAuth = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization || req.headers.Authorization || req.headers['x-access-token'] || req.headers['x-auth-token'];
   let token = null;
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.split(' ')[1];
-  } else if (req.query.token) {
+  if (authHeader && typeof authHeader === 'string') {
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } else {
+      token = authHeader;
+    }
+  }
+
+  if (!token && req.query && req.query.token) {
     token = req.query.token;
+  }
+
+  if (!token && req.body && req.body.token) {
+    token = req.body.token;
   }
 
   if (!token) {

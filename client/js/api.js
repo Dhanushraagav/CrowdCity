@@ -6,7 +6,7 @@ const API_BASE = '/api';
  * Perform a fetch request with automatic authorization header injection
  */
 async function request(endpoint, options = {}) {
-  const url = `${API_BASE}${endpoint}`;
+  let url = `${API_BASE}${endpoint}`;
   
   // Set up default headers
   const headers = {
@@ -28,6 +28,11 @@ async function request(endpoint, options = {}) {
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    headers['X-Access-Token'] = token;
+    headers['X-Auth-Token'] = token;
+    if (!url.includes('token=')) {
+      url += (url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(token);
+    }
   }
 
   const config = {
