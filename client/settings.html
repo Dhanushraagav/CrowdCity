@@ -227,7 +227,7 @@
             
             <div class="profile-photo-buttons" style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; width: 100%;">
               <button id="btn-upload-photo" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600;" data-i18n="upload_photo">Upload Photo</button>
-              <button id="btn-remove-photo" class="btn btn-text btn-danger hidden" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600;" data-i18n="remove_photo">Remove Photo</button>
+              <button id="btn-remove-photo" type="button" class="btn btn-text hidden" style="padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; background: transparent;" data-i18n="remove_photo">Remove Photo</button>
             </div>
             <input type="file" id="profile-photo-file-input" accept="image/*" class="hidden">
           </div>
@@ -533,15 +533,51 @@
         });
       }
 
-      if (removeBtn) {
-        removeBtn.addEventListener('click', async () => {
-          if (!confirm("Are you sure you want to remove your profile photo?")) return;
+      const removePhotoModal = document.getElementById('remove-photo-modal');
+      const confirmRemoveBtn = document.getElementById('btn-confirm-remove-photo');
+      const cancelRemoveBtn = document.getElementById('btn-cancel-remove-photo');
+      const cancelRemoveBtnX = document.getElementById('btn-cancel-remove-photo-x');
+      const removePhotoBackdrop = document.getElementById('remove-photo-modal-backdrop');
 
-          removeBtn.disabled = true;
-          removeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Removing...';
+      function openRemovePhotoModal() {
+        if (!removePhotoModal) return;
+        removePhotoModal.classList.remove('hidden');
+        removePhotoModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeRemovePhotoModal() {
+        if (!removePhotoModal) return;
+        removePhotoModal.classList.add('hidden');
+        removePhotoModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (confirmRemoveBtn) {
+          confirmRemoveBtn.disabled = false;
+          confirmRemoveBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> <span>Remove Photo</span>';
+        }
+      }
+
+      if (removeBtn) {
+        removeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openRemovePhotoModal();
+        });
+      }
+
+      if (cancelRemoveBtn) cancelRemoveBtn.addEventListener('click', closeRemovePhotoModal);
+      if (cancelRemoveBtnX) cancelRemoveBtnX.addEventListener('click', closeRemovePhotoModal);
+      if (removePhotoBackdrop) removePhotoBackdrop.addEventListener('click', closeRemovePhotoModal);
+
+      if (confirmRemoveBtn) {
+        confirmRemoveBtn.addEventListener('click', async () => {
+          confirmRemoveBtn.disabled = true;
+          if (cancelRemoveBtn) cancelRemoveBtn.disabled = true;
+          confirmRemoveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Removing...</span>';
 
           try {
             const user = getCurrentUser();
+            if (!user) throw new Error("User session not found.");
+
             const { error: dbError } = await supabaseClient
               .from('profiles')
               .update({ avatar_url: '' })
@@ -562,15 +598,17 @@
               localStorage.setItem('cc_user_profile', JSON.stringify(profile));
             }
 
-            window.showToast("Profile photo removed successfully!", "success");
+            if (window.showToast) window.showToast("Profile photo removed.", "success");
             syncSettingsPhoto();
             window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
+            closeRemovePhotoModal();
           } catch (err) {
             console.error("Error removing profile picture:", err);
-            window.showToast("Failed to remove profile picture: " + (err.message || err), "error");
+            if (window.showToast) window.showToast("Failed to remove profile picture: " + (err.message || err), "error");
           } finally {
-            removeBtn.disabled = false;
-            syncSettingsPhoto();
+            confirmRemoveBtn.disabled = false;
+            if (cancelRemoveBtn) cancelRemoveBtn.disabled = false;
+            confirmRemoveBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> <span>Remove Photo</span>';
           }
         });
       }
@@ -623,6 +661,42 @@
         <p>Using advanced AI, the platform auto-categorizes and routes reports to municipal authorities immediately, expediting resolution and keeping citizens updated in real-time.</p>
         <p style="margin-top: 1rem; font-weight: 700; color: var(--primary);">Empower your city, report issues today.</p>
       </div>
+    </div>
+  </div>
+
+  <!-- Custom CrowdCity Remove Photo Confirmation Modal -->
+  <div id="remove-photo-modal" class="custom-modal hidden" aria-hidden="true" role="dialog" aria-labelledby="remove-photo-modal-title">
+    <div class="custom-modal-backdrop" id="remove-photo-modal-backdrop"></div>
+    <div class="custom-modal-content" style="max-width: 380px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+      
+      <div class="custom-modal-header" style="padding: 1.15rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+            <i class="fa-solid fa-trash-can"></i>
+          </div>
+          <h3 id="remove-photo-modal-title" style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--text-main);">Remove Profile Photo?</h3>
+        </div>
+        <button type="button" class="close-modal-btn" id="btn-cancel-remove-photo-x" aria-label="Close modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="custom-modal-body" style="padding: 1.25rem;">
+        <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+          Are you sure you want to remove your profile photo?
+        </p>
+      </div>
+
+      <div style="padding: 1rem 1.25rem 1.25rem 1.25rem; display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid var(--border-color); background: var(--bg-app);">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-remove-photo" style="padding: 0.6rem 1.15rem; font-size: 0.85rem; font-weight: 600; border-radius: 10px;">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-remove-photo" style="padding: 0.6rem 1.15rem; font-size: 0.85rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Remove Photo</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
