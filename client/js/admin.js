@@ -63,10 +63,46 @@
     return true;
   }
 
+  // Helper to compute client-side analytics fallback from issues array
+  function computeAnalyticsFromIssues(issuesList) {
+    const byCategory = {
+      roads: 0, streetlights: 0, water_supply: 0, drainage: 0, garbage: 0,
+      traffic: 0, public_property: 0, parks: 0, sanitation: 0, safety_hazard: 0,
+      environment: 0, other: 0
+    };
+    const byStatus = {
+      pending: 0, assigned: 0, in_progress: 0, resolved: 0, rejected: 0
+    };
+
+    (issuesList || []).forEach(issue => {
+      let rawCat = (issue.category || '').toLowerCase().trim().replace(/ /g, '_');
+      if (rawCat === 'pothole' || rawCat === 'road') rawCat = 'roads';
+      if (rawCat === 'leakage' || rawCat === 'water') rawCat = 'water_supply';
+      if (rawCat === 'street_light' || rawCat === 'streetlight') rawCat = 'streetlights';
+      if (byCategory.hasOwnProperty(rawCat)) byCategory[rawCat]++;
+      else byCategory['other']++;
+
+      let rawStatus = (issue.status || '').toLowerCase().trim();
+      if (rawStatus === 'resolved' || rawStatus === 'completed' || rawStatus === 'closed' || rawStatus === 'verified') byStatus.resolved++;
+      else if (rawStatus === 'assigned') byStatus.assigned++;
+      else if (rawStatus === 'in_progress' || rawStatus === 'investigating') byStatus.in_progress++;
+      else if (rawStatus === 'rejected' || rawStatus === 'declined') byStatus.rejected++;
+      else byStatus.pending++;
+    });
+
+    return {
+      totalComplaints: (issuesList || []).length,
+      byCategory,
+      byStatus
+    };
+  }
+
   // ----------------------------------------------------
   // SERVICE 1: DashboardService ( Caseload & KPIs )
   // ----------------------------------------------------
   window.DashboardService = {
+    cachedAnalytics: null,
+
     init: async function() {
       // Load all dashboard widgets in parallel for faster initial render
       await Promise.allSettled([
@@ -77,7 +113,34 @@
       ]);
     },
 
-    loadKPIs: async function() {
+    applyAnalyticsData: function(analytics) {
+      if (!analytics) return;
+      const totalEl = document.getElementById('kpi-total');
+      const pendingEl = document.getElementById('kpi-pending');
+      const resolvedEl = document.getElementById('kpi-resolved');
+
+      const catContainer = document.getElementById('chart-categories-container');
+      const statContainer = document.getElementById('chart-statuses-container');
+      const perfContainer = document.getElementById('chart-performance-container');
+
+      if (totalEl) totalEl.textContent = analytics.totalComplaints;
+      if (pendingEl) pendingEl.textContent = analytics.byStatus ? (analytics.byStatus.pending || 0) : 0;
+      if (resolvedEl) resolvedEl.textContent = analytics.byStatus ? (analytics.byStatus.resolved || 0) : 0;
+
+      if (catContainer && !catContainer.querySelector('canvas')) {
+        catContainer.innerHTML = '<canvas id="chart-categories"></canvas>';
+      }
+      if (statContainer && !statContainer.querySelector('canvas')) {
+        statContainer.innerHTML = '<canvas id="chart-statuses"></canvas>';
+      }
+      if (perfContainer && !perfContainer.querySelector('canvas')) {
+        perfContainer.innerHTML = '<canvas id="chart-performance"></canvas>';
+      }
+
+      this.renderCharts(analytics);
+    },
+
+    loadKPIs: async function(forceSkeleton = false) {
       const totalEl = document.getElementById('kpi-total');
       const pendingEl = document.getElementById('kpi-pending');
       const resolvedEl = document.getElementById('kpi-resolved');
@@ -87,64 +150,57 @@
       const statContainer = document.getElementById('chart-statuses-container');
       const perfContainer = document.getElementById('chart-performance-container');
 
-      // Reset to skeletons
-      if (totalEl) totalEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
-      if (pendingEl) pendingEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
-      if (resolvedEl) resolvedEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
-      if (staffEl) staffEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
+      // Instant UI render from cache if available to prevent skeleton delay
+      if (this.cachedAnalytics) {
+        this.applyAnalyticsData(this.cachedAnalytics);
+      } else if (currentComplaints && currentComplaints.length > 0) {
+        const computed = computeAnalyticsFromIssues(currentComplaints);
+        this.applyAnalyticsData(computed);
+      } else if (forceSkeleton || (totalEl && totalEl.querySelector('.skeleton'))) {
+        // Show skeleton shimmer on cold initial load only
+        if (totalEl) totalEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
+        if (pendingEl) pendingEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
+        if (resolvedEl) resolvedEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
+        if (staffEl) staffEl.innerHTML = '<div class="skeleton" style="width: 40px; height: 1.5rem;"></div>';
 
-      if (catContainer) catContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
-      if (statContainer) statContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
-      if (perfContainer) perfContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
+        if (catContainer) catContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
+        if (statContainer) statContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
+        if (perfContainer) perfContainer.innerHTML = '<div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>';
+      }
 
       try {
         const analyticsPromise = API.getAdminAnalytics();
         const usersPromise = API.getAllUsers();
+        const issuesPromise = (currentComplaints && currentComplaints.length) 
+          ? Promise.resolve({ data: currentComplaints }) 
+          : API.getIssues();
 
-        analyticsPromise.then(analyticsRes => {
-          if (analyticsRes.error) throw new Error(analyticsRes.error);
-          const analytics = analyticsRes.data;
+        const [analyticsRes, usersRes, issuesRes] = await Promise.allSettled([
+          analyticsPromise,
+          usersPromise,
+          issuesPromise
+        ]);
 
-          if (totalEl) totalEl.textContent = analytics.totalComplaints;
-          if (pendingEl) pendingEl.textContent = analytics.byStatus.pending || 0;
-          if (resolvedEl) resolvedEl.textContent = analytics.byStatus.resolved || 0;
+        let analyticsData = null;
 
-          // Re-create canvases and render
-          if (catContainer) catContainer.innerHTML = '<canvas id="chart-categories"></canvas>';
-          if (statContainer) statContainer.innerHTML = '<canvas id="chart-statuses"></canvas>';
-          if (perfContainer) perfContainer.innerHTML = '<canvas id="chart-performance"></canvas>';
+        if (analyticsRes.status === 'fulfilled' && analyticsRes.value && !analyticsRes.value.error) {
+          analyticsData = analyticsRes.value.data;
+        } else if (issuesRes.status === 'fulfilled' && issuesRes.value && !issuesRes.value.error) {
+          currentComplaints = issuesRes.value.data || [];
+          analyticsData = computeAnalyticsFromIssues(currentComplaints);
+        }
 
-          this.renderCharts(analytics);
-        }).catch(err => {
-          console.error("Dashboard statistics load failed:", err);
-          const errorRetryHtml = `
-            <div class="error-retry-card" style="background-color: var(--bg-surface); border: 1px dashed #ef4444; border-radius: var(--radius-md); padding: 1.5rem; text-align: center; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-              <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-              <p style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin: 0;">Analytics temporarily unavailable</p>
-              <button onclick="window.DashboardService.loadKPIs()" class="btn" style="margin-top:0.75rem; padding: 0.4rem 0.8rem; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); cursor: pointer; border-radius: var(--radius-sm);">
-                <i class="fa-solid fa-rotate-right"></i> Retry
-              </button>
-            </div>
-          `;
-          if (catContainer) catContainer.innerHTML = errorRetryHtml;
-          if (statContainer) statContainer.innerHTML = errorRetryHtml;
-          if (perfContainer) perfContainer.innerHTML = errorRetryHtml;
+        if (analyticsData) {
+          this.cachedAnalytics = analyticsData;
+          this.applyAnalyticsData(analyticsData);
+        }
 
-          if (totalEl) totalEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
-          if (pendingEl) pendingEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
-          if (resolvedEl) resolvedEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
-        });
-
-        usersPromise.then(usersRes => {
-          if (usersRes.error) throw new Error(usersRes.error);
-          const count = (usersRes.data || []).filter(u => u.role === 'authority' || u.role === 'admin').length;
+        if (usersRes.status === 'fulfilled' && usersRes.value && !usersRes.value.error) {
+          const count = (usersRes.value.data || []).filter(u => u.role === 'authority' || u.role === 'admin').length;
           if (staffEl) staffEl.textContent = count;
-        }).catch(err => {
-          console.error("Dashboard users load failed:", err);
-          if (staffEl) staffEl.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></span>';
-        });
+        }
       } catch (err) {
-        console.error("loadKPIs outer error:", err);
+        console.error("loadKPIs error:", err);
       }
     },
 

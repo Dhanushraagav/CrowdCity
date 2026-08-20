@@ -55,8 +55,8 @@ router.get('/:id/receipt', requireAuth, getIssueReceipt);
 router.get('/:id/messages', requireAuth, validateIdParam('id'), getChatMessages);
 router.post('/:id/messages', requireAuth, validateIdParam('id'), sendChatMessage);
 
-// Admin-only analytics route (registered before parameterized ID routes to avoid routing conflicts)
-router.get('/admin/analytics', requireAuth, requireRole(['admin']), getAdminAnalytics);
+// Admin & Authority analytics route (registered before parameterized ID routes to avoid routing conflicts)
+router.get('/admin/analytics', requireAuth, requireRole(['authority', 'admin']), getAdminAnalytics);
 router.get('/admin/ai-decisions', requireAuth, requireRole(['admin']), getAiDecisions);
 router.post('/admin/ai-decisions/:id/override', requireAuth, requireRole(['admin']), overrideAiDecision);
 router.get('/admin/reports/export', requireAuth, requireRole(['admin']), exportReport);
