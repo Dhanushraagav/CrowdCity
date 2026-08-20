@@ -901,11 +901,7 @@
       } catch (err) {
         console.error("sendDetailChatMessage error:", err);
         showToast("Message sent!", "success");
-        await this.loadChatMessages(issueId);
       }
-    },
-
-      this.bindCardActions(authorities);
     },
 
     bindCardActions: function(authorities) {
