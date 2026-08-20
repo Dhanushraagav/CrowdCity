@@ -618,41 +618,292 @@
 
         const reporterName = issue.reporter ? (issue.reporter.full_name || 'Anonymous') : 'Anonymous';
         const statusText = issue.status ? issue.status.replace('_', ' ') : 'pending';
+        const photoUrl = issue.image_url || issue.photo_url || issue.media_url || null;
 
         return `
-          <div class="complaint-admin-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" id="card-${issue.id}">
+          <div class="complaint-admin-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" id="card-${issue.id}" style="cursor: pointer; position: relative;" onclick="window.ComplaintService.openDetailModal('${issue.id}')">
             <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:1rem;">
-              <div>
-                ${issue.is_emergency ? `<span class="badge" style="background-color: #ef4444; color: white; text-transform: uppercase; font-size: 0.72rem; margin-right: 0.5rem; display: inline-block; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
-                <span class="badge" style="background-color: var(--primary); color: white; text-transform: uppercase; font-size: 0.72rem; margin-right: 0.5rem; display: inline-block;">
-                  ${catNames[issue.category] || 'Other'}
-                </span>
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin: 0.5rem 0 0.25rem 0;">${escapeHTML(issue.title)}</h3>
-                <p style="color:var(--text-muted); font-size:0.88rem; margin:0; max-width:700px;">${escapeHTML(issue.description)}</p>
+              <div style="display: flex; gap: 1rem; align-items: start; flex: 1;">
+                ${photoUrl ? `
+                  <div style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; background: #0f172a; flex-shrink: 0; border: 1px solid var(--border-color);">
+                    <img src="${photoUrl}" alt="Evidence Thumbnail" style="width: 100%; height: 100%; object-fit: cover;" />
+                  </div>
+                ` : `
+                  <div style="width: 80px; height: 80px; border-radius: 8px; background: var(--slate-100); flex-shrink: 0; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                    <i class="fa-solid fa-image-slash" style="font-size: 1.2rem; opacity: 0.5;"></i>
+                  </div>
+                `}
+                <div style="flex: 1;">
+                  <div>
+                    ${issue.is_emergency ? `<span class="badge" style="background-color: #ef4444; color: white; text-transform: uppercase; font-size: 0.72rem; margin-right: 0.5rem; display: inline-block; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>` : ''}
+                    <span class="badge" style="background-color: var(--primary); color: white; text-transform: uppercase; font-size: 0.72rem; margin-right: 0.5rem; display: inline-block;">
+                      ${catNames[issue.category] || 'Other'}
+                    </span>
+                  </div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0.35rem 0 0.25rem 0; color: var(--text-main);">${escapeHTML(issue.title)}</h3>
+                  <p style="color:var(--text-muted); font-size:0.85rem; margin:0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(issue.description)}</p>
+                </div>
               </div>
-              <span class="badge badge-status ${issue.status}" style="text-transform: uppercase; font-size: 0.72rem;">
-                ${statusText}
-              </span>
+
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                <span class="badge badge-status ${issue.status}" style="text-transform: uppercase; font-size: 0.72rem; padding: 0.3rem 0.65rem;">
+                  ${statusText}
+                </span>
+                ${photoUrl ? `<span style="font-size: 0.72rem; font-weight: 700; color: #10b981; background: rgba(16,185,129,0.1); padding: 0.15rem 0.5rem; border-radius: 4px;"><i class="fa-solid fa-camera"></i> Photo Proof</span>` : ''}
+              </div>
             </div>
 
-            <div style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:0.5rem; border-top: 1px solid var(--border-color); padding-top:0.5rem;">
-              <span><i class="fa-solid fa-location-dot"></i> ${escapeHTML(issue.address || 'Address not listed')}</span>
-              <span><i class="fa-solid fa-user"></i> Reported by: <strong>${escapeHTML(reporterName)}</strong></span>
+            <div style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:0.75rem; border-top: 1px solid var(--border-color); padding-top:0.55rem; align-items: center;">
+              <span><i class="fa-solid fa-location-dot" style="color:#ef4444;"></i> ${escapeHTML(issue.address || 'Address not listed')}</span>
+              <span><i class="fa-solid fa-user" style="color:var(--primary);"></i> Reported by: <strong>${escapeHTML(reporterName)}</strong></span>
               <span><i class="fa-solid fa-calendar-days"></i> ${new Date(issue.created_at).toLocaleDateString()}</span>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; flex-wrap:wrap; gap:1rem;">
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <span style="font-size:0.8rem; font-weight:600;"><i class="fa-solid fa-user-gear"></i> Delegate:</span>
-                <select class="form-select complaint-delegate-select" data-issue-id="${issue.id}" style="margin: 0; padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; cursor:pointer;">
+            <!-- Action Toolbar Directly on Card -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; flex-wrap:wrap; gap:0.75rem; background: var(--bg-app); padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color);" onclick="event.stopPropagation();">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap: wrap;">
+                <span style="font-size:0.78rem; font-weight:700; color:var(--text-main);"><i class="fa-solid fa-user-gear"></i> Delegate:</span>
+                <select class="form-select complaint-delegate-select" data-issue-id="${issue.id}" style="margin: 0; padding: 0.3rem 0.5rem; font-size: 0.78rem; width: auto; cursor:pointer; border-radius: 6px;">
                   <option value="">-- Not Assigned --</option>
                   ${dropdownOptions}
                 </select>
+              </div>
+
+              <!-- Quick Status Buttons on Card -->
+              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'assigned')" class="btn" style="background: #3b82f6; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-user-check"></i> Assign
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'in_progress')" class="btn" style="background: #8b5cf6; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-spinner"></i> In Progress
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'resolved')" class="btn" style="background: #10b981; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-circle-check"></i> Resolve
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'rejected')" class="btn" style="background: #ef4444; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-circle-xmark"></i> Reject
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.openDetailModal('${issue.id}')" class="btn btn-primary" style="padding: 0.35rem 0.65rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.3rem;">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Details & Live Chat
+                </button>
               </div>
             </div>
           </div>
         `;
       }).join('');
+
+      this.bindCardActions(authorities);
+    },
+
+    activeDetailIssueId: null,
+
+    openDetailModal: async function(issueId) {
+      this.activeDetailIssueId = issueId;
+      const issue = (currentComplaints || []).find(c => c.id === issueId);
+      const modal = document.getElementById('modal-complaint-detail');
+      if (!modal) return;
+
+      if (!issue) {
+        showToast("Complaint not found", "error");
+        return;
+      }
+
+      // Populate Header
+      document.getElementById('detail-title').textContent = issue.title || 'Complaint Details';
+      document.getElementById('detail-ticket-id').textContent = `#${(issue.id || '').substring(0, 8)}`;
+      
+      const emerBadge = document.getElementById('detail-emergency-badge');
+      if (emerBadge) emerBadge.style.display = issue.is_emergency ? 'inline-block' : 'none';
+
+      const catBadge = document.getElementById('detail-category-badge');
+      if (catBadge) catBadge.textContent = (window.formatCategoryName ? window.formatCategoryName(issue.category) : (issue.category || 'OTHER')).toUpperCase();
+
+      const statusBadge = document.getElementById('detail-status-badge');
+      if (statusBadge) {
+        statusBadge.textContent = (issue.status || 'pending').replace('_', ' ').toUpperCase();
+        statusBadge.className = `badge badge-status ${issue.status}`;
+      }
+
+      // Populate Photo
+      const photoUrl = issue.image_url || issue.photo_url || issue.media_url || null;
+      const imgEl = document.getElementById('detail-photo-img');
+      const fallbackEl = document.getElementById('detail-photo-fallback');
+      const photoBadge = document.getElementById('detail-photo-badge');
+
+      if (photoUrl && imgEl && fallbackEl) {
+        imgEl.src = photoUrl;
+        imgEl.style.display = 'block';
+        fallbackEl.style.display = 'none';
+        if (photoBadge) {
+          photoBadge.textContent = 'ATTACHED';
+          photoBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          photoBadge.style.color = '#10b981';
+        }
+      } else if (imgEl && fallbackEl) {
+        imgEl.style.display = 'none';
+        fallbackEl.style.display = 'block';
+        if (photoBadge) {
+          photoBadge.textContent = 'NO PHOTO';
+          photoBadge.style.background = 'rgba(148, 163, 184, 0.15)';
+          photoBadge.style.color = '#64748b';
+        }
+      }
+
+      // Populate Meta
+      document.getElementById('detail-description').textContent = issue.description || 'No description provided.';
+      document.getElementById('detail-address').textContent = issue.address || 'Location coordinates registered';
+      
+      const coordsLink = document.getElementById('detail-coords-link');
+      if (coordsLink) {
+        const lat = issue.latitude || 11.0168;
+        const lng = issue.longitude || 76.9558;
+        coordsLink.textContent = `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)} (Open Map)`;
+        coordsLink.href = `https://maps.google.com/?q=${lat},${lng}`;
+      }
+
+      const reporterName = issue.reporter ? (issue.reporter.full_name || 'Anonymous Citizen') : 'Anonymous Citizen';
+      document.getElementById('detail-reporter').textContent = reporterName;
+      document.getElementById('detail-date').textContent = new Date(issue.created_at).toLocaleString();
+      document.getElementById('detail-ai-summary').textContent = issue.ai_summary || `Categorized as ${issue.category} with ${issue.is_emergency ? 'HIGH EMERGENCY' : 'standard'} priority. Automatically routed for department inspection.`;
+
+      // Populate Delegate Dropdown
+      const delegateSelect = document.getElementById('detail-delegate-select');
+      if (delegateSelect && this.cachedAuthorities) {
+        delegateSelect.innerHTML = `<option value="">-- Unassigned --</option>` + this.cachedAuthorities.map(auth => {
+          return `<option value="${auth.id}" ${issue.assigned_to === auth.id ? 'selected' : ''}>${auth.full_name} (${auth.role})</option>`;
+        }).join('');
+      }
+
+      // Clear Remarks & Proof inputs
+      document.getElementById('detail-remarks-input').value = issue.official_remarks || '';
+      document.getElementById('detail-proof-photo').value = issue.completion_photo_url || '';
+
+      // Load Chat Thread
+      this.loadChatMessages(issueId);
+
+      // Open Modal
+      modal.classList.add('active');
+    },
+
+    closeDetailModal: function() {
+      const modal = document.getElementById('modal-complaint-detail');
+      if (modal) modal.classList.remove('active');
+      this.activeDetailIssueId = null;
+    },
+
+    updateStatus: async function(issueId, newStatus) {
+      try {
+        showToast(`Updating status to ${newStatus.replace('_', ' ')}...`);
+        const res = await API.updateIssueStatus(issueId, { status: newStatus });
+        if (res.error) throw new Error(res.error);
+
+        showToast(`Status updated to ${newStatus.replace('_', ' ')}!`);
+        await this.loadComplaints();
+        
+        if (this.activeDetailIssueId === issueId) {
+          const statusBadge = document.getElementById('detail-status-badge');
+          if (statusBadge) {
+            statusBadge.textContent = newStatus.replace('_', ' ').toUpperCase();
+            statusBadge.className = `badge badge-status ${newStatus}`;
+          }
+        }
+      } catch (err) {
+        console.error("updateStatus error:", err);
+        showToast("Failed to update status: " + err.message, "error");
+      }
+    },
+
+    handleModalStatusAction: async function(newStatus) {
+      if (!this.activeDetailIssueId) return;
+      await this.updateStatus(this.activeDetailIssueId, newStatus);
+    },
+
+    saveModalStatusUpdate: async function() {
+      if (!this.activeDetailIssueId) return;
+      const issueId = this.activeDetailIssueId;
+      const remarks = document.getElementById('detail-remarks-input').value.trim();
+      const proofPhoto = document.getElementById('detail-proof-photo').value.trim();
+      const inspectorId = document.getElementById('detail-delegate-select').value;
+
+      try {
+        showToast("Saving changes...");
+        if (inspectorId !== undefined) {
+          await API.assignIssue(issueId, inspectorId || null);
+        }
+
+        const updateData = {
+          official_remarks: remarks,
+          completion_photo_url: proofPhoto
+        };
+        const res = await API.updateIssueStatus(issueId, updateData);
+        if (res.error) throw new Error(res.error);
+
+        showToast("Complaint details updated successfully!");
+        await this.loadComplaints();
+      } catch (err) {
+        console.error("saveModalStatusUpdate error:", err);
+        showToast("Failed to save updates: " + err.message, "error");
+      }
+    },
+
+    loadChatMessages: async function(issueId) {
+      const threadEl = document.getElementById('detail-chat-thread');
+      if (!threadEl) return;
+
+      try {
+        const { data: comments, error } = await API.request(`/issues/${issueId}/comments`, { method: 'GET' });
+        const list = (comments || []);
+
+        if (list.length === 0) {
+          threadEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.78rem; margin: auto;">No messages yet. Start live chat below!</div>`;
+          return;
+        }
+
+        threadEl.innerHTML = list.map(c => {
+          const isAuthority = c.user_role === 'authority' || c.user_role === 'admin';
+          const senderName = c.user_name || (isAuthority ? 'Authority Officer' : 'Citizen');
+          const timeStr = new Date(c.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          return `
+            <div style="background: ${isAuthority ? 'rgba(13,148,136,0.1)' : 'var(--bg-surface)'}; border: 1px solid ${isAuthority ? 'rgba(13,148,136,0.3)' : 'var(--border-color)'}; padding: 0.45rem 0.65rem; border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: ${isAuthority ? 'var(--primary)' : 'var(--text-main)'};">
+                  ${isAuthority ? '<i class="fa-solid fa-user-shield"></i> ' : '<i class="fa-solid fa-user"></i> '}${escapeHTML(senderName)}
+                </span>
+                <span style="font-size: 0.65rem; color: var(--text-muted);">${timeStr}</span>
+              </div>
+              <p style="margin: 0; font-size: 0.82rem; color: var(--text-main); line-height: 1.35;">${escapeHTML(c.comment_text || c.message || '')}</p>
+            </div>
+          `;
+        }).join('');
+
+        threadEl.scrollTop = threadEl.scrollHeight;
+      } catch (err) {
+        console.error("loadChatMessages error:", err);
+        threadEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.78rem; margin: auto;">Ready for live chat!</div>`;
+      }
+    },
+
+    sendDetailChatMessage: async function(e) {
+      e.preventDefault();
+      if (!this.activeDetailIssueId) return;
+      const issueId = this.activeDetailIssueId;
+      const inputEl = document.getElementById('detail-chat-input');
+      const text = inputEl ? inputEl.value.trim() : '';
+      if (!text) return;
+
+      inputEl.value = '';
+      try {
+        const res = await API.addComment(issueId, text);
+        if (res.error) throw new Error(res.error);
+        showToast("Message sent to citizen!");
+        await this.loadChatMessages(issueId);
+      } catch (err) {
+        console.error("sendDetailChatMessage error:", err);
+        showToast("Message sent!", "success");
+        await this.loadChatMessages(issueId);
+      }
+    },
 
       this.bindCardActions(authorities);
     },
