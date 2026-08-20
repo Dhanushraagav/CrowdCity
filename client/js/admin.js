@@ -621,7 +621,7 @@
         const photoUrl = issue.image_url || issue.photo_url || issue.media_url || null;
 
         return `
-          <div class="complaint-admin-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" id="card-${issue.id}" style="cursor: pointer; position: relative;" onclick="window.location.href='authority-issue-details.html?id=${issue.id}'">
+          <div class="complaint-admin-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" id="card-${issue.id}" style="cursor: pointer; position: relative;" onclick="window.ComplaintService.openDetailModal('${issue.id}')">
             <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:1rem;">
               <div style="display: flex; gap: 1rem; align-items: start; flex: 1;">
                 ${photoUrl ? `
@@ -659,9 +659,9 @@
               <span><i class="fa-solid fa-calendar-days"></i> ${new Date(issue.created_at).toLocaleDateString()}</span>
             </div>
 
-            <!-- Clean Single Action Bar -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; flex-wrap:wrap; gap:0.75rem; background: var(--bg-app); padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color);" onclick="event.stopPropagation();">
-              <div style="display:flex; align-items:center; gap:0.5rem;">
+            <!-- Action Toolbar Directly on Card -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; flex-wrap:wrap; gap:0.75rem; background: var(--bg-app); padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color);" onclick="event.stopPropagation();">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap: wrap;">
                 <span style="font-size:0.78rem; font-weight:700; color:var(--text-main);"><i class="fa-solid fa-user-gear"></i> Delegate:</span>
                 <select class="form-select complaint-delegate-select" data-issue-id="${issue.id}" style="margin: 0; padding: 0.3rem 0.5rem; font-size: 0.78rem; width: auto; cursor:pointer; border-radius: 6px;">
                   <option value="">-- Not Assigned --</option>
@@ -669,9 +669,24 @@
                 </select>
               </div>
 
-              <a href="authority-issue-details.html?id=${issue.id}" class="btn btn-primary" style="padding: 0.45rem 0.9rem; font-size: 0.78rem; font-weight: 700; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-                <i class="fa-solid fa-arrow-right"></i> Inspect Case & Live Chat
-              </a>
+              <!-- Quick Status Buttons on Card -->
+              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'assigned')" class="btn" style="background: #3b82f6; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-user-check"></i> Assign
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'in_progress')" class="btn" style="background: #8b5cf6; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-spinner"></i> In Progress
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'resolved')" class="btn" style="background: #10b981; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-circle-check"></i> Resolve
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.updateStatus('${issue.id}', 'rejected')" class="btn" style="background: #ef4444; color: white; border: none; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                  <i class="fa-solid fa-circle-xmark"></i> Reject
+                </button>
+                <button type="button" onclick="event.stopPropagation(); window.ComplaintService.openDetailModal('${issue.id}')" class="btn btn-primary" style="padding: 0.35rem 0.65rem; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.3rem;">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Details & Live Chat
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -885,7 +900,6 @@
         await this.loadChatMessages(issueId);
       } catch (err) {
         console.error("sendDetailChatMessage error:", err);
-        showToast("Message sent!", "success");
       }
     },
 
