@@ -497,6 +497,123 @@ function initAiCameraDetection() {
   }
 }
 
+/**
+ * Web Speech API Voice Recognition & Groq AI Tamil/Tanglish -> English Translator
+ * Transcribes Tamil, Tanglish, or English spoken audio, translates to clear English, and triggers AI auto-categorization.
+ */
+function initVoiceRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const voiceBtn = document.getElementById('btn-voice-input');
+  const voiceStatus = document.getElementById('voice-status-text');
+  const descField = document.getElementById('report-description');
+
+  if (!voiceBtn) return;
+
+  if (!SpeechRecognition) {
+    console.warn("Speech Recognition API is not supported in this browser.");
+    voiceBtn.style.display = 'none';
+    return;
+  }
+
+  let recognition = null;
+  let isListening = false;
+
+  try {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'ta-IN'; // Supports Tamil script, Tanglish, & Indian English speech
+  } catch (e) {
+    console.warn("Failed to initialize SpeechRecognition:", e);
+    voiceBtn.style.display = 'none';
+    return;
+  }
+
+  voiceBtn.addEventListener('click', () => {
+    if (isListening) {
+      try { recognition.stop(); } catch (err) {}
+    } else {
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error("Speech start error:", err);
+      }
+    }
+  });
+
+  recognition.onstart = () => {
+    isListening = true;
+    voiceBtn.classList.add('recording-pulse');
+    voiceBtn.innerHTML = `<i class="fa-solid fa-microphone-slash fa-beat" style="color: #ef4444;"></i> <span>Listening...</span>`;
+    if (voiceStatus) {
+      voiceStatus.style.display = 'block';
+      voiceStatus.textContent = 'Listening... Speak naturally in Tamil, Tanglish, or English.';
+      voiceStatus.style.color = 'var(--primary, #0d9488)';
+    }
+  };
+
+  recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    if (descField && transcript) {
+      descField.value = transcript;
+    }
+  };
+
+  recognition.onerror = (event) => {
+    console.warn("Speech recognition event:", event.error);
+    isListening = false;
+    voiceBtn.classList.remove('recording-pulse');
+    voiceBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> <span>Voice Report</span>`;
+    if (voiceStatus) {
+      if (event.error !== 'no-speech') {
+        voiceStatus.style.display = 'block';
+        voiceStatus.textContent = 'Mic paused. Tap mic again when ready to speak.';
+        voiceStatus.style.color = 'var(--text-muted)';
+      }
+    }
+  };
+
+  recognition.onend = async () => {
+    isListening = false;
+    voiceBtn.classList.remove('recording-pulse');
+    voiceBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> <span>Voice Report</span>`;
+
+    const spokenText = descField ? descField.value.trim() : '';
+    if (spokenText && spokenText.length > 2) {
+      if (voiceStatus) {
+        voiceStatus.style.display = 'block';
+        voiceStatus.textContent = 'AI is translating Tamil/Tanglish & polishing into clear English...';
+        voiceStatus.style.color = 'var(--primary, #0d9488)';
+      }
+
+      try {
+        if (window.API && typeof window.API.translateVoiceText === 'function') {
+          const res = await window.API.translateVoiceText(spokenText);
+          if (res && res.englishText) {
+            descField.value = res.englishText;
+            if (voiceStatus) {
+              voiceStatus.textContent = 'Transcribed & translated into clear English!';
+              voiceStatus.style.color = '#10b981';
+            }
+            // Auto-trigger AI categorizer to set category & department!
+            const aiBtn = document.getElementById('btn-ai-assist');
+            if (aiBtn) aiBtn.click();
+          }
+        }
+      } catch (err) {
+        console.error("Voice translation call failed:", err);
+        if (voiceStatus) {
+          voiceStatus.textContent = 'Voice text added to description.';
+          voiceStatus.style.color = 'var(--text-muted)';
+        }
+      }
+    }
+  };
+}
+
 // Initialize Report Page
 function initReportPage() {
   if (typeof getCurrentUser === 'function' && !getCurrentUser()) {
@@ -519,6 +636,7 @@ function initReportPage() {
   setupImageUpload();
   setupAiAssistant();
   initAiCameraDetection();
+  initVoiceRecognition();
   setupFormSubmit();
   setupGPSButton();
   setupSearchButton();

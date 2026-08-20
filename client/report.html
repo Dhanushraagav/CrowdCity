@@ -606,17 +606,23 @@
 
             <!-- Detailed Description -->
             <div class="description-group">
-              <div class="desc-header">
+              <div class="desc-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
                 <label for="report-description" class="field-label" style="margin-bottom: 0;" data-i18n="detailed_description">Detailed Description</label>
-                <button type="button" id="btn-ai-assist" class="btn-ai">
-                  <i class="fa-solid fa-wand-magic-sparkles ai-icon"></i>
-                  <div class="ai-btn-content">
-                    <span class="ai-btn-title" data-i18n="auto_categorize_ai">Auto-Categorize with AI</span>
-                    <span class="ai-btn-subtitle mobile-only">AI will analyze text to set category and department</span>
-                  </div>
-                  <i class="fa-solid fa-chevron-right ai-btn-arrow mobile-only"></i>
-                </button>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <button type="button" id="btn-voice-input" class="btn-voice-reporter" title="Speak in Tamil, Tanglish, or English" style="padding: 0.45rem 0.85rem; font-size: 0.78rem; font-weight: 800; border-radius: 8px; background: rgba(13, 148, 136, 0.1); color: var(--primary, #0d9488); border: 1px solid rgba(13, 148, 136, 0.25); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+                    <i class="fa-solid fa-microphone"></i> <span>Voice Report</span>
+                  </button>
+                  <button type="button" id="btn-ai-assist" class="btn-ai">
+                    <i class="fa-solid fa-wand-magic-sparkles ai-icon"></i>
+                    <div class="ai-btn-content">
+                      <span class="ai-btn-title" data-i18n="auto_categorize_ai">Auto-Categorize with AI</span>
+                      <span class="ai-btn-subtitle mobile-only">AI will analyze text to set category and department</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right ai-btn-arrow mobile-only"></i>
+                  </button>
+                </div>
               </div>
+              <div id="voice-status-text" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-top: 0.35rem; margin-bottom: 0.4rem; display: none;"></div>
               <textarea
                 id="report-description"
                 class="form-textarea"

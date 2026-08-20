@@ -1,7 +1,14 @@
-/* Mobile Tap Highlight Removal */
-*, *:before, *:after, a, button, input, select, textarea, div, span, label {
-  -webkit-tap-highlight-color: transparent !important;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+/* Voice Reporter Recording Pulse Animation */
+@keyframes recordingPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.btn-voice-reporter.recording-pulse {
+  animation: recordingPulse 1.5s infinite;
+  background: #fef2f2 !important;
+  color: #ef4444 !important;
+  border-color: #fca5a5 !important;
 }
 
 /* Permanent Government Services Back Button */
