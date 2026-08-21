@@ -64,7 +64,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: #0b1329;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -144,7 +144,7 @@
     .gov-loader-title {
       font-size: 0.72rem;
       font-weight: 800;
-      color: #94a3b8;
+      color: #0f172a;
       letter-spacing: 0.28em;
       margin-top: 1.2rem;
       text-transform: uppercase;
