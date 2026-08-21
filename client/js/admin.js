@@ -166,41 +166,47 @@
         ]);
 
         let civicList = [];
-        if (issuesRes.status === 'fulfilled' && issuesRes.value && issuesRes.value.data) {
-          civicList = issuesRes.value.data || [];
+        if (issuesRes.status === 'fulfilled' && issuesRes.value) {
+          const rawCivic = issuesRes.value.data !== undefined ? issuesRes.value.data : issuesRes.value;
+          if (Array.isArray(rawCivic)) civicList = rawCivic;
         }
 
         let transList = [];
-        if (transRes.status === 'fulfilled' && transRes.value && transRes.value.data) {
-          transList = (transRes.value.data || []).map(tr => ({
-            id: tr.id,
-            title: tr.title || tr.issue_type || 'Transportation Issue',
-            description: tr.description || tr.issue_description || '',
-            category: 'transportation',
-            priority: tr.priority || (tr.is_emergency ? 'emergency' : 'normal'),
-            is_emergency: tr.is_emergency || false,
-            status: tr.status || 'pending',
-            address: tr.address || tr.location_name || 'Transportation Route',
-            latitude: tr.latitude,
-            longitude: tr.longitude,
-            assigned_to: tr.assigned_to,
-            created_at: tr.created_at,
-            reporter: tr.reporter || tr.user,
-            official_remarks: tr.official_remarks,
-            completion_photo_url: tr.completion_photo_url,
-            is_transportation: true
-          }));
+        if (transRes.status === 'fulfilled' && transRes.value) {
+          const rawTrans = transRes.value.data !== undefined ? transRes.value.data : transRes.value;
+          if (Array.isArray(rawTrans)) {
+            transList = rawTrans.map(tr => ({
+              id: tr.id,
+              title: tr.title || tr.issue_type || 'Transportation Issue',
+              description: tr.description || tr.issue_description || '',
+              category: 'transportation',
+              priority: tr.priority || (tr.is_emergency ? 'emergency' : 'normal'),
+              is_emergency: tr.is_emergency || false,
+              status: tr.status || 'pending',
+              address: tr.address || tr.location_name || 'Transportation Route',
+              latitude: tr.latitude,
+              longitude: tr.longitude,
+              assigned_to: tr.assigned_to,
+              created_at: tr.created_at || new Date().toISOString(),
+              reporter: tr.reporter || tr.user,
+              official_remarks: tr.official_remarks,
+              completion_photo_url: tr.completion_photo_url,
+              is_transportation: true
+            }));
+          }
         }
 
-        currentComplaints = [...civicList, ...transList].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        currentComplaints = [...civicList, ...transList].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
-        if (usersRes.status === 'fulfilled' && usersRes.value && usersRes.value.data) {
-          const users = usersRes.value.data || [];
-          currentAuthorities = users.filter(u => u.role === 'authority' || u.role === 'admin');
+        if (usersRes.status === 'fulfilled' && usersRes.value) {
+          const rawUsers = usersRes.value.data !== undefined ? usersRes.value.data : usersRes.value;
+          const users = Array.isArray(rawUsers) ? rawUsers : [];
+          currentAuthorities = users.filter(u => u && (u.role === 'authority' || u.role === 'admin'));
         }
 
-        if (notifsRes.status === 'fulfilled' && notifsRes.value && notifsRes.value.data) {
-          currentNotifications = notifsRes.value.data || [];
+        if (notifsRes.status === 'fulfilled' && notifsRes.value) {
+          const rawNotifs = notifsRes.value.data !== undefined ? notifsRes.value.data : notifsRes.value;
+          currentNotifications = Array.isArray(rawNotifs) ? rawNotifs : [];
         }
 
         this.renderDashboard();
