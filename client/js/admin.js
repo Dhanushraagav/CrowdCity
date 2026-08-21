@@ -9,17 +9,37 @@
   let activeProofPhotoUrl = null;
 
   // ----------------------------------------------------
-  // HELPER: Toast Banner
+  // HELPER: Floating Popup Toast Notification
   // ----------------------------------------------------
+  let toastTimer = null;
   function showToast(message, type = 'success') {
     const container = document.getElementById('toast-message');
     if (!container) return;
+
+    if (toastTimer) clearTimeout(toastTimer);
+
+    const isSuccess = type === 'success';
+    const iconSVG = isSuccess 
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+
     container.className = `toast-box ${type}`;
-    container.textContent = message;
-    container.style.display = 'block';
-    setTimeout(() => {
-      container.style.display = 'none';
-    }, 4000);
+    container.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${iconSVG}</div>
+      <div style="flex: 1; font-weight: 600; font-size: 0.88rem; line-height: 1.4;">${escapeHTML(message)}</div>
+    `;
+
+    container.style.display = 'flex';
+    container.style.opacity = '1';
+    container.style.transform = 'translateY(0)';
+
+    toastTimer = setTimeout(() => {
+      container.style.opacity = '0';
+      container.style.transform = 'translateY(-10px)';
+      setTimeout(() => {
+        container.style.display = 'none';
+      }, 300);
+    }, 3500);
   }
 
   function escapeHTML(str) {
