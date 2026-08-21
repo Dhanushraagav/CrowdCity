@@ -157,12 +157,21 @@
     },
 
     loadAllData: async function() {
+      const fetchWithTimeout = (apiFn, ms = 3000) => {
+        if (typeof apiFn !== 'function') return Promise.resolve({ data: [] });
+        return Promise.race([
+          apiFn(),
+          new Promise(resolve => setTimeout(() => resolve({ data: [], error: 'timeout' }), ms))
+        ]);
+      };
+
       try {
+        // Fast primary fetch for complaints
         const [issuesRes, transRes, usersRes, notifsRes] = await Promise.allSettled([
-          API.getIssues ? API.getIssues() : Promise.resolve({ data: [] }),
-          API.getTransportationReports ? API.getTransportationReports() : (API.request ? API.request('/transportation/reports') : Promise.resolve({ data: [] })),
-          API.getAllUsers ? API.getAllUsers() : Promise.resolve({ data: [] }),
-          API.getNotifications ? API.getNotifications() : Promise.resolve({ data: [] })
+          fetchWithTimeout(() => API.getIssues(), 3500),
+          fetchWithTimeout(() => (API.getTransportationReports ? API.getTransportationReports() : API.request('/transportation/reports')), 2500),
+          fetchWithTimeout(() => API.getAllUsers(), 2500),
+          fetchWithTimeout(() => API.getNotifications(), 2500)
         ]);
 
         let civicList = [];
@@ -209,6 +218,7 @@
           currentNotifications = Array.isArray(rawNotifs) ? rawNotifs : [];
         }
 
+        // Render all UI views instantly
         this.renderDashboard();
         this.renderComplaintsQueue();
         this.renderAssignedCases();
