@@ -1,653 +1,625 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CrowdCity AI Municipal Authority Operations Platform">
+  <title>Authority Portal - CrowdCity AI</title>
+
   <!-- PWA Meta and Manifest -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon-192.png">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <meta name="theme-color" content="#0D9488">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="CrowdCity Portal">
-  <!-- CDN Resource Preconnects -->
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <script src="js/pwa-helper.js" defer></script>
-  <!-- Central Authentication Router -->
-  <script src="js/auth-router.js?v=1.0.6"></script>
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Central Auth Router -->
+  <script src="js/auth-router.js?v=2.5.0"></script>
   <script src="js/i18n.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Municipal administration portal for CrowdCity AI. Oversee caseloads, delegate complaints, manage system settings.">
-  <title>Authority Portal - CrowdCity AI</title>
-  
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=1.0.5">
-  <link rel="stylesheet" href="css/components.css">
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Synchronous Redirect Script to prevent flash of content -->
-  <script>
-    (function() {
-      document.documentElement.classList.add('light-theme');
-      document.documentElement.classList.remove('dark-theme');
-      document.addEventListener('DOMContentLoaded', () => {
-        document.body.classList.add('ready');
-      });
-    })();
-  </script>
 
   <style>
-    /* Tab panes logic */
-    .tab-pane {
-      display: none;
-    }
-    .tab-pane.active-pane {
-      display: block;
-    }
-    .admin-only-section {
-      display: none;
-    }
-    body.is-admin .admin-only-section {
-      display: block;
+    :root {
+      --bg-canvas: #f8fafc;
+      --bg-card: #ffffff;
+      --border-color: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-pending-bg: #fef3c7;
+      --badge-pending-text: #92400e;
+      --badge-assigned-bg: #dbeafe;
+      --badge-assigned-text: #1e40af;
+      --badge-progress-bg: #f3e8ff;
+      --badge-progress-text: #6b21a8;
+      --badge-resolved-bg: #d1fae5;
+      --badge-resolved-text: #065f46;
+      --badge-rejected-bg: #fee2e2;
+      --badge-rejected-text: #991b1b;
+      --badge-emergency-bg: #991b1b;
+      --badge-emergency-text: #ffffff;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Grid layouts */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    .stat-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.5rem;
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Layout */
+    .portal-layout {
       display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition-normal);
+      min-height: 100vh;
+      width: 100%;
     }
 
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      color: white;
-    }
-
-    .stat-number {
-      font-size: 1.75rem;
-      font-weight: 800;
-      font-family: var(--font-heading);
-      line-height: 1;
-      margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-      margin-top: 1.5rem;
-    }
-
-    .chart-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
+    /* Sidebar */
+    .portal-sidebar {
+      width: 250px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.2s ease;
     }
 
-    .chart-card h3 {
-      font-size: 1.1rem;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .sidebar-brand {
+      padding: 1.25rem 1rem;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.75rem;
     }
 
-    .chart-container {
-      position: relative;
-      width: 100%;
-      height: 260px;
+    .brand-title-text {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--text-main);
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle-text {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-top: 0.15rem;
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+    }
+
+    .nav-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-    }
-
-    .table-container {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      overflow-x: auto;
-      box-shadow: var(--shadow-sm);
-      margin-top: 1rem;
-    }
-
-    .admin-table {
+      padding: 0.65rem 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      background: none;
       width: 100%;
-      border-collapse: collapse;
       text-align: left;
     }
 
-    .admin-table th {
-      background-color: var(--slate-100);
-      color: var(--slate-700);
-      font-weight: 600;
-      padding: 1rem;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border-color);
+    .nav-item:hover {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      border-color: var(--border-light);
     }
 
-    .admin-table td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.9rem;
-      vertical-align: middle;
-    }
-
-    .admin-table tr:hover {
-      background-color: var(--bg-surface-hover);
-    }
-
-    .badge-role {
-      padding: 0.25rem 0.5rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.72rem;
+    .nav-item.active {
+      background-color: var(--bg-canvas);
+      color: var(--primary);
       font-weight: 700;
-      text-transform: uppercase;
-      display: inline-block;
+      border-color: var(--border-color);
     }
 
-    .badge-role.citizen { background-color: var(--primary-light-alpha); color: var(--primary); }
-    .badge-role.authority { background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
-    .badge-role.admin { background-color: rgba(236, 72, 153, 0.1); color: #ec4899; }
-
-    .controls-row {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.78rem;
+      color: var(--text-light);
     }
 
-    .complaints-list {
+    /* Main Area */
+    .portal-main {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      margin-top: 1rem;
+      min-width: 0;
     }
 
-    .complaint-admin-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition-normal);
-    }
-
-    .complaint-admin-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    /* Weather widget */
-    .weather-widget {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--slate-100);
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
-    }
-
-    /* Modal styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--transition-normal);
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 550px;
-      padding: 2rem;
-      box-shadow: var(--shadow-lg);
-      transform: translateY(20px);
-      transition: transform var(--transition-normal);
-    }
-
-    .modal-overlay.active .modal-card {
-      transform: translateY(0);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
+    .portal-header {
+      height: 60px;
+      background-color: var(--bg-card);
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
     }
 
-    .modal-close-btn {
-      background: none;
-      border: none;
-      font-size: 1.25rem;
+    .header-title-area {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 0.4rem 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .header-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .header-user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.82rem;
+    }
+
+    .user-badge {
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
       cursor: pointer;
       color: var(--text-muted);
     }
 
-    /* Custom form styling for CMS */
-    .form-group-custom {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      margin-bottom: 1rem;
+    .btn-logout:hover {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fca5a5;
     }
-    .form-label-custom {
-      font-size: 0.8rem;
+
+    /* Body Container */
+    .portal-body {
+      padding: 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Panes */
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active-pane {
+      display: block;
+    }
+
+    /* Cards & Containers */
+    .content-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--text-main);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 0.5rem;
     }
-    .form-input-custom, .form-select-custom {
-      padding: 0.5rem 0.75rem;
+
+    /* Metric Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .metric-box {
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
+      border-radius: 6px;
+      padding: 1rem;
+    }
+
+    .metric-box-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-box-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
       font-size: 0.85rem;
-      background: var(--bg-surface);
+    }
+
+    .data-table th {
+      background: var(--bg-canvas);
+      padding: 0.65rem 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 0.75rem 0.85rem;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background-color: var(--bg-canvas);
+    }
+
+    /* Badges */
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .status-pending { background: var(--badge-pending-bg); color: var(--badge-pending-text); }
+    .status-assigned { background: var(--badge-assigned-bg); color: var(--badge-assigned-text); }
+    .status-in_progress { background: var(--badge-progress-bg); color: var(--badge-progress-text); }
+    .status-resolved { background: var(--badge-resolved-bg); color: var(--badge-resolved-text); }
+    .status-rejected { background: var(--badge-rejected-bg); color: var(--badge-rejected-text); }
+    .status-emergency { background: var(--badge-emergency-bg); color: var(--badge-emergency-text); }
+
+    /* Filters & Forms */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      background: var(--bg-card);
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      align-items: center;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      padding: 0.45rem 0.65rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: var(--bg-card);
       color: var(--text-main);
     }
 
-    /* CMS Sub-tabs style */
-    .admin-nav-tab {
-      flex: 1;
-      min-width: 120px;
-      padding: 0.6rem;
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn-action {
+      background: var(--primary);
+      color: #ffffff;
       border: none;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .gateway-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-    }
-    .gateway-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      box-shadow: var(--shadow-sm);
-    }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.75rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      padding: 0.25rem 0.65rem;
-      border-radius: 999px;
-      border: 1px solid transparent;
-    }
-    .status-badge.status-ready { background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
-    .status-badge.status-disconnected { background: rgba(239, 68, 68, 0.12); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
-
-    /* Admin badge tags */
-    .badge-emergency {
-      background-color: #ef4444;
-      color: white;
-      font-size: 0.65rem;
-      padding: 0.1rem 0.35rem;
+      padding: 0.45rem 0.85rem;
       border-radius: 4px;
-      animation: pulse-red 1.5s infinite;
-    }
-    @keyframes pulse-red {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
     }
 
-    /* Mobile sidebar overlay & scrolling fix */
+    .btn-action:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-canvas);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.45rem 0.85rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    /* Toast */
+    .toast-box {
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .toast-box.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      display: block;
+    }
+
+    .toast-box.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      display: block;
+    }
+
+    /* Responsive */
     @media (max-width: 1023px) {
-      body.admin-portal-body {
-        overflow-x: hidden !important;
-      }
-      .app-layout {
-        display: block !important;
-        width: 100% !important;
-        overflow-x: hidden !important;
-      }
-      .app-sidebar {
+      .portal-sidebar {
         position: fixed;
         top: 0;
-        left: -280px;
-        width: 260px;
-        height: 100vh;
-        z-index: 3000;
-        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .app-sidebar.sidebar-open {
         left: 0;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+        bottom: 0;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
       }
-      .app-main {
-        margin-left: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        overflow-x: hidden !important;
+
+      .portal-sidebar.open {
+        transform: translateX(0);
       }
-      .admin-content-pane {
-        padding: 1rem !important;
-        gap: 1.25rem !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      .executive-kpi-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 0.75rem !important;
-      }
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 0.75rem !important;
-      }
-      .charts-grid {
-        grid-template-columns: 1fr !important;
-      }
-      .mobile-menu-toggle {
-        display: flex !important;
-      }
-    }
-    @media (min-width: 1024px) {
-      .mobile-menu-toggle {
-        display: none !important;
+
+      .mobile-menu-btn {
+        display: block;
       }
     }
   </style>
 </head>
-<body class="protected-page admin-portal-body">
+<body>
 
-  <div class="app-layout">
+  <div class="portal-layout">
     <!-- Sidebar -->
-    <aside class="app-sidebar">
-      <div class="sidebar-header" style="padding: 0.5rem 0.5rem 1.25rem 0.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color, #e2e8f0);">
-        <a href="admin.html" class="app-sidebar-logo" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
-          <div class="brand-emblems-wrap" style="display: flex; align-items: center; gap: 0.45rem;">
-            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 28px; height: 28px; object-fit: contain;" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" style="width: 30px; height: 30px; object-fit: contain;" />
-          </div>
-          <div class="brand-text-container" style="display: flex; flex-direction: column;">
-            <span class="brand-title" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main, #0f172a); letter-spacing: 0.5px; font-family: 'Outfit', sans-serif;">CROWDCITY</span>
-            <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 800; color: var(--primary, #0d9488); letter-spacing: 0.08em; text-transform: uppercase;">AUTHORITY PORTAL</span>
-          </div>
-        </a>
+    <aside class="portal-sidebar" id="portal-sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-title-text">CrowdCity</span>
+        <span class="brand-subtitle-text">Municipal Operations</span>
       </div>
-      
-      <!-- Badges injected dynamically by auth.js -->
-      <nav class="app-sidebar-nav" id="sidebar-navigation">
-        <a href="#dashboard" class="app-sidebar-link active" data-target="pane-dashboard">
-          <i class="fa-solid fa-gauge-high"></i> <span data-i18n="dashboard">Dashboard</span>
-        </a>
-        <a href="#complaints" class="app-sidebar-link" data-target="pane-complaints">
-          <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="complaints">Complaints</span>
-        </a>
-        <a href="#transportation" class="app-sidebar-link" data-target="pane-transportation">
-          <i class="fa-solid fa-bus-simple"></i> <span>Transportation</span>
-        </a>
-        <a href="#users" class="app-sidebar-link admin-only-section" data-target="pane-users">
-          <i class="fa-solid fa-user-shield"></i> <span data-i18n="user_management">User Management</span>
-        </a>
-        <a href="#reports" class="app-sidebar-link" data-target="pane-reports">
-          <i class="fa-solid fa-chart-pie"></i> <span data-i18n="reports">Reports</span>
-        </a>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-pane="pane-dashboard" onclick="window.ComplaintService.showPane('pane-dashboard')">Dashboard</button>
+        <button class="nav-item" data-pane="pane-complaints" onclick="window.ComplaintService.showPane('pane-complaints')">Complaints Queue</button>
+        <button class="nav-item" data-pane="pane-assigned" onclick="window.ComplaintService.showPane('pane-assigned')">Assigned Cases</button>
+        <button class="nav-item" data-pane="pane-notifications" onclick="window.ComplaintService.showPane('pane-notifications')">Notifications</button>
+        <button class="nav-item" data-pane="pane-profile" onclick="window.ComplaintService.showPane('pane-profile')">Profile & Security</button>
       </nav>
+      <div class="sidebar-footer">
+        <div>Department of Municipal Administration</div>
+        <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+      </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="app-main">
-      <header class="app-header-main">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-            <i class="fa-solid fa-bars"></i>
-          </button>
-        </div>
+    <!-- Overlay backdrop for mobile -->
+    <div id="sidebar-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 90;" onclick="window.ComplaintService.toggleMobileSidebar(false)"></div>
 
-        <div style="display: flex; align-items: center; gap: 1rem; margin-left: auto;">
-          <div id="auth-nav-container"></div>
+    <!-- Main Content Area -->
+    <main class="portal-main">
+      <header class="portal-header">
+        <div class="header-title-area">
+          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu">Toggle Menu</button>
+          <span class="header-title" id="header-pane-title">Municipal Dashboard</span>
+        </div>
+        <div class="header-user-info">
+          <span class="user-badge" id="header-user-name">Officer Loading...</span>
+          <button class="btn-logout" onclick="logoutUser()">Logout</button>
         </div>
       </header>
 
-      <!-- Toast Alerts -->
-      <div id="toast-container" class="hidden" style="margin: 1.5rem 1.5rem 0 1.5rem;"></div>
+      <div class="portal-body">
+        <div id="toast-message" class="toast-box"></div>
 
-      <div class="app-content-body" style="padding: 1.5rem 1.5rem; width: 100%;">
-        
         <!-- ============================================== -->
-        <!-- VIEW 1: DASHBOARD                              -->
+        <!-- PANE 1: DASHBOARD                              -->
         <!-- ============================================== -->
         <section id="pane-dashboard" class="tab-pane active-pane">
-          <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
-            <div class="stat-card stat-card-clickable" onclick="filterComplaintsByStatus('')" title="Click to view all complaints" style="cursor: pointer;">
-              <div class="stat-icon" style="background-color: var(--slate-600);"><i class="fa-solid fa-database"></i></div>
-              <div>
-                <div class="stat-number" id="kpi-total"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
-                <div class="stat-label" data-i18n="total_reports">Total Reports</div>
-              </div>
+          <div class="metric-grid">
+            <div class="metric-box">
+              <div class="metric-box-title">Total Complaints</div>
+              <div class="metric-box-value" id="kpi-total">0</div>
             </div>
-            <div class="stat-card stat-card-clickable" onclick="filterComplaintsByStatus('pending')" title="Click to view & assign pending cases" style="cursor: pointer;">
-              <div class="stat-icon" style="background-color: #f59e0b;"><i class="fa-solid fa-clock"></i></div>
-              <div>
-                <div class="stat-number" id="kpi-pending"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
-                <div class="stat-label" data-i18n="pending_cases">Pending Cases</div>
-              </div>
+            <div class="metric-box">
+              <div class="metric-box-title">Pending Dispatch</div>
+              <div class="metric-box-value" id="kpi-pending" style="color: #d97706;">0</div>
             </div>
-            <div class="stat-card stat-card-clickable" onclick="filterComplaintsByStatus('resolved')" title="Click to view resolved complaints" style="cursor: pointer;">
-              <div class="stat-icon" style="background-color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
-              <div>
-                <div class="stat-number" id="kpi-resolved"><div class="skeleton" style="width: 40px; height: 1.5rem;"></div></div>
-                <div class="stat-label" data-i18n="status_resolved">Resolved</div>
-              </div>
+            <div class="metric-box">
+              <div class="metric-box-title">In Progress</div>
+              <div class="metric-box-value" id="kpi-progress" style="color: #7e22ce;">0</div>
             </div>
-          </div>
-
-          <!-- Charts Layout Grid -->
-          <div class="charts-grid">
-            <div class="chart-card">
-              <h3><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> <span data-i18n="complaints_by_category">Complaints by Category</span></h3>
-              <div class="chart-container" id="chart-categories-container">
-                <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
-              </div>
+            <div class="metric-box">
+              <div class="metric-box-title">Resolved Cases</div>
+              <div class="metric-box-value" id="kpi-resolved" style="color: #059669;">0</div>
             </div>
-            <div class="chart-card">
-              <h3><i class="fa-solid fa-chart-bar" style="color:#8b5cf6;"></i> <span data-i18n="complaints_by_status">Complaints by Status</span></h3>
-              <div class="chart-container" id="chart-statuses-container">
-                <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
-              </div>
-            </div>
-            <div class="chart-card">
-              <h3><i class="fa-solid fa-ranking-stars" style="color:#ec4899;"></i> <span data-i18n="inspector_resolution_performance">Inspector Resolution Performance</span></h3>
-              <div class="chart-container" id="chart-performance-container">
-                <div class="skeleton-shimmer skeleton-chart" style="height: 260px;"></div>
-              </div>
+            <div class="metric-box">
+              <div class="metric-box-title">Emergency / High Priority</div>
+              <div class="metric-box-value" id="kpi-emergency" style="color: #dc2626;">0</div>
             </div>
           </div>
 
-          <!-- Split Layout: Recent Assignments & Activity Logs -->
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 2rem; align-items: start;">
-            <div>
-              <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin-bottom: 1rem;"><i class="fa-solid fa-clipboard-user"></i> Recent Operational Assignments</h3>
-              <div id="recent-assigned-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
-                <div class="skeleton-shimmer skeleton-card"></div>
-                <div class="skeleton-shimmer skeleton-card"></div>
-              </div>
-
-              <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin-top: 2rem; margin-bottom: 1rem;"><i class="fa-solid fa-arrow-trend-up"></i> Priority Cases (Unassigned & Upvoted)</h3>
-              <div id="priority-cases-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
-                <div class="skeleton-shimmer skeleton-card"></div>
-              </div>
-            </div>
-
-            <!-- Activity Log -->
-            <div class="chart-card">
-              <h3 style="border: none; padding: 0;"><i class="fa-solid fa-timeline"></i> Activity Timeline</h3>
-              <div id="activity-log-timeline" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; border-left: 2px solid var(--border-color); padding-left: 1.5rem;">
-                <!-- Dynamically loaded timeline elements -->
-                <div class="skeleton-shimmer" style="height: 60px; width: 100%;"></div>
-                <div class="skeleton-shimmer" style="height: 60px; width: 100%;"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============================================== -->
-        <!-- VIEW 2: COMPLAINTS QUEUE                       -->
-        <!-- ============================================== -->
-        <section id="pane-complaints" class="tab-pane">
-          <div class="controls-row" style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.5rem; justify-content: space-between;">
-            <h3 style="font-size: 1.1rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-list-check"></i> Overall complaints queue</h3>
-            <div class="filter-pills" id="admin-status-filters" style="margin: 0;">
-              <button class="filter-pill active" data-status="">All</button>
-              <button class="filter-pill" data-status="pending">Pending</button>
-              <button class="filter-pill" data-status="assigned">Assigned</button>
-              <button class="filter-pill" data-status="in_progress">In Progress</button>
-              <button class="filter-pill" data-status="resolved">Resolved</button>
-              <button class="filter-pill" data-status="rejected">Rejected</button>
-            </div>
-          </div>
-
-          <div id="admin-complaints-list" class="complaints-list">
-            <div class="skeleton-shimmer skeleton-card"></div>
-            <div class="skeleton-shimmer skeleton-card"></div>
-            <div class="skeleton-shimmer skeleton-card"></div>
-          </div>
-        </section>
-
-        <!-- ============================================== -->
-        <!-- VIEW: TRANSPORTATION MODULE MANAGEMENT         -->
-        <!-- ============================================== -->
-        <section id="pane-transportation" class="tab-pane">
-          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-              <div>
-                <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--text-main);">
-                  <i class="fa-solid fa-car-side" style="color: var(--primary);"></i> Smart Transportation Operations Console
-                </h3>
-                <p style="margin: 0.2rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">Review road hazards, assign repair engineers, update work progress, and attach completion proof.</p>
-              </div>
-
-              <!-- Search Bar -->
-              <input type="text" id="admin-trans-search" placeholder="Search issue, road, category..." style="padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.84rem; font-family: inherit; width: 260px;" />
-            </div>
-
-            <!-- Filters Bar -->
-            <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
-              <select id="admin-trans-filter-category" style="padding: 0.4rem 0.65rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.8rem; font-family: inherit;">
-                <option value="All">All Categories</option>
-                <option value="Potholes">Potholes</option>
-                <option value="Damaged Roads">Damaged Roads</option>
-                <option value="Traffic Signal Not Working">Traffic Signals</option>
-                <option value="Waterlogging">Waterlogging</option>
-                <option value="Broken Street Lights">Street Lights</option>
-                <option value="Illegal Parking">Illegal Parking</option>
-              </select>
-
-              <select id="admin-trans-filter-status" style="padding: 0.4rem 0.65rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.8rem; font-family: inherit;">
-                <option value="All">All Statuses</option>
-                <option value="Submitted">Submitted</option>
-                <option value="Assigned">Assigned</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-              </select>
-
-              <select id="admin-trans-filter-priority" style="padding: 0.4rem 0.65rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.8rem; font-family: inherit;">
-                <option value="All">All Priorities</option>
-                <option value="Critical">Critical</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Transportation Reports Queue Table -->
-          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm);">
-            <div style="overflow-x: auto;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+          <!-- Operational Table -->
+          <div class="content-card">
+            <div class="card-title">Recent Operational Complaints</div>
+            <div class="table-container">
+              <table class="data-table">
                 <thead>
-                  <tr style="background: var(--bg-surface-hover); border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
-                    <th style="padding: 0.85rem 1rem;">Report ID</th>
-                    <th style="padding: 0.85rem 1rem;">Issue & Category</th>
-                    <th style="padding: 0.85rem 1rem;">Priority</th>
-                    <th style="padding: 0.85rem 1rem;">Department</th>
-                    <th style="padding: 0.85rem 1rem;">Assigned Engineer</th>
-                    <th style="padding: 0.85rem 1rem;">Status</th>
-                    <th style="padding: 0.85rem 1rem; text-align: right;">Actions</th>
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                    <th>Assigned To</th>
+                    <th>Date</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
-                <tbody id="admin-trans-table-body">
-                  <tr><td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">Loading transportation reports...</td></tr>
+                <tbody id="dashboard-recent-table-body">
+                  <tr>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading operational dataset...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="content-card">
+            <div class="card-title">System Activity Log</div>
+            <div id="dashboard-activity-list" style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
+              <div style="color: var(--text-muted);">Loading activity log...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- PANE 2: COMPLAINTS QUEUE                       -->
+        <!-- ============================================== -->
+        <section id="pane-complaints" class="tab-pane">
+          <div class="filter-bar">
+            <input type="text" id="filter-search-input" class="form-input" placeholder="Search title, description, address..." style="flex: 1; min-width: 200px;" oninput="window.ComplaintService.applyFilters()" />
+            
+            <select id="filter-status-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="assigned">Assigned</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+
+            <select id="filter-category-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
+              <option value="">All Categories</option>
+              <option value="roads">Roads</option>
+              <option value="water_supply">Water Supply</option>
+              <option value="streetlights">Streetlights</option>
+              <option value="garbage">Garbage</option>
+              <option value="traffic">Traffic</option>
+              <option value="drainage">Drainage</option>
+              <option value="parks">Parks</option>
+              <option value="sanitation">Sanitation</option>
+              <option value="safety_hazard">Safety Hazard</option>
+              <option value="environment">Environment</option>
+              <option value="other">Other</option>
+            </select>
+
+            <select id="filter-priority-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
+              <option value="">All Priorities</option>
+              <option value="emergency">Emergency Priority</option>
+              <option value="high">High Priority</option>
+              <option value="normal">Normal Priority</option>
+            </select>
+
+            <button class="btn-secondary" onclick="window.ComplaintService.resetFilters()">Reset Filters</button>
+          </div>
+
+          <div class="content-card" style="padding: 0; overflow: hidden;">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>Title & Description</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Location / Address</th>
+                    <th>Assigned Official</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="complaints-queue-table-body">
+                  <tr>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading complaints queue...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -655,279 +627,171 @@
         </section>
 
         <!-- ============================================== -->
-        <!-- VIEW 3: GOVERNMENT SERVICES CMS                -->
+        <!-- PANE 3: ASSIGNED CASES                         -->
         <!-- ============================================== -->
-        <section id="pane-services" class="tab-pane">
-          <!-- Stats Summary Grid -->
-          <div class="admin-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
-              <div id="stat-total-schemes" style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">0</div>
-              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Schemes</div>
+        <section id="pane-assigned" class="tab-pane">
+          <div class="content-card" style="padding: 0; overflow: hidden;">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="assigned-cases-table-body">
+                  <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading assigned casework...</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
-              <div id="stat-total-offices" style="font-size: 1.5rem; font-weight: 800; color: #6366f1;">0</div>
-              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Registered Offices</div>
-            </div>
-            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
-              <div id="stat-total-announcements" style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">0</div>
-              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Announcements</div>
-            </div>
-            <div class="admin-stat-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center;">
-              <div id="stat-total-faqs" style="font-size: 1.5rem; font-weight: 800; color: #10b981;">0</div>
-              <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">AI FAQs</div>
-            </div>
-          </div>
-
-          <!-- CMS Sub Navigation Tabs -->
-          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.35rem; border-radius: 14px; flex-wrap: wrap;">
-            <button type="button" class="admin-nav-tab active-sub-tab" data-tab="schemes" style="background: var(--primary); color: #ffffff;">
-              <i class="fa-solid fa-award"></i> Schemes
-            </button>
-            <button type="button" class="admin-nav-tab" data-tab="offices" style="background: transparent; color: var(--text-muted);">
-              <i class="fa-solid fa-building-columns"></i> Offices
-            </button>
-            <button type="button" class="admin-nav-tab" data-tab="announcements" style="background: transparent; color: var(--text-muted);">
-              <i class="fa-solid fa-bullhorn"></i> Announcements
-            </button>
-            <button type="button" class="admin-nav-tab" data-tab="faqs" style="background: transparent; color: var(--text-muted);">
-              <i class="fa-solid fa-circle-question"></i> AI FAQs
-            </button>
-          </div>
-
-          <div id="admin-tab-content" style="min-height: 250px;">
-            <!-- Dynamically populated schemes list -->
-            <div class="skeleton-shimmer skeleton-card"></div>
-            <div class="skeleton-shimmer skeleton-card"></div>
           </div>
         </section>
 
         <!-- ============================================== -->
-        <!-- VIEW 4: USER MANAGEMENT                        -->
+        <!-- PANE 4: CASE INSPECTION & DISPATCH DETAILS     -->
         <!-- ============================================== -->
-        <section id="pane-users" class="tab-pane">
-          <div class="controls-row">
-            <div style="flex: 1; min-width: 250px; position: relative;">
-              <input type="text" id="user-search-input" class="form-input" placeholder="Search users by name or email..." style="padding-left: 2.25rem;">
-              <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-            </div>
-            <div style="min-width: 150px;">
-              <select id="user-role-filter" class="form-select" style="margin:0;">
-                <option value="">All Roles</option>
-                <option value="citizen">Citizen</option>
-                <option value="authority">Authority</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-          </div>
+        <section id="pane-details" class="tab-pane">
+          <button class="btn-secondary" style="margin-bottom: 1rem;" onclick="window.ComplaintService.showPane('pane-complaints')">Back to Complaints Queue</button>
 
-          <div class="table-container">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Registration Date</th>
-                  <th>Role</th>
-                  <th>Verify Authority</th>
-                  <th>Department Assignment</th>
-                  <th>Status / Suspension</th>
-                </tr>
-              </thead>
-              <tbody id="users-table-body">
-                <tr class="skeleton-table-row"></tr>
-                <tr class="skeleton-table-row"></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ============================================== -->
-        <!-- VIEW 5: REPORTS CENTER                         -->
-        <!-- ============================================== -->
-        <section id="pane-reports" class="tab-pane">
-          <div class="glass-panel" style="padding: 2.5rem; max-width: 600px; margin: 2rem auto; display: flex; flex-direction: column; gap: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px;">
-            <h2 style="font-size: 1.5rem; font-family: var(--font-heading); color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fa-solid fa-file-invoice"></i> System Reports Export Center
-            </h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;">
-              Download municipal operations and citizen involvement reports. Select report timeframe parameters and preferred output layout format.
-            </p>
-
-            <hr style="border:0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
-
-            <div class="form-group">
-              <label for="export-range" class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Report Timeframe Range</label>
-              <select id="export-range" class="form-select" style="font-size: 0.95rem; padding: 0.5rem;">
-                <option value="daily">Daily Report (Past 24 Hours)</option>
-                <option value="weekly" selected>Weekly Operations Report (Past 7 Days)</option>
-                <option value="monthly">Monthly Civic Report (Past 30 Days)</option>
-              </select>
-            </div>
-
-            <div class="form-group" style="margin-top: 0.5rem;">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Output Layout Format</label>
-              <div style="display: flex; gap: 2rem; align-items: center; padding: 0.25rem 0;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; cursor: pointer;">
-                  <input type="radio" name="export-format" value="csv" checked style="width:18px; height:18px; accent-color:var(--primary);">
-                  <span>Excel Spreadsheet (.CSV)</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; cursor: pointer;">
-                  <input type="radio" name="export-format" value="pdf" style="width:18px; height:18px; accent-color:var(--primary);">
-                  <span>Printable PDF Report (.HTML)</span>
-                </label>
-              </div>
-            </div>
-
-            <button id="btn-export-report" class="btn btn-primary" style="margin-top: 1.5rem; font-size: 1rem; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-              <i class="fa-solid fa-download"></i> Generate & Export Report
-            </button>
-          </div>
-        </section>
-
-        <!-- ============================================== -->
-        <!-- VIEW 7: SYSTEM SETTINGS                        -->
-        <!-- ============================================== -->
-        <section id="pane-settings" class="tab-pane">
-          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.35rem; border-radius: 14px; flex-wrap: wrap;">
-            <button type="button" class="admin-nav-tab active-sub-tab" data-setting-tab="departments" style="background: var(--primary); color: #ffffff;">
-              <i class="fa-solid fa-building-flag"></i> Departments
-            </button>
-            <button type="button" class="admin-nav-tab" data-setting-tab="ai-decisions" style="background: transparent; color: var(--text-muted);">
-              <i class="fa-solid fa-robot"></i> AI Monitor
-            </button>
-          </div>
-
-          <div id="settings-tab-content">
-            <!-- Subpane A: Departments -->
-            <div id="subpane-departments" class="sub-tab-pane">
-              <div class="controls-row" style="justify-content: space-between; align-items: center; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-                <div>
-                  <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-building-flag" style="color:var(--primary);"></i> City Departments Manager</h3>
-                  <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0 0 0;">Create, edit, and delete municipal departments for routing complaints.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+            
+            <!-- Left Column: Case Information & Evidence -->
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+              
+              <div class="content-card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                  <div>
+                    <span id="detail-emergency-badge" class="status-badge status-emergency" style="display: none; margin-bottom: 0.35rem;">EMERGENCY PRIORITY</span>
+                    <span id="detail-category-badge" class="status-badge" style="background: #e2e8f0; color: #334155;">Category</span>
+                    <span id="detail-status-badge" class="status-badge status-pending" style="margin-left: 0.25rem;">Status</span>
+                  </div>
+                  <span id="detail-ticket-id" style="font-weight: 700; font-size: 0.8rem; color: var(--text-light);">Ticket #...</span>
                 </div>
-                <button id="btn-add-department" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-                  <i class="fa-solid fa-plus"></i> Add New Department
-                </button>
-              </div>
 
-              <!-- Department CRUD Form (Initially hidden) -->
-              <div id="department-form-card" class="glass-panel hidden" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--primary-light-alpha); background: var(--bg-surface); border-radius: 12px;">
-                <h4 id="dept-form-title" style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem;"><i class="fa-solid fa-square-plus"></i> Create Department</h4>
-                <form id="department-crud-form">
-                  <input type="hidden" id="dept-edit-id">
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">Department Name *</label>
-                      <input type="text" id="dept-name-input" class="form-input-custom" placeholder="e.g. Roads & Transport Dept" required>
-                    </div>
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">Unique Code (Uppercase) *</label>
-                      <input type="text" id="dept-code-input" class="form-input-custom" placeholder="e.g. ROAD" required>
-                    </div>
-                  </div>
-                  <div class="form-group-custom" style="margin-bottom: 1rem;">
-                    <label class="form-label-custom">Description</label>
-                    <textarea id="dept-desc-input" class="form-input-custom" style="min-height: 50px;" placeholder="Explain the responsibilities of this department..."></textarea>
-                  </div>
-                  <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                    <button type="button" id="btn-cancel-dept" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">Cancel</button>
-                    <button type="submit" id="btn-submit-dept" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">Save Department</button>
-                  </div>
-                </form>
-              </div>
+                <h2 id="detail-title" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">Complaint Title</h2>
+                <p id="detail-description" style="font-size: 0.9rem; color: var(--text-main); line-height: 1.5; white-space: pre-line; margin-bottom: 1rem;">Description loading...</p>
 
-              <!-- Departments List Table -->
-              <div class="table-container">
-                <table class="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Code</th>
-                      <th>Department Name</th>
-                      <th>Description</th>
-                      <th style="width: 150px; text-align: right;">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="departments-table-body">
-                    <!-- Populated dynamically -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Subpane B: AI Decisions Auditor -->
-            <div id="subpane-ai-decisions" class="sub-tab-pane" style="display: none;">
-              <div class="controls-row" style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-                <div>
-                  <h3 style="font-size: 1.15rem; font-family: var(--font-heading); margin: 0;"><i class="fa-solid fa-microchip" style="color:var(--primary);"></i> AI Decisions Auditor</h3>
-                  <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0 0 0;">Audit predictions made by Groq Llama AI models and execute overrides.</p>
+                <div style="border-top: 1px solid var(--border-light); padding-top: 0.75rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.4rem;">
+                  <div>Address: <strong id="detail-address" style="color: var(--text-main);">Address</strong></div>
+                  <div>Coordinates: <a id="detail-coords-link" href="#" target="_blank" style="color: var(--primary); font-weight: 600;">0.000, 0.000 (Open Map Link)</a></div>
+                  <div>Reported By: <strong id="detail-reporter" style="color: var(--text-main);">Citizen Name</strong></div>
+                  <div>Submitted On: <span id="detail-date">Date</span></div>
                 </div>
               </div>
 
-              <!-- Overrides form popup card (Initially hidden) -->
-              <div id="ai-override-card" class="glass-panel hidden" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #f59e0b; background: var(--bg-surface); border-radius: 12px;">
-                <h4 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem; color:#f59e0b;"><i class="fa-solid fa-pen-nib"></i> Override AI Prediction</h4>
-                <form id="ai-override-form">
-                  <input type="hidden" id="override-issue-id">
-                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">Category</label>
-                      <select id="override-category" class="form-select-custom">
-                        <option value="roads">Roads</option>
-                        <option value="streetlights">Streetlights</option>
-                        <option value="water_supply">Water Supply</option>
-                        <option value="drainage">Drainage</option>
-                        <option value="garbage">Garbage</option>
-                        <option value="traffic">Traffic</option>
-                        <option value="public_property">Public Property</option>
-                        <option value="parks">Parks</option>
-                        <option value="sanitation">Sanitation</option>
-                        <option value="safety_hazard">Safety Hazard</option>
-                        <option value="environment">Environment</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">Assigned Department</label>
-                      <select id="override-department" class="form-select-custom">
-                        <!-- Dynamically rendered options -->
-                      </select>
-                    </div>
-                    <div class="form-group-custom">
-                      <label class="form-label-custom">Priority Severity</label>
-                      <select id="override-priority" class="form-select-custom">
-                        <option value="low">LOW</option>
-                        <option value="medium">MEDIUM</option>
-                        <option value="high">HIGH</option>
-                        <option value="critical">CRITICAL</option>
-                      </select>
-                    </div>
+              <!-- Evidence Photo Viewer -->
+              <div class="content-card">
+                <div class="card-title">Evidence Photo Proof</div>
+                <div id="detail-photo-wrapper" style="min-height: 180px; max-height: 350px; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img id="detail-photo-img" src="" alt="Evidence Photo" style="width: 100%; height: 100%; max-height: 350px; object-fit: contain; display: none; cursor: pointer;" onclick="window.open(this.src, '_blank')" />
+                  <div id="detail-photo-fallback" style="padding: 2.5rem; text-align: center; color: var(--text-light); font-size: 0.85rem;">
+                    No evidence photo attached by citizen.
                   </div>
-                  <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                    <button type="button" id="btn-cancel-override" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">Cancel</button>
-                    <button type="submit" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem; background-color:#f59e0b; border-color:#f59e0b;">Apply Override</button>
+                </div>
+              </div>
+
+              <!-- AI Triage Summary -->
+              <div class="content-card">
+                <div class="card-title">Automated AI Triage Summary</div>
+                <p id="detail-ai-summary" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.5;">Loading summary...</p>
+              </div>
+
+            </div>
+
+            <!-- Right Column: Dispatch Action Form & Live Communication -->
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+              
+              <div class="content-card">
+                <div class="card-title">Authority Action & Dispatch Controls</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Assign / Delegate Officer</label>
+                    <select id="detail-delegate-select" class="form-select" style="width: 100%;">
+                      <option value="">Unassigned</option>
+                    </select>
                   </div>
+
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Update Case Lifecycle Status</label>
+                    <select id="detail-status-select" class="form-select" style="width: 100%;">
+                      <option value="pending">Pending</option>
+                      <option value="assigned">Assigned</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Official Remarks / Action Log</label>
+                    <textarea id="detail-remarks-input" class="form-textarea" rows="3" placeholder="Enter resolution notes, field inspection updates or rejection reasons..." style="width: 100%;"></textarea>
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Resolution Completion Photo URL (Optional)</label>
+                    <input type="url" id="detail-proof-photo" class="form-input" placeholder="https://example.com/resolved_photo.jpg" style="width: 100%;" />
+                  </div>
+
+                  <button class="btn-action" style="width: 100%; padding: 0.6rem;" onclick="window.ComplaintService.saveDetailStatusUpdate()">Save Status & Remarks</button>
+                </div>
+              </div>
+
+              <!-- Authority-Citizen Live Communication -->
+              <div class="content-card" style="display: flex; flex-direction: column; height: 320px;">
+                <div class="card-title">Authority-Citizen Communication Thread</div>
+                
+                <div id="detail-chat-thread" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 0.75rem;">
+                  <div style="text-align: center; color: var(--text-light); font-size: 0.8rem; margin: auto;">Loading communication history...</div>
+                </div>
+
+                <form onsubmit="window.ComplaintService.sendDetailChatMessage(event)" style="display: flex; gap: 0.5rem;">
+                  <input type="text" id="detail-chat-input" class="form-input" placeholder="Type message to citizen..." style="flex: 1;" required />
+                  <button type="submit" class="btn-action">Send Message</button>
                 </form>
               </div>
 
-              <!-- AI Decisions Table -->
-              <div class="table-container">
-                <table class="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Complaint</th>
-                      <th>Selected Category</th>
-                      <th>AI Predicted Category</th>
-                      <th>AI Assigned Department</th>
-                      <th>AI Priority</th>
-                      <th>Audit Match</th>
-                      <th style="width: 140px; text-align: right;">Auditing</th>
-                    </tr>
-                  </thead>
-                  <tbody id="ai-decisions-table-body">
-                    <!-- Dynamically populated -->
-                  </tbody>
-                </table>
-              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- PANE 5: NOTIFICATIONS                          -->
+        <!-- ============================================== -->
+        <section id="pane-notifications" class="tab-pane">
+          <div class="content-card">
+            <div class="card-title">System & Operational Notifications</div>
+            <div id="notifications-list" style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading notifications...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- PANE 6: PROFILE & SECURITY                     -->
+        <!-- ============================================== -->
+        <section id="pane-profile" class="tab-pane">
+          <div class="content-card" style="max-width: 600px;">
+            <div class="card-title">Authority Officer Profile</div>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.9rem;">
+              <div>Full Name: <strong id="profile-full-name" style="color: var(--text-main);">Loading...</strong></div>
+              <div>Email Address: <span id="profile-email" style="color: var(--text-muted);">Loading...</span></div>
+              <div>Assigned Role: <span id="profile-role" class="status-badge status-assigned">AUTHORITY</span></div>
+              <div>Department / Division: <span id="profile-dept" style="font-weight: 600;">Municipal Administration</span></div>
+              <div>Jurisdiction Zone: <span id="profile-zone" style="font-weight: 600;">Tamil Nadu Central Zone</span></div>
+            </div>
+
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+              <button class="btn-logout" style="padding: 0.5rem 1rem;" onclick="logoutUser()">Logout of Authority Session</button>
             </div>
           </div>
         </section>
@@ -936,378 +800,14 @@
     </main>
   </div>
 
-  <!-- Edit Eligibility Rules Modal -->
-  <div id="modal-edit-eligibility" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.85rem; margin-bottom: 1.25rem;">
-        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0;">Edit Eligibility Conditions</h3>
-        <button type="button" id="btn-close-modal" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <form id="form-edit-eligibility">
-        <input type="hidden" id="edit-scheme-id">
-        
-        <div class="form-group-custom" style="margin-bottom: 1rem;">
-          <label class="form-label-custom" style="font-weight: 800;">Scheme Name</label>
-          <input type="text" id="edit-scheme-name" class="form-input-custom" disabled style="background: var(--bg-app); cursor: not-allowed; width: 95%;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-min-age">Minimum Age</label>
-            <input type="number" id="edit-min-age" class="form-input-custom" placeholder="None">
-          </div>
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-max-age">Maximum Age</label>
-            <input type="number" id="edit-max-age" class="form-input-custom" placeholder="None">
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-max-income">Max Annual Income (₹)</label>
-            <input type="number" id="edit-max-income" class="form-input-custom" placeholder="None">
-          </div>
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-gender">Gender</label>
-            <select id="edit-gender" class="form-select-custom">
-              <option value="all">All / Any</option>
-              <option value="female">Female Only</option>
-              <option value="male">Male Only</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-student-req">Student Required</label>
-            <select id="edit-student-req" class="form-select-custom">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-gov-school">Gov School Required</label>
-            <select id="edit-gov-school" class="form-select-custom">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-gov-college">Gov College Required</label>
-            <select id="edit-gov-college" class="form-select-custom">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-disability">Disability Required</label>
-            <select id="edit-disability" class="form-select-custom">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-widow">Widow Required</label>
-            <select id="edit-widow" class="form-select-custom">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-farmer">Farmer Required</label>
-            <select id="edit-farmer" class="form-select-custom">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group-custom" style="margin-bottom: 1rem;">
-          <label class="form-label-custom" for="edit-native-state">Native State Requirement</label>
-          <input type="text" id="edit-native-state" class="form-input-custom" placeholder="e.g. Tamil Nadu" style="width: 95%;">
-        </div>
-
-        <div class="form-group-custom" style="margin-bottom: 1rem;">
-          <label class="form-label-custom" for="edit-certificates">Required Certificates (comma separated)</label>
-          <input type="text" id="edit-certificates" class="form-input-custom" placeholder="e.g. Income Certificate, Community Certificate" style="width: 95%;">
-        </div>
-
-        <!-- Trust and Verification Section -->
-        <h4 style="font-size: 1rem; font-weight: 800; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1.25rem; margin-bottom: 0.75rem; color: var(--primary);">Official Source Verification</h4>
-
-        <div class="form-group-custom" style="margin-bottom: 1rem;">
-          <label class="form-label-custom" for="edit-official-url">Official Scheme Website URL</label>
-          <input type="url" id="edit-official-url" class="form-input-custom" placeholder="https://..." style="width: 95%;">
-        </div>
-
-        <div class="form-group-custom" style="margin-bottom: 1rem;">
-          <label class="form-label-custom" for="edit-dept-name">Official Government Department Name</label>
-          <input type="text" id="edit-dept-name" class="form-input-custom" placeholder="e.g. Department of Social Welfare" style="width: 95%;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-notif-number">Official Notification Number</label>
-            <input type="text" id="edit-notif-number" class="form-input-custom" placeholder="e.g. G.O. Ms No. 45">
-          </div>
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-pdf-link">Official PDF / GO Document Link</label>
-            <input type="url" id="edit-pdf-link" class="form-input-custom" placeholder="https://...">
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-verified-date">Last Verified Date</label>
-            <input type="date" id="edit-verified-date" class="form-input-custom">
-          </div>
-          <div class="form-group-custom" style="margin: 0;">
-            <label class="form-label-custom" for="edit-data-source">Data Source Label</label>
-            <input type="text" id="edit-data-source" class="form-input-custom" placeholder="e.g. Tamil Nadu Government Portal">
-          </div>
-        </div>
-
-        <!-- Change Log Verification Reason -->
-        <h4 style="font-size: 1rem; font-weight: 800; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1.25rem; margin-bottom: 0.75rem; color: #ef4444;">Change Log Audit Requirement</h4>
-        <div class="form-group-custom" style="margin-bottom: 1.5rem;">
-          <label class="form-label-custom" for="edit-change-reason" style="color: #ef4444;">Reason for modifying rules * (Required for audit trails)</label>
-          <textarea id="edit-change-reason" class="form-input-custom" style="min-height: 60px; border-color: rgba(239, 68, 68, 0.4); width: 95%;" placeholder="Provide justification or G.O. citation for this rule update..." required></textarea>
-        </div>
-
-        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-          <button type="button" id="btn-cancel-modal" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">Cancel</button>
-          <button type="submit" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">Save Rules</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- UPDATE TRANSPORTATION REPORT MODAL -->
-  <div id="modal-update-transportation" class="modal-overlay">
-    <div class="modal-card" style="max-width: 520px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.85rem; margin-bottom: 1rem;">
-        <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; color: var(--text-main);">
-          Update Transportation Case <span id="trans-modal-id" style="color: var(--primary);">#TRP-1001</span>
-        </h3>
-        <button type="button" onclick="closeTransModal()" style="background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <form id="form-update-transportation" onsubmit="handleTransUpdateSubmit(event)">
-        <input type="hidden" id="trans-report-id-input" />
-
-        <!-- AI Analysis Inspection Panel -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 0.9rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.4rem;">
-            <i class="fa-solid fa-microchip"></i> CrowdCity AI Triage Verification
-          </h4>
-        </div>
-        <div id="trans-modal-ai-details" style="line-height: 1.45; color: var(--text-muted); font-size: 0.85rem; background: var(--bg-app); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
-          Loading AI triage report...
-        </div>
-        
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-          <div>
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem;">Update Status *</label>
-            <select id="trans-update-status" style="width: 100%; padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; font-family: inherit;">
-              <option value="Submitted">Submitted</option>
-              <option value="AI Reviewed">AI Reviewed</option>
-              <option value="Assigned">Assigned</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Closed">Closed</option>
-            </select>
-          </div>
-
-          <div>
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem;">Assign Engineer / Official Name</label>
-            <input type="text" id="trans-update-engineer" placeholder="e.g. Eng. K. Rajan (Roads Dept)" style="width: 100%; padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; font-family: inherit;" />
-          </div>
-
-          <div>
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem;">Official Remarks / Work Progress Log</label>
-            <textarea id="trans-update-remarks" rows="3" placeholder="Provide inspection notes or repair completion details..." style="width: 100%; padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; font-family: inherit; resize: vertical;"></textarea>
-          </div>
-
-          <div>
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem;">Completion Photo URL (Optional)</label>
-            <input type="url" id="trans-update-photo" placeholder="https://example.com/resolved_proof.jpg" style="width: 100%; padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; font-family: inherit;" />
-          </div>
-
-          <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
-            <button type="button" onclick="closeTransModal()" class="btn btn-secondary" style="font-size: 0.85rem;">Cancel</button>
-            <button type="submit" class="btn btn-primary" style="font-size: 0.85rem;">Save Changes</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  <!-- COMPLAINT DETAIL & LIVE CHAT MODAL -->
-  <div id="modal-complaint-detail" class="modal-overlay">
-    <div class="modal-card" style="max-width: 920px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem;">
-      <!-- Modal Header -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-        <div>
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
-            <span id="detail-emergency-badge" class="badge" style="background-color: #ef4444; color: white; display: none;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY</span>
-            <span id="detail-category-badge" class="badge" style="background-color: var(--primary); color: white;">CATEGORY</span>
-            <span id="detail-status-badge" class="badge badge-status">STATUS</span>
-            <span id="detail-ticket-id" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">#TICKET-ID</span>
-          </div>
-          <h2 id="detail-title" style="margin: 0; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Complaint Title</h2>
-        </div>
-        <button type="button" onclick="window.ComplaintService.closeDetailModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer; padding: 0.2rem;"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <!-- Modal Main Content (2 Columns on desktop) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
-        
-        <!-- Column 1: Evidence Photo & Case Overview -->
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-          
-          <!-- Evidence Photo Container -->
-          <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; position: relative;">
-            <div style="padding: 0.6rem 0.8rem; background: var(--slate-100); border-bottom: 1px solid var(--border-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between;">
-              <span><i class="fa-solid fa-camera" style="color: var(--primary);"></i> Citizen Evidence Photo</span>
-              <span id="detail-photo-badge" class="badge" style="font-size: 0.65rem; background: rgba(16, 185, 129, 0.15); color: #10b981;">ATTACHED</span>
-            </div>
-            <div id="detail-photo-wrapper" style="min-height: 200px; max-height: 320px; display: flex; align-items: center; justify-content: center; background: #0f172a; position: relative;">
-              <img id="detail-photo-img" src="" alt="Evidence Photo" style="width: 100%; height: 100%; max-height: 320px; object-fit: contain; display: none; cursor: pointer;" onclick="window.open(this.src, '_blank')" title="Click to open image full size in new tab" />
-              <div id="detail-photo-fallback" style="padding: 2.5rem; text-align: center; color: #94a3b8;">
-                <i class="fa-solid fa-image" style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                <p style="margin: 0; font-size: 0.85rem; font-weight: 600;">No Evidence Photo Uploaded</p>
-                <p style="margin: 0.2rem 0 0 0; font-size: 0.75rem; opacity: 0.7;">Reporter submitted text/voice description only.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Description & Metadata Card -->
-          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
-            <h4 style="margin: 0; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Issue Description</h4>
-            <p id="detail-description" style="margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--text-main); font-weight: 500;">Description text...</p>
-            
-            <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.82rem; color: var(--text-muted);">
-              <div><i class="fa-solid fa-location-dot" style="color: #ef4444; width: 18px;"></i> <span id="detail-address">Address</span></div>
-              <div><i class="fa-solid fa-map-pin" style="color: var(--primary); width: 18px;"></i> Coordinates: <a id="detail-coords-link" href="#" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">0.000, 0.000 (Open Map)</a></div>
-              <div><i class="fa-solid fa-user" style="color: #8b5cf6; width: 18px;"></i> Reported by: <strong id="detail-reporter" style="color: var(--text-main);">Citizen Name</strong></div>
-              <div><i class="fa-solid fa-calendar-days" style="color: #f59e0b; width: 18px;"></i> Date: <span id="detail-date">Date</span></div>
-            </div>
-          </div>
-
-          <!-- AI Triage Report -->
-          <div style="background: rgba(13, 148, 136, 0.05); border: 1px solid rgba(13, 148, 136, 0.2); border-radius: 12px; padding: 1rem;">
-            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.85rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 0.4rem;">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> CrowdCity AI Triage Insights
-            </h4>
-            <p id="detail-ai-summary" style="margin: 0; font-size: 0.82rem; line-height: 1.45; color: var(--text-main);">AI Summary loading...</p>
-          </div>
-
-        </div>
-
-        <!-- Column 2: Status Actions & Authority-Citizen Live Chat -->
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-          
-          <!-- Authority Action Controls Card -->
-          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.15rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm);">
-            <h4 style="margin: 0; font-size: 0.9rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem;">
-              <i class="fa-solid fa-user-gear" style="color: var(--primary);"></i> Authority Action Controls
-            </h4>
-
-            <!-- Delegate Officer Dropdown -->
-            <div>
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Assign / Delegate Officer</label>
-              <select id="detail-delegate-select" style="width: 100%; padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; background: var(--bg-app); color: var(--text-main);">
-                <option value="">-- Unassigned --</option>
-              </select>
-            </div>
-
-            <!-- Quick Status Change Buttons -->
-            <div>
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem;">Quick Status Actions</label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                <button type="button" onclick="window.ComplaintService.handleModalStatusAction('assigned')" class="btn" style="background: #3b82f6; color: white; border: none; padding: 0.55rem; font-size: 0.78rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <i class="fa-solid fa-user-check"></i> Assign
-                </button>
-                <button type="button" onclick="window.ComplaintService.handleModalStatusAction('in_progress')" class="btn" style="background: #8b5cf6; color: white; border: none; padding: 0.55rem; font-size: 0.78rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <i class="fa-solid fa-spinner"></i> In Progress
-                </button>
-                <button type="button" onclick="window.ComplaintService.handleModalStatusAction('resolved')" class="btn" style="background: #10b981; color: white; border: none; padding: 0.55rem; font-size: 0.78rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <i class="fa-solid fa-circle-check"></i> Resolve
-                </button>
-                <button type="button" onclick="window.ComplaintService.handleModalStatusAction('rejected')" class="btn" style="background: #ef4444; color: white; border: none; padding: 0.55rem; font-size: 0.78rem; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                  <i class="fa-solid fa-circle-xmark"></i> Reject
-                </button>
-              </div>
-            </div>
-
-            <!-- Remarks & Proof Input -->
-            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-              <div>
-                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.2rem;">Official Remarks / Update Log</label>
-                <textarea id="detail-remarks-input" rows="2" placeholder="Enter resolution notes, field inspection updates or rejection reasons..." style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.82rem; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
-              </div>
-              <div>
-                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.2rem;">Resolution Photo Proof URL (Optional)</label>
-                <input type="url" id="detail-proof-photo" placeholder="https://example.com/resolved_photo.jpg" style="width: 100%; padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.82rem; box-sizing: border-box;" />
-              </div>
-              <button type="button" onclick="window.ComplaintService.saveModalStatusUpdate()" class="btn btn-primary" style="width: 100%; font-size: 0.85rem; font-weight: 700; padding: 0.55rem; margin-top: 0.25rem;">
-                <i class="fa-solid fa-floppy-disk"></i> Save Remarks & Status
-              </button>
-            </div>
-
-          </div>
-
-          <!-- Authority-Citizen Live Chat Panel -->
-          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.15rem; display: flex; flex-direction: column; gap: 0.75rem; flex: 1; min-height: 280px; box-shadow: var(--shadow-sm);">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-              <h4 style="margin: 0; font-size: 0.9rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem;">
-                <i class="fa-solid fa-comments" style="color: #06b6d4;"></i> Authority-Citizen Live Chat
-              </h4>
-              <span style="font-size: 0.7rem; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 0.15rem 0.5rem; border-radius: 999px;">
-                <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> LIVE
-              </span>
-            </div>
-
-            <!-- Messages Thread -->
-            <div id="detail-chat-thread" style="flex: 1; min-height: 180px; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.5rem; background: var(--bg-app); border-radius: 8px; border: 1px solid var(--border-color);">
-              <div style="text-align: center; color: var(--text-muted); font-size: 0.78rem; margin: auto;">Loading communication history...</div>
-            </div>
-
-            <!-- Chat Input Form -->
-            <form onsubmit="window.ComplaintService.sendDetailChatMessage(event)" style="display: flex; gap: 0.5rem;">
-              <input type="text" id="detail-chat-input" placeholder="Type message to citizen..." style="flex: 1; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.82rem; background: var(--bg-surface); color: var(--text-main);" required />
-              <button type="submit" class="btn btn-primary" style="padding: 0.5rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 8px; white-space: nowrap;">
-                <i class="fa-solid fa-paper-plane"></i> Send
-              </button>
-            </form>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Client Script files -->
-  <script src="js/auth.js?v=2.4.3"></script>
-  <script src="js/api.js?v=2.4.3"></script>
-  <script src="js/notifications.js?v=2.4.3"></script>
-  <script src="js/admin.js?v=2.4.3"></script>
-  <script src="js/chat-widget.js?v=2.4.3"></script>
+  <script src="js/auth.js?v=2.5.0"></script>
+  <script src="js/api.js?v=2.5.0"></script>
+  <script src="js/notifications.js?v=2.5.0"></script>
+  <script src="js/admin.js?v=2.5.0"></script>
 
 </body>
 </html>
