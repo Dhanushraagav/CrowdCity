@@ -558,31 +558,32 @@ body {
 
 /* Floating Toast Popup Container */
 .toast-popup-container {
-  position: fixed;
-  top: 1.25rem;
-  right: 1.5rem;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  pointer-events: none;
-  max-width: 400px;
-  width: calc(100% - 3rem);
+  position: fixed !important;
+  top: 1.25rem !important;
+  right: 1.5rem !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  pointer-events: none !important;
+  max-width: 400px !important;
+  width: calc(100% - 3rem) !important;
 }
 
 .toast-box {
-  pointer-events: auto;
-  padding: 0.85rem 1.15rem;
-  border-radius: 8px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
-  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  background: #ffffff;
+  pointer-events: auto !important;
+  padding: 0.85rem 1.15rem !important;
+  border-radius: 8px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+  background: #ffffff !important;
+  margin: 0 !important;
 }
 
 @keyframes toastSlideIn {
@@ -597,15 +598,15 @@ body {
 }
 
 .toast-box.success {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #6ee7b7;
+  background: #ecfdf5 !important;
+  color: #065f46 !important;
+  border: 1px solid #6ee7b7 !important;
 }
 
 .toast-box.error {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fca5a5 !important;
 }
 
 /* Responsive Media Queries */
