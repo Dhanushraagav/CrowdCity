@@ -560,8 +560,13 @@
       reader.readAsDataURL(file);
     },
 
-    cancelProofPhoto: function() {
-      activeProofPhotoUrl = null;
+    cancelProofPhoto: async function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      activeProofPhotoUrl = "";
       const fileInput = document.getElementById('detail-proof-file');
       if (fileInput) fileInput.value = '';
 
@@ -570,7 +575,18 @@
       if (img) img.src = '';
       if (wrapper) wrapper.style.display = 'none';
 
-      showToast("Uploaded photo removed.");
+      if (activeDetailIssueId) {
+        const issue = currentComplaints.find(c => c.id === activeDetailIssueId);
+        if (issue) issue.completion_photo_url = "";
+
+        try {
+          await API.updateIssueStatus(activeDetailIssueId, { completion_photo_url: "" });
+        } catch (err) {
+          console.error("Error clearing photo from database:", err);
+        }
+      }
+
+      showToast("Resolution proof photo removed successfully.", "success");
     },
 
     renderTimeline: function(issue) {
