@@ -773,6 +773,7 @@
 
       // Status & remarks
       document.getElementById('detail-status-select').value = issue.status || 'pending';
+      this.handleStatusSelectChange();
       document.getElementById('detail-remarks-input').value = issue.official_remarks || '';
       
       activeProofPhotoUrl = issue.completion_photo_url || null;
@@ -920,12 +921,48 @@
       `).join('');
     },
 
+    handleStatusSelectChange: function() {
+      const statusSelect = document.getElementById('detail-status-select');
+      const badge = document.getElementById('detail-proof-required-badge');
+      if (!statusSelect || !badge) return;
+
+      if (statusSelect.value === 'resolved') {
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    },
+
     saveDetailStatusUpdate: async function() {
       if (!activeDetailIssueId) return;
       const issueId = activeDetailIssueId;
       const newStatus = document.getElementById('detail-status-select').value;
       const remarks = document.getElementById('detail-remarks-input').value.trim();
       const delegateId = document.getElementById('detail-delegate-select').value;
+
+      // STRICT VALIDATION: Resolution proof image is required to resolve a complaint
+      if (newStatus === 'resolved' && !activeProofPhotoUrl) {
+        showToast("Resolution proof image is strictly required to resolve a complaint.", "error");
+        const fileInput = document.getElementById('detail-proof-file');
+        if (fileInput) {
+          fileInput.focus();
+          fileInput.style.borderColor = '#dc2626';
+          setTimeout(() => { fileInput.style.borderColor = 'var(--border-color)'; }, 3000);
+        }
+        return;
+      }
+
+      // STRICT VALIDATION: Official remarks are required to reject a complaint
+      if (newStatus === 'rejected' && !remarks) {
+        showToast("Official remarks/reasons are strictly required to reject a complaint.", "error");
+        const remarksInput = document.getElementById('detail-remarks-input');
+        if (remarksInput) {
+          remarksInput.focus();
+          remarksInput.style.borderColor = '#dc2626';
+          setTimeout(() => { remarksInput.style.borderColor = 'var(--border-color)'; }, 3000);
+        }
+        return;
+      }
 
       try {
         showToast("Saving status update...");
@@ -943,12 +980,12 @@
         const res = await API.updateIssueStatus(issueId, updateData);
         if (res.error) throw new Error(res.error);
 
-        showToast("Status updated successfully.");
+        showToast("Status updated successfully.", "success");
         await this.loadAllData();
         this.openCaseDetails(issueId);
       } catch (err) {
         console.error("saveDetailStatusUpdate error:", err);
-        showToast("Failed to update status: " + err.message, "error");
+        showToast(err.message || "Failed to update status.", "error");
       }
     },
 

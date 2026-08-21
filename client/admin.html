@@ -467,7 +467,7 @@
 
                   <div>
                     <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Update Case Lifecycle Status</label>
-                    <select id="detail-status-select" class="form-select" style="width: 100%;">
+                    <select id="detail-status-select" class="form-select" style="width: 100%;" onchange="window.ComplaintService.handleStatusSelectChange()">
                       <option value="pending">Pending</option>
                       <option value="assigned">Assigned</option>
                       <option value="in_progress">In Progress</option>
@@ -482,7 +482,9 @@
                   </div>
 
                   <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Upload Resolution Proof Photo</label>
+                    <label id="detail-proof-label" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">
+                      Upload Resolution Proof Photo <span id="detail-proof-required-badge" style="display: none; color: #dc2626; font-size: 0.72rem; font-weight: 800;">* (Required to Resolve)</span>
+                    </label>
                     <input type="file" id="detail-proof-file" class="form-input" accept="image/*" style="width: 100%; font-size: 0.82rem;" onchange="window.ComplaintService.handleProofPhotoSelect(event)" />
                     <div id="detail-proof-preview-wrapper" style="margin-top: 0.5rem; display: none;">
                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
