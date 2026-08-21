@@ -561,8 +561,6 @@
         <button class="nav-item" data-pane="pane-complaints" onclick="window.ComplaintService.showPane('pane-complaints')">Complaints Queue</button>
         <button class="nav-item" data-pane="pane-assigned" onclick="window.ComplaintService.showPane('pane-assigned')">Assigned Cases</button>
         <button class="nav-item" data-pane="pane-reports" onclick="window.ComplaintService.showPane('pane-reports')">Operational Reports</button>
-        <button class="nav-item" data-pane="pane-notifications" onclick="window.ComplaintService.showPane('pane-notifications')">Notifications</button>
-        <button class="nav-item" data-pane="pane-profile" onclick="window.ComplaintService.showPane('pane-profile')">Profile & Security</button>
       </nav>
       <div class="sidebar-footer">
         <div>Department of Municipal Administration</div>
@@ -580,9 +578,36 @@
           <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu">Toggle Menu</button>
           <span class="header-title" id="header-pane-title">Municipal Dashboard</span>
         </div>
-        <div class="header-user-info">
-          <span class="user-badge" id="header-user-name">Officer Loading...</span>
-          <button class="btn-logout" onclick="logoutUser()">Logout</button>
+        
+        <!-- Top-Right Header Navigation Controls -->
+        <div class="header-user-info" style="display: flex; align-items: center; gap: 0.65rem;">
+          <!-- Notifications Bell Button with Dynamic Unread Badge -->
+          <button type="button" id="header-notif-btn" class="btn-secondary" style="position: relative; padding: 0.4rem 0.7rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem;" onclick="window.ComplaintService.showPane('pane-notifications')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span>Notifications</span>
+            <span id="header-notif-badge" style="display: none; background: #dc2626; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 999px; margin-left: 0.2rem;">0</span>
+          </button>
+
+          <!-- Officer Profile Dropdown Trigger -->
+          <div style="position: relative;">
+            <button type="button" id="header-profile-btn" class="btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;" onclick="window.ComplaintService.toggleProfileDropdown(event)">
+              <span id="header-user-name">Officer Loading...</span>
+              <span style="font-size: 0.65rem; color: var(--text-light);">▼</span>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.35rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 180px; z-index: 200; overflow: hidden;">
+              <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="window.ComplaintService.showPane('pane-profile'); window.ComplaintService.toggleProfileDropdown(false);">
+                Profile & Security
+              </button>
+              <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: #991b1b; background: none; border: none; cursor: pointer;" onclick="logoutUser()">
+                Logout Session
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
