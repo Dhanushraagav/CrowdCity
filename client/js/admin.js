@@ -155,22 +155,48 @@
 
     loadAllData: async function() {
       try {
-        const [issuesRes, usersRes, notifsRes] = await Promise.allSettled([
+        const [issuesRes, transRes, usersRes, notifsRes] = await Promise.allSettled([
           API.getIssues(),
+          API.request('/transportation/reports'),
           API.getAllUsers(),
           API.getNotifications()
         ]);
 
-        if (issuesRes.status === 'fulfilled' && issuesRes.value.data) {
-          currentComplaints = issuesRes.value.data || [];
+        let civicList = [];
+        if (issuesRes.status === 'fulfilled' && issuesRes.value && issuesRes.value.data) {
+          civicList = issuesRes.value.data || [];
         }
 
-        if (usersRes.status === 'fulfilled' && usersRes.value.data) {
+        let transList = [];
+        if (transRes.status === 'fulfilled' && transRes.value && transRes.value.data) {
+          transList = (transRes.value.data || []).map(tr => ({
+            id: tr.id,
+            title: tr.title || tr.issue_type || 'Transportation Issue',
+            description: tr.description || tr.issue_description || '',
+            category: 'transportation',
+            priority: tr.priority || (tr.is_emergency ? 'emergency' : 'normal'),
+            is_emergency: tr.is_emergency || false,
+            status: tr.status || 'pending',
+            address: tr.address || tr.location_name || 'Transportation Route',
+            latitude: tr.latitude,
+            longitude: tr.longitude,
+            assigned_to: tr.assigned_to,
+            created_at: tr.created_at,
+            reporter: tr.reporter || tr.user,
+            official_remarks: tr.official_remarks,
+            completion_photo_url: tr.completion_photo_url,
+            is_transportation: true
+          }));
+        }
+
+        currentComplaints = [...civicList, ...transList].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        if (usersRes.status === 'fulfilled' && usersRes.value && usersRes.value.data) {
           const users = usersRes.value.data || [];
           currentAuthorities = users.filter(u => u.role === 'authority' || u.role === 'admin');
         }
 
-        if (notifsRes.status === 'fulfilled' && notifsRes.value.data) {
+        if (notifsRes.status === 'fulfilled' && notifsRes.value && notifsRes.value.data) {
           currentNotifications = notifsRes.value.data || [];
         }
 
