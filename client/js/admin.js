@@ -564,6 +564,19 @@
       reader.readAsDataURL(file);
     },
 
+    cancelProofPhoto: function() {
+      activeProofPhotoUrl = null;
+      const fileInput = document.getElementById('detail-proof-file');
+      if (fileInput) fileInput.value = '';
+
+      const wrapper = document.getElementById('detail-proof-preview-wrapper');
+      const img = document.getElementById('detail-proof-preview-img');
+      if (img) img.src = '';
+      if (wrapper) wrapper.style.display = 'none';
+
+      showToast("Uploaded photo removed.");
+    },
+
     renderTimeline: function(issue) {
       const timelineEl = document.getElementById('detail-timeline-list');
       if (!timelineEl) return;
