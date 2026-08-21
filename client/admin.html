@@ -12,556 +12,29 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <meta name="theme-color" content="#ffffff">
 
+  <!-- Authority Portal External Stylesheet -->
+  <link rel="stylesheet" href="css/authority-portal.css?v=2.8.0">
+
   <!-- Central Auth Router -->
-  <script src="js/auth-router.js?v=2.7.0"></script>
-
-  <style>
-    #lang-toggle-container, .lang-toggle, .lang-toggle-fixed {
-      display: none !important;
-    }
-    :root {
-      --bg-canvas: #f8fafc;
-      --bg-card: #ffffff;
-      --border-color: #cbd5e1;
-      --border-light: #e2e8f0;
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --text-light: #64748b;
-      --primary: #0284c7;
-      --primary-hover: #0369a1;
-      --badge-pending-bg: #fef3c7;
-      --badge-pending-text: #92400e;
-      --badge-assigned-bg: #dbeafe;
-      --badge-assigned-text: #1e40af;
-      --badge-progress-bg: #f3e8ff;
-      --badge-progress-text: #6b21a8;
-      --badge-resolved-bg: #d1fae5;
-      --badge-resolved-text: #065f46;
-      --badge-rejected-bg: #fee2e2;
-      --badge-rejected-text: #991b1b;
-      --badge-emergency-bg: #991b1b;
-      --badge-emergency-text: #ffffff;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background-color: var(--bg-canvas);
-      color: var(--text-main);
-      font-family: var(--font-family);
-      font-size: 14px;
-      line-height: 1.5;
-      min-height: 100vh;
-    }
-
-    /* Layout */
-    .portal-layout {
-      display: flex;
-      min-height: 100vh;
-      width: 100%;
-    }
-
-    /* Sidebar */
-    .portal-sidebar {
-      width: 250px;
-      background-color: var(--bg-card);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      z-index: 100;
-      transition: transform 0.2s ease;
-    }
-
-    .sidebar-brand {
-      padding: 1.25rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .brand-title-text {
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      color: var(--text-main);
-      text-transform: uppercase;
-    }
-
-    .brand-subtitle-text {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      display: block;
-      margin-top: 0.15rem;
-    }
-
-    .sidebar-nav {
-      padding: 1rem 0.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      flex: 1;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      padding: 0.65rem 0.85rem;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 600;
-      border-radius: 4px;
-      border: 1px solid transparent;
-      transition: all 0.15s ease;
-      cursor: pointer;
-      background: none;
-      width: 100%;
-      text-align: left;
-    }
-
-    .nav-item:hover {
-      background-color: var(--bg-canvas);
-      color: var(--text-main);
-      border-color: var(--border-light);
-    }
-
-    .nav-item.active {
-      background-color: var(--bg-canvas);
-      color: var(--primary);
-      font-weight: 700;
-      border-color: var(--border-color);
-    }
-
-    .sidebar-footer {
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
-      font-size: 0.78rem;
-      color: var(--text-light);
-    }
-
-    /* Main Area */
-    .portal-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .portal-header {
-      height: 60px;
-      background-color: var(--bg-card);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1.5rem;
-    }
-
-    .header-title-area {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .mobile-menu-btn {
-      display: none;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 0.4rem 0.65rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      color: var(--text-main);
-    }
-
-    .header-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .header-user-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      font-size: 0.82rem;
-    }
-
-    .user-badge {
-      background: var(--bg-canvas);
-      border: 1px solid var(--border-color);
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .btn-logout {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      padding: 0.3rem 0.7rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-
-    .btn-logout:hover {
-      background: #fee2e2;
-      color: #991b1b;
-      border-color: #fca5a5;
-    }
-
-    /* Body Container */
-    .portal-body {
-      padding: 1.5rem;
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    /* Panes */
-    .tab-pane {
-      display: none;
-    }
-
-    .tab-pane.active-pane {
-      display: block;
-    }
-
-    /* Cards & Containers */
-    .content-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 1.25rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .card-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      border-bottom: 1px solid var(--border-light);
-      padding-bottom: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* Metric Grid */
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .metric-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 1rem;
-    }
-
-    .metric-box-title {
-      font-size: 0.73rem;
-      font-weight: 700;
-      color: var(--text-light);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
-    }
-
-    .metric-box-value {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--text-main);
-      line-height: 1;
-    }
-
-    /* SVG Chart Containers */
-    .svg-chart-container {
-      width: 100%;
-      min-height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Tables */
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-    }
-
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.85rem;
-    }
-
-    .data-table th {
-      background: var(--bg-canvas);
-      padding: 0.65rem 0.85rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-color);
-      text-transform: uppercase;
-      font-size: 0.72rem;
-      letter-spacing: 0.04em;
-      white-space: nowrap;
-    }
-
-    .data-table td {
-      padding: 0.75rem 0.85rem;
-      border-bottom: 1px solid var(--border-light);
-      color: var(--text-main);
-      vertical-align: middle;
-    }
-
-    .data-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .data-table tr:hover td {
-      background-color: var(--bg-canvas);
-    }
-
-    /* Badges */
-    .status-badge {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      white-space: nowrap;
-    }
-
-    .status-pending { background: var(--badge-pending-bg); color: var(--badge-pending-text); }
-    .status-assigned { background: var(--badge-assigned-bg); color: var(--badge-assigned-text); }
-    .status-in_progress { background: var(--badge-progress-bg); color: var(--badge-progress-text); }
-    .status-resolved { background: var(--badge-resolved-bg); color: var(--badge-resolved-text); }
-    .status-rejected { background: var(--badge-rejected-bg); color: var(--badge-rejected-text); }
-    .status-emergency { background: var(--badge-emergency-bg); color: var(--badge-emergency-text); }
-
-    /* Presence Indicator */
-    .presence-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-canvas);
-    }
-    .presence-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-    }
-    .presence-dot.online { background-color: #10b981; }
-    .presence-dot.offline { background-color: #94a3b8; }
-
-    /* Filters & Forms */
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      background: var(--bg-card);
-      padding: 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      align-items: center;
-    }
-
-    .form-input, .form-select, .form-textarea {
-      padding: 0.45rem 0.65rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      font-size: 0.85rem;
-      font-family: inherit;
-      background: var(--bg-card);
-      color: var(--text-main);
-    }
-
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
-    .btn-action {
-      background: var(--primary);
-      color: #ffffff;
-      border: none;
-      padding: 0.45rem 0.85rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .btn-action:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-secondary {
-      background: var(--bg-canvas);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-      padding: 0.45rem 0.85rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .btn-secondary:hover {
-      background: #e2e8f0;
-    }
-
-    /* Activity Timeline */
-    .timeline-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-      position: relative;
-      padding-left: 1.25rem;
-      border-left: 2px solid var(--border-color);
-      margin: 0.5rem 0 0 0.5rem;
-    }
-
-    .timeline-item {
-      position: relative;
-      font-size: 0.83rem;
-    }
-
-    .timeline-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--primary);
-      position: absolute;
-      left: calc(-1.25rem - 5px);
-      top: 4px;
-    }
-
-    .timeline-title {
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .timeline-time {
-      font-size: 0.72rem;
-      color: var(--text-light);
-    }
-
-    /* Modal Styling */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-
-    .modal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      width: 100%;
-      max-width: 520px;
-      padding: 1.5rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    /* Toast */
-    .toast-box {
-      padding: 0.75rem 1rem;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: none;
-    }
-
-    .toast-box.success {
-      background: #d1fae5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-      display: block;
-    }
-
-    .toast-box.error {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-      display: block;
-    }
-
-    /* Responsive */
-    @media (max-width: 1023px) {
-      .portal-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-      }
-
-      .portal-sidebar.open {
-        transform: translateX(0);
-      }
-
-      .mobile-menu-btn {
-        display: block;
-      }
-    }
-  </style>
+  <script src="js/auth-router.js?v=2.8.0"></script>
 </head>
 <body>
 
   <div class="portal-layout">
-    <!-- Sidebar -->
+    <!-- Sidebar Navigation -->
     <aside class="portal-sidebar" id="portal-sidebar">
       <div class="sidebar-brand">
         <span class="brand-title-text">CrowdCity</span>
         <span class="brand-subtitle-text">Municipal Operations</span>
       </div>
+
       <nav class="sidebar-nav">
         <button class="nav-item active" data-pane="pane-dashboard" onclick="window.ComplaintService.showPane('pane-dashboard')">Dashboard</button>
         <button class="nav-item" data-pane="pane-complaints" onclick="window.ComplaintService.showPane('pane-complaints')">Complaints Queue</button>
         <button class="nav-item" data-pane="pane-assigned" onclick="window.ComplaintService.showPane('pane-assigned')">Assigned Cases</button>
         <button class="nav-item" data-pane="pane-reports" onclick="window.ComplaintService.showPane('pane-reports')">Operational Reports</button>
       </nav>
+
       <div class="sidebar-footer">
         <div>Department of Municipal Administration</div>
         <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
@@ -580,9 +53,9 @@
         </div>
         
         <!-- Top-Right Header Navigation Controls -->
-        <div class="header-user-info" style="display: flex; align-items: center; gap: 0.65rem;">
+        <div class="header-user-info">
           <!-- Notifications Bell Button with Dynamic Unread Badge -->
-          <button type="button" id="header-notif-btn" class="btn-secondary" style="position: relative; padding: 0.4rem 0.7rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem;" onclick="window.ComplaintService.showPane('pane-notifications')">
+          <button type="button" id="header-notif-btn" class="btn-secondary" style="position: relative; padding: 0.4rem 0.75rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem;" onclick="window.ComplaintService.showPane('pane-notifications')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -593,13 +66,13 @@
 
           <!-- Officer Profile Dropdown Trigger -->
           <div style="position: relative;">
-            <button type="button" id="header-profile-btn" class="btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;" onclick="window.ComplaintService.toggleProfileDropdown(event)">
+            <button type="button" id="header-profile-btn" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;" onclick="window.ComplaintService.toggleProfileDropdown(event)">
               <span id="header-user-name">Officer Loading...</span>
               <span style="font-size: 0.65rem; color: var(--text-light);">▼</span>
             </button>
 
             <!-- Dropdown Menu -->
-            <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.35rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 180px; z-index: 200; overflow: hidden;">
+            <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 200; overflow: hidden;">
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="window.ComplaintService.showPane('pane-profile'); window.ComplaintService.toggleProfileDropdown(false);">
                 Profile & Security
               </button>
@@ -618,38 +91,46 @@
         <!-- PANE 1: DASHBOARD                              -->
         <!-- ============================================== -->
         <section id="pane-dashboard" class="tab-pane active-pane">
+          <!-- Refined Operational Metric Cards -->
           <div class="metric-grid">
             <div class="metric-box">
               <div class="metric-box-title">Total Complaints</div>
               <div class="metric-box-value" id="kpi-total">0</div>
+              <div class="metric-box-subtext">All reported civic issues</div>
             </div>
             <div class="metric-box">
               <div class="metric-box-title">Pending Dispatch</div>
               <div class="metric-box-value" id="kpi-pending" style="color: #d97706;">0</div>
+              <div class="metric-box-subtext">Awaiting action</div>
             </div>
             <div class="metric-box">
               <div class="metric-box-title">Assigned</div>
               <div class="metric-box-value" id="kpi-assigned" style="color: #2563eb;">0</div>
+              <div class="metric-box-subtext">Currently assigned</div>
             </div>
             <div class="metric-box">
               <div class="metric-box-title">In Progress</div>
               <div class="metric-box-value" id="kpi-progress" style="color: #7e22ce;">0</div>
+              <div class="metric-box-subtext">Under field investigation</div>
             </div>
             <div class="metric-box">
               <div class="metric-box-title">Resolved Cases</div>
               <div class="metric-box-value" id="kpi-resolved" style="color: #059669;">0</div>
+              <div class="metric-box-subtext">Successfully completed</div>
             </div>
             <div class="metric-box">
               <div class="metric-box-title">Rejected Cases</div>
               <div class="metric-box-value" id="kpi-rejected" style="color: #475569;">0</div>
+              <div class="metric-box-subtext">Closed / Declined</div>
             </div>
             <div class="metric-box">
               <div class="metric-box-title">Emergency Priority</div>
               <div class="metric-box-value" id="kpi-emergency" style="color: #dc2626;">0</div>
+              <div class="metric-box-subtext">Critical attention required</div>
             </div>
           </div>
 
-          <!-- Operational SVG Charts Row 1 -->
+          <!-- Operational SVG Analytics Row 1 -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             
             <div class="content-card">
@@ -664,7 +145,7 @@
 
           </div>
 
-          <!-- Operational SVG Charts Row 2 -->
+          <!-- Operational SVG Analytics Row 2 -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             
             <div class="content-card">
@@ -679,7 +160,7 @@
 
           </div>
 
-          <!-- Operational Table -->
+          <!-- Operational Complaints Table Card -->
           <div class="content-card">
             <div class="card-title">Recent Operational Complaints</div>
             <div class="table-container">
@@ -706,7 +187,7 @@
             </div>
           </div>
 
-          <!-- Recent Activity -->
+          <!-- Recent Activity Log Card -->
           <div class="content-card">
             <div class="card-title">System Activity Log</div>
             <div id="dashboard-activity-list" style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
@@ -1053,7 +534,7 @@
         <section id="pane-profile" class="tab-pane">
           
           <!-- 3D Officer Profile Card -->
-          <div class="card-3d" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; max-width: 650px; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.08); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+          <div class="card-3d" style="max-width: 650px; margin-bottom: 1.5rem;">
             <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem;">
               <div id="profile-avatar-circle" style="width: 56px; height: 56px; border-radius: 50%; background: #e0f2fe; border: 2px solid #0284c7; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; text-transform: uppercase;">
                 AO
@@ -1090,7 +571,7 @@
           </div>
 
           <!-- Separate Security Card -->
-          <div class="card-3d" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; max-width: 650px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.08); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+          <div class="card-3d" style="max-width: 650px;">
             <div class="card-title" style="margin-bottom: 1rem;">Security & Session Control</div>
 
             <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
@@ -1158,10 +639,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Client Script files -->
-  <script src="js/auth.js?v=2.7.0"></script>
-  <script src="js/api.js?v=2.7.0"></script>
-  <script src="js/notifications.js?v=2.7.0"></script>
-  <script src="js/admin.js?v=2.7.0"></script>
+  <script src="js/auth.js?v=2.8.0"></script>
+  <script src="js/api.js?v=2.8.0"></script>
+  <script src="js/notifications.js?v=2.8.0"></script>
+  <script src="js/admin.js?v=2.8.0"></script>
 
 </body>
 </html>
