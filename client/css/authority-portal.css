@@ -289,6 +289,20 @@ body {
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  animation: cardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.metric-box:nth-child(1) { animation-delay: 0ms; }
+.metric-box:nth-child(2) { animation-delay: 40ms; }
+.metric-box:nth-child(3) { animation-delay: 80ms; }
+.metric-box:nth-child(4) { animation-delay: 120ms; }
+.metric-box:nth-child(5) { animation-delay: 160ms; }
+.metric-box:nth-child(6) { animation-delay: 200ms; }
+.metric-box:nth-child(7) { animation-delay: 240ms; }
+
+@keyframes cardEntrance {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .metric-box:hover {
@@ -611,6 +625,22 @@ body {
   border: 1px solid #fca5a5 !important;
 }
 
+/* Button Press Active Effects */
+.btn-action:active, .btn-secondary:active, .btn-logout:active {
+  transform: scale(0.98) !important;
+}
+
+/* Subtle Emergency Pulse Animation (1-cycle, non-distracting) */
+.status-emergency {
+  animation: emergencyPulse 1.8s ease-out 1;
+}
+
+@keyframes emergencyPulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+  70% { box-shadow: 0 0 0 4px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
 /* Responsive Media Queries */
 @media (max-width: 1023px) {
   .portal-sidebar {
@@ -628,5 +658,15 @@ body {
 
   .mobile-menu-btn {
     display: block;
+  }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
