@@ -13,7 +13,7 @@
   <meta name="theme-color" content="#ffffff">
 
   <!-- Central Auth Router -->
-  <script src="js/auth-router.js?v=2.5.0"></script>
+  <script src="js/auth-router.js?v=2.6.0"></script>
 
   <style>
     #lang-toggle-container, .lang-toggle, .lang-toggle-fixed {
@@ -255,12 +255,15 @@
       letter-spacing: 0.03em;
       border-bottom: 1px solid var(--border-light);
       padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     /* Metric Grid */
     .metric-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 1rem;
       margin-bottom: 1.25rem;
     }
@@ -273,7 +276,7 @@
     }
 
     .metric-box-title {
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       font-weight: 700;
       color: var(--text-light);
       text-transform: uppercase;
@@ -412,6 +415,42 @@
       background: #e2e8f0;
     }
 
+    /* Activity Timeline */
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      position: relative;
+      padding-left: 1.25rem;
+      border-left: 2px solid var(--border-color);
+      margin: 0.5rem 0 0 0.5rem;
+    }
+
+    .timeline-item {
+      position: relative;
+      font-size: 0.83rem;
+    }
+
+    .timeline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      position: absolute;
+      left: calc(-1.25rem - 5px);
+      top: 4px;
+    }
+
+    .timeline-title {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .timeline-time {
+      font-size: 0.72rem;
+      color: var(--text-light);
+    }
+
     /* Toast */
     .toast-box {
       padding: 0.75rem 1rem;
@@ -470,7 +509,9 @@
         <button class="nav-item active" data-pane="pane-dashboard" onclick="window.ComplaintService.showPane('pane-dashboard')">Dashboard</button>
         <button class="nav-item" data-pane="pane-complaints" onclick="window.ComplaintService.showPane('pane-complaints')">Complaints Queue</button>
         <button class="nav-item" data-pane="pane-assigned" onclick="window.ComplaintService.showPane('pane-assigned')">Assigned Cases</button>
+        <button class="nav-item" data-pane="pane-reports" onclick="window.ComplaintService.showPane('pane-reports')">Operational Reports</button>
         <button class="nav-item" data-pane="pane-notifications" onclick="window.ComplaintService.showPane('pane-notifications')">Notifications</button>
+        <button class="nav-item" data-pane="pane-profile" onclick="window.ComplaintService.showPane('pane-profile')">Profile & Security</button>
       </nav>
       <div class="sidebar-footer">
         <div>Department of Municipal Administration</div>
@@ -511,6 +552,10 @@
               <div class="metric-box-value" id="kpi-pending" style="color: #d97706;">0</div>
             </div>
             <div class="metric-box">
+              <div class="metric-box-title">Assigned</div>
+              <div class="metric-box-value" id="kpi-assigned" style="color: #2563eb;">0</div>
+            </div>
+            <div class="metric-box">
               <div class="metric-box-title">In Progress</div>
               <div class="metric-box-value" id="kpi-progress" style="color: #7e22ce;">0</div>
             </div>
@@ -519,7 +564,11 @@
               <div class="metric-box-value" id="kpi-resolved" style="color: #059669;">0</div>
             </div>
             <div class="metric-box">
-              <div class="metric-box-title">Emergency / High Priority</div>
+              <div class="metric-box-title">Rejected Cases</div>
+              <div class="metric-box-value" id="kpi-rejected" style="color: #475569;">0</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-box-title">Emergency Priority</div>
               <div class="metric-box-value" id="kpi-emergency" style="color: #dc2626;">0</div>
             </div>
           </div>
@@ -565,7 +614,7 @@
         <!-- ============================================== -->
         <section id="pane-complaints" class="tab-pane">
           <div class="filter-bar">
-            <input type="text" id="filter-search-input" class="form-input" placeholder="Search title, description, address..." style="flex: 1; min-width: 200px;" oninput="window.ComplaintService.applyFilters()" />
+            <input type="text" id="filter-search-input" class="form-input" placeholder="Search title, description, address..." style="flex: 1; min-width: 180px;" oninput="window.ComplaintService.applyFilters()" />
             
             <select id="filter-status-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
               <option value="">All Statuses</option>
@@ -596,6 +645,12 @@
               <option value="emergency">Emergency Priority</option>
               <option value="high">High Priority</option>
               <option value="normal">Normal Priority</option>
+            </select>
+
+            <select id="filter-assignment-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
+              <option value="">All Assignments</option>
+              <option value="assigned">Assigned Cases Only</option>
+              <option value="unassigned">Unassigned Cases Only</option>
             </select>
 
             <button class="btn-secondary" onclick="window.ComplaintService.resetFilters()">Reset Filters</button>
@@ -657,7 +712,79 @@
         </section>
 
         <!-- ============================================== -->
-        <!-- PANE 4: CASE INSPECTION & DISPATCH DETAILS     -->
+        <!-- PANE 4: OPERATIONAL REPORTS & ANALYTICS        -->
+        <!-- ============================================== -->
+        <section id="pane-reports" class="tab-pane">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            
+            <div class="content-card">
+              <div class="card-title">Complaints by Category Summary</div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Total Cases</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reports-category-table-body">
+                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);">Loading categories...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="content-card">
+              <div class="card-title">Complaints by Lifecycle Status</div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Total Cases</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reports-status-table-body">
+                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);">Loading statuses...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            
+            <div class="content-card">
+              <div class="card-title">Resolution Rate Performance</div>
+              <div style="padding: 1rem; text-align: center;">
+                <div style="font-size: 2.2rem; font-weight: 800; color: #059669;" id="reports-resolution-rate">0%</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">Percentage of total complaints resolved or verified.</div>
+              </div>
+            </div>
+
+            <div class="content-card">
+              <div class="card-title">Officer Workload & Delegation Summary</div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Officer Name</th>
+                      <th>Assigned Cases</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reports-workload-table-body">
+                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);">Loading workload...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- PANE 5: CASE INSPECTION & DISPATCH DETAILS     -->
         <!-- ============================================== -->
         <section id="pane-details" class="tab-pane">
           <button class="btn-secondary" style="margin-bottom: 1rem;" onclick="window.ComplaintService.showPane('pane-complaints')">Back to Complaints Queue</button>
@@ -688,21 +815,37 @@
                 </div>
               </div>
 
+              <!-- AI Auto-Triage Box -->
+              <div class="content-card">
+                <div class="card-title">Automated AI Triage Analysis</div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
+                  <div>AI Category: <strong id="detail-ai-category" style="color: var(--text-main);">Roads</strong></div>
+                  <div>AI Priority Level: <strong id="detail-ai-priority" style="color: var(--primary);">Normal</strong></div>
+                  <div>Recommended Department: <strong id="detail-ai-dept" style="color: var(--text-main);">Municipal Engineering</strong></div>
+                  <div style="border-top: 1px solid var(--border-light); padding-top: 0.5rem; margin-top: 0.25rem;">
+                    <div style="font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">AI Reasoning Summary</div>
+                    <p id="detail-ai-summary" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.45; margin-top: 0.2rem;">Loading summary...</p>
+                  </div>
+                </div>
+              </div>
+
               <!-- Evidence Photo Viewer -->
               <div class="content-card">
                 <div class="card-title">Evidence Photo Proof</div>
                 <div id="detail-photo-wrapper" style="min-height: 180px; max-height: 350px; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                   <img id="detail-photo-img" src="" alt="Evidence Photo" style="width: 100%; height: 100%; max-height: 350px; object-fit: contain; display: none; cursor: pointer;" onclick="window.open(this.src, '_blank')" />
-                  <div id="detail-photo-fallback" style="padding: 2.5rem; text-align: center; color: var(--text-light); font-size: 0.85rem;">
+                  <div id="detail-photo-fallback" style="padding: 2rem; text-align: center; color: var(--text-light); font-size: 0.85rem;">
                     No evidence photo attached by citizen.
                   </div>
                 </div>
               </div>
 
-              <!-- AI Triage Summary -->
+              <!-- Case Activity Timeline -->
               <div class="content-card">
-                <div class="card-title">Automated AI Triage Summary</div>
-                <p id="detail-ai-summary" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.5;">Loading summary...</p>
+                <div class="card-title">Case Activity Timeline</div>
+                <div id="detail-timeline-list" class="timeline-list">
+                  <div style="color: var(--text-muted); font-size: 0.82rem;">Loading activity timeline...</div>
+                </div>
               </div>
 
             </div>
@@ -747,7 +890,7 @@
               </div>
 
               <!-- Authority-Citizen Live Communication -->
-              <div class="content-card" style="display: flex; flex-direction: column; height: 320px;">
+              <div class="content-card" style="display: flex; flex-direction: column; height: 350px;">
                 <div class="card-title">Authority-Citizen Communication Thread</div>
                 
                 <div id="detail-chat-thread" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 0.75rem;">
@@ -766,17 +909,38 @@
         </section>
 
         <!-- ============================================== -->
-        <!-- PANE 5: NOTIFICATIONS                          -->
+        <!-- PANE 6: NOTIFICATIONS                          -->
         <!-- ============================================== -->
         <section id="pane-notifications" class="tab-pane">
           <div class="content-card">
-            <div class="card-title">System & Operational Notifications</div>
+            <div class="card-title">
+              <span>System & Operational Notifications</span>
+              <button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="window.ComplaintService.markAllNotificationsRead()">Mark All as Read</button>
+            </div>
             <div id="notifications-list" style="display: flex; flex-direction: column; gap: 0.6rem;">
               <div style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading notifications...</div>
             </div>
           </div>
         </section>
 
+        <!-- ============================================== -->
+        <!-- PANE 7: PROFILE & SECURITY                     -->
+        <!-- ============================================== -->
+        <section id="pane-profile" class="tab-pane">
+          <div class="content-card" style="max-width: 600px;">
+            <div class="card-title">Authority Officer Profile</div>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.9rem;">
+              <div>Full Name: <strong id="profile-full-name" style="color: var(--text-main);">Loading...</strong></div>
+              <div>Email Address: <span id="profile-email" style="color: var(--text-muted);">Loading...</span></div>
+              <div>Assigned Role: <span id="profile-role" class="status-badge status-assigned">AUTHORITY</span></div>
+              <div>Department / Division: <span id="profile-dept" style="font-weight: 600;">Municipal Administration</span></div>
+              <div>Jurisdiction Zone: <span id="profile-zone" style="font-weight: 600;">Tamil Nadu Central Zone</span></div>
+            </div>
+
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+              <button class="btn-logout" style="padding: 0.5rem 1rem;" onclick="logoutUser()">Logout of Authority Session</button>
+            </div>
+          </div>
         </section>
 
       </div>
@@ -787,10 +951,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Client Script files -->
-  <script src="js/auth.js?v=2.5.0"></script>
-  <script src="js/api.js?v=2.5.0"></script>
-  <script src="js/notifications.js?v=2.5.0"></script>
-  <script src="js/admin.js?v=2.5.0"></script>
+  <script src="js/auth.js?v=2.6.0"></script>
+  <script src="js/api.js?v=2.6.0"></script>
+  <script src="js/notifications.js?v=2.6.0"></script>
+  <script src="js/admin.js?v=2.6.0"></script>
 
 </body>
 </html>

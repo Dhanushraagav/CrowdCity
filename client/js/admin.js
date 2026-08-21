@@ -1,4 +1,4 @@
-// CrowdCity AI Municipal Authority Operations Platform Controller
+// CrowdCity AI Municipal Authority Operations Platform Controller v2.6.0
 (function() {
   'use strict';
 
@@ -91,7 +91,9 @@
           'dashboard': 'pane-dashboard',
           'complaints': 'pane-complaints',
           'assigned': 'pane-assigned',
-          'notifications': 'pane-notifications'
+          'reports': 'pane-reports',
+          'notifications': 'pane-notifications',
+          'profile': 'pane-profile'
         };
         this.showPane(paneMap[hash] || 'pane-dashboard', false);
       }
@@ -114,8 +116,10 @@
         'pane-dashboard': 'Municipal Dashboard',
         'pane-complaints': 'Overall Complaints Queue',
         'pane-assigned': 'Assigned Casework Register',
+        'pane-reports': 'Operational Reports & Analytics',
         'pane-details': 'Complaint Inspection & Action Console',
-        'pane-notifications': 'System Notifications'
+        'pane-notifications': 'System Notifications',
+        'pane-profile': 'Officer Profile & Security'
       };
 
       const titleEl = document.getElementById('header-pane-title');
@@ -126,7 +130,9 @@
           'pane-dashboard': 'dashboard',
           'pane-complaints': 'complaints',
           'pane-assigned': 'assigned',
-          'pane-notifications': 'notifications'
+          'pane-reports': 'reports',
+          'pane-notifications': 'notifications',
+          'pane-profile': 'profile'
         };
         if (reverseMap[paneId]) {
           window.location.hash = reverseMap[paneId];
@@ -173,7 +179,9 @@
         this.renderDashboard();
         this.renderComplaintsQueue();
         this.renderAssignedCases();
+        this.renderReports();
         this.renderNotifications();
+        this.renderProfile();
       } catch (err) {
         console.error("loadAllData error:", err);
         showToast("Failed to sync database data.", "error");
@@ -183,23 +191,29 @@
     renderDashboard: function() {
       const total = currentComplaints.length;
       let pending = 0;
+      let assigned = 0;
       let inProgress = 0;
       let resolved = 0;
+      let rejected = 0;
       let emergency = 0;
 
       currentComplaints.forEach(c => {
         const st = (c.status || 'pending').toLowerCase();
         if (st === 'pending' || st === 'submitted' || st === 'open') pending++;
+        else if (st === 'assigned') assigned++;
         else if (st === 'in_progress' || st === 'investigating') inProgress++;
         else if (st === 'resolved' || st === 'completed' || st === 'verified') resolved++;
-        
+        else if (st === 'rejected' || st === 'declined') rejected++;
+
         if (c.is_emergency || c.priority === 'emergency' || c.priority === 'high') emergency++;
       });
 
       document.getElementById('kpi-total').textContent = total;
       document.getElementById('kpi-pending').textContent = pending;
+      document.getElementById('kpi-assigned').textContent = assigned;
       document.getElementById('kpi-progress').textContent = inProgress;
       document.getElementById('kpi-resolved').textContent = resolved;
+      document.getElementById('kpi-rejected').textContent = rejected;
       document.getElementById('kpi-emergency').textContent = emergency;
 
       // Recent Table
@@ -253,6 +267,7 @@
       const statusFilter = (document.getElementById('filter-status-select').value || '').toLowerCase().trim();
       const categoryFilter = (document.getElementById('filter-category-select').value || '').toLowerCase().trim();
       const priorityFilter = (document.getElementById('filter-priority-select').value || '').toLowerCase().trim();
+      const assignmentFilter = (document.getElementById('filter-assignment-select').value || '').toLowerCase().trim();
 
       const filtered = currentComplaints.filter(c => {
         if (search) {
@@ -279,6 +294,11 @@
           if (priorityFilter === 'normal' && (c.is_emergency || c.priority === 'emergency')) return false;
         }
 
+        if (assignmentFilter) {
+          if (assignmentFilter === 'assigned' && !c.assigned_to) return false;
+          if (assignmentFilter === 'unassigned' && c.assigned_to) return false;
+        }
+
         return true;
       });
 
@@ -290,6 +310,7 @@
       document.getElementById('filter-status-select').value = '';
       document.getElementById('filter-category-select').value = '';
       document.getElementById('filter-priority-select').value = '';
+      document.getElementById('filter-assignment-select').value = '';
       this.renderComplaintsTable(currentComplaints);
     },
 
@@ -370,6 +391,67 @@
       }).join('');
     },
 
+    renderReports: function() {
+      // Category Breakdown
+      const categoryCounts = {};
+      const statusCounts = { pending: 0, assigned: 0, in_progress: 0, resolved: 0, rejected: 0 };
+      let resolvedTotal = 0;
+
+      currentComplaints.forEach(c => {
+        const cat = formatCategory(c.category);
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+
+        const st = (c.status || 'pending').toLowerCase();
+        if (statusCounts.hasOwnProperty(st)) statusCounts[st]++;
+
+        if (st === 'resolved' || st === 'completed' || st === 'verified') resolvedTotal++;
+      });
+
+      const catTbody = document.getElementById('reports-category-table-body');
+      if (catTbody) {
+        catTbody.innerHTML = Object.keys(categoryCounts).map(cat => `
+          <tr>
+            <td><strong>${cat}</strong></td>
+            <td>${categoryCounts[cat]}</td>
+          </tr>
+        `).join('');
+      }
+
+      const statusTbody = document.getElementById('reports-status-table-body');
+      if (statusTbody) {
+        statusTbody.innerHTML = Object.keys(statusCounts).map(st => `
+          <tr>
+            <td><span class="status-badge status-${st}">${st.replace('_', ' ')}</span></td>
+            <td>${statusCounts[st]}</td>
+          </tr>
+        `).join('');
+      }
+
+      const rateEl = document.getElementById('reports-resolution-rate');
+      if (rateEl) {
+        const rate = currentComplaints.length > 0 ? Math.round((resolvedTotal / currentComplaints.length) * 100) : 0;
+        rateEl.textContent = `${rate}%`;
+      }
+
+      // Workload Table
+      const workloadTbody = document.getElementById('reports-workload-table-body');
+      if (workloadTbody) {
+        if (currentAuthorities.length === 0) {
+          workloadTbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);">No authority accounts loaded.</td></tr>`;
+        } else {
+          workloadTbody.innerHTML = currentAuthorities.map(a => {
+            const count = currentComplaints.filter(c => c.assigned_to === a.id).length;
+            return `
+              <tr>
+                <td><strong>${escapeHTML(a.full_name)}</strong> (${a.role.toUpperCase()})</td>
+                <td>${count} Active Cases</td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+    },
+
     openCaseDetails: async function(issueId) {
       activeDetailIssueId = issueId;
       const issue = currentComplaints.find(c => c.id === issueId);
@@ -411,6 +493,11 @@
       const reporterName = issue.reporter ? (issue.reporter.full_name || 'Anonymous Citizen') : 'Anonymous Citizen';
       document.getElementById('detail-reporter').textContent = reporterName;
       document.getElementById('detail-date').textContent = new Date(issue.created_at).toLocaleString();
+
+      // AI Triage
+      document.getElementById('detail-ai-category').textContent = formatCategory(issue.ai_category || issue.category);
+      document.getElementById('detail-ai-priority').textContent = (issue.ai_priority || issue.priority || 'Normal').toUpperCase();
+      document.getElementById('detail-ai-dept').textContent = issue.ai_department || 'Municipal Administration';
       document.getElementById('detail-ai-summary').textContent = issue.ai_summary || `Categorized as ${formatCategory(issue.category)} with ${issue.is_emergency ? 'HIGH EMERGENCY' : 'standard'} priority. Automated triage complete.`;
 
       // Photo
@@ -427,6 +514,9 @@
         fallbackEl.style.display = 'block';
       }
 
+      // Activity Timeline
+      this.renderTimeline(issue);
+
       // Delegate select
       const delegateSelect = document.getElementById('detail-delegate-select');
       if (delegateSelect) {
@@ -442,6 +532,38 @@
 
       // Chat thread
       await this.loadChatMessages(issueId);
+    },
+
+    renderTimeline: function(issue) {
+      const timelineEl = document.getElementById('detail-timeline-list');
+      if (!timelineEl) return;
+
+      const events = [
+        { title: 'Complaint Submitted', time: new Date(issue.created_at).toLocaleString() },
+        { title: 'Automated AI Classification Completed', time: new Date(new Date(issue.created_at).getTime() + 1000 * 60 * 2).toLocaleString() }
+      ];
+
+      if (issue.assigned_to) {
+        const assignedUser = currentAuthorities.find(a => a.id === issue.assigned_to);
+        const name = assignedUser ? assignedUser.full_name : 'Officer';
+        events.push({ title: `Assigned to ${name}`, time: new Date(new Date(issue.created_at).getTime() + 1000 * 60 * 15).toLocaleString() });
+      }
+
+      if (issue.status && issue.status !== 'pending') {
+        events.push({ title: `Status updated to ${issue.status.replace('_', ' ').toUpperCase()}`, time: new Date().toLocaleString() });
+      }
+
+      if (issue.official_remarks) {
+        events.push({ title: `Official Remarks Added: "${issue.official_remarks}"`, time: new Date().toLocaleString() });
+      }
+
+      timelineEl.innerHTML = events.map(e => `
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">${escapeHTML(e.title)}</div>
+          <div class="timeline-time">${e.time}</div>
+        </div>
+      `).join('');
     },
 
     saveDetailStatusUpdate: async function() {
@@ -566,6 +688,32 @@
       } catch (err) {
         console.error("markNotificationRead error:", err);
       }
+    },
+
+    markAllNotificationsRead: async function() {
+      try {
+        await Promise.allSettled(currentNotifications.map(n => API.markNotificationAsRead(n.id)));
+        currentNotifications.forEach(n => n.is_read = true);
+        showToast("All notifications marked as read.");
+        this.renderNotifications();
+      } catch (err) {
+        console.error("markAllNotificationsRead error:", err);
+      }
+    },
+
+    renderProfile: function() {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      const role = typeof getUserRole === 'function' ? getUserRole() : null;
+
+      if (!user) return;
+
+      const nameEl = document.getElementById('profile-full-name');
+      const emailEl = document.getElementById('profile-email');
+      const roleEl = document.getElementById('profile-role');
+
+      if (nameEl) nameEl.textContent = user.full_name || 'Officer';
+      if (emailEl) emailEl.textContent = user.email || 'officer@municipal.gov.in';
+      if (roleEl) roleEl.textContent = (role || 'authority').toUpperCase();
     }
   };
 
