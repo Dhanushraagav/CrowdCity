@@ -511,7 +511,6 @@
         <button class="nav-item" data-pane="pane-assigned" onclick="window.ComplaintService.showPane('pane-assigned')">Assigned Cases</button>
         <button class="nav-item" data-pane="pane-reports" onclick="window.ComplaintService.showPane('pane-reports')">Operational Reports</button>
         <button class="nav-item" data-pane="pane-notifications" onclick="window.ComplaintService.showPane('pane-notifications')">Notifications</button>
-        <button class="nav-item" data-pane="pane-profile" onclick="window.ComplaintService.showPane('pane-profile')">Profile & Security</button>
       </nav>
       <div class="sidebar-footer">
         <div>Department of Municipal Administration</div>
@@ -930,24 +929,6 @@
           </div>
         </section>
 
-        <!-- ============================================== -->
-        <!-- PANE 7: PROFILE & SECURITY                     -->
-        <!-- ============================================== -->
-        <section id="pane-profile" class="tab-pane">
-          <div class="content-card" style="max-width: 600px;">
-            <div class="card-title">Authority Officer Profile</div>
-            <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.9rem;">
-              <div>Full Name: <strong id="profile-full-name" style="color: var(--text-main);">Loading...</strong></div>
-              <div>Email Address: <span id="profile-email" style="color: var(--text-muted);">Loading...</span></div>
-              <div>Assigned Role: <span id="profile-role" class="status-badge status-assigned">AUTHORITY</span></div>
-              <div>Department / Division: <span id="profile-dept" style="font-weight: 600;">Municipal Administration</span></div>
-              <div>Jurisdiction Zone: <span id="profile-zone" style="font-weight: 600;">Tamil Nadu Central Zone</span></div>
-            </div>
-
-            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-              <button class="btn-logout" style="padding: 0.5rem 1rem;" onclick="logoutUser()">Logout of Authority Session</button>
-            </div>
-          </div>
         </section>
 
       </div>
