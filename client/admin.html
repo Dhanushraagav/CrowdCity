@@ -881,8 +881,12 @@
                   </div>
 
                   <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Resolution Completion Photo URL (Optional)</label>
-                    <input type="url" id="detail-proof-photo" class="form-input" placeholder="https://example.com/resolved_photo.jpg" style="width: 100%;" />
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Upload Resolution Proof Photo</label>
+                    <input type="file" id="detail-proof-file" class="form-input" accept="image/*" style="width: 100%; font-size: 0.82rem;" onchange="window.ComplaintService.handleProofPhotoSelect(event)" />
+                    <div id="detail-proof-preview-wrapper" style="margin-top: 0.5rem; display: none;">
+                      <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.25rem;">Proof Image Preview:</div>
+                      <img id="detail-proof-preview-img" src="" alt="Proof Photo Preview" style="max-height: 140px; border-radius: 4px; border: 1px solid var(--border-color); object-fit: contain;" />
+                    </div>
                   </div>
 
                   <button class="btn-action" style="width: 100%; padding: 0.6rem;" onclick="window.ComplaintService.saveDetailStatusUpdate()">Save Status & Remarks</button>

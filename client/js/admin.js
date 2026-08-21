@@ -6,6 +6,7 @@
   let currentAuthorities = [];
   let currentNotifications = [];
   let activeDetailIssueId = null;
+  let activeProofPhotoUrl = null;
 
   // ----------------------------------------------------
   // HELPER: Toast Banner
@@ -528,10 +529,39 @@
       // Status & remarks
       document.getElementById('detail-status-select').value = issue.status || 'pending';
       document.getElementById('detail-remarks-input').value = issue.official_remarks || '';
-      document.getElementById('detail-proof-photo').value = issue.completion_photo_url || '';
+      
+      activeProofPhotoUrl = issue.completion_photo_url || null;
+      const fileInput = document.getElementById('detail-proof-file');
+      if (fileInput) fileInput.value = '';
+
+      const proofWrapper = document.getElementById('detail-proof-preview-wrapper');
+      const proofImg = document.getElementById('detail-proof-preview-img');
+      if (activeProofPhotoUrl && proofWrapper && proofImg) {
+        proofImg.src = activeProofPhotoUrl;
+        proofWrapper.style.display = 'block';
+      } else if (proofWrapper) {
+        proofWrapper.style.display = 'none';
+      }
 
       // Chat thread
       await this.loadChatMessages(issueId);
+    },
+
+    handleProofPhotoSelect: function(e) {
+      const file = e.target.files ? e.target.files[0] : null;
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        activeProofPhotoUrl = evt.target.result;
+        const wrapper = document.getElementById('detail-proof-preview-wrapper');
+        const img = document.getElementById('detail-proof-preview-img');
+        if (wrapper && img) {
+          img.src = activeProofPhotoUrl;
+          wrapper.style.display = 'block';
+        }
+      };
+      reader.readAsDataURL(file);
     },
 
     renderTimeline: function(issue) {
@@ -571,7 +601,6 @@
       const issueId = activeDetailIssueId;
       const newStatus = document.getElementById('detail-status-select').value;
       const remarks = document.getElementById('detail-remarks-input').value.trim();
-      const proofPhoto = document.getElementById('detail-proof-photo').value.trim();
       const delegateId = document.getElementById('detail-delegate-select').value;
 
       try {
@@ -584,7 +613,7 @@
         const updateData = {
           status: newStatus,
           official_remarks: remarks,
-          completion_photo_url: proofPhoto
+          completion_photo_url: activeProofPhotoUrl
         };
 
         const res = await API.updateIssueStatus(issueId, updateData);
