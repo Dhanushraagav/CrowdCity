@@ -106,11 +106,12 @@
       });
     },
 
-    handleInitialHash: function() {
+    handleInitialHash: async function() {
       const hash = window.location.hash.replace('#', '') || 'dashboard';
       if (hash.startsWith('details?id=')) {
         const issueId = hash.split('details?id=')[1];
-        this.openCaseDetails(issueId);
+        this.showPane('pane-details', false);
+        await this.openCaseDetails(issueId);
       } else {
         const paneMap = {
           'dashboard': 'pane-dashboard',
@@ -695,16 +696,38 @@
       }
     },
 
-    openCaseDetails: async function(issueId) {
-      activeDetailIssueId = issueId;
-      const issue = currentComplaints.find(c => c.id === issueId);
+    openCaseDetails: async function(rawIssueId) {
+      if (!rawIssueId) return;
+
+      const cleanId = String(rawIssueId).replace(/^-+/, '').trim();
+      let issue = currentComplaints.find(c => c.id === cleanId || c.id === rawIssueId || (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id))));
+
+      if (!issue && currentComplaints.length === 0) {
+        await this.loadAllData();
+        issue = currentComplaints.find(c => c.id === cleanId || c.id === rawIssueId || (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id))));
+      }
+
+      if (!issue && cleanId) {
+        try {
+          const res = await API.request(`/issues/${cleanId}`, { method: 'GET' });
+          if (res && res.data) issue = res.data;
+          else if (res && !res.error && res.id) issue = res;
+        } catch (e) {
+          console.warn("Direct issue fetch fallback error:", e);
+        }
+      }
+
       if (!issue) {
         showToast("Complaint record not found.", "error");
+        this.showPane('pane-complaints');
         return;
       }
 
+      activeDetailIssueId = issue.id;
       this.showPane('pane-details', false);
-      window.location.hash = `details?id=${issueId}`;
+      if (!window.location.hash.includes(issue.id)) {
+        window.location.hash = `details?id=${issue.id}`;
+      }
 
       document.getElementById('detail-title').textContent = issue.title || 'Complaint Details';
       document.getElementById('detail-ticket-id').textContent = `Ticket #${(issue.id || '').substring(0, 8)}`;
