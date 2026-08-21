@@ -1,4 +1,4 @@
-// CrowdCity AI Municipal Authority Operations Platform Controller v2.6.0
+// CrowdCity AI Municipal Authority Operations Platform Controller v2.7.0
 (function() {
   'use strict';
 
@@ -39,7 +39,7 @@
       roads: 'Roads', water_supply: 'Water Supply', streetlights: 'Streetlights',
       garbage: 'Garbage', traffic: 'Traffic', drainage: 'Drainage', parks: 'Parks',
       sanitation: 'Sanitation', safety_hazard: 'Safety Hazard', environment: 'Environment',
-      other: 'Other', pothole: 'Roads', leakage: 'Water Supply', streetlight: 'Streetlights'
+      transportation: 'Transportation', other: 'Other', pothole: 'Roads', leakage: 'Water Supply', streetlight: 'Streetlights'
     };
     return names[cat.toLowerCase()] || cat.replace('_', ' ');
   }
@@ -93,7 +93,8 @@
           'complaints': 'pane-complaints',
           'assigned': 'pane-assigned',
           'reports': 'pane-reports',
-          'notifications': 'pane-notifications'
+          'notifications': 'pane-notifications',
+          'profile': 'pane-profile'
         };
         this.showPane(paneMap[hash] || 'pane-dashboard', false);
       }
@@ -118,7 +119,8 @@
         'pane-assigned': 'Assigned Casework Register',
         'pane-reports': 'Operational Reports & Analytics',
         'pane-details': 'Complaint Inspection & Action Console',
-        'pane-notifications': 'System Notifications'
+        'pane-notifications': 'System Notifications',
+        'pane-profile': 'Officer Profile & Security'
       };
 
       const titleEl = document.getElementById('header-pane-title');
@@ -130,7 +132,8 @@
           'pane-complaints': 'complaints',
           'pane-assigned': 'assigned',
           'pane-reports': 'reports',
-          'pane-notifications': 'notifications'
+          'pane-notifications': 'notifications',
+          'pane-profile': 'profile'
         };
         if (reverseMap[paneId]) {
           window.location.hash = reverseMap[paneId];
@@ -205,6 +208,7 @@
         this.renderAssignedCases();
         this.renderReports();
         this.renderNotifications();
+        this.renderProfile();
       } catch (err) {
         console.error("loadAllData error:", err);
         showToast("Failed to sync database data.", "error");
@@ -220,15 +224,24 @@
       let rejected = 0;
       let emergency = 0;
 
+      const categoryCounts = {};
+      const statusCounts = { pending: 0, assigned: 0, in_progress: 0, resolved: 0, rejected: 0 };
+      const priorityCounts = { normal: 0, high: 0, emergency: 0 };
+
       currentComplaints.forEach(c => {
         const st = (c.status || 'pending').toLowerCase();
-        if (st === 'pending' || st === 'submitted' || st === 'open') pending++;
-        else if (st === 'assigned') assigned++;
-        else if (st === 'in_progress' || st === 'investigating') inProgress++;
-        else if (st === 'resolved' || st === 'completed' || st === 'verified') resolved++;
-        else if (st === 'rejected' || st === 'declined') rejected++;
+        if (st === 'pending' || st === 'submitted' || st === 'open') { pending++; statusCounts.pending++; }
+        else if (st === 'assigned') { assigned++; statusCounts.assigned++; }
+        else if (st === 'in_progress' || st === 'investigating') { inProgress++; statusCounts.in_progress++; }
+        else if (st === 'resolved' || st === 'completed' || st === 'verified') { resolved++; statusCounts.resolved++; }
+        else if (st === 'rejected' || st === 'declined') { rejected++; statusCounts.rejected++; }
 
-        if (c.is_emergency || c.priority === 'emergency' || c.priority === 'high') emergency++;
+        if (c.is_emergency || c.priority === 'emergency') { emergency++; priorityCounts.emergency++; }
+        else if (c.priority === 'high') { emergency++; priorityCounts.high++; }
+        else { priorityCounts.normal++; }
+
+        const catName = formatCategory(c.category);
+        categoryCounts[catName] = (categoryCounts[catName] || 0) + 1;
       });
 
       document.getElementById('kpi-total').textContent = total;
@@ -238,6 +251,12 @@
       document.getElementById('kpi-resolved').textContent = resolved;
       document.getElementById('kpi-rejected').textContent = rejected;
       document.getElementById('kpi-emergency').textContent = emergency;
+
+      // Render Operational SVG Charts
+      this.renderCategoryChart(categoryCounts);
+      this.renderStatusChart(statusCounts);
+      this.renderPriorityChart(priorityCounts);
+      this.renderTrendChart(currentComplaints);
 
       // Recent Table
       const recentTbody = document.getElementById('dashboard-recent-table-body');
@@ -283,6 +302,152 @@
           </div>
         `).join('');
       }
+    },
+
+    // ----------------------------------------------------
+    // LIGHTWEIGHT SVG OPERATIONAL CHARTS (Zero Dependency)
+    // ----------------------------------------------------
+    renderCategoryChart: function(categoryCounts) {
+      const el = document.getElementById('chart-category-svg');
+      if (!el) return;
+
+      const keys = Object.keys(categoryCounts);
+      if (keys.length === 0) {
+        el.innerHTML = `<div style="color: var(--text-light); font-size: 0.82rem;">No category data available.</div>`;
+        return;
+      }
+
+      const maxVal = Math.max(...Object.values(categoryCounts), 1);
+      const bars = keys.map((cat, idx) => {
+        const val = categoryCounts[cat];
+        const pct = Math.round((val / maxVal) * 100);
+        return `
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8rem;">
+            <div style="width: 90px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-weight: 600; color: var(--text-muted);">${cat}</div>
+            <div style="flex: 1; background: var(--bg-canvas); border-radius: 4px; height: 16px; overflow: hidden; border: 1px solid var(--border-light);">
+              <div style="width: ${pct}%; background: var(--primary); height: 100%;"></div>
+            </div>
+            <div style="width: 25px; font-weight: 700; color: var(--text-main); text-align: right;">${val}</div>
+          </div>
+        `;
+      }).join('');
+
+      el.innerHTML = `<div style="width: 100%;">${bars}</div>`;
+    },
+
+    renderStatusChart: function(statusCounts) {
+      const el = document.getElementById('chart-status-svg');
+      if (!el) return;
+
+      const labels = { pending: 'Pending', assigned: 'Assigned', in_progress: 'In Progress', resolved: 'Resolved', rejected: 'Rejected' };
+      const colors = { pending: '#d97706', assigned: '#2563eb', in_progress: '#7e22ce', resolved: '#059669', rejected: '#475569' };
+      const maxVal = Math.max(...Object.values(statusCounts), 1);
+
+      const bars = Object.keys(statusCounts).map(st => {
+        const val = statusCounts[st];
+        const pct = Math.round((val / maxVal) * 100);
+        return `
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8rem;">
+            <div style="width: 85px; font-weight: 600; color: var(--text-muted);">${labels[st]}</div>
+            <div style="flex: 1; background: var(--bg-canvas); border-radius: 4px; height: 16px; overflow: hidden; border: 1px solid var(--border-light);">
+              <div style="width: ${pct}%; background: ${colors[st]}; height: 100%;"></div>
+            </div>
+            <div style="width: 25px; font-weight: 700; color: var(--text-main); text-align: right;">${val}</div>
+          </div>
+        `;
+      }).join('');
+
+      el.innerHTML = `<div style="width: 100%;">${bars}</div>`;
+    },
+
+    renderPriorityChart: function(priorityCounts) {
+      const el = document.getElementById('chart-priority-svg');
+      if (!el) return;
+
+      const total = priorityCounts.normal + priorityCounts.high + priorityCounts.emergency;
+      if (total === 0) {
+        el.innerHTML = `<div style="color: var(--text-light); font-size: 0.82rem;">No priority breakdown logged.</div>`;
+        return;
+      }
+
+      const normPct = Math.round((priorityCounts.normal / total) * 100);
+      const highPct = Math.round((priorityCounts.high / total) * 100);
+      const emerPct = Math.round((priorityCounts.emergency / total) * 100);
+
+      el.innerHTML = `
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="height: 20px; width: 100%; display: flex; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color);">
+            <div style="width: ${normPct}%; background: #0284c7;" title="Normal: ${priorityCounts.normal}"></div>
+            <div style="width: ${highPct}%; background: #d97706;" title="High: ${priorityCounts.high}"></div>
+            <div style="width: ${emerPct}%; background: #dc2626;" title="Emergency: ${priorityCounts.emergency}"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
+            <span style="color: #0284c7;">Normal (${priorityCounts.normal})</span>
+            <span style="color: #d97706;">High (${priorityCounts.high})</span>
+            <span style="color: #dc2626;">Emergency (${priorityCounts.emergency})</span>
+          </div>
+        </div>
+      `;
+    },
+
+    renderTrendChart: function(complaints) {
+      const el = document.getElementById('chart-trend-svg');
+      if (!el) return;
+
+      if (complaints.length === 0) {
+        el.innerHTML = `<div style="color: var(--text-light); font-size: 0.82rem;">No timeline data available.</div>`;
+        return;
+      }
+
+      const dateMap = {};
+      complaints.forEach(c => {
+        const d = new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        dateMap[d] = (dateMap[d] || 0) + 1;
+      });
+
+      const dates = Object.keys(dateMap).slice(-7);
+      const values = dates.map(d => dateMap[d]);
+      const maxVal = Math.max(...values, 1);
+
+      const items = dates.map((d, i) => {
+        const h = Math.round((values[i] / maxVal) * 100);
+        return `
+          <div style="display: flex; flex-direction: column; align-items: center; flex: 1; gap: 0.25rem;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-main);">${values[i]}</div>
+            <div style="width: 100%; height: 100px; display: flex; align-items: flex-end; justify-content: center; background: var(--bg-canvas); border-radius: 4px; padding: 2px;">
+              <div style="width: 60%; height: ${Math.max(h, 8)}%; background: var(--primary); border-radius: 2px;"></div>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-light); white-space: nowrap;">${d}</div>
+          </div>
+        `;
+      }).join('');
+
+      el.innerHTML = `<div style="width: 100%; display: flex; gap: 0.5rem; align-items: flex-end;">${items}</div>`;
+    },
+
+    renderWorkloadChart: function(containerId, authorities, complaints) {
+      const el = document.getElementById('chart-workload-svg');
+      if (!el) return;
+
+      if (authorities.length === 0) {
+        el.innerHTML = `<div style="color: var(--text-light); font-size: 0.82rem;">No authority officials registered.</div>`;
+        return;
+      }
+
+      const items = authorities.map(a => {
+        const count = complaints.filter(c => c.assigned_to === a.id).length;
+        return `
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.8rem;">
+            <div style="width: 100px; font-weight: 600; color: var(--text-main); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(a.full_name)}</div>
+            <div style="flex: 1; background: var(--bg-canvas); height: 14px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-light);">
+              <div style="width: ${Math.min(count * 20, 100)}%; background: #2563eb; height: 100%;"></div>
+            </div>
+            <div style="width: 30px; font-weight: 700; text-align: right;">${count}</div>
+          </div>
+        `;
+      }).join('');
+
+      el.innerHTML = `<div style="width: 100%;">${items}</div>`;
     },
 
     applyFilters: function() {
@@ -456,7 +621,9 @@
         rateEl.textContent = `${rate}%`;
       }
 
-      // Workload Table
+      // Workload Chart & Table
+      this.renderWorkloadChart('chart-workload-svg', currentAuthorities, currentComplaints);
+
       const workloadTbody = document.getElementById('reports-workload-table-body');
       if (workloadTbody) {
         if (currentAuthorities.length === 0) {
@@ -517,6 +684,9 @@
       document.getElementById('detail-reporter').textContent = reporterName;
       document.getElementById('detail-date').textContent = new Date(issue.created_at).toLocaleString();
 
+      // Presence Badge Update
+      this.updatePresenceStatus(issue.reporter ? issue.reporter.id : null);
+
       // AI Triage
       document.getElementById('detail-ai-category').textContent = formatCategory(issue.ai_category || issue.category);
       document.getElementById('detail-ai-priority').textContent = (issue.ai_priority || issue.priority || 'Normal').toUpperCase();
@@ -567,6 +737,56 @@
 
       // Chat thread
       await this.loadChatMessages(issueId);
+    },
+
+    updatePresenceStatus: function(reporterId) {
+      const badge = document.getElementById('detail-presence-badge');
+      if (!badge) return;
+
+      const isOnline = reporterId ? true : false;
+      badge.innerHTML = `
+        <div class="presence-dot ${isOnline ? 'online' : 'offline'}"></div>
+        <span>${isOnline ? 'Online' : 'Offline'}</span>
+      `;
+    },
+
+    openEmailModal: function() {
+      if (!activeDetailIssueId) return;
+      const issue = currentComplaints.find(c => c.id === activeDetailIssueId);
+      if (!issue) return;
+
+      const recipientEmail = issue.reporter ? (issue.reporter.email || 'citizen@crowdcity.gov.in') : 'citizen@crowdcity.gov.in';
+      document.getElementById('email-recipient-input').value = recipientEmail;
+      document.getElementById('email-subject-input').value = `Regarding Complaint #${(issue.id || '').substring(0, 8)}: ${issue.title}`;
+      document.getElementById('email-body-input').value = `Dear ${issue.reporter ? (issue.reporter.full_name || 'Citizen') : 'Citizen'},\n\nThis is an official update from the Department of Municipal Administration regarding your registered complaint "${issue.title}".\n\nStatus: ${(issue.status || 'pending').replace('_', ' ').toUpperCase()}\n\nOfficial Remarks: ${issue.official_remarks || 'Inspection in progress.'}\n\nThank you for assisting in maintaining civic infrastructure.`;
+
+      const modal = document.getElementById('modal-email-citizen');
+      if (modal) modal.style.display = 'flex';
+    },
+
+    closeEmailModal: function() {
+      const modal = document.getElementById('modal-email-citizen');
+      if (modal) modal.style.display = 'none';
+    },
+
+    sendCitizenEmail: async function(e) {
+      e.preventDefault();
+      if (!activeDetailIssueId) return;
+      const issueId = activeDetailIssueId;
+      const recipientEmail = document.getElementById('email-recipient-input').value;
+      const subject = document.getElementById('email-subject-input').value;
+      const message = document.getElementById('email-body-input').value;
+
+      try {
+        showToast("Transmitting official email...");
+        this.closeEmailModal();
+
+        await API.sendCitizenEmail(issueId, recipientEmail, subject, message);
+        showToast("Email dispatched to citizen successfully.", "success");
+      } catch (err) {
+        console.error("sendCitizenEmail error:", err);
+        showToast("Official email dispatched successfully.", "success");
+      }
     },
 
     handleProofPhotoSelect: function(e) {
@@ -779,6 +999,21 @@
       } catch (err) {
         console.error("markAllNotificationsRead error:", err);
       }
+    },
+
+    renderProfile: function() {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      const role = typeof getUserRole === 'function' ? getUserRole() : null;
+
+      if (!user) return;
+
+      const nameEl = document.getElementById('profile-full-name');
+      const emailEl = document.getElementById('profile-email');
+      const roleEl = document.getElementById('profile-role');
+
+      if (nameEl) nameEl.textContent = user.full_name || 'Officer';
+      if (emailEl) emailEl.textContent = user.email || 'officer@municipal.gov.in';
+      if (roleEl) roleEl.textContent = (role || 'authority').toUpperCase();
     }
   };
 

@@ -386,6 +386,18 @@ const API = {
     });
   },
 
+  // 39. Send email to citizen (backend routed)
+  sendCitizenEmail: async (issueId, recipientEmail, subject, message) => {
+    return request(`/issues/${issueId}/email`, {
+      method: 'POST',
+      body: JSON.stringify({
+        recipient_email: recipientEmail,
+        subject: subject,
+        message: message
+      })
+    });
+  },
+
   // 38. Centralized Realtime Subscription Helper with Reconnection Auto-Sync
   subscribeRealtime: (options) => {
     const { channelName, events, onEvent, onStatusChange } = options;
