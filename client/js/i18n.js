@@ -419,6 +419,11 @@ class I18nService {
   }
 
   injectLanguageToggle() {
+    const path = window.location.pathname.toLowerCase();
+    if (path.includes('admin') || path.includes('authority') || (document.body && document.body.classList.contains('admin-portal-body'))) {
+      return;
+    }
+
     if (document.getElementById('lang-toggle-container')) return;
 
     const container = document.createElement('div');

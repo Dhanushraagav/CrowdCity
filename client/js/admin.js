@@ -91,8 +91,7 @@
           'dashboard': 'pane-dashboard',
           'complaints': 'pane-complaints',
           'assigned': 'pane-assigned',
-          'notifications': 'pane-notifications',
-          'profile': 'pane-profile'
+          'notifications': 'pane-notifications'
         };
         this.showPane(paneMap[hash] || 'pane-dashboard', false);
       }
@@ -116,8 +115,7 @@
         'pane-complaints': 'Overall Complaints Queue',
         'pane-assigned': 'Assigned Casework Register',
         'pane-details': 'Complaint Inspection & Action Console',
-        'pane-notifications': 'System Notifications',
-        'pane-profile': 'Officer Profile & Security'
+        'pane-notifications': 'System Notifications'
       };
 
       const titleEl = document.getElementById('header-pane-title');
@@ -128,8 +126,7 @@
           'pane-dashboard': 'dashboard',
           'pane-complaints': 'complaints',
           'pane-assigned': 'assigned',
-          'pane-notifications': 'notifications',
-          'pane-profile': 'profile'
+          'pane-notifications': 'notifications'
         };
         if (reverseMap[paneId]) {
           window.location.hash = reverseMap[paneId];
@@ -177,7 +174,6 @@
         this.renderComplaintsQueue();
         this.renderAssignedCases();
         this.renderNotifications();
-        this.renderProfile();
       } catch (err) {
         console.error("loadAllData error:", err);
         showToast("Failed to sync database data.", "error");
@@ -570,21 +566,6 @@
       } catch (err) {
         console.error("markNotificationRead error:", err);
       }
-    },
-
-    renderProfile: function() {
-      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-      const role = typeof getUserRole === 'function' ? getUserRole() : null;
-
-      if (!user) return;
-
-      const nameEl = document.getElementById('profile-full-name');
-      const emailEl = document.getElementById('profile-email');
-      const roleEl = document.getElementById('profile-role');
-
-      if (nameEl) nameEl.textContent = user.full_name || 'Officer';
-      if (emailEl) emailEl.textContent = user.email || 'officer@municipal.gov.in';
-      if (roleEl) roleEl.textContent = (role || 'authority').toUpperCase();
     }
   };
 
