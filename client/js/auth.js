@@ -1156,7 +1156,10 @@ async function logoutUser() {
   const role = getUserRole(); // Get role before clearing cache
   console.log('[Auth Client] Logging out user. Current role:', role);
 
-  // 1. Show loading overlay
+  const isAuthorityPage = window.location.pathname.includes('admin') || window.location.pathname.includes('authority') || (document.body && document.body.classList.contains('admin-portal-body'));
+  const overlayBg = isAuthorityPage ? '#ffffff' : '#0f172a';
+  const overlayTextColor = isAuthorityPage ? '#0f172a' : '#ffffff';
+
   let overlay = document.getElementById('cc-logout-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -1166,22 +1169,24 @@ async function logoutUser() {
     overlay.style.left = '0';
     overlay.style.width = '100vw';
     overlay.style.height = '100vh';
-    overlay.style.backgroundColor = 'var(--bg-app, #0f172a)'; // match dark theme
-    overlay.style.zIndex = '99999';
+    overlay.style.backgroundColor = overlayBg;
+    overlay.style.zIndex = '2147483647';
     overlay.style.display = 'flex';
     overlay.style.flexDirection = 'column';
     overlay.style.alignItems = 'center';
     overlay.style.justifyContent = 'center';
-    overlay.style.color = 'var(--text-main, #ffffff)';
-    overlay.style.fontFamily = 'var(--font-body, sans-serif)';
+    overlay.style.color = overlayTextColor;
+    overlay.style.fontFamily = 'system-ui, -apple-system, sans-serif';
     overlay.style.gap = '1rem';
     overlay.style.visibility = 'visible';
     
     overlay.innerHTML = `
-      <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary, #4f46e5);"></i>
-      <span style="font-weight: 600; font-size: 1.1rem;">Signing out...</span>
+      <div style="font-weight: 700; font-size: 1.1rem; color: ${overlayTextColor};">Signing out...</div>
     `;
     document.body.appendChild(overlay);
+  } else {
+    overlay.style.backgroundColor = overlayBg;
+    overlay.style.color = overlayTextColor;
   }
   overlay.style.display = 'flex';
   
