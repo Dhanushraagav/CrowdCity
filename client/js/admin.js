@@ -1026,10 +1026,22 @@
       const nameEl = document.getElementById('profile-full-name');
       const emailEl = document.getElementById('profile-email');
       const roleEl = document.getElementById('profile-role');
+      const avatarEl = document.getElementById('profile-avatar-circle');
+      const lastLoginEl = document.getElementById('profile-last-login');
 
-      if (nameEl) nameEl.textContent = user.full_name || 'Officer';
+      if (nameEl) nameEl.textContent = user.full_name || 'Authority Officer';
       if (emailEl) emailEl.textContent = user.email || 'officer@municipal.gov.in';
-      if (roleEl) roleEl.textContent = (role || 'authority').toUpperCase();
+      if (roleEl) roleEl.textContent = (role || 'authority').toUpperCase() + ' OFFICER';
+
+      if (avatarEl && user.full_name) {
+        const parts = user.full_name.trim().split(' ');
+        const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]) : parts[0].substring(0, 2);
+        avatarEl.textContent = initials.toUpperCase();
+      }
+
+      if (lastLoginEl) {
+        lastLoginEl.textContent = `Active Session (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+      }
     }
   };
 
