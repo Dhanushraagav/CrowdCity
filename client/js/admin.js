@@ -159,10 +159,10 @@
     loadAllData: async function() {
       try {
         const [issuesRes, transRes, usersRes, notifsRes] = await Promise.allSettled([
-          API.getIssues(),
-          API.request('/transportation/reports'),
-          API.getAllUsers(),
-          API.getNotifications()
+          API.getIssues ? API.getIssues() : Promise.resolve({ data: [] }),
+          API.getTransportationReports ? API.getTransportationReports() : (API.request ? API.request('/transportation/reports') : Promise.resolve({ data: [] })),
+          API.getAllUsers ? API.getAllUsers() : Promise.resolve({ data: [] }),
+          API.getNotifications ? API.getNotifications() : Promise.resolve({ data: [] })
         ]);
 
         let civicList = [];

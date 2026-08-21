@@ -67,6 +67,9 @@ async function request(endpoint, options = {}) {
 }
 
 const API = {
+  // Generic request method
+  request: request,
+
   // 1. Get Issues List
   getIssues: async (filters = {}) => {
     const params = new URLSearchParams();
