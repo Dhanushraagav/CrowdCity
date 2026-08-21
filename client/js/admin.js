@@ -92,8 +92,8 @@
       if (!checkAccess()) return;
       
       this.bindHashRouting();
-      await this.loadAllData();
       this.handleInitialHash();
+      await this.loadAllData();
     },
 
     bindHashRouting: function() {
