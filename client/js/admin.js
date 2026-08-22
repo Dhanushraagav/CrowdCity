@@ -195,7 +195,7 @@
     },
 
     loadAllData: async function() {
-      const fetchWithTimeout = (apiFn, ms = 3000) => {
+      const fetchWithTimeout = (apiFn, ms = 10000) => {
         if (typeof apiFn !== 'function') return Promise.resolve({ data: [] });
         return Promise.race([
           apiFn(),
@@ -206,14 +206,14 @@
       try {
         // Fast primary fetch for complaints
         const [issuesRes, transRes, usersRes, notifsRes] = await Promise.allSettled([
-          fetchWithTimeout(() => API.getIssues(), 3500),
-          fetchWithTimeout(() => (API.getTransportationReports ? API.getTransportationReports() : API.request('/transportation/reports')), 2500),
-          fetchWithTimeout(() => API.getAllUsers(), 2500),
-          fetchWithTimeout(() => API.getNotifications(), 2500)
+          fetchWithTimeout(() => API.getIssues(), 10000),
+          fetchWithTimeout(() => (API.getTransportationReports ? API.getTransportationReports() : API.request('/transportation/reports')), 8000),
+          fetchWithTimeout(() => API.getAllUsers(), 8000),
+          fetchWithTimeout(() => API.getNotifications(), 8000)
         ]);
 
         let civicList = [];
-        if (issuesRes.status === 'fulfilled' && issuesRes.value) {
+        if (issuesRes.status === 'fulfilled' && issuesRes.value && !issuesRes.value.error) {
           const rawCivic = issuesRes.value.data !== undefined ? issuesRes.value.data : issuesRes.value;
           if (Array.isArray(rawCivic)) civicList = rawCivic;
         }
