@@ -315,13 +315,18 @@
         categoryCounts[catName] = (categoryCounts[catName] || 0) + 1;
       });
 
-      document.getElementById('kpi-total').textContent = total;
-      document.getElementById('kpi-pending').textContent = pending;
-      document.getElementById('kpi-assigned').textContent = assigned;
-      document.getElementById('kpi-progress').textContent = inProgress;
-      document.getElementById('kpi-resolved').textContent = resolved;
-      document.getElementById('kpi-rejected').textContent = rejected;
-      document.getElementById('kpi-emergency').textContent = emergency;
+      const setElText = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+
+      setElText('kpi-total', total);
+      setElText('kpi-pending', pending);
+      setElText('kpi-assigned', assigned);
+      setElText('kpi-progress', inProgress);
+      setElText('kpi-resolved', resolved);
+      setElText('kpi-rejected', rejected);
+      setElText('kpi-emergency', emergency);
 
       // Render Operational SVG Charts
       this.renderCategoryChart(categoryCounts);
