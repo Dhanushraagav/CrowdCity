@@ -401,17 +401,10 @@ window.authRouter = {
         window.location.href = CITIZEN_DASHBOARD;
         return;
       }
-    } else if (role === 'authority') {
-      // Authority users CAN access admin.html (unified portal) but NOT citizen pages
+    } else if (role === 'authority' || role === 'admin') {
       if (isCitizenPage) {
-        console.warn("[Auth Router] Authority role cannot access citizen page. Redirecting.");
+        console.warn("[Auth Router] Authority/Admin role cannot access citizen page. Redirecting.");
         window.location.href = AUTHORITY_DASHBOARD;
-        return;
-      }
-    } else if (role === 'admin') {
-      if (isCitizenPage) {
-        console.warn("[Auth Router] Admin role cannot access citizen page. Redirecting.");
-        window.location.href = ADMIN_DASHBOARD;
         return;
       }
     }

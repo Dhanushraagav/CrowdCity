@@ -748,10 +748,8 @@ function verifyRoleForCurrentPage(role) {
   let accessDenied = false;
   if (role === 'citizen') {
     if (isAuthorityPage || isAdminPage) accessDenied = true;
-  } else if (role === 'authority') {
-    if (isCitizenPage || isAdminPage) accessDenied = true;
-  } else if (role === 'admin') {
-    if (isCitizenPage || isAuthorityPage) accessDenied = true;
+  } else if (role === 'authority' || role === 'admin') {
+    if (isCitizenPage) accessDenied = true;
   }
 
   if (accessDenied) {
