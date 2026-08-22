@@ -273,13 +273,25 @@
           currentNotifications = Array.isArray(rawNotifs) ? rawNotifs : [];
         }
 
-        // Render all UI views instantly
-        this.renderDashboard();
-        this.renderComplaintsQueue();
-        this.renderAssignedCases();
-        this.renderReports();
-        this.renderNotifications();
-        this.renderProfile();
+        // Render UI views only if their container pane/elements exist on this page
+        if (document.getElementById('pane-dashboard') || document.getElementById('kpi-total')) {
+          this.renderDashboard();
+        }
+        if (document.getElementById('pane-complaints') || document.getElementById('complaints-queue-table-body')) {
+          this.renderComplaintsQueue();
+        }
+        if (document.getElementById('pane-assigned') || document.getElementById('assigned-cases-table-body')) {
+          this.renderAssignedCases();
+        }
+        if (document.getElementById('pane-reports') || document.getElementById('reports-category-table-body')) {
+          this.renderReports();
+        }
+        if (document.getElementById('pane-notifications') || document.getElementById('notifications-list')) {
+          this.renderNotifications();
+        }
+        if (document.getElementById('pane-profile') || document.getElementById('profile-full-name')) {
+          this.renderProfile();
+        }
       } catch (err) {
         console.error("loadAllData error:", err);
         showToast("Failed to sync database data.", "error");
@@ -527,11 +539,16 @@
     },
 
     applyFilters: function() {
-      const search = (document.getElementById('filter-search-input').value || '').toLowerCase().trim();
-      const statusFilter = (document.getElementById('filter-status-select').value || '').toLowerCase().trim();
-      const categoryFilter = (document.getElementById('filter-category-select').value || '').toLowerCase().trim();
-      const priorityFilter = (document.getElementById('filter-priority-select').value || '').toLowerCase().trim();
-      const assignmentFilter = (document.getElementById('filter-assignment-select').value || '').toLowerCase().trim();
+      const getVal = id => {
+        const el = document.getElementById(id);
+        return el ? (el.value || '').toLowerCase().trim() : '';
+      };
+
+      const search = getVal('filter-search-input');
+      const statusFilter = getVal('filter-status-select');
+      const categoryFilter = getVal('filter-category-select');
+      const priorityFilter = getVal('filter-priority-select');
+      const assignmentFilter = getVal('filter-assignment-select');
 
       const filtered = currentComplaints.filter(c => {
         if (search) {
@@ -570,11 +587,15 @@
     },
 
     resetFilters: function() {
-      document.getElementById('filter-search-input').value = '';
-      document.getElementById('filter-status-select').value = '';
-      document.getElementById('filter-category-select').value = '';
-      document.getElementById('filter-priority-select').value = '';
-      document.getElementById('filter-assignment-select').value = '';
+      const resetVal = id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      };
+      resetVal('filter-search-input');
+      resetVal('filter-status-select');
+      resetVal('filter-category-select');
+      resetVal('filter-priority-select');
+      resetVal('filter-assignment-select');
       this.renderComplaintsTable(currentComplaints);
     },
 
