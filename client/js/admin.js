@@ -107,28 +107,59 @@
     },
 
     handleInitialHash: async function() {
-      const hash = window.location.hash.replace('#', '') || 'dashboard';
-      if (hash.startsWith('details?id=')) {
-        const issueId = hash.split('details?id=')[1];
+      const searchParams = new URLSearchParams(window.location.search);
+      const queryId = searchParams.get('id');
+      const hash = window.location.hash.replace('#', '') || '';
+
+      if (queryId || hash.startsWith('details?id=')) {
+        const issueId = queryId || hash.split('details?id=')[1];
         this.showPane('pane-details', false);
         await this.openCaseDetails(issueId);
       } else {
-        const paneMap = {
-          'dashboard': 'pane-dashboard',
-          'complaints': 'pane-complaints',
-          'assigned': 'pane-assigned',
-          'reports': 'pane-reports',
-          'notifications': 'pane-notifications',
-          'profile': 'pane-profile'
-        };
-        this.showPane(paneMap[hash] || 'pane-dashboard', false);
+        const path = window.location.pathname;
+        let paneId = 'pane-dashboard';
+        if (path.includes('authority-complaints')) paneId = 'pane-complaints';
+        else if (path.includes('authority-assigned')) paneId = 'pane-assigned';
+        else if (path.includes('authority-reports')) paneId = 'pane-reports';
+        else if (path.includes('authority-notifications')) paneId = 'pane-notifications';
+        else if (path.includes('authority-profile')) paneId = 'pane-profile';
+        else if (path.includes('authority-case-details')) paneId = 'pane-details';
+        else {
+          const paneMap = {
+            'dashboard': 'pane-dashboard',
+            'complaints': 'pane-complaints',
+            'assigned': 'pane-assigned',
+            'reports': 'pane-reports',
+            'notifications': 'pane-notifications',
+            'profile': 'pane-profile'
+          };
+          if (paneMap[hash]) paneId = paneMap[hash];
+        }
+        this.showPane(paneId, false);
       }
     },
 
     showPane: function(paneId, updateHash = true) {
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
       const targetPane = document.getElementById(paneId);
-      if (targetPane) targetPane.classList.add('active-pane');
+
+      if (targetPane) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
+        targetPane.classList.add('active-pane');
+      } else {
+        const pageMap = {
+          'pane-dashboard': 'authority-dashboard.html',
+          'pane-complaints': 'authority-complaints.html',
+          'pane-assigned': 'authority-assigned.html',
+          'pane-reports': 'authority-reports.html',
+          'pane-notifications': 'authority-notifications.html',
+          'pane-profile': 'authority-profile.html',
+          'pane-details': 'authority-case-details.html'
+        };
+        if (pageMap[paneId] && !window.location.pathname.includes(pageMap[paneId])) {
+          window.location.href = pageMap[paneId];
+          return;
+        }
+      }
 
       document.querySelectorAll('.nav-item').forEach(nav => {
         if (nav.getAttribute('data-pane') === paneId) {
@@ -150,20 +181,6 @@
 
       const titleEl = document.getElementById('header-pane-title');
       if (titleEl) titleEl.textContent = paneTitles[paneId] || 'Authority Portal';
-
-      if (updateHash) {
-        const reverseMap = {
-          'pane-dashboard': 'dashboard',
-          'pane-complaints': 'complaints',
-          'pane-assigned': 'assigned',
-          'pane-reports': 'reports',
-          'pane-notifications': 'notifications',
-          'pane-profile': 'profile'
-        };
-        if (reverseMap[paneId]) {
-          window.location.hash = reverseMap[paneId];
-        }
-      }
 
       this.toggleMobileSidebar(false);
     },
@@ -724,8 +741,14 @@
       }
 
       activeDetailIssueId = issue.id;
+
+      if (!document.getElementById('pane-details')) {
+        window.location.href = `authority-case-details.html?id=${issue.id}`;
+        return;
+      }
+
       this.showPane('pane-details', false);
-      if (!window.location.hash.includes(issue.id)) {
+      if (!window.location.search.includes(issue.id) && !window.location.hash.includes(issue.id)) {
         window.location.hash = `details?id=${issue.id}`;
       }
 

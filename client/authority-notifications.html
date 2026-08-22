@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CrowdCity AI Municipal Authority System Notifications">
+  <title>System Notifications - CrowdCity AI Authority Portal</title>
+
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Premium Google Fonts - Inter Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Authority Portal Stylesheet -->
+  <link rel="stylesheet" href="css/authority-portal.css?v=3.0.0">
+
+  <!-- Central Auth Router -->
+  <script src="js/auth-router.js?v=3.0.0"></script>
+</head>
+<body>
+
+  <!-- Top-Right Floating Toast Popup Container -->
+  <div class="toast-popup-container">
+    <div id="toast-message" class="toast-box" style="display: none;"></div>
+  </div>
+
+  <div class="portal-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="portal-sidebar" id="portal-sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-title-text">CrowdCity</span>
+        <span class="brand-subtitle-text">Municipal Operations</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="authority-dashboard.html" class="nav-item" data-pane="pane-dashboard">Dashboard</a>
+        <a href="authority-complaints.html" class="nav-item" data-pane="pane-complaints">Complaints Queue</a>
+        <a href="authority-assigned.html" class="nav-item" data-pane="pane-assigned">Assigned Cases</a>
+        <a href="authority-reports.html" class="nav-item" data-pane="pane-reports">Operational Reports</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>Department of Municipal Administration</div>
+        <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+      </div>
+    </aside>
+
+    <!-- Overlay backdrop for mobile -->
+    <div id="sidebar-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 90;" onclick="window.ComplaintService.toggleMobileSidebar(false)"></div>
+
+    <!-- Main Content Area -->
+    <main class="portal-main">
+      <header class="portal-header">
+        <div class="header-title-area">
+          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu">Toggle Menu</button>
+          <span class="header-title" id="header-pane-title">System Notifications</span>
+        </div>
+        
+        <!-- Top-Right Header Navigation Controls -->
+        <div class="header-user-info">
+          <!-- Notifications Bell Button with Dynamic Unread Badge -->
+          <button type="button" id="header-notif-btn" class="btn-secondary" style="position: relative; padding: 0.4rem 0.75rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem;" onclick="event.stopPropagation(); window.location.href='authority-notifications.html'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span>Notifications</span>
+            <span id="header-notif-badge" style="display: none; background: #dc2626; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 999px; margin-left: 0.2rem;">0</span>
+          </button>
+
+          <!-- Officer Profile Dropdown Trigger -->
+          <div style="position: relative;">
+            <button type="button" id="header-profile-btn" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;" onclick="window.ComplaintService.toggleProfileDropdown(event)">
+              <span id="header-user-name">Officer Loading...</span>
+              <span style="font-size: 0.65rem; color: var(--text-light);">▼</span>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
+              <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="event.stopPropagation(); window.location.href='authority-profile.html'">
+                Profile & Security
+              </button>
+              <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: #991b1b; background: none; border: none; cursor: pointer;" onclick="logoutUser()">
+                Logout Session
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="portal-body">
+
+        <!-- NOTIFICATIONS PANE -->
+        <section id="pane-notifications" class="tab-pane active-pane">
+          <div class="content-card">
+            <div class="card-title">
+              <span>System & Operational Notifications</span>
+              <button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="window.ComplaintService.markAllNotificationsRead()">Mark All as Read</button>
+            </div>
+            <div id="notifications-list" style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading notifications...</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Client Script files -->
+  <script src="js/auth.js?v=3.0.0"></script>
+  <script src="js/api.js?v=3.0.0"></script>
+  <script src="js/notifications.js?v=3.0.0"></script>
+  <script src="js/admin.js?v=3.0.0"></script>
+  <script src="js/authority-notifications.js?v=3.0.0"></script>
+
+</body>
+</html>
