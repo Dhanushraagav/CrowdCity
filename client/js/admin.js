@@ -211,7 +211,71 @@
       }
     },
 
+    loadCachedData: function() {
+      try {
+        const cachedComplaints = sessionStorage.getItem('cc_auth_cache_complaints');
+        const cachedAuthorities = sessionStorage.getItem('cc_auth_cache_authorities');
+        const cachedNotifs = sessionStorage.getItem('cc_auth_cache_notifications');
+
+        if (cachedComplaints) {
+          currentComplaints = JSON.parse(cachedComplaints);
+        }
+        if (cachedAuthorities) {
+          currentAuthorities = JSON.parse(cachedAuthorities);
+        }
+        if (cachedNotifs) {
+          currentNotifications = JSON.parse(cachedNotifs);
+        }
+
+        if (currentComplaints && currentComplaints.length > 0) {
+          this.renderViewsSafely();
+        }
+      } catch (e) {
+        console.warn("Failed to load cached authority data:", e);
+      }
+    },
+
+    saveCachedData: function() {
+      try {
+        if (currentComplaints && currentComplaints.length > 0) {
+          sessionStorage.setItem('cc_auth_cache_complaints', JSON.stringify(currentComplaints));
+        }
+        if (currentAuthorities && currentAuthorities.length > 0) {
+          sessionStorage.setItem('cc_auth_cache_authorities', JSON.stringify(currentAuthorities));
+        }
+        if (currentNotifications && currentNotifications.length > 0) {
+          sessionStorage.setItem('cc_auth_cache_notifications', JSON.stringify(currentNotifications));
+        }
+      } catch (e) {
+        console.warn("Failed to save cached authority data:", e);
+      }
+    },
+
+    renderViewsSafely: function() {
+      if (document.getElementById('pane-dashboard') || document.getElementById('kpi-total')) {
+        this.renderDashboard();
+      }
+      if (document.getElementById('pane-complaints') || document.getElementById('complaints-queue-table-body')) {
+        this.renderComplaintsQueue();
+      }
+      if (document.getElementById('pane-assigned') || document.getElementById('assigned-cases-table-body')) {
+        this.renderAssignedCases();
+      }
+      if (document.getElementById('pane-reports') || document.getElementById('reports-category-table-body')) {
+        this.renderReports();
+      }
+      if (document.getElementById('pane-notifications') || document.getElementById('notifications-list')) {
+        this.renderNotifications();
+      }
+      if (document.getElementById('pane-profile') || document.getElementById('profile-full-name')) {
+        this.renderProfile();
+      }
+    },
+
     loadAllData: async function() {
+      // Instant load from session cache for 0ms page transitions
+      this.loadCachedData();
+
       const fetchWithTimeout = (apiFn, ms = 10000) => {
         if (typeof apiFn !== 'function') return Promise.resolve({ data: [] });
         return Promise.race([
@@ -273,25 +337,11 @@
           currentNotifications = Array.isArray(rawNotifs) ? rawNotifs : [];
         }
 
-        // Render UI views only if their container pane/elements exist on this page
-        if (document.getElementById('pane-dashboard') || document.getElementById('kpi-total')) {
-          this.renderDashboard();
-        }
-        if (document.getElementById('pane-complaints') || document.getElementById('complaints-queue-table-body')) {
-          this.renderComplaintsQueue();
-        }
-        if (document.getElementById('pane-assigned') || document.getElementById('assigned-cases-table-body')) {
-          this.renderAssignedCases();
-        }
-        if (document.getElementById('pane-reports') || document.getElementById('reports-category-table-body')) {
-          this.renderReports();
-        }
-        if (document.getElementById('pane-notifications') || document.getElementById('notifications-list')) {
-          this.renderNotifications();
-        }
-        if (document.getElementById('pane-profile') || document.getElementById('profile-full-name')) {
-          this.renderProfile();
-        }
+        // Persist to session cache
+        this.saveCachedData();
+
+        // Re-render UI views with fresh dataset
+        this.renderViewsSafely();
       } catch (err) {
         console.error("loadAllData error:", err);
         showToast("Failed to sync database data.", "error");
