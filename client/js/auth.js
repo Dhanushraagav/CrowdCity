@@ -893,7 +893,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   let redirectTarget = null;
   if (role === 'authority') {
     if (profile.is_verified === true) {
-      redirectTarget = 'admin.html';
+      redirectTarget = 'authority-dashboard.html';
     } else {
       console.warn("Authority user is not verified");
       window.cc_routing_in_progress = false;
@@ -905,7 +905,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   } else if (role === 'citizen') {
     redirectTarget = 'citizen-dashboard.html';
   } else if (role === 'admin') {
-    redirectTarget = 'admin.html';
+    redirectTarget = 'authority-dashboard.html';
   } else {
     console.warn("Unknown role designated:", role);
     window.cc_routing_in_progress = false;
