@@ -813,7 +813,7 @@
       }
 
       // Chat thread
-      await this.loadChatMessages(issueId);
+      await this.loadChatMessages(issue.id);
     },
 
     updatePresenceStatus: function(reporterId) {
