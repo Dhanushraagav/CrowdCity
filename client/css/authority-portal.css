@@ -72,6 +72,10 @@ body {
   flex-shrink: 0;
   z-index: 100;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar-brand {
