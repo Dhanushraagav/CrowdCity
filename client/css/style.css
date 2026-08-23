@@ -430,7 +430,7 @@ footer,
   }
 
   .mobile-menu-toggle {
-    display: block;
+    display: none !important;
   }
 
   .nav-links {
