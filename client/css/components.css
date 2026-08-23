@@ -5071,26 +5071,49 @@ footer,
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: var(--bg-surface-hover, rgba(15, 23, 42, 0.05));
-  border: 1px solid var(--border-color, rgba(226, 232, 240, 0.8));
-  color: var(--text-main, #0f172a);
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
   font-size: 0.95rem;
   cursor: pointer;
   margin-right: 0.65rem;
   flex-shrink: 0;
   transition: all 0.2s ease;
+  z-index: 100 !important;
 }
 
-[data-theme="dark"] .universal-mobile-back-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #f8fafc;
+.universal-mobile-back-btn i,
+.universal-mobile-back-btn svg {
+  color: #0f172a !important;
+  font-size: 0.95rem !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .universal-mobile-back-btn,
+body.dark-theme .universal-mobile-back-btn {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .universal-mobile-back-btn i,
+body.dark-theme .universal-mobile-back-btn i,
+[data-theme="dark"] .universal-mobile-back-btn svg,
+body.dark-theme .universal-mobile-back-btn svg {
+  color: #ffffff !important;
 }
 
 .universal-mobile-back-btn:active {
   transform: scale(0.95);
-  background: var(--primary, #0d9488);
-  color: #ffffff;
+  background: var(--primary, #0d9488) !important;
+  color: #ffffff !important;
+}
+
+.universal-mobile-back-btn:active i,
+.universal-mobile-back-btn:active svg {
+  color: #ffffff !important;
 }
 
 @media (max-width: 1023px) {
@@ -5112,9 +5135,9 @@ footer,
   /* Standardize top-left header back button position */
   .universal-mobile-back-btn {
     display: inline-flex !important;
-    width: 34px !important;
-    height: 34px !important;
-    font-size: 0.85rem !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.95rem !important;
     margin-right: 0.5rem !important;
     flex-shrink: 0 !important;
   }
