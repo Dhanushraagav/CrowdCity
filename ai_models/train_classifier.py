@@ -182,7 +182,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset_dir", type=str, default="./dataset", help="Path to dataset directory")
     parser.add_argument("--epochs", type=int, default=15, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
-    parser.add_argument("--target_acc", type=float, default=0.85, help="Target accuracy for early stopping (e.g. 0.85 for 85%)")
+    parser.add_argument("--target_acc", type=float, default=0.85, help="Target accuracy ratio for early stopping (e.g. 0.85 for 85 percent)")
     args = parser.parse_args()
 
     train_model(args.dataset_dir, args.epochs, args.batch_size, args.target_acc)
