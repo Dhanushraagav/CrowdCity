@@ -43,151 +43,22 @@
   };
 })();
 
-// Universal Page Loader Injection
+// Universal Page Loader Injection (Disabled for Instant 0ms Page & Back Navigation)
 (function() {
-  // Avoid loader on simple redirection pages or offline
-  const path = window.location.pathname;
-  if (path.endsWith('/') || path.endsWith('/index') || path.endsWith('/index.html') || path.includes('offline')) {
-    return;
-  }
-
-  // Record start time to ensure minimum loader duration
   window.authLoaderStartTime = Date.now();
-
-  // Inject 100% Hardware GPU-Accelerated 60FPS Page Loader (ZERO LOGOS, MINIMAL TEXT)
-  const loaderStyle = document.createElement('style');
-  loaderStyle.id = 'global-page-loader-style';
-  loaderStyle.innerHTML = `
-    #global-page-loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 2147483646;
-      transition: opacity 0.2s linear, visibility 0.2s linear;
-      opacity: 1;
-      visibility: visible;
-      will-change: opacity, visibility;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    .light-theme #global-page-loader {
-      background: #ffffff;
-    }
-    #global-page-loader.fade-out {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    #gov-top-loader-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, #0d9488, #38bdf8, #10b981);
-      z-index: 2147483647;
-      will-change: transform;
-      transform: translate3d(-100%, 0, 0);
-      animation: gpuTopLoaderBar 1.2s linear infinite;
-    }
-    @keyframes gpuTopLoaderBar {
-      0% { transform: translate3d(-100%, 0, 0); }
-      100% { transform: translate3d(100%, 0, 0); }
-    }
-    .gpu-pulse-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      height: 32px;
-    }
-    .gpu-pulse-bar {
-      width: 5px;
-      height: 22px;
-      border-radius: 999px;
-      will-change: transform, opacity;
-      transform: translate3d(0, 0, 0);
-      animation: gpuBarPulse 0.75s ease-in-out infinite alternate;
-    }
-    .gpu-pulse-bar:nth-child(1) {
-      background: #14b8a6;
-      animation-delay: 0s;
-    }
-    .gpu-pulse-bar:nth-child(2) {
-      background: #38bdf8;
-      animation-delay: 0.15s;
-    }
-    .gpu-pulse-bar:nth-child(3) {
-      background: #10b981;
-      animation-delay: 0.3s;
-    }
-    .gpu-pulse-bar:nth-child(4) {
-      background: #0284c7;
-      animation-delay: 0.45s;
-    }
-    @keyframes gpuBarPulse {
-      0% {
-        transform: translate3d(0, 3px, 0) scaleY(0.4);
-        opacity: 0.3;
-      }
-      100% {
-        transform: translate3d(0, -5px, 0) scaleY(1.1);
-        opacity: 1;
-      }
-    }
-    .gov-loader-title {
-      font-size: 0.72rem;
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: 0.28em;
-      margin-top: 1.2rem;
-      text-transform: uppercase;
-      text-align: center;
-    }
-    .light-theme .gov-loader-title {
-      color: #64748b;
-    }
-  `;
-  (document.head || document.documentElement).appendChild(loaderStyle);
-
-  // Inject loader HTML strictly during real browser page loading
-  function injectLoaderHTML() {
-    if (document.getElementById('global-page-loader')) return;
-    const loader = document.createElement('div');
-    loader.id = 'global-page-loader';
-    loader.innerHTML = `
-      <div id="gov-top-loader-bar"></div>
-      <div class="gpu-pulse-container">
-        <div class="gpu-pulse-bar"></div>
-        <div class="gpu-pulse-bar"></div>
-        <div class="gpu-pulse-bar"></div>
-        <div class="gpu-pulse-bar"></div>
-      </div>
-      <div class="gov-loader-title">Loading</div>
-    `;
-    document.body.insertBefore(loader, document.body.firstChild);
+  
+  // Clean up any legacy/cached loader elements immediately on page load or back navigation
+  function cleanLoader() {
+    const el = document.getElementById('global-page-loader');
+    if (el) el.remove();
+    const styleEl = document.getElementById('global-page-loader-style');
+    if (styleEl) styleEl.remove();
+    document.documentElement.classList.remove('loader-active');
   }
 
-  if (document.body) {
-    injectLoaderHTML();
-  } else {
-    const bodyObserver = new MutationObserver((mutations, observer) => {
-      if (document.body) {
-        injectLoaderHTML();
-        observer.disconnect();
-      }
-    });
-    bodyObserver.observe(document.documentElement, { childList: true });
-    
-    // Fallback
-    document.addEventListener('DOMContentLoaded', injectLoaderHTML);
-  }
+  cleanLoader();
+  window.addEventListener('pageshow', cleanLoader);
+  document.addEventListener('DOMContentLoaded', cleanLoader);
 })();
 
 

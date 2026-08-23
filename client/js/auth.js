@@ -2522,39 +2522,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Dismiss Global Page Loader
+// Dismiss Global Page Loader Immediately
 (function() {
-  const startTime = window.authLoaderStartTime || Date.now();
-  
   function dismissLoader() {
     const loader = document.getElementById('global-page-loader');
-    if (!loader || loader.classList.contains('fade-out')) return;
-
-    loader.classList.add('fade-out');
+    if (loader) {
+      loader.remove();
+    }
+    const styleEl = document.getElementById('global-page-loader-style');
+    if (styleEl) {
+      styleEl.remove();
+    }
     document.documentElement.classList.remove('loader-active');
-    setTimeout(() => {
-      if (loader.parentNode) {
-        loader.parentNode.removeChild(loader);
-      }
-    }, 250);
   }
 
-  // Safety fail-safe timeout (3.5s) to guarantee user access
-  setTimeout(dismissLoader, 3500);
-
-  // Wait for authInitPromise and DOMContentLoaded (interactive DOM) for ultra-fast page presentation
-  const docLoaded = new Promise(resolve => {
-    if (document.readyState === 'interactive' || document.readyState === 'complete') {
-      resolve();
-    } else {
-      document.addEventListener('DOMContentLoaded', resolve);
-    }
-  });
-
-  Promise.all([
-    window.authInitPromise || Promise.resolve(),
-    docLoaded
-  ]).then(dismissLoader);
+  dismissLoader();
+  document.addEventListener('DOMContentLoaded', dismissLoader);
+  window.addEventListener('pageshow', dismissLoader);
 })();
 
 // Cloudflare Turnstile CAPTCHA Integration
