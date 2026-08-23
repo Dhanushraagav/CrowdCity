@@ -1110,19 +1110,37 @@ function setCategoryProgrammatically(categoryName) {
     }
   }
 
-  // Fallback keyword mapping
+  // Fallback keyword mapping (Supports English, Tamil script & Tanglish)
   if (!matched) {
-    if (rawLower.includes('road') || rawLower.includes('pothole') || rawLower.includes('street') || rawLower.includes('asphalt')) {
+    if (
+      rawLower.includes('road') || rawLower.includes('pothole') || rawLower.includes('street') || rawLower.includes('asphalt') || rawLower.includes('damage') || rawLower.includes('damaged') ||
+      rawLower.includes('ரோடு') || rawLower.includes('சாலை') || rawLower.includes('டேமேஜ்') || rawLower.includes('குழி') || rawLower.includes('சேதம்') || rawLower.includes('பழுது') || rawLower.includes('roatu') || rawLower.includes('kuzhi')
+    ) {
       categoryInput.value = 'roads';
-    } else if (rawLower.includes('light') || rawLower.includes('lamp') || rawLower.includes('bulb')) {
+    } else if (
+      rawLower.includes('light') || rawLower.includes('lamp') || rawLower.includes('bulb') ||
+      rawLower.includes('தெருவிளக்கு') || rawLower.includes('விளக்கு') || rawLower.includes('லைட்') || rawLower.includes('theruvilakku')
+    ) {
       categoryInput.value = 'streetlights';
-    } else if (rawLower.includes('water') || rawLower.includes('pipe') || rawLower.includes('leak')) {
+    } else if (
+      rawLower.includes('water') || rawLower.includes('pipe') || rawLower.includes('leak') ||
+      rawLower.includes('தண்ணீர்') || rawLower.includes('குடிநீர்') || rawLower.includes('வாட்டர்') || rawLower.includes('கசிவு') || rawLower.includes('thanneer')
+    ) {
       categoryInput.value = 'water_supply';
-    } else if (rawLower.includes('drain') || rawLower.includes('sewer') || rawLower.includes('gutter')) {
+    } else if (
+      rawLower.includes('drain') || rawLower.includes('sewer') || rawLower.includes('gutter') ||
+      rawLower.includes('சாக்கடை') || rawLower.includes('டிரைனேஜ்') || rawLower.includes('கழிவுநீர்') || rawLower.includes('saakkadai')
+    ) {
       categoryInput.value = 'drainage';
-    } else if (rawLower.includes('garbage') || rawLower.includes('trash') || rawLower.includes('waste') || rawLower.includes('litter')) {
+    } else if (
+      rawLower.includes('garbage') || rawLower.includes('trash') || rawLower.includes('waste') || rawLower.includes('litter') ||
+      rawLower.includes('குப்பை') || rawLower.includes('தொட்டி') || rawLower.includes('kuppai')
+    ) {
       categoryInput.value = 'garbage';
-    } else if (rawLower.includes('traffic') || rawLower.includes('signal') || rawLower.includes('jam')) {
+    } else if (
+      rawLower.includes('traffic') || rawLower.includes('signal') || rawLower.includes('jam') ||
+      rawLower.includes('டிராஃபிக்') || rawLower.includes('போக்குவரத்து') || rawLower.includes('pokkuvarathu')
+    ) {
       categoryInput.value = 'traffic';
     } else if (typeof currentReportMode !== 'undefined' && currentReportMode === 'transportation') {
       categoryInput.value = 'roads';

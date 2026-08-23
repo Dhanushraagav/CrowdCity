@@ -261,38 +261,56 @@ export function getLocalFallbackAnalysis(title, description) {
   let department = 'General Department';
   let priority = 'Medium';
 
-  // Category & Department mapping
-  if (text.includes('mosquito') || text.includes('breeding') || text.includes('pollution') || text.includes('environment') || text.includes('ecology') || text.includes('conservation')) {
+  // Category & Department mapping (Supports English, Tamil script & Tanglish)
+  if (text.includes('mosquito') || text.includes('breeding') || text.includes('pollution') || text.includes('environment') || text.includes('ecology') || text.includes('conservation') || text.includes('கொசு') || text.includes('கழிவு')) {
     category = 'Environment';
     department = 'Sanitation Department';
-  } else if (text.includes('manhole') || text.includes('fallen tree') || text.includes('exposed wire') || text.includes('live wire')) {
+  } else if (text.includes('manhole') || text.includes('fallen tree') || text.includes('exposed wire') || text.includes('live wire') || text.includes('ஆபத்து') || text.includes('மரம் சாய்ந்தது')) {
     category = 'Safety Hazard';
     department = 'Road Department';
-  } else if (text.includes('toilet') || text.includes('unclean') || text.includes('dirty') || text.includes('sanitation') || text.includes('hygiene')) {
+  } else if (text.includes('toilet') || text.includes('unclean') || text.includes('dirty') || text.includes('sanitation') || text.includes('hygiene') || text.includes('கப்பறை') || text.includes('சுகாதாரம்')) {
     category = 'Sanitation';
     department = 'Sanitation Department';
-  } else if (text.includes('pothole') || text.includes('crater') || text.includes('asphalt') || text.includes('footpath') || text.includes('sidewalk') || text.includes('crack') || text.includes('road')) {
+  } else if (
+    text.includes('pothole') || text.includes('crater') || text.includes('asphalt') || text.includes('footpath') || text.includes('sidewalk') || text.includes('crack') || text.includes('road') || text.includes('damage') || text.includes('damaged') ||
+    text.includes('ரோடு') || text.includes('சாலை') || text.includes('டேமேஜ்') || text.includes('குழி') || text.includes('சேதம்') || text.includes('பழுது') || text.includes('தார்') || text.includes('நடைபாதை') || text.includes('roatu') || text.includes('kuzhi') || text.includes('vazhi')
+  ) {
     category = 'Roads';
     department = 'Road Department';
-  } else if (text.includes('streetlight') || text.includes('light pole') || text.includes('lamp') || text.includes('bulb') || text.includes('light')) {
+  } else if (
+    text.includes('streetlight') || text.includes('light pole') || text.includes('lamp') || text.includes('bulb') || text.includes('light') ||
+    text.includes('தெருவிளக்கு') || text.includes('விளக்கு') || text.includes('லைட்') || text.includes('வெளிச்சம்') || text.includes('theruvilakku') || text.includes('vilakku')
+  ) {
     category = 'Streetlights';
     department = 'Electrical Department';
-  } else if (text.includes('leak') || text.includes('water supply') || text.includes('burst') || text.includes('pipe') || text.includes('pressure') || text.includes('water')) {
+  } else if (
+    text.includes('leak') || text.includes('water supply') || text.includes('burst') || text.includes('pipe') || text.includes('pressure') || text.includes('water') ||
+    text.includes('தண்ணீர்') || text.includes('குடிநீர்') || text.includes('வாட்டர்') || text.includes('கசிவு') || text.includes('குழாய்') || text.includes('thanneer') || text.includes('kudineer')
+  ) {
     category = 'Water Supply';
     department = 'Water Department';
-  } else if (text.includes('drain') || text.includes('sewer') || text.includes('gutter') || text.includes('flooded drainage')) {
+  } else if (
+    text.includes('drain') || text.includes('sewer') || text.includes('gutter') || text.includes('flooded drainage') ||
+    text.includes('சாக்கடை') || text.includes('டிரைனேஜ்') || text.includes('கழிவுநீர்') || text.includes('வாய்க்கால்') || text.includes('saakkadai')
+  ) {
     category = 'Drainage';
     department = 'Water Department';
-  } else if (text.includes('garbage') || text.includes('trash') || text.includes('dump') || text.includes('litter') || text.includes('waste') || text.includes('refuse')) {
+  } else if (
+    text.includes('garbage') || text.includes('trash') || text.includes('dump') || text.includes('litter') || text.includes('waste') || text.includes('refuse') ||
+    text.includes('குப்பை') || text.includes('தொட்டி') || text.includes('தூய்மை') || text.includes('kuppai')
+  ) {
     category = 'Garbage';
     department = 'Sanitation Department';
-  } else if (text.includes('traffic') || text.includes('signal') || text.includes('sign') || text.includes('intersection')) {
+  } else if (
+    text.includes('traffic') || text.includes('signal') || text.includes('sign') || text.includes('intersection') ||
+    text.includes('டிராஃபிக்') || text.includes('போக்குவரத்து') || text.includes('சிக்னல்') || text.includes('pokkuvarathu')
+  ) {
     category = 'Traffic';
     department = 'Road Department';
-  } else if (text.includes('bus stop') || text.includes('bench') || text.includes('public property') || text.includes('government property') || text.includes('damaging public')) {
+  } else if (text.includes('bus stop') || text.includes('bench') || text.includes('public property') || text.includes('government property') || text.includes('damaging public') || text.includes('பேருந்து') || text.includes('பஸ்')) {
     category = 'Public Property';
     department = 'Road Department';
-  } else if (text.includes('park') || text.includes('playground') || text.includes('garden') || text.includes('fence')) {
+  } else if (text.includes('park') || text.includes('playground') || text.includes('garden') || text.includes('fence') || text.includes('பூங்கா')) {
     category = 'Parks';
     department = 'Road Department';
   } else if (text.includes('hazard') || text.includes('danger') || text.includes('accident') || text.includes('debris')) {
