@@ -2785,11 +2785,11 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 .stitch-hero:has(.stitch-hero-title) .stitch-hero-title {
-  color: var(--primary) !important;
+  color: var(--primary, #0d9488) !important;
   text-shadow: none;
-  background: linear-gradient(135deg, var(--primary) 0%, #0d9488 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
 }
 
 .stitch-hero-desc {
