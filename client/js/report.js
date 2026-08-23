@@ -438,11 +438,12 @@ function initAiCameraDetection() {
         const { data, error } = await window.API.analyzeImageWithAi(resizedBase64);
         
         if (data && data.isValidCivicIssue === false) {
-          // Toast popup warning for fake/unrelated image (e.g. shirt, selfie)
+          // Toast popup warning for invalid/unrelated photo (e.g. selfie, shirt, document, indoor room)
+          const errorMsg = data.error || "Unrecognized Photo: Please upload or capture a photo showing a valid civic issue (pothole, streetlight, signal, garbage, etc.).";
           if (typeof window.showToast === 'function') {
-            window.showToast("Oops! Please capture a valid civic or road issue image.", "error");
+            window.showToast(errorMsg, "warning");
           } else {
-            alert("Oops! Please capture a valid civic or road issue image.");
+            alert(errorMsg);
           }
           if (inputElem) inputElem.value = '';
           return;
@@ -458,24 +459,30 @@ function initAiCameraDetection() {
           }
 
           // Auto-fill category
-          const categorySelect = document.getElementById('report-category');
-          if (categorySelect && data.category) {
-            const targetVal = data.category.toLowerCase().replace(/\s+/g, '_');
-            let matchOption = Array.from(categorySelect.options).find(o => o.value.toLowerCase() === targetVal || o.value.toLowerCase() === data.category.toLowerCase());
-            if (matchOption) {
-              categorySelect.value = matchOption.value;
+          if (typeof setCategoryProgrammatically === 'function' && data.category) {
+            setCategoryProgrammatically(data.category);
+          } else {
+            const categorySelect = document.getElementById('report-category');
+            if (categorySelect && data.category) {
+              const targetVal = data.category.toLowerCase().replace(/\s+/g, '_');
+              let matchOption = Array.from(categorySelect.options).find(o => o.value.toLowerCase() === targetVal || o.value.toLowerCase() === data.category.toLowerCase());
+              if (matchOption) {
+                categorySelect.value = matchOption.value;
+              }
             }
           }
 
-          // Auto-fill description
+          // Auto-fill description with detailed object recognition summary
           const descTextarea = document.getElementById('report-description');
           if (descTextarea && data.description) {
-            descTextarea.value = `${data.title ? data.title + ': ' : ''}${data.description}`;
+            const heading = data.detectedObject || data.title || 'Civic Infrastructure Hazard';
+            descTextarea.value = `${heading}: ${data.description}`;
           }
 
-          // Success toast popup
+          // Success toast popup with detected object recognition name
+          const detectedLabel = data.detectedObject || data.title || 'Civic Issue';
           if (typeof window.showToast === 'function') {
-            window.showToast(`AI Detected: ${data.title || 'Civic Issue'}. Photo attached!`, "success");
+            window.showToast(`AI Identified: ${detectedLabel}. Photo evidence attached!`, "success");
           }
           return;
         }

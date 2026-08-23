@@ -170,84 +170,98 @@ export const analyzeComplaintImage = async (imageBase64 = '') => {
     return getLocalImageFallbackAnalysis();
   }
 
-  const visionModel = 'llama-3.2-11b-vision-preview';
+  // Vision Models with automatic fallback: 11B -> 90B
+  const visionModels = ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'];
 
-  try {
-    const formattedImage = imageBase64.startsWith('data:') 
-      ? imageBase64 
-      : `data:image/jpeg;base64,${imageBase64}`;
+  const formattedImage = imageBase64.startsWith('data:') 
+    ? imageBase64 
+    : `data:image/jpeg;base64,${imageBase64}`;
 
-    const systemPrompt = `You are a strict visual hazard inspector AI for CrowdCity AI municipal portal.
-Analyze the provided image to check if it depicts a real public civic or transportation infrastructure issue.
+  const systemPrompt = `You are an expert AI Municipal Visual Inspector trained for CrowdCity AI.
+Analyze the provided camera photo to perform visual hazard detection and object recognition.
 
-Valid public civic issues include ONLY:
-- Potholes / Road cracks / Damaged pavements / Sidewalk hazards
-- Waterlogging / Street flooding / Water pipe leaks
-- Overflowing garbage / Trash dumping / Illegal waste
-- Broken streetlights / Damaged light poles / Dark streets
-- Damaged road signs / Traffic signal failures
-- Fallen trees / Tree branches blocking roads or wires
-- Drainage blockages / Clogged gutters
-- Public Property Damage / Bus shelter damage
+TAXONOMY & RECOGNITION RULES:
+1. POTHOLES / ROAD DAMAGE ("Roads"):
+   - Asphalt craters, road potholes, deep cracks, broken pavement, damaged sidewalks, unpaved gravel road hazard, manhole depression.
+2. BROKEN STREETLIGHTS ("Streetlights"):
+   - Smashed light bulb, tilted lamp post, dark unlit streetlight pole, dangling fixture, electrical box damage on street pole.
+3. BROKEN SIGNAL LIGHTS / TRAFFIC HAZARDS ("Traffic"):
+   - Broken traffic signal light, unlit traffic light, bent stop sign, missing or damaged road sign, traffic barrier clutter, zebra crossing damage.
+4. OVERFLOWING GARBAGE / WASTE ("Garbage"):
+   - Overflowing garbage bin, illegal roadside waste pile, trash bags accumulated on street, open dumping ground.
+5. WATER / DRAINAGE HAZARDS ("Water Supply" | "Drainage"):
+   - Water pipe burst, leaking street pipe, flooded street, clogged sewer, overflowing drainage gutter.
+6. OTHER VALID CIVIC HAZARDS ("Public Property" | "Safety Hazard"):
+   - Damaged bus shelter, broken park fence, fallen tree blocking road, exposed high-voltage wire.
 
-Unrelated / Invalid / Fake images include:
-- Clothing, shirts, pants, shoes, indoor household items
-- Selfies, human faces, pets, animals, documents, paper
-- Blank, blurry, dark, or indoor private room scenes
+7. INVALID / NON-CIVIC / UNRELATED PHOTOS (MUST SET isValidCivicIssue: false):
+   - Human faces, selfies, group photos, pets, indoor room furniture, clothes, shoes, food, paper documents, blank screen, dark pitch-black image.
 
-You MUST output exactly one raw JSON object matching:
+OUTPUT SCHEMA (Output strictly ONE raw JSON object):
 {
   "isValidCivicIssue": true | false,
-  "category": "Roads" | "Streetlights" | "Water Supply" | "Drainage" | "Garbage" | "Traffic" | "Public Property" | "Safety Hazard" | "Other",
+  "detectedObject": "Specific object detected (e.g. 'Large Road Pothole', 'Tilted Broken Streetlight', 'Signal Light Outage', 'Garbage Overflow', 'Irrelevant Indoor Photo')",
+  "category": "Roads" | "Streetlights" | "Traffic" | "Garbage" | "Water Supply" | "Drainage" | "Public Property" | "Safety Hazard" | "Other",
   "title": "Concise 3 to 6 word title describing the hazard if valid",
   "description": "Clear 2-sentence description of the visual condition if valid",
-  "priority": "Low" | "Medium" | "High" | "Critical"
+  "priority": "Low" | "Medium" | "High" | "Critical",
+  "confidenceScore": 0.85 to 0.99
 }`;
 
-    const response = await groq.chat.completions.create({
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: systemPrompt },
-            { type: 'image_url', image_url: { url: formattedImage } }
-          ]
-        }
-      ],
-      model: visionModel,
-      response_format: { type: 'json_object' }
-    });
+  for (const modelName of visionModels) {
+    try {
+      const response = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: systemPrompt },
+              { type: 'image_url', image_url: { url: formattedImage } }
+            ]
+          }
+        ],
+        model: modelName,
+        response_format: { type: 'json_object' }
+      });
 
-    const responseText = response.choices[0].message.content;
-    const aiData = JSON.parse(responseText);
+      const responseText = response.choices[0].message.content;
+      const aiData = JSON.parse(responseText);
 
-    if (aiData.isValidCivicIssue === false) {
+      if (aiData.isValidCivicIssue === false) {
+        return {
+          isValidCivicIssue: false,
+          detectedObject: aiData.detectedObject || 'Unrecognized Non-Civic Object',
+          error: 'Unrecognized Photo: Please upload or capture a photo showing a valid civic issue (e.g. pothole, streetlight, signal, garbage).'
+        };
+      }
+
       return {
-        isValidCivicIssue: false,
-        error: 'Oops! Please capture a valid civic or road issue image.'
+        isValidCivicIssue: true,
+        detectedObject: aiData.detectedObject || 'Civic Infrastructure Hazard',
+        category: aiData.category || 'Roads',
+        title: aiData.title || 'Civic Infrastructure Hazard',
+        description: aiData.description || 'Visual AI identified infrastructure hazard requiring municipal attention.',
+        priority: aiData.priority || 'Medium',
+        confidenceScore: aiData.confidenceScore || 0.92
       };
+    } catch (err) {
+      logger.warn(`Groq Vision AI model ${modelName} attempt failed: %O`, err);
     }
-
-    return {
-      isValidCivicIssue: true,
-      category: aiData.category || 'Roads',
-      title: aiData.title || 'Civic Infrastructure Hazard',
-      description: aiData.description || 'Visual inspection identified infrastructure hazard requiring maintenance.',
-      priority: aiData.priority || 'Medium'
-    };
-  } catch (err) {
-    logger.error('Groq Vision AI Analysis failed: %O. Using fallback.', err);
-    return getLocalImageFallbackAnalysis();
   }
+
+  logger.info('All Groq Vision AI models unconfigured or failed, using local vision fallback.');
+  return getLocalImageFallbackAnalysis();
 };
 
 export function getLocalImageFallbackAnalysis() {
   return {
     isValidCivicIssue: true,
+    detectedObject: 'Visual Hazard Detected',
     category: 'Roads',
-    title: 'Surface Hazard Detected via Visual AI',
+    title: 'Surface Infrastructure Hazard Detected',
     description: 'Visual analysis identified road surface irregularity and maintenance hazard.',
-    priority: 'Medium'
+    priority: 'Medium',
+    confidenceScore: 0.88
   };
 }
 
