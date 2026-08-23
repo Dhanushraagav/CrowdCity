@@ -36,6 +36,12 @@
   box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
 }
 
+@media (max-width: 768px) {
+  .gov-back-btn {
+    display: none !important;
+  }
+}
+
 /* 1. Buttons */
 .btn {
   display: inline-flex;
