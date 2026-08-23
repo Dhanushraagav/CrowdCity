@@ -5520,43 +5520,61 @@ body.dark-theme .universal-mobile-back-btn svg {
     box-sizing: border-box !important;
   }
 
-  /* 8. Premium Professional Action Buttons (Reduced font size, zero wrap) */
+  /* 8. Premium Professional Compact Action Buttons (Compact height, reduced font size, zero wrap) */
+  .btn-prev-step,
+  .btn-prev-step span,
+  .scheme-checker-page .btn-prev-step,
+  .scheme-checker-page .btn-prev-step span {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    font-size: 0.76rem !important; /* ~12px compact font */
+    font-weight: 700 !important;
+  }
+
   .btn-prev-step,
   .scheme-checker-page .btn-prev-step {
     flex-shrink: 0 !important;
-    white-space: nowrap !important;
-    min-width: 80px !important;
+    width: auto !important;
+    min-width: 75px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.35rem !important;
-    font-size: 0.78rem !important; /* ~12.5px - slightly reduced, sleek font size */
-    font-weight: 700 !important;
-    padding: 0.5rem 0.85rem !important;
-    border-radius: 10px !important;
-    background: var(--bg-app, #f8fafc) !important;
-    border: 1px solid var(--border-color, #cbd5e1) !important;
-    color: var(--text-main, #0f172a) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    gap: 0.3rem !important;
+    padding: 0.42rem 0.75rem !important;
+    border-radius: 8px !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
     box-sizing: border-box !important;
+  }
+
+  .btn-next-step,
+  .btn-next-step span,
+  .scheme-checker-page .btn-next-step,
+  .scheme-checker-page .btn-next-step span {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    font-size: 0.76rem !important; /* ~12px compact font */
+    font-weight: 700 !important;
   }
 
   .btn-next-step,
   .scheme-checker-page .btn-next-step {
     flex: 1 !important;
-    white-space: nowrap !important;
+    width: auto !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.35rem !important;
-    font-size: 0.78rem !important; /* ~12.5px - slightly reduced, sleek font size */
-    font-weight: 700 !important;
-    padding: 0.5rem 0.85rem !important;
-    border-radius: 10px !important;
-    background: linear-gradient(135deg, #0d9488 0%, #4f46e5 100%) !important;
+    gap: 0.3rem !important;
+    padding: 0.42rem 0.75rem !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%) !important;
     border: none !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
+    box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2) !important;
     box-sizing: border-box !important;
   }
 
