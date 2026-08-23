@@ -28,13 +28,15 @@ window.EmergencySearch = {
 
   overpassEndpoints: [
     'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter'
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass.nchc.org.tw/api/interpreter',
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
   ],
 
   /**
-   * Fetch nearby emergency responders (Hospitals, Police, Fire) with 1.2s strict timeout
+   * Fetch nearby emergency responders (Hospitals, Police, Fire) with 4.5s timeout & rich queries
    */
-  fetchNearbyResponders: async function(lat, lng, radiusKm = 10, type = 'all') {
+  fetchNearbyResponders: async function(lat, lng, radiusKm = 15, type = 'all') {
     const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusKm}_${type}`;
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
@@ -44,27 +46,36 @@ window.EmergencySearch = {
     let queryFilter = '';
 
     if (type === 'hospital') {
-      queryFilter = `node["amenity"="hospital"](around:${radiusMeters},${lat},${lng}); way["amenity"="hospital"](around:${radiusMeters},${lat},${lng});`;
-    } else if (type === 'police') {
-      queryFilter = `node["amenity"="police"](around:${radiusMeters},${lat},${lng}); way["amenity"="police"](around:${radiusMeters},${lat},${lng});`;
-    } else if (type === 'fire') {
-      queryFilter = `node["amenity"="fire_station"](around:${radiusMeters},${lat},${lng}); way["amenity"="fire_station"](around:${radiusMeters},${lat},${lng});`;
-    } else {
       queryFilter = `
-        node["amenity"="hospital"](around:${radiusMeters},${lat},${lng});
-        way["amenity"="hospital"](around:${radiusMeters},${lat},${lng});
+        node["amenity"~"hospital|clinic|doctors"](around:${radiusMeters},${lat},${lng});
+        way["amenity"~"hospital|clinic|doctors"](around:${radiusMeters},${lat},${lng});
+        node["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
+        way["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
+      `;
+    } else if (type === 'police') {
+      queryFilter = `
         node["amenity"="police"](around:${radiusMeters},${lat},${lng});
         way["amenity"="police"](around:${radiusMeters},${lat},${lng});
+      `;
+    } else if (type === 'fire') {
+      queryFilter = `
         node["amenity"="fire_station"](around:${radiusMeters},${lat},${lng});
         way["amenity"="fire_station"](around:${radiusMeters},${lat},${lng});
       `;
+    } else {
+      queryFilter = `
+        node["amenity"~"hospital|clinic|doctors|police|fire_station"](around:${radiusMeters},${lat},${lng});
+        way["amenity"~"hospital|clinic|doctors|police|fire_station"](around:${radiusMeters},${lat},${lng});
+        node["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
+        way["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
+      `;
     }
 
-    const overpassQL = `[out:json][timeout:5];(${queryFilter});out center 35;`;
+    const overpassQL = `[out:json][timeout:8];(${queryFilter});out center 50;`;
     let responseData = null;
 
-    // Helper timeout wrapper to race Overpass API (1.2s limit)
-    const fetchWithTimeout = (url, options, timeoutMs = 1200) => {
+    // Helper timeout wrapper to race Overpass API (4.5s limit)
+    const fetchWithTimeout = (url, options, timeoutMs = 4500) => {
       return Promise.race([
         fetch(url, options),
         new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
@@ -77,14 +88,16 @@ window.EmergencySearch = {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `data=${encodeURIComponent(overpassQL)}`
-        }, 1200);
+        }, 4500);
 
         if (res.ok) {
           responseData = await res.json();
-          break;
+          if (responseData && responseData.elements && responseData.elements.length > 0) {
+            break;
+          }
         }
       } catch (err) {
-        // Fast failover to next endpoint or fallback
+        // Fast failover to next endpoint
       }
     }
 
@@ -107,11 +120,11 @@ window.EmergencySearch = {
 
       return {
         id: el.id,
-        name: tags.name || tags['name:en'] || `${this.getResponderTypeName(responderType)} Center`,
+        name: tags.name || tags['name:en'] || tags['name:ta'] || `${this.getResponderTypeName(responderType)} Center`,
         type: responderType,
         lat: elLat,
         lng: elLng,
-        address: tags['addr:full'] || tags['addr:street'] || tags['addr:district'] || 'Tamil Nadu',
+        address: tags['addr:full'] || tags['addr:street'] || tags['addr:district'] || tags['addr:city'] || 'Tamil Nadu',
         phone: tags.phone || tags['contact:phone'] || tags['emergency:phone'] || this.getDefaultPhoneForType(responderType),
         distanceKm: distance
       };
@@ -123,7 +136,7 @@ window.EmergencySearch = {
   },
 
   /**
-   * Geocode query with 0ms local pincode lookup + 1.2s Nominatim API race
+   * Geocode query with 0ms local pincode lookup + 2s Nominatim API race
    */
   geocodeQuery: async function(query) {
     if (!query || query.trim().length < 2) return null;
@@ -139,7 +152,7 @@ window.EmergencySearch = {
       };
     }
 
-    // 2. Nominatim Geocoding API with 1.2s timeout
+    // 2. Nominatim Geocoding API with 2s timeout
     let searchUrl = '';
     if (/^\d{6}$/.test(cleanQuery)) {
       searchUrl = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${cleanQuery}&country=India&limit=1`;
@@ -148,14 +161,14 @@ window.EmergencySearch = {
     }
 
     try {
-      const fetchWithTimeout = (url, timeoutMs = 1200) => {
+      const fetchWithTimeout = (url, timeoutMs = 2000) => {
         return Promise.race([
           fetch(url, { headers: { 'User-Agent': 'CrowdCityAI-EmergencyPortal/3.0' } }),
           new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
         ]);
       };
 
-      const res = await fetchWithTimeout(searchUrl, 1200);
+      const res = await fetchWithTimeout(searchUrl, 2000);
       if (res.ok) {
         const data = await res.json();
         if (data && data.length > 0) {
@@ -170,7 +183,7 @@ window.EmergencySearch = {
       // Fallback: match query string against seed cities
       const lowerQ = cleanQuery.toLowerCase();
       if (lowerQ.includes('chennai')) return { latitude: 13.0827, longitude: 80.2707, displayName: 'Chennai, Tamil Nadu' };
-      if (lowerQ.includes('coimbatore')) return { latitude: 11.0168, longitude: 76.9558, displayName: 'Coimbatore, Tamil Nadu' };
+      if (lowerQ.includes('coimbatore') || lowerQ.includes('kannampalayam') || lowerQ.includes('sulur')) return { latitude: 11.0168, longitude: 76.9558, displayName: 'Coimbatore, Tamil Nadu' };
       if (lowerQ.includes('madurai')) return { latitude: 9.9252, longitude: 78.1198, displayName: 'Madurai, Tamil Nadu' };
       if (lowerQ.includes('salem')) return { latitude: 11.6643, longitude: 78.1460, displayName: 'Salem, Tamil Nadu' };
       if (lowerQ.includes('trichy') || lowerQ.includes('tiruchirappalli')) return { latitude: 10.8050, longitude: 78.6856, displayName: 'Tiruchirappalli, Tamil Nadu' };
@@ -194,13 +207,33 @@ window.EmergencySearch = {
   },
 
   getFallbackSeedResponders: function(lat, lng, filterType) {
-    const seed = [
-      { id: 'h1', name: 'Government General Hospital & Medical College', type: 'hospital', lat: lat + 0.012, lng: lng + 0.008, address: 'Collectorate Campus, Main Road, Tamil Nadu', phone: '108' },
-      { id: 'h2', name: 'City Emergency Trauma & Care Unit', type: 'hospital', lat: lat - 0.018, lng: lng + 0.022, address: 'Bypass Road, District HQ, Tamil Nadu', phone: '044-25305000' },
-      { id: 'p1', name: 'Central Police Headquarters Station', type: 'police', lat: lat + 0.007, lng: lng - 0.011, address: 'Police Line Road, Circle HQ, Tamil Nadu', phone: '100' },
-      { id: 'p2', name: 'All Women Police Station', type: 'police', lat: lat - 0.014, lng: lng - 0.019, address: 'Civil Lines Road, Tamil Nadu', phone: '1091' },
-      { id: 'f1', name: 'Fire & Rescue Headquarters Station', type: 'fire', lat: lat + 0.021, lng: lng - 0.006, address: 'Fire Station Road, Tamil Nadu', phone: '101' }
-    ];
+    // Check if location is in Coimbatore / Kannampalayam / Sulur region (~10.8 to 11.2 lat, 76.7 to 77.2 lng)
+    const isCoimbatoreRegion = (lat >= 10.7 && lat <= 11.3 && lng >= 76.6 && lng <= 77.3);
+
+    let seed = [];
+
+    if (isCoimbatoreRegion) {
+      seed = [
+        { id: 'cbe_h1', name: 'Government Hospital Sulur', type: 'hospital', lat: 11.0264, lng: 77.1264, address: 'Trichy Main Road, Sulur, Coimbatore, Tamil Nadu', phone: '0422-2687228' },
+        { id: 'cbe_h2', name: 'Primary Health Centre Kannampalayam', type: 'hospital', lat: 11.0182, lng: 77.0986, address: 'Main Road, Kannampalayam, Coimbatore, Tamil Nadu', phone: '108' },
+        { id: 'cbe_h3', name: 'KMCH Super Speciality Hospital', type: 'hospital', lat: 11.0435, lng: 77.0375, address: 'Avinashi Road, Civil Aerodrome, Coimbatore', phone: '0422-4323800' },
+        { id: 'cbe_h4', name: 'PSG Hospitals & Trauma Center', type: 'hospital', lat: 11.0285, lng: 76.9950, address: 'Avinashi Road, Peelamedu, Coimbatore', phone: '0422-2570170' },
+        { id: 'cbe_h5', name: 'Coimbatore Medical College Hospital (GH)', type: 'hospital', lat: 10.9982, lng: 76.9680, address: 'Trichy Road, Town Hall, Coimbatore', phone: '0422-2301393' },
+        { id: 'cbe_p1', name: 'Sulur Police Station', type: 'police', lat: 11.0270, lng: 77.1250, address: 'Trichy Road, Sulur, Coimbatore, Tamil Nadu', phone: '0422-2687100' },
+        { id: 'cbe_p2', name: 'Peelamedu Police Station', type: 'police', lat: 11.0310, lng: 76.9980, address: 'Avinashi Road, Peelamedu, Coimbatore', phone: '0422-2572200' },
+        { id: 'cbe_p3', name: 'Coimbatore City Central Police Control Room', type: 'police', lat: 10.9990, lng: 76.9650, address: 'Collectorate Campus, Coimbatore', phone: '100' },
+        { id: 'cbe_f1', name: 'Sulur Fire & Rescue Station', type: 'fire', lat: 11.0250, lng: 77.1240, address: 'Trichy Road, Sulur, Coimbatore', phone: '0422-2687101' },
+        { id: 'cbe_f2', name: 'Coimbatore Central Fire Station', type: 'fire', lat: 10.9970, lng: 76.9630, address: 'Railway Station Road, Coimbatore', phone: '0422-2300101' }
+      ];
+    } else {
+      seed = [
+        { id: 'h1', name: 'Government General Hospital & Medical College', type: 'hospital', lat: lat + 0.008, lng: lng + 0.006, address: 'Main Road, District HQ, Tamil Nadu', phone: '108' },
+        { id: 'h2', name: 'District Emergency Trauma & Care Center', type: 'hospital', lat: lat - 0.012, lng: lng + 0.015, address: 'Bypass Road, Tamil Nadu', phone: '044-25305000' },
+        { id: 'p1', name: 'Central Police Station & Control Room', type: 'police', lat: lat + 0.005, lng: lng - 0.007, address: 'Police Line Road, Tamil Nadu', phone: '100' },
+        { id: 'p2', name: 'All Women Police Station', type: 'police', lat: lat - 0.010, lng: lng - 0.012, address: 'Civil Lines Road, Tamil Nadu', phone: '1091' },
+        { id: 'f1', name: 'Fire & Rescue Station', type: 'fire', lat: lat + 0.014, lng: lng - 0.004, address: 'Fire Station Road, Tamil Nadu', phone: '101' }
+      ];
+    }
 
     const mapped = seed.map(item => {
       const dist = window.EmergencyLocation.calculateDistance(lat, lng, item.lat, item.lng);
