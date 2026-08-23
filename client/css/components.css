@@ -5453,8 +5453,19 @@ body.dark-theme .universal-mobile-back-btn svg {
     margin-bottom: 0.75rem !important; /* Compact vertical gap! */
   }
 
-  .checker-content-body {
-    padding: 0.75rem 0.5rem !important;
+  /* 7. Zero side gaps on mobile for full width fit */
+  .app-main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .app-content-body,
+  .checker-content-body,
+  .services-content-body {
+    padding: 0.5rem 0.15rem !important;
+    margin: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -5462,49 +5473,68 @@ body.dark-theme .universal-mobile-back-btn svg {
 
   #checker-form-card,
   .checker-hero-card {
-    padding: 1.15rem 0.85rem !important;
-    border-radius: 16px !important;
+    padding: 0.85rem 0.6rem !important;
+    margin: 0 0 0.75rem 0 !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Result & Saved Scheme Cards full-width fit on mobile */
+  .result-scheme-card,
+  .saved-scheme-card,
+  .scheme-card,
+  .checker-step-pane {
+    padding: 0.75rem 0.4rem !important;
+    margin-bottom: 0.75rem !important;
+    border-radius: 12px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
   .step-progress-tracker {
-    gap: 0.35rem !important;
-    padding-bottom: 0.85rem !important;
+    gap: 0.25rem !important;
+    padding-bottom: 0.65rem !important;
   }
 
   .step-progress-item {
-    padding: 0.45rem 0.5rem !important;
-    gap: 0.35rem !important;
-    border-radius: 10px !important;
+    padding: 0.35rem 0.4rem !important;
+    gap: 0.25rem !important;
+    border-radius: 8px !important;
   }
 
   .checker-action-footer {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 0.75rem !important;
-    margin-top: 1.5rem !important;
-    padding-top: 1.25rem !important;
+    gap: 0.5rem !important;
+    margin-top: 1.25rem !important;
+    padding-top: 1rem !important;
     border-top: 1px solid var(--border-color, #e2e8f0) !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
 
-  /* 8. "Next Step" & "Back" buttons */
+  /* 8. Premium Professional Action Buttons (Reduced font size, zero wrap) */
   .btn-prev-step,
   .scheme-checker-page .btn-prev-step {
     flex-shrink: 0 !important;
     white-space: nowrap !important;
-    min-width: 90px !important;
+    min-width: 80px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.4rem !important;
-    font-size: 0.85rem !important;
-    padding: 0.65rem 1.1rem !important;
+    gap: 0.35rem !important;
+    font-size: 0.78rem !important; /* ~12.5px - slightly reduced, sleek font size */
+    font-weight: 700 !important;
+    padding: 0.5rem 0.85rem !important;
     border-radius: 10px !important;
+    background: var(--bg-app, #f8fafc) !important;
+    border: 1px solid var(--border-color, #cbd5e1) !important;
+    color: var(--text-main, #0f172a) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
     box-sizing: border-box !important;
   }
 
@@ -5515,10 +5545,15 @@ body.dark-theme .universal-mobile-back-btn svg {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.4rem !important;
-    font-size: 0.85rem !important;
-    padding: 0.65rem 1.1rem !important;
+    gap: 0.35rem !important;
+    font-size: 0.78rem !important; /* ~12.5px - slightly reduced, sleek font size */
+    font-weight: 700 !important;
+    padding: 0.5rem 0.85rem !important;
     border-radius: 10px !important;
+    background: linear-gradient(135deg, #0d9488 0%, #4f46e5 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
     box-sizing: border-box !important;
   }
 
