@@ -25,21 +25,31 @@ def flatten_subfolders(folder_path):
     if not os.path.exists(folder_path):
         return
 
+    file_moves = []
     for root, dirs, files in os.walk(folder_path):
         if root == folder_path:
             continue
         for file in files:
             if file.lower().endswith(IMAGE_EXTENSIONS):
                 src = os.path.join(root, file)
-                # Generate unique target filename if collision
-                target_name = f"{os.path.basename(root)}_{file}"
+                folder_tag = os.path.basename(root).replace('.', '_').replace(' ', '_')
+                target_name = f"{folder_tag}_{file}"
                 dst = os.path.join(folder_path, target_name)
+                file_moves.append((src, dst))
+
+    if file_moves:
+        print(f"[INFO] Flattening {len(file_moves)} images from subfolders into {folder_path}...")
+        for src, dst in file_moves:
+            try:
                 shutil.move(src, dst)
-        # Remove empty subdirectories
-        for d in dirs:
-            dir_to_remove = os.path.join(root, d)
-            if os.path.exists(dir_to_remove) and not os.listdir(dir_to_remove):
-                shutil.rmtree(dir_to_remove, ignore_errors=True)
+            except Exception as e:
+                pass
+
+    # Clean up empty subdirectories
+    for item in os.listdir(folder_path):
+        item_path = os.path.join(folder_path, item)
+        if os.path.isdir(item_path):
+            shutil.rmtree(item_path, ignore_errors=True)
 
 def ensure_val_split(cls_name):
     """Auto-split 20% of train images into val/ if val/ has no images"""
