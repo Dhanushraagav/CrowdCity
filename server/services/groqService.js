@@ -164,6 +164,30 @@ export const analyzeComplaintImage = async (imageBase64 = '') => {
     return getLocalImageFallbackAnalysis();
   }
 
+  const formattedImage = imageBase64.startsWith('data:') 
+    ? imageBase64 
+    : `data:image/jpeg;base64,${imageBase64}`;
+
+  // 1. Check if a dedicated custom vision classification microservice URL is configured
+  const customVisionUrl = process.env.CUSTOM_VISION_MODEL_URL;
+  if (customVisionUrl) {
+    try {
+      logger.info(`Sending image to dedicated custom vision model at ${customVisionUrl}...`);
+      const response = await fetch(customVisionUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: formattedImage })
+      });
+      if (response.ok) {
+        const dedicatedData = await response.json();
+        logger.info('Dedicated vision model classification success: %O', dedicatedData);
+        return dedicatedData;
+      }
+    } catch (customErr) {
+      logger.warn('Dedicated custom vision model request failed: %O. Falling back to primary Vision LLM.', customErr);
+    }
+  }
+
   const groq = getGroqClient();
   if (!groq) {
     logger.info('Groq SDK client unconfigured, using local image vision fallback.');
@@ -172,10 +196,6 @@ export const analyzeComplaintImage = async (imageBase64 = '') => {
 
   // Vision Models with automatic fallback: 11B -> 90B
   const visionModels = ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'];
-
-  const formattedImage = imageBase64.startsWith('data:') 
-    ? imageBase64 
-    : `data:image/jpeg;base64,${imageBase64}`;
 
   const systemPrompt = `You are an expert AI Municipal Visual Inspector trained for CrowdCity AI.
 Analyze the provided camera photo to perform visual hazard detection and object recognition.
