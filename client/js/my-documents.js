@@ -98,6 +98,47 @@
     });
   }
 
+  async function compressImageFile(file) {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      return fileToDataURL(file);
+    }
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = () => {
+          fileToDataURL(file).then(resolve).catch(() => resolve(''));
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        fileToDataURL(file).then(resolve).catch(() => resolve(''));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   function dataURLToBlob(dataurl) {
     try {
       if (!dataurl || typeof dataurl !== 'string' || !dataurl.startsWith('data:')) return null;
@@ -400,12 +441,13 @@
     const docId = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
     const cleanDocName = docName || file.name || 'Uploaded Document';
 
-    // Convert file to Base64 Data URL for cross-device cloud sync
+    // Convert and compress file to Base64 Data URL for cross-device cloud sync
     let fileDataUrl = '';
     try {
-      fileDataUrl = await fileToDataURL(file);
+      fileDataUrl = await compressImageFile(file);
     } catch (e) {
-      console.warn("File to DataURL warning:", e);
+      console.warn("File compression warning:", e);
+      fileDataUrl = await fileToDataURL(file);
     }
 
     // Store binary file Blob in local IndexedDB
