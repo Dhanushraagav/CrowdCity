@@ -5426,12 +5426,46 @@ body.dark-theme .universal-mobile-back-btn svg {
     margin-bottom: 0.75rem !important; /* Compact vertical gap! */
   }
 
+  .checker-action-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.75rem !important;
+    margin-top: 1.5rem !important;
+    padding-top: 1.25rem !important;
+    border-top: 1px solid var(--border-color, #e2e8f0) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   /* 8. "Next Step" & "Back" buttons */
-  .scheme-checker-page .btn-next-step,
+  .btn-prev-step,
   .scheme-checker-page .btn-prev-step {
-    font-size: 0.82rem !important; /* ~13px */
-    padding: 0.5rem 1rem !important;
-    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    min-width: 90px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    font-size: 0.85rem !important;
+    padding: 0.65rem 1.1rem !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  .btn-next-step,
+  .scheme-checker-page .btn-next-step {
+    flex: 1 !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    font-size: 0.85rem !important;
+    padding: 0.65rem 1.1rem !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
   }
 
   /* Government Services Portal Compact Styling */
