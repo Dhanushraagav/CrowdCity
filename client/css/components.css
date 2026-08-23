@@ -5426,6 +5426,33 @@ body.dark-theme .universal-mobile-back-btn svg {
     margin-bottom: 0.75rem !important; /* Compact vertical gap! */
   }
 
+  .checker-content-body {
+    padding: 0.75rem 0.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #checker-form-card,
+  .checker-hero-card {
+    padding: 1.15rem 0.85rem !important;
+    border-radius: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .step-progress-tracker {
+    gap: 0.35rem !important;
+    padding-bottom: 0.85rem !important;
+  }
+
+  .step-progress-item {
+    padding: 0.45rem 0.5rem !important;
+    gap: 0.35rem !important;
+    border-radius: 10px !important;
+  }
+
   .checker-action-footer {
     display: flex !important;
     align-items: center !important;
