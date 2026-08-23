@@ -173,12 +173,22 @@
         const client = await window.getOrInitSupabaseClient();
         if (client) {
           const session = await client.auth.getSession();
-          const user = session?.data?.session?.user;
+          let user = session?.data?.session?.user;
           const userId = user?.id;
 
           if (!userId) {
             renderEmptyState("Please sign in to access your secure document wallet.");
             return;
+          }
+
+          // Fetch fresh user profile from Supabase server to pull latest cloud metadata synced from other devices (e.g. mobile -> desktop)
+          try {
+            const { data: freshUserData } = await client.auth.getUser();
+            if (freshUserData?.user) {
+              user = freshUserData.user;
+            }
+          } catch (getUserErr) {
+            console.warn("[Doc Wallet] Auth getUser fresh sync warning:", getUserErr);
           }
 
           // Fetch and sync MPIN from account cloud metadata across devices
