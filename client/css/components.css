@@ -5658,8 +5658,36 @@ a,
 /* Optimize transitions on mobile devices for instant lag-free response */
 @media (max-width: 768px) {
   *, *::before, *::after {
-    animation-duration: 0.15s !important;
     transition-duration: 0.15s !important;
+  }
+
+  /* Natural, smooth 1s & 1.5s speeds for spinners, voice recording pulses & loading shimmers */
+  .fa-spin,
+  .fa-spinner,
+  .fa-circle-notch,
+  [class*="fa-spin"],
+  [class*="fa-spinner"],
+  [class*="fa-circle-notch"],
+  .spinner,
+  .spinner-border {
+    animation-duration: 1s !important;
+  }
+
+  .fa-beat,
+  .recording-pulse,
+  .status-dot-pulse,
+  .pulse-ring,
+  [class*="fa-beat"],
+  [class*="recording-pulse"] {
+    animation-duration: 1.5s !important;
+  }
+
+  .skeleton-pulse,
+  .skeleton-box,
+  .shimmer,
+  .loading-shimmer,
+  [class*="shimmer"] {
+    animation-duration: 1.5s !important;
   }
 
   .ambient-blur-blob,
