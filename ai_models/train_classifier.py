@@ -21,8 +21,22 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms, models
 
+try:
+    from prepare_dataset import run_prep
+except ImportError:
+    try:
+        from ai_models.prepare_dataset import run_prep
+    except ImportError:
+        run_prep = None
+
 def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./weights"):
     os.makedirs(save_dir, exist_ok=True)
+
+    if run_prep:
+        try:
+            run_prep()
+        except Exception as prep_err:
+            print(f"[WARN] Auto-prep warning: {prep_err}")
     
     print(f"[INFO] Initializing dataset pipeline from {dataset_dir}...")
     
