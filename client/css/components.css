@@ -5271,19 +5271,6 @@ body.dark-theme .universal-mobile-back-btn svg {
   input[type="password"],
   input[type="search"],
   input[type="tel"],
-  select,
-  textarea,
-  .form-input,
-  .form-select,
-  .form-input-custom,
-  .form-select-custom {
-    font-size: 0.85rem !important; /* ~13.5px */
-    padding: 0.6rem 0.85rem !important;
-    border-radius: 10px !important;
-  }
-
-  /* Button Text */
-  .btn, 
   button:not(.universal-mobile-back-btn):not(.mobile-menu-toggle) {
     font-size: 0.85rem !important;
   }
@@ -5370,287 +5357,202 @@ body.dark-theme .universal-mobile-back-btn svg {
 }
 
 .scheme-checker-page .checker-hero-desc {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  margin: 0;
-  line-height: 1.5;
-}
-
-.scheme-checker-page #checker-form-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 2rem 1.5rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-}
-
-.scheme-checker-page .checker-step-title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--text-main);
-  margin: 0 0 1.25rem 0;
-}
-
-/* Mobile Specific Responsive Scaling (Screens <= 768px) */
-@media (max-width: 768px) {
-  .scheme-checker-page .checker-content-body {
-    padding: 0.85rem !important;
+  .services-nav-card-desc {
+    font-size: 0.75rem !important; /* ~12px */
   }
 
-  /* 1. Header Title: "Scheme Eligibility Checker" */
+  .services-search-input {
+    padding: 0.55rem 0.85rem !important;
+    font-size: 0.85rem !important; /* ~13.5px */
+    border-radius: 10px !important;
+  }
+
+  .services-pill {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.72rem !important; /* ~11.5px */
+  }
+
+  .scheme-card {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .scheme-title {
+    font-size: 0.98rem !important; /* ~15.5px */
+    line-height: 1.3 !important;
+  }
+
+  .scheme-dept {
+    font-size: 0.75rem !important;
+  }
+
+  .scheme-benefits {
+    font-size: 0.8rem !important;
+    padding: 0.6rem !important;
+  }
+}
+
+@media (max-width: 380px) {
+  /* Extra-compact viewports (320px - 360px) */
   .scheme-checker-page .checker-page-title,
   .scheme-checker-page .app-header-main h1 {
-    font-size: 0.98rem !important; /* ~15.5px */
-    font-weight: 700 !important;
-    line-height: 1.2 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 175px !important;
+    font-size: 0.9rem !important;
+    max-width: 140px !important;
   }
 
-  /* Hero Section Compact Layout */
-  .scheme-checker-page .checker-hero-flex {
-    gap: 0.75rem !important;
-    align-items: flex-start !important;
-  }
-
-  .scheme-checker-page .checker-hero-card {
-    padding: 0.85rem 1rem !important;
-    margin-bottom: 1rem !important;
-    border-radius: 12px !important;
-  }
-
-  .scheme-checker-page .checker-hero-icon {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 0.95rem !important;
-    border-radius: 8px !important;
-  }
-
-  /* 2. Hero Heading: "Find Government Schemes You Qualify For" */
   .scheme-checker-page .checker-hero-title {
-    font-size: 0.98rem !important; /* ~15.5px */
-    font-weight: 800 !important;
-    line-height: 1.3 !important;
-    margin: 0 0 0.2rem 0 !important;
+    font-size: 0.92rem !important;
   }
 
-  /* 3. Hero Description */
   .scheme-checker-page .checker-hero-desc {
-    font-size: 0.8rem !important; /* ~12.8px */
-    line-height: 1.4 !important;
+    font-size: 0.78rem !important;
   }
 
-  /* Form Container compact padding */
-  .scheme-checker-page #checker-form-card {
-    padding: 1rem 0.85rem !important;
-    border-radius: 12px !important;
-  }
-
-  /* 7. Step indicator labels ("DEMOGRAPHICS", "INCOME", etc.) */
-  .scheme-checker-page .step-progress-tracker {
-    margin-bottom: 0.85rem !important;
-  }
-
-  .scheme-checker-page .step-progress-tracker .step-label {
-    font-size: 0.65rem !important; /* ~10.5px */
-    font-weight: 700 !important;
-    letter-spacing: 0.02em !important;
-    margin-top: 0.2rem !important;
-  }
-
-  .scheme-checker-page .step-progress-tracker .step-circle {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 0.72rem !important;
-  }
-
-  /* 4. Step Heading: "Step 1 of 3: Basic Profile" */
   .scheme-checker-page .checker-step-title {
-    font-size: 0.92rem !important; /* ~14.8px */
-    font-weight: 700 !important;
-    margin: 0 0 0.75rem 0 !important;
+    font-size: 0.88rem !important;
   }
 
-  /* 5. Form Labels: "Age (Years)", "Gender", etc. */
-  .scheme-checker-page .form-label-custom {
-    font-size: 0.82rem !important; /* ~13px */
-    font-weight: 600 !important;
-    margin-bottom: 0.25rem !important;
-  }
-
-  /* 6. Input / Select text */
+  .scheme-checker-page .form-label-custom,
   .scheme-checker-page .form-input-custom,
-  .scheme-checker-page .form-select-custom {
-    font-size: 0.85rem !important; /* ~13.5px */
-    padding: 0.55rem 0.75rem !important;
-    border-radius: 8px !important;
-    height: auto !important;
-  }
-
-  .scheme-checker-page .form-group-custom {
-    margin-bottom: 0.75rem !important; /* Compact vertical gap! */
-  }
-
-  /* 7. Zero side gaps on mobile for full width fit */
-  .app-main {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .app-content-body,
-  .checker-content-body,
-  .services-content-body {
-    padding: 0.5rem 0.15rem !important;
-    margin: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  #checker-form-card,
-  .checker-hero-card {
-    padding: 0.85rem 0.6rem !important;
-    margin: 0 0 0.75rem 0 !important;
-    border-radius: 14px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* When Results (Step 4) is active on mobile, unwrap outer container so scheme cards show in 100% full view */
-  #checker-form-card.step-results-active,
-  #checker-form-card:has(#checker-step-4.active) {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Result & Saved Scheme Cards 100% full-width fit on mobile with zero side gaps */
-  .result-scheme-card,
-  .saved-scheme-card,
-  .scheme-card {
-    padding: 0.85rem 0.65rem !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-bottom: 0.85rem !important;
-    border-radius: 14px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
-  }
-
-  .checker-step-pane {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .step-progress-tracker {
-    gap: 0.25rem !important;
-    padding-bottom: 0.65rem !important;
-  }
-
-  .step-progress-item {
-    padding: 0.35rem 0.4rem !important;
-    gap: 0.25rem !important;
-    border-radius: 8px !important;
-  }
-
-  .checker-action-footer {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 0.5rem !important;
-    margin-top: 1.25rem !important;
-    padding-top: 1rem !important;
-    border-top: 1px solid var(--border-color, #e2e8f0) !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 8. Premium Professional Compact Action Buttons (Compact height, reduced font size, zero wrap) */
-  .btn-prev-step,
-  .btn-prev-step span,
-  .scheme-checker-page .btn-prev-step,
-  .scheme-checker-page .btn-prev-step span {
-    white-space: nowrap !important;
-    word-break: keep-all !important;
-    overflow-wrap: normal !important;
-    font-size: 0.76rem !important; /* ~12px compact font */
-    font-weight: 700 !important;
-  }
-
-  .btn-prev-step,
-  .scheme-checker-page .btn-prev-step {
-    flex-shrink: 0 !important;
-    width: auto !important;
-    min-width: 75px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0.3rem !important;
-    padding: 0.42rem 0.75rem !important;
-    border-radius: 8px !important;
-    background: #f1f5f9 !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #0f172a !important;
-    box-shadow: none !important;
-    box-sizing: border-box !important;
-  }
-
-  .btn-next-step,
-  .btn-next-step span,
-  .scheme-checker-page .btn-next-step,
-  .scheme-checker-page .btn-next-step span {
-    white-space: nowrap !important;
-    word-break: keep-all !important;
-    overflow-wrap: normal !important;
-    font-size: 0.76rem !important; /* ~12px compact font */
-    font-weight: 700 !important;
-  }
-
-  .btn-next-step,
+  .scheme-checker-page .form-select-custom,
   .scheme-checker-page .btn-next-step {
-    flex: 1 !important;
-    width: auto !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0.3rem !important;
-    padding: 0.42rem 0.75rem !important;
-    border-radius: 8px !important;
-    background: linear-gradient(135deg, #0d9488 0%, #059669 100%) !important;
-    border: none !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2) !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+/* ==========================================================================
+   ULTRA-SMOOTH 60FPS HARDWARE-ACCELERATED MOTION SYSTEM
+   ========================================================================== */
+*, *::before, *::after {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Fast, smooth micro-interactions for buttons and links without layout jank */
+.btn,
+button,
+a,
+.card,
+.checker-card,
+.result-scheme-card,
+.saved-scheme-card,
+.scheme-card,
+  }
+
+  /* Body Text & Descriptions */
+  p, 
+  span:not(.badge):not(.btn):not(.brand-title):not(.brand-subtitle), 
+  .text-muted, 
+  .description,
+  .page-subtitle,
+  .hero-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
+  /* Form Labels & Custom Labels */
+  label, 
+  .form-label, 
+  .form-label-custom {
+    font-size: 0.8rem !important; /* ~13px */
+    font-weight: 600 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  /* Inputs, Selects, and Textareas */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  button:not(.universal-mobile-back-btn):not(.mobile-menu-toggle) {
+    font-size: 0.85rem !important;
+  }
+
+  /* Specific padding & container adjustments to prevent horizontal overflow & clipping */
+  .app-content-body,
+  .content-wrapper,
+  .checker-card,
+  .checker-form-wrapper,
+  .checker-step-pane,
+  .settings-card,
+  .profile-card,
+  .complaint-card,
+  .history-card {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
-  /* Government Services Portal Compact Styling */
-  .services-hero-banner {
-    padding: 1rem 1.15rem !important;
-    border-radius: 14px !important;
-    margin-bottom: 1.25rem !important;
+  /* Checkbox tile groups spacing on small screens */
+  .checkbox-tile-group {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 0.5rem !important;
+  }
+}
+
+@media (max-width: 380px) {
+  /* Ultra-compact screens (320px - 375px) */
+  h1, .page-title, .hero-title {
+    font-size: 1.15rem !important; /* ~18px */
   }
 
-  .services-nav-card {
-    padding: 0.85rem 1rem !important;
-    border-radius: 12px !important;
+  h2, .section-title {
+    font-size: 0.98rem !important; /* ~15.5px */
   }
 
-  .services-nav-card-title {
-    font-size: 0.88rem !important; /* ~14px */
-    font-weight: 800 !important;
+  h3, .card-title {
+    font-size: 0.9rem !important; /* ~14.5px */
   }
 
+  body, p, label {
+    font-size: 0.8rem !important; /* ~12.8px */
+  }
+}
+/* ==========================================================================
+   PAGE-SPECIFIC SCHEME ELIGIBILITY CHECKER & GOVT SERVICES MOBILE TYPOGRAPHY
+   ========================================================================== */
+.scheme-checker-page .checker-page-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.scheme-checker-page .checker-hero-card {
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(99, 102, 241, 0.08));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.scheme-checker-page .checker-hero-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.scheme-checker-page .checker-hero-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.25rem 0;
+}
+
+.scheme-checker-page .checker-hero-desc {
   .services-nav-card-desc {
     font-size: 0.75rem !important; /* ~12px */
   }
@@ -5749,5 +5651,70 @@ a,
   [class*="ambientFloat"] {
     display: none !important;
     animation: none !important;
+  }
+
+  /* ==========================================================================
+     GLOBAL MOBILE 100% FULL-WIDTH SCREEN FILL (Zero side gaps across ALL pages)
+     ========================================================================== */
+  html,
+  body,
+  .app-layout,
+  .app-main,
+  .app-content-body,
+  .content-wrapper,
+  .container,
+  .report-container,
+  .checker-content-body,
+  .services-content-body,
+  main,
+  section {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0.15rem !important;
+    padding-right: 0.15rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Force all primary cards, wizard containers & form panels to fill mobile screen width without side gaps */
+  .card,
+  .report-wizard-card,
+  .report-card,
+  #report-form-card,
+  #checker-form-card,
+  .checker-hero-card,
+  .services-hero-banner,
+  .emergency-section-inner,
+  .stitch-hero,
+  .glass-panel,
+  .profile-card,
+  .complaint-card,
+  .issue-card,
+  .checker-step-pane,
+  .report-step-pane,
+  .step-pane,
+  .form-card,
+  .result-scheme-card,
+  .saved-scheme-card,
+  .scheme-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0.85rem 0.6rem !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* When Results (Step 4) is active on mobile, unwrap outer container so scheme cards show in 100% full view */
+  #checker-form-card.step-results-active,
+  #checker-form-card:has(#checker-step-4.active) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
