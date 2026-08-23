@@ -342,9 +342,9 @@ window.authRouter = {
         width: 100vw !important;
         height: 100vh !important;
         height: 100dvh !important;
-        background: rgba(3, 7, 18, 0.85) !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
+        background: rgba(15, 23, 42, 0.5) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -355,15 +355,14 @@ window.authRouter = {
         -webkit-user-select: none !important;
       }
       .demo-notice-card {
-        background: #0b1329 !important;
-        background: linear-gradient(145deg, #0e172e 0%, #080e1e 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
         border-radius: 20px !important;
         max-width: 520px !important;
         width: 100% !important;
         max-height: 90vh !important;
         max-height: 90dvh !important;
-        box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(13, 148, 136, 0.12) !important;
+        box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.25), 0 0 25px rgba(13, 148, 136, 0.1) !important;
         overflow: hidden !important;
         display: flex !important;
         flex-direction: column !important;
@@ -377,10 +376,11 @@ window.authRouter = {
       }
       .demo-notice-header {
         padding: 1.25rem 1.5rem 1rem !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-bottom: 1px solid #f1f5f9 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
+        background: #ffffff !important;
       }
       .demo-notice-header-left {
         display: flex !important;
@@ -395,7 +395,7 @@ window.authRouter = {
       .demo-notice-title {
         font-size: 1.25rem !important;
         font-weight: 800 !important;
-        color: #ffffff !important;
+        color: #0f172a !important;
         margin: 0 !important;
         letter-spacing: -0.02em !important;
         font-family: system-ui, -apple-system, sans-serif !important;
@@ -404,11 +404,11 @@ window.authRouter = {
         font-size: 0.7rem !important;
         font-weight: 800 !important;
         text-transform: uppercase !important;
-        background: rgba(13, 148, 136, 0.15) !important;
-        color: #14b8a6 !important;
+        background: #ccfbf1 !important;
+        color: #0d9488 !important;
         padding: 0.3rem 0.75rem !important;
         border-radius: 9999px !important;
-        border: 1px solid rgba(13, 148, 136, 0.3) !important;
+        border: 1px solid #99f6e4 !important;
         letter-spacing: 0.08em !important;
         font-family: system-ui, -apple-system, sans-serif !important;
       }
@@ -422,10 +422,11 @@ window.authRouter = {
         -webkit-overflow-scrolling: touch !important;
         max-height: calc(90vh - 130px) !important;
         max-height: calc(90dvh - 130px) !important;
+        background: #ffffff !important;
       }
       .demo-notice-box {
-        background: rgba(15, 23, 42, 0.7) !important;
-        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
         border-radius: 12px !important;
         padding: 1rem 1.15rem !important;
         display: flex !important;
@@ -436,7 +437,7 @@ window.authRouter = {
       .demo-notice-info-icon {
         width: 22px !important;
         height: 22px !important;
-        background: #0ea5e9 !important;
+        background: #0284c7 !important;
         color: #ffffff !important;
         border-radius: 50% !important;
         display: flex !important;
@@ -452,16 +453,16 @@ window.authRouter = {
       .demo-notice-text {
         font-size: 0.88rem !important;
         line-height: 1.55 !important;
-        color: #94a3b8 !important;
+        color: #334155 !important;
         margin: 0 !important;
         font-family: system-ui, -apple-system, sans-serif !important;
       }
       .demo-notice-text strong.red {
-        color: #f87171 !important;
+        color: #dc2626 !important;
         font-weight: 800 !important;
       }
       .demo-notice-text strong.yellow {
-        color: #fbbf24 !important;
+        color: #d97706 !important;
         font-weight: 800 !important;
       }
       .demo-notice-checkbox-block {
@@ -471,23 +472,23 @@ window.authRouter = {
         cursor: pointer !important;
         padding: 0.85rem 1rem !important;
         border-radius: 12px !important;
-        background: rgba(15, 23, 42, 0.7) !important;
-        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
         transition: all 0.2s ease !important;
         touch-action: manipulation !important;
         -webkit-tap-highlight-color: transparent !important;
         box-sizing: border-box !important;
       }
       .demo-notice-checkbox-block:hover {
-        border-color: rgba(20, 184, 166, 0.3) !important;
-        background: rgba(20, 184, 166, 0.05) !important;
+        border-color: #0d9488 !important;
+        background: #f0fdf4 !important;
       }
       .demo-notice-check-box {
         width: 22px !important;
         height: 22px !important;
         border-radius: 6px !important;
-        border: 2px solid rgba(255, 255, 255, 0.25) !important;
-        background: rgba(255, 255, 255, 0.04) !important;
+        border: 2px solid #94a3b8 !important;
+        background: #ffffff !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -503,9 +504,9 @@ window.authRouter = {
         transition: all 0.2s ease !important;
       }
       .demo-notice-checkbox-block.checked .demo-notice-check-box {
-        background: #14b8a6 !important;
-        border-color: #14b8a6 !important;
-        box-shadow: 0 0 12px rgba(20, 184, 166, 0.4) !important;
+        background: #0d9488 !important;
+        border-color: #0d9488 !important;
+        box-shadow: 0 0 10px rgba(13, 148, 136, 0.3) !important;
       }
       .demo-notice-checkbox-block.checked .demo-notice-check-box svg {
         opacity: 1 !important;
@@ -513,18 +514,18 @@ window.authRouter = {
       }
       .demo-notice-checkbox-label {
         font-size: 0.88rem !important;
-        color: #ffffff !important;
+        color: #0f172a !important;
         line-height: 1.4 !important;
         font-weight: 700 !important;
         font-family: system-ui, -apple-system, sans-serif !important;
       }
       .demo-notice-footer {
         padding: 1rem 1.5rem 1.25rem !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-top: 1px solid #f1f5f9 !important;
         display: flex !important;
         justify-content: flex-end !important;
         gap: 0.85rem !important;
-        background: rgba(8, 14, 30, 0.8) !important;
+        background: #f8fafc !important;
         box-sizing: border-box !important;
       }
       .demo-notice-btn {
@@ -545,32 +546,32 @@ window.authRouter = {
         font-family: system-ui, -apple-system, sans-serif !important;
       }
       .demo-notice-btn-learn {
-        background: transparent !important;
-        color: #94a3b8 !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        background: #ffffff !important;
+        color: #475569 !important;
+        border: 1px solid #cbd5e1 !important;
         text-decoration: none !important;
       }
       .demo-notice-btn-learn:hover {
-        background: rgba(255, 255, 255, 0.06) !important;
-        color: #ffffff !important;
-        border-color: rgba(255, 255, 255, 0.25) !important;
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #94a3b8 !important;
       }
       .demo-notice-btn-continue {
-        background: rgba(255, 255, 255, 0.06) !important;
-        color: rgba(255, 255, 255, 0.35) !important;
-        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        background: #e2e8f0 !important;
+        color: #94a3b8 !important;
+        border: 1px solid #cbd5e1 !important;
         cursor: not-allowed !important;
       }
       .demo-notice-btn-continue.active {
-        background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%) !important;
+        background: linear-gradient(135deg, #0d9488 0%, #059669 100%) !important;
         color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 6px 20px rgba(13, 148, 136, 0.35) !important;
+        border: none !important;
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3) !important;
         cursor: pointer !important;
       }
       .demo-notice-btn-continue.active:hover {
         transform: translate3d(0, -1.5px, 0) !important;
-        box-shadow: 0 10px 25px rgba(13, 148, 136, 0.5) !important;
+        box-shadow: 0 6px 18px rgba(13, 148, 136, 0.45) !important;
       }
     `;
     document.head.appendChild(modalStyle);
