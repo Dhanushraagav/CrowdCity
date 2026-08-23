@@ -594,6 +594,16 @@
   document.addEventListener('DOMContentLoaded', () => {
     fetchUserDocuments();
 
+    // Auto-sync document wallet whenever switching between tabs or devices
+    window.addEventListener('focus', () => {
+      fetchUserDocuments();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        fetchUserDocuments();
+      }
+    });
+
     // File Input & Drag and Drop Setup
     const fileInput = document.getElementById('doc-file-input');
     const dropZone = document.getElementById('doc-drop-zone');
