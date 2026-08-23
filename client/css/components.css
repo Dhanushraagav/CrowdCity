@@ -2821,12 +2821,29 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   margin: 0;
 }
 
-.stitch-hero:has(.stitch-hero-title) .stitch-hero-title {
+.stitch-hero:has(.stitch-hero-title) .stitch-hero-title,
+#hero-greeting {
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
   color: var(--primary, #0d9488) !important;
-  text-shadow: none;
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  -webkit-text-fill-color: initial !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 !important;
+  line-height: 1.25 !important;
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 0 6px !important;
+}
+
+.stitch-hero-title .user-greeting-name,
+#hero-greeting .user-greeting-name,
+.user-greeting-name {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  color: inherit !important;
+  line-height: inherit !important;
+  display: inline !important;
+  vertical-align: baseline !important;
 }
 
 .stitch-hero-desc {
@@ -5441,7 +5458,7 @@ a,
 
   /* Body Text & Descriptions */
   p, 
-  span:not(.badge):not(.btn):not(.brand-title):not(.brand-subtitle), 
+  span:not(.badge):not(.btn):not(.brand-title):not(.brand-subtitle):not(.user-greeting-name), 
   .text-muted, 
   .description,
   .page-subtitle,
