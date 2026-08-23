@@ -46,8 +46,9 @@ except ImportError:
     except ImportError:
         run_prep = None
 
-def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./weights"):
+def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, target_acc=0.85, save_dir="./weights"):
     os.makedirs(save_dir, exist_ok=True)
+    save_path = os.path.join(save_dir, "civic_vision_model.pth")
 
     if run_prep:
         try:
@@ -88,6 +89,7 @@ def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./wei
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"[INFO] Training on device: {device}")
+    print(f"[INFO] Early Stopping target accuracy set to: {target_acc * 100:.1f}%")
 
     # Load MobileNetV3 Backbone in 100% PURE OFFLINE MODE (Zero network calls)
     print("[INFO] 100% PURE OFFLINE MODE ENABLED: Initializing MobileNetV3 architecture locally with zero online network requests.")
@@ -103,9 +105,13 @@ def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./wei
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
+    best_acc = 0.0
+
     for epoch in range(epochs):
         print(f"\nEpoch {epoch+1}/{epochs}")
         print("-" * 55)
+
+        epoch_val_acc = 0.0
 
         for phase in ['train', 'val']:
             if phase not in dataloaders:
@@ -152,17 +158,31 @@ def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./wei
             epoch_loss = running_loss / dataset_size
             epoch_acc = (running_corrects.double() / dataset_size).item()
 
-            print(f"\n[{phase.upper()} SUMMARY] Loss: {epoch_loss:.4f} | Final Acc: {epoch_acc*100:.2f}%\n")
+            if phase == 'val':
+                epoch_val_acc = epoch_acc
 
-    save_path = os.path.join(save_dir, "civic_vision_model.pth")
-    torch.save(model.state_dict(), save_path)
-    print(f"\n[SUCCESS] Model training complete! Trained weights saved to {save_path}")
+            print(f"\n[{phase.upper()} SUMMARY] Loss: {epoch_loss:.4f} | Accuracy: {epoch_acc*100:.2f}%\n")
+
+        # Save Checkpoint if best accuracy
+        check_acc = epoch_val_acc if 'val' in dataloaders else epoch_acc
+        if check_acc > best_acc:
+            best_acc = check_acc
+            torch.save(model.state_dict(), save_path)
+            print(f"[CHECKPOINT] Best model weights updated and saved to {save_path} (Acc: {best_acc*100:.2f}%)")
+
+        # Early Stopping Trigger
+        if check_acc >= target_acc:
+            print(f"\n[EARLY STOPPING TRIGGERED] Target accuracy of {target_acc*100:.1f}% reached ({check_acc*100:.2f}%)! Saving best weights and completing training early.")
+            break
+
+    print(f"\n[SUCCESS] Training completed! Best weights saved at {save_path} with Best Accuracy: {best_acc*100:.2f}%")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Custom Vision Model for CrowdCity AI")
     parser.add_argument("--dataset_dir", type=str, default="./dataset", help="Path to dataset directory")
     parser.add_argument("--epochs", type=int, default=15, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
+    parser.add_argument("--target_acc", type=float, default=0.85, help="Target accuracy for early stopping (e.g. 0.85 for 85%)")
     args = parser.parse_args()
 
-    train_model(args.dataset_dir, args.epochs, args.batch_size)
+    train_model(args.dataset_dir, args.epochs, args.batch_size, args.target_acc)
