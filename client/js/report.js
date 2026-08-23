@@ -582,7 +582,7 @@ function initVoiceRecognition() {
     voiceBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> <span>Voice Report</span>`;
 
     const spokenText = descField ? descField.value.trim() : '';
-    if (spokenText && spokenText.length > 2) {
+    if (spokenText && isMeaningfulCivicDescription(spokenText)) {
       if (voiceStatus) {
         voiceStatus.style.display = 'block';
         voiceStatus.textContent = 'AI is translating Tamil/Tanglish & polishing into clear English...';
@@ -598,9 +598,11 @@ function initVoiceRecognition() {
               voiceStatus.textContent = 'Transcribed & translated into clear English!';
               voiceStatus.style.color = '#10b981';
             }
-            // Auto-trigger AI categorizer to set category & department!
-            const aiBtn = document.getElementById('btn-ai-assist');
-            if (aiBtn) aiBtn.click();
+            // Auto-trigger AI categorizer to set category & department if text describes a real civic issue!
+            if (isMeaningfulCivicDescription(res.englishText)) {
+              const aiBtn = document.getElementById('btn-ai-assist');
+              if (aiBtn) aiBtn.click();
+            }
           }
         }
       } catch (err) {
@@ -610,8 +612,42 @@ function initVoiceRecognition() {
           voiceStatus.style.color = 'var(--text-muted)';
         }
       }
+    } else if (spokenText) {
+      if (voiceStatus) {
+        voiceStatus.style.display = 'block';
+        voiceStatus.textContent = 'Voice captured. Please describe a specific civic issue (e.g. damaged road, streetlight issue, garbage leak).';
+        voiceStatus.style.color = '#d97706';
+      }
     }
   };
+}
+
+/**
+ * Check if the text is a meaningful civic issue description
+ * Rejects humming, repetitive gibberish (e.g. "la laala", "test test", "aaa"), and short non-words
+ */
+function isMeaningfulCivicDescription(text) {
+  if (!text || typeof text !== 'string') return false;
+  const cleaned = text.trim().toLowerCase();
+  
+  // Must be at least 6 characters
+  if (cleaned.length < 6) return false;
+
+  // Detect repetitive single words or syllables like "la la la", "laala", "na na", "tst tst"
+  const words = cleaned.split(/\s+/).filter(w => w.length > 0);
+  if (words.length === 0) return false;
+
+  // If 70%+ of words are identical repetitive patterns (e.g., ["laala", "laala", "laala"])
+  const uniqueWords = new Set(words);
+  if (words.length >= 2 && uniqueWords.size === 1) return false;
+
+  // List of common gibberish / test phrases / repetitive humming
+  const gibberishPhrases = ['la la', 'lala', 'laala', 'la laala', 'lalala', ' test test', 'testing 123', 'asdf', 'qwerty', 'abcde', 'hhhh', 'aaaa', 'லாலா'];
+  if (gibberishPhrases.some(g => cleaned.includes(g) && words.length < 5)) {
+    return false;
+  }
+
+  return true;
 }
 
 // Initialize Report Page
@@ -1242,10 +1278,10 @@ function setupAiAssistant() {
   aiBtn.addEventListener('click', async () => {
     const description = document.getElementById('report-description').value.trim();
 
-    if (!description) {
-      alertBanner.textContent = 'Please fill out the Detailed Description first so the AI can analyze the details.';
+    if (!description || !isMeaningfulCivicDescription(description)) {
+      alertBanner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Please describe a specific civic issue in the Detailed Description (e.g. pothole on road, streetlights damaged, garbage overflow, water supply issue).';
       alertBanner.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
-      alertBanner.style.color = '#f59e0b';
+      alertBanner.style.color = '#d97706';
       alertBanner.classList.remove('hidden');
       alertBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return;
@@ -1269,6 +1305,19 @@ function setupAiAssistant() {
     }
 
     if (data && data.suggestedCategory) {
+      const isOtherCategory = (data.suggestedCategory.toLowerCase() === 'other');
+      
+      if (isOtherCategory && !isMeaningfulCivicDescription(description)) {
+        alertBanner.innerHTML = `
+          <i class="fa-solid fa-triangle-exclamation"></i> 
+          AI could not identify a specific civic category from the text. Please describe the problem in detail or select your category manually.
+        `;
+        alertBanner.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
+        alertBanner.style.color = '#d97706';
+        alertBanner.classList.remove('hidden');
+        return;
+      }
+
       setCategoryProgrammatically(data.suggestedCategory);
       
       alertBanner.innerHTML = `
