@@ -108,13 +108,26 @@ def load_model():
     ])
 
     MODEL = CivicVisionClassifier(num_classes=5)
-    model_path = os.path.join(os.path.dirname(__file__), "weights", "civic_vision_model.pth")
     
-    if os.path.exists(model_path):
-        print(f"[INFO] Loading trained weights from {model_path}")
+    # Check potential weight paths
+    candidate_paths = [
+        os.path.join(os.path.dirname(__file__), "weights", "civic_vision_model.pth"),
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "weights", "civic_vision_model.pth"),
+        os.path.abspath("weights/civic_vision_model.pth"),
+        os.path.abspath("ai_models/weights/civic_vision_model.pth")
+    ]
+    
+    model_path = None
+    for p in candidate_paths:
+        if os.path.exists(p):
+            model_path = p
+            break
+
+    if model_path:
+        print(f"[INFO] Successfully loaded custom trained weights from {model_path}")
         MODEL.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     else:
-        print("[INFO] No custom weights found. Model ready for training.")
+        print("[INFO] No custom weights file found. Model running with default feature extractor.")
     
     MODEL.eval()
 
