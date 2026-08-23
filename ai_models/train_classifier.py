@@ -16,10 +16,23 @@ python train_classifier.py --dataset_dir ./dataset --epochs 15 --batch_size 32
 
 import os
 import argparse
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms, models
+import sys
+
+try:
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    from torchvision import datasets, transforms, models
+except ImportError:
+    print("\n" + "="*70)
+    print("[ERROR] PyTorch (torch / torchvision) is not installed in your Python environment.")
+    print("="*70)
+    print("\nPlease run this command to install PyTorch:")
+    print("  pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu")
+    print("\nOr for GPU acceleration (if you have an NVIDIA graphics card):")
+    print("  pip install torch torchvision")
+    print("="*70 + "\n")
+    sys.exit(1)
 
 try:
     from prepare_dataset import run_prep
