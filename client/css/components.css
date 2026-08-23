@@ -4635,29 +4635,13 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 /* ==========================================================================
-   Footer UI Refinement
-   ========================================================================== */
-.app-footer {
-  background-color: var(--bg-surface) !important;
-  border-top: 1px solid var(--border-color) !important;
-  padding: 1.25rem 2rem !important;
-  text-align: center !important;
-  color: var(--text-muted) !important;
-  font-size: 0.82rem !important;
-  margin-top: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  width: 100% !important;
+footer,
+.app-footer,
+.footer,
+.site-footer,
+.main-footer {
+  display: none !important;
 }
-
-.app-footer p {
-  margin: 0 !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.5px !important;
-  color: var(--text-muted) !important;
-  opacity: 0.85 !important;
 }
 
 .page-wrapper {

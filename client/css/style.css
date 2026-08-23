@@ -367,15 +367,13 @@ img {
   cursor: pointer;
 }
 
-/* Footers */
-.app-footer {
-  background-color: var(--bg-surface);
-  border-top: 1px solid var(--border-color);
-  padding: 1.5rem;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  margin-top: auto;
+/* Footers - Hidden globally */
+footer,
+.app-footer,
+.footer,
+.site-footer,
+.main-footer {
+  display: none !important;
 }
 
 /* Utility classes */
