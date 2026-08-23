@@ -85,8 +85,20 @@ def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./wei
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"[INFO] Training on device: {device}")
 
-    # Load MobileNetV3 Pretrained Backbone
-    model = models.mobilenet_v3_small(pretrained=True)
+    # Load MobileNetV3 Backbone with network failover fallback
+    try:
+        if hasattr(models, 'MobileNet_V3_Small_Weights'):
+            model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT)
+        else:
+            model = models.mobilenet_v3_small(pretrained=True)
+        print("[INFO] Successfully loaded pretrained MobileNetV3 ImageNet backbone weights.")
+    except Exception as net_err:
+        print(f"[NOTE] Network download failed ({net_err}). Initializing MobileNetV3 architecture in offline mode.")
+        if hasattr(models, 'MobileNet_V3_Small_Weights'):
+            model = models.mobilenet_v3_small(weights=None)
+        else:
+            model = models.mobilenet_v3_small(pretrained=False)
+
     in_features = model.classifier[3].in_features
     model.classifier[3] = nn.Linear(in_features, len(class_names))
     model = model.to(device)
