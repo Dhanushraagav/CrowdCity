@@ -5677,13 +5677,40 @@ body.dark-theme .universal-mobile-back-btn svg {
   }
 }
 
+/* ==========================================================================
+   ULTRA-SMOOTH 60FPS HARDWARE-ACCELERATED MOTION SYSTEM
+   ========================================================================== */
+*, *::before, *::after {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
 
+/* Fast, smooth micro-interactions for buttons and links without layout jank */
+.btn,
+button,
+a,
+.card,
+.checker-card,
+.result-scheme-card,
+.saved-scheme-card,
+.scheme-card,
+.quick-action-card,
+.services-nav-card {
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out !important;
+}
 
+/* Optimize transitions on mobile devices for instant lag-free response */
+@media (max-width: 768px) {
+  *, *::before, *::after {
+    animation-duration: 0.15s !important;
+    transition-duration: 0.15s !important;
+  }
 
-
-
-
-
-
-
-
+  .ambient-blur-blob,
+  .bg-ambient-blob,
+  .weather-floating-bg,
+  [class*="ambientFloat"] {
+    display: none !important;
+    animation: none !important;
+  }
+}

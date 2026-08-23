@@ -491,14 +491,9 @@ footer,
 }
 
 
-/* Premium Motion Systems */
+/* Premium Hardware-Accelerated High-Performance Motion Systems */
 body {
-  opacity: 0;
-  animation: bodyFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes bodyFadeIn {
-  to { opacity: 1; }
+  opacity: 1 !important; /* Instant 0ms page rendering - no fade-in lag */
 }
 
 .issue-card,
@@ -510,25 +505,21 @@ body {
 .glass-panel {
   opacity: 1;
   transform: translateY(0);
-  animation: cardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease;
+  will-change: transform;
 }
 
+/* Crisp, lightweight card entrance without laggy blur filters or staggered delays */
 @keyframes cardSlideUp {
+  from {
+    opacity: 0.85;
+    transform: translateY(4px);
+  }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-.issue-card:nth-child(1), .stitch-stat-card:nth-child(1), .stitch-item-card:nth-child(1), .timeline-content:nth-child(1), .comment-card:nth-child(1), .profile-stat-card:nth-child(1) { animation-delay: 0.04s; }
-.issue-card:nth-child(2), .stitch-stat-card:nth-child(2), .stitch-item-card:nth-child(2), .timeline-content:nth-child(2), .comment-card:nth-child(2), .profile-stat-card:nth-child(2) { animation-delay: 0.08s; }
-.issue-card:nth-child(3), .stitch-stat-card:nth-child(3), .stitch-item-card:nth-child(3), .timeline-content:nth-child(3), .comment-card:nth-child(3), .profile-stat-card:nth-child(3) { animation-delay: 0.12s; }
-.issue-card:nth-child(4), .stitch-stat-card:nth-child(4), .stitch-item-card:nth-child(4), .timeline-content:nth-child(4), .comment-card:nth-child(4), .profile-stat-card:nth-child(4) { animation-delay: 0.16s; }
-.issue-card:nth-child(5), .stitch-item-card:nth-child(5), .timeline-content:nth-child(5) { animation-delay: 0.2s; }
-.issue-card:nth-child(6), .stitch-item-card:nth-child(6), .timeline-content:nth-child(6) { animation-delay: 0.24s; }
-.issue-card:nth-child(7), .stitch-item-card:nth-child(7), .timeline-content:nth-child(7) { animation-delay: 0.28s; }
-.issue-card:nth-child(8), .stitch-item-card:nth-child(8), .timeline-content:nth-child(8) { animation-delay: 0.32s; }
 
 .issue-card:hover,
 .stitch-stat-card:hover,
@@ -537,11 +528,9 @@ body {
 .comment-card:hover,
 .profile-stat-card:hover,
 .glass-panel-hover:hover {
-  transform: translateY(-4px) scale(1.015);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
   border-color: var(--primary) !important;
 }
-
 
 /* AI Status Dot pulse animation */
 .status-dot-pulse {
@@ -594,75 +583,12 @@ body {
   background-size: 20px 20px;
 }
 
-
-/* ==========================================================================
-   Premium Living Background & Global Page Animations
-   ========================================================================== */
-
-/* Animated, floating background gradient blobs on ALL pages */
-body::before {
-  content: '';
-  position: fixed;
-  top: -15%;
-  right: -15%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(13, 148, 136, 0.06) 0%, rgba(13, 148, 136, 0) 70%);
-  border-radius: 50%;
-  z-index: -10;
-  pointer-events: none;
-  animation: ambientFloat1 22s infinite alternate ease-in-out;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  bottom: -20%;
-  left: -15%;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.04) 0%, rgba(99, 102, 241, 0) 70%);
-  border-radius: 50%;
-  z-index: -10;
-  pointer-events: none;
-  animation: ambientFloat2 28s infinite alternate ease-in-out;
-}
-
-@keyframes ambientFloat1 {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(-5%, 8%) scale(1.15);
-  }
-  100% {
-    transform: translate(8%, -5%) scale(0.9);
-  }
-}
-
-@keyframes ambientFloat2 {
-  0% {
-    transform: translate(0, 0) scale(1.1);
-  }
-  50% {
-    transform: translate(8%, -8%) scale(0.95);
-  }
-  100% {
-    transform: translate(-5%, 5%) scale(1.2);
-  }
-}
-
-/* Premium Card Hover Bounce & Slide-up Keyframes Overrides */
-@keyframes cardSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.975);
-    filter: blur(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+/* Disable heavy ambient floating background animations on mobile to guarantee 60fps */
+@media (max-width: 768px) {
+  body::before,
+  body::after {
+    display: none !important;
+    animation: none !important;
   }
 }
 
