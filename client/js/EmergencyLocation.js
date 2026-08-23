@@ -16,7 +16,7 @@ window.EmergencyLocation = {
   /**
    * Request browser geolocation with high accuracy
    */
-  getCurrentPosition: function() {
+  getCurrentPosition: function(forceFresh = false) {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
         console.warn('Geolocation not supported by browser. Using default Tamil Nadu location.');
@@ -24,6 +24,12 @@ window.EmergencyLocation = {
         resolve(this.currentLocation);
         return;
       }
+
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 10000, // 10 seconds for mobile GPS acquisition
+        maximumAge: forceFresh ? 0 : 60000
+      };
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -40,11 +46,7 @@ window.EmergencyLocation = {
           this.currentLocation = { ...this.fallbackCoords, isFallback: true, error: error.message };
           resolve(this.currentLocation);
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 3000,
-          maximumAge: 300000
-        }
+        options
       );
     });
   },

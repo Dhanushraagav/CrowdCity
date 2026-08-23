@@ -19,20 +19,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Initialize Interactive Emergency Map Instantly
   window.EmergencyMap.init('emergency-map', initialLoc.latitude, initialLoc.longitude);
 
-  // 4. Load Responders Instantly (0.1s response)
+  // 4. Load Responders Instantly (0.1s initial response)
   await loadResponders(initialLoc.latitude, initialLoc.longitude, currentRadiusKm, currentFilterType);
 
   // 5. Setup Event Listeners (Search Bar, Radius Buttons, Instant Type Filters)
   setupEventListeners(initialLoc);
 
-  // 6. Asynchronously Fetch Real GPS Position in Background without blocking UI
-  window.EmergencyLocation.getCurrentPosition().then(async (realLoc) => {
-    if (realLoc && !realLoc.isFallback) {
-      window.EmergencyMap.setUserLocation(realLoc.latitude, realLoc.longitude);
-      window.EmergencyMap.map.setView([realLoc.latitude, realLoc.longitude], 13);
-      await loadResponders(realLoc.latitude, realLoc.longitude, currentRadiusKm, currentFilterType);
-    }
-  });
+  // 6. AUTOMATICALLY REQUEST & FETCH REAL LIVE GPS POSITION IMMEDIATELY
+  fetchAndCenterLiveGPS(true);
 });
 
 async function loadResponders(lat, lng, radiusKm, type) {
@@ -231,6 +225,39 @@ window.openShareLocationModal = async function() {
   }
 };
 
+async function fetchAndCenterLiveGPS(isAutoLoad = false) {
+  const locateBtns = document.querySelectorAll('.btn-locate-me');
+  locateBtns.forEach(btn => {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Locating...';
+  });
+
+  try {
+    const realLoc = await window.EmergencyLocation.getCurrentPosition(true);
+    if (realLoc && !realLoc.isFallback) {
+      window.EmergencyMap.setUserLocation(realLoc.latitude, realLoc.longitude);
+      if (window.EmergencyMap.map) {
+        window.EmergencyMap.map.setView([realLoc.latitude, realLoc.longitude], 14);
+      }
+      allLoadedResponders = []; // Clear in-memory cache to pull fresh nearby responders for real GPS location
+      await loadResponders(realLoc.latitude, realLoc.longitude, currentRadiusKm, currentFilterType);
+
+      if (window.EmergencyContacts && window.EmergencyContacts.showToast) {
+        window.EmergencyContacts.showToast('📍 Live GPS location detected!');
+      }
+    } else if (!isAutoLoad) {
+      alert('Could not access live GPS location. Please ensure location permissions are enabled on your device.');
+    }
+  } catch (err) {
+    console.warn('GPS location error:', err);
+  } finally {
+    locateBtns.forEach(btn => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Locate Me';
+    });
+  }
+}
+
 window.recenterMap = function() {
-  window.EmergencyMap.recenterToUser();
+  fetchAndCenterLiveGPS(false);
 };
