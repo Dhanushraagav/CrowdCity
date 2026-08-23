@@ -105,7 +105,7 @@ def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./wei
 
     for epoch in range(epochs):
         print(f"\nEpoch {epoch+1}/{epochs}")
-        print("-" * 20)
+        print("-" * 55)
 
         for phase in ['train', 'val']:
             if phase not in dataloaders:
@@ -115,8 +115,10 @@ def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./wei
 
             running_loss = 0.0
             running_corrects = 0
+            total_batches = len(dataloaders[phase])
+            dataset_size = len(image_datasets[phase])
 
-            for inputs, labels in dataloaders[phase]:
+            for batch_idx, (inputs, labels) in enumerate(dataloaders[phase]):
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
@@ -134,10 +136,23 @@ def train_model(dataset_dir, epochs=15, batch_size=32, lr=0.001, save_dir="./wei
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
 
-            epoch_loss = running_loss / len(image_datasets[phase])
-            epoch_acc = running_corrects.double() / len(image_datasets[phase])
+                # Real-time progress bar output
+                pct = ((batch_idx + 1) / total_batches) * 100
+                bar_len = 20
+                filled = int(bar_len * (batch_idx + 1) // total_batches)
+                bar = '█' * filled + '░' * (bar_len - filled)
+                current_acc = (running_corrects.double() / ((batch_idx + 1) * batch_size)).item()
+                
+                print(
+                    f"\r[{phase.upper()}] |{bar}| {pct:5.1f}% [{batch_idx+1:4d}/{total_batches:4d} batches] "
+                    f"Loss: {loss.item():.4f} | Acc: {current_acc:.4f}",
+                    end="", flush=True
+                )
 
-            print(f"{phase.capitalize()} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
+            epoch_loss = running_loss / dataset_size
+            epoch_acc = (running_corrects.double() / dataset_size).item()
+
+            print(f"\n[{phase.upper()} SUMMARY] Loss: {epoch_loss:.4f} | Final Acc: {epoch_acc*100:.2f}%\n")
 
     save_path = os.path.join(save_dir, "civic_vision_model.pth")
     torch.save(model.state_dict(), save_path)
