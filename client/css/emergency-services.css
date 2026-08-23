@@ -84,6 +84,12 @@ body.emergency-body .app-sidebar.active {
   letter-spacing: 0.02em;
 }
 
+@media (max-width: 768px) {
+  .emergency-gov-header-banner {
+    display: none !important;
+  }
+}
+
 .emergency-gov-badge {
   background: var(--emergency-red);
   color: #ffffff;

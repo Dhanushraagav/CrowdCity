@@ -3576,7 +3576,10 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   }
 
   .header-datetime-widget,
-  .weather-widget {
+  .weather-widget,
+  .emergency-gov-header-banner,
+  .tn-govt-announcement-banner,
+  .compact-emergency-banner {
     display: none !important;
   }
 
