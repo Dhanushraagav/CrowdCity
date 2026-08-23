@@ -440,7 +440,14 @@
     });
 
     const formCard = document.getElementById('checker-form-card');
-    if (formCard) formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (formCard) {
+      if (currentStep === 4) {
+        formCard.classList.add('step-results-active');
+      } else {
+        formCard.classList.remove('step-results-active');
+      }
+      formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   function getFormData() {

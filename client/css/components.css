@@ -5484,16 +5484,35 @@ body.dark-theme .universal-mobile-back-btn svg {
     box-sizing: border-box !important;
   }
 
-  /* Result & Saved Scheme Cards full-width fit on mobile */
+  /* When Results (Step 4) is active on mobile, unwrap outer container so scheme cards show in 100% full view */
+  #checker-form-card.step-results-active,
+  #checker-form-card:has(#checker-step-4.active) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Result & Saved Scheme Cards 100% full-width fit on mobile with zero side gaps */
   .result-scheme-card,
   .saved-scheme-card,
-  .scheme-card,
-  .checker-step-pane {
-    padding: 0.75rem 0.4rem !important;
-    margin-bottom: 0.75rem !important;
-    border-radius: 12px !important;
+  .scheme-card {
+    padding: 0.85rem 0.65rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0.85rem !important;
+    border-radius: 14px !important;
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .checker-step-pane {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
     box-sizing: border-box !important;
   }
 
