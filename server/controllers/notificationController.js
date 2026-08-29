@@ -36,7 +36,7 @@ export const getNotifications = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const activeClient = getSupabaseClient(req);
+    const activeClient = supabaseAdmin || getSupabaseClient(req);
     const { data, error } = await activeClient
       .from('notifications')
       .select('*')

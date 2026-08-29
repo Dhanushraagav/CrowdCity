@@ -26,7 +26,7 @@ export const getAllIssues = async (req, res) => {
   }
 
   try {
-    const activeClient = getSupabaseClient(req);
+    const activeClient = supabaseAdmin || getSupabaseClient(req);
     let query = activeClient
       .from('issues')
       .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url)');
