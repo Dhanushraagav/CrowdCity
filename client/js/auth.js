@@ -1,4 +1,7 @@
 // CrowdCity - Authentication Manager
+if (typeof window !== 'undefined' && window.location.hostname === 'crowdcity.co.in') {
+  window.location.replace('https://www.crowdcity.co.in' + window.location.pathname + window.location.search + window.location.hash);
+}
 
 // Global helper to format category names nicely for display
 window.formatCategoryName = function(category) {

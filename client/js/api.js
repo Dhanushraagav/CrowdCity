@@ -1,6 +1,8 @@
 // CrowdCity - REST API Client Wrapper
 
-const API_BASE = '/api';
+const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'crowdcity.co.in' || window.location.hostname === 'www.crowdcity.co.in'))
+  ? 'https://www.crowdcity.co.in/api'
+  : '/api';
 
 // ─── In-flight request deduplication ─────────────────────────────────────────
 // If the same request is already in-flight, return the existing Promise.
