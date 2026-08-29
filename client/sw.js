@@ -1,7 +1,7 @@
 // CrowdCity AI - Service Worker
 // Production-grade Service Worker with Stale-While-Revalidate static asset caching and offline fallback.
 
-const CACHE_NAME = 'crowdcity-static-v16';
+const CACHE_NAME = 'crowdcity-static-v17';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_ASSETS = [

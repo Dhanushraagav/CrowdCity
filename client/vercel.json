@@ -3,14 +3,6 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/rest/v1/:path*",
-      "destination": "https://swbktcwlxbnbsjrmmmjj.supabase.co/rest/v1/:path*"
-    },
-    {
-      "source": "/auth/v1/:path*",
-      "destination": "https://swbktcwlxbnbsjrmmmjj.supabase.co/auth/v1/:path*"
-    },
-    {
       "source": "/api/:path*",
       "destination": "https://crowdcity-api.onrender.com/api/:path*"
     }

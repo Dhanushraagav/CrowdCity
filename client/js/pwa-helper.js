@@ -206,17 +206,14 @@
     registerServiceWorker();
   }
 
-  // Register sw.js safely - [Diagnostic Deployment: Unregister to eliminate SW interference]
+  // Register sw.js safely
   async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       try {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (let registration of registrations) {
-          await registration.unregister();
-          console.log('[Diagnostic] ServiceWorker unregistered for diagnosis');
-        }
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('✅ ServiceWorker registered successfully with scope:', registration.scope);
       } catch (error) {
-        console.warn('ServiceWorker unregister error:', error);
+        console.error('❌ ServiceWorker registration failed:', error);
       }
     }
   }
