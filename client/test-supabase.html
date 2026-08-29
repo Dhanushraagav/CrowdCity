@@ -20,6 +20,7 @@
     <button onclick="testDirectNativeFetch()">2. Test Native Fetch (/rest/v1)</button>
     <button onclick="testHealth()">3. Test /api/health</button>
     <button onclick="testBackendAPI()">4. Test Backend /api/issues</button>
+    <button onclick="testNotificationsAPI()">5. Test Backend /api/notifications</button>
   </div>
   <h2>Result:</h2>
   <pre id="output">Click a button above to run test...</pre>
@@ -93,6 +94,25 @@
         out.innerHTML = `<span class="success">[SUCCESS] HTTP ${status} in ${duration}ms! Loaded ${data.length} issues from Backend</span>\n\n${JSON.stringify(data.slice(0, 3), null, 2)}`;
       } catch (err) {
         out.innerHTML = `<span class="error">[BACKEND FETCH ERROR] ${err.name}: ${err.message}</span>`;
+      }
+    }
+
+    async function testNotificationsAPI() {
+      out.textContent = 'Testing Backend /api/notifications...';
+      try {
+        const start = performance.now();
+        let token = localStorage.getItem('sb-swbktcwlxbnbsjrmmmjj-auth-token');
+        if (token) {
+          try { token = JSON.parse(token).access_token; } catch (e) {}
+        }
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch('/api/notifications', { headers });
+        const duration = Math.round(performance.now() - start);
+        const status = res.status;
+        const data = await res.json();
+        out.innerHTML = `<span class="success">[SUCCESS] HTTP ${status} in ${duration}ms!</span>\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        out.innerHTML = `<span class="error">[NOTIFICATIONS FETCH ERROR] ${err.name}: ${err.message}</span>`;
       }
     }
   </script>

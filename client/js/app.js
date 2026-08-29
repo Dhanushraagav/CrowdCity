@@ -621,13 +621,9 @@ window.addEventListener('auth-change', async () => {
 let _realtimeDebounceTimer = null;
 
 function initRealtimeDashboard() {
-  if (appRealtimeChannel) {
-    const client = window.supabaseClient || null;
-    if (client) client.removeChannel(appRealtimeChannel);
-    appRealtimeChannel = null;
-  }
-
-  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+  // [Diagnostic Deployment] Realtime channel disconnected to verify pure API transport
+  console.log('[Diagnostic] Realtime refresh paused during diagnostic verification');
+  return;
 
   appRealtimeChannel = window.API.subscribeRealtime({
     channelName: 'public:issues_dashboard',

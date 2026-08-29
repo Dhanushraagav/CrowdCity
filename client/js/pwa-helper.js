@@ -206,15 +206,16 @@
     registerServiceWorker();
   }
 
-  // Register sw.js safely
+  // Register sw.js safely - [Diagnostic: Unregister all service workers to ensure clean network transport]
   async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('✅ ServiceWorker registered successfully with scope:', registration.scope);
-      } catch (error) {
-        console.error('❌ ServiceWorker registration failed:', error);
-      }
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+          console.log('[Diagnostic] ServiceWorker cleanly unregistered');
+        }
+      } catch (error) {}
     }
   }
 

@@ -60,15 +60,10 @@ async function request(endpoint, options = {}) {
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-    headers['X-Access-Token'] = token;
-    headers['X-Auth-Token'] = token;
-    if (!url.includes('token=')) {
-      url += (url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(token);
-    }
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
 
   const config = {
     ...options,

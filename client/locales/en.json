@@ -70,7 +70,7 @@
   "hero_greeting_morning": "Good Morning, {name}",
   "hero_greeting_afternoon": "Good Afternoon, {name}",
   "hero_greeting_evening": "Good Evening, {name}",
-  "hero_desc_default": "Start reporting civic issues in your area. Every report builds a more responsive city for everyone.",
+  "hero_desc_default": "Transforming citizen voices into rapid community action. Report local issues, track live department resolutions, and earn Civic Impact points.",
   "hero_desc_stats": "You have submitted {total} report{s} with {resolved} resolved. Every report builds a more responsive city for everyone.",
   "your_progress": "Your Progress",
   "reports_submitted": "Reports Submitted",
