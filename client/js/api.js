@@ -108,54 +108,57 @@ const API = {
   // Generic request method
   request: request,
 
-  // 1. Get Issues — official Supabase client query
+  // 1. Get Issues — official Supabase client query with automatic backend fallback
   // Deduplicated: concurrent calls with same filters share one in-flight request.
   getIssues: (filters = {}) => {
     const key = `issues:${JSON.stringify(filters)}`;
     return _dedupFetch(key, async () => {
       const client = await _getSupabaseClient();
-      if (!client) {
-        console.warn('[API getIssues] Supabase client not ready yet');
-        return { data: [], error: 'Supabase client initializing' };
+      if (client) {
+        try {
+          let query = client.from('issues').select('*');
+          if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category);
+          if (filters.status   && filters.status   !== 'all') query = query.eq('status', filters.status);
+          if (filters.reporter_id) query = query.eq('reporter_id', filters.reporter_id);
+          if (filters.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
+          
+          if (filters.sort_by === 'popularity') {
+            query = query.order('upvotes_count', { ascending: false });
+          } else {
+            query = query.order('created_at', { ascending: false });
+          }
+
+          const { data, error } = await query;
+          if (!error && data) {
+            return { data, error: null };
+          }
+        } catch (err) {
+          // Direct connection failed (e.g. ISP reset / HTTP2 error) — fallback seamlessly
+        }
       }
 
-      try {
-        let query = client.from('issues').select('*');
-        if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category);
-        if (filters.status   && filters.status   !== 'all') query = query.eq('status', filters.status);
-        if (filters.reporter_id) query = query.eq('reporter_id', filters.reporter_id);
-        if (filters.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
-        
-        if (filters.sort_by === 'popularity') {
-          query = query.order('upvotes_count', { ascending: false });
-        } else {
-          query = query.order('created_at', { ascending: false });
-        }
-
-        const { data, error } = await query;
-        if (error) {
-          console.warn('[Supabase issues query notice]:', error.message || error);
-          return { data: null, error: error.message || 'Failed to fetch issues' };
-        }
-        return { data: data || [], error: null };
-      } catch (err) {
-        console.warn('[API getIssues Exception]:', err.message || err);
-        return { data: null, error: err.message || 'Failed to fetch issues' };
-      }
+      // Backend fallback via Vercel proxy to Render API
+      const params = new URLSearchParams();
+      if (filters.category && filters.category !== 'all') params.append('category', filters.category);
+      if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+      if (filters.reporter_id) params.append('reporter_id', filters.reporter_id);
+      if (filters.assigned_to) params.append('assigned_to', filters.assigned_to);
+      if (filters.sort_by) params.append('sort_by', filters.sort_by);
+      const qs = params.toString();
+      return request(`/issues${qs ? `?${qs}` : ''}`, { method: 'GET' });
     });
   },
 
-  // 2. Get Single Issue details — official Supabase client query
+  // 2. Get Single Issue details — official Supabase client query with fallback
   getIssueDetails: async (id) => {
     const client = await _getSupabaseClient();
-    if (!client) return { data: null, error: 'Supabase client initializing' };
-    try {
-      const { data, error } = await client.from('issues').select('*').eq('id', id).maybeSingle();
-      if (error) return { data: null, error: error.message || error };
-      return { data: data || null, error: null };
-    } catch (err) {
-      return { data: null, error: err.message || err };
+    if (client) {
+      try {
+        const { data, error } = await client.from('issues').select('*').eq('id', id).maybeSingle();
+        if (!error && data) return { data, error: null };
+      } catch (err) {}
     }
+    return request(`/issues/${id}`, { method: 'GET' });
   },
 
   // 3. Report a new issue (supports JSON or FormData for uploads)
@@ -260,43 +263,36 @@ const API = {
     });
   },
 
-  // 14. Get user notifications — official Supabase client query
+  // 14. Get user notifications — official Supabase client query with fallback
   // Deduplicated: concurrent calls share one in-flight request.
   getNotifications: () => {
     return _dedupFetch('notifications:user', async () => {
       const client = await _getSupabaseClient();
-      if (!client) {
-        return { data: [], error: null };
-      }
-
       let userId = null;
-      try {
-        const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-        userId = user?.id;
-        if (!userId) {
-          const { data: { user: authUser } } = await client.auth.getUser();
-          userId = authUser?.id;
-        }
-      } catch (e) {}
+      if (client) {
+        try {
+          const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+          userId = user?.id;
+          if (!userId) {
+            const { data: { user: authUser } } = await client.auth.getUser();
+            userId = authUser?.id;
+          }
+          if (userId) {
+            const { data, error } = await client
+              .from('notifications')
+              .select('*')
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false });
 
-      if (!userId) return { data: [], error: null };
-
-      try {
-        const { data, error } = await client
-          .from('notifications')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.warn('[Supabase notifications query notice]:', error.message || error);
-          return { data: null, error: error.message || 'Failed to fetch notifications' };
-        }
-        return { data: data || [], error: null };
-      } catch (err) {
-        console.warn('[API getNotifications Exception]:', err.message || err);
-        return { data: null, error: err.message || 'Failed to fetch notifications' };
+            if (!error && data) {
+              return { data, error: null };
+            }
+          }
+        } catch (err) {}
       }
+
+      // Backend fallback
+      return request('/notifications', { method: 'GET' });
     });
   },
 
