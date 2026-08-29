@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,8 +17,10 @@
   <p>Tests direct Supabase queries with zero wrappers, zero interceptors, and zero service worker.</p>
   <div>
     <button onclick="testDirectSupabaseSDK()">1. Test Official Supabase SDK</button>
-    <button onclick="testDirectNativeFetch()">2. Test Native Fetch</button>
-    <button onclick="testBackendAPI()">3. Test Backend /api/issues</button>
+    <button onclick="testDirectNativeFetch()">2. Test Native Fetch (/rest/v1)</button>
+    <button onclick="testHealth()">3. Test /api/health</button>
+    <button onclick="testDb()">4. Test /api/test-db</button>
+    <button onclick="testBackendAPI()">5. Test Backend /api/issues</button>
   </div>
   <h2>Result:</h2>
   <pre id="output">Click a button above to run test...</pre>
@@ -27,6 +29,32 @@
     const SUPABASE_URL = 'https://swbktcwlxbnbsjrmmmjj.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_kUW0Yid-0eAcDlOde-ETPQ_Udmo8krY';
     const out = document.getElementById('output');
+
+    async function testHealth() {
+      out.textContent = 'Testing /api/health...';
+      try {
+        const start = performance.now();
+        const res = await fetch('/api/health');
+        const duration = Math.round(performance.now() - start);
+        const data = await res.json();
+        out.innerHTML = `<span class="success">[SUCCESS] HTTP ${res.status} in ${duration}ms!</span>\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        out.innerHTML = `<span class="error">[ERROR] ${err.name}: ${err.message}</span>`;
+      }
+    }
+
+    async function testDb() {
+      out.textContent = 'Testing /api/test-db...';
+      try {
+        const start = performance.now();
+        const res = await fetch('/api/test-db');
+        const duration = Math.round(performance.now() - start);
+        const data = await res.json();
+        out.innerHTML = `<span class="success">[SUCCESS] HTTP ${res.status} in ${duration}ms!</span>\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        out.innerHTML = `<span class="error">[ERROR] ${err.name}: ${err.message}</span>`;
+      }
+    }
 
     async function testDirectSupabaseSDK() {
       out.textContent = 'Testing Official Supabase SDK (@supabase/supabase-js v2)...';

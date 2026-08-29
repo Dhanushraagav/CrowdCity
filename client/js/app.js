@@ -621,13 +621,9 @@ window.addEventListener('auth-change', async () => {
 let _realtimeDebounceTimer = null;
 
 function initRealtimeDashboard() {
-  if (appRealtimeChannel) {
-    const client = window.supabaseClient || null;
-    if (client) client.removeChannel(appRealtimeChannel);
-    appRealtimeChannel = null;
-  }
-
-  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
+  // [Diagnostic Deployment] Temporarily disabled to isolate network impact
+  console.log('[Diagnostic] Realtime refresh temporarily disabled for diagnostic step');
+  return;
 
   appRealtimeChannel = window.API.subscribeRealtime({
     channelName: 'public:issues_dashboard',
