@@ -111,15 +111,22 @@ const API = {
   // 1. Get Issues — Backend REST API (reads live PostgreSQL database)
   // Deduplicated: concurrent calls with same filters share one in-flight request.
   getIssues: (filters = {}) => {
-    const key = `issues:${JSON.stringify(filters)}`;
+    const norm = {
+      category: (filters.category && filters.category !== 'all') ? filters.category : '',
+      status: (filters.status && filters.status !== 'all') ? filters.status : '',
+      reporter_id: filters.reporter_id || '',
+      assigned_to: filters.assigned_to || '',
+      sort_by: filters.sort_by === 'popularity' ? 'popularity' : 'newest'
+    };
+    const key = `issues:${JSON.stringify(norm)}`;
     return _dedupFetch(key, async () => {
-      console.log('[DATA] getIssues START (fetching from /api/issues)', filters);
+      console.log('[DATA] getIssues START (fetching from /api/issues)', norm);
       const params = new URLSearchParams();
-      if (filters.category && filters.category !== 'all') params.append('category', filters.category);
-      if (filters.status && filters.status !== 'all') params.append('status', filters.status);
-      if (filters.reporter_id) params.append('reporter_id', filters.reporter_id);
-      if (filters.assigned_to) params.append('assigned_to', filters.assigned_to);
-      if (filters.sort_by) params.append('sort_by', filters.sort_by);
+      if (norm.category) params.append('category', norm.category);
+      if (norm.status) params.append('status', norm.status);
+      if (norm.reporter_id) params.append('reporter_id', norm.reporter_id);
+      if (norm.assigned_to) params.append('assigned_to', norm.assigned_to);
+      if (norm.sort_by) params.append('sort_by', norm.sort_by);
       const qs = params.toString();
       const res = await request(`/issues${qs ? `?${qs}` : ''}`, { method: 'GET' });
       if (res && res.data) {
