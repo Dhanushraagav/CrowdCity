@@ -618,6 +618,8 @@ window.addEventListener('auth-change', async () => {
   initRealtimeDashboard();
 });
 
+let _realtimeDebounceTimer = null;
+
 function initRealtimeDashboard() {
   if (appRealtimeChannel) {
     const client = window.supabaseClient || null;
@@ -634,11 +636,9 @@ function initRealtimeDashboard() {
       { event: 'UPDATE', table: 'issues' }
     ],
     onEvent: (event, payload) => {
-      // IMPORTANT: Do NOT reload on RECONNECT — that caused the infinite loop.
-      // Realtime RECONNECT fires every time the WebSocket reconnects.
-      // If the HTTP/2 connection is unstable, this becomes an infinite fetch cycle.
-      // Instead, only react to actual database INSERT/UPDATE events.
+      // Ignore RECONNECT to prevent loops
       if (event === 'RECONNECT') return;
+      console.log(`[REALTIME] event: ${event}`);
 
       if (window.showToast) {
         if (event === 'INSERT') {
@@ -648,10 +648,13 @@ function initRealtimeDashboard() {
         }
       }
 
-      // Refresh data for actual DB changes only.
-      // loadAndRenderIssues has a cooldown guard so rapid events don't spam fetches.
-      loadAndRenderIssues(true).catch(err => console.error("Error refreshing issues on realtime update:", err));
-      loadUserStats().catch(err => console.error("Error refreshing user stats on realtime update:", err));
+      // Debounce the refresh by 1500ms to prevent rapid consecutive fetches
+      if (_realtimeDebounceTimer) clearTimeout(_realtimeDebounceTimer);
+      console.log('[REALTIME] refresh scheduled');
+      _realtimeDebounceTimer = setTimeout(() => {
+        loadAndRenderIssues(true).catch(err => console.error("Error refreshing issues on realtime update:", err));
+        loadUserStats().catch(err => console.error("Error refreshing user stats on realtime update:", err));
+      }, 1500);
     }
   });
 }

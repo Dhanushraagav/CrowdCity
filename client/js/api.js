@@ -113,6 +113,7 @@ const API = {
   getIssues: (filters = {}) => {
     const key = `issues:${JSON.stringify(filters)}`;
     return _dedupFetch(key, async () => {
+      console.log('[DATA] getIssues START', filters);
       const client = await _getSupabaseClient();
       if (client) {
         try {
@@ -130,14 +131,17 @@ const API = {
 
           const { data, error } = await query;
           if (!error && data) {
+            console.log('[DATA] getIssues SUCCESS (from Supabase SDK):', data.length, 'records');
+            console.log('[DATA] getIssues END');
             return { data, error: null };
           }
         } catch (err) {
-          // Direct connection failed (e.g. ISP reset / HTTP2 error) — fallback seamlessly
+          // Direct connection failed — fallback to backend
         }
       }
 
       // Backend fallback via Vercel proxy to Render API
+      console.log('[DATA] getIssues FALLBACK to backend /api/issues');
       const params = new URLSearchParams();
       if (filters.category && filters.category !== 'all') params.append('category', filters.category);
       if (filters.status && filters.status !== 'all') params.append('status', filters.status);
@@ -145,7 +149,12 @@ const API = {
       if (filters.assigned_to) params.append('assigned_to', filters.assigned_to);
       if (filters.sort_by) params.append('sort_by', filters.sort_by);
       const qs = params.toString();
-      return request(`/issues${qs ? `?${qs}` : ''}`, { method: 'GET' });
+      const res = await request(`/issues${qs ? `?${qs}` : ''}`, { method: 'GET' });
+      if (res && res.data) {
+        console.log('[DATA] getIssues SUCCESS (from backend API):', res.data.length, 'records');
+      }
+      console.log('[DATA] getIssues END');
+      return res;
     });
   },
 
@@ -267,6 +276,7 @@ const API = {
   // Deduplicated: concurrent calls share one in-flight request.
   getNotifications: () => {
     return _dedupFetch('notifications:user', async () => {
+      console.log('[DATA] getNotifications START');
       const client = await _getSupabaseClient();
       let userId = null;
       if (client) {
@@ -285,6 +295,7 @@ const API = {
               .order('created_at', { ascending: false });
 
             if (!error && data) {
+              console.log('[DATA] getNotifications SUCCESS (from Supabase SDK):', data.length, 'records');
               return { data, error: null };
             }
           }
@@ -292,7 +303,12 @@ const API = {
       }
 
       // Backend fallback
-      return request('/notifications', { method: 'GET' });
+      console.log('[DATA] getNotifications FALLBACK to backend /api/notifications');
+      const res = await request('/notifications', { method: 'GET' });
+      if (res && res.data) {
+        console.log('[DATA] getNotifications SUCCESS (from backend API):', res.data.length, 'records');
+      }
+      return res;
     });
   },
 

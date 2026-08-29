@@ -1,7 +1,7 @@
 // CrowdCity AI - Service Worker
 // Production-grade Service Worker with Stale-While-Revalidate static asset caching and offline fallback.
 
-const CACHE_NAME = 'crowdcity-static-v15';
+const CACHE_NAME = 'crowdcity-static-v16';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_ASSETS = [
@@ -44,10 +44,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
-  // Never intercept POST/PUT/DELETE, API endpoints, or database calls
+  // Never intercept POST/PUT/DELETE, API endpoints, Supabase REST/Auth, or database calls
   if (
     event.request.method !== 'GET' ||
     requestUrl.pathname.startsWith('/api/') ||
+    requestUrl.pathname.startsWith('/rest/') ||
+    requestUrl.pathname.startsWith('/auth/') ||
     event.request.url.includes('supabase.co')
   ) {
     return;
