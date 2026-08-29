@@ -450,13 +450,21 @@ function _attachAuthStateListener() {
 
 // Fetch user profile from Express server and cache the role locally
 async function fetchAndCacheRole(token) {
-  console.log('[Debug Log] Profile loading');
+  if (!token) {
+    const cachedRole = localStorage.getItem('cc_user_role') || 'citizen';
+    verifyRoleForCurrentPage(cachedRole);
+    return;
+  }
+
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     const response = await fetch('/api/auth/profile', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` },
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+
     if (response.ok) {
       const profile = await response.json();
       if (profile && profile.role) {
@@ -466,80 +474,41 @@ async function fetchAndCacheRole(token) {
         return;
       }
     } else if (response.status === 401 || response.status === 403) {
-      // Token is explicitly invalid/expired, log out immediately
       verifyRoleForCurrentPage(null);
       return;
     }
-    
-    // For other transient status errors (e.g. 500, 502, 503, or rate limits)
-    // Fall back to cached role if it exists to allow offline support
-    const cachedRole = localStorage.getItem('cc_user_role');
-    if (cachedRole) {
-      verifyRoleForCurrentPage(cachedRole);
-    } else {
-      verifyRoleForCurrentPage(null);
-    }
   } catch (err) {
-    console.error('Error fetching user role:', err);
-    // Fall back to cached role on network exceptions/offline state
-    const cachedRole = localStorage.getItem('cc_user_role');
-    if (cachedRole) {
-      verifyRoleForCurrentPage(cachedRole);
-    } else {
-      verifyRoleForCurrentPage(null);
-    }
+    // Graceful offline/timeout fallback
   }
+
+  const cachedRole = localStorage.getItem('cc_user_role') || 'citizen';
+  verifyRoleForCurrentPage(cachedRole);
 }
 
 // Fetch fresh profile in the background and update cache/UI if changed
 async function syncUserProfileBackground() {
-  console.log('[Debug Log] Profile loading');
   const token = getAuthToken();
   if (!token) return;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     const response = await fetch('/api/auth/profile', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` },
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+
     if (response.ok) {
       const freshProfile = await response.json();
-      
       if (freshProfile && freshProfile.role) {
-        // Update role cache
         localStorage.setItem('cc_user_role', freshProfile.role);
         verifyRoleForCurrentPage(freshProfile.role);
-
-        // Parse cached profile and compare key properties to determine if it has changed
-        let hasChanged = true;
-        const cachedStr = localStorage.getItem('cc_user_profile');
-        if (cachedStr) {
-          try {
-            const cachedProfile = JSON.parse(cachedStr);
-            if (cachedProfile && typeof cachedProfile === 'object') {
-              hasChanged = (
-                cachedProfile.role !== freshProfile.role ||
-                cachedProfile.full_name !== freshProfile.full_name ||
-                cachedProfile.email !== freshProfile.email ||
-                cachedProfile.is_verified_authority !== (freshProfile.is_verified_authority || freshProfile.is_verified) ||
-                cachedProfile.points !== freshProfile.points
-              );
-            }
-          } catch (e) {
-            hasChanged = true;
-          }
-        }
-
-        if (hasChanged) {
-          localStorage.setItem('cc_user_profile', JSON.stringify(freshProfile));
-          updateAuthUI();
-        }
+        localStorage.setItem('cc_user_profile', JSON.stringify(freshProfile));
+        updateAuthUI();
       }
     }
-  } catch (err) {
-    console.error("Background profile sync failed:", err);
-  }
+  } catch (err) {}
 }
 
 // Helper to get active session

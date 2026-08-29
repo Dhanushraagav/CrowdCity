@@ -35,13 +35,18 @@ async function request(endpoint, options = {}) {
     }
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   const config = {
     ...options,
     headers,
+    signal: options.signal || controller.signal
   };
 
   try {
     const response = await fetch(url, config);
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       let errorMessage = `HTTP error ${response.status}`;
@@ -62,7 +67,8 @@ async function request(endpoint, options = {}) {
       return { data: null, error: 'Server returned non-JSON response' };
     }
   } catch (error) {
-    return { data: null, error: error.message || 'API request failed' };
+    clearTimeout(timeoutId);
+    return { data: null, error: error.name === 'AbortError' ? 'Request timed out' : (error.message || 'API request failed') };
   }
 }
 
