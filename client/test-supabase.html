@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Supabase REST Isolated Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: monospace; padding: 2rem; background: #0f172a; color: #f8fafc; }
+    button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; margin-right: 0.5rem; }
+    pre { background: #1e293b; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <h1>Supabase REST Isolation Test</h1>
+  <p>Tests direct Supabase queries with zero wrappers, zero interceptors, and zero service worker.</p>
+  <div>
+    <button onclick="testDirectSupabaseSDK()">1. Test Official Supabase SDK</button>
+    <button onclick="testDirectNativeFetch()">2. Test Native Fetch</button>
+    <button onclick="testBackendAPI()">3. Test Backend /api/issues</button>
+  </div>
+  <h2>Result:</h2>
+  <pre id="output">Click a button above to run test...</pre>
+
+  <script>
+    const SUPABASE_URL = 'https://swbktcwlxbnbsjrmmmjj.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_kUW0Yid-0eAcDlOde-ETPQ_Udmo8krY';
+    const out = document.getElementById('output');
+
+    async function testDirectSupabaseSDK() {
+      out.textContent = 'Testing Official Supabase SDK (@supabase/supabase-js v2)...';
+      try {
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const start = performance.now();
+        const { data, error } = await client.from('issues').select('id, title, category, status').limit(3);
+        const duration = Math.round(performance.now() - start);
+        if (error) {
+          out.innerHTML = `<span class="error">[FAILED] Error: ${JSON.stringify(error, null, 2)}</span>\nDuration: ${duration}ms`;
+        } else {
+          out.innerHTML = `<span class="success">[SUCCESS] Loaded ${data.length} issues via Official Supabase SDK in ${duration}ms!</span>\n\n${JSON.stringify(data, null, 2)}`;
+        }
+      } catch (err) {
+        out.innerHTML = `<span class="error">[EXCEPTION] ${err.name}: ${err.message}\nStack:\n${err.stack}</span>`;
+      }
+    }
+
+    async function testDirectNativeFetch() {
+      out.textContent = 'Testing Direct Native Fetch to Supabase /rest/v1/issues...';
+      try {
+        const start = performance.now();
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/issues?select=id,title,category,status&limit=3`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Accept': 'application/json'
+          }
+        });
+        const duration = Math.round(performance.now() - start);
+        const status = res.status;
+        const text = await res.text();
+        if (res.ok) {
+          out.innerHTML = `<span class="success">[SUCCESS] HTTP ${status} in ${duration}ms!</span>\n\n${JSON.stringify(JSON.parse(text), null, 2)}`;
+        } else {
+          out.innerHTML = `<span class="error">[FAILED] HTTP ${status} in ${duration}ms: ${text}</span>`;
+        }
+      } catch (err) {
+        out.innerHTML = `<span class="error">[FETCH ERROR] ${err.name}: ${err.message}</span>`;
+      }
+    }
+
+    async function testBackendAPI() {
+      out.textContent = 'Testing Backend /api/issues...';
+      try {
+        const start = performance.now();
+        const res = await fetch('/api/issues');
+        const duration = Math.round(performance.now() - start);
+        const status = res.status;
+        const data = await res.json();
+        out.innerHTML = `<span class="success">[SUCCESS] HTTP ${status} in ${duration}ms! Loaded ${data.length} issues from Backend</span>\n\n${JSON.stringify(data.slice(0, 3), null, 2)}`;
+      } catch (err) {
+        out.innerHTML = `<span class="error">[BACKEND FETCH ERROR] ${err.name}: ${err.message}</span>`;
+      }
+    }
+  </script>
+</body>
+</html>
