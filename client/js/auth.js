@@ -174,12 +174,14 @@ function getSafeSupabaseOptions() {
       }
     },
     global: {
-      fetch: (input, init = {}) => {
-        init.headers = init.headers || {};
-        if (init.headers.Authorization && typeof init.headers.Authorization === 'string' && init.headers.Authorization.includes('sb_publishable_')) {
-          delete init.headers.Authorization;
+      fetch: (input, init) => {
+        const targetUrl = typeof input === 'string' ? input : (input && input.url ? input.url : input);
+        const headers = new Headers(init && init.headers ? init.headers : (input && input.headers ? input.headers : {}));
+        const authHeader = headers.get('authorization') || '';
+        if (authHeader.includes('sb_publishable_')) {
+          headers.delete('authorization');
         }
-        return fetch(input, init);
+        return fetch(targetUrl, { ...init, headers });
       }
     }
   };
