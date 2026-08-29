@@ -176,11 +176,9 @@ async function loadUserStats(isLanguageChange = false) {
 
   let freshPoints = cachedPoints;
   try {
-    const response = await fetch('/api/auth/profile', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (response.ok) {
-      const profile = await response.json();
+    const raw = localStorage.getItem('cc_user_profile');
+    if (raw) {
+      const profile = JSON.parse(raw);
       freshPoints = profile.points || 0;
       animateCountUp(pointsCardNum, freshPoints);
       updateProgressionUI(freshPoints);
@@ -188,12 +186,8 @@ async function loadUserStats(isLanguageChange = false) {
         const progression = calculateProgression(freshPoints);
         rankEl.textContent = progression.levelName;
       }
-      // Cache profile
-      localStorage.setItem('cc_user_profile', JSON.stringify(profile));
     }
-  } catch (err) {
-    console.error('Failed to load user stats for dashboard:', err);
-  }
+  } catch (err) {}
 
   // Fetch user's issues to compute accurate stats from logged-in user data
   try {

@@ -307,8 +307,8 @@ async function initNotifications() {
     notificationsList = data;
     localStorage.setItem('cc_notifications_cache', JSON.stringify(data));
     renderNotifications();
-  } else {
-    console.error("Failed to fetch initial notifications:", error);
+  } else if (error) {
+    console.warn("Notice loading notifications:", error);
   }
 
   // Setup Realtime connection (Supabase Realtime for Production Mode)

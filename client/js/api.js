@@ -76,8 +76,34 @@ const API = {
   // Generic request method
   request: request,
 
-  // 1. Get Issues List
+  // 1. Get Issues List directly from Supabase for instant 0ms response
   getIssues: async (filters = {}) => {
+    let client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (!client && typeof window.getOrInitSupabaseClient === 'function') {
+      try { client = await window.getOrInitSupabaseClient(); } catch(e) {}
+    }
+    if (client) {
+      try {
+        let query = client.from('issues').select('*');
+        if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category);
+        if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status);
+        if (filters.reporter_id) query = query.eq('reporter_id', filters.reporter_id);
+        if (filters.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
+        
+        if (filters.sort_by === 'popularity') {
+          query = query.order('upvotes_count', { ascending: false });
+        } else {
+          query = query.order('created_at', { ascending: false });
+        }
+        
+        const { data: issues, error } = await query;
+        if (!error && issues) {
+          return { data: issues, error: null };
+        }
+      } catch (e) {}
+    }
+
+    // Fallback to backend REST
     const params = new URLSearchParams();
     if (filters.category) params.append('category', filters.category);
     if (filters.status) params.append('status', filters.status);
@@ -90,8 +116,20 @@ const API = {
     return request(endpoint, { method: 'GET' });
   },
 
-  // 2. Get Single Issue details
+  // 2. Get Single Issue details directly from Supabase
   getIssueDetails: async (id) => {
+    let client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (!client && typeof window.getOrInitSupabaseClient === 'function') {
+      try { client = await window.getOrInitSupabaseClient(); } catch(e) {}
+    }
+    if (client) {
+      try {
+        const { data, error } = await client.from('issues').select('*').eq('id', id).maybeSingle();
+        if (!error && data) {
+          return { data, error: null };
+        }
+      } catch (e) {}
+    }
     return request(`/issues/${id}`, { method: 'GET' });
   },
 
@@ -197,8 +235,27 @@ const API = {
     });
   },
 
-  // 14. Get user notifications
+  // 14. Get user notifications directly from Supabase
   getNotifications: async () => {
+    let client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (!client && typeof window.getOrInitSupabaseClient === 'function') {
+      try { client = await window.getOrInitSupabaseClient(); } catch(e) {}
+    }
+    if (client) {
+      try {
+        const user = typeof getUser === 'function' ? getUser() : (typeof getCurrentUser === 'function' ? getCurrentUser() : null);
+        if (user && user.id) {
+          const { data, error } = await client
+            .from('notifications')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+          if (!error && data) {
+            return { data, error: null };
+          }
+        }
+      } catch (e) {}
+    }
     return request('/notifications', {
       method: 'GET'
     });

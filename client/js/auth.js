@@ -67,7 +67,7 @@ async function getOrInitSupabaseClient() {
   }
   if (typeof window.supabase !== 'undefined' && window.supabaseConfig && window.supabaseConfig.supabaseUrl) {
     try {
-      supabaseClient = window.supabase.createClient(window.supabaseConfig.supabaseUrl, window.supabaseConfig.supabaseAnonKey);
+      supabaseClient = window.supabase.createClient(window.supabaseConfig.supabaseUrl, window.supabaseConfig.supabaseAnonKey, getSafeSupabaseOptions());
       window.supabaseClient = supabaseClient;
       return supabaseClient;
     } catch (e) {}
@@ -155,30 +155,57 @@ function showFatalConfigError(details) {
 }
 window.showFatalConfigError = showFatalConfigError;
 
+const DEFAULT_SUPABASE_CONFIG = {
+  supabaseUrl: 'https://swbktcwlxbnbsjrmmmjj.supabase.co',
+  supabaseAnonKey: 'sb_publishable_kUW0Yid-0eAcDlOde-ETPQ_Udmo8krY',
+  turnstileSiteKey: '0x4AAAAAADpoqphtoebgazMP'
+};
+
+function getSafeSupabaseOptions() {
+  return {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: {
+        getItem: (k) => { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+        setItem: (k, v) => { try { window.localStorage.setItem(k, v); } catch (e) {} },
+        removeItem: (k) => { try { window.localStorage.removeItem(k); } catch (e) {} }
+      }
+    },
+    global: {
+      fetch: (input, init = {}) => {
+        init.headers = init.headers || {};
+        if (init.headers.Authorization && typeof init.headers.Authorization === 'string' && init.headers.Authorization.includes('sb_publishable_')) {
+          delete init.headers.Authorization;
+        }
+        return fetch(input, init);
+      }
+    }
+  };
+}
+
 // Initialize Supabase Client dynamically from server config
 async function initAuth() {
   let initializedFromCache = false;
   // Pre-load from cache for instant CAPTCHA and UI loading
   try {
-    const raw = localStorage.getItem('cc_config_cache');
-    if (raw) {
-      const cachedConfig = JSON.parse(raw);
-      if (cachedConfig && cachedConfig.supabaseUrl && cachedConfig.supabaseAnonKey) {
-        window.supabaseConfig = cachedConfig;
-        if (typeof window.supabase !== 'undefined' && !supabaseClient) {
-          supabaseClient = window.supabase.createClient(cachedConfig.supabaseUrl, cachedConfig.supabaseAnonKey);
-          window.supabaseClient = supabaseClient;
-          window.cc_initialized_supabase_url = cachedConfig.supabaseUrl;
-          window.cc_initialized_supabase_key = cachedConfig.supabaseAnonKey;
-          _attachAuthStateListener();
-          updateAuthUI();
-          if (window.turnstileLoaded) {
-            window.renderTurnstileWidgets();
-          }
-          resolveAuthInit();
-          initializedFromCache = true;
-        }
+    let raw = localStorage.getItem('cc_config_cache');
+    let cachedConfig = raw ? JSON.parse(raw) : DEFAULT_SUPABASE_CONFIG;
+    if (!cachedConfig || !cachedConfig.supabaseUrl) cachedConfig = DEFAULT_SUPABASE_CONFIG;
+    window.supabaseConfig = cachedConfig;
+    if (typeof window.supabase !== 'undefined' && !supabaseClient) {
+      supabaseClient = window.supabase.createClient(cachedConfig.supabaseUrl, cachedConfig.supabaseAnonKey, getSafeSupabaseOptions());
+      window.supabaseClient = supabaseClient;
+      window.cc_initialized_supabase_url = cachedConfig.supabaseUrl;
+      window.cc_initialized_supabase_key = cachedConfig.supabaseAnonKey;
+      _attachAuthStateListener();
+      updateAuthUI();
+      if (window.turnstileLoaded) {
+        window.renderTurnstileWidgets();
       }
+      resolveAuthInit();
+      initializedFromCache = true;
     }
   } catch (e) {
     console.warn('[Auth] Pre-init config cache check failed:', e);
@@ -248,7 +275,7 @@ async function initAuth() {
       console.log("[Auth] Supabase client already initialized with matching config. Skipping re-initialization.");
     } else {
       console.log("[Auth] Connecting to Supabase at URL:", config.supabaseUrl);
-      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, getSafeSupabaseOptions());
       window.supabaseClient = supabaseClient;
       window.cc_initialized_supabase_url = config.supabaseUrl;
       window.cc_initialized_supabase_key = config.supabaseAnonKey;
@@ -283,7 +310,7 @@ function _tryInitFromCache() {
                              config.supabaseAnonKey.includes('placeholder') || 
                              (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
     if (!config.supabaseUrl || config.supabaseUrl.includes('placeholder') || isKeyPlaceholder) return false;
-    supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, getSafeSupabaseOptions());
     window.supabaseClient = supabaseClient;
     window.cc_initialized_supabase_url = config.supabaseUrl;
     window.cc_initialized_supabase_key = config.supabaseAnonKey;
@@ -448,38 +475,23 @@ function _attachAuthStateListener() {
   })();
 }
 
-// Fetch user profile from Express server and cache the role locally
+// Fetch user profile from Supabase and cache the role locally
 async function fetchAndCacheRole(token) {
-  if (!token) {
-    const cachedRole = localStorage.getItem('cc_user_role') || 'citizen';
-    verifyRoleForCurrentPage(cachedRole);
-    return;
-  }
-
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-    const response = await fetch('/api/auth/profile', {
-      headers: { 'Authorization': `Bearer ${token}` },
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const profile = await response.json();
-      if (profile && profile.role) {
-        localStorage.setItem('cc_user_role', profile.role);
-        localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-        verifyRoleForCurrentPage(profile.role);
-        return;
+    const user = getUser();
+    if (user && user.id) {
+      const client = typeof getSupabase === 'function' ? getSupabase() : (typeof supabaseClient !== 'undefined' ? supabaseClient : window.supabaseClient);
+      if (client) {
+        const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+        if (profile && profile.role) {
+          localStorage.setItem('cc_user_role', profile.role);
+          localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+          verifyRoleForCurrentPage(profile.role);
+          return;
+        }
       }
-    } else if (response.status === 401 || response.status === 403) {
-      verifyRoleForCurrentPage(null);
-      return;
     }
-  } catch (err) {
-    // Graceful offline/timeout fallback
-  }
+  } catch (err) {}
 
   const cachedRole = localStorage.getItem('cc_user_role') || 'citizen';
   verifyRoleForCurrentPage(cachedRole);
@@ -487,25 +499,18 @@ async function fetchAndCacheRole(token) {
 
 // Fetch fresh profile in the background and update cache/UI if changed
 async function syncUserProfileBackground() {
-  const token = getAuthToken();
-  if (!token) return;
-
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-    const response = await fetch('/api/auth/profile', {
-      headers: { 'Authorization': `Bearer ${token}` },
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const freshProfile = await response.json();
-      if (freshProfile && freshProfile.role) {
-        localStorage.setItem('cc_user_role', freshProfile.role);
-        verifyRoleForCurrentPage(freshProfile.role);
-        localStorage.setItem('cc_user_profile', JSON.stringify(freshProfile));
-        updateAuthUI();
+    const user = getUser();
+    if (user && user.id) {
+      const client = typeof getSupabase === 'function' ? getSupabase() : (typeof supabaseClient !== 'undefined' ? supabaseClient : window.supabaseClient);
+      if (client) {
+        const { data: freshProfile } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+        if (freshProfile && freshProfile.role) {
+          localStorage.setItem('cc_user_role', freshProfile.role);
+          localStorage.setItem('cc_user_profile', JSON.stringify(freshProfile));
+          verifyRoleForCurrentPage(freshProfile.role);
+          updateAuthUI();
+        }
       }
     }
   } catch (err) {}
