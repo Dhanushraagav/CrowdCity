@@ -87,7 +87,7 @@
       out.textContent = 'Testing Backend /api/issues...';
       try {
         const start = performance.now();
-        const res = await fetch('/api/issues');
+        const res = await fetch('/api/issues', { credentials: 'omit' });
         const duration = Math.round(performance.now() - start);
         const status = res.status;
         const data = await res.json();
@@ -106,7 +106,7 @@
           try { token = JSON.parse(token).access_token; } catch (e) {}
         }
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const res = await fetch('/api/notifications', { headers });
+        const res = await fetch('/api/notifications', { headers, credentials: 'omit' });
         const duration = Math.round(performance.now() - start);
         const status = res.status;
         const data = await res.json();

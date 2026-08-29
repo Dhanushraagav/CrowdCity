@@ -69,6 +69,7 @@ async function request(endpoint, options = {}) {
   const config = {
     ...options,
     headers,
+    credentials: 'omit',
     signal: options.signal || controller.signal
   };
 
