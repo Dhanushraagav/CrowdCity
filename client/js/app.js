@@ -53,28 +53,17 @@ function animateCountUp(element, targetVal, suffix = '') {
   requestAnimationFrame(update);
 }
 
+let _dashboardInitialized = false;
+
 // Initialize the dashboard components
 function initDashboard() {
-  try {
-    updateHeroGreeting();
-  } catch (e) {
-    console.error("Failed to update hero greeting:", e);
-  }
-  try {
-    setupFilterListeners();
-  } catch (e) {
-    console.error("Failed to setup filter listeners:", e);
-  }
-  try {
-    setupSearchListener();
-  } catch (e) {
-    console.error("Failed to setup search listener:", e);
-  }
-  try {
-    setupFeedTabs();
-  } catch (e) {
-    console.error("Failed to setup feed tabs:", e);
-  }
+  if (_dashboardInitialized) return;
+  _dashboardInitialized = true;
+
+  try { updateHeroGreeting(); } catch (e) {}
+  try { setupFilterListeners(); } catch (e) {}
+  try { setupSearchListener(); } catch (e) {}
+  try { setupFeedTabs(); } catch (e) {}
   
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   lastLoadedUserIdApp = user ? user.id : null;
@@ -83,12 +72,12 @@ function initDashboard() {
   document.body.classList.add('ready');
   document.body.style.visibility = 'visible';
 
-  // Load initial datasets in parallel in the background
-  Promise.all([
-    loadAndRenderIssues().catch(err => console.error("Error in loadAndRenderIssues:", err)),
-    loadUserStats().catch(err => console.error("Error in loadUserStats:", err)),
-    loadRecentNotifications().catch(err => console.error("Error in loadRecentNotifications:", err))
-  ]);
+  // Load initial datasets cleanly once
+  loadAndRenderIssues().catch(err => console.error("Error in loadAndRenderIssues:", err));
+  if (user) {
+    loadUserStats().catch(err => console.error("Error in loadUserStats:", err));
+    loadRecentNotifications().catch(err => console.error("Error in loadRecentNotifications:", err));
+  }
 
   initRealtimeDashboard();
 }
@@ -593,37 +582,41 @@ function escapeHTML(str) {
   );
 }
 
-// Re-evaluate filters and reload when auth changes
+// Re-evaluate greeting and stats when auth changes
 window.addEventListener('auth-change', async () => {
   try {
     updateHeroGreeting();
-  } catch (e) {
-    console.error("Failed to update greeting on auth change:", e);
-  }
+  } catch (e) {}
+
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   const currentUserId = user ? user.id : null;
   
-  if (currentUserId === lastLoadedUserIdApp) {
-    // Avoid duplicate loads that cause UI flickering
+  if (!_dashboardInitialized) {
+    initDashboard();
     return;
   }
-  
+
+  if (currentUserId === lastLoadedUserIdApp) {
+    return;
+  }
   lastLoadedUserIdApp = currentUserId;
 
-  await Promise.all([
-    loadAndRenderIssues().catch(err => console.error("Error updating issues on auth change:", err)),
-    loadUserStats().catch(err => console.error("Error updating user stats on auth change:", err))
-  ]);
-
-  initRealtimeDashboard();
+  if (currentUserId) {
+    loadUserStats().catch(err => console.error("Error updating user stats on auth change:", err));
+    loadRecentNotifications().catch(err => console.error("Error updating notifications on auth change:", err));
+  }
 });
 
 let _realtimeDebounceTimer = null;
 
 function initRealtimeDashboard() {
-  // [Diagnostic Deployment] Realtime channel disconnected to verify pure API transport
-  console.log('[Diagnostic] Realtime refresh paused during diagnostic verification');
-  return;
+  if (appRealtimeChannel) {
+    const client = window.supabaseClient || null;
+    if (client) client.removeChannel(appRealtimeChannel);
+    appRealtimeChannel = null;
+  }
+
+  if (!window.API || typeof window.API.subscribeRealtime !== 'function') return;
 
   appRealtimeChannel = window.API.subscribeRealtime({
     channelName: 'public:issues_dashboard',
@@ -632,7 +625,6 @@ function initRealtimeDashboard() {
       { event: 'UPDATE', table: 'issues' }
     ],
     onEvent: (event, payload) => {
-      // Ignore RECONNECT to prevent loops
       if (event === 'RECONNECT') return;
       console.log(`[REALTIME] event: ${event}`);
 
@@ -655,7 +647,7 @@ function initRealtimeDashboard() {
   });
 }
 
-// Initialize when both window is ready (using readystate check to prevent DOMContentLoaded race condition)
+// Initialize when window is ready
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', () => {
     initDashboard();
