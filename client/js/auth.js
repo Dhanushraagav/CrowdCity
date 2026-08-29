@@ -175,13 +175,33 @@ function getSafeSupabaseOptions() {
     },
     global: {
       fetch: (input, init) => {
-        const targetUrl = typeof input === 'string' ? input : (input && input.url ? input.url : input);
-        const headers = new Headers(init && init.headers ? init.headers : (input && input.headers ? input.headers : {}));
-        const authHeader = headers.get('authorization') || '';
-        if (authHeader.includes('sb_publishable_')) {
-          headers.delete('authorization');
+        try {
+          // Resolve the target URL safely regardless of input type
+          const targetUrl = typeof input === 'string'
+            ? input
+            : (input instanceof Request ? input.url : String(input));
+
+          // Build a fresh Headers object from whatever was passed in
+          let srcHeaders = {};
+          if (init && init.headers) {
+            srcHeaders = init.headers;
+          } else if (input instanceof Request && input.headers) {
+            srcHeaders = input.headers;
+          }
+          const headers = new Headers(srcHeaders);
+
+          // Strip invalid publishable key from Authorization — PostgREST only accepts real JWTs there
+          const authVal = headers.get('authorization') || '';
+          if (authVal.includes('sb_publishable_')) {
+            headers.delete('authorization');
+          }
+
+          const fetchInit = Object.assign({}, init || {}, { headers });
+          return fetch(targetUrl, fetchInit);
+        } catch (e) {
+          // Absolute last-resort fallback — should never reach here
+          return fetch(input, init);
         }
-        return fetch(targetUrl, { ...init, headers });
       }
     }
   };
@@ -213,9 +233,11 @@ async function initAuth() {
     console.warn('[Auth] Pre-init config cache check failed:', e);
   }
 
-  // If already initialized instantly from cache, do non-blocking background revalidation
+  // If already initialized instantly from cache, do non-blocking background revalidation with strict timeout
   if (initializedFromCache) {
-    fetch('/api/config')
+    const bgCtrl = new AbortController();
+    setTimeout(() => bgCtrl.abort(), 4000);
+    fetch('/api/config', { signal: bgCtrl.signal })
       .then(res => res.ok ? res.json() : null)
       .then(config => {
         if (config && config.supabaseUrl && config.supabaseAnonKey) {
@@ -227,7 +249,9 @@ async function initAuth() {
   }
 
   try {
-    const response = await fetch('/api/config');
+    const configCtrl = new AbortController();
+    setTimeout(() => configCtrl.abort(), 4000);
+    const response = await fetch('/api/config', { signal: configCtrl.signal });
 
     if (!response.ok) {
       console.warn(`[Auth] /api/config returned HTTP ${response.status}. Attempting cached-config recovery...`);
