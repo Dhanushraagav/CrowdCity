@@ -188,55 +188,51 @@ async function loadUserStats(isLanguageChange = false) {
     }
   } catch (err) {}
 
-  // Fetch user's issues to compute accurate stats from logged-in user data
+  // Compute accurate stats from in-memory issues for logged-in user without duplicate network fetch
   try {
-    if (window.API && typeof window.API.getIssues === 'function') {
-      const { data: userIssues, error: issuesError } = await window.API.getIssues({ reporter_id: user.id });
-      if (!issuesError && userIssues) {
-        lastUserIssues = userIssues;
-        const total = userIssues.length;
-        const resolved = userIssues.filter(i => i.status === 'resolved' || i.status === 'verified').length;
-        const active = userIssues.filter(i => i.status === 'pending' || i.status === 'assigned' || i.status === 'in_progress').length;
+    const userIssues = (currentIssues || []).filter(i => i && i.reporter_id === user.id);
+    lastUserIssues = userIssues;
+    const total = userIssues.length;
+    const resolved = userIssues.filter(i => i.status === 'resolved' || i.status === 'verified').length;
+    const active = userIssues.filter(i => i.status === 'pending' || i.status === 'assigned' || i.status === 'in_progress').length;
 
-        if (totalEl) animateCountUp(totalEl, total);
-        if (resolvedEl) animateCountUp(resolvedEl, resolved);
-        if (activeEl) animateCountUp(activeEl, active);
+    if (totalEl) animateCountUp(totalEl, total);
+    if (resolvedEl) animateCountUp(resolvedEl, resolved);
+    if (activeEl) animateCountUp(activeEl, active);
 
-        // Update resolved rate badge dynamically
-        const rateEl = document.getElementById('stat-resolved-rate');
-        if (rateEl) {
-          const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-          const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
-          rateEl.textContent = total > 0 ? `${rate}% ${tRate}` : '';
+    // Update resolved rate badge dynamically
+    const rateEl = document.getElementById('stat-resolved-rate');
+    if (rateEl) {
+      const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+      const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
+      rateEl.textContent = total > 0 ? `${rate}% ${tRate}` : '';
+    }
+
+    // Update hero description with real stats
+    const heroDesc = document.getElementById('hero-desc');
+    if (heroDesc) {
+      if (total === 0) {
+        heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Start reporting civic issues in your area. Every report builds a more responsive city for everyone.';
+      } else {
+        if (window.i18n) {
+          heroDesc.textContent = window.i18n.t('hero_desc_stats', {
+            total: total,
+            s: total !== 1 ? 's' : '',
+            resolved: resolved
+          });
+        } else {
+          heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
         }
-
-        // Update hero description with real stats
-        const heroDesc = document.getElementById('hero-desc');
-        if (heroDesc) {
-          if (total === 0) {
-            heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Start reporting civic issues in your area. Every report builds a more responsive city for everyone.';
-          } else {
-            if (window.i18n) {
-              heroDesc.textContent = window.i18n.t('hero_desc_stats', {
-                total: total,
-                s: total !== 1 ? 's' : '',
-                resolved: resolved
-              });
-            } else {
-              heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
-            }
-          }
-        }
-
-        localStorage.setItem('cc_user_stat_total', total.toString());
-        localStorage.setItem('cc_user_stat_resolved', resolved.toString());
-        localStorage.setItem('cc_user_stat_active', active.toString());
-
-        renderRecentComplaints(userIssues);
       }
     }
+
+    localStorage.setItem('cc_user_stat_total', total.toString());
+    localStorage.setItem('cc_user_stat_resolved', resolved.toString());
+    localStorage.setItem('cc_user_stat_active', active.toString());
+
+    renderRecentComplaints(userIssues);
   } catch (err) {
-    console.error('Failed to load user issues stats for dashboard:', err);
+    console.error('Failed to compute user stats:', err);
   }
 }
 
@@ -311,6 +307,8 @@ async function loadAndRenderIssues(forceReload = false) {
     currentIssues = issues;
     _lastIssuesFetchAt = Date.now(); // Mark successful fetch time for cooldown guard
     
+    try { loadUserStats(); } catch (e) {}
+
     // Calculate and render Community Insights dynamically
     updateCommunityInsights(currentIssues);
     

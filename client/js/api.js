@@ -27,18 +27,26 @@ async function request(endpoint, options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
-  // Attach Authorization header if a valid JWT token exists in session
-  let token = null;
-  if (typeof getAuthToken === 'function') {
-    token = getAuthToken();
-  }
-  if (!token && typeof getSession === 'function') {
-    const session = getSession();
-    token = session?.access_token || null;
-  }
+  // Authentication is STRICTLY OPT-IN (options.auth === true)
+  if (options.auth === true) {
+    let token = null;
+    if (typeof getAuthToken === 'function') {
+      token = getAuthToken();
+    }
+    if (!token && typeof getSession === 'function') {
+      const session = getSession();
+      token = session?.access_token || null;
+    }
 
-  if (token && typeof token === 'string' && token.split('.').length === 3) {
-    headers['Authorization'] = `Bearer ${token}`;
+    if (token && typeof token === 'string' && token.split('.').length === 3) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      return {
+        data: null,
+        error: 'Authentication required',
+        status: 401
+      };
+    }
   }
 
   const controller = new AbortController();
@@ -113,7 +121,7 @@ const API = {
 
     return _dedupFetch(dedupKey, async () => {
       console.log('[DATA] getIssues START', endpoint);
-      const res = await request(endpoint, { method: 'GET' });
+      const res = await request(endpoint, { method: 'GET', auth: false });
       console.log(`[DATA] getIssues RESPONSE ${res.status}`);
 
       if (res.data) {
@@ -129,21 +137,23 @@ const API = {
 
   // 2. Get Single Issue details
   getIssueDetails: async (id) => {
-    return request(`/issues/${id}`, { method: 'GET' });
+    return request(`/issues/${id}`, { method: 'GET', auth: false });
   },
 
   // 3. Report a new issue
   createIssue: async (issueData) => {
     return request('/issues', {
       method: 'POST',
-      body: issueData
+      body: issueData,
+      auth: true
     });
   },
 
   // 4. Toggle issue upvote
   upvoteIssue: async (id) => {
     return request(`/issues/${id}/upvote`, {
-      method: 'POST'
+      method: 'POST',
+      auth: true
     });
   },
 
@@ -151,7 +161,8 @@ const API = {
   addComment: async (id, commentText) => {
     return request(`/issues/${id}/comments`, {
       method: 'POST',
-      body: JSON.stringify({ comment_text: commentText })
+      body: JSON.stringify({ comment_text: commentText }),
+      auth: true
     });
   },
 
@@ -160,13 +171,14 @@ const API = {
     const isFormData = statusData instanceof FormData;
     return request(`/issues/${id}/status`, {
       method: 'PATCH',
-      body: isFormData ? statusData : JSON.stringify(statusData)
+      body: isFormData ? statusData : JSON.stringify(statusData),
+      auth: true
     });
   },
 
   // 7. Assign complaint (Authority/Admin Only)
   assignIssue: async (id, assignedTo = null) => {
-    const options = { method: 'POST' };
+    const options = { method: 'POST', auth: true };
     if (assignedTo) {
       options.body = JSON.stringify({ assigned_to: assignedTo });
     }
@@ -176,14 +188,16 @@ const API = {
   // 8. Get caseload statistics
   getAuthorityStats: async () => {
     return request('/issues/authority/stats', {
-      method: 'GET'
+      method: 'GET',
+      auth: true
     });
   },
 
   // 9. Delete Issue (Admin Only)
   deleteIssue: async (id) => {
     return request(`/issues/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      auth: true
     });
   },
 
@@ -191,7 +205,8 @@ const API = {
   updateUserRole: async (targetUserId, role) => {
     return request('/auth/role', {
       method: 'POST',
-      body: JSON.stringify({ userId: targetUserId, role })
+      body: JSON.stringify({ userId: targetUserId, role }),
+      auth: true
     });
   },
 
@@ -199,7 +214,8 @@ const API = {
   analyzeWithAi: async (title, description) => {
     return request('/ai/analyze', {
       method: 'POST',
-      body: JSON.stringify({ title, description })
+      body: JSON.stringify({ title, description }),
+      auth: false
     });
   },
 
@@ -207,7 +223,8 @@ const API = {
   translateVoiceText: async (text) => {
     return request('/ai/translate-voice', {
       method: 'POST',
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text }),
+      auth: false
     });
   },
 
@@ -215,21 +232,24 @@ const API = {
   analyzeImageWithAi: async (imageBase64) => {
     return request('/ai/analyze-image', {
       method: 'POST',
-      body: JSON.stringify({ image: imageBase64 })
+      body: JSON.stringify({ image: imageBase64 }),
+      auth: false
     });
   },
 
   // 12. Get all users (Admin Only)
   getAllUsers: async () => {
     return request('/auth/users', {
-      method: 'GET'
+      method: 'GET',
+      auth: true
     });
   },
 
   // 13. Get system-wide analytics (Admin Only)
   getAdminAnalytics: async () => {
     return request('/issues/admin/analytics', {
-      method: 'GET'
+      method: 'GET',
+      auth: true
     });
   },
 
@@ -237,7 +257,7 @@ const API = {
   getNotifications: () => {
     return _dedupFetch('GET:/notifications', async () => {
       console.log('[DATA] getNotifications START');
-      const res = await request('/notifications', { method: 'GET' });
+      const res = await request('/notifications', { method: 'GET', auth: true });
       console.log(`[DATA] getNotifications RESPONSE ${res.status}`);
 
       if (res.data) {
@@ -253,14 +273,16 @@ const API = {
   // 15. Mark single notification as read
   markNotificationAsRead: async (id) => {
     return request(`/notifications/${id}/read`, {
-      method: 'PATCH'
+      method: 'PATCH',
+      auth: true
     });
   },
 
   // 16. Mark all notifications as read
   markAllNotificationsAsRead: async () => {
     return request('/notifications/read-all', {
-      method: 'PATCH'
+      method: 'PATCH',
+      auth: true
     });
   },
 
@@ -268,28 +290,32 @@ const API = {
   editComment: async (commentId, commentText) => {
     return request(`/issues/comments/${commentId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ comment_text: commentText })
+      body: JSON.stringify({ comment_text: commentText }),
+      auth: true
     });
   },
 
   // 18. Delete comment
   deleteComment: async (commentId) => {
     return request(`/issues/comments/${commentId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      auth: true
     });
   },
 
   // 20. Get current user badges
   getUserBadges: async () => {
     return request('/gamification/badges', {
-      method: 'GET'
+      method: 'GET',
+      auth: true
     });
   },
 
   // 21. Get advanced analytics data
   getAdvancedAnalytics: async () => {
     return request('/issues/analytics', {
-      method: 'GET'
+      method: 'GET',
+      auth: false
     });
   },
 
@@ -297,14 +323,16 @@ const API = {
   chatWithAi: async (messages) => {
     return request('/ai/chat', {
       method: 'POST',
-      body: JSON.stringify({ messages })
+      body: JSON.stringify({ messages }),
+      auth: false
     });
   },
 
   // 23. Verify issue resolution
   verifyIssue: async (id) => {
     return request(`/issues/${id}/verify`, {
-      method: 'POST'
+      method: 'POST',
+      auth: true
     });
   },
 
@@ -312,7 +340,8 @@ const API = {
   reopenIssue: async (id, reason = '') => {
     return request(`/issues/${id}/reopen`, {
       method: 'POST',
-      body: JSON.stringify({ reason })
+      body: JSON.stringify({ reason }),
+      auth: true
     });
   },
 
@@ -320,7 +349,8 @@ const API = {
   suspendUser: async (id, isSuspended) => {
     return request(`/auth/users/${id}/suspend`, {
       method: 'PATCH',
-      body: JSON.stringify({ isSuspended })
+      body: JSON.stringify({ isSuspended }),
+      auth: true
     });
   },
 
@@ -328,7 +358,8 @@ const API = {
   verifyAuthority: async (id, isVerified) => {
     return request(`/auth/users/${id}/verify-authority`, {
       method: 'PATCH',
-      body: JSON.stringify({ isVerified })
+      body: JSON.stringify({ isVerified }),
+      auth: true
     });
   },
 
@@ -336,20 +367,22 @@ const API = {
   assignUserDepartment: async (id, departmentId) => {
     return request(`/auth/users/${id}/assign-department`, {
       method: 'PATCH',
-      body: JSON.stringify({ departmentId })
+      body: JSON.stringify({ departmentId }),
+      auth: true
     });
   },
 
   // 28. Get all departments
   getDepartments: async () => {
-    return request('/departments', { method: 'GET' });
+    return request('/departments', { method: 'GET', auth: false });
   },
 
   // 29. Create department (Admin Only)
   createDepartment: async (deptData) => {
     return request('/departments', {
       method: 'POST',
-      body: JSON.stringify(deptData)
+      body: JSON.stringify(deptData),
+      auth: true
     });
   },
 
@@ -357,57 +390,63 @@ const API = {
   updateDepartment: async (id, deptData) => {
     return request(`/departments/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(deptData)
+      body: JSON.stringify(deptData),
+      auth: true
     });
   },
 
   // 31. Delete department (Admin Only)
   deleteDepartment: async (id) => {
     return request(`/departments/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      auth: true
     });
   },
 
   // 32. Transportation Module APIs
   getTransportationReports: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    return request(`/transportation/reports${query ? '?' + query : ''}`, { method: 'GET' });
+    return request(`/transportation/reports${query ? '?' + query : ''}`, { method: 'GET', auth: false });
   },
 
   getTransportationReportById: async (id) => {
-    return request(`/transportation/reports/${id}`, { method: 'GET' });
+    return request(`/transportation/reports/${id}`, { method: 'GET', auth: false });
   },
 
   createTransportationReport: async (reportData) => {
     return request('/transportation/reports', {
       method: 'POST',
-      body: JSON.stringify(reportData)
+      body: JSON.stringify(reportData),
+      auth: true
     });
   },
 
   updateTransportationReportStatus: async (id, updateData) => {
     return request(`/transportation/reports/${id}/status`, {
       method: 'PUT',
-      body: JSON.stringify(updateData)
+      body: JSON.stringify(updateData),
+      auth: true
     });
   },
 
   analyzeTransportationIssue: async (data) => {
     return request('/transportation/analyze', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      auth: false
     });
   },
 
   // 33. AI decisions
   getAiDecisions: async () => {
-    return request('/issues/admin/ai-decisions', { method: 'GET' });
+    return request('/issues/admin/ai-decisions', { method: 'GET', auth: true });
   },
 
   overrideAiDecision: async (id, overrideData) => {
     return request(`/issues/admin/ai-decisions/${id}/override`, {
       method: 'POST',
-      body: JSON.stringify(overrideData)
+      body: JSON.stringify(overrideData),
+      auth: true
     });
   },
 
@@ -415,7 +454,8 @@ const API = {
   withdrawIssue: async (id, reason = '') => {
     return request(`/issues/${id}/withdraw`, {
       method: 'POST',
-      body: JSON.stringify({ reason })
+      body: JSON.stringify({ reason }),
+      auth: true
     });
   },
 
@@ -423,19 +463,21 @@ const API = {
   uploadEvidence: async (id, formData) => {
     return request(`/issues/${id}/evidence`, {
       method: 'POST',
-      body: formData
+      body: formData,
+      auth: true
     });
   },
 
   // 36. Chat messages
   getChatMessages: async (id) => {
-    return request(`/issues/${id}/messages`, { method: 'GET' });
+    return request(`/issues/${id}/messages`, { method: 'GET', auth: true });
   },
 
   sendChatMessage: async (id, messageText) => {
     return request(`/issues/${id}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ message_text: messageText })
+      body: JSON.stringify({ message_text: messageText }),
+      auth: true
     });
   },
 
@@ -447,7 +489,8 @@ const API = {
         recipient_email: recipientEmail,
         subject: subject,
         message: message
-      })
+      }),
+      auth: true
     });
   },
 
