@@ -172,37 +172,6 @@ function getSafeSupabaseOptions() {
         setItem: (k, v) => { try { window.localStorage.setItem(k, v); } catch (e) {} },
         removeItem: (k) => { try { window.localStorage.removeItem(k); } catch (e) {} }
       }
-    },
-    global: {
-      fetch: (input, init) => {
-        try {
-          // Resolve the target URL safely regardless of input type
-          const targetUrl = typeof input === 'string'
-            ? input
-            : (input instanceof Request ? input.url : String(input));
-
-          // Build a fresh Headers object from whatever was passed in
-          let srcHeaders = {};
-          if (init && init.headers) {
-            srcHeaders = init.headers;
-          } else if (input instanceof Request && input.headers) {
-            srcHeaders = input.headers;
-          }
-          const headers = new Headers(srcHeaders);
-
-          // Strip invalid publishable key from Authorization — PostgREST only accepts real JWTs there
-          const authVal = headers.get('authorization') || '';
-          if (authVal.includes('sb_publishable_')) {
-            headers.delete('authorization');
-          }
-
-          const fetchInit = Object.assign({}, init || {}, { headers });
-          return fetch(targetUrl, fetchInit);
-        } catch (e) {
-          // Absolute last-resort fallback — should never reach here
-          return fetch(input, init);
-        }
-      }
     }
   };
 }

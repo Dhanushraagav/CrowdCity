@@ -2,14 +2,6 @@
 
 const API_BASE = '/api';
 
-// ─── Supabase direct REST config ─────────────────────────────────────────────
-// Anon/publishable key is intentionally public (safe for frontend).
-// We bypass the Supabase JS client for REST reads because supabase-js v2 sends
-// "Authorization: Bearer sb_publishable_..." which PostgREST rejects and closes
-// the HTTP/2 stream — causing cascading ERR_HTTP2_PROTOCOL_ERROR errors.
-const _SB_URL = 'https://swbktcwlxbnbsjrmmmjj.supabase.co';
-const _SB_ANON_KEY = 'sb_publishable_kUW0Yid-0eAcDlOde-ETPQ_Udmo8krY';
-
 // ─── In-flight request deduplication ─────────────────────────────────────────
 // If the same request is already in-flight, return the existing Promise.
 // Prevents duplicate concurrent fetches caused by rapid auth-change/realtime events.
@@ -21,66 +13,22 @@ function _dedupFetch(key, fetcher) {
   return p;
 }
 
-// ─── Direct Supabase REST fetch ───────────────────────────────────────────────
-// Sends ONLY apikey header for anon reads. For authenticated user queries,
-// pass the session JWT (eyJ...) — NOT the publishable key.
-async function _sbFetch(table, queryParams, userJwt) {
-  const url = new URL(`${_SB_URL}/rest/v1/${table}`);
-  if (queryParams) {
-    Object.entries(queryParams).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
-    });
+// ─── Helper to obtain initialized Supabase SDK client ────────────────────────
+async function _getSupabaseClient() {
+  if (window.supabaseClient) return window.supabaseClient;
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) return supabaseClient;
+  if (typeof window.getOrInitSupabaseClient === 'function') {
+    try {
+      const client = await window.getOrInitSupabaseClient();
+      if (client) return client;
+    } catch (e) {}
   }
-
-  const headers = {
-    'apikey': _SB_ANON_KEY,
-    'Accept': 'application/json'
-  };
-  // Only attach Authorization if we have a real Supabase JWT (starts with eyJ)
-  if (userJwt && typeof userJwt === 'string' && userJwt.startsWith('eyJ')) {
-    headers['Authorization'] = `Bearer ${userJwt}`;
+  if (window.authInitPromise) {
+    try {
+      await window.authInitPromise;
+      if (window.supabaseClient) return window.supabaseClient;
+    } catch (e) {}
   }
-
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 8000);
-  try {
-    const res = await fetch(url.toString(), { headers, signal: ctrl.signal });
-    clearTimeout(t);
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      return { data: null, error: `Supabase HTTP ${res.status}: ${body.slice(0, 120)}` };
-    }
-    return { data: await res.json(), error: null };
-  } catch (err) {
-    clearTimeout(t);
-    return { data: null, error: err.name === 'AbortError' ? 'Request timed out' : err.message };
-  }
-}
-
-// ─── Get current user's Supabase JWT from localStorage ───────────────────────
-function _getSessionJwt() {
-  try {
-    // Supabase JS v2 stores session under keys matching "sb-*-auth-token"
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && (k.includes('supabase') || k.startsWith('sb-')) && k.includes('auth')) {
-        const raw = localStorage.getItem(k);
-        if (!raw) continue;
-        const parsed = JSON.parse(raw);
-        const jwt = parsed?.access_token
-          || parsed?.currentSession?.access_token
-          || parsed?.session?.access_token;
-        if (jwt && jwt.startsWith('eyJ')) return jwt;
-      }
-    }
-    // Fallback: CrowdCity session cache
-    const cc = localStorage.getItem('cc_session');
-    if (cc) {
-      const s = JSON.parse(cc);
-      const jwt = s?.access_token || s?.session?.access_token;
-      if (jwt && jwt.startsWith('eyJ')) return jwt;
-    }
-  } catch (e) {}
   return null;
 }
 
@@ -160,28 +108,54 @@ const API = {
   // Generic request method
   request: request,
 
-  // 1. Get Issues — direct Supabase REST (no supabase-js client, no /api fallback)
+  // 1. Get Issues — official Supabase client query
   // Deduplicated: concurrent calls with same filters share one in-flight request.
   getIssues: (filters = {}) => {
     const key = `issues:${JSON.stringify(filters)}`;
     return _dedupFetch(key, async () => {
-      const params = { select: '*' };
-      if (filters.category && filters.category !== 'all') params['category'] = `eq.${filters.category}`;
-      if (filters.status   && filters.status   !== 'all') params['status']   = `eq.${filters.status}`;
-      if (filters.reporter_id) params['reporter_id'] = `eq.${filters.reporter_id}`;
-      if (filters.assigned_to) params['assigned_to'] = `eq.${filters.assigned_to}`;
-      params['order'] = filters.sort_by === 'popularity' ? 'upvotes_count.desc' : 'created_at.desc';
-      return _sbFetch('issues', params, _getSessionJwt());
+      const client = await _getSupabaseClient();
+      if (!client) {
+        console.warn('[API getIssues] Supabase client not ready yet');
+        return { data: [], error: 'Supabase client initializing' };
+      }
+
+      try {
+        let query = client.from('issues').select('*');
+        if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category);
+        if (filters.status   && filters.status   !== 'all') query = query.eq('status', filters.status);
+        if (filters.reporter_id) query = query.eq('reporter_id', filters.reporter_id);
+        if (filters.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
+        
+        if (filters.sort_by === 'popularity') {
+          query = query.order('upvotes_count', { ascending: false });
+        } else {
+          query = query.order('created_at', { ascending: false });
+        }
+
+        const { data, error } = await query;
+        if (error) {
+          console.warn('[Supabase issues query notice]:', error.message || error);
+          return { data: null, error: error.message || 'Failed to fetch issues' };
+        }
+        return { data: data || [], error: null };
+      } catch (err) {
+        console.warn('[API getIssues Exception]:', err.message || err);
+        return { data: null, error: err.message || 'Failed to fetch issues' };
+      }
     });
   },
 
-  // 2. Get Single Issue details — direct Supabase REST
+  // 2. Get Single Issue details — official Supabase client query
   getIssueDetails: async (id) => {
-    const { data, error } = await _sbFetch('issues', { select: '*', id: `eq.${id}` }, _getSessionJwt());
-    if (!error && Array.isArray(data)) {
-      return data.length > 0 ? { data: data[0], error: null } : { data: null, error: 'Not found' };
+    const client = await _getSupabaseClient();
+    if (!client) return { data: null, error: 'Supabase client initializing' };
+    try {
+      const { data, error } = await client.from('issues').select('*').eq('id', id).maybeSingle();
+      if (error) return { data: null, error: error.message || error };
+      return { data: data || null, error: null };
+    } catch (err) {
+      return { data: null, error: err.message || err };
     }
-    return { data: null, error };
   },
 
   // 3. Report a new issue (supports JSON or FormData for uploads)
@@ -286,31 +260,43 @@ const API = {
     });
   },
 
-  // 14. Get user notifications — direct Supabase REST (no supabase-js, no /api fallback)
+  // 14. Get user notifications — official Supabase client query
   // Deduplicated: concurrent calls share one in-flight request.
   getNotifications: () => {
     return _dedupFetch('notifications:user', async () => {
-      const jwt = _getSessionJwt();
-      // Get current user ID from session
+      const client = await _getSupabaseClient();
+      if (!client) {
+        return { data: [], error: null };
+      }
+
       let userId = null;
       try {
         const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
         userId = user?.id;
         if (!userId) {
-          const cc = localStorage.getItem('cc_session');
-          if (cc) {
-            const s = JSON.parse(cc);
-            userId = s?.user?.id || s?.session?.user?.id;
-          }
+          const { data: { user: authUser } } = await client.auth.getUser();
+          userId = authUser?.id;
         }
       } catch (e) {}
+
       if (!userId) return { data: [], error: null };
 
-      return _sbFetch('notifications', {
-        select: '*',
-        user_id: `eq.${userId}`,
-        order: 'created_at.desc'
-      }, jwt);
+      try {
+        const { data, error } = await client
+          .from('notifications')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.warn('[Supabase notifications query notice]:', error.message || error);
+          return { data: null, error: error.message || 'Failed to fetch notifications' };
+        }
+        return { data: data || [], error: null };
+      } catch (err) {
+        console.warn('[API getNotifications Exception]:', err.message || err);
+        return { data: null, error: err.message || 'Failed to fetch notifications' };
+      }
     });
   },
 
