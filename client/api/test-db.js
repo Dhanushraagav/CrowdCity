@@ -1,4 +1,4 @@
-﻿export default async function handler(req, res) {
+module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   try {
     const supabaseUrl = 'https://swbktcwlxbnbsjrmmmjj.supabase.co';
@@ -17,4 +17,4 @@
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
-}
+};
