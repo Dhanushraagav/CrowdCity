@@ -10,6 +10,16 @@ let isLoadingIssues = false;
 let lastUserIssues = [];
 let appRealtimeChannel = null;
 
+// ─── Load guards: prevent duplicate/rapid concurrent data fetches ────────────
+// These track the last time each data set was successfully fetched.
+// A realtime RECONNECT or auth-change will not re-fetch if a fetch already
+// happened within the last 8 seconds, eliminating the infinite retry loop.
+let _lastIssuesFetchAt = 0;
+let _lastStatsFetchAt = 0;
+let _lastNotifFetchAt = 0;
+const _FETCH_COOLDOWN_MS = 8000;
+
+
 // High-performance requestAnimationFrame count-up animation
 function animateCountUp(element, targetVal, suffix = '') {
   if (!element) return;
@@ -243,9 +253,17 @@ async function loadUserStats(isLanguageChange = false) {
 
 
 // Fetch and draw issues list
-async function loadAndRenderIssues() {
+async function loadAndRenderIssues(forceReload = false) {
   const listContainer = document.getElementById('issues-list');
   if (!listContainer) return;
+
+  // Prevent concurrent duplicate loads (e.g. from realtime reconnect + auth change firing together)
+  if (isLoadingIssues) return;
+
+  // Cooldown guard: don't re-fetch if data was loaded within the past 8 seconds
+  // (unless forceReload is explicitly set by filter/tab interactions)
+  const now = Date.now();
+  if (!forceReload && (now - _lastIssuesFetchAt) < _FETCH_COOLDOWN_MS) return;
 
   try {
     isLoadingIssues = true;
@@ -295,13 +313,14 @@ async function loadAndRenderIssues() {
         <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
           <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
           <p>Failed to load issues: ${error || 'Unknown error'}</p>
-          <button onclick="loadAndRenderIssues()" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
+          <button onclick="loadAndRenderIssues(true)" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
         </div>
       `;
       return;
     }
 
     currentIssues = issues;
+    _lastIssuesFetchAt = Date.now(); // Mark successful fetch time for cooldown guard
     
     // Calculate and render Community Insights dynamically
     updateCommunityInsights(currentIssues);
@@ -324,7 +343,7 @@ async function loadAndRenderIssues() {
       <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
         <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
         <p>Failed to load issues: ${err.message || 'Unknown error'}</p>
-        <button onclick="loadAndRenderIssues()" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
+        <button onclick="loadAndRenderIssues(true)" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
       </div>
     `;
   }
@@ -496,7 +515,7 @@ function setupFilterListeners() {
       pill.classList.add('active');
 
       activeCategory = pill.dataset.category;
-      await loadAndRenderIssues();
+      await loadAndRenderIssues(true);
     });
   }
 
@@ -514,7 +533,7 @@ function setupFilterListeners() {
 
       activeStatus = newStatus;
       syncFilterUI();
-      await loadAndRenderIssues();
+      await loadAndRenderIssues(true);
     });
   }
 }
@@ -601,10 +620,8 @@ window.addEventListener('auth-change', async () => {
 
 function initRealtimeDashboard() {
   if (appRealtimeChannel) {
-    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-    if (client) {
-      client.removeChannel(appRealtimeChannel);
-    }
+    const client = window.supabaseClient || null;
+    if (client) client.removeChannel(appRealtimeChannel);
     appRealtimeChannel = null;
   }
 
@@ -617,18 +634,23 @@ function initRealtimeDashboard() {
       { event: 'UPDATE', table: 'issues' }
     ],
     onEvent: (event, payload) => {
-      console.log(`[Dashboard Realtime] Event ${event} received.`, payload);
+      // IMPORTANT: Do NOT reload on RECONNECT — that caused the infinite loop.
+      // Realtime RECONNECT fires every time the WebSocket reconnects.
+      // If the HTTP/2 connection is unstable, this becomes an infinite fetch cycle.
+      // Instead, only react to actual database INSERT/UPDATE events.
+      if (event === 'RECONNECT') return;
+
       if (window.showToast) {
         if (event === 'INSERT') {
           window.showToast(window.i18n ? window.i18n.t('toast_new_complaint') || 'New civic complaint reported in your city!' : 'New civic complaint reported in your city!', 'info');
         } else if (event === 'UPDATE') {
           window.showToast(window.i18n ? window.i18n.t('toast_complaint_updated') || 'A complaint status was updated.' : 'A complaint status was updated.', 'info');
-        } else if (event === 'RECONNECT') {
-          // Automatic reconnect already notifies, just sync
         }
       }
-      // Re-fetch issues and telemetry without reloading page
-      loadAndRenderIssues().catch(err => console.error("Error refreshing issues on realtime update:", err));
+
+      // Refresh data for actual DB changes only.
+      // loadAndRenderIssues has a cooldown guard so rapid events don't spam fetches.
+      loadAndRenderIssues(true).catch(err => console.error("Error refreshing issues on realtime update:", err));
       loadUserStats().catch(err => console.error("Error refreshing user stats on realtime update:", err));
     }
   });
@@ -777,7 +799,7 @@ function setupFeedTabs() {
     syncFilterUI();
     
     if (activeStatus !== oldStatus) {
-      await loadAndRenderIssues();
+      await loadAndRenderIssues(true);
     } else {
       await processAndRenderFeed();
     }

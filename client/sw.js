@@ -1,20 +1,18 @@
 // CrowdCity AI - Service Worker
 // Production-grade Service Worker with Stale-While-Revalidate static asset caching and offline fallback.
 
-const CACHE_NAME = 'crowdcity-static-v12-fix';
+const CACHE_NAME = 'crowdcity-static-v13';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_ASSETS = [
   'offline.html',
   'css/style.css',
   'css/components.css',
-  'js/i18n.js',
-  'js/auth.js',
-  'js/pwa-helper.js',
   'images/crowdcity_icon_transparent.png'
 ];
+// NOTE: JS files are NOT precached — they always use network-first to prevent stale code bugs.
 
-// 1. Install Event: Pre-cache core shell assets
+// 1. Install Event: Pre-cache core shell assets (no JS)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -42,7 +40,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch Event: Fast Stale-While-Revalidate for static assets, network-first for navigation
+// 3. Fetch Event: Network-first for JS; Stale-While-Revalidate for CSS/images; network-first for navigation
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
@@ -67,10 +65,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static Assets (CSS, JS, Fonts, Local Images): Stale-While-Revalidate
+  // JavaScript files: ALWAYS network-first, no stale-cache serving
+  // This prevents serving outdated auth.js/api.js/app.js after a deployment.
+  if (event.request.destination === 'script') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // Only use cached version if network completely fails (offline)
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // CSS, Fonts, Images: Stale-While-Revalidate (safe to cache)
   if (
     event.request.destination === 'style' ||
-    event.request.destination === 'script' ||
     event.request.destination === 'font' ||
     event.request.destination === 'image'
   ) {

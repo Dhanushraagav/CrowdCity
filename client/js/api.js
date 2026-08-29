@@ -2,6 +2,90 @@
 
 const API_BASE = '/api';
 
+// ─── Supabase direct REST config ─────────────────────────────────────────────
+// Anon/publishable key is intentionally public (safe for frontend).
+// We bypass the Supabase JS client for REST reads because supabase-js v2 sends
+// "Authorization: Bearer sb_publishable_..." which PostgREST rejects and closes
+// the HTTP/2 stream — causing cascading ERR_HTTP2_PROTOCOL_ERROR errors.
+const _SB_URL = 'https://swbktcwlxbnbsjrmmmjj.supabase.co';
+const _SB_ANON_KEY = 'sb_publishable_kUW0Yid-0eAcDlOde-ETPQ_Udmo8krY';
+
+// ─── In-flight request deduplication ─────────────────────────────────────────
+// If the same request is already in-flight, return the existing Promise.
+// Prevents duplicate concurrent fetches caused by rapid auth-change/realtime events.
+const _inFlight = new Map();
+function _dedupFetch(key, fetcher) {
+  if (_inFlight.has(key)) return _inFlight.get(key);
+  const p = fetcher().finally(() => _inFlight.delete(key));
+  _inFlight.set(key, p);
+  return p;
+}
+
+// ─── Direct Supabase REST fetch ───────────────────────────────────────────────
+// Sends ONLY apikey header for anon reads. For authenticated user queries,
+// pass the session JWT (eyJ...) — NOT the publishable key.
+async function _sbFetch(table, queryParams, userJwt) {
+  const url = new URL(`${_SB_URL}/rest/v1/${table}`);
+  if (queryParams) {
+    Object.entries(queryParams).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
+    });
+  }
+
+  const headers = {
+    'apikey': _SB_ANON_KEY,
+    'Accept': 'application/json'
+  };
+  // Only attach Authorization if we have a real Supabase JWT (starts with eyJ)
+  if (userJwt && typeof userJwt === 'string' && userJwt.startsWith('eyJ')) {
+    headers['Authorization'] = `Bearer ${userJwt}`;
+  }
+
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(url.toString(), { headers, signal: ctrl.signal });
+    clearTimeout(t);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      return { data: null, error: `Supabase HTTP ${res.status}: ${body.slice(0, 120)}` };
+    }
+    return { data: await res.json(), error: null };
+  } catch (err) {
+    clearTimeout(t);
+    return { data: null, error: err.name === 'AbortError' ? 'Request timed out' : err.message };
+  }
+}
+
+// ─── Get current user's Supabase JWT from localStorage ───────────────────────
+function _getSessionJwt() {
+  try {
+    // Supabase JS v2 stores session under keys matching "sb-*-auth-token"
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.includes('supabase') || k.startsWith('sb-')) && k.includes('auth')) {
+        const raw = localStorage.getItem(k);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        const jwt = parsed?.access_token
+          || parsed?.currentSession?.access_token
+          || parsed?.session?.access_token;
+        if (jwt && jwt.startsWith('eyJ')) return jwt;
+      }
+    }
+    // Fallback: CrowdCity session cache
+    const cc = localStorage.getItem('cc_session');
+    if (cc) {
+      const s = JSON.parse(cc);
+      const jwt = s?.access_token || s?.session?.access_token;
+      if (jwt && jwt.startsWith('eyJ')) return jwt;
+    }
+  } catch (e) {}
+  return null;
+}
+
+
+
 /**
  * Perform a fetch request with automatic authorization header injection
  */
@@ -76,61 +160,28 @@ const API = {
   // Generic request method
   request: request,
 
-  // 1. Get Issues List directly from Supabase for instant 0ms response
-  getIssues: async (filters = {}) => {
-    let client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-    if (!client && typeof window.getOrInitSupabaseClient === 'function') {
-      try { client = await window.getOrInitSupabaseClient(); } catch(e) {}
-    }
-    if (client) {
-      try {
-        let query = client.from('issues').select('*');
-        if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category);
-        if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status);
-        if (filters.reporter_id) query = query.eq('reporter_id', filters.reporter_id);
-        if (filters.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
-        
-        if (filters.sort_by === 'popularity') {
-          query = query.order('upvotes_count', { ascending: false });
-        } else {
-          query = query.order('created_at', { ascending: false });
-        }
-        
-        const { data: issues, error } = await query;
-        if (!error && issues) {
-          return { data: issues, error: null };
-        }
-      } catch (e) {}
-    }
-
-    // Fallback to backend REST
-    const params = new URLSearchParams();
-    if (filters.category) params.append('category', filters.category);
-    if (filters.status) params.append('status', filters.status);
-    if (filters.reporter_id) params.append('reporter_id', filters.reporter_id);
-    if (filters.assigned_to) params.append('assigned_to', filters.assigned_to);
-    if (filters.sort_by) params.append('sort_by', filters.sort_by);
-    
-    const queryString = params.toString();
-    const endpoint = `/issues${queryString ? `?${queryString}` : ''}`;
-    return request(endpoint, { method: 'GET' });
+  // 1. Get Issues — direct Supabase REST (no supabase-js client, no /api fallback)
+  // Deduplicated: concurrent calls with same filters share one in-flight request.
+  getIssues: (filters = {}) => {
+    const key = `issues:${JSON.stringify(filters)}`;
+    return _dedupFetch(key, async () => {
+      const params = { select: '*' };
+      if (filters.category && filters.category !== 'all') params['category'] = `eq.${filters.category}`;
+      if (filters.status   && filters.status   !== 'all') params['status']   = `eq.${filters.status}`;
+      if (filters.reporter_id) params['reporter_id'] = `eq.${filters.reporter_id}`;
+      if (filters.assigned_to) params['assigned_to'] = `eq.${filters.assigned_to}`;
+      params['order'] = filters.sort_by === 'popularity' ? 'upvotes_count.desc' : 'created_at.desc';
+      return _sbFetch('issues', params, _getSessionJwt());
+    });
   },
 
-  // 2. Get Single Issue details directly from Supabase
+  // 2. Get Single Issue details — direct Supabase REST
   getIssueDetails: async (id) => {
-    let client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-    if (!client && typeof window.getOrInitSupabaseClient === 'function') {
-      try { client = await window.getOrInitSupabaseClient(); } catch(e) {}
+    const { data, error } = await _sbFetch('issues', { select: '*', id: `eq.${id}` }, _getSessionJwt());
+    if (!error && Array.isArray(data)) {
+      return data.length > 0 ? { data: data[0], error: null } : { data: null, error: 'Not found' };
     }
-    if (client) {
-      try {
-        const { data, error } = await client.from('issues').select('*').eq('id', id).maybeSingle();
-        if (!error && data) {
-          return { data, error: null };
-        }
-      } catch (e) {}
-    }
-    return request(`/issues/${id}`, { method: 'GET' });
+    return { data: null, error };
   },
 
   // 3. Report a new issue (supports JSON or FormData for uploads)
@@ -235,29 +286,31 @@ const API = {
     });
   },
 
-  // 14. Get user notifications directly from Supabase
-  getNotifications: async () => {
-    let client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-    if (!client && typeof window.getOrInitSupabaseClient === 'function') {
-      try { client = await window.getOrInitSupabaseClient(); } catch(e) {}
-    }
-    if (client) {
+  // 14. Get user notifications — direct Supabase REST (no supabase-js, no /api fallback)
+  // Deduplicated: concurrent calls share one in-flight request.
+  getNotifications: () => {
+    return _dedupFetch('notifications:user', async () => {
+      const jwt = _getSessionJwt();
+      // Get current user ID from session
+      let userId = null;
       try {
-        const user = typeof getUser === 'function' ? getUser() : (typeof getCurrentUser === 'function' ? getCurrentUser() : null);
-        if (user && user.id) {
-          const { data, error } = await client
-            .from('notifications')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
-          if (!error && data) {
-            return { data, error: null };
+        const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+        userId = user?.id;
+        if (!userId) {
+          const cc = localStorage.getItem('cc_session');
+          if (cc) {
+            const s = JSON.parse(cc);
+            userId = s?.user?.id || s?.session?.user?.id;
           }
         }
       } catch (e) {}
-    }
-    return request('/notifications', {
-      method: 'GET'
+      if (!userId) return { data: [], error: null };
+
+      return _sbFetch('notifications', {
+        select: '*',
+        user_id: `eq.${userId}`,
+        order: 'created_at.desc'
+      }, jwt);
     });
   },
 
