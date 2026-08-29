@@ -833,12 +833,36 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   }
 
   if (!profile) {
-    console.warn("Profile record not found");
-    window.cc_routing_in_progress = false;
-    await clearSessionSilent();
-    showAlert("Profile record not found");
-    restoreSubmitButtons();
-    return;
+    console.log("[Auth Client] Profile record not found. Auto-synthesizing citizen profile...");
+    const userName = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || 
+                     (user.email ? user.email.split('@')[0] : 'Citizen');
+    const synthesizedProfile = {
+      id: user.id,
+      email: user.email || '',
+      full_name: userName,
+      role: 'citizen',
+      is_verified_authority: false,
+      points: 50,
+      created_at: new Date().toISOString()
+    };
+
+    try {
+      const supabase = await getOrInitSupabaseClient();
+      if (supabase) {
+        await supabase.from('profiles').upsert(synthesizedProfile, { onConflict: 'id' });
+      }
+    } catch (e) {
+      console.warn("[Auth Client] Background profile auto-creation notice:", e);
+    }
+
+    profile = {
+      role: 'citizen',
+      is_verified: false,
+      full_name: userName,
+      points: 50
+    };
+    localStorage.setItem('cc_user_role', 'citizen');
+    localStorage.setItem('cc_user_profile', JSON.stringify(synthesizedProfile));
   }
 
   console.log("PROFILE FOUND");
@@ -847,15 +871,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   console.log("- Role:", profile.role);
   console.log("- Is Verified:", profile.is_verified);
 
-  const role = profile.role;
-  if (!role) {
-    console.warn("Role not detected in profile");
-    window.cc_routing_in_progress = false;
-    await clearSessionSilent();
-    showAlert("Profile record not found");
-    restoreSubmitButtons();
-    return;
-  }
+  const role = profile.role || 'citizen';
 
   // Enforce strict portal-role boundaries
   const path = window.location.pathname;
