@@ -58,7 +58,8 @@ async function request(endpoint, options = {}) {
     token = getAuthToken();
   }
 
-  if (token) {
+  // Inject JWT Bearer token only if it is a valid 3-part JWT string
+  if (token && typeof token === 'string' && token.split('.').length === 3) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 

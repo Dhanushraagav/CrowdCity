@@ -1,5 +1,4 @@
-// CrowdCity AI - Service Worker (Diagnostic Mode: Transparent Network Pass-Through)
-const CACHE_NAME = 'crowdcity-static-v19';
+const CACHE_NAME = 'crowdcity-static-v20';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
