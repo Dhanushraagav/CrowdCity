@@ -117,7 +117,7 @@ function loadUserStats(isLanguageChange = false) {
     const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
     const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
     const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-    const tAcrossCity = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+    const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
 
     if (totalEl) animateCountUp(totalEl, 0);
     if (weeklyEl) weeklyEl.textContent = `+0 ${tThisWeek}`;
@@ -125,8 +125,8 @@ function loadUserStats(isLanguageChange = false) {
     if (rateEl) rateEl.textContent = `0% ${tResolutionRate}`;
     if (inprogressEl) animateCountUp(inprogressEl, 0);
     if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) animateCountUp(cityTotalEl, Array.isArray(currentIssues) ? currentIssues.length : 0);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = tAcrossCity;
+    if (cityTotalEl) animateCountUp(cityTotalEl, 0);
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
     return;
   }
 
@@ -143,20 +143,19 @@ function loadUserStats(isLanguageChange = false) {
       const s = (i.status || '').toLowerCase();
       return s === 'pending' || s === 'assigned' || s === 'in_progress';
     }).length;
-    const cityTotal = Array.isArray(currentIssues) ? currentIssues.length : 0;
 
     const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
     const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
     const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-    const tAcrossCity = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+    const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
 
     if (totalEl) animateCountUp(totalEl, total);
     if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
     if (inprogressEl) animateCountUp(inprogressEl, active);
     if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = tAcrossCity;
+    if (cityTotalEl) animateCountUp(cityTotalEl, total);
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
@@ -193,20 +192,19 @@ function loadUserStats(isLanguageChange = false) {
       const s = (i.status || '').toLowerCase();
       return s === 'pending' || s === 'assigned' || s === 'in_progress';
     }).length;
-    const cityTotal = currentIssues.length;
 
     const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
     const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
     const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-    const tAcrossCity = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+    const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
 
     if (totalEl) animateCountUp(totalEl, total);
     if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
     if (inprogressEl) animateCountUp(inprogressEl, active);
     if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = tAcrossCity;
+    if (cityTotalEl) animateCountUp(cityTotalEl, total);
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
