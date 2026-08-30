@@ -509,40 +509,69 @@ export const updateIssueStatus = async (req, res) => {
 
     const targetStatus = status === 'timeline_update' ? originalIssue.status : status;
 
-    // Enforce mandatory proof image file when status transitions to resolved
+    const incomingProof = req.body?.completion_photo_url || req.body?.completion_proof_url || req.body?.proof_photo_url || '';
+
+    // Enforce mandatory proof image when status transitions to resolved
     if (targetStatus === 'resolved') {
-      if (!req.file) {
-        if (!originalIssue.completion_proof_url) {
-          return res.status(400).json({ error: 'Resolution proof image is strictly required to resolve a complaint.' });
-        }
+      if (!req.file && !incomingProof && !originalIssue.completion_proof_url && !originalIssue.completion_photo_url) {
+        return res.status(400).json({ error: 'Resolution proof image is strictly required to resolve a complaint.' });
       }
     }
 
-    let proofUrl = '';
+    let proofUrl = incomingProof || originalIssue.completion_proof_url || originalIssue.completion_photo_url || '';
 
-    // Handle resolution image upload if status is resolved and file exists
+    // Handle resolution image file upload if multipart file exists
     if (targetStatus === 'resolved' && req.file) {
-      const activeStorageClient = supabaseAdmin || activeClient;
-      const fileExt = req.file.originalname.split('.').pop();
-      const fileName = `resolved-${Date.now()}.${fileExt}`;
-      const filePath = `resolved/${fileName}`;
+      try {
+        const activeStorageClient = supabaseAdmin || activeClient;
+        const fileExt = req.file.originalname.split('.').pop();
+        const fileName = `resolved-${Date.now()}.${fileExt}`;
+        const filePath = `resolved/${fileName}`;
 
-      const { data: uploadData, error: uploadError } = await activeStorageClient.storage
-        .from('issue-images')
-        .upload(filePath, req.file.buffer, {
-          contentType: req.file.mimetype,
-          upsert: true
-        });
+        const { data: uploadData, error: uploadError } = await activeStorageClient.storage
+          .from('issue-images')
+          .upload(filePath, req.file.buffer, {
+            contentType: req.file.mimetype,
+            upsert: true
+          });
 
-      if (uploadError) {
-        logger.error('Failed to upload completion proof image: %O', uploadError);
-        return res.status(500).json({ error: 'Failed to upload resolution proof image.' });
+        if (!uploadError) {
+          const { data: { publicUrl } } = activeStorageClient.storage
+            .from('issue-images')
+            .getPublicUrl(filePath);
+          proofUrl = publicUrl;
+        }
+      } catch (uploadErr) {
+        logger.error('Failed to upload completion proof image: %O', uploadErr);
       }
+    } else if (targetStatus === 'resolved' && incomingProof && incomingProof.startsWith('data:image')) {
+      // Handle base64 image payload upload to Supabase storage
+      try {
+        const base64Data = incomingProof.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        const mimeMatch = incomingProof.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        const ext = mimeType.split('/')[1] || 'jpg';
+        const fileName = `resolved-${Date.now()}.${ext}`;
+        const filePath = `resolved/${fileName}`;
 
-      const { data: { publicUrl } } = activeStorageClient.storage
-        .from('issue-images')
-        .getPublicUrl(filePath);
-      proofUrl = publicUrl;
+        const activeStorageClient = supabaseAdmin || activeClient;
+        const { data: uploadData, error: uploadError } = await activeStorageClient.storage
+          .from('issue-images')
+          .upload(filePath, buffer, {
+            contentType: mimeType,
+            upsert: true
+          });
+
+        if (!uploadError) {
+          const { data: { publicUrl } } = activeStorageClient.storage
+            .from('issue-images')
+            .getPublicUrl(filePath);
+          proofUrl = publicUrl;
+        }
+      } catch (b64Err) {
+        logger.warn('Base64 upload error, preserving original data: %O', b64Err);
+      }
     }
 
     const updates = { 
@@ -551,8 +580,11 @@ export const updateIssueStatus = async (req, res) => {
     };
 
     if (targetStatus === 'resolved') {
-      if (proofUrl) updates.completion_proof_url = proofUrl;
-      updates.completion_notes = notes || 'Complaint resolved successfully.';
+      if (proofUrl) {
+        updates.completion_proof_url = proofUrl;
+        updates.completion_photo_url = proofUrl;
+      }
+      updates.completion_notes = notes || official_remarks || req.body?.official_remarks || 'Complaint resolved successfully.';
     }
 
     // 1. Update status

@@ -1062,6 +1062,24 @@
       const remarks = document.getElementById('detail-remarks-input').value.trim();
       const delegateId = document.getElementById('detail-delegate-select').value;
 
+      // Resolve photo if input has file or preview img is populated
+      if (!activeProofPhotoUrl) {
+        const fileInput = document.getElementById('detail-proof-file');
+        const previewImg = document.getElementById('detail-proof-preview-img');
+        if (previewImg && previewImg.src && !previewImg.src.endsWith('#') && !previewImg.src.endsWith('/') && !previewImg.src.includes('undefined')) {
+          activeProofPhotoUrl = previewImg.src;
+        } else if (fileInput && fileInput.files && fileInput.files[0]) {
+          try {
+            activeProofPhotoUrl = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (evt) => resolve(evt.target.result);
+              reader.onerror = () => resolve(null);
+              reader.readAsDataURL(fileInput.files[0]);
+            });
+          } catch (e) {}
+        }
+      }
+
       // STRICT VALIDATION: Resolution proof image is required to resolve a complaint
       if (newStatus === 'resolved' && !activeProofPhotoUrl) {
         showToast("Resolution proof image is strictly required to resolve a complaint.", "error");
