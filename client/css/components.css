@@ -2796,10 +2796,10 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 .stitch-hero:has(.stitch-hero-title) {
   background-color: #ffffff;
   background-image: 
-    linear-gradient(to right, #ffffff 26%, rgba(255, 255, 255, 0.86) 52%, rgba(255, 255, 255, 0.12) 100%), 
-    url('../images/tamilnadu_temple_hero.jpg');
+    linear-gradient(to right, #ffffff 28%, rgba(255, 255, 255, 0.88) 54%, rgba(255, 255, 255, 0.15) 100%), 
+    url('../images/tamilnadu_civic_landmarks.jpg');
   background-repeat: no-repeat;
-  background-position: right center;
+  background-position: right 30%;
   background-size: cover;
   color: var(--text-main) !important;
   border: 1px solid var(--border-color);
@@ -2809,10 +2809,10 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 @media (max-width: 768px) {
   .stitch-hero:has(.stitch-hero-title) {
     background-image: 
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.95) 48%, rgba(255, 255, 255, 0.6) 100%), 
-      url('../images/tamilnadu_temple_hero.jpg');
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.95) 48%, rgba(255, 255, 255, 0.65) 100%), 
+      url('../images/tamilnadu_civic_landmarks.jpg');
     background-size: cover;
-    background-position: right center;
+    background-position: right 35%;
   }
 }
 
