@@ -26,31 +26,26 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    body {
-      opacity: 1;
-    }
-
-    /* TN Updates Hero Card */
     .tn-hero-banner {
-      background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%, var(--bg-surface) 100%);
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
+      border-radius: 20px;
       padding: 1.75rem 2rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.75rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 1.25rem;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
 
     .tn-hero-title-group h1 {
       font-size: 1.5rem;
       font-weight: 800;
       color: var(--text-main);
-      margin: 0 0 0.4rem 0;
-      font-family: var(--font-heading);
+      margin: 0 0 0.35rem 0;
+      font-family: var(--font-heading, system-ui);
       display: flex;
       align-items: center;
       gap: 0.65rem;
@@ -60,23 +55,24 @@
       font-size: 0.88rem;
       color: var(--text-muted);
       margin: 0;
-      line-height: 1.45;
-      max-width: 680px;
+      line-height: 1.5;
+      max-width: 650px;
     }
 
     .tn-hero-actions {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .tn-status-pill {
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      padding: 0.35rem 0.75rem;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 0.4rem 0.85rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       border-radius: 9999px;
       font-size: 0.78rem;
       font-weight: 700;
@@ -87,12 +83,12 @@
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      padding: 0.5rem 1rem;
+      padding: 0.45rem 1rem;
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
+      border-radius: 10px;
       font-size: 0.84rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-main);
       cursor: pointer;
       transition: all 0.2s ease;
@@ -108,28 +104,28 @@
     .tn-filter-bar {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1.75rem;
       display: flex;
       gap: 1rem;
       align-items: center;
       flex-wrap: wrap;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
     }
 
     .tn-search-wrap {
       flex: 1;
-      min-width: 240px;
+      min-width: 260px;
       position: relative;
     }
 
     .tn-search-wrap input {
       width: 100%;
-      padding: 0.6rem 1rem 0.6rem 2.4rem;
+      padding: 0.65rem 1rem 0.65rem 2.4rem;
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      font-size: 0.86rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
       color: var(--text-main);
       background: var(--bg-app);
       box-sizing: border-box;
@@ -152,16 +148,16 @@
     }
 
     .tn-select-filter {
-      padding: 0.6rem 0.9rem;
+      padding: 0.65rem 1rem;
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      font-size: 0.84rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-main);
       background: var(--bg-app);
       cursor: pointer;
       outline: none;
-      min-width: 160px;
+      min-width: 170px;
     }
 
     .tn-select-filter:focus {
@@ -171,7 +167,7 @@
     /* News Grid */
     .tn-updates-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 1.25rem;
       margin-bottom: 2.5rem;
     }
@@ -179,13 +175,13 @@
     .tn-update-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.35rem;
+      border-radius: 18px;
+      padding: 1.4rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: 1rem;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
       transition: all 0.2s ease;
       position: relative;
     }
@@ -193,7 +189,7 @@
     .tn-update-card:hover {
       transform: translateY(-2px);
       border-color: var(--primary);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
     }
 
     .tn-card-meta {
@@ -209,12 +205,12 @@
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      padding: 0.2rem 0.55rem;
-      background: var(--primary-light-alpha);
-      color: var(--primary);
+      padding: 0.2rem 0.6rem;
+      background: var(--primary-light-alpha, rgba(13, 148, 136, 0.12));
+      color: var(--primary, #0d9488);
       font-size: 0.72rem;
-      font-weight: 700;
-      border-radius: 4px;
+      font-weight: 800;
+      border-radius: 6px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
@@ -233,7 +229,7 @@
       color: var(--text-main);
       line-height: 1.45;
       margin: 0;
-      font-family: var(--font-heading);
+      font-family: var(--font-heading, system-ui);
     }
 
     .tn-card-footer {
@@ -241,7 +237,7 @@
       align-items: center;
       justify-content: space-between;
       border-top: 1px solid var(--border-color);
-      padding-top: 0.75rem;
+      padding-top: 0.85rem;
       font-size: 0.76rem;
       color: var(--text-muted);
     }
@@ -252,7 +248,7 @@
       gap: 0.35rem;
       font-size: 0.82rem;
       font-weight: 700;
-      color: var(--primary);
+      color: var(--primary, #0d9488);
       text-decoration: none;
       transition: color 0.15s ease;
     }
@@ -265,8 +261,8 @@
     .tn-skeleton-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.35rem;
+      border-radius: 18px;
+      padding: 1.4rem;
       display: flex;
       flex-direction: column;
       gap: 0.85rem;
@@ -298,193 +294,187 @@
       }
     }
   </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
 </head>
-<body class="app-layout">
+<body class="protected-page">
 
-  <!-- Desktop App Sidebar Navigation -->
-  <aside class="app-sidebar">
-    <div class="app-sidebar-header">
-      <a href="citizen-dashboard.html" class="app-sidebar-logo">
-        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="width: 32px; height: 32px; object-fit: contain;">
-        <span class="logo-text">CROWDCITY<small class="portal-badge" style="display:block; font-size:0.6rem; color:var(--text-muted); font-weight:600;">CITIZEN PORTAL</small></span>
-      </a>
-    </div>
-
-    <nav class="app-sidebar-nav" id="sidebar-nav">
-      <a href="citizen-dashboard.html" class="nav-item">
-        <i class="fa-solid fa-house-chimney"></i> <span data-i18n="nav_dashboard">Dashboard</span>
-      </a>
-      <a href="report.html" class="nav-item">
-        <i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
-      </a>
-      <a href="my-complaints.html" class="nav-item">
-        <i class="fa-solid fa-clipboard-list"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
-      </a>
-      <a href="map.html" class="nav-item">
-        <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
-      </a>
-      <a href="transportation.html" class="nav-item">
-        <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
-      </a>
-      <a href="services.html" class="nav-item">
-        <i class="fa-solid fa-landmark"></i> <span data-i18n="nav_government_services">Government Services</span>
-      </a>
-      <a href="helplines.html" class="nav-item">
-        <i class="fa-solid fa-headset"></i> <span data-i18n="nav_district_helplines">District Helplines</span>
-      </a>
-      <a href="ministers.html" class="nav-item">
-        <i class="fa-solid fa-user-tie"></i> <span data-i18n="nav_ministers">Council of Ministers</span>
-      </a>
-      <a href="tamilnadu-updates.html" class="nav-item active">
-        <i class="fa-solid fa-newspaper"></i> <span>TN Updates</span>
-      </a>
-    </nav>
-  </aside>
-
-  <!-- Mobile Topnav Drawer Backdrop -->
-  <div class="mobile-drawer-backdrop" id="drawer-backdrop"></div>
-
-  <!-- Mobile Topnav Drawer Navigation -->
-  <div class="mobile-topnav-drawer" id="mobile-drawer">
-    <div class="drawer-header">
-      <div class="drawer-logo">
-        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity Logo" style="width: 28px; height: 28px; object-fit: contain;">
-        <span style="font-weight: 800; font-size: 1.05rem; color: var(--text-main); font-family: var(--font-heading);">CROWDCITY</span>
-      </div>
-      <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close Navigation Menu"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="drawer-nav-list">
-      <a href="citizen-dashboard.html" class="drawer-nav-item"><i class="fa-solid fa-house-chimney"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
-      <a href="report.html" class="drawer-nav-item"><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span></a>
-      <a href="my-complaints.html" class="drawer-nav-item"><i class="fa-solid fa-clipboard-list"></i> <span data-i18n="nav_my_complaints">My Complaints</span></a>
-      <a href="map.html" class="drawer-nav-item"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span></a>
-      <a href="transportation.html" class="drawer-nav-item"><i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span></a>
-      <a href="services.html" class="drawer-nav-item"><i class="fa-solid fa-landmark"></i> <span data-i18n="nav_government_services">Government Services</span></a>
-      <a href="helplines.html" class="drawer-nav-item"><i class="fa-solid fa-headset"></i> <span data-i18n="nav_district_helplines">District Helplines</span></a>
-      <a href="ministers.html" class="drawer-nav-item"><i class="fa-solid fa-user-tie"></i> <span data-i18n="nav_ministers">Council of Ministers</span></a>
-      <a href="tamilnadu-updates.html" class="drawer-nav-item active"><i class="fa-solid fa-newspaper"></i> <span>Tamil Nadu Updates</span></a>
-    </div>
-  </div>
-
-  <!-- Main Content Area -->
-  <div class="app-main">
-    
-    <!-- Top Header -->
-    <header class="app-header-main">
-      <a href="citizen-dashboard.html" class="app-header-logo-mobile">
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" decoding="async" style="width: 28px; height: 28px; object-fit: contain;" />
-          <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 0.1rem;"></div>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" decoding="async" style="width: 30px; height: 30px; object-fit: contain;" />
-        </div>
-      </a>
-
-      <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-
-      <div class="app-header-actions">
-        <div id="auth-nav-container">
-          <!-- Dynamic header actions populated by auth.js -->
-        </div>
-      </div>
-    </header>
-
-    <!-- Page Body -->
-    <div class="app-content-body">
-
-      <!-- Hero Header Card -->
-      <div class="tn-hero-banner">
-        <div class="tn-hero-title-group">
-          <h1><i class="fa-solid fa-newspaper" style="color: var(--primary);"></i> Tamil Nadu Updates</h1>
-          <p>Verified state government decisions, municipal announcements, infrastructure progress, welfare initiatives, and district civic alerts across Tamil Nadu.</p>
-        </div>
-        <div class="tn-hero-actions">
-          <div class="tn-status-pill">
-            <span class="status-dot-pulse active" style="width: 8px; height: 8px;"></span>
-            <span>Live Dispatch</span>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" />
           </div>
-          <button class="btn-refresh-feed" id="btn-refresh-updates" onclick="refreshTamilNaduUpdates()">
-            <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
-            <span>Refresh</span>
-          </button>
+          <div class="brand-text-container">
+            <span class="brand-title">CROWDCITY</span>
+            <span class="brand-subtitle">CITIZEN PORTAL</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Issue">
+          <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link" title="Transportation">
+          <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
+          <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <a href="ministers.html" class="app-sidebar-link" title="Council of Ministers">
+          <i class="fa-solid fa-user-tie"></i> <span data-i18n="nav_ministers">Council of Ministers</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+          </div>
+        </a>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <a href="citizen-dashboard.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.42rem 0.8rem; font-size: 0.82rem; font-weight: 700; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-color); color: var(--text-main); background: var(--bg-surface);">
+            <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+          </a>
+          <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Tamil Nadu Updates</h1>
         </div>
-      </div>
 
-      <!-- Search & Filters -->
-      <div class="tn-filter-bar">
-        <div class="tn-search-wrap">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="tn-search-input" placeholder="Search updates by headline, scheme, or keywords..." oninput="handleFilterUpdates()">
+        <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
+          <div id="auth-nav-container"></div>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%; box-sizing: border-box;">
+
+        <!-- Hero Header Card -->
+        <div class="tn-hero-banner">
+          <div class="tn-hero-title-group">
+            <h1><i class="fa-solid fa-newspaper" style="color: var(--primary);"></i> Tamil Nadu Live Updates</h1>
+            <p>Verified state government decisions, municipal announcements, infrastructure progress, welfare initiatives, and district civic alerts across Tamil Nadu.</p>
+          </div>
+          <div class="tn-hero-actions">
+            <div class="tn-status-pill">
+              <span class="status-dot-pulse active" style="width: 8px; height: 8px;"></span>
+              <span>Live Dispatch</span>
+            </div>
+            <button class="btn-refresh-feed" id="btn-refresh-updates" onclick="refreshTamilNaduUpdates()">
+              <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
 
-        <select class="tn-select-filter" id="tn-district-filter" onchange="handleFilterUpdates()">
-          <option value="all">All Districts (38)</option>
-          <option value="Chennai">Chennai</option>
-          <option value="Coimbatore">Coimbatore</option>
-          <option value="Madurai">Madurai</option>
-          <option value="Tiruchirappalli">Tiruchirappalli</option>
-          <option value="Salem">Salem</option>
-          <option value="Tirunelveli">Tirunelveli</option>
-          <option value="Erode">Erode</option>
-          <option value="Vellore">Vellore</option>
-          <option value="Thoothukudi">Thoothukudi</option>
-          <option value="Dindigul">Dindigul</option>
-          <option value="Thanjavur">Thanjavur</option>
-          <option value="Ranipet">Ranipet</option>
-          <option value="Sivaganga">Sivaganga</option>
-          <option value="Karur">Karur</option>
-          <option value="Ramanathapuram">Ramanathapuram</option>
-          <option value="Virudhunagar">Virudhunagar</option>
-          <option value="Cuddalore">Cuddalore</option>
-          <option value="Kanchipuram">Kanchipuram</option>
-          <option value="Tiruvallur">Tiruvallur</option>
-          <option value="Chengalpattu">Chengalpattu</option>
-          <option value="Tiruppur">Tiruppur</option>
-          <option value="Namakkal">Namakkal</option>
-          <option value="Krishnagiri">Krishnagiri</option>
-          <option value="Dharmapuri">Dharmapuri</option>
-          <option value="Nilgiris">Nilgiris</option>
-          <option value="Nagapattinam">Nagapattinam</option>
-          <option value="Tiruvarur">Tiruvarur</option>
-          <option value="Mayiladuthurai">Mayiladuthurai</option>
-          <option value="Pudukkottai">Pudukkottai</option>
-          <option value="Theni">Theni</option>
-          <option value="Perambalur">Perambalur</option>
-          <option value="Ariyalur">Ariyalur</option>
-          <option value="Tenkasi">Tenkasi</option>
-          <option value="Tirupathur">Tirupathur</option>
-          <option value="Kallakurichi">Kallakurichi</option>
-          <option value="Kanniyakumari">Kanniyakumari</option>
-        </select>
+        <!-- Search & Filters -->
+        <div class="tn-filter-bar">
+          <div class="tn-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="tn-search-input" placeholder="Search updates by headline, scheme, or keywords..." oninput="handleFilterUpdates()">
+          </div>
 
-        <select class="tn-select-filter" id="tn-source-filter" onchange="handleFilterUpdates()">
-          <option value="all">All Sources</option>
-        </select>
+          <select class="tn-select-filter" id="tn-district-filter" onchange="handleFilterUpdates()">
+            <option value="all">All Districts (38)</option>
+            <option value="Chennai">Chennai</option>
+            <option value="Coimbatore">Coimbatore</option>
+            <option value="Madurai">Madurai</option>
+            <option value="Tiruchirappalli">Tiruchirappalli</option>
+            <option value="Salem">Salem</option>
+            <option value="Tirunelveli">Tirunelveli</option>
+            <option value="Erode">Erode</option>
+            <option value="Vellore">Vellore</option>
+            <option value="Thoothukudi">Thoothukudi</option>
+            <option value="Dindigul">Dindigul</option>
+            <option value="Thanjavur">Thanjavur</option>
+            <option value="Ranipet">Ranipet</option>
+            <option value="Sivaganga">Sivaganga</option>
+            <option value="Karur">Karur</option>
+            <option value="Ramanathapuram">Ramanathapuram</option>
+            <option value="Virudhunagar">Virudhunagar</option>
+            <option value="Cuddalore">Cuddalore</option>
+            <option value="Kanchipuram">Kanchipuram</option>
+            <option value="Tiruvallur">Tiruvallur</option>
+            <option value="Chengalpattu">Chengalpattu</option>
+            <option value="Tiruppur">Tiruppur</option>
+            <option value="Namakkal">Namakkal</option>
+            <option value="Krishnagiri">Krishnagiri</option>
+            <option value="Dharmapuri">Dharmapuri</option>
+            <option value="Nilgiris">Nilgiris</option>
+            <option value="Nagapattinam">Nagapattinam</option>
+            <option value="Tiruvarur">Tiruvarur</option>
+            <option value="Mayiladuthurai">Mayiladuthurai</option>
+            <option value="Pudukkottai">Pudukkottai</option>
+            <option value="Theni">Theni</option>
+            <option value="Perambalur">Perambalur</option>
+            <option value="Ariyalur">Ariyalur</option>
+            <option value="Tenkasi">Tenkasi</option>
+            <option value="Tirupathur">Tirupathur</option>
+            <option value="Kallakurichi">Kallakurichi</option>
+            <option value="Kanniyakumari">Kanniyakumari</option>
+          </select>
+
+          <select class="tn-select-filter" id="tn-source-filter" onchange="handleFilterUpdates()">
+            <option value="all">All Sources</option>
+          </select>
+        </div>
+
+        <!-- News Updates Grid -->
+        <div class="tn-updates-grid" id="tn-updates-container">
+          <!-- Dynamic content or skeletons injected via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="tn-empty-state" class="hidden" style="text-align: center; padding: 4rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px;">
+          <i class="fa-regular fa-newspaper" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">No Matching Tamil Nadu Updates Found</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;">Try adjusting your keyword search or district filter to view more headlines.</p>
+          <button class="btn btn-secondary" onclick="resetFilters()" style="padding: 0.55rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Reset Filters</button>
+        </div>
+
+        <!-- Error State -->
+        <div id="tn-error-state" class="hidden" style="text-align: center; padding: 3.5rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px;">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; color: #ef4444; margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Unable to Load Updates</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;" id="tn-error-message">Could not connect to the Tamil Nadu updates feed.</p>
+          <button class="btn btn-primary" onclick="refreshTamilNaduUpdates()" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
+        </div>
+
       </div>
-
-      <!-- News Updates Grid -->
-      <div class="tn-updates-grid" id="tn-updates-container">
-        <!-- Dynamic content or skeletons injected via JS -->
-      </div>
-
-      <!-- Empty State -->
-      <div id="tn-empty-state" class="hidden" style="text-align: center; padding: 4rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
-        <i class="fa-regular fa-newspaper" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">No Matching Tamil Nadu Updates Found</h3>
-        <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;">Try adjusting your keyword search or district filter to view more headlines.</p>
-        <button class="btn btn-secondary" onclick="resetFilters()" style="padding: 0.55rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Reset Filters</button>
-      </div>
-
-      <!-- Error State -->
-      <div id="tn-error-state" class="hidden" style="text-align: center; padding: 3.5rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; color: #ef4444; margin-bottom: 1rem;"></i>
-        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Unable to Load Updates</h3>
-        <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;" id="tn-error-message">Could not connect to the Tamil Nadu updates feed.</p>
-        <button class="btn btn-primary" onclick="refreshTamilNaduUpdates()" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
-      </div>
-
-    </div>
+    </main>
   </div>
 
   <!-- Scripts -->
