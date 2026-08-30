@@ -10,20 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let resolvedUserRole = 'citizen';
   let isPasswordUpdated = false;
 
-  // Password visibility eye toggles
-  document.querySelectorAll('.toggle-password-visibility').forEach(icon => {
-    icon.addEventListener('click', () => {
-      const targetId = icon.getAttribute('data-target');
-      const input = document.getElementById(targetId);
-      if (input) {
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-        icon.classList.toggle('fa-eye', !isPassword);
-        icon.classList.toggle('fa-eye-slash', isPassword);
-      }
-    });
-  });
-
   function logDebug(msg, obj = null) {
     const time = new Date().toLocaleTimeString();
     let text = `[${time}] ${msg}`;

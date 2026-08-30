@@ -2550,13 +2550,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     const toggle = e.target.closest('.toggle-password-visibility');
     if (!toggle) return;
+    e.preventDefault();
+    e.stopPropagation();
     
     const targetId = toggle.getAttribute('data-target');
-    // Query within the same parent container or globally
     const parentContainer = toggle.closest('.password-input-container');
-    const passwordInput = parentContainer 
-      ? parentContainer.querySelector('input') 
-      : document.getElementById(targetId);
+    const passwordInput = (targetId ? document.getElementById(targetId) : null) ||
+                          (parentContainer ? parentContainer.querySelector('input') : null);
       
     if (!passwordInput) return;
     
