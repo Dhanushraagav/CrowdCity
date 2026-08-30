@@ -181,40 +181,53 @@
           </div>
         </div>
 
-        <!-- Clean KPI Stat Cards Grid with Desktop Minimal Icons -->
-        <div class="stitch-stats-grid" style="margin-bottom: 1.5rem;">
+        <!-- Clean 4-Card KPI Stat Cards Grid -->
+        <div class="stitch-stats-grid kpi-4-grid" style="margin-bottom: 1.5rem;">
           <!-- Card 1: Reports Submitted -->
           <div class="stitch-stat-card stat-card-teal">
-            <div class="stat-card-header">
-              <span class="stitch-stat-label" data-i18n="reports_submitted">Reports Submitted</span>
-              <div class="minimal-desktop-icon icon-teal desktop-only"><i class="fa-solid fa-file-lines"></i></div>
+            <div class="kpi-icon-circle icon-teal">
+              <i class="fa-regular fa-file-lines"></i>
             </div>
-            <div class="stitch-stat-value-row">
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label" data-i18n="reports_submitted">REPORTS SUBMITTED</span>
               <span class="stitch-stat-value" id="stat-total-reports">0</span>
-              <span class="stitch-stat-change" id="stat-total-reports-change"></span>
+              <span class="kpi-subtext kpi-subtext-green" id="stat-total-reports-change">+0 this week</span>
             </div>
           </div>
 
-          <!-- Card 2: Resolved Issues -->
+          <!-- Card 2: Resolved Reports -->
           <div class="stitch-stat-card stat-card-blue">
-            <div class="stat-card-header">
-              <span class="stitch-stat-label" data-i18n="resolved_reports">Resolved Issues</span>
-              <div class="minimal-desktop-icon icon-blue desktop-only"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="kpi-icon-circle icon-blue">
+              <i class="fa-regular fa-circle-check"></i>
             </div>
-            <div class="stitch-stat-value-row">
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label" data-i18n="resolved_reports">RESOLVED REPORTS</span>
               <span class="stitch-stat-value" id="stat-resolved-issues">0</span>
-              <span class="stitch-stat-change green-badge" id="stat-resolved-rate"></span>
+              <span class="kpi-subtext kpi-subtext-blue" id="stat-resolved-rate">0% Resolution Rate</span>
             </div>
           </div>
 
-          <!-- Card 3: Current Points -->
-          <div class="stitch-stat-card stat-card-amber">
-            <div class="stat-card-header">
-              <span class="stitch-stat-label" data-i18n="current_points">Current Points</span>
-              <div class="minimal-desktop-icon icon-amber desktop-only"><i class="fa-solid fa-trophy"></i></div>
+          <!-- Card 3: In Progress -->
+          <div class="stitch-stat-card stat-card-purple">
+            <div class="kpi-icon-circle icon-purple">
+              <i class="fa-regular fa-clock"></i>
             </div>
-            <div class="stitch-stat-value-row">
-              <span class="stitch-stat-value" id="stat-user-points">0</span>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label" data-i18n="in_progress_reports">IN PROGRESS</span>
+              <span class="stitch-stat-value" id="stat-inprogress-reports">0</span>
+              <span class="kpi-subtext kpi-subtext-purple" id="stat-inprogress-sub">Active reports</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Total Reports (Platform / City) -->
+          <div class="stitch-stat-card stat-card-slate">
+            <div class="kpi-icon-circle icon-slate">
+              <i class="fa-regular fa-flag"></i>
+            </div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label" data-i18n="total_reports">TOTAL REPORTS</span>
+              <span class="stitch-stat-value" id="stat-city-total-reports">0</span>
+              <span class="kpi-subtext kpi-subtext-slate" id="stat-city-total-sub">All time</span>
             </div>
           </div>
         </div>

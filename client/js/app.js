@@ -89,12 +89,14 @@ function initDashboard() {
 
 // Fetch user profile and compute real database statistics
 function loadUserStats(isLanguageChange = false) {
-  const pointsCardNum = document.getElementById('stat-user-points');
-  const rankEl = document.getElementById('stat-community-rank');
   const totalEl = document.getElementById('stat-total-reports');
+  const weeklyEl = document.getElementById('stat-total-reports-change');
   const resolvedEl = document.getElementById('stat-resolved-issues');
-  const activeEl = document.getElementById('stat-active-complaints');
   const rateEl = document.getElementById('stat-resolved-rate');
+  const inprogressEl = document.getElementById('stat-inprogress-reports');
+  const inprogressSubEl = document.getElementById('stat-inprogress-sub');
+  const cityTotalEl = document.getElementById('stat-city-total-reports');
+  const cityTotalSubEl = document.getElementById('stat-city-total-sub');
   const heroDesc = document.getElementById('hero-desc');
 
   // Retrieve authenticated user ID
@@ -110,39 +112,24 @@ function loadUserStats(isLanguageChange = false) {
     } catch (e) {}
   }
 
-  // Load cached profile points
-  const cachedProfileStr = localStorage.getItem('cc_user_profile');
-  let userPoints = 0;
-  if (cachedProfileStr) {
-    try {
-      const cachedProfile = JSON.parse(cachedProfileStr);
-      if (cachedProfile && typeof cachedProfile.points === 'number') {
-        userPoints = cachedProfile.points;
-      }
-    } catch (e) {}
-  }
-
-  if (pointsCardNum) {
-    animateCountUp(pointsCardNum, userPoints);
-    updateProgressionUI(userPoints);
-    if (rankEl) {
-      const progression = calculateProgression(userPoints);
-      rankEl.textContent = progression.levelName;
-    }
-  }
-
   // If user is not authenticated, show zeroes
   if (!userId) {
     if (totalEl) animateCountUp(totalEl, 0);
+    if (weeklyEl) weeklyEl.textContent = '+0 this week';
     if (resolvedEl) animateCountUp(resolvedEl, 0);
-    if (activeEl) animateCountUp(activeEl, 0);
-    if (rateEl) rateEl.textContent = '';
+    if (rateEl) rateEl.textContent = '0% Resolution Rate';
+    if (inprogressEl) animateCountUp(inprogressEl, 0);
+    if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
+    if (cityTotalEl) animateCountUp(cityTotalEl, Array.isArray(currentIssues) ? currentIssues.length : 0);
+    if (cityTotalSubEl) cityTotalSubEl.textContent = 'All time';
     return;
   }
 
   // If language changed and we have cached user issues, recalculate text strings
   if (isLanguageChange && lastUserIssues && lastUserIssues.length > 0) {
     const total = lastUserIssues.length;
+    const now = Date.now();
+    const weeklyCount = lastUserIssues.filter(i => (now - new Date(i.created_at).getTime()) <= 7 * 86400000).length;
     const resolved = lastUserIssues.filter(i => {
       const s = (i.status || '').toLowerCase();
       return s === 'resolved' || s === 'verified' || s === 'closed';
@@ -151,20 +138,24 @@ function loadUserStats(isLanguageChange = false) {
       const s = (i.status || '').toLowerCase();
       return s === 'pending' || s === 'assigned' || s === 'in_progress';
     }).length;
+    const cityTotal = Array.isArray(currentIssues) ? currentIssues.length : 0;
 
     if (totalEl) animateCountUp(totalEl, total);
+    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} this week`;
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
-    if (activeEl) animateCountUp(activeEl, active);
+    if (inprogressEl) animateCountUp(inprogressEl, active);
+    if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
+    if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
+    if (cityTotalSubEl) cityTotalSubEl.textContent = 'All time';
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
-      rateEl.textContent = total > 0 ? `${rate}% ${tRate}` : '';
+      rateEl.textContent = `${rate}% Resolution Rate`;
     }
 
     if (heroDesc) {
       if (total === 0) {
-        heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Start reporting civic issues in your area. Every report builds a more responsive city for everyone.';
+        heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.';
       } else {
         if (window.i18n) {
           heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
@@ -182,6 +173,8 @@ function loadUserStats(isLanguageChange = false) {
     const userIssues = currentIssues.filter(i => i && (i.reporter_id === userId || i.user_id === userId));
     lastUserIssues = userIssues;
     const total = userIssues.length;
+    const now = Date.now();
+    const weeklyCount = userIssues.filter(i => (now - new Date(i.created_at).getTime()) <= 7 * 86400000).length;
     const resolved = userIssues.filter(i => {
       const s = (i.status || '').toLowerCase();
       return s === 'resolved' || s === 'verified' || s === 'closed';
@@ -190,20 +183,24 @@ function loadUserStats(isLanguageChange = false) {
       const s = (i.status || '').toLowerCase();
       return s === 'pending' || s === 'assigned' || s === 'in_progress';
     }).length;
+    const cityTotal = currentIssues.length;
 
     if (totalEl) animateCountUp(totalEl, total);
+    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} this week`;
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
-    if (activeEl) animateCountUp(activeEl, active);
+    if (inprogressEl) animateCountUp(inprogressEl, active);
+    if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
+    if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
+    if (cityTotalSubEl) cityTotalSubEl.textContent = 'All time';
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
-      rateEl.textContent = total > 0 ? `${rate}% ${tRate}` : '';
+      rateEl.textContent = `${rate}% Resolution Rate`;
     }
 
     if (heroDesc) {
       if (total === 0) {
-        heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Start reporting civic issues in your area. Every report builds a more responsive city for everyone.';
+        heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.';
       } else {
         if (window.i18n) {
           heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
@@ -214,8 +211,10 @@ function loadUserStats(isLanguageChange = false) {
     }
 
     localStorage.setItem('cc_user_stat_total', total.toString());
+    localStorage.setItem('cc_user_stat_weekly', weeklyCount.toString());
     localStorage.setItem('cc_user_stat_resolved', resolved.toString());
     localStorage.setItem('cc_user_stat_active', active.toString());
+    localStorage.setItem('cc_city_stat_total', cityTotal.toString());
 
     renderRecentComplaints(userIssues);
     return;
@@ -223,20 +222,23 @@ function loadUserStats(isLanguageChange = false) {
 
   // Otherwise, load last known cached stats while data is fetching
   const cachedTotal = localStorage.getItem('cc_user_stat_total');
+  const cachedWeekly = localStorage.getItem('cc_user_stat_weekly');
   const cachedResolved = localStorage.getItem('cc_user_stat_resolved');
   const cachedActive = localStorage.getItem('cc_user_stat_active');
+  const cachedCityTotal = localStorage.getItem('cc_city_stat_total');
 
   if (totalEl && cachedTotal !== null) animateCountUp(totalEl, parseInt(cachedTotal, 10) || 0);
+  if (weeklyEl && cachedWeekly !== null) weeklyEl.textContent = `+${parseInt(cachedWeekly, 10) || 0} this week`;
   if (resolvedEl && cachedResolved !== null) animateCountUp(resolvedEl, parseInt(cachedResolved, 10) || 0);
-  if (activeEl && cachedActive !== null) animateCountUp(activeEl, parseInt(cachedActive, 10) || 0);
+  if (inprogressEl && cachedActive !== null) animateCountUp(inprogressEl, parseInt(cachedActive, 10) || 0);
+  if (cityTotalEl && cachedCityTotal !== null) animateCountUp(cityTotalEl, parseInt(cachedCityTotal, 10) || 0);
 
   if (cachedTotal !== null && cachedResolved !== null) {
     const total = parseInt(cachedTotal, 10) || 0;
     const resolved = parseInt(cachedResolved, 10) || 0;
-    if (rateEl && total > 0) {
-      const rate = Math.round((resolved / total) * 100);
-      const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
-      rateEl.textContent = `${rate}% ${tRate}`;
+    if (rateEl) {
+      const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+      rateEl.textContent = `${rate}% Resolution Rate`;
     }
   }
 }
@@ -659,58 +661,7 @@ if (document.readyState === 'loading') {
   initDashboard();
 }
 
-// Citizen Progression & Smart Feed Helpers
-function calculateProgression(points) {
-  let level = 1;
-  let levelName = "Civic Novice";
-  let pointsRemaining = points;
-  let xpNeeded = 150;
 
-  const levelNames = ["", "Civic Novice", "Local Watchdog", "Civic Leader", "City Legend"];
-  const levelKeys = ["", "level_civic_novice", "level_local_watchdog", "level_civic_leader", "level_city_legend"];
-
-  while (true) {
-    let neededForNext = level * 150;
-    if (pointsRemaining >= neededForNext) {
-      pointsRemaining -= neededForNext;
-      level += 1;
-      xpNeeded = (level * 150);
-      const levelKey = levelKeys[level];
-      if (window.i18n && typeof window.i18n.t === 'function' && levelKey) {
-        levelName = window.i18n.t(levelKey);
-      } else {
-        const fallbackPattern = window.i18n ? window.i18n.t('level_hero_abbr', { level: level }) : `City Hero (Lvl ${level})`;
-        levelName = levelNames[level] || fallbackPattern;
-      }
-    } else {
-      xpNeeded = neededForNext;
-      break;
-    }
-  }
-
-  const percent = Math.min(100, Math.floor((pointsRemaining / xpNeeded) * 100));
-
-  return {
-    level,
-    levelName,
-    xpCurrent: pointsRemaining,
-    xpNeeded,
-    percent
-  };
-}
-
-function updateProgressionUI(points) {
-  const levelNameEl = document.getElementById('progression-level-name');
-  const xpTextEl = document.getElementById('progression-xp-text');
-  const xpBarEl = document.getElementById('progression-xp-bar');
-  
-  if (!levelNameEl || !xpTextEl || !xpBarEl) return;
-  
-  const progression = calculateProgression(points);
-  levelNameEl.textContent = `Rank ${progression.level}: ${progression.levelName}`;
-  xpTextEl.textContent = `${progression.xpCurrent} / ${progression.xpNeeded} Points`;
-  xpBarEl.style.width = `${progression.percent}%`;
-}
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radius of earth in km

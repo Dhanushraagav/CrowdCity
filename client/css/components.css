@@ -2921,66 +2921,105 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   }
 }
 
-/* Desktop-Only Premium Animations & Minimal Icons */
+/* 4-Card KPI Grid with Left Icon and Info Column */
 .stitch-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.15rem;
   margin-bottom: 1.75rem;
+}
+
+@media (max-width: 1199px) and (min-width: 768px) {
+  .stitch-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .stitch-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem;
+  }
 }
 
 .stitch-stat-card {
   position: relative;
   background: #ffffff;
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 16px;
-  padding: 1.35rem 1.4rem;
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.75rem;
-  box-shadow: 0 4px 16px -2px rgba(15, 118, 110, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  flex-direction: row;
+  align-items: center;
+  gap: 1.1rem;
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.04);
   overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
 }
 
+.kpi-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.icon-teal { background: rgba(13, 148, 136, 0.1); color: #0d9488; }
+.icon-blue { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+.icon-purple { background: rgba(126, 34, 206, 0.1); color: #7e22ce; }
+.icon-slate { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+
+.kpi-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.stitch-stat-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.stitch-stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+  line-height: 1.1;
+}
+
+.kpi-subtext {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kpi-subtext-green { color: #16a34a; }
+.kpi-subtext-blue { color: #2563eb; }
+.kpi-subtext-purple { color: #7e22ce; }
+.kpi-subtext-slate { color: #64748b; }
+
 @media (min-width: 1024px) {
-  .desktop-only {
-    display: flex !important;
-  }
-
-  .stat-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-
-  .minimal-desktop-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease;
-  }
-
-  .icon-teal { background: rgba(13, 148, 136, 0.12); color: #0d9488; }
-  .icon-blue { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
-  .icon-amber { background: rgba(245, 158, 11, 0.12); color: #d97706; }
-
   .stitch-stat-card {
-    background: #ffffff;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
     animation: desktopKpiEntrance 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-    cursor: pointer;
   }
 
   .stitch-stat-card:nth-child(1) { animation-delay: 0.02s; }
   .stitch-stat-card:nth-child(2) { animation-delay: 0.05s; }
   .stitch-stat-card:nth-child(3) { animation-delay: 0.08s; }
+  .stitch-stat-card:nth-child(4) { animation-delay: 0.11s; }
 
   @keyframes desktopKpiEntrance {
     0% { opacity: 0; transform: translateY(8px); }
@@ -3001,7 +3040,8 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 
   .stat-card-teal::after { background: #0d9488; }
   .stat-card-blue::after { background: #2563eb; }
-  .stat-card-amber::after { background: #d97706; }
+  .stat-card-purple::after { background: #7e22ce; }
+  .stat-card-slate::after { background: #64748b; }
 
   .stitch-stat-card:hover::after {
     width: 100%;
@@ -3014,17 +3054,9 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     box-shadow: 0 8px 18px -4px rgba(15, 118, 110, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
   }
 
-  .stitch-stat-card:hover .minimal-desktop-icon {
-    transform: scale(1.06);
+  .stitch-stat-card:hover .kpi-icon-circle {
+    transform: scale(1.08);
   }
-}
-
-.stitch-stat-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--text-muted, #64748b);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .stitch-stat-value-row {
