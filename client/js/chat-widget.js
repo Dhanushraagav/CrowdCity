@@ -870,12 +870,6 @@
     // Append user message to display
     appendMessage('user', userText);
 
-    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (!currentUser) {
-      appendMessage('bot', 'Please **Sign In** to chat with the CrowdCity AI Assistant.');
-      return;
-    }
-
     // Append to memory history
     chatHistory.push({ role: 'user', content: userText });
 
@@ -892,10 +886,8 @@
 
       if (error) {
         console.error('Chat completions error:', error);
-        let userErrStr = 'Sorry, I encountered an issue connecting to the AI helper. Please try again.';
-        if (typeof error === 'string' && (error.toLowerCase().includes('token') || error.toLowerCase().includes('unauthorized'))) {
-          userErrStr = 'Please **Sign In** to chat with the CrowdCity AI Assistant.';
-        } else if (typeof error === 'string' && error.toLowerCase().includes('rate limit')) {
+        let userErrStr = 'Sorry, I encountered an issue connecting to the AI helper. Please try again in a moment.';
+        if (typeof error === 'string' && error.toLowerCase().includes('rate limit')) {
           userErrStr = 'Groq AI rate limit exceeded. Please wait a moment and try again.';
         }
         appendMessage('bot', userErrStr);

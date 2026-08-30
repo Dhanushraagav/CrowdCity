@@ -343,7 +343,7 @@ const API = {
     return request('/ai/chat', {
       method: 'POST',
       body: JSON.stringify({ messages }),
-      auth: false
+      auth: true
     });
   },
 

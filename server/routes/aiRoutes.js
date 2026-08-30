@@ -15,7 +15,7 @@ router.post('/form-guidance', formGuidanceController);
 router.post('/recommendations', recommendationController);
 router.post('/translate-voice', translateVoiceController);
 router.post('/analyze-image', analyzeImageController);
-router.post('/chat', requireAuth, validateChatPayload, chatWithAi);
+router.post('/chat', validateChatPayload, chatWithAi);
 router.get('/test-groq', testGroqConnectivity);
 
 export default router;
