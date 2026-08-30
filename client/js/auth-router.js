@@ -75,8 +75,10 @@ window.authRouter = {
       return;
     }
     
-    // Set flag to display mandatory Demo Notice disclaimer on dashboard arrival
-    sessionStorage.setItem('cc_show_demo_notice', 'true');
+    // Set flag to display mandatory Demo Notice disclaimer on initial login only (if not yet accepted)
+    if (sessionStorage.getItem('cc_demo_notice_accepted') !== 'true') {
+      sessionStorage.setItem('cc_show_demo_notice', 'true');
+    }
 
     console.log(`[Auth Router] ROLE: ${role} | TARGET PAGE: ${target}`);
     window.location.href = target;
@@ -287,6 +289,12 @@ window.authRouter = {
 // Universal Demo Notice Modal Injection
 (function() {
   function injectDemoNotice() {
+    // If already accepted in this session, never show again
+    if (sessionStorage.getItem('cc_demo_notice_accepted') === 'true') {
+      sessionStorage.removeItem('cc_show_demo_notice');
+      return;
+    }
+
     // Only show if the session storage flag is set to true
     if (sessionStorage.getItem('cc_show_demo_notice') !== 'true') {
       return;
@@ -658,6 +666,7 @@ window.authRouter = {
       if (!isChecked) return;
 
       sessionStorage.removeItem('cc_show_demo_notice');
+      sessionStorage.setItem('cc_demo_notice_accepted', 'true');
       document.body.style.overflow = '';
 
       modal.style.opacity = '0';

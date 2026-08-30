@@ -1587,7 +1587,7 @@ function setupFormSubmit() {
           }
           if (count <= 0) {
             clearInterval(interval);
-            window.authRouter.redirectToDashboard('citizen');
+            window.location.href = 'citizen-dashboard.html';
           }
         }, 1000);
       } else {
@@ -1597,7 +1597,7 @@ function setupFormSubmit() {
         alertBanner.style.color = '#10b981';
         alertBanner.classList.remove('hidden');
         setTimeout(() => {
-          window.authRouter.redirectToDashboard('citizen');
+          window.location.href = 'citizen-dashboard.html';
         }, 1500);
       }
     }
