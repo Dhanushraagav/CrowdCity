@@ -953,54 +953,34 @@ function updateCivicIntelligenceFeed(issues) {
   const msgs = [];
   const safeIssues = Array.isArray(issues) ? issues : [];
 
-  // 1. Dynamic User Reported Issues (Live from Database)
+  // 1. Dynamic User Reported Issues (Queried Live from Database)
   const recentReports = safeIssues
     .filter(i => i.status === 'pending' || i.status === 'assigned' || i.status === 'in_progress')
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 4);
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  recentReports.forEach(r => {
+  recentReports.slice(0, 6).forEach(r => {
     const cat = window.formatCategoryName ? window.formatCategoryName(r.category) : (r.category || 'Civic Issue');
     const loc = r.address ? ` in ${r.address}` : '';
-    msgs.push(`Citizen Report Logged: "${r.title}" (${cat})${loc} — Dispatched to municipal team.`);
+    const statusText = (r.status === 'in_progress' ? 'In Progress' : (r.status === 'assigned' ? 'Assigned to Field Team' : 'Dispatched to Department'));
+    msgs.push(`Citizen Report: "${r.title}" (${cat})${loc} — ${statusText}.`);
   });
 
-  // 2. Dynamic Resolved Issues (Live from Database)
+  // 2. Dynamic Resolved Issues (Queried Live from Database)
   const resolvedReports = safeIssues
     .filter(i => i.status === 'resolved' || i.status === 'verified')
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 4);
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  resolvedReports.forEach(r => {
+  resolvedReports.slice(0, 6).forEach(r => {
     const cat = window.formatCategoryName ? window.formatCategoryName(r.category) : (r.category || 'Civic Issue');
     const loc = r.address ? ` in ${r.address}` : '';
-    msgs.push(`Recently Resolved: "${r.title}" (${cat})${loc} • Fixed & Verified.`);
+    msgs.push(`Resolved: "${r.title}" (${cat})${loc} • Fixed & Verified.`);
   });
 
-  // 3. Tamil Nadu Government Welfare Schemes & Citizen Services
-  msgs.push('Kalaignar Magalir Urimai Thittam: Monthly ₹1,000 assistance directly deposited for eligible women heads of households.');
-  msgs.push('Pudhumai Penn Scheme: Monthly ₹1,000 financial aid for girl students pursuing degrees and diplomas across Tamil Nadu.');
-  msgs.push('Naan Mudhalvan Scheme: Free technical skills, AI & coding courses for Tamil Nadu youth.');
-  msgs.push("Chief Minister's Comprehensive Health Insurance (CMCHIS): Cashless hospital treatments up to ₹5 Lakh per family/year.");
-  msgs.push('Makkalai Thedi Maruthuvam: Doorstep essential healthcare screening and free medicine delivery for senior citizens across TN.');
-  msgs.push('Illam Thedi Kalvi: Neighborhood educational bridge classes conducted across all Tamil Nadu districts.');
-  msgs.push('Ungal Thoguthiyil Mudhalamaicher: Special cell ensuring rapid time-bound redressal of citizen grievances.');
-
-  // 4. CrowdCity AI Platform Highlights & Gamification
-  msgs.push('Report local issues (potholes, garbage, water leaks, streetlights) in under 60 seconds with AI photo triage.');
-  msgs.push('Earn +50 Civic Impact Points and unlock Community Sentinel Badges when your reported issues get resolved!');
-  msgs.push('Store your Ration Card, Aadhaar, Income & Community certificates securely in your encrypted Document Wallet.');
-  msgs.push('Explore city-wide repair speeds and geographic hotspot clusters on our Civic Analytics Dashboard.');
-  msgs.push('Ask our 24/7 AI Civic Assistant (bottom right) for instant scheme eligibility guidance and report tracking.');
-  msgs.push('Check qualification criteria for state & central schemes in the Government Services Hub.');
-
-  // 5. Official Tamil Nadu 24/7 Emergency Helplines
-  msgs.push('Emergency Medical Ambulance: Dial 108 for immediate 24/7 medical response across all 38 TN districts.');
-  msgs.push('Tamil Nadu Police Control Room: Dial 100 • Single National Emergency Helpline: Dial 112.');
-  msgs.push('Fire & Rescue Services: Dial 101 • Women Safety Helpline: Dial 1091.');
+  // 3. Official City Operational Status & 24/7 Helplines
+  msgs.push('All municipal civic dispatch services are active and operational across Tamil Nadu.');
+  msgs.push('24/7 Emergency Helplines: Ambulance 108 • Police 100 • Fire 101 • Citizen Helpline 112.');
   msgs.push('TANGEDCO Electricity Grievance (Minnagam): Dial 94987 94987 for power outages and electrical hazards.');
   msgs.push('TWAD Board Drinking Water & Drainage Helpline: Dial 1916 for water supply complaints.');
-  msgs.push('Municipal Corporation Grievance Redressal: Dial 1913 for urban civic complaints.');
 
   _tickerMessages = msgs;
   
