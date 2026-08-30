@@ -5268,6 +5268,13 @@ body.dark-theme .universal-mobile-back-btn svg {
     gap: 0.5rem !important;
   }
 
+  /* Specific Dashboard Split Header on Mobile */
+  .dashboard-header,
+  .app-header-main.dashboard-header {
+    justify-content: space-between !important;
+    padding: 0 1rem !important;
+  }
+
   .universal-mobile-back-btn {
     display: inline-flex !important;
     align-items: center !important;
@@ -5303,9 +5310,20 @@ body.dark-theme .universal-mobile-back-btn svg {
     flex-shrink: 0 !important;
   }
 
-  .dashboard-header .mobile-menu-toggle {
+  /* Hamburger on Dashboard: FAR LEFT edge */
+  .dashboard-header .mobile-menu-toggle,
+  .dashboard-header #mobile-menu-btn {
+    display: flex !important;
     margin-right: auto !important;
     margin-left: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.35rem !important;
+    color: var(--text-main, #0f172a) !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
   }
 
   .app-header-actions {
