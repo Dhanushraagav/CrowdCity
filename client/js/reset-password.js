@@ -8,8 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const debugPanel = document.getElementById('debug-log-panel');
 
   let resolvedUserRole = 'citizen';
+  let isPasswordUpdated = false;
 
-  // Diagnostic logs panel remains hidden in production
+  // Password visibility eye toggles
+  document.querySelectorAll('.toggle-password-visibility').forEach(icon => {
+    icon.addEventListener('click', () => {
+      const targetId = icon.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (input) {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        icon.classList.toggle('fa-eye', !isPassword);
+        icon.classList.toggle('fa-eye-slash', isPassword);
+      }
+    });
+  });
 
   function logDebug(msg, obj = null) {
     const time = new Date().toLocaleTimeString();
@@ -18,8 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
       text += `\n${JSON.stringify(obj, null, 2)}`;
     }
     console.log(`[Reset Password Debug] ${msg}`, obj || '');
-    debugPanel.textContent += text + '\n\n';
-    debugPanel.scrollTop = debugPanel.scrollHeight;
+    if (debugPanel) {
+      debugPanel.textContent += text + '\n\n';
+      debugPanel.scrollTop = debugPanel.scrollHeight;
+    }
   }
 
   function showAlert(msg, isSuccess = false) {
@@ -51,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     logDebug("Password recovery active flag saved to localStorage on page load.");
   }
   
-  // Print access_token / refresh_token lengths safely (do not print full values for security, but verify presence)
+  // Print access_token / refresh_token lengths safely
   const queryAccessToken = urlParams.get('access_token');
   const hashAccessToken = hashParams.get('access_token');
   const hashRefreshToken = hashParams.get('refresh_token');
@@ -81,9 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     logDebug("Supabase client initialized. Attaching auth state change listener...");
 
-    // 2. Detect Supabase recovery sessions using onAuthStateChange() and PASSWORD_RECOVERY events
+    // Detect Supabase recovery sessions using onAuthStateChange() and PASSWORD_RECOVERY events
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      // Goal 7: proper logging for SIGNED_IN, PASSWORD_RECOVERY, SIGNED_OUT
+      if (isPasswordUpdated) return;
+
       if (event === 'SIGNED_IN') {
         logDebug('[Auth Log] SIGNED_IN event triggered');
       } else if (event === 'PASSWORD_RECOVERY') {
@@ -91,7 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('cc_password_recovery_active', 'true');
       } else if (event === 'SIGNED_OUT') {
         logDebug('[Auth Log] SIGNED_OUT event triggered');
-        localStorage.removeItem('cc_password_recovery_active');
+        if (!isPasswordUpdated) {
+          localStorage.removeItem('cc_password_recovery_active');
+        }
       } else {
         logDebug(`Auth event triggered: "${event}"`);
       }
@@ -120,9 +138,19 @@ document.addEventListener('DOMContentLoaded', () => {
               logDebug(`User profile role resolved: ${resolvedUserRole}`);
               localStorage.setItem('cc_user_role', resolvedUserRole);
               localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+
+              // Update back button link dynamically if authority user
+              const backLink = document.getElementById('back-to-login-link');
+              if (backLink) {
+                if (resolvedUserRole === 'authority' || resolvedUserRole === 'admin') {
+                  backLink.href = 'authority-login.html';
+                  backLink.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Back to Authority Login';
+                } else {
+                  backLink.href = 'auth.html';
+                  backLink.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Back to Sign In';
+                }
+              }
             }
-          } else {
-            logDebug(`Profile API response not OK: ${response.status}`);
           }
         } catch (err) {
           logDebug("Error resolving profile role:", err);
@@ -139,9 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isRecoveryEvent || isRecoveryActive) {
         if (hasSession) {
           logDebug("Recovery session verified successfully! Showing reset form.");
-          console.log("FLOW DETECTED: PASSWORD_RECOVERY");
-          console.log("TARGET PAGE: reset-password.html");
-
           if (noSessionBanner) noSessionBanner.classList.add('hidden');
           if (resetForm) {
             resetForm.classList.remove('hidden');
@@ -149,19 +174,16 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } else {
           logDebug("Recovery flow active but no session present.");
-          if (resetForm) resetForm.classList.add('hidden');
-          if (noSessionBanner) noSessionBanner.classList.remove('hidden');
+          if (!isPasswordUpdated) {
+            if (resetForm) resetForm.classList.add('hidden');
+            if (noSessionBanner) noSessionBanner.classList.remove('hidden');
+          }
         }
       } else {
         logDebug("Non-recovery event or no session present. Hiding form.");
-        if (resetForm) resetForm.classList.add('hidden');
-        if (noSessionBanner) noSessionBanner.classList.remove('hidden');
-
-        // Exclude reset-password.html from automatic auth redirects (Goal 4 & 6)
-        if (hasSession) {
-          logDebug("FLOW DETECTED: NORMAL_LOGIN_ON_RESET_PAGE. No automatic redirect.");
-        } else {
-          logDebug("Unauthenticated access without recovery context.");
+        if (!isPasswordUpdated) {
+          if (resetForm) resetForm.classList.add('hidden');
+          if (noSessionBanner) noSessionBanner.classList.remove('hidden');
         }
       }
 
@@ -178,13 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.body.classList.add('ready');
   } else {
-    // Wait for the central auth initialization to complete (handles Render API cold start latencies safely)
+    // Wait for central auth initialization
     if (window.authInitPromise) {
       window.authInitPromise.then(() => {
         initResetPage();
       });
     } else {
-      // Fallback if promise is not available
       const checkInterval = setInterval(() => {
         if (typeof supabaseClient !== 'undefined' && supabaseClient !== null) {
           clearInterval(checkInterval);
@@ -237,25 +258,27 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await res.json();
 
           if (res.ok) {
+            isPasswordUpdated = true;
             logDebug("Custom password update succeeded!");
-            showAlert("Password updated successfully! Redirecting to login portal...", true);
+            if (noSessionBanner) noSessionBanner.classList.add('hidden');
+            showAlert("Password updated successfully! Redirecting to Sign In...", true);
             
             document.getElementById('new-password').value = '';
             document.getElementById('confirm-new-password').value = '';
 
             setTimeout(() => {
               window.authRouter.redirectToLogin('citizen');
-            }, 2000);
+            }, 1800);
           } else {
             logDebug(`Custom reset failed: ${data.error}`);
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Update Password';
+            submitBtn.innerHTML = 'Update Password';
             showAlert(`Failed to update password: ${data.error || 'Unknown error'}`);
           }
         } catch (err) {
           logDebug("Catch block error during custom update:", err);
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Update Password';
+          submitBtn.innerHTML = 'Update Password';
           showAlert(err.message || "An unexpected error occurred during password update.");
         }
       } else {
@@ -272,30 +295,37 @@ document.addEventListener('DOMContentLoaded', () => {
           if (error) {
             logDebug(`Update failed. error.code: "${error.code}", error.message: "${error.message}"`);
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Update Password';
+            submitBtn.innerHTML = 'Update Password';
             showAlert(`Failed to update password: ${error.message} (Code: ${error.code || 'None'})`);
           } else {
+            isPasswordUpdated = true;
             logDebug("Password update succeeded! Signing out recovery session...");
             
-            await supabaseClient.auth.signOut();
+            // Clean up session data
+            try {
+              await supabaseClient.auth.signOut().catch(() => {});
+            } catch (e) {}
+
             localStorage.removeItem('cc_session');
             localStorage.removeItem('cc_user_role');
             localStorage.removeItem('cc_user_profile');
+            localStorage.removeItem('cc_password_recovery_active');
 
-            showAlert("Password updated successfully! Redirecting to authority login portal...", true);
+            if (noSessionBanner) noSessionBanner.classList.add('hidden');
+            showAlert("Password updated successfully! Redirecting to Sign In...", true);
             
             document.getElementById('new-password').value = '';
             document.getElementById('confirm-new-password').value = '';
 
             setTimeout(() => {
-              logDebug(`Redirecting to login portal for role: ${resolvedUserRole}`);
-              window.authRouter.redirectToLogin(resolvedUserRole);
-            }, 2000);
+              logDebug(`Redirecting to login for role: ${resolvedUserRole}`);
+              window.authRouter.redirectToLogin(resolvedUserRole || 'citizen');
+            }, 1800);
           }
         } catch (err) {
           logDebug("Catch block error during updateUser:", err);
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Update Password';
+          submitBtn.innerHTML = 'Update Password';
           showAlert(err.message || "An unexpected error occurred during password update.");
         }
       }
