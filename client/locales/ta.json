@@ -78,6 +78,8 @@
   "resolved_issues": "தீர்க்கப்பட்ட பிரச்சினைகள்",
   "in_progress_reports": "செயல்பாட்டில்",
   "total_reports": "மொத்த புகார்கள்",
+  "city_total_reports": "சமூகப் புகார்கள்",
+  "city_total_sub": "நகரம் முழுவதும்",
   "current_points": "தற்போதைய புள்ளிகள்",
   "community_rank": "சமூக தரவரிசை",
   "rate_suffix": "விகிதம்",

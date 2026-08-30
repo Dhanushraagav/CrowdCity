@@ -78,6 +78,8 @@
   "resolved_issues": "Resolved Issues",
   "in_progress_reports": "In Progress",
   "total_reports": "Total Reports",
+  "city_total_reports": "Community Reports",
+  "city_total_sub": "Across city",
   "current_points": "Current Points",
   "community_rank": "Community Rank",
   "rate_suffix": "Rate",

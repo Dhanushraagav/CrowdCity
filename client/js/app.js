@@ -121,7 +121,7 @@ function loadUserStats(isLanguageChange = false) {
     if (inprogressEl) animateCountUp(inprogressEl, 0);
     if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
     if (cityTotalEl) animateCountUp(cityTotalEl, Array.isArray(currentIssues) ? currentIssues.length : 0);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = 'All time';
+    if (cityTotalSubEl) cityTotalSubEl.textContent = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
     return;
   }
 
@@ -146,7 +146,7 @@ function loadUserStats(isLanguageChange = false) {
     if (inprogressEl) animateCountUp(inprogressEl, active);
     if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
     if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = 'All time';
+    if (cityTotalSubEl) cityTotalSubEl.textContent = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
@@ -191,7 +191,7 @@ function loadUserStats(isLanguageChange = false) {
     if (inprogressEl) animateCountUp(inprogressEl, active);
     if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
     if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = 'All time';
+    if (cityTotalSubEl) cityTotalSubEl.textContent = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
