@@ -123,22 +123,25 @@
     <div class="app-main">
       <!-- Top Header inside main content -->
       <header class="app-header-main dashboard-header">
+        <!-- Far Left Edge: Hamburger Menu -->
         <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
           <i class="fa-solid fa-bars"></i>
         </button>
 
-        <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
+        <div class="app-header-actions">
           <div id="auth-nav-container">
             <!-- Dynamic header actions populated by auth.js -->
           </div>
-          <a href="citizen-dashboard.html" class="app-header-logo-mobile">
-            <div style="display: flex; align-items: center; gap: 0.4rem;">
-              <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" decoding="async" style="width: 28px; height: 28px; object-fit: contain;" />
-              <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 0.1rem;"></div>
-              <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" decoding="async" style="width: 30px; height: 30px; object-fit: contain;" />
-            </div>
-          </a>
         </div>
+
+        <!-- Far Right Edge: CrowdCity & Government Logos -->
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" aria-label="CrowdCity AI and Government of Tamil Nadu">
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" decoding="async" style="width: 28px; height: 28px; object-fit: contain;" />
+            <div style="width: 1px; height: 18px; background: var(--border-color, #cbd5e1); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" decoding="async" style="width: 30px; height: 30px; object-fit: contain;" />
+          </div>
+        </a>
       </header>
 
       <!-- Page Body -->

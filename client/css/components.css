@@ -5271,8 +5271,58 @@ body.dark-theme .universal-mobile-back-btn svg {
   /* Specific Dashboard Split Header on Mobile */
   .dashboard-header,
   .app-header-main.dashboard-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
     justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
     padding: 0 1rem !important;
+    height: 58px !important;
+  }
+
+  /* Hamburger on Dashboard: STRICT FAR LEFT EDGE */
+  .dashboard-header .mobile-menu-toggle,
+  .dashboard-header #mobile-menu-btn {
+    display: inline-flex !important;
+    order: 1 !important;
+    margin: 0 !important;
+    margin-right: auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.35rem !important;
+    color: var(--text-main, #0f172a) !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Hide center actions on mobile dashboard header so edges are pure */
+  .dashboard-header .app-header-actions {
+    display: none !important;
+  }
+
+  /* Hide logos on subpages */
+  .app-header-logo-mobile {
+    display: none !important;
+  }
+
+  /* CrowdCity & Tamil Nadu Emblem: STRICT FAR RIGHT EDGE */
+  .dashboard-header .app-header-logo-mobile,
+  body.dashboard-page .app-header-logo-mobile,
+  .citizen-dashboard .app-header-logo-mobile {
+    display: inline-flex !important;
+    order: 2 !important;
+    margin: 0 !important;
+    margin-left: auto !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+    text-decoration: none !important;
+    flex-shrink: 0 !important;
   }
 
   .universal-mobile-back-btn {
@@ -5282,54 +5332,6 @@ body.dark-theme .universal-mobile-back-btn svg {
     width: 36px !important;
     height: 36px !important;
     margin: 0 !important;
-    flex-shrink: 0 !important;
-  }
-
-  /* Hide logos everywhere on mobile EXCEPT the citizen dashboard */
-  .app-header-logo-mobile {
-    display: none !important;
-  }
-
-  /* Show logo ONLY on Dashboard on the FAR RIGHT side */
-  .dashboard-header .app-header-logo-mobile,
-  body.dashboard-page .app-header-logo-mobile,
-  .citizen-dashboard .app-header-logo-mobile {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.45rem !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    flex-shrink: 0 !important;
-  }
-
-  .mobile-menu-toggle {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    flex-shrink: 0 !important;
-  }
-
-  /* Hamburger on Dashboard: FAR LEFT edge */
-  .dashboard-header .mobile-menu-toggle,
-  .dashboard-header #mobile-menu-btn {
-    display: flex !important;
-    margin-right: auto !important;
-    margin-left: 0 !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    border: none !important;
-    font-size: 1.35rem !important;
-    color: var(--text-main, #0f172a) !important;
-    cursor: pointer !important;
-    flex-shrink: 0 !important;
-  }
-
-  .app-header-actions {
-    margin-left: auto !important;
-    display: flex !important;
-    align-items: center !important;
     flex-shrink: 0 !important;
   }
 }
