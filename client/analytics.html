@@ -25,186 +25,341 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
   <style>
-    /* Analytics Dashboard styling layout */
+    /* Premium Modern Civic Analytics UI */
     .analytics-container {
       max-width: 100%;
       width: 100%;
       margin: 0;
-      padding: 1.5rem 3rem;
+      padding: 1.25rem 2rem 3rem 2rem;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
-      font-family: var(--font-body);
-    }
-
-    .analytics-hero {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       gap: 1.5rem;
-      padding: 2.5rem 2rem;
-      background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-hover) 100%);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
+      font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    @media (min-width: 768px) {
-      .analytics-hero {
-        flex-direction: row;
-        align-items: center;
+    @media (max-width: 768px) {
+      .analytics-container {
+        padding: 1rem 1rem 2.5rem 1rem;
       }
     }
 
-    .hero-content h1 {
-      font-family: var(--font-heading);
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 0.5rem;
+    /* Hero Banner */
+    .analytics-hero-banner {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 18px;
+      padding: 1.75rem 2rem;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.75rem;
-    }
-
-    .hero-content h1 i {
-      color: var(--primary);
-    }
-
-    .hero-content p {
-      color: var(--text-muted);
-      font-size: 1rem;
-      line-height: 1.5;
-      max-width: 600px;
-    }
-
-    /* Filters Layout Block */
-    .analytics-filters {
-      display: flex;
       flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .filter-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-right: 0.5rem;
-    }
-
-    /* KPI Cards row */
-    .kpi-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
     }
 
-    .kpi-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      padding: 1.5rem;
+    .analytics-hero-details {
+      max-width: 650px;
+    }
+
+    .analytics-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(13, 148, 136, 0.12);
+      color: var(--primary, #0d9488);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 0.6rem;
+    }
+
+    .analytics-hero-title {
+      font-family: var(--font-heading, 'Inter', sans-serif);
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 0.35rem 0;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .analytics-hero-desc {
+      color: var(--text-muted, #64748b);
+      font-size: 0.88rem;
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* Filter Controls */
+    .analytics-controls-bar {
       display: flex;
       align-items: center;
+      gap: 0.6rem;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      padding: 0.5rem 0.75rem;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      flex-wrap: wrap;
+    }
+
+    .analytics-filter-icon {
+      font-size: 0.8rem;
+      color: var(--primary, #0d9488);
+      padding: 0 0.25rem;
+    }
+
+    .analytics-select {
+      border: 1px solid var(--border-color, #e2e8f0);
+      background: var(--bg-surface, #ffffff);
+      color: var(--text-main, #0f172a);
+      border-radius: 10px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+      height: 36px;
+    }
+
+    .analytics-select:focus {
+      border-color: var(--primary, #0d9488);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+    }
+
+    /* 4-Card KPI Grid (Matching Citizen Dashboard Stitch Style) */
+    .analytics-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.25rem;
-      box-shadow: var(--shadow-sm);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
     }
 
-    .kpi-card:hover {
+    .analytics-stat-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.15rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .analytics-stat-card:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      border-color: var(--border-color-hover, #cbd5e1);
     }
 
-    .kpi-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: var(--radius-round);
+    .kpi-icon-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
-      color: #fff;
+      font-size: 1.25rem;
       flex-shrink: 0;
     }
 
-    .kpi-details {
-      flex: 1;
+    .icon-teal {
+      background: rgba(13, 148, 136, 0.12);
+      color: #0d9488;
     }
 
-    .kpi-value {
-      font-family: var(--font-heading);
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: var(--text-main);
-      line-height: 1.2;
+    .icon-green {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
     }
 
-    .kpi-title {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 0.15rem;
+    .icon-blue {
+      background: rgba(59, 130, 246, 0.12);
+      color: #3b82f6;
     }
 
-    /* Maps and Area Split Row */
-    .map-split-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
+    .icon-amber {
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
     }
 
-    @media (min-width: 992px) {
-      .map-split-row {
-        grid-template-columns: 1.6fr 1fr;
-      }
-    }
-
-    .analytics-map-card, .area-distribution-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
+    .kpi-info-col {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.15rem;
     }
 
-    .card-title-row {
+    .kpi-stat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted, #64748b);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-stat-value {
+      font-family: var(--font-heading, 'Inter', sans-serif);
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-stat-subtext {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #10b981;
+      margin-top: 0.1rem;
+    }
+
+    /* AI City Insights Panel */
+    .analytics-ai-panel {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-left: 4px solid var(--primary, #0d9488);
+      border-radius: 16px;
+      padding: 1.35rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .ai-panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
 
-    .card-title-row h2 {
-      font-family: var(--font-heading);
-      font-size: 1.3rem;
+    .ai-panel-title {
+      font-family: var(--font-heading, 'Inter', sans-serif);
+      font-size: 1.05rem;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--text-main, #0f172a);
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin: 0;
     }
 
-    .card-title-row h2 i {
-      color: var(--primary);
+    .ai-diagnostics-badge {
+      background: rgba(13, 148, 136, 0.12);
+      color: var(--primary, #0d9488);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
     }
 
-    .map-wrapper {
-      height: 420px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--card-border);
+    .ai-insights-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .ai-insight-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.84rem;
+      color: var(--text-main, #0f172a);
+      line-height: 1.5;
+    }
+
+    .ai-insight-item i {
+      color: var(--primary, #0d9488);
+      margin-top: 0.2rem;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    /* Map & Area Split Grid */
+    .analytics-map-grid {
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+      .analytics-map-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .analytics-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.2s ease;
+    }
+
+    .analytics-card:hover {
+      border-color: var(--border-color-hover, #cbd5e1);
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .card-heading {
+      font-family: var(--font-heading, 'Inter', sans-serif);
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text-main, #0f172a);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-toggle-heatmap {
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--primary, #0d9488);
+      border: 1px solid rgba(13, 148, 136, 0.2);
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-heatmap:hover, .btn-toggle-heatmap.active {
+      background: var(--primary, #0d9488);
+      color: #ffffff;
+      border-color: var(--primary, #0d9488);
+    }
+
+    .map-container-box {
+      height: 380px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color, #e2e8f0);
       overflow: hidden;
       position: relative;
     }
@@ -215,12 +370,11 @@
       z-index: 1;
     }
 
-    /* Area Distribution List */
     .area-list {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      max-height: 420px;
+      gap: 0.6rem;
+      max-height: 380px;
       overflow-y: auto;
       padding-right: 0.25rem;
     }
@@ -229,116 +383,82 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.85rem 1rem;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      background-color: var(--bg-surface-hover);
-      transition: all var(--transition-fast);
+      padding: 0.75rem 0.95rem;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 10px;
+      background-color: var(--bg-app, #f8fafc);
+      transition: all 0.2s ease;
     }
 
     .area-item:hover {
-      border-color: var(--input-focus-border);
+      border-color: var(--primary, #0d9488);
+      background-color: #ffffff;
     }
 
     .area-name {
+      font-size: 0.82rem;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--text-main, #0f172a);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
     }
 
     .area-name i {
-      color: var(--primary);
-      font-size: 0.9rem;
+      color: var(--primary, #0d9488);
+      font-size: 0.8rem;
     }
 
     .area-count {
-      background-color: var(--primary-light-alpha);
-      color: var(--primary);
+      background-color: rgba(13, 148, 136, 0.12);
+      color: var(--primary, #0d9488);
       font-weight: 700;
-      font-size: 0.85rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
     }
 
-    /* Charts grid layouts */
-    .charts-row-grid {
+    /* 2x2 Charts Grid */
+    .charts-grid-2x2 {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
       gap: 1.5rem;
     }
 
-    @media (min-width: 768px) {
-      .charts-row-grid {
-        grid-template-columns: 1fr 1fr;
+    @media (max-width: 480px) {
+      .charts-grid-2x2 {
+        grid-template-columns: 1fr;
       }
-    }
-
-    .chart-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .chart-card h2 {
-      font-family: var(--font-heading);
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
     }
 
     .chart-wrapper {
       position: relative;
-      height: 300px;
+      height: 280px;
       width: 100%;
     }
 
-    /* Legend colors override helper styling */
-    .text-roads { color: #d97706; }
-    .text-streetlights { color: #f59e0b; }
-    .text-water_supply { color: #3b82f6; }
-    .text-drainage { color: #06b6d4; }
-    .text-garbage { color: #10b981; }
-    .text-traffic { color: #ef4444; }
-    .text-public_property { color: #8b5cf6; }
-    .text-parks { color: #22c55e; }
-    .text-sanitation { color: #ec4899; }
-    .text-safety_hazard { color: #f97316; }
-    .text-environment { color: #14b8a6; }
-    .text-other { color: #64748b; }
-    
-    .btn-toggle-heatmap {
-      background: var(--primary-light-alpha);
-      color: var(--primary);
-      border: 1px solid var(--primary-light-alpha);
-      padding: 0.35rem 0.85rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: all var(--transition-fast);
+    /* Clean Scorecards */
+    .scorecard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
     }
 
-    .btn-toggle-heatmap:hover, .btn-toggle-heatmap.active {
-      background: var(--btn-primary-bg);
-      color: var(--btn-primary-text);
-      border-color: var(--btn-primary-bg);
+    .scorecard-item {
+      background: var(--bg-app, #f8fafc);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
     }
-    /* Clean, non-blocking page rendering */
-    body {
-      opacity: 1;
+
+    .scorecard-item:hover {
+      border-color: var(--primary, #0d9488);
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
   </style>
 </head>
@@ -413,177 +533,229 @@
         </div>
       </header>
 
-      <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%;">
+      <div class="app-content-body" style="padding: 1.5rem 2rem; width: 100%; max-width: 100%;">
         <main class="analytics-container" style="padding: 0;">
 
-    <!-- Hero Header & Filter Bar -->
-    <section class="analytics-hero">
-      <div class="hero-content">
-        <h1 data-i18n="advanced_civic_analytics_title"><i class="fa-solid fa-chart-line"></i> Advanced Civic Analytics</h1>
-        <p data-i18n="advanced_civic_analytics_desc">Interactive diagnostics of civic complaints, monthly resolution speeds, department efficiency, and geographic hazard heatmaps across the city.</p>
-      </div>
+          <!-- Hero Header & Filter Bar -->
+          <section class="analytics-hero-banner">
+            <div class="analytics-hero-details">
+              <div class="analytics-pill-badge">
+                <span class="status-dot-pulse active" style="width: 7px; height: 7px;"></span>
+                <span>Live Civic Intelligence v4.0</span>
+              </div>
+              <h1 class="analytics-hero-title" data-i18n="advanced_civic_analytics_title">
+                Advanced Civic Analytics & City Diagnostics
+              </h1>
+              <p class="analytics-hero-desc" data-i18n="advanced_civic_analytics_desc">
+                Interactive real-time diagnostics of civic complaints, resolution speeds, department efficiency benchmarks, and geospatial hazard heatmaps across the city.
+              </p>
+            </div>
 
-      <!-- Filters Wrapper -->
-      <div class="analytics-filters">
-        <span class="filter-label"><i class="fa-solid fa-filter"></i> <span data-i18n="filters">Filters</span></span>
-        
-        <!-- Category Filter -->
-        <select id="analytics-category-filter" class="form-select" style="margin: 0; width: 150px; font-size: 0.85rem; height: 38px;">
-          <option value="" data-i18n="all_categories">All Categories</option>
-          <option value="roads" data-i18n="category_roads">Roads</option>
-          <option value="streetlights" data-i18n="category_streetlights">Streetlights</option>
-          <option value="water_supply" data-i18n="category_water_supply">Water Supply</option>
-          <option value="drainage" data-i18n="category_drainage">Drainage</option>
-          <option value="garbage" data-i18n="category_garbage">Garbage</option>
-          <option value="traffic" data-i18n="category_traffic">Traffic</option>
-          <option value="public_property" data-i18n="category_public_property">Public Property</option>
-          <option value="parks" data-i18n="category_parks">Parks</option>
-          <option value="sanitation" data-i18n="category_sanitation">Sanitation</option>
-          <option value="safety_hazard" data-i18n="category_safety_hazard">Safety Hazard</option>
-          <option value="environment" data-i18n="category_environment">Environment</option>
-          <option value="other" data-i18n="category_other">Other</option>
-        </select>
+            <!-- Sleek Integrated Filter Controls -->
+            <div class="analytics-controls-bar">
+              <i class="fa-solid fa-filter analytics-filter-icon"></i>
+              
+              <!-- Category Filter -->
+              <select id="analytics-category-filter" class="analytics-select" aria-label="Filter Category">
+                <option value="" data-i18n="all_categories">All Categories</option>
+                <option value="roads" data-i18n="category_roads">Roads</option>
+                <option value="streetlights" data-i18n="category_streetlights">Streetlights</option>
+                <option value="water_supply" data-i18n="category_water_supply">Water Supply</option>
+                <option value="drainage" data-i18n="category_drainage">Drainage</option>
+                <option value="garbage" data-i18n="category_garbage">Garbage</option>
+                <option value="traffic" data-i18n="category_traffic">Traffic</option>
+                <option value="public_property" data-i18n="category_public_property">Public Property</option>
+                <option value="parks" data-i18n="category_parks">Parks</option>
+                <option value="sanitation" data-i18n="category_sanitation">Sanitation</option>
+                <option value="safety_hazard" data-i18n="category_safety_hazard">Safety Hazard</option>
+                <option value="environment" data-i18n="category_environment">Environment</option>
+                <option value="other" data-i18n="category_other">Other</option>
+              </select>
 
-        <!-- Time Range Filter -->
-        <select id="analytics-range-filter" class="form-select" style="margin: 0; width: 140px; font-size: 0.85rem; height: 38px;">
-          <option value="all" data-i18n="all_time">All Time</option>
-          <option value="30" data-i18n="last_30_days">Last 30 Days</option>
-          <option value="90" data-i18n="last_90_days">Last 90 Days</option>
-          <option value="180" data-i18n="last_6_months">Last 6 Months</option>
-        </select>
-      </div>
-    </section>
+              <!-- Time Range Filter -->
+              <select id="analytics-range-filter" class="analytics-select" aria-label="Filter Range">
+                <option value="all" data-i18n="all_time">All Time</option>
+                <option value="30" data-i18n="last_30_days">Last 30 Days</option>
+                <option value="90" data-i18n="last_90_days">Last 90 Days</option>
+                <option value="180" data-i18n="last_6_months">Last 6 Months</option>
+              </select>
+            </div>
+          </section>
 
-    <!-- KPI Overview Cards -->
-    <section class="kpi-row">
-      <!-- Total Complaints -->
-      <div class="kpi-card">
-        <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.08); color: #3b82f6;"><i class="fa-solid fa-folder-open"></i></div>
-        <div class="kpi-details">
-          <div class="kpi-value" id="kpi-total-complaints">0</div>
-          <div class="kpi-title" data-i18n="total_reports">Total Reports</div>
-        </div>
-      </div>
-      <!-- Resolved Complaints -->
-      <div class="kpi-card">
-        <div class="kpi-icon" style="background: rgba(34, 197, 94, 0.08); color: #22c55e;"><i class="fa-solid fa-circle-check"></i></div>
-        <div class="kpi-details">
-          <div class="kpi-value" id="kpi-resolved-complaints">0</div>
-          <div class="kpi-title" data-i18n="resolved_cases">Resolved Cases</div>
-        </div>
-      </div>
-      <!-- Avg Resolution Time -->
-      <div class="kpi-card">
-        <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.08); color: #3b82f6;"><i class="fa-solid fa-clock"></i></div>
-        <div class="kpi-details">
-          <div class="kpi-value" id="kpi-avg-resolution">0 hr</div>
-          <div class="kpi-title" data-i18n="average_response_time">Avg Repair Speed</div>
-        </div>
-      </div>
-      <!-- Active Hotspots -->
-      <div class="kpi-card">
-        <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.08); color: #f59e0b;"><i class="fa-solid fa-fire"></i></div>
-        <div class="kpi-details">
-          <div class="kpi-value" id="kpi-hotspots-count">0</div>
-          <div class="kpi-title" data-i18n="hotspot_points">Hotspot Points</div>
-        </div>
-      </div>
-    </section>
+          <!-- 4-Card KPI Overview Grid -->
+          <section class="analytics-kpi-grid">
+            <!-- Card 1: Total Reports -->
+            <div class="analytics-stat-card">
+              <div class="kpi-icon-circle icon-teal">
+                <i class="fa-regular fa-file-lines"></i>
+              </div>
+              <div class="kpi-info-col">
+                <span class="kpi-stat-label" data-i18n="total_reports">TOTAL REPORTS</span>
+                <span class="kpi-stat-value" id="kpi-total-complaints">0</span>
+                <span class="kpi-stat-subtext">+ Live Synchronized</span>
+              </div>
+            </div>
 
-    <!-- AI-Generated City Insights -->
-    <section class="glass-panel" id="ai-insights-panel" style="padding: 1.75rem 2rem; border-left: 5px solid var(--primary); display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-hover) 100%);">
-      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-        <h2 style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.6rem;">
-          <i class="fa-solid fa-robot" style="color: var(--primary);"></i> <span data-i18n="ai_insights_title">AI-Generated City Insights</span>
-        </h2>
-        <span class="badge" style="background-color: var(--primary); color: white; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.6rem; border-radius: var(--radius-sm);" data-i18n="realtime_diagnostics">
-          Real-Time Diagnostics
-        </span>
-      </div>
-      <div id="ai-insights-list" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.25rem;">
-        <div class="skeleton-pulse" style="height: 20px; width: 90%; border-radius: var(--radius-sm);"></div>
-        <div class="skeleton-pulse" style="height: 20px; width: 75%; border-radius: var(--radius-sm);"></div>
-      </div>
-    </section>
+            <!-- Card 2: Resolved Cases -->
+            <div class="analytics-stat-card">
+              <div class="kpi-icon-circle icon-green">
+                <i class="fa-regular fa-circle-check"></i>
+              </div>
+              <div class="kpi-info-col">
+                <span class="kpi-stat-label" data-i18n="resolved_cases">RESOLVED CASES</span>
+                <span class="kpi-stat-value" id="kpi-resolved-complaints">0</span>
+                <span class="kpi-stat-subtext" style="color: #10b981;">100% Tracked</span>
+              </div>
+            </div>
 
-    <!-- Map Heatmap and Area Distribution split row -->
-    <div class="map-split-row">
-      
-      <!-- Leaflet Map Container -->
-      <section class="analytics-map-card">
-        <div class="card-title-row">
-          <h2><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="heatmap_title">Heatmap of Complaint Hotspots</span></h2>
-          <button class="btn-toggle-heatmap active" id="toggle-heatmap-btn" onclick="toggleHeatmapView()">
-            <i class="fa-solid fa-layer-group"></i> <span data-i18n="heatmap_overlay">Heatmap Overlay</span>
-          </button>
-        </div>
-        <div class="map-wrapper">
-          <div id="analytics-map"></div>
-        </div>
-      </section>
+            <!-- Card 3: Avg Resolution Speed -->
+            <div class="analytics-stat-card">
+              <div class="kpi-icon-circle icon-blue">
+                <i class="fa-regular fa-clock"></i>
+              </div>
+              <div class="kpi-info-col">
+                <span class="kpi-stat-label" data-i18n="average_response_time">AVG REPAIR SPEED</span>
+                <span class="kpi-stat-value" id="kpi-avg-resolution">0 hr</span>
+                <span class="kpi-stat-subtext" style="color: #3b82f6;">Target SLA: 48h</span>
+              </div>
+            </div>
 
-      <!-- Area distribution block -->
-      <section class="area-distribution-card">
-        <div class="card-title-row">
-          <h2><i class="fa-solid fa-building-flag"></i> <span data-i18n="neighborhood_distribution">Neighborhood Distribution</span></h2>
-        </div>
-        <div class="area-list" id="area-list-container">
-          <!-- Skeleton Loaders -->
-          <div class="skeleton-pulse" style="height: 44px; border-radius: var(--radius-sm); margin-bottom: 0.5rem;"></div>
-          <div class="skeleton-pulse" style="height: 44px; border-radius: var(--radius-sm); margin-bottom: 0.5rem;"></div>
-          <div class="skeleton-pulse" style="height: 44px; border-radius: var(--radius-sm);"></div>
-        </div>
-      </section>
+            <!-- Card 4: Active Hotspots -->
+            <div class="analytics-stat-card">
+              <div class="kpi-icon-circle icon-amber">
+                <i class="fa-solid fa-fire"></i>
+              </div>
+              <div class="kpi-info-col">
+                <span class="kpi-stat-label" data-i18n="hotspot_points">HOTSPOT POINTS</span>
+                <span class="kpi-stat-value" id="kpi-hotspots-count">0</span>
+                <span class="kpi-stat-subtext" style="color: #f59e0b;">GIS Heatmap Clusters</span>
+              </div>
+            </div>
+          </section>
 
-    </div>
+          <!-- AI-Generated City Insights -->
+          <section class="analytics-ai-panel" id="ai-insights-panel">
+            <div class="ai-panel-header">
+              <h2 class="ai-panel-title">
+                <i class="fa-solid fa-robot" style="color: var(--primary);"></i>
+                <span data-i18n="ai_insights_title">AI-Generated City Diagnostics & Telemetry</span>
+              </h2>
+              <span class="ai-diagnostics-badge" data-i18n="realtime_diagnostics">
+                Real-Time Diagnostics
+              </span>
+            </div>
+            <div id="ai-insights-list" class="ai-insights-list">
+              <div class="skeleton-pulse" style="height: 20px; width: 90%; border-radius: 6px;"></div>
+              <div class="skeleton-pulse" style="height: 20px; width: 75%; border-radius: 6px;"></div>
+            </div>
+          </section>
 
-    <!-- Charts Layout Grid Row 1 (Categories / Status) -->
-    <div class="charts-row-grid">
-      <!-- Category Doughnut -->
-      <section class="chart-card">
-        <h2><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> <span data-i18n="complaints_by_category">Complaints by Category</span></h2>
-        <div class="chart-wrapper">
-          <canvas id="chart-advanced-categories"></canvas>
-        </div>
-      </section>
+          <!-- Map Heatmap and Area Distribution split row -->
+          <div class="analytics-map-grid">
+            
+            <!-- Leaflet Map Container -->
+            <section class="analytics-card">
+              <div class="card-header-row">
+                <h2 class="card-heading">
+                  <i class="fa-solid fa-map-location-dot" style="color: var(--primary);"></i>
+                  <span data-i18n="heatmap_title">Geographic Complaint Hotspots</span>
+                </h2>
+                <button class="btn-toggle-heatmap active" id="toggle-heatmap-btn" onclick="toggleHeatmapView()">
+                  <i class="fa-solid fa-layer-group"></i> <span data-i18n="heatmap_overlay">Heatmap Overlay</span>
+                </button>
+              </div>
+              <div class="map-container-box">
+                <div id="analytics-map"></div>
+              </div>
+            </section>
 
-      <!-- Status Bar -->
-      <section class="chart-card">
-        <h2><i class="fa-solid fa-chart-bar" style="color:var(--primary);"></i> <span data-i18n="complaints_by_status">Complaints by Status</span></h2>
-        <div class="chart-wrapper">
-          <canvas id="chart-advanced-statuses"></canvas>
-        </div>
-      </section>
-    </div>
+            <!-- Area distribution block -->
+            <section class="analytics-card">
+              <div class="card-header-row">
+                <h2 class="card-heading">
+                  <i class="fa-solid fa-building-flag" style="color: var(--primary);"></i>
+                  <span data-i18n="neighborhood_distribution">Neighborhood Density</span>
+                </h2>
+              </div>
+              <div class="area-list" id="area-list-container">
+                <!-- Skeleton Loaders -->
+                <div class="skeleton-pulse" style="height: 44px; border-radius: 8px; margin-bottom: 0.5rem;"></div>
+                <div class="skeleton-pulse" style="height: 44px; border-radius: 8px; margin-bottom: 0.5rem;"></div>
+                <div class="skeleton-pulse" style="height: 44px; border-radius: 8px;"></div>
+              </div>
+            </section>
 
-    <!-- Charts Layout Grid Row 2 (Trends / Performance) -->
-    <div class="charts-row-grid">
-      <!-- Monthly Trends -->
-      <section class="chart-card">
-        <h2><i class="fa-solid fa-chart-line" style="color:#ec4899;"></i> <span data-i18n="monthly_reporting_trends">Monthly Reporting Trends</span></h2>
-        <div class="chart-wrapper">
-          <canvas id="chart-monthly-trends"></canvas>
-        </div>
-      </section>
+          </div>
 
-      <!-- Department Performance -->
-      <section class="chart-card">
-        <h2><i class="fa-solid fa-building-shield" style="color:#8b5cf6;"></i> <span data-i18n="responsible_dept_performance">Responsible Department Performance</span></h2>
-        <div class="chart-wrapper">
-          <canvas id="chart-department-performance"></canvas>
-        </div>
-      </section>
-    </div>
+          <!-- Charts Layout Grid Row (2x2) -->
+          <div class="charts-grid-2x2">
+            <!-- Category Doughnut -->
+            <section class="analytics-card">
+              <div class="card-header-row">
+                <h2 class="card-heading">
+                  <i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i>
+                  <span data-i18n="complaints_by_category">Complaints by Category</span>
+                </h2>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-advanced-categories"></canvas>
+              </div>
+            </section>
 
-    <!-- Department Performance Scores Card -->
-    <section class="chart-card" style="margin-top: 1.5rem;">
-      <h2><i class="fa-solid fa-ranking-stars" style="color: var(--primary);"></i> <span data-i18n="dept_efficiency_scorecard">Department Efficiency Scorecard</span></h2>
-      <div id="dept-scorecard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 0.5rem;">
-        <div class="skeleton-pulse" style="height: 100px; border-radius: var(--radius-md);"></div>
-        <div class="skeleton-pulse" style="height: 100px; border-radius: var(--radius-md);"></div>
-        <div class="skeleton-pulse" style="height: 100px; border-radius: var(--radius-md);"></div>
-      </div>
-    </section>
+            <!-- Status Bar -->
+            <section class="analytics-card">
+              <div class="card-header-row">
+                <h2 class="card-heading">
+                  <i class="fa-solid fa-chart-bar" style="color: #3b82f6;"></i>
+                  <span data-i18n="complaints_by_status">Complaints by Lifecycle Status</span>
+                </h2>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-advanced-statuses"></canvas>
+              </div>
+            </section>
+
+            <!-- Monthly Trends -->
+            <section class="analytics-card">
+              <div class="card-header-row">
+                <h2 class="card-heading">
+                  <i class="fa-solid fa-chart-line" style="color: #ec4899;"></i>
+                  <span data-i18n="monthly_reporting_trends">Monthly Reporting Trends</span>
+                </h2>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-monthly-trends"></canvas>
+              </div>
+            </section>
+
+            <!-- Department Performance -->
+            <section class="analytics-card">
+              <div class="card-header-row">
+                <h2 class="card-heading">
+                  <i class="fa-solid fa-building-shield" style="color: #8b5cf6;"></i>
+                  <span data-i18n="responsible_dept_performance">Department Resolution Performance</span>
+                </h2>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-department-performance"></canvas>
+              </div>
+            </section>
+          </div>
+
+          <!-- Department Performance Scores Card -->
+          <section class="analytics-card" style="margin-top: 0.5rem;">
+            <div class="card-header-row">
+              <h2 class="card-heading">
+                <i class="fa-solid fa-ranking-stars" style="color: var(--primary);"></i>
+                <span data-i18n="dept_efficiency_scorecard">Department SLA & Efficiency Scorecard</span>
+              </h2>
+            </div>
+            <div id="dept-scorecard-grid" class="scorecard-grid" style="margin-top: 0.25rem;">
+              <div class="skeleton-pulse" style="height: 100px; border-radius: 12px;"></div>
+              <div class="skeleton-pulse" style="height: 100px; border-radius: 12px;"></div>
+              <div class="skeleton-pulse" style="height: 100px; border-radius: 12px;"></div>
+            </div>
+          </section>
 
         </main>
       </div>
