@@ -1867,6 +1867,9 @@ function updateAuthUI() {
               <a href="${role === 'admin' ? 'admin.html' : 'authority-settings.html'}" class="nav-dropdown-item">
                 <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> ${tSettings}
               </a>
+              <a href="analytics.html" class="nav-dropdown-item">
+                <i class="fa-solid fa-chart-line" style="width: 16px; color: var(--text-muted);"></i> Analytics & Insights
+              </a>
               <a href="about.html" class="nav-dropdown-item">
                 <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> About Us
               </a>
@@ -1946,7 +1949,13 @@ function updateAuthUI() {
               <i class="fa-regular fa-bell" style="width: 16px; color: var(--text-muted);"></i> Notifications
             </a>
             <a href="my-documents.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-file-contract" style="width: 16px; color: var(--text-muted);"></i> Documents
+              <i class="fa-solid fa-folder-closed" style="width: 16px; color: var(--text-muted);"></i> Document Wallet
+            </a>
+            <a href="saved-schemes.html" class="nav-dropdown-item">
+              <i class="fa-solid fa-bookmark" style="width: 16px; color: var(--text-muted);"></i> Saved Schemes
+            </a>
+            <a href="analytics.html" class="nav-dropdown-item">
+              <i class="fa-solid fa-chart-line" style="width: 16px; color: var(--text-muted);"></i> Analytics & Insights
             </a>
             <a href="about.html" class="nav-dropdown-item">
               <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> About Us

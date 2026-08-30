@@ -341,35 +341,79 @@
     }
   </style>
 </head>
-<body>
+<body class="protected-page">
 
-  <!-- App Header -->
-  <header class="app-header">
-    <div class="logo-container" onclick="window.location.href='index.html'" style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer;">
-        <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" style="width: 30px; height: 30px; flex-shrink: 0; object-fit: contain;" />
-        <div class="brand-text-container" style="display: flex; flex-direction: column; line-height: 1.1; gap: 0.05rem; text-align: left;">
-          <span class="brand-title" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; font-family: var(--font-heading, inherit);">CrowdCity</span>
-          <span class="brand-subtitle" style="font-size: 0.65rem; font-weight: 600; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-heading, inherit);">Powered by AI</span>
-        </div></div>
-      <span class="logo-text">CrowdCity AI</span>
-    </div>
-
-    <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-
-    <nav class="nav-links" id="nav-menu">
-      <a href="index.html" class="nav-link"><i class="fa-solid fa-house-chimney"></i> <span data-i18n="dashboard">Dashboard</span></a>
-      <a href="report.html" class="nav-link"><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="report_an_issue">AI-Assisted Report</span></a>
-      <a href="analytics.html" class="nav-link active"><i class="fa-solid fa-chart-simple"></i> <span data-i18n="analytics">Analytics</span></a>
-      <div id="auth-nav-container">
-        <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="sign_in">Sign In</span></a>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" />
+          </div>
+          <div class="brand-text-container">
+            <span class="brand-title">CROWDCITY</span>
+            <span class="brand-subtitle">CITIZEN PORTAL</span>
+          </div>
+        </a>
       </div>
-    </nav>
-  </header>
 
-  <!-- Analytics Container -->
-  <main class="analytics-container">
+      <div class="sidebar-divider"></div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Issue">
+          <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link" title="Transportation">
+          <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
+          <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <a href="ministers.html" class="app-sidebar-link" title="Council of Ministers">
+          <i class="fa-solid fa-user-tie"></i> <span data-i18n="nav_ministers">Council of Ministers</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+          </div>
+        </a>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions" style="margin-left: auto;">
+          <div id="auth-nav-container"></div>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%;">
+        <main class="analytics-container" style="padding: 0;">
 
     <!-- Hero Header & Filter Bar -->
     <section class="analytics-hero">
@@ -540,7 +584,10 @@
       </div>
     </section>
 
-  </main>
+        </main>
+      </div>
+    </div>
+  </div>
 
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
