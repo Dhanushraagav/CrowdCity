@@ -21,18 +21,21 @@
 
   <style>
     .contact-container {
-      max-width: 1100px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1.75rem;
     }
 
     .contact-hero-banner {
+      width: 100%;
+      box-sizing: border-box;
       background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(37, 99, 235, 0.08));
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 2.25rem 2rem;
+      padding: 2rem 2.25rem;
       position: relative;
       overflow: hidden;
     }
@@ -51,7 +54,6 @@
       color: var(--text-muted);
       margin: 0;
       line-height: 1.6;
-      max-width: 680px;
     }
 
     .contact-cards-grid {
