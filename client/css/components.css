@@ -2941,8 +2941,36 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 
 @media (max-width: 767px) {
   .stitch-stats-grid {
-    grid-template-columns: 1fr !important;
-    gap: 0.85rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+
+  .stitch-stat-card {
+    padding: 0.85rem 0.75rem !important;
+    gap: 0.5rem !important;
+    border-radius: 12px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .stitch-stat-card .kpi-icon-circle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .stitch-stat-card .stitch-stat-label {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .stitch-stat-card .stitch-stat-value {
+    font-size: 1.35rem !important;
+    font-weight: 800 !important;
+  }
+
+  .stitch-stat-card .kpi-subtext {
+    font-size: 0.68rem !important;
   }
 }
 
@@ -3476,12 +3504,12 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     width: 100% !important;
     justify-content: center;
   }
-
-  /* Force 1-column layout for small stats grids on narrow mobile */
+  /* 2-column layout for stats grids on mobile */
   .stats-grid,
   .stitch-stats-grid,
   .profile-stats-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
   }
 
   /* Reduce general layout padding on cards and panels */
