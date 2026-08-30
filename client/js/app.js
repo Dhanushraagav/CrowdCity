@@ -953,34 +953,74 @@ function updateCivicIntelligenceFeed(issues) {
   const msgs = [];
   const safeIssues = Array.isArray(issues) ? issues : [];
 
-  // 1. Dynamic User Reported Issues (Queried Live from Database)
-  const recentReports = safeIssues
+  // 1. Genuine Citizen Reports (Live from Database only — zero mock/fake data)
+  const realIssues = safeIssues.filter(i => 
+    i && i.title && i.title.trim().length > 3 && 
+    !i.title.toLowerCase().includes('sample') && 
+    !i.title.toLowerCase().includes('test') &&
+    !i.title.toLowerCase().includes('dummy')
+  );
+
+  const recentPending = realIssues
     .filter(i => i.status === 'pending' || i.status === 'assigned' || i.status === 'in_progress')
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3);
 
-  recentReports.slice(0, 6).forEach(r => {
+  recentPending.forEach(r => {
     const cat = window.formatCategoryName ? window.formatCategoryName(r.category) : (r.category || 'Civic Issue');
     const loc = r.address ? ` in ${r.address}` : '';
-    const statusText = (r.status === 'in_progress' ? 'In Progress' : (r.status === 'assigned' ? 'Assigned to Field Team' : 'Dispatched to Department'));
-    msgs.push(`Citizen Report: "${r.title}" (${cat})${loc} — ${statusText}.`);
+    msgs.push(`Citizen Report Logged: "${r.title}" (${cat})${loc} — Dispatched to municipal response team.`);
   });
 
-  // 2. Dynamic Resolved Issues (Queried Live from Database)
-  const resolvedReports = safeIssues
+  const recentResolved = realIssues
     .filter(i => i.status === 'resolved' || i.status === 'verified')
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3);
 
-  resolvedReports.slice(0, 6).forEach(r => {
+  recentResolved.forEach(r => {
     const cat = window.formatCategoryName ? window.formatCategoryName(r.category) : (r.category || 'Civic Issue');
     const loc = r.address ? ` in ${r.address}` : '';
-    msgs.push(`Resolved: "${r.title}" (${cat})${loc} • Fixed & Verified.`);
+    msgs.push(`Recently Resolved: "${r.title}" (${cat})${loc} • Fixed & Verified.`);
   });
 
-  // 3. Official City Operational Status & 24/7 Helplines
-  msgs.push('All municipal civic dispatch services are active and operational across Tamil Nadu.');
-  msgs.push('24/7 Emergency Helplines: Ambulance 108 • Police 100 • Fire 101 • Citizen Helpline 112.');
-  msgs.push('TANGEDCO Electricity Grievance (Minnagam): Dial 94987 94987 for power outages and electrical hazards.');
-  msgs.push('TWAD Board Drinking Water & Drainage Helpline: Dial 1916 for water supply complaints.');
+  // 2. Hon'ble Chief Minister Thiru C. Joseph Vijay's Vision & State Governance
+  msgs.push("Hon'ble Chief Minister Thiru C. Joseph Vijay directs 24/7 time-bound resolution for all citizen complaints across Tamil Nadu.");
+  msgs.push("Chief Minister's Special Cell (CM Office): Dedicated priority tracking ensuring rapid resolution of citizen grievances under CM Vijay's administration.");
+  msgs.push("CM Vijay's Youth Empowerment Mission: Launching AI labs, skill hubs, and tech employment opportunities for Tamil Nadu graduates.");
+  msgs.push("Transparent Governance: Chief Minister Thiru C. Joseph Vijay champions corruption-free public administration and direct citizen participation.");
+  msgs.push("Tamil Nadu Smart Cities Mission: Modernizing roads, storm water drainage, and solar streetlights across all 38 districts under CM Vijay.");
+  msgs.push("Doorstep Welfare Delivery: Chief Minister Thiru C. Joseph Vijay's initiative ensuring government schemes reach every household directly.");
+  msgs.push("Clean Governance Drive: Chief Minister Vijay mandates strict quality audits on public roads, bridges, and infrastructure projects.");
+
+  // 3. Tamil Nadu State Pride, Industrial Leadership & Heritage
+  msgs.push("Tamil Nadu leads India in electronics manufacturing, automobile production, renewable wind energy, and software exports.");
+  msgs.push("Tamil Nadu — The historic land of Dravidian architecture, classical Sangam literature, and rich heritage spanning 38 districts.");
+  msgs.push("Green Tamil Nadu Mission: State-wide drive for clean waterways, plastic-free cities, solar energy, and urban tree canopy.");
+  msgs.push("Tamil Nadu Rapid Transit Expansion: Expanding modern Metro rail and smart bus corridors in Chennai, Coimbatore, Madurai, and Trichy.");
+  msgs.push("Industrial Innovation: Chennai, Coimbatore, Hosur, and Tuticorin driving next-generation electric mobility and aerospace hubs.");
+
+  // 4. Tamil Nadu Flagship Welfare Schemes & Citizen Services
+  msgs.push("Kalaignar Magalir Urimai Thittam: Monthly ₹1,000 rights assistance directly deposited for eligible women heads of households.");
+  msgs.push("Pudhumai Penn & Tamil Pudhalvan Schemes: Monthly ₹1,000 education financial assistance for college and polytechnic students across TN.");
+  msgs.push("Chief Minister's Comprehensive Health Insurance (CMCHIS): Cashless medical coverage up to ₹5 Lakh per family annually.");
+  msgs.push("Naan Mudhalvan Scheme: Free technical skills, AI, robotics, and emerging technology courses for Tamil Nadu youth.");
+  msgs.push("Makkalai Thedi Maruthuvam: Doorstep essential healthcare screening, vital checks, and free medicines for senior citizens across TN.");
+  msgs.push("Illam Thedi Kalvi: Community education bridge classes ensuring equitable learning across all Tamil Nadu villages and towns.");
+  msgs.push("Tamil Nadu Free Bus Travel Scheme: Free public bus transportation for women, school students, and differently-abled citizens.");
+
+  // 5. Official 24/7 Emergency & Citizen Helplines
+  msgs.push("Chief Minister's Special Helpline: Dial 1100 for direct grievance escalation to the Chief Minister's Office.");
+  msgs.push("Emergency Medical Ambulance: Dial 108 for immediate 24/7 medical response across all 38 Tamil Nadu districts.");
+  msgs.push("Tamil Nadu Police Control Room: Dial 100 • Single National Emergency Helpline: Dial 112.");
+  msgs.push("Fire & Rescue Services: Dial 101 • Women Safety Helpline: Dial 1091.");
+  msgs.push("TANGEDCO Electricity Grievance (Minnagam): Dial 94987 94987 for power outages and electrical safety.");
+  msgs.push("TWAD Board Drinking Water & Drainage Helpline: Dial 1916 • Municipal Grievance Helpline: Dial 1913.");
+
+  // Fisher-Yates Shuffle for fresh, non-repetitive viewing on every visit
+  for (let i = msgs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [msgs[i], msgs[j]] = [msgs[j], msgs[i]];
+  }
 
   _tickerMessages = msgs;
   
