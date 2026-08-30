@@ -2357,13 +2357,15 @@ function initResponsiveSidebar() {
     const links = isAuth ? [
       { href: 'admin.html#dashboard', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
       { href: 'admin.html#complaints', icon: 'fa-clipboard-list', label: 'Complaints', key: 'nav_cases' },
-      { href: 'admin.html#reports', icon: 'fa-file-invoice', label: 'Reports', key: 'nav_reports' }
+      { href: 'admin.html#reports', icon: 'fa-file-invoice', label: 'Reports', key: 'nav_reports' },
+      { href: 'authority-settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
     ] : [
       { href: 'citizen-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
       { href: 'report.html', icon: 'fa-plus', label: 'Report Issue', key: 'nav_report' },
       { href: 'my-complaints.html', icon: 'fa-clipboard-list', label: 'My Complaints', key: 'nav_my_complaints' },
       { href: 'my-documents.html', icon: 'fa-folder-closed', label: 'Documents', key: 'nav_documents' },
-      { href: 'notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' }
+      { href: 'notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
+      { href: 'settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
     ];
     
     let linksHtml = links.map(link => {
