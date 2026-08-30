@@ -118,6 +118,7 @@ async function loadAndRenderMyIssues() {
   }
 
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  const currentUserId = user ? (user.id || user.sub) : null;
   const catSelect = document.getElementById('my-cat-filter') || document.getElementById('my-issues-category-filter');
   const statusSelect = document.getElementById('my-status-filter') || document.getElementById('my-issues-status-filter');
   const activeCategory = catSelect?.value || '';
