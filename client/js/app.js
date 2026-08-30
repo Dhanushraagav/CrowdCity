@@ -942,9 +942,65 @@ function updateCommunityInsights(issues) {
 // Government Typewriter Ticker Engine
 let _tickerTimer = null;
 let _tickerMessages = [];
-let _tickerMsgIdx = 0;
-let _tickerCharIdx = 0;
-let _tickerIsDeleting = false;
+let _cachedTNLiveUpdates = null;
+let _isFetchingTNUpdates = false;
+
+async function loadTamilNaduDynamicUpdates() {
+  if (_cachedTNLiveUpdates && _cachedTNLiveUpdates.length > 0) {
+    integrateTNUpdatesIntoTicker(_cachedTNLiveUpdates);
+    return _cachedTNLiveUpdates;
+  }
+  if (_isFetchingTNUpdates) return [];
+  _isFetchingTNUpdates = true;
+
+  try {
+    const res = await fetch('/api/tamilnadu-updates');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.updates) && data.updates.length > 0) {
+        _cachedTNLiveUpdates = data.updates;
+        integrateTNUpdatesIntoTicker(data.updates);
+        return data.updates;
+      }
+    }
+  } catch (err) {
+    console.warn('[TN Updates] Async feed fetch notice:', err.message);
+  } finally {
+    _isFetchingTNUpdates = false;
+  }
+  return [];
+}
+
+function integrateTNUpdatesIntoTicker(updates) {
+  if (!Array.isArray(updates) || updates.length === 0) return;
+  const newHeadlines = updates
+    .filter(u => u && u.title && u.title.trim().length > 10)
+    .map(u => {
+      const prefix = u.district && u.district !== 'Tamil Nadu' ? `[${u.district}] ` : '';
+      return `${prefix}${u.title}`;
+    });
+
+  if (_tickerMessages && _tickerMessages.length > 0) {
+    // Interleave live dynamic updates into current ticker messages without duplicating
+    const currentSet = new Set(_tickerMessages);
+    const uniqueNews = newHeadlines.filter(h => !currentSet.has(h));
+    
+    if (uniqueNews.length > 0) {
+      const merged = [..._tickerMessages];
+      uniqueNews.forEach((item, idx) => {
+        const insertPos = (idx * 2 + 1) % (merged.length + 1);
+        merged.splice(insertPos, 0, item);
+      });
+      _tickerMessages = merged;
+    }
+  } else {
+    _tickerMessages = newHeadlines;
+    _tickerMsgIdx = 0;
+    _tickerCharIdx = 0;
+    _tickerIsDeleting = false;
+    runTickerTypewriter();
+  }
+}
 
 function updateCivicIntelligenceFeed(issues) {
   const feedTextEl = document.getElementById('civic-intelligence-feed-text');
@@ -1031,6 +1087,9 @@ function updateCivicIntelligenceFeed(issues) {
   _tickerCharIdx = 0;
   _tickerIsDeleting = false;
   runTickerTypewriter();
+
+  // Asynchronously load and merge live dynamic Tamil Nadu updates from backend API
+  loadTamilNaduDynamicUpdates();
 }
 
 function runTickerTypewriter() {
