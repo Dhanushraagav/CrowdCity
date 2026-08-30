@@ -280,9 +280,9 @@ function renderAiInsights(insights) {
 
   listEl.innerHTML = insights.map((insight, idx) => {
     return `
-      <div style="display:flex; gap:0.75rem; align-items:flex-start; margin-bottom: 0.25rem;">
-        <span style="color:var(--primary); font-size:1.1rem; line-height:1.2; margin-top:2px;">
-          <i class="fa-solid fa-circle-nodes"></i>
+      <div style="display:flex; gap:0.75rem; align-items:flex-start; margin-bottom: 0.5rem;">
+        <span style="color:var(--primary); font-size:1.05rem; line-height:1.2; margin-top:2px;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
         </span>
         <p style="margin:0; font-size:0.95rem; color:var(--text-main); font-weight:500; line-height:1.5;">${insight}</p>
       </div>
