@@ -462,17 +462,17 @@
       return '#64748b';
     }
 
-    async function fetchWeather(lat, lon) {
+    async function fetchWeather(lat, lon, isForced = false) {
       try {
-        // Reverse geocode to get district/city name
-        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`, {
+        // Reverse geocode with zoom=12 for precise city/town detection
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=12&addressdetails=1`, {
           headers: { 'Accept-Language': currentLang }
         });
         const geoData = await geoRes.json();
         const addr = geoData.address || {};
-        const district = addr.state_district || addr.county || addr.city || addr.town || addr.village || addr.state || 'Your Location';
-        // Clean up district name
-        const cleanDistrict = district.replace(/ district$/i, '').replace(/ taluk$/i, '');
+        // Prioritize specific city/town/suburb before falling back to district
+        const detectedPlace = addr.city || addr.town || addr.municipality || addr.suburb || addr.village || addr.state_district || addr.county || 'Tamil Nadu';
+        const cleanDistrict = detectedPlace.replace(/ district$/i, '').replace(/ taluk$/i, '').replace(/ Corporation$/i, '').replace(/ Municipality$/i, '');
 
         // Fetch weather from Open-Meteo
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
@@ -487,9 +487,9 @@
         iconEl.style.color = getWeatherColor(code);
         applyWeatherTheme(code, temp);
         widget.classList.remove('loading');
-        widget.title = `${cleanDistrict} — ${temp}\u00B0C`;
+        widget.title = `${cleanDistrict} — ${temp}\u00B0C (Click to re-detect location)`;
 
-        // Cache for 15 min with language key
+        // Cache for 10 min with language key
         localStorage.setItem(`cc_weather_cache_${currentLang}`, JSON.stringify({
           district: cleanDistrict, temp, code, lang: currentLang, ts: Date.now()
         }));
@@ -501,55 +501,71 @@
       }
     }
 
-    // Check language-specific cache first (15 min TTL)
+    // Function to trigger live geolocation
+    function detectLiveLocation(isForced = false) {
+      if (navigator.geolocation) {
+        widget.classList.add('loading');
+        tempEl.textContent = 'Detecting...';
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            localStorage.setItem('cc_weather_coords', JSON.stringify({ lat, lon, ts: Date.now() }));
+            fetchWeather(lat, lon, isForced);
+          },
+          (err) => {
+            console.warn('Geolocation denied or failed, falling back to default:', err.message);
+            // Default: Chennai / Tamil Nadu
+            fetchWeather(13.0827, 80.2707, isForced);
+          },
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: isForced ? 0 : 300000 }
+        );
+      } else {
+        fetchWeather(13.0827, 80.2707, isForced);
+      }
+    }
+
+    // Click on weather widget to instantly re-detect live GPS coordinates
+    widget.style.cursor = 'pointer';
+    widget.addEventListener('click', () => {
+      localStorage.removeItem(`cc_weather_cache_${currentLang}`);
+      localStorage.removeItem('cc_weather_coords');
+      detectLiveLocation(true);
+    });
+
+    // Check language-specific cache first (10 min TTL)
     const cacheKey = `cc_weather_cache_${currentLang}`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
         const c = JSON.parse(cached);
-        if (c.lang === currentLang && Date.now() - c.ts < 15 * 60 * 1000) {
+        if (c.lang === currentLang && Date.now() - c.ts < 10 * 60 * 1000) {
           cityEl.textContent = c.district;
           tempEl.textContent = `${c.temp}\u00B0C`;
           iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code)}"></i>`;
           iconEl.style.color = getWeatherColor(c.code);
           applyWeatherTheme(c.code, c.temp);
           widget.classList.remove('loading');
-          widget.title = `${c.district} — ${c.temp}\u00B0C`;
+          widget.title = `${c.district} — ${c.temp}\u00B0C (Click to re-detect location)`;
           return; // Use cached data
         }
       } catch (e) { /* ignore parse errors */ }
     }
 
-    // Check if we have cached coordinates to avoid native geolocation delay (30 min TTL)
+    // Check if we have cached coordinates (15 min TTL)
     const cachedCoords = localStorage.getItem('cc_weather_coords');
     if (cachedCoords) {
       try {
         const coords = JSON.parse(cachedCoords);
-        if (coords && coords.lat && coords.lon && coords.ts && Date.now() - coords.ts < 30 * 60 * 1000) {
+        if (coords && coords.lat && coords.lon && coords.ts && Date.now() - coords.ts < 15 * 60 * 1000) {
           fetchWeather(coords.lat, coords.lon);
           return;
         }
       } catch (e) { /* ignore */ }
     }
 
-    // Request geolocation if no cached coordinates or they expired
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          localStorage.setItem('cc_weather_coords', JSON.stringify({ lat, lon, ts: Date.now() }));
-          fetchWeather(lat, lon);
-        },
-        () => {
-          // Fallback: default to Chennai
-          fetchWeather(13.0827, 80.2707);
-        },
-        { timeout: 8000, maximumAge: 600000 }
-      );
-    } else {
-      fetchWeather(13.0827, 80.2707);
-    }
+    // Request fresh geolocation
+    detectLiveLocation(false);
   })();
 
   // Listen to language-change event to re-fetch/re-render weather in the correct language
