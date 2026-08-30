@@ -2528,16 +2528,18 @@ function setupUniversalMobileNavigation() {
   const isAuthRoot = path.endsWith('/auth.html') || path.endsWith('/authority-login.html');
   
   if (isCitizenRoot || isAdminRoot || isAuthRoot) {
-    const existing = document.getElementById('universal-back-btn');
-    if (existing) existing.remove();
+    const existingMobile = document.getElementById('universal-back-btn');
+    if (existingMobile) existingMobile.remove();
+    const existingDesktop = document.getElementById('universal-desktop-back-btn');
+    if (existingDesktop) existingDesktop.remove();
     return;
   }
 
-  // Secondary Page: Ensure ONE shared universal back button exists in header area
+  // Secondary Page: Ensure shared universal back buttons exist in header area (Mobile & Desktop)
   const headerMain = document.querySelector('.app-header-main') || document.querySelector('.admin-header-actions') || document.querySelector('.auth-header') || document.querySelector('header.app-header');
   if (!headerMain) return;
 
-  // Remove all legacy / duplicate inline back buttons inside the header on mobile
+  // Remove all legacy / duplicate inline back buttons inside the header
   const legacyBacks = headerMain.querySelectorAll('.subpage-back-btn, .gov-back-btn, a[href*="citizen-dashboard"], a[href*="services.html"], a[href*="services-dashboard"], a[href*="scheme-checker"]');
   legacyBacks.forEach(el => {
     if (el.querySelector('.fa-arrow-left') || el.classList.contains('subpage-back-btn') || el.classList.contains('gov-back-btn') || el.textContent.toLowerCase().includes('back')) {
@@ -2550,6 +2552,7 @@ function setupUniversalMobileNavigation() {
     }
   });
 
+  // 1. Mobile Back Button ([ ← ] icon button)
   if (!document.getElementById('universal-back-btn')) {
     const backBtn = document.createElement('button');
     backBtn.id = 'universal-back-btn';
@@ -2563,6 +2566,24 @@ function setupUniversalMobileNavigation() {
       headerMain.insertBefore(backBtn, insertTarget);
     } else {
       headerMain.appendChild(backBtn);
+    }
+  }
+
+  // 2. Desktop / Laptop Back Button ([ ← Back ] button with translation)
+  if (!document.getElementById('universal-desktop-back-btn')) {
+    const desktopBackBtn = document.createElement('button');
+    desktopBackBtn.id = 'universal-desktop-back-btn';
+    desktopBackBtn.className = 'universal-desktop-back-btn';
+    desktopBackBtn.setAttribute('aria-label', 'Go Back');
+    const tBack = window.i18n ? window.i18n.t('back_action') : 'Back';
+    desktopBackBtn.innerHTML = `<i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_action">${tBack}</span>`;
+    desktopBackBtn.onclick = window.handleUniversalBack;
+
+    const actionsContainer = headerMain.querySelector('.app-header-actions');
+    if (actionsContainer) {
+      headerMain.insertBefore(desktopBackBtn, actionsContainer);
+    } else {
+      headerMain.appendChild(desktopBackBtn);
     }
   }
 }

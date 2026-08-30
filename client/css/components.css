@@ -5259,6 +5259,62 @@ body.dark-theme .universal-mobile-back-btn svg {
 }
 
 /* ==========================================================================
+   UNIVERSAL SHARED DESKTOP / LAPTOP BACK BUTTON STYLING
+   ========================================================================== */
+.universal-desktop-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.95rem;
+  background: #ffffff;
+  color: var(--text-main, #0f172a);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 9px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-right: auto;
+  user-select: none;
+}
+
+.universal-desktop-back-btn:hover {
+  background: rgba(13, 148, 136, 0.08);
+  color: var(--primary, #0d9488);
+  border-color: var(--primary, #0d9488);
+  transform: translateX(-3px);
+  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.12);
+}
+
+.universal-desktop-back-btn:active {
+  transform: scale(0.97);
+}
+
+.universal-desktop-back-btn i {
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.universal-desktop-back-btn:hover i {
+  transform: translateX(-2px);
+}
+
+[data-theme="dark"] .universal-desktop-back-btn,
+body.dark-theme .universal-desktop-back-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+@media (max-width: 1023px) {
+  .universal-desktop-back-btn {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
    MOBILE TYPOGRAPHY CONSISTENCY & RESPONSIVE SCALING (MAX-WIDTH: 768px)
    ========================================================================== */
 @media (max-width: 768px) {
