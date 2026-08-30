@@ -967,9 +967,8 @@ function updateCivicIntelligenceFeed(issues) {
     .slice(0, 3);
 
   recentPending.forEach(r => {
-    const cat = window.formatCategoryName ? window.formatCategoryName(r.category) : (r.category || 'Civic Issue');
-    const loc = r.address ? ` in ${r.address}` : '';
-    msgs.push(`Citizen Report Logged: "${r.title}" (${cat})${loc} — Dispatched to municipal response team.`);
+    const loc = r.address ? ` (${r.address})` : '';
+    msgs.push(`குடிமக்கள் பதிவுசெய்த புகார்: "${r.title}"${loc} — நகராட்சி துரித நடவடிக்கை குழுவிற்கு அனுப்பப்பட்டுள்ளது.`);
   });
 
   const recentResolved = realIssues
@@ -978,43 +977,42 @@ function updateCivicIntelligenceFeed(issues) {
     .slice(0, 3);
 
   recentResolved.forEach(r => {
-    const cat = window.formatCategoryName ? window.formatCategoryName(r.category) : (r.category || 'Civic Issue');
-    const loc = r.address ? ` in ${r.address}` : '';
-    msgs.push(`Recently Resolved: "${r.title}" (${cat})${loc} • Fixed & Verified.`);
+    const loc = r.address ? ` (${r.address})` : '';
+    msgs.push(`சமீபத்தில் தீர்க்கப்பட்ட புகார்: "${r.title}"${loc} • சரிபார்க்கப்பட்டு முழுமையாக தீர்க்கப்பட்டது.`);
   });
 
-  // 2. Hon'ble Chief Minister Thiru C. Joseph Vijay's Vision & State Governance
-  msgs.push("Hon'ble Chief Minister Thiru C. Joseph Vijay directs 24/7 time-bound resolution for all citizen complaints across Tamil Nadu.");
-  msgs.push("Chief Minister's Special Cell (CM Office): Dedicated priority tracking ensuring rapid resolution of citizen grievances under CM Vijay's administration.");
-  msgs.push("CM Vijay's Youth Empowerment Mission: Launching AI labs, skill hubs, and tech employment opportunities for Tamil Nadu graduates.");
-  msgs.push("Transparent Governance: Chief Minister Thiru C. Joseph Vijay champions corruption-free public administration and direct citizen participation.");
-  msgs.push("Tamil Nadu Smart Cities Mission: Modernizing roads, storm water drainage, and solar streetlights across all 38 districts under CM Vijay.");
-  msgs.push("Doorstep Welfare Delivery: Chief Minister Thiru C. Joseph Vijay's initiative ensuring government schemes reach every household directly.");
-  msgs.push("Clean Governance Drive: Chief Minister Vijay mandates strict quality audits on public roads, bridges, and infrastructure projects.");
+  // 2. Hon'ble Chief Minister Thiru C. Joseph Vijay's Vision & State Governance (Tamil)
+  msgs.push("மாண்புமிகு முதலமைச்சர் திரு சி. ஜோசப் விஜய் அவர்களின் தலைமையில் தமிழகம் முழுவதும் மக்கள் குறைகள் 24 மணி நேரத்திற்குள் தீர்க்க நடவடிக்கை.");
+  msgs.push("முதலமைச்சரின் தனிப்பிரிவு (CM Cell): பொதுமக்களின் அவசர புகார்களுக்கு முன்னுரிமை அளித்து உடனடி தீர்வு காண முதலமைச்சர் விஜய் உத்தரவு.");
+  msgs.push("முதலமைச்சர் விஜய் அவர்களின் இளைஞர் நலன் திட்டம்: தமிழக இளைஞர்களுக்கு இலவச AI தொழில்நுட்ப பயிற்சி மற்றும் வேலைவாய்ப்பு முகாம்கள்.");
+  msgs.push("ஊழலற்ற மக்கள் ஆட்சி: வெளிப்படையான நிர்வாகம் மற்றும் தரமான சாலை கட்டமைப்பை உறுதி செய்ய முதலமைச்சர் திரு சி. ஜோசப் விஜய் உத்தரவு.");
+  msgs.push("தமிழக சீர்மிகு நகரங்கள் திட்டம்: 38 மாவட்டங்களிலும் நவீன சாலைகள், மழைநீர் வடிகால் மற்றும் தெருவிளக்குகள் புனரமைப்பு.");
+  msgs.push("மக்களைத் தேடி அரசு நிர்வாகம்: அரசு நலத்திட்டங்கள் நேரடியாக ஒவ்வொரு குடும்பத்தின் இல்லத்திற்கே சென்றடைய முதலமைச்சர் திட்டம்.");
+  msgs.push("தரக்கட்டுப்பாடு ஆய்வு: அரசு திட்டங்கள் மற்றும் பொதுப்பணி கட்டமைப்புகளில் எவ்வித சமரசமுமின்றி தரத்தை உறுதி செய்ய உத்தரவு.");
 
-  // 3. Tamil Nadu State Pride, Industrial Leadership & Heritage
-  msgs.push("Tamil Nadu leads India in electronics manufacturing, automobile production, renewable wind energy, and software exports.");
-  msgs.push("Tamil Nadu — The historic land of Dravidian architecture, classical Sangam literature, and rich heritage spanning 38 districts.");
-  msgs.push("Green Tamil Nadu Mission: State-wide drive for clean waterways, plastic-free cities, solar energy, and urban tree canopy.");
-  msgs.push("Tamil Nadu Rapid Transit Expansion: Expanding modern Metro rail and smart bus corridors in Chennai, Coimbatore, Madurai, and Trichy.");
-  msgs.push("Industrial Innovation: Chennai, Coimbatore, Hosur, and Tuticorin driving next-generation electric mobility and aerospace hubs.");
+  // 3. Tamil Nadu State Pride, Industrial Leadership & Heritage (Tamil)
+  msgs.push("தமிழ்நாடு — மின்னணு உற்பத்தி, ஆட்டோமொபைல் ஏற்றுமதி, காற்றாலை மின்சாரம் மற்றும் மென்பொருள் கண்டுபிடிப்புகளில் இந்தியாவின் முன்னணி மாநிலம்.");
+  msgs.push("செம்மொழித் தமிழ் மற்றும் திராவிட கட்டிடக்கலை பெருமைமிகு 38 மாவட்டங்களை உள்ளடக்கிய வரலாற்று சிறப்புமிக்க தமிழ்நாடு.");
+  msgs.push("பசுமைத் தமிழ்நாடு இயக்கம்: பிளாஸ்டிக் இல்லாத நகரங்கள், நதிகள் தூய்மை மற்றும் மரக்கன்றுகள் நடும் பிரம்மாண்ட திட்டம்.");
+  msgs.push("தமிழக மெட்ரோ மற்றும் போக்குவரத்து விரிவாக்கம்: சென்னை, கோவை, மதுரை மற்றும் திருச்சி நகரங்களில் நவீன பொதுப்போக்குவரத்து.");
+  msgs.push("தொழில்நுட்ப மையங்கள்: சென்னை, கோயம்புத்தூர், ஓசூர் மற்றும் தூத்துக்குடி ஆகிய இடங்களில் புதிய மின்சார வாகன மற்றும் தொழில் பூங்காக்கள்.");
 
-  // 4. Tamil Nadu Flagship Welfare Schemes & Citizen Services
-  msgs.push("Kalaignar Magalir Urimai Thittam: Monthly ₹1,000 rights assistance directly deposited for eligible women heads of households.");
-  msgs.push("Pudhumai Penn & Tamil Pudhalvan Schemes: Monthly ₹1,000 education financial assistance for college and polytechnic students across TN.");
-  msgs.push("Chief Minister's Comprehensive Health Insurance (CMCHIS): Cashless medical coverage up to ₹5 Lakh per family annually.");
-  msgs.push("Naan Mudhalvan Scheme: Free technical skills, AI, robotics, and emerging technology courses for Tamil Nadu youth.");
-  msgs.push("Makkalai Thedi Maruthuvam: Doorstep essential healthcare screening, vital checks, and free medicines for senior citizens across TN.");
-  msgs.push("Illam Thedi Kalvi: Community education bridge classes ensuring equitable learning across all Tamil Nadu villages and towns.");
-  msgs.push("Tamil Nadu Free Bus Travel Scheme: Free public bus transportation for women, school students, and differently-abled citizens.");
+  // 4. Tamil Nadu Flagship Welfare Schemes & Citizen Services (Tamil)
+  msgs.push("கலைஞர் மகளிர் உரிமைத் திட்டம்: தகுதியுடைய குடும்பத் தலைவிகளுக்கு மாதம் ₹1,000 உரிமைத் தொகை நேரடியாக வங்கிக் கணக்கில் வரவு.");
+  msgs.push("புதுமைப் பெண் & தமிழ்ப் புதல்வன் திட்டம்: உயர்கல்வி பயிலும் மாணவ-மாணவிகளுக்கு மாதம் ₹1,000 கல்வி ஊக்கத்தொகை.");
+  msgs.push("முதலமைச்சரின் விரிவான மருத்துவக் காப்பீட்டுத் திட்டம் (CMCHIS): குடும்பத்திற்கு ஆண்டுக்கு ₹5 லட்சம் வரை கட்டணமில்லா சிகிச்சை.");
+  msgs.push("நான் முதல்வன் திட்டம்: தமிழக இளைஞர்களுக்கு அதிநவீன தொழில்நுட்பம், ரோபாட்டிக்ஸ் மற்றும் இலவச திறன் மேம்பாட்டு பயிற்சிகள்.");
+  msgs.push("மக்களைத் தேடி மருத்துவம்: முதியோர்களுக்கு இல்லத்திற்கே சென்று இலவச மருத்துவப் பரிசோதனை மற்றும் மருந்து மாத்திரைகள் வழங்கும் திட்டம்.");
+  msgs.push("இல்லம் தேடிக் கல்வி: தமிழகத்தின் அனைத்து கிராமங்களிலும் மாணவர்களுக்கான மாலை நேர வழிகாட்டுதல் வகுப்புகள்.");
+  msgs.push("மகளிர் கட்டணமில்லா பேருந்து பயணம்: தமிழகம் முழுவதும் அரசுப் பேருந்துகளில் மகளிர் மற்றும் மாணவர்களுக்கு இலவச பயணம்.");
 
-  // 5. Official 24/7 Emergency & Citizen Helplines
-  msgs.push("Chief Minister's Special Helpline: Dial 1100 for direct grievance escalation to the Chief Minister's Office.");
-  msgs.push("Emergency Medical Ambulance: Dial 108 for immediate 24/7 medical response across all 38 Tamil Nadu districts.");
-  msgs.push("Tamil Nadu Police Control Room: Dial 100 • Single National Emergency Helpline: Dial 112.");
-  msgs.push("Fire & Rescue Services: Dial 101 • Women Safety Helpline: Dial 1091.");
-  msgs.push("TANGEDCO Electricity Grievance (Minnagam): Dial 94987 94987 for power outages and electrical safety.");
-  msgs.push("TWAD Board Drinking Water & Drainage Helpline: Dial 1916 • Municipal Grievance Helpline: Dial 1913.");
+  // 5. Official 24/7 Emergency & Citizen Helplines (Tamil)
+  msgs.push("முதலமைச்சரின் உதவி மையம்: பொதுமக்கள் தங்கள் குறைகளை நேரடியாகத் தெரிவிக்க 1100 எண்ணை அழைக்கவும்.");
+  msgs.push("அவசர மருத்துவ ஊர்தி சேவை: 38 மாவட்டங்களிலும் 24 மணி நேர இலவச ஆம்புலன்ஸ் சேவைக்கு 108 ஐ அழைக்கவும்.");
+  msgs.push("தமிழ்நாடு காவல்துறை கட்டுப்பாட்டு அறை: 100 • தேசிய அவசர கால உதவி எண்: 112.");
+  msgs.push("தீயணைப்பு மற்றும் மீட்புப் பணி: 101 • பெண்கள் பாதுகாப்பு உதவி எண்: 1091.");
+  msgs.push("மின்வாரிய அவசர புகார் மையம் (மின்னகம்): 94987 94987 ஐ அழைக்கவும்.");
+  msgs.push("குடிநீர் மற்றும் கழிவுநீர் வடிகால் வாரியம்: 1916 • மாநகராட்சி மக்கள் குறைதீர்க்கும் எண்: 1913.");
 
   // Fisher-Yates Shuffle for fresh, non-repetitive viewing on every visit
   for (let i = msgs.length - 1; i > 0; i--) {
