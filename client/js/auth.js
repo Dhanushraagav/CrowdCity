@@ -1612,6 +1612,7 @@ function updateAuthUI() {
     // If sidebar is already rendered (e.g. pre-rendered in HTML), just update active link classes without wiping DOM
     const existingNav = sidebar.querySelector('.app-sidebar-nav');
     if (existingNav) {
+      existingNav.querySelectorAll('a[href*="analytics.html"], a[href*="analytics"]').forEach(el => el.remove());
       existingNav.querySelectorAll('.app-sidebar-link').forEach(link => {
         const href = (link.getAttribute('href') || '').toLowerCase();
         let active = false;
