@@ -1727,20 +1727,73 @@
         updateOtpVisuals();
       }
 
-      // â”€â”€â”€ Alert helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ─── Alert helper ─────────────────────────────────────────────────────────────
       function showAlert(msg, isSuccess = false) {
         alertBanner.textContent = msg;
         if (isSuccess) {
           alertBanner.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
           alertBanner.style.color = '#10b981';
+          alertBanner.style.border = '1px solid rgba(16, 185, 129, 0.25)';
         } else {
           alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
           alertBanner.style.color = '#ef4444';
+          alertBanner.style.border = '1px solid rgba(239, 68, 68, 0.25)';
         }
         alertBanner.classList.remove('hidden');
       }
 
-      // â”€â”€â”€ Sign In (Email + Password / Email OTP) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      function showGoogleProviderAlert(email) {
+        alertBanner.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 0.65rem; text-align: center; padding: 0.25rem 0;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.45rem; font-weight: 700; font-size: 0.88rem; color: #1e293b;">
+              <svg style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3A11.91 11.91 0 0 0 12 .909a11.968 11.968 0 0 0-9.664 4.945L5.266 9.765z"/>
+                <path fill="#4285F4" d="M23.045 12.182c0-.818-.073-1.609-.209-2.373H12v4.5H18.2c-.268 1.44-.945 2.659-2.1 3.44l3.227 2.505c1.89-1.745 2.973-4.314 2.973-7.209z"/>
+                <path fill="#FBBC05" d="M5.266 9.765L2.336 5.854A11.968 11.968 0 0 0 .091 12c0 2.29.645 4.436 1.764 6.264l3.41-2.655a7.078 7.078 0 0 1-1.764-3.609c0-2.02.682-3.886 1.764-5.235z"/>
+                <path fill="#34A853" d="M12 23.091a11.518 11.518 0 0 0 7.973-2.964l-3.227-2.505A7.077 7.077 0 0 1 12 19.091c-3.155 0-5.836-2.127-6.79-5.01l-3.41 2.655a11.968 11.968 0 0 0 10.2 6.355z"/>
+              </svg>
+              <span>This account uses Google Sign-In. Please continue with Google.</span>
+            </div>
+            <button type="button" id="btn-alert-google-login" class="btn btn-google" style="width: 100%; border-color: #cbd5e1; background: #ffffff; color: #1e293b; font-weight: 700; padding: 0.65rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.25rem;">
+              <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3A11.91 11.91 0 0 0 12 .909a11.968 11.968 0 0 0-9.664 4.945L5.266 9.765z"/>
+                <path fill="#4285F4" d="M23.045 12.182c0-.818-.073-1.609-.209-2.373H12v4.5H18.2c-.268 1.44-.945 2.659-2.1 3.44l3.227 2.505c1.89-1.745 2.973-4.314 2.973-7.209z"/>
+                <path fill="#FBBC05" d="M5.266 9.765L2.336 5.854A11.968 11.968 0 0 0 .091 12c0 2.29.645 4.436 1.764 6.264l3.41-2.655a7.078 7.078 0 0 1-1.764-3.609c0-2.02.682-3.886 1.764-5.235z"/>
+                <path fill="#34A853" d="M12 23.091a11.518 11.518 0 0 0 7.973-2.964l-3.227-2.505A7.077 7.077 0 0 1 12 19.091c-3.155 0-5.836-2.127-6.79-5.01l-3.41 2.655a11.968 11.968 0 0 0 10.2 6.355z"/>
+              </svg>
+              Continue with Google
+            </button>
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">
+              Want to set a password instead? <a href="#" id="link-google-set-password" style="color: var(--primary); font-weight: 700; text-decoration: underline;">Set Password</a>
+            </div>
+          </div>
+        `;
+        alertBanner.style.backgroundColor = 'rgba(234, 67, 53, 0.08)';
+        alertBanner.style.border = '1px solid rgba(234, 67, 53, 0.25)';
+        alertBanner.style.color = '#1e293b';
+        alertBanner.classList.remove('hidden');
+
+        const alertGoogleBtn = document.getElementById('btn-alert-google-login');
+        if (alertGoogleBtn) {
+          alertGoogleBtn.addEventListener('click', () => {
+            if (typeof loginWithGoogle === 'function') loginWithGoogle();
+          });
+        }
+
+        const setPasswordLink = document.getElementById('link-google-set-password');
+        if (setPasswordLink) {
+          setPasswordLink.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            const recoveryEmailInput = document.getElementById('recovery-email');
+            if (recoveryEmailInput && email) {
+              recoveryEmailInput.value = email;
+            }
+            showRecoveryForm(ev);
+          });
+        }
+      }
+
+      // ─── Sign In (Email + Password / Email OTP) ─────────────────────────────
       if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -1774,7 +1827,12 @@
               }
               submitBtn.disabled = false;
               submitBtn.innerHTML = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
-              showAlert(error.message || 'Login failed.');
+
+              if (error.isGoogleAccount) {
+                showGoogleProviderAlert(email);
+              } else {
+                showAlert(error.message || 'Login failed.');
+              }
             } else {
               const user = data.user || (data.session && data.session.user);
               const token = data.session ? data.session.access_token : null;

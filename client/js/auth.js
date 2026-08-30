@@ -999,6 +999,24 @@ async function registerUser(email, password, fullName, captchaToken) {
   return { data, error };
 }
 
+// Check registered authentication providers for an email
+async function checkAccountAuthMethods(email) {
+  if (!email) return { exists: false, isGoogleOnly: false, providers: [] };
+  try {
+    const res = await fetch('/api/auth/check-auth-methods', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.warn('[Auth] Check auth methods network exception:', e);
+  }
+  return { exists: false, isGoogleOnly: false, providers: [] };
+}
+
 // Sign in with email and password
 async function loginUser(email, password, captchaToken) {
   console.log(`[Auth Client] Attempting Email/Password login for: ${email}`);
@@ -1019,6 +1037,24 @@ async function loginUser(email, password, captchaToken) {
     });
     if (error) {
       console.error('[Auth Client] Supabase signInWithPassword error:', error.message || error);
+      
+      // If error occurs, check if this email is an existing Google OAuth account
+      try {
+        const methodCheck = await checkAccountAuthMethods(email);
+        if (methodCheck && methodCheck.isGoogleOnly) {
+          console.log('[Auth Client] Google-authenticated account detected for password login attempt:', email);
+          return {
+            data: null,
+            error: {
+              isGoogleAccount: true,
+              email: email,
+              message: "This account uses Google Sign-In. Please continue with Google."
+            }
+          };
+        }
+      } catch (checkErr) {
+        console.warn('[Auth Client] Provider method check exception:', checkErr);
+      }
     } else {
       console.log('[Auth Client] Supabase signInWithPassword success. User ID:', data.user ? data.user.id : 'none');
     }

@@ -738,3 +738,69 @@ export const resetPasswordOverride = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error resetting password.' });
   }
 };
+
+/**
+ * Check registered authentication methods for an email (Google OAuth vs Email/Password)
+ * Safely inspects Supabase auth.users without exposing credentials or service role keys.
+ */
+export const checkAuthMethods = async (req, res) => {
+  const { email } = req.body;
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ error: 'Email address is required.' });
+  }
+
+  const emailLower = email.toLowerCase().trim();
+
+  try {
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Authentication service temporarily unavailable.' });
+    }
+
+    // Query user record using Supabase Admin
+    const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
+    if (error) {
+      logger.error(`[authController] Error listing users in checkAuthMethods: ${error.message}`);
+      return res.status(500).json({ error: 'Failed to verify account provider.' });
+    }
+
+    const matchedUser = (users || []).find(u => u.email && u.email.toLowerCase() === emailLower);
+
+    if (!matchedUser) {
+      return res.status(200).json({
+        exists: false,
+        isGoogleOnly: false,
+        hasGoogle: false,
+        hasEmail: false,
+        providers: []
+      });
+    }
+
+    // Extract providers from user metadata and identities
+    const appProviders = (matchedUser.app_metadata && matchedUser.app_metadata.providers) || [];
+    const mainProvider = (matchedUser.app_metadata && matchedUser.app_metadata.provider) || '';
+    const identityProviders = (matchedUser.identities || []).map(i => i.provider);
+
+    const allProviders = Array.from(new Set([
+      ...appProviders,
+      ...(mainProvider ? [mainProvider] : []),
+      ...identityProviders
+    ]));
+
+    const hasGoogle = allProviders.includes('google');
+    const hasEmail = allProviders.includes('email');
+    const isGoogleOnly = hasGoogle && !hasEmail;
+
+    return res.status(200).json({
+      exists: true,
+      isGoogleOnly: isGoogleOnly,
+      hasGoogle: hasGoogle,
+      hasEmail: hasEmail,
+      primaryProvider: isGoogleOnly ? 'google' : (hasEmail ? 'email' : (allProviders[0] || 'email')),
+      providers: allProviders
+    });
+  } catch (err) {
+    logger.error(`[authController] Exception in checkAuthMethods: %O`, err);
+    return res.status(500).json({ error: 'Internal server error checking account providers.' });
+  }
+};
+
