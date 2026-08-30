@@ -1857,7 +1857,7 @@ function updateAuthUI() {
                 <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> ${tSettings}
               </a>
               <a href="analytics.html" class="nav-dropdown-item">
-                <i class="fa-solid fa-chart-line" style="width: 16px; color: var(--text-muted);"></i> Analytics & Insights
+                <i class="fa-solid fa-chart-pie" style="width: 16px; color: var(--text-muted);"></i> Analytics & Insights
               </a>
               <a href="about.html" class="nav-dropdown-item">
                 <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> About Us
@@ -1954,7 +1954,7 @@ function updateAuthUI() {
               <i class="fa-solid fa-bookmark" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_saved_schemes">${window.i18n ? window.i18n.t('nav_saved_schemes') : 'Saved Schemes'}</span>
             </a>
             <a href="analytics.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-chart-line" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_analytics">${window.i18n ? window.i18n.t('nav_analytics') : 'Analytics & Insights'}</span>
+              <i class="fa-solid fa-chart-pie" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_analytics">${window.i18n ? window.i18n.t('nav_analytics') : 'Analytics & Insights'}</span>
             </a>
             <a href="about.html" class="nav-dropdown-item">
               <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> <span data-i18n="nav_about_us">${window.i18n ? window.i18n.t('nav_about_us') : 'About Us'}</span>
