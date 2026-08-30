@@ -1005,14 +1005,36 @@ function integrateTNUpdatesIntoTicker(updates) {
         merged.splice(insertPos, 0, item);
       });
       _tickerMessages = merged;
+      if (window.innerWidth <= 768) {
+        initMobileMarqueeTicker();
+      }
     }
   } else {
     _tickerMessages = newHeadlines;
-    _tickerMsgIdx = 0;
-    _tickerCharIdx = 0;
-    _tickerIsDeleting = false;
-    runTickerTypewriter();
+    if (window.innerWidth <= 768) {
+      initMobileMarqueeTicker();
+    } else {
+      _tickerMsgIdx = 0;
+      _tickerCharIdx = 0;
+      _tickerIsDeleting = false;
+      runTickerTypewriter();
+    }
   }
+}
+
+function initMobileMarqueeTicker() {
+  const feedTextEl = document.getElementById('civic-intelligence-feed-text');
+  if (!feedTextEl || !_tickerMessages || _tickerMessages.length === 0) return;
+
+  if (_tickerTimer) {
+    clearTimeout(_tickerTimer);
+    _tickerTimer = null;
+  }
+
+  // Combine top live messages with a premium divider
+  const combined = _tickerMessages.slice(0, 15).join('   ✦   ');
+  // Duplicate for seamless 0-gap continuous CSS loop (-50% transform)
+  feedTextEl.innerHTML = `<span class="ticker-marquee-inner">${combined}   ✦   ${combined}   ✦   </span>`;
 }
 
 function updateCivicIntelligenceFeed(issues) {
@@ -1096,16 +1118,25 @@ function updateCivicIntelligenceFeed(issues) {
     _tickerTimer = null;
   }
 
-  _tickerMsgIdx = 0;
-  _tickerCharIdx = 0;
-  _tickerIsDeleting = false;
-  runTickerTypewriter();
+  if (window.innerWidth <= 768) {
+    initMobileMarqueeTicker();
+  } else {
+    _tickerMsgIdx = 0;
+    _tickerCharIdx = 0;
+    _tickerIsDeleting = false;
+    runTickerTypewriter();
+  }
 
   // Asynchronously load and merge live dynamic Tamil Nadu updates from backend API
   loadTamilNaduDynamicUpdates();
 }
 
 function runTickerTypewriter() {
+  if (window.innerWidth <= 768) {
+    initMobileMarqueeTicker();
+    return;
+  }
+
   const feedTextEl = document.getElementById('civic-intelligence-feed-text');
   if (!feedTextEl || !_tickerMessages || _tickerMessages.length === 0) return;
 
@@ -1150,6 +1181,26 @@ function runTickerTypewriter() {
     // Fast erase speed
     _tickerTimer = setTimeout(runTickerTypewriter, 14);
   }
+}
+
+// Window resize listener for responsive ticker transition
+let _tickerLastIsMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', () => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile !== _tickerLastIsMobile) {
+      _tickerLastIsMobile = isMobile;
+      if (isMobile) {
+        initMobileMarqueeTicker();
+      } else {
+        if (_tickerMessages && _tickerMessages.length > 0) {
+          _tickerCharIdx = 0;
+          _tickerIsDeleting = false;
+          runTickerTypewriter();
+        }
+      }
+    }
+  });
 }
 
 // Update greeting dynamically based on local hours and user name
