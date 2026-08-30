@@ -186,7 +186,7 @@
 
           // Vertical timeline track calculation
           if (progressLine) {
-            const track = document.querySelector('.team-story-section');
+            const track = document.querySelector('.team-story-blocks-container') || document.querySelector('.team-story-section');
             if (track) {
               const rect = track.getBoundingClientRect();
               const windowHeight = window.innerHeight;

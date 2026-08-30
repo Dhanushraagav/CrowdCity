@@ -482,10 +482,15 @@
     }
 
     /* Central Connecting Technology Line */
+    .team-story-blocks-container {
+      position: relative;
+      width: 100%;
+    }
+
     .timeline-track-container {
       position: absolute;
-      top: 170px;
-      bottom: 170px;
+      top: 130px;
+      bottom: 130px;
       left: 50%;
       width: 2px;
       transform: translateX(-50%);
@@ -813,6 +818,8 @@
         grid-template-columns: 1fr;
       }
       .timeline-track-container {
+        top: 80px;
+        bottom: 80px;
         left: 20px;
         transform: none;
       }
@@ -861,6 +868,10 @@
       .timeline-track-container,
       .timeline-node-point {
         left: 14px;
+      }
+      .timeline-track-container {
+        top: 68px;
+        bottom: 68px;
       }
       .profile-photo-circle {
         width: 135px;
@@ -1050,146 +1061,148 @@
         <p class="section-desc" data-i18n="about_team_desc">Meet the developers building digital civic technology for Tamil Nadu.</p>
       </div>
 
-      <!-- Connecting Vertical Network Track -->
-      <div class="timeline-track-container">
-        <div class="timeline-progress-line" id="timeline-progress"></div>
-      </div>
+      <!-- Connecting Vertical Network Track & Story Blocks -->
+      <div class="team-story-blocks-container">
+        <div class="timeline-track-container">
+          <div class="timeline-progress-line" id="timeline-progress"></div>
+        </div>
 
-      <!-- Section 1 — Founder -->
-      <div class="story-block block-left" id="team-block-1">
-        <div class="timeline-node-point"></div>
+        <!-- Section 1 — Founder -->
+        <div class="story-block block-left" id="team-block-1">
+          <div class="timeline-node-point"></div>
 
-        <div class="story-image-wrap">
-          <div class="photo-aura-wrap">
-            <div class="photo-glowing-ring"></div>
-            <div class="profile-photo-circle">
-              <img src="images/team/sandeep-kumar.jpg" alt="Sandeep Kumar J — Founder" loading="lazy" decoding="async" />
+          <div class="story-image-wrap">
+            <div class="photo-aura-wrap">
+              <div class="photo-glowing-ring"></div>
+              <div class="profile-photo-circle">
+                <img src="images/team/sandeep-kumar.jpg" alt="Sandeep Kumar J — Founder" loading="lazy" decoding="async" />
+              </div>
             </div>
+          </div>
+
+          <div class="story-text-wrap">
+            <span class="member-num-label"><span class="online-pulse-dot"></span>01 — FOUNDER</span>
+            <h3 class="member-name">Sandeep Kumar J</h3>
+            <div class="member-role">Founder — CrowdCity AI</div>
+            <p class="member-about">
+              Sandeep Kumar is the founder of CrowdCity AI and an entrepreneur focused on building technology-driven solutions for smarter and more connected communities. His vision is to use innovation and AI to make civic interaction more efficient, transparent, and accessible.
+            </p>
           </div>
         </div>
 
-        <div class="story-text-wrap">
-          <span class="member-num-label"><span class="online-pulse-dot"></span>01 — FOUNDER</span>
-          <h3 class="member-name">Sandeep Kumar J</h3>
-          <div class="member-role">Founder — CrowdCity AI</div>
-          <p class="member-about">
-            Sandeep Kumar is the founder of CrowdCity AI and an entrepreneur focused on building technology-driven solutions for smarter and more connected communities. His vision is to use innovation and AI to make civic interaction more efficient, transparent, and accessible.
-          </p>
-        </div>
-      </div>
+        <!-- Section 2 — Developer -->
+        <div class="story-block block-right" id="team-block-2">
+          <div class="timeline-node-point"></div>
 
-      <!-- Section 2 — Developer -->
-      <div class="story-block block-right" id="team-block-2">
-        <div class="timeline-node-point"></div>
-
-        <div class="story-image-wrap">
-          <div class="photo-aura-wrap">
-            <div class="photo-glowing-ring"></div>
-            <div class="profile-photo-circle">
-              <img src="images/team/dhanush-raagav.jpg" alt="Dhanush Raagav S — Developer" loading="lazy" decoding="async" />
+          <div class="story-image-wrap">
+            <div class="photo-aura-wrap">
+              <div class="photo-glowing-ring"></div>
+              <div class="profile-photo-circle">
+                <img src="images/team/dhanush-raagav.jpg" alt="Dhanush Raagav S — Developer" loading="lazy" decoding="async" />
+              </div>
             </div>
+          </div>
+
+          <div class="story-text-wrap">
+            <span class="member-num-label"><span class="online-pulse-dot"></span>02 — DEVELOPER</span>
+            <h3 class="member-name">Dhanush Raagav S</h3>
+            <div class="member-role">Developer</div>
+            <p class="member-about">
+              Dhanush Raagav is a technology enthusiast and developer passionate about building modern digital products and intelligent applications. He focuses on transforming ideas into scalable, user-friendly solutions through clean development and innovative technology.
+            </p>
           </div>
         </div>
 
-        <div class="story-text-wrap">
-          <span class="member-num-label"><span class="online-pulse-dot"></span>02 — DEVELOPER</span>
-          <h3 class="member-name">Dhanush Raagav S</h3>
-          <div class="member-role">Developer</div>
-          <p class="member-about">
-            Dhanush Raagav is a technology enthusiast and developer passionate about building modern digital products and intelligent applications. He focuses on transforming ideas into scalable, user-friendly solutions through clean development and innovative technology.
-          </p>
-        </div>
-      </div>
+        <!-- Section 3 — Test Engineer -->
+        <div class="story-block block-left" id="team-block-3">
+          <div class="timeline-node-point"></div>
 
-      <!-- Section 3 — Test Engineer -->
-      <div class="story-block block-left" id="team-block-3">
-        <div class="timeline-node-point"></div>
-
-        <div class="story-image-wrap">
-          <div class="photo-aura-wrap">
-            <div class="photo-glowing-ring"></div>
-            <div class="profile-photo-circle">
-              <img src="images/team/tulasiram-v.jpg" alt="Tulasiram V — Test Engineer" loading="lazy" decoding="async" />
+          <div class="story-image-wrap">
+            <div class="photo-aura-wrap">
+              <div class="photo-glowing-ring"></div>
+              <div class="profile-photo-circle">
+                <img src="images/team/tulasiram-v.jpg" alt="Tulasiram V — Test Engineer" loading="lazy" decoding="async" />
+              </div>
             </div>
+          </div>
+
+          <div class="story-text-wrap">
+            <span class="member-num-label"><span class="online-pulse-dot"></span>03 — TEST ENGINEER</span>
+            <h3 class="member-name">Tulasiram V</h3>
+            <div class="member-role">Test Engineer</div>
+            <p class="member-about">
+              Tulasiram works as the Test Engineer for CrowdCity AI, focusing on quality, reliability, and real-world usability. He helps identify issues, validate system behaviour, and ensure that every major feature delivers a consistent user experience.
+            </p>
           </div>
         </div>
 
-        <div class="story-text-wrap">
-          <span class="member-num-label"><span class="online-pulse-dot"></span>03 — TEST ENGINEER</span>
-          <h3 class="member-name">Tulasiram V</h3>
-          <div class="member-role">Test Engineer</div>
-          <p class="member-about">
-            Tulasiram works as the Test Engineer for CrowdCity AI, focusing on quality, reliability, and real-world usability. He helps identify issues, validate system behaviour, and ensure that every major feature delivers a consistent user experience.
-          </p>
-        </div>
-      </div>
+        <!-- Section 4 — Software Architect -->
+        <div class="story-block block-right" id="team-block-4">
+          <div class="timeline-node-point"></div>
 
-      <!-- Section 4 — Software Architect -->
-      <div class="story-block block-right" id="team-block-4">
-        <div class="timeline-node-point"></div>
-
-        <div class="story-image-wrap">
-          <div class="photo-aura-wrap">
-            <div class="photo-glowing-ring"></div>
-            <div class="profile-photo-circle">
-              <img src="images/team/aathi-shankar.jpg" alt="Aathi Shankar A — Software Architect" loading="lazy" decoding="async" />
+          <div class="story-image-wrap">
+            <div class="photo-aura-wrap">
+              <div class="photo-glowing-ring"></div>
+              <div class="profile-photo-circle">
+                <img src="images/team/aathi-shankar.jpg" alt="Aathi Shankar A — Software Architect" loading="lazy" decoding="async" />
+              </div>
             </div>
+          </div>
+
+          <div class="story-text-wrap">
+            <span class="member-num-label"><span class="online-pulse-dot"></span>04 — SOFTWARE ARCHITECT</span>
+            <h3 class="member-name">Aathi Shankar A</h3>
+            <div class="member-role">Software Architect</div>
+            <p class="member-about">
+              Aathi Shankar contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
+            </p>
           </div>
         </div>
 
-        <div class="story-text-wrap">
-          <span class="member-num-label"><span class="online-pulse-dot"></span>04 — SOFTWARE ARCHITECT</span>
-          <h3 class="member-name">Aathi Shankar A</h3>
-          <div class="member-role">Software Architect</div>
-          <p class="member-about">
-            Aathi Shankar contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
-          </p>
-        </div>
-      </div>
+        <!-- Section 5 — DevOps Engineer -->
+        <div class="story-block block-left" id="team-block-5">
+          <div class="timeline-node-point"></div>
 
-      <!-- Section 5 — DevOps Engineer -->
-      <div class="story-block block-left" id="team-block-5">
-        <div class="timeline-node-point"></div>
-
-        <div class="story-image-wrap">
-          <div class="photo-aura-wrap">
-            <div class="photo-glowing-ring"></div>
-            <div class="profile-photo-circle">
-              <img src="images/team/padmadev-d.jpg" alt="Padmadev D — DevOps Engineer" loading="lazy" decoding="async" />
+          <div class="story-image-wrap">
+            <div class="photo-aura-wrap">
+              <div class="photo-glowing-ring"></div>
+              <div class="profile-photo-circle">
+                <img src="images/team/padmadev-d.jpg" alt="Padmadev D — DevOps Engineer" loading="lazy" decoding="async" />
+              </div>
             </div>
+          </div>
+
+          <div class="story-text-wrap">
+            <span class="member-num-label"><span class="online-pulse-dot"></span>05 — DEVOPS ENGINEER</span>
+            <h3 class="member-name">Padmadev D</h3>
+            <div class="member-role">DevOps Engineer</div>
+            <p class="member-about">
+              Padmadev contributes as the DevOps Engineer, focusing on deployment, infrastructure, development workflows, and system reliability. He helps ensure that CrowdCity AI can move efficiently from development to a stable and maintainable production environment.
+            </p>
           </div>
         </div>
 
-        <div class="story-text-wrap">
-          <span class="member-num-label"><span class="online-pulse-dot"></span>05 — DEVOPS ENGINEER</span>
-          <h3 class="member-name">Padmadev D</h3>
-          <div class="member-role">DevOps Engineer</div>
-          <p class="member-about">
-            Padmadev contributes as the DevOps Engineer, focusing on deployment, infrastructure, development workflows, and system reliability. He helps ensure that CrowdCity AI can move efficiently from development to a stable and maintainable production environment.
-          </p>
-        </div>
-      </div>
+        <!-- Section 6 — End-to-End Developer -->
+        <div class="story-block block-right" id="team-block-6">
+          <div class="timeline-node-point"></div>
 
-      <!-- Section 6 — End-to-End Developer -->
-      <div class="story-block block-right" id="team-block-6">
-        <div class="timeline-node-point"></div>
-
-        <div class="story-image-wrap">
-          <div class="photo-aura-wrap">
-            <div class="photo-glowing-ring"></div>
-            <div class="profile-photo-circle">
-              <img src="images/team/aakash.jpg" alt="Aakash M — End-to-End Developer" loading="lazy" decoding="async" />
+          <div class="story-image-wrap">
+            <div class="photo-aura-wrap">
+              <div class="photo-glowing-ring"></div>
+              <div class="profile-photo-circle">
+                <img src="images/team/aakash.jpg" alt="Aakash M — End-to-End Developer" loading="lazy" decoding="async" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="story-text-wrap">
-          <span class="member-num-label"><span class="online-pulse-dot"></span>06 — END-TO-END DEVELOPER</span>
-          <h3 class="member-name">Aakash M</h3>
-          <div class="member-role">End-to-End Developer</div>
-          <p class="member-about">
-            Aakash is an End-to-End Developer for CrowdCity AI, specializing in building seamlessly integrated full-stack architectures, high-performance APIs, and robust front-end user experiences. He focuses on delivering end-to-end reliability, scalable workflows, and intelligent civic tech features across the entire platform.
-          </p>
+          <div class="story-text-wrap">
+            <span class="member-num-label"><span class="online-pulse-dot"></span>06 — END-TO-END DEVELOPER</span>
+            <h3 class="member-name">Aakash M</h3>
+            <div class="member-role">End-to-End Developer</div>
+            <p class="member-about">
+              Aakash is an End-to-End Developer for CrowdCity AI, specializing in building seamlessly integrated full-stack architectures, high-performance APIs, and robust front-end user experiences. He focuses on delivering end-to-end reliability, scalable workflows, and intelligent civic tech features across the entire platform.
+            </p>
+          </div>
         </div>
       </div>
 
