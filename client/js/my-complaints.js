@@ -137,32 +137,36 @@ async function loadAndRenderMyIssues() {
   const storageKey = (currentComplaintsTab === 'transportation') ? 'cc_my_complaints_trans' : 'cc_my_complaints_civic';
   const memCached = (currentComplaintsTab === 'transportation') ? _memoryCacheTrans : _memoryCacheCivic;
 
-  // Cache-first: render cached complaints if they exist
+  // Cache-first instant filter: filter from memory/local cache immediately with ZERO flickering
   let hasCachedData = false;
-  if (!activeCategory && !activeStatus) {
-    if (Array.isArray(memCached) && memCached.length > 0) {
-      renderMyIssuesList(memCached);
-      hasCachedData = true;
-    } else {
-      const cachedStr = localStorage.getItem(storageKey);
-      if (cachedStr) {
-        try {
-          const issues = JSON.parse(cachedStr);
-          if (Array.isArray(issues)) {
-            if (currentComplaintsTab === 'transportation') _memoryCacheTrans = issues;
-            else _memoryCacheCivic = issues;
-            renderMyIssuesList(issues);
-            hasCachedData = true;
-          }
-        } catch (e) {
-          console.warn("Failed to parse cached complaints:", e);
-        }
+  let sourceList = memCached;
+  if (!sourceList) {
+    const cachedStr = localStorage.getItem(storageKey);
+    if (cachedStr) {
+      try {
+        sourceList = JSON.parse(cachedStr);
+        if (currentComplaintsTab === 'transportation') _memoryCacheTrans = sourceList;
+        else _memoryCacheCivic = sourceList;
+      } catch (e) {
+        console.warn("Failed to parse cached complaints:", e);
       }
     }
   }
 
-  // Draw shimming skeletons ONLY if we have zero cached data to show
-  if (!hasCachedData && (activeCategory || activeStatus || !memCached)) {
+  if (Array.isArray(sourceList) && sourceList.length > 0) {
+    let filtered = sourceList;
+    if (activeCategory) {
+      filtered = filtered.filter(i => (i.category || '').toLowerCase() === activeCategory.toLowerCase());
+    }
+    if (activeStatus) {
+      filtered = filtered.filter(i => (i.status || '').toLowerCase() === activeStatus.toLowerCase());
+    }
+    renderMyIssuesList(filtered);
+    hasCachedData = true;
+  }
+
+  // Draw shimming skeletons ONLY if we have zero cached data to show on cold initial load
+  if (!hasCachedData && (!sourceList || sourceList.length === 0)) {
     container.innerHTML = `
         <div class="issue-card" style="cursor: default; pointer-events: none; display: flex; flex-direction: column; gap: 12px; padding: 1.25rem; border: 1px solid var(--border-color);">
           <div style="display: flex; justify-content: space-between; align-items: center;">

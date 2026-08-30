@@ -4408,8 +4408,10 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     margin-bottom: 0.35rem !important;
   }
   .form-input, .form-select, .form-textarea {
-    font-size: 0.85rem !important;
+    font-size: 16px !important;
     padding: 0.65rem 0.85rem !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   .btn {
     font-size: 0.82rem !important;
