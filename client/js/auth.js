@@ -2476,12 +2476,16 @@ function setupUniversalMobileNavigation() {
   const headerMain = document.querySelector('.app-header-main') || document.querySelector('.admin-header-actions') || document.querySelector('.auth-header') || document.querySelector('header.app-header');
   if (!headerMain) return;
 
-  // Remove legacy/duplicate inline back arrows inside the header
-  const legacyBacks = headerMain.querySelectorAll('.subpage-back-btn, a[href*="services.html"] i.fa-arrow-left, a[href*="services-dashboard"] i.fa-arrow-left, a[href*="scheme-checker"] i.fa-arrow-left, a[href*="citizen-dashboard"] i.fa-arrow-left');
+  // Remove all legacy / duplicate inline back buttons inside the header on mobile
+  const legacyBacks = headerMain.querySelectorAll('.subpage-back-btn, .gov-back-btn, a[href*="citizen-dashboard"], a[href*="services.html"], a[href*="services-dashboard"], a[href*="scheme-checker"]');
   legacyBacks.forEach(el => {
-    const parentA = el.closest('a');
-    if (parentA && parentA.children.length === 1 && parentA.children[0].tagName === 'I') {
-      parentA.remove();
+    if (el.querySelector('.fa-arrow-left') || el.classList.contains('subpage-back-btn') || el.classList.contains('gov-back-btn') || el.textContent.toLowerCase().includes('back')) {
+      const wrapperDiv = el.parentElement;
+      if (wrapperDiv && wrapperDiv.parentElement === headerMain && wrapperDiv.children.length === 1 && !wrapperDiv.classList.contains('app-header-actions')) {
+        wrapperDiv.remove();
+      } else {
+        el.remove();
+      }
     }
   });
 
