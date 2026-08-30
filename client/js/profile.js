@@ -182,9 +182,13 @@ async function loadUserProfile(user) {
           createdDate = joined.toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-US', { month: 'long', year: 'numeric' });
         }
         // Render fresh values
-        renderProfileFields(displayName, email, avatarUrl, points, role, createdDate);
+        const freshAvatar = profile.avatar_url || user.user_metadata?.avatar_url || '';
+        renderProfileFields(displayName, email, freshAvatar, points, role, createdDate);
         // Cache profile
+        profile.avatar_url = freshAvatar;
         localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+        if (typeof renderAuthUI === 'function') renderAuthUI();
+        if (typeof initMobileTopnav === 'function') initMobileTopnav();
       }
     } catch (err) {
       console.error("Failed to load user profile:", err);

@@ -303,6 +303,16 @@ img {
   overflow: hidden;
 }
 
+.user-avatar img,
+.mobile-drawer-avatar img,
+.mobile-drawer-avatar-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  display: block !important;
+}
+
 /* 2. Main Containers */
 .app-container {
   margin-top: var(--header-height);

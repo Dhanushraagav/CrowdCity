@@ -1820,6 +1820,10 @@ function updateAuthUI() {
     const defaultName = role === 'admin' ? 'Admin' : (role === 'authority' ? 'Inspector' : 'User');
     const fullName = cachedProfile?.full_name || user.user_metadata?.full_name || defaultName;
     const initial = (fullName && fullName !== defaultName) ? fullName.charAt(0).toUpperCase() : defaultName.charAt(0).toUpperCase();
+    const avatarUrl = cachedProfile?.avatar_url || user.user_metadata?.avatar_url || user.avatar_url || '';
+    const avatarInnerHtml = avatarUrl 
+      ? `<img src="${avatarUrl}" alt="${fullName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` 
+      : initial;
 
     if (role === 'authority' || role === 'admin') {
       const tRole = window.i18n ? window.i18n.t('role_' + role) : role;
@@ -1838,7 +1842,7 @@ function updateAuthUI() {
         <div class="auth-nav-wrapper">
           <!-- User profile menu -->
           <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown()" style="position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-            <div class="user-avatar" style="width: 28px; height: 28px; border-radius: 50%; background-color: var(--primary-light-alpha); color: var(--primary); font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: center;">${initial}</div>
+            <div class="user-avatar" style="width: 28px; height: 28px; border-radius: 50%; background-color: var(--primary-light-alpha); color: var(--primary); font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0;">${avatarInnerHtml}</div>
             <span style="font-size: 0.9rem; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               ${tRoleLabel}: <strong style="color: var(--text-main); font-weight: 700;">${fullName}</strong>
             </span>
@@ -1931,7 +1935,7 @@ function updateAuthUI() {
 
         <!-- User profile menu -->
         <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown()" style="position: relative; cursor: pointer;">
-          <div class="user-avatar">${initial}</div>
+          <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; padding: 0; display: flex; align-items: center; justify-content: center;">${avatarInnerHtml}</div>
           <span style="font-size: 0.9rem; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fullName}</span>
           <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
           
