@@ -5679,7 +5679,7 @@ a,
 
 @media (max-width: 768px) {
   .ticker-banner {
-    padding: 0.35rem 0.6rem;
+    padding: 0.35rem 0.65rem;
     gap: 0.45rem;
     align-items: center;
     border-radius: 8px;
@@ -5694,13 +5694,11 @@ a,
   .ticker-pulse {
     flex-shrink: 0;
     z-index: 3;
+    width: 6px;
+    height: 6px;
   }
   .ticker-badge {
-    font-size: 0.58rem;
-    padding: 0.14rem 0.4rem;
-    margin-top: 0;
-    flex-shrink: 0;
-    z-index: 3;
+    display: none !important;
   }
   .ticker-text-wrapper {
     flex: 1;
@@ -5709,15 +5707,15 @@ a,
     position: relative;
     display: flex;
     align-items: center;
-    mask-image: linear-gradient(90deg, transparent 0%, black 12px, black calc(100% - 12px), transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 12px, black calc(100% - 12px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, black 10px, black calc(100% - 10px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10px, black calc(100% - 10px), transparent 100%);
     min-width: 0;
   }
   .ticker-text {
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
-    font-size: 0.76rem;
+    font-size: 0.78rem;
     font-weight: 600;
     line-height: 1.2;
     overflow: visible;
