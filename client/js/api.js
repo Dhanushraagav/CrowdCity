@@ -68,7 +68,7 @@ async function request(endpoint, options = {}) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000);
+  const timeoutId = setTimeout(() => controller.abort(), 35000);
 
   const config = {
     method: options.method || 'GET',

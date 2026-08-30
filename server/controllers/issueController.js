@@ -2311,3 +2311,29 @@ export const sendChatMessage = async (req, res) => {
     return res.status(400).json({ error: `Failed to send message: ${err.message || err}` });
   }
 };
+
+/**
+ * GET /api/issues/:id/comments
+ * Fetch all comments for a specific complaint
+ */
+export const getIssueComments = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const activeClient = getSupabaseClient(req);
+    const { data: comments, error } = await activeClient
+      .from('comments')
+      .select('*, profiles:profiles(full_name, avatar_url, role)')
+      .eq('issue_id', id)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      logger.error('getIssueComments Error: %O', error);
+      return res.status(200).json([]);
+    }
+    return res.status(200).json(comments || []);
+  } catch (err) {
+    logger.error('getIssueComments Exception: %O', err);
+    return res.status(200).json([]);
+  }
+};
+

@@ -5,6 +5,7 @@ import {
   createIssue, 
   upvoteIssue, 
   addComment,
+  getIssueComments,
   editComment,
   deleteComment,
   updateIssueStatus,
@@ -44,6 +45,7 @@ router.get('/:id', validateIdParam('id'), getIssueById);
 // Authenticated routes (All citizens/roles)
 router.post('/', requireAuth, upload.array('image', 5), handleUploadError, validateCreateIssue, createIssue);
 router.post('/:id/upvote', requireAuth, validateIdParam('id'), upvoteIssue);
+router.get('/:id/comments', getIssueComments);
 router.post('/:id/comments', requireAuth, validateAddComment, addComment);
 router.patch('/comments/:commentId', requireAuth, validateEditComment, editComment);
 router.delete('/comments/:commentId', requireAuth, validateIdParam('commentId'), deleteComment);
