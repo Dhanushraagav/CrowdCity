@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact Us — CrowdCity AI Citizen Portal</title>
   
-  <!-- Central Authentication Router & i18n -->
+  <!-- Supabase JS SDK, Central Authentication Router & i18n -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth-router.js?v=1.0.6"></script>
   <script src="js/i18n.js"></script>
 
@@ -19,7 +20,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* Contact Page Layout & Components */
     .contact-container {
       max-width: 1100px;
       margin: 0 auto;
@@ -54,7 +54,6 @@
       max-width: 680px;
     }
 
-    /* 4 Clean Category Cards Grid */
     .contact-cards-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -112,7 +111,6 @@
       line-height: 1.45;
     }
 
-    /* Main Split: Form (Left) & Info / FAQ (Right) */
     .contact-main-grid {
       display: grid;
       grid-template-columns: 1.4fr 1fr;
@@ -259,7 +257,6 @@
       transform: none;
     }
 
-    /* Success State Container */
     .contact-success-banner {
       display: none;
       background: rgba(16, 185, 129, 0.08);
@@ -300,7 +297,6 @@
       line-height: 1.5;
     }
 
-    /* Right Sidebar: Contact Info & FAQ */
     .contact-side-col {
       display: flex;
       flex-direction: column;
@@ -372,7 +368,6 @@
       text-decoration: underline;
     }
 
-    /* FAQ Card & Accordion */
     .faq-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -434,7 +429,6 @@
       display: block;
     }
 
-    /* Responsive Adjustments */
     @media (max-width: 992px) {
       .contact-cards-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -742,6 +736,7 @@
   </div>
 
   <!-- Client Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=2.0.8"></script>
   <script src="js/contact.js?v=1.0.0"></script>
 </body>
