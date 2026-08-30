@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crowdcity-static-v49';
+const CACHE_NAME = 'crowdcity-static-v50';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
