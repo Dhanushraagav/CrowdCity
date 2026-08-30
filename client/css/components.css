@@ -3644,15 +3644,21 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   }
 
   .app-header-logo-mobile {
-    order: 1 !important;
+    display: none !important;
+  }
+
+  .dashboard-header .app-header-logo-mobile,
+  body.dashboard-page .app-header-logo-mobile,
+  .citizen-dashboard .app-header-logo-mobile {
+    order: 10 !important;
     display: flex !important;
     align-items: center !important;
     gap: 0.5rem !important;
     text-decoration: none !important;
     flex-shrink: 0 !important;
     height: 100% !important;
-    margin-left: 0.35rem !important;
-    margin-right: auto !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
@@ -3689,7 +3695,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     display: none !important;
   }
 
-  /* Remove Hamburger Menu Button from mobile subpages, show ONLY on Citizen Dashboard header */
+  /* Hamburger Menu Button: far left on Dashboard header */
   .mobile-menu-toggle,
   #mobile-menu-btn {
     display: none !important;
@@ -3698,13 +3704,13 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   .dashboard-header .mobile-menu-toggle,
   .dashboard-header #mobile-menu-btn {
     display: flex !important;
-    order: 2 !important;
+    order: 1 !important;
     align-items: center !important;
     justify-content: center !important;
     width: 44px !important;
     height: 44px !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
     padding: 0 !important;
     background: transparent !important;
     border: none !important;
