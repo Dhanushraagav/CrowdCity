@@ -334,7 +334,7 @@ const API = {
   getAdvancedAnalytics: async () => {
     return request('/issues/analytics', {
       method: 'GET',
-      auth: false
+      auth: true
     });
   },
 

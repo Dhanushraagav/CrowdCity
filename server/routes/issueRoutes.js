@@ -38,7 +38,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getAllIssues);
-router.get('/analytics', requireAuth, getAdvancedAnalytics);
+router.get('/analytics', getAdvancedAnalytics);
 router.get('/:id', validateIdParam('id'), getIssueById);
 
 // Authenticated routes (All citizens/roles)
