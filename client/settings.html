@@ -123,7 +123,13 @@
           <i class="fa-solid fa-bars"></i>
         </button>
 
-        <div class="app-header-actions">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <a href="citizen-dashboard.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.42rem 0.8rem; font-size: 0.82rem; font-weight: 700; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-color); color: var(--text-main); background: var(--bg-surface);">
+            <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+          </a>
+        </div>
+
+        <div class="app-header-actions" style="margin-left: auto;">
           <div id="auth-nav-container">
             <!-- Dynamic header actions populated by auth.js -->
           </div>
@@ -194,6 +200,49 @@
             Update Password
           </button>
         </form>
+      </div>
+
+      <!-- Card 3: Language & Localization Preferences -->
+      <div class="settings-card" id="language-settings-card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-globe" style="color: var(--primary);"></i> <span data-i18n="language">Language & Localization</span>
+        </h3>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;">
+          Select your preferred portal display language. Changes are instantly applied across all dashboards, forms, and services.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.5rem;">
+          <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Preferred Language</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem;">
+            
+            <button type="button" class="lang-setting-card-btn" id="btn-desktop-lang-en" onclick="setPortalLanguage('en')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem;">
+                  EN
+                </div>
+                <div style="text-align: left;">
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">English</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Standard</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-circle-check lang-check-icon" id="check-desktop-en" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
+            </button>
+
+            <button type="button" class="lang-setting-card-btn" id="btn-desktop-lang-ta" onclick="setPortalLanguage('ta')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem;">
+                  த
+                </div>
+                <div style="text-align: left;">
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">தமிழ் (Tamil)</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">தமிழ்நாடு அரசு</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-circle-check lang-check-icon" id="check-desktop-ta" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
+            </button>
+
+          </div>
+        </div>
       </div>
 
       <!-- Modern Mobile Settings List (Visible only on mobile) -->
@@ -379,31 +428,67 @@
 
 
 
-      // Language segmented control logic
+      // Language selection logic (both Desktop Card and Mobile Segmented Control)
       const langEnBtn = document.getElementById('lang-en-btn');
       const langTaBtn = document.getElementById('lang-ta-btn');
-      
-      function updateLangSegmented() {
-        const lang = localStorage.getItem('cc_lang') || 'en';
-        if (lang === 'ta') {
-          if (langTaBtn) langTaBtn.classList.add('active');
-          if (langEnBtn) langEnBtn.classList.remove('active');
+
+      window.setPortalLanguage = function(lang) {
+        if (window.i18n) {
+          window.i18n.setLanguage(lang);
         } else {
-          if (langEnBtn) langEnBtn.classList.add('active');
-          if (langTaBtn) langTaBtn.classList.remove('active');
+          localStorage.setItem('cc_lang', lang);
+          window.location.reload();
+        }
+        updateLangUI();
+      };
+      
+      function updateLangUI() {
+        const currentLang = localStorage.getItem('cc_lang') || 'en';
+
+        // 1. Update Desktop Settings Card UI
+        const btnEn = document.getElementById('btn-desktop-lang-en');
+        const btnTa = document.getElementById('btn-desktop-lang-ta');
+        const checkEn = document.getElementById('check-desktop-en');
+        const checkTa = document.getElementById('check-desktop-ta');
+
+        if (btnEn && btnTa) {
+          if (currentLang === 'ta') {
+            btnTa.style.borderColor = 'var(--primary)';
+            btnTa.style.background = 'rgba(13, 148, 136, 0.08)';
+            if (checkTa) checkTa.style.display = 'block';
+
+            btnEn.style.borderColor = 'var(--border-color)';
+            btnEn.style.background = 'var(--bg-app)';
+            if (checkEn) checkEn.style.display = 'none';
+          } else {
+            btnEn.style.borderColor = 'var(--primary)';
+            btnEn.style.background = 'rgba(13, 148, 136, 0.08)';
+            if (checkEn) checkEn.style.display = 'block';
+
+            btnTa.style.borderColor = 'var(--border-color)';
+            btnTa.style.background = 'var(--bg-app)';
+            if (checkTa) checkTa.style.display = 'none';
+          }
+        }
+
+        // 2. Update Mobile Segmented Control UI
+        if (langTaBtn && langEnBtn) {
+          if (currentLang === 'ta') {
+            langTaBtn.classList.add('active');
+            langEnBtn.classList.remove('active');
+          } else {
+            langEnBtn.classList.add('active');
+            langTaBtn.classList.remove('active');
+          }
         }
       }
       
+      updateLangUI();
       if (langEnBtn && langTaBtn) {
-        updateLangSegmented();
-        langEnBtn.addEventListener('click', () => {
-          if (window.i18n) window.i18n.setLanguage('en');
-        });
-        langTaBtn.addEventListener('click', () => {
-          if (window.i18n) window.i18n.setLanguage('ta');
-        });
+        langEnBtn.addEventListener('click', () => setPortalLanguage('en'));
+        langTaBtn.addEventListener('click', () => setPortalLanguage('ta'));
       }
-      window.addEventListener('language-change', updateLangSegmented);
+      window.addEventListener('language-change', updateLangUI);
 
       // Profile photo upload, change, and remove logic
       const photoInput = document.getElementById('profile-photo-file-input');
