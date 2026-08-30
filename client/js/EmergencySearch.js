@@ -34,7 +34,7 @@ window.EmergencySearch = {
   ],
 
   /**
-   * Fetch nearby emergency responders (Hospitals, Police, Fire) with 4.5s timeout & rich queries
+   * Fetch nearby emergency responders (Hospitals, Clinics, Police, Fire) with concurrent Overpass racing & rich tags
    */
   fetchNearbyResponders: async function(lat, lng, radiusKm = 15, type = 'all') {
     const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusKm}_${type}`;
@@ -47,10 +47,10 @@ window.EmergencySearch = {
 
     if (type === 'hospital') {
       queryFilter = `
-        node["amenity"~"hospital|clinic|doctors"](around:${radiusMeters},${lat},${lng});
-        way["amenity"~"hospital|clinic|doctors"](around:${radiusMeters},${lat},${lng});
-        node["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
-        way["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
+        node["amenity"~"hospital|clinic|doctors|pharmacy|nursing_home"](around:${radiusMeters},${lat},${lng});
+        way["amenity"~"hospital|clinic|doctors|pharmacy|nursing_home"](around:${radiusMeters},${lat},${lng});
+        node["healthcare"~"hospital|clinic|centre|center|doctor|nursing_home|dispensary"](around:${radiusMeters},${lat},${lng});
+        way["healthcare"~"hospital|clinic|centre|center|doctor|nursing_home|dispensary"](around:${radiusMeters},${lat},${lng});
       `;
     } else if (type === 'police') {
       queryFilter = `
@@ -64,50 +64,57 @@ window.EmergencySearch = {
       `;
     } else {
       queryFilter = `
-        node["amenity"~"hospital|clinic|doctors|police|fire_station"](around:${radiusMeters},${lat},${lng});
-        way["amenity"~"hospital|clinic|doctors|police|fire_station"](around:${radiusMeters},${lat},${lng});
-        node["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
-        way["healthcare"~"hospital|clinic|center"](around:${radiusMeters},${lat},${lng});
+        node["amenity"~"hospital|clinic|doctors|pharmacy|police|fire_station|nursing_home"](around:${radiusMeters},${lat},${lng});
+        way["amenity"~"hospital|clinic|doctors|pharmacy|police|fire_station|nursing_home"](around:${radiusMeters},${lat},${lng});
+        node["healthcare"~"hospital|clinic|centre|center|doctor|nursing_home|dispensary"](around:${radiusMeters},${lat},${lng});
+        way["healthcare"~"hospital|clinic|centre|center|doctor|nursing_home|dispensary"](around:${radiusMeters},${lat},${lng});
+        node["emergency"~"ambulance_station|fire_hydrant|hospital"](around:${radiusMeters},${lat},${lng});
       `;
     }
 
-    const overpassQL = `[out:json][timeout:8];(${queryFilter});out center 50;`;
-    let responseData = null;
+    const overpassQL = `[out:json][timeout:5];(${queryFilter});out center 60;`;
 
-    // Helper timeout wrapper to race Overpass API (4.5s limit)
-    const fetchWithTimeout = (url, options, timeoutMs = 4500) => {
-      return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
-      ]);
-    };
-
-    for (const endpoint of this.overpassEndpoints) {
-      try {
-        const res = await fetchWithTimeout(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `data=${encodeURIComponent(overpassQL)}`
-        }, 4500);
-
-        if (res.ok) {
-          responseData = await res.json();
-          if (responseData && responseData.elements && responseData.elements.length > 0) {
-            break;
+    // Concurrent Racing over all endpoints with 2.8s limit
+    const fetchPromises = this.overpassEndpoints.map(endpoint => {
+      return new Promise(async (resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Timeout')), 2800);
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `data=${encodeURIComponent(overpassQL)}`
+          });
+          clearTimeout(timer);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.elements && data.elements.length > 0) {
+              resolve(data);
+              return;
+            }
           }
+          reject(new Error('No elements'));
+        } catch (e) {
+          clearTimeout(timer);
+          reject(e);
         }
-      } catch (err) {
-        // Fast failover to next endpoint
-      }
+      });
+    });
+
+    let responseData = null;
+    try {
+      responseData = await Promise.any(fetchPromises);
+    } catch (err) {
+      // Overpass race timed out or failed
     }
+
+    const fallbackSeeds = this.getFallbackSeedResponders(lat, lng, type);
 
     if (!responseData || !responseData.elements || responseData.elements.length === 0) {
-      const fallback = this.getFallbackSeedResponders(lat, lng, type);
-      this.cache.set(cacheKey, fallback);
-      return fallback;
+      this.cache.set(cacheKey, fallbackSeeds);
+      return fallbackSeeds;
     }
 
-    const results = responseData.elements.map(el => {
+    const liveResults = responseData.elements.map(el => {
       const elLat = el.lat || (el.center ? el.center.lat : lat);
       const elLng = el.lon || (el.center ? el.center.lon : lng);
       const tags = el.tags || {};
@@ -116,11 +123,20 @@ window.EmergencySearch = {
       if (tags.amenity === 'police') responderType = 'police';
       else if (tags.amenity === 'fire_station') responderType = 'fire';
 
+      let cleanName = tags.name || tags['name:en'] || tags['name:ta'];
+      if (!cleanName) {
+        if (responderType === 'police') cleanName = 'Police Station';
+        else if (responderType === 'fire') cleanName = 'Fire & Rescue Station';
+        else if (tags.amenity === 'clinic' || tags.healthcare === 'clinic') cleanName = 'Primary Health Clinic';
+        else if (tags.amenity === 'pharmacy') cleanName = 'Emergency Medical Store & Pharmacy';
+        else cleanName = 'Government Hospital';
+      }
+
       const distance = window.EmergencyLocation.calculateDistance(lat, lng, elLat, elLng);
 
       return {
-        id: el.id,
-        name: tags.name || tags['name:en'] || tags['name:ta'] || `${this.getResponderTypeName(responderType)} Center`,
+        id: el.id || 'osm_' + Math.random().toString(36).substr(2, 9),
+        name: cleanName,
         type: responderType,
         lat: elLat,
         lng: elLng,
@@ -130,9 +146,25 @@ window.EmergencySearch = {
       };
     });
 
-    results.sort((a, b) => a.distanceKm - b.distanceKm);
-    this.cache.set(cacheKey, results);
-    return results;
+    // Merge seed responders if live count is small so all local responders are visible
+    const combined = [...liveResults];
+    for (const seed of fallbackSeeds) {
+      const alreadyExists = combined.some(r => 
+        (r.name && r.name.toLowerCase().includes(seed.name.toLowerCase().split(' ')[0])) ||
+        (Math.abs(r.lat - seed.lat) < 0.003 && Math.abs(r.lng - seed.lng) < 0.003)
+      );
+      if (!alreadyExists) {
+        combined.push(seed);
+      }
+    }
+
+    const filtered = (type === 'all')
+      ? combined
+      : combined.filter(r => r.type === type);
+
+    filtered.sort((a, b) => a.distanceKm - b.distanceKm);
+    this.cache.set(cacheKey, filtered);
+    return filtered;
   },
 
   /**
@@ -214,16 +246,23 @@ window.EmergencySearch = {
 
     if (isCoimbatoreRegion) {
       seed = [
-        { id: 'cbe_h1', name: 'Government Hospital Sulur', type: 'hospital', lat: 11.0264, lng: 77.1264, address: 'Trichy Main Road, Sulur, Coimbatore, Tamil Nadu', phone: '0422-2687228' },
-        { id: 'cbe_h2', name: 'Primary Health Centre Kannampalayam', type: 'hospital', lat: 11.0182, lng: 77.0986, address: 'Main Road, Kannampalayam, Coimbatore, Tamil Nadu', phone: '108' },
-        { id: 'cbe_h3', name: 'KMCH Super Speciality Hospital', type: 'hospital', lat: 11.0435, lng: 77.0375, address: 'Avinashi Road, Civil Aerodrome, Coimbatore', phone: '0422-4323800' },
-        { id: 'cbe_h4', name: 'PSG Hospitals & Trauma Center', type: 'hospital', lat: 11.0285, lng: 76.9950, address: 'Avinashi Road, Peelamedu, Coimbatore', phone: '0422-2570170' },
-        { id: 'cbe_h5', name: 'Coimbatore Medical College Hospital (GH)', type: 'hospital', lat: 10.9982, lng: 76.9680, address: 'Trichy Road, Town Hall, Coimbatore', phone: '0422-2301393' },
-        { id: 'cbe_p1', name: 'Sulur Police Station', type: 'police', lat: 11.0270, lng: 77.1250, address: 'Trichy Road, Sulur, Coimbatore, Tamil Nadu', phone: '0422-2687100' },
-        { id: 'cbe_p2', name: 'Peelamedu Police Station', type: 'police', lat: 11.0310, lng: 76.9980, address: 'Avinashi Road, Peelamedu, Coimbatore', phone: '0422-2572200' },
-        { id: 'cbe_p3', name: 'Coimbatore City Central Police Control Room', type: 'police', lat: 10.9990, lng: 76.9650, address: 'Collectorate Campus, Coimbatore', phone: '100' },
+        { id: 'cbe_h0', name: 'Primary Health Centre (PHC) Kannampalayam', type: 'hospital', lat: 11.0182, lng: 77.0986, address: 'Karanampettai Road, Kannampalayam, Coimbatore', phone: '108' },
+        { id: 'cbe_h1', name: 'Government Hospital Sulur', type: 'hospital', lat: 11.0264, lng: 77.1264, address: 'Trichy Main Road, Sulur, Coimbatore', phone: '0422-2687228' },
+        { id: 'cbe_h2', name: 'KMCH Sulur Medical Centre & Clinic', type: 'hospital', lat: 11.0298, lng: 77.1180, address: 'Trichy Road, RVS Nagar, Sulur', phone: '0422-2687444' },
+        { id: 'cbe_h3', name: 'Royal Care Super Speciality Hospital', type: 'hospital', lat: 11.0620, lng: 77.0850, address: 'L&T Bypass Road, Neelambur, Coimbatore', phone: '0422-2227000' },
+        { id: 'cbe_h4', name: 'KMCH Main Super Speciality Hospital', type: 'hospital', lat: 11.0435, lng: 77.0375, address: 'Avinashi Road, Civil Aerodrome, Coimbatore', phone: '0422-4323800' },
+        { id: 'cbe_h5', name: 'PSG Hospitals & Trauma Emergency Center', type: 'hospital', lat: 11.0285, lng: 76.9950, address: 'Avinashi Road, Peelamedu, Coimbatore', phone: '0422-2570170' },
+        { id: 'cbe_h6', name: 'Coimbatore Medical College Hospital (GH)', type: 'hospital', lat: 10.9982, lng: 76.9680, address: 'Trichy Road, Town Hall, Coimbatore', phone: '0422-2301393' },
+        { id: 'cbe_h7', name: 'Sri Ramakrishna Hospital & Emergency', type: 'hospital', lat: 11.0185, lng: 76.9830, address: 'Sarojini Naidu Road, Siddhapudur, Coimbatore', phone: '0422-4500000' },
+        { id: 'cbe_h8', name: 'Ganga Hospital & Trauma Care Unit', type: 'hospital', lat: 11.0240, lng: 76.9580, address: 'Mettupalayam Road, Saibaba Colony, Coimbatore', phone: '0422-2485000' },
+        { id: 'cbe_h9', name: 'Palladam Government Hospital', type: 'hospital', lat: 11.0040, lng: 77.2910, address: 'Trichy Road, Palladam', phone: '04255-252233' },
+        { id: 'cbe_p1', name: 'Sulur Police Station', type: 'police', lat: 11.0270, lng: 77.1250, address: 'Trichy Road, Sulur, Coimbatore', phone: '0422-2687100' },
+        { id: 'cbe_p2', name: 'Singanallur Police Station', type: 'police', lat: 11.0020, lng: 77.0210, address: 'Trichy Road, Singanallur, Coimbatore', phone: '0422-2595100' },
+        { id: 'cbe_p3', name: 'Peelamedu Police Station', type: 'police', lat: 11.0310, lng: 76.9980, address: 'Avinashi Road, Peelamedu, Coimbatore', phone: '0422-2572200' },
+        { id: 'cbe_p4', name: 'Coimbatore City Central Police Control Room', type: 'police', lat: 10.9990, lng: 76.9650, address: 'Collectorate Campus, Coimbatore', phone: '100' },
         { id: 'cbe_f1', name: 'Sulur Fire & Rescue Station', type: 'fire', lat: 11.0250, lng: 77.1240, address: 'Trichy Road, Sulur, Coimbatore', phone: '0422-2687101' },
-        { id: 'cbe_f2', name: 'Coimbatore Central Fire Station', type: 'fire', lat: 10.9970, lng: 76.9630, address: 'Railway Station Road, Coimbatore', phone: '0422-2300101' }
+        { id: 'cbe_f2', name: 'Peelamedu Fire & Rescue Station', type: 'fire', lat: 11.0320, lng: 77.0010, address: 'Avinashi Road, Peelamedu, Coimbatore', phone: '0422-2572101' },
+        { id: 'cbe_f3', name: 'Coimbatore South Fire Station', type: 'fire', lat: 10.9970, lng: 76.9630, address: 'Railway Station Road, Coimbatore', phone: '0422-2300101' }
       ];
     } else {
       seed = [

@@ -3,7 +3,7 @@
  * Optimized for instant 0.1s mobile rendering, instant filter clicks, and background GPS lock.
  */
 
-let currentRadiusKm = 10;
+let currentRadiusKm = 15;
 let currentFilterType = 'all';
 let allLoadedResponders = [];
 
@@ -13,19 +13,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.EmergencyContacts.renderTable('emergency-contacts-tbody');
   }
 
-  // 2. Use Fallback Coordinates Instantly for 0.1s Map & Responder Render
-  const initialLoc = window.EmergencyLocation.fallbackCoords;
+  // 2. Fast Cached Coordinates or Fallback
+  let initialLoc = window.EmergencyLocation.fallbackCoords;
+  try {
+    const cached = sessionStorage.getItem('cc_last_emergency_loc');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed && parsed.latitude && parsed.longitude) {
+        initialLoc = parsed;
+      }
+    }
+  } catch (e) {}
 
   // 3. Initialize Interactive Emergency Map Instantly
   window.EmergencyMap.init('emergency-map', initialLoc.latitude, initialLoc.longitude);
 
-  // 4. Load Responders Instantly (0.1s initial response)
-  await loadResponders(initialLoc.latitude, initialLoc.longitude, currentRadiusKm, currentFilterType);
-
-  // 5. Setup Event Listeners (Search Bar, Radius Buttons, Instant Type Filters)
+  // 4. Setup Event Listeners
   setupEventListeners(initialLoc);
 
-  // 6. AUTOMATICALLY REQUEST & FETCH REAL LIVE GPS POSITION IMMEDIATELY
+  // 5. Load Initial Responders Fast
+  loadResponders(initialLoc.latitude, initialLoc.longitude, currentRadiusKm, currentFilterType);
+
+  // 6. Fast Real GPS acquisition & Auto-Center
   fetchAndCenterLiveGPS(true);
 });
 
@@ -233,17 +242,17 @@ async function fetchAndCenterLiveGPS(isAutoLoad = false) {
   });
 
   try {
-    const realLoc = await window.EmergencyLocation.getCurrentPosition(true);
+    const realLoc = await window.EmergencyLocation.getCurrentPosition(!isAutoLoad);
     if (realLoc && !realLoc.isFallback) {
       window.EmergencyMap.setUserLocation(realLoc.latitude, realLoc.longitude);
       if (window.EmergencyMap.map) {
         window.EmergencyMap.map.setView([realLoc.latitude, realLoc.longitude], 14);
       }
-      allLoadedResponders = []; // Clear in-memory cache to pull fresh nearby responders for real GPS location
+      allLoadedResponders = []; // Pull fresh nearby responders for real GPS location
       await loadResponders(realLoc.latitude, realLoc.longitude, currentRadiusKm, currentFilterType);
 
       if (window.EmergencyContacts && window.EmergencyContacts.showToast) {
-        window.EmergencyContacts.showToast('📍 Live GPS location detected!');
+        window.EmergencyContacts.showToast('📍 Live GPS location updated!');
       }
     } else if (!isAutoLoad) {
       alert('Could not access live GPS location. Please ensure location permissions are enabled on your device.');

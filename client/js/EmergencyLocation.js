@@ -14,10 +14,26 @@ window.EmergencyLocation = {
   currentLocation: null,
 
   /**
-   * Request browser geolocation with high accuracy
+   * Request browser geolocation with fast two-stage acquisition & session caching
    */
   getCurrentPosition: function(forceFresh = false) {
     return new Promise((resolve) => {
+      // Check if we have cached position in sessionStorage (< 5 minutes old)
+      if (!forceFresh) {
+        try {
+          const cached = sessionStorage.getItem('cc_last_emergency_loc');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.latitude && parsed.longitude && (Date.now() - (parsed.time || 0) < 300000)) {
+              this.currentLocation = { ...parsed, isFallback: false };
+              resolve(this.currentLocation);
+              this.refreshPositionBackground();
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+
       if (!navigator.geolocation) {
         console.warn('Geolocation not supported by browser. Using default Tamil Nadu location.');
         this.currentLocation = { ...this.fallbackCoords, isFallback: true };
@@ -25,30 +41,71 @@ window.EmergencyLocation = {
         return;
       }
 
-      const options = {
-        enableHighAccuracy: true,
-        timeout: 10000, // 10 seconds for mobile GPS acquisition
-        maximumAge: forceFresh ? 0 : 60000
+      let resolved = false;
+      const done = (loc) => {
+        if (resolved) return;
+        resolved = true;
+        this.currentLocation = loc;
+        try {
+          sessionStorage.setItem('cc_last_emergency_loc', JSON.stringify({ ...loc, time: Date.now() }));
+        } catch (e) {}
+        resolve(loc);
       };
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          this.currentLocation = {
+          done({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
             accuracy: position.coords.accuracy,
             isFallback: false
-          };
-          resolve(this.currentLocation);
+          });
         },
         (error) => {
-          console.warn('Geolocation access denied or timed out:', error.message);
-          this.currentLocation = { ...this.fallbackCoords, isFallback: true, error: error.message };
-          resolve(this.currentLocation);
+          // Fast fallback to cell/wifi location if GPS takes too long
+          navigator.geolocation.getCurrentPosition(
+            (pos2) => {
+              done({
+                latitude: pos2.coords.latitude,
+                longitude: pos2.coords.longitude,
+                accuracy: pos2.coords.accuracy,
+                isFallback: false
+              });
+            },
+            () => {
+              console.warn('Geolocation access denied or timed out:', error.message);
+              done({ ...this.fallbackCoords, isFallback: true, error: error.message });
+            },
+            { enableHighAccuracy: false, timeout: 2500, maximumAge: 120000 }
+          );
         },
-        options
+        {
+          enableHighAccuracy: true,
+          timeout: 3500,
+          maximumAge: forceFresh ? 0 : 60000
+        }
       );
     });
+  },
+
+  refreshPositionBackground: function() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const fresh = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+          isFallback: false
+        };
+        this.currentLocation = fresh;
+        try {
+          sessionStorage.setItem('cc_last_emergency_loc', JSON.stringify({ ...fresh, time: Date.now() }));
+        } catch (e) {}
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
   },
 
   /**
