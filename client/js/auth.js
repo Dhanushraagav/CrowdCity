@@ -1897,10 +1897,11 @@ function updateAuthUI() {
     const tSettings = window.i18n ? window.i18n.t('nav_settings') : 'Settings';
     const currentPath = window.location.pathname;
     const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || currentPath.endsWith('/') || currentPath.endsWith('/index.html') || currentPath.endsWith('/index');
+    const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';
     const tnUpdatesBtnHtml = isCitizenDashboardOnly
       ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn" title="Tamil Nadu Government & Civic Updates">
           <i class="fa-solid fa-newspaper"></i>
-          <span class="tn-updates-btn-text">TN Updates</span>
+          <span class="tn-updates-btn-text" data-i18n="nav_tn_updates">${tTnUpdates}</span>
         </a>`
       : '';
 
@@ -1918,11 +1919,11 @@ function updateAuthUI() {
           <!-- Dropdown Menu -->
           <div id="notification-dropdown" class="notification-dropdown hidden">
             <div class="notification-dropdown-header">
-              <h3>${tNotifications}</h3>
-              <button id="mark-all-read-btn" class="btn-text" onclick="handleMarkAllRead(event)">${tMarkAllRead}</button>
+              <h3 data-i18n="nav_notifications">${tNotifications}</h3>
+              <button id="mark-all-read-btn" class="btn-text" onclick="handleMarkAllRead(event)" data-i18n="mark_all_read">${tMarkAllRead}</button>
             </div>
             <div class="notification-list" id="notification-dropdown-list">
-              <div class="no-notifications">${tNoNotifications}</div>
+              <div class="no-notifications" data-i18n="no_notifications">${tNoNotifications}</div>
             </div>
             ${notificationsFooterHtml}
           </div>
@@ -1940,29 +1941,29 @@ function updateAuthUI() {
               ${roleDisplayHtml}
             </div>
             <a href="profile.html" class="nav-dropdown-item">
-              <i class="fa-regular fa-user" style="width: 16px; color: var(--text-muted);"></i> My Profile
+              <i class="fa-regular fa-user" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_profile">${window.i18n ? window.i18n.t('nav_profile') : 'My Profile'}</span>
             </a>
             <a href="notifications.html" class="nav-dropdown-item">
-              <i class="fa-regular fa-bell" style="width: 16px; color: var(--text-muted);"></i> Notifications
+              <i class="fa-regular fa-bell" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_notifications">${window.i18n ? window.i18n.t('nav_notifications') : 'Notifications'}</span>
             </a>
             <a href="my-documents.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-folder-closed" style="width: 16px; color: var(--text-muted);"></i> Document Wallet
+              <i class="fa-solid fa-folder-closed" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_documents">${window.i18n ? window.i18n.t('nav_documents') : 'Document Wallet'}</span>
             </a>
             <a href="saved-schemes.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-bookmark" style="width: 16px; color: var(--text-muted);"></i> Saved Schemes
+              <i class="fa-solid fa-bookmark" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_saved_schemes">${window.i18n ? window.i18n.t('nav_saved_schemes') : 'Saved Schemes'}</span>
             </a>
             <a href="analytics.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-chart-line" style="width: 16px; color: var(--text-muted);"></i> Analytics & Insights
+              <i class="fa-solid fa-chart-line" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_analytics">${window.i18n ? window.i18n.t('nav_analytics') : 'Analytics & Insights'}</span>
             </a>
             <a href="about.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> About Us
+              <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> <span data-i18n="nav_about_us">${window.i18n ? window.i18n.t('nav_about_us') : 'About Us'}</span>
             </a>
             <a href="settings.html" class="nav-dropdown-item">
-              <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> Settings
+              <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_settings">${window.i18n ? window.i18n.t('nav_settings') : 'Settings'}</span>
             </a>
             <div style="border-top: 1px solid var(--border-color); margin: 0.15rem 0;"></div>
             <button onclick="logoutUser()" class="nav-dropdown-item btn-logout" style="width: 100%; text-align: left; background: none; border: none; padding: 0.4rem 0.5rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-              <i class="fa-solid fa-right-from-bracket" style="width: 16px; color: #ef4444;"></i> Logout
+              <i class="fa-solid fa-right-from-bracket" style="width: 16px; color: #ef4444;"></i> <span data-i18n="nav_logout">${window.i18n ? window.i18n.t('nav_logout') : 'Logout'}</span>
             </button>
           </div>
         </div>

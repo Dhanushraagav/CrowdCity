@@ -114,14 +114,19 @@ function loadUserStats(isLanguageChange = false) {
 
   // If user is not authenticated, show zeroes
   if (!userId) {
+    const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
+    const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
+    const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
+    const tAcrossCity = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+
     if (totalEl) animateCountUp(totalEl, 0);
-    if (weeklyEl) weeklyEl.textContent = '+0 this week';
+    if (weeklyEl) weeklyEl.textContent = `+0 ${tThisWeek}`;
     if (resolvedEl) animateCountUp(resolvedEl, 0);
-    if (rateEl) rateEl.textContent = '0% Resolution Rate';
+    if (rateEl) rateEl.textContent = `0% ${tResolutionRate}`;
     if (inprogressEl) animateCountUp(inprogressEl, 0);
-    if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
+    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
     if (cityTotalEl) animateCountUp(cityTotalEl, Array.isArray(currentIssues) ? currentIssues.length : 0);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAcrossCity;
     return;
   }
 
@@ -140,17 +145,22 @@ function loadUserStats(isLanguageChange = false) {
     }).length;
     const cityTotal = Array.isArray(currentIssues) ? currentIssues.length : 0;
 
+    const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
+    const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
+    const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
+    const tAcrossCity = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+
     if (totalEl) animateCountUp(totalEl, total);
-    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} this week`;
+    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
     if (inprogressEl) animateCountUp(inprogressEl, active);
-    if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
+    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
     if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAcrossCity;
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      rateEl.textContent = `${rate}% Resolution Rate`;
+      rateEl.textContent = `${rate}% ${tResolutionRate}`;
     }
 
     if (heroDesc) {
@@ -185,17 +195,22 @@ function loadUserStats(isLanguageChange = false) {
     }).length;
     const cityTotal = currentIssues.length;
 
+    const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
+    const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
+    const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
+    const tAcrossCity = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+
     if (totalEl) animateCountUp(totalEl, total);
-    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} this week`;
+    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
     if (inprogressEl) animateCountUp(inprogressEl, active);
-    if (inprogressSubEl) inprogressSubEl.textContent = 'Active reports';
+    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
     if (cityTotalEl) animateCountUp(cityTotalEl, cityTotal);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = window.i18n ? window.i18n.t('city_total_sub') : 'Across city';
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAcrossCity;
 
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      rateEl.textContent = `${rate}% Resolution Rate`;
+      rateEl.textContent = `${rate}% ${tResolutionRate}`;
     }
 
     if (heroDesc) {
