@@ -1178,70 +1178,49 @@ async function logoutUser() {
   const role = getUserRole(); // Get role before clearing cache
   console.log('[Auth Client] Logging out user. Current role:', role);
 
-  const isAuthorityPage = window.location.pathname.includes('admin') || window.location.pathname.includes('authority') || (document.body && document.body.classList.contains('admin-portal-body'));
-  const overlayBg = isAuthorityPage ? '#ffffff' : '#0f172a';
-  const overlayTextColor = isAuthorityPage ? '#0f172a' : '#ffffff';
+  // 1. Immediately clear all local session storage keys
+  const authKeys = [
+    'cc_session',
+    'cc_user_role',
+    'cc_user_profile',
+    'cc_unread_notifications_count',
+    'cc_user_stat_total',
+    'cc_user_stat_resolved',
+    'cc_user_stat_active',
+    'cc_my_complaints',
+    'cc_notifications_cache',
+    'cc_password_recovery_active'
+  ];
+  authKeys.forEach(k => {
+    try { localStorage.removeItem(k); } catch (e) {}
+    try { sessionStorage.removeItem(k); } catch (e) {}
+  });
 
-  let overlay = document.getElementById('cc-logout-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'cc-logout-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100vw';
-    overlay.style.height = '100vh';
-    overlay.style.backgroundColor = overlayBg;
-    overlay.style.zIndex = '2147483647';
-    overlay.style.display = 'flex';
-    overlay.style.flexDirection = 'column';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.color = overlayTextColor;
-    overlay.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-    overlay.style.gap = '1rem';
-    overlay.style.visibility = 'visible';
-    
-    overlay.innerHTML = `
-      <div style="font-weight: 700; font-size: 1.1rem; color: ${overlayTextColor};">Signing out...</div>
-    `;
-    document.body.appendChild(overlay);
-  } else {
-    overlay.style.backgroundColor = overlayBg;
-    overlay.style.color = overlayTextColor;
-  }
-  overlay.style.display = 'flex';
-  
-  // Hide page body to prevent dashboard layout updates/rendering
-  document.body.style.visibility = 'hidden';
+  // Also remove native Supabase tokens from localStorage
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch (e) {}
 
-  // 2. await supabaseClient.auth.signOut()
-  if (supabaseClient) {
+  // 2. Perform non-blocking Supabase signOut with a strict timeout guard (max 400ms)
+  if (supabaseClient && supabaseClient.auth) {
     try {
-      console.log('[Auth Client] Calling supabaseClient.auth.signOut()...');
-      await supabaseClient.auth.signOut();
-      console.log('[Auth Client] Supabase signOut completed successfully.');
+      const signOutPromise = supabaseClient.auth.signOut().catch(() => {});
+      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 400));
+      await Promise.race([signOutPromise, timeoutPromise]);
     } catch (e) {
-      console.error("[Auth Client] Supabase signOut error in logoutUser:", e);
+      console.warn('[Auth Client] Non-blocking signOut notice:', e);
     }
   }
 
-  // 3. clear local session state
-  console.log('[Auth Client] Clearing all cached credentials and states from localStorage.');
-  localStorage.removeItem('cc_session');
-  localStorage.removeItem('cc_user_role');
-  localStorage.removeItem('cc_user_profile');
-  localStorage.removeItem('cc_unread_notifications_count');
-  localStorage.removeItem('cc_user_stat_total');
-  localStorage.removeItem('cc_user_stat_resolved');
-  localStorage.removeItem('cc_user_stat_active');
-  localStorage.removeItem('cc_my_complaints');
-  localStorage.removeItem('cc_notifications_cache');
-
-  // 4. redirect to auth.html / authority-login.html
-  updateAuthUI();
-  console.log('[Auth Client] Redirecting to login target for role:', role || 'citizen');
-  window.authRouter.redirectToLogin(role || 'citizen');
+  // 3. Immediately replace location with target login page
+  const target = (role === 'authority' || role === 'admin') ? 'authority-login.html' : 'auth.html';
+  console.log('[Auth Client] Logout complete. Redirecting to:', target);
+  window.location.replace(target);
 }
 
 
