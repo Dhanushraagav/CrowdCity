@@ -12,15 +12,17 @@ import {
   registerVerifiedUser,
   requestPasswordRecovery,
   resetPasswordOverride,
-  checkAuthMethods
+  checkAuthMethods,
+  submitContactInquiry
 } from '../controllers/authController.js';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 import { validateUserId } from '../middlewares/validationMiddleware.js';
 
 const router = express.Router();
 
-// Public auth and verification routes
+// Public auth, verification and contact routes
 router.post('/check-auth-methods', checkAuthMethods);
+router.post('/contact', submitContactInquiry);
 router.post('/send-welcome', sendWelcomeEmailAfterSignup);
 router.post('/send-otp', sendOtpCode);
 router.post('/verify-otp', verifyOtpCode);

@@ -1,6 +1,6 @@
 import { supabase, supabaseAdmin, getSupabaseClient } from '../config/supabase.js';
 import logger from '../config/logger.js';
-import { sendWelcomeEmail, sendVerificationOtpEmail, sendLoginOtpEmail, sendResetPasswordEmail, sendMpinOtpEmail } from '../services/emailService.js';
+import { sendWelcomeEmail, sendVerificationOtpEmail, sendLoginOtpEmail, sendResetPasswordEmail, sendMpinOtpEmail, sendContactInquiryEmail } from '../services/emailService.js';
 import { otpService } from '../services/otpService.js';
 
 // In-memory safeguard to ensure welcome email is triggered at most once per user session/server run
@@ -801,6 +801,72 @@ export const checkAuthMethods = async (req, res) => {
   } catch (err) {
     logger.error(`[authController] Exception in checkAuthMethods: %O`, err);
     return res.status(500).json({ error: 'Internal server error checking account providers.' });
+  }
+};
+
+/**
+ * Handle Contact Us Form Submissions
+ */
+export const submitContactInquiry = async (req, res) => {
+  try {
+    const { name, email, category, subject, message, attachmentUrl } = req.body || {};
+
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required.' });
+    }
+    if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json({ error: 'A valid email address is required.' });
+    }
+    if (!category || typeof category !== 'string' || !category.trim()) {
+      return res.status(400).json({ error: 'Category is required.' });
+    }
+    if (!subject || typeof subject !== 'string' || !subject.trim()) {
+      return res.status(400).json({ error: 'Subject is required.' });
+    }
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    const cleanData = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      category: category.trim(),
+      subject: subject.trim(),
+      message: message.trim(),
+      attachmentUrl: attachmentUrl ? String(attachmentUrl).trim() : null
+    };
+
+    logger.info(`[Contact] Processing inquiry from "${cleanData.name}" <${cleanData.email}> - Category: ${cleanData.category}`);
+
+    // Try saving inquiry to Supabase if contact_inquiries table exists
+    try {
+      await supabaseAdmin.from('contact_inquiries').insert([{
+        name: cleanData.name,
+        email: cleanData.email,
+        category: cleanData.category,
+        subject: cleanData.subject,
+        message: cleanData.message,
+        attachment_url: cleanData.attachmentUrl,
+        created_at: new Date().toISOString()
+      }]);
+    } catch (dbErr) {
+      logger.warn(`[Contact] Database insert skipped or table not present: ${dbErr.message}`);
+    }
+
+    // Trigger email delivery
+    try {
+      await sendContactInquiryEmail(cleanData);
+    } catch (mailErr) {
+      logger.error(`[Contact] Failed to send email notifications: ${mailErr.message}`);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Message sent successfully. Our team will review your message and get back to you.'
+    });
+  } catch (err) {
+    logger.error(`[Contact] Error processing contact inquiry: %O`, err);
+    return res.status(500).json({ error: 'Failed to process inquiry. Please try again later.' });
   }
 };
 

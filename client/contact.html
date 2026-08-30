@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us — CrowdCity AI Citizen Portal</title>
+  
+  <!-- Central Authentication Router & i18n -->
+  <script src="js/auth-router.js?v=1.0.6"></script>
+  <script src="js/i18n.js"></script>
+
+  <!-- Fonts & Core Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Contact Page Layout & Components */
+    .contact-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .contact-hero-banner {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.12), rgba(37, 99, 235, 0.08));
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.25rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-hero-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0 0 0.5rem 0;
+      font-family: var(--font-heading, system-ui);
+      letter-spacing: -0.02em;
+    }
+
+    .contact-hero-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.6;
+      max-width: 680px;
+    }
+
+    /* 4 Clean Category Cards Grid */
+    .contact-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .contact-card-option {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.35rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: left;
+    }
+
+    .contact-card-option:hover {
+      border-color: var(--primary, #0d9488);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md, 0 8px 20px rgba(0, 0, 0, 0.06));
+    }
+
+    .contact-card-option.active {
+      border-color: var(--primary, #0d9488);
+      background: rgba(13, 148, 136, 0.04);
+      box-shadow: 0 0 0 1px var(--primary, #0d9488);
+    }
+
+    .contact-card-icon-wrap {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--primary, #0d9488);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+    }
+
+    .contact-card-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .contact-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* Main Split: Form (Left) & Info / FAQ (Right) */
+    .contact-main-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .contact-form-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .contact-form-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .contact-form-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0 0 0.35rem 0;
+    }
+
+    .contact-form-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-group-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .form-field label span.required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--border-color, #cbd5e1);
+      border-radius: 10px;
+      background: var(--bg-surface-hover, #ffffff);
+      color: var(--text-main, #0f172a);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      border-color: var(--primary, #0d9488);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    }
+
+    .file-upload-box {
+      border: 1px dashed var(--border-color, #cbd5e1);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-surface-hover, #f8fafc);
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .file-upload-box:hover {
+      border-color: var(--primary, #0d9488);
+    }
+
+    .file-upload-box input[type="file"] {
+      display: none;
+    }
+
+    .file-upload-text {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .file-name-display {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary, #0d9488);
+      display: none;
+    }
+
+    .btn-send-message {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      background: var(--primary, #0d9488);
+      color: #ffffff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background-color 0.2s ease, transform 0.15s ease;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+    }
+
+    .btn-send-message:hover {
+      background: var(--primary-hover, #0f766e);
+      transform: translateY(-1px);
+    }
+
+    .btn-send-message:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Success State Container */
+    .contact-success-banner {
+      display: none;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      padding: 2rem;
+      text-align: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .contact-success-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #10b981;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .contact-success-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .contact-success-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+      max-width: 440px;
+      line-height: 1.5;
+    }
+
+    /* Right Sidebar: Contact Info & FAQ */
+    .contact-side-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .contact-info-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .contact-info-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0 0 1rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .contact-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .contact-info-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .contact-info-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--primary, #0d9488);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .contact-info-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.15rem;
+    }
+
+    .contact-info-value {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+
+    .contact-info-value a {
+      color: var(--primary, #0d9488);
+      text-decoration: none;
+    }
+
+    .contact-info-value a:hover {
+      text-decoration: underline;
+    }
+
+    /* FAQ Card & Accordion */
+    .faq-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .faq-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0 0 1rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 0;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .faq-question {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      user-select: none;
+    }
+
+    .faq-question i {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .faq-item.open .faq-question i {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+      .contact-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .contact-main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .contact-cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-group-row {
+        grid-template-columns: 1fr;
+      }
+      .contact-form-panel {
+        padding: 1.35rem;
+      }
+      .contact-hero-banner {
+        padding: 1.5rem 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="app-sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-brand" style="text-decoration: none;">
+          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" style="width: 28px; height: 28px; object-fit: contain;" />
+          <span style="font-weight: 800; font-size: 1.1rem; color: var(--text-main); letter-spacing: -0.02em;">CrowdCity</span>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Issue">
+          <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link" title="Transportation">
+          <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
+          <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
+          </div>
+        </a>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
+          <div id="auth-nav-container"></div>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; width: 100%; box-sizing: border-box;">
+        
+        <div class="contact-container">
+          
+          <!-- 1. Page Header Banner -->
+          <div class="contact-hero-banner">
+            <h1 class="contact-hero-title">Contact CrowdCity</h1>
+            <p class="contact-hero-desc">
+              Have a question, need assistance, or want to share feedback? We're here to help.
+            </p>
+          </div>
+
+          <!-- 2. Contact Options (4 Clean Cards) -->
+          <div class="contact-cards-grid">
+            <div class="contact-card-option" data-category="General Support" onclick="selectContactCategory('General Support', this)">
+              <div class="contact-card-icon-wrap">
+                <i class="fa-solid fa-headset"></i>
+              </div>
+              <h3 class="contact-card-title">General Support</h3>
+              <p class="contact-card-desc">Questions about using CrowdCity</p>
+            </div>
+
+            <div class="contact-card-option" data-category="Report a Problem" onclick="selectContactCategory('Report a Problem', this)">
+              <div class="contact-card-icon-wrap">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <h3 class="contact-card-title">Report a Problem</h3>
+              <p class="contact-card-desc">Website or application technical issues</p>
+            </div>
+
+            <div class="contact-card-option" data-category="Feedback & Suggestions" onclick="selectContactCategory('Feedback & Suggestions', this)">
+              <div class="contact-card-icon-wrap">
+                <i class="fa-solid fa-lightbulb"></i>
+              </div>
+              <h3 class="contact-card-title">Feedback & Suggestions</h3>
+              <p class="contact-card-desc">Ideas and suggestions to improve CrowdCity</p>
+            </div>
+
+            <div class="contact-card-option" data-category="Partnership / Government Enquiries" onclick="selectContactCategory('Partnership / Government Enquiries', this)">
+              <div class="contact-card-icon-wrap">
+                <i class="fa-solid fa-building-columns"></i>
+              </div>
+              <h3 class="contact-card-title">Partnership / Government Enquiries</h3>
+              <p class="contact-card-desc">Organizations or departments wanting to work with CrowdCity</p>
+            </div>
+          </div>
+
+          <!-- 3. Main Split: Contact Form (Left) & Info/FAQ (Right) -->
+          <div class="contact-main-grid">
+            
+            <!-- Contact Form Column -->
+            <div class="contact-form-panel">
+              <div class="contact-form-header">
+                <h2 class="contact-form-title">Send a Message</h2>
+                <p class="contact-form-subtitle">Fill out the details below and our team will get back to you.</p>
+              </div>
+
+              <!-- Form State -->
+              <form id="contact-form" class="contact-form" onsubmit="handleContactFormSubmit(event)" novalidate>
+                <div class="form-group-row">
+                  <div class="form-field">
+                    <label for="contact-name">Name <span class="required">*</span></label>
+                    <input type="text" id="contact-name" name="name" placeholder="Your full name" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="contact-email">Email <span class="required">*</span></label>
+                    <input type="email" id="contact-email" name="email" placeholder="name@example.com" required />
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="contact-category">Category <span class="required">*</span></label>
+                  <select id="contact-category" name="category" required onchange="syncCategoryCardSelection(this.value)">
+                    <option value="">Select an inquiry category</option>
+                    <option value="General Support">General Support</option>
+                    <option value="Report a Problem">Report a Problem</option>
+                    <option value="Feedback & Suggestions">Feedback & Suggestions</option>
+                    <option value="Partnership / Government Enquiries">Partnership / Government Enquiries</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label for="contact-subject">Subject <span class="required">*</span></label>
+                  <input type="text" id="contact-subject" name="subject" placeholder="Brief summary of your inquiry" required />
+                </div>
+
+                <div class="form-field">
+                  <label for="contact-message">Message <span class="required">*</span></label>
+                  <textarea id="contact-message" name="message" rows="5" placeholder="Provide details regarding your inquiry or request..." required></textarea>
+                </div>
+
+                <div class="form-field">
+                  <label>Attachment (Optional)</label>
+                  <label for="contact-attachment" class="file-upload-box">
+                    <i class="fa-solid fa-paperclip" style="color: var(--primary);"></i>
+                    <span class="file-upload-text" id="upload-status-text">Attach screenshot or document (PDF, PNG, JPG up to 5MB)</span>
+                    <span class="file-name-display" id="file-name-display"></span>
+                    <input type="file" id="contact-attachment" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" onchange="handleAttachmentChange(this)" />
+                  </label>
+                </div>
+
+                <div id="contact-error-msg" style="display: none; color: #ef4444; font-size: 0.85rem; font-weight: 600; padding: 0.5rem 0.75rem; background: rgba(239, 68, 68, 0.08); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);"></div>
+
+                <button type="submit" id="contact-submit-btn" class="btn-send-message">
+                  <i class="fa-solid fa-paper-plane"></i>
+                  <span id="btn-text">Send Message</span>
+                </button>
+              </form>
+
+              <!-- Success State -->
+              <div id="contact-success-banner" class="contact-success-banner">
+                <div class="contact-success-icon">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 class="contact-success-title">Message sent successfully.</h3>
+                <p class="contact-success-desc">
+                  Our team will review your message and get back to you.
+                </p>
+                <button type="button" class="btn btn-secondary" onclick="resetContactFormState()" style="margin-top: 0.75rem; padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 600; border-radius: 8px;">
+                  Send Another Message
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Column: Official Info & FAQs -->
+            <div class="contact-side-col">
+              
+              <!-- 4. Contact Information -->
+              <div class="contact-info-card">
+                <h3 class="contact-info-title">Contact Information</h3>
+                
+                <div class="contact-info-item">
+                  <div class="contact-info-icon">
+                    <i class="fa-solid fa-envelope"></i>
+                  </div>
+                  <div>
+                    <div class="contact-info-label">Official Email</div>
+                    <div class="contact-info-value">
+                      <a href="mailto:crowdcityai@gmail.com">crowdcityai@gmail.com</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="contact-info-item">
+                  <div class="contact-info-icon">
+                    <i class="fa-solid fa-clock"></i>
+                  </div>
+                  <div>
+                    <div class="contact-info-label">Response Hours</div>
+                    <div class="contact-info-value">Monday to Saturday, 9:00 AM - 6:00 PM IST</div>
+                  </div>
+                </div>
+
+                <div class="contact-info-item">
+                  <div class="contact-info-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                  </div>
+                  <div>
+                    <div class="contact-info-label">Platform Verification</div>
+                    <div class="contact-info-value">Verified Citizen Redressal Portal</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. FAQ / Help Section -->
+              <div class="faq-card">
+                <h3 class="faq-card-title">Frequently Asked Questions</h3>
+                
+                <div class="faq-item open">
+                  <div class="faq-question" onclick="toggleFaqItem(this)">
+                    <span>How do I report a civic issue?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </div>
+                  <div class="faq-answer">
+                    Click 'Report Issue' in the navigation menu. Select your location on the interactive map, choose the appropriate category (such as Roads, Sanitation, or Streetlights), provide details, and submit to dispatch municipal authorities.
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <div class="faq-question" onclick="toggleFaqItem(this)">
+                    <span>How can I track my complaint?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </div>
+                  <div class="faq-answer">
+                    Open 'My Complaints' from the sidebar to review the status progression (Pending, Assigned, In Progress, Resolved), assigned field officer, and resolution notes in real-time.
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <div class="faq-question" onclick="toggleFaqItem(this)">
+                    <span>How do I update my profile?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </div>
+                  <div class="faq-answer">
+                    Click on your user menu in the top right header and select 'My Profile' or 'Settings' to update your personal details, language preferences, and notification channels.
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <div class="faq-question" onclick="toggleFaqItem(this)">
+                    <span>What happens after submitting a complaint?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </div>
+                  <div class="faq-answer">
+                    CrowdCity AI routes your report directly to the relevant municipal department. An acknowledgment tracking ID is generated, and you receive milestone updates until final verification.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Client Scripts -->
+  <script src="js/auth.js?v=2.0.8"></script>
+  <script src="js/contact.js?v=1.0.0"></script>
+</body>
+</html>

@@ -463,3 +463,66 @@ export const sendIssueWithdrawnEmail = async (email, fullName, issue) => {
 
   return sendResendEmail({ to: email, subject, html, text });
 };
+
+/**
+ * 9. Contact Us Inquiry Email Notification (Delivered to crowdcityai@gmail.com and citizen receipt)
+ */
+export const sendContactInquiryEmail = async ({ name, email, category, subject, message, attachmentUrl }) => {
+  const adminSubject = `[CrowdCity Contact Inquiry] ${category}: ${subject}`;
+  const adminContentHtml = `
+    <h1 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: #ffffff; text-align: left; letter-spacing: -0.5px; line-height: 1.25;">
+      New Contact Form Inquiry
+    </h1>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 6px; padding: 16px; margin: 16px 0; text-align: left; font-size: 14px; color: #cbd5e1; line-height: 1.6;">
+      <p style="margin: 0 0 8px 0;"><strong style="color: #ffffff;">Sender Name:</strong> ${name}</p>
+      <p style="margin: 0 0 8px 0;"><strong style="color: #ffffff;">Sender Email:</strong> <a href="mailto:${email}" style="color: #38bdf8;">${email}</a></p>
+      <p style="margin: 0 0 8px 0;"><strong style="color: #ffffff;">Category:</strong> ${category}</p>
+      <p style="margin: 0 0 8px 0;"><strong style="color: #ffffff;">Subject:</strong> ${subject}</p>
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #202731;">
+        <strong style="color: #ffffff;">Message:</strong>
+        <p style="margin: 8px 0 0 0; white-space: pre-wrap; color: #e2e8f0;">${message}</p>
+      </div>
+      ${attachmentUrl ? `<p style="margin: 12px 0 0 0;"><strong style="color: #ffffff;">Attachment:</strong> <a href="${attachmentUrl}" target="_blank" style="color: #38bdf8;">View Attachment</a></p>` : ''}
+    </div>
+  `;
+  const adminHtml = getEmailHtmlWrapper('Contact Inquiry', adminContentHtml);
+  const adminText = `New Contact Inquiry\n\nName: ${name}\nEmail: ${email}\nCategory: ${category}\nSubject: ${subject}\n\nMessage:\n${message}\n${attachmentUrl ? `Attachment: ${attachmentUrl}` : ''}`;
+
+  // Send to official inbox crowdcityai@gmail.com
+  await sendResendEmail({
+    to: 'crowdcityai@gmail.com',
+    subject: adminSubject,
+    html: adminHtml,
+    text: adminText
+  });
+
+  // Automated confirmation receipt to sender
+  const userSubject = `We have received your message - CrowdCity`;
+  const userContentHtml = `
+    <h1 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: #ffffff; text-align: left;">
+      Thank you for contacting CrowdCity
+    </h1>
+    <p style="margin: 0 0 16px 0; font-size: 14px; color: #cbd5e1; line-height: 1.6;">
+      Hello ${name},
+    </p>
+    <p style="margin: 0 0 16px 0; font-size: 14px; color: #cbd5e1; line-height: 1.6;">
+      We have received your message regarding <strong>${category}</strong>. Our team will review your message and get back to you.
+    </p>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 6px; padding: 14px; margin: 16px 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+      <p style="margin: 0 0 4px 0;"><strong style="color: #cbd5e1;">Subject:</strong> ${subject}</p>
+      <p style="margin: 0;"><strong style="color: #cbd5e1;">Inquiry ID:</strong> CC-${Date.now().toString(36).toUpperCase()}</p>
+    </div>
+    <p style="margin: 16px 0 0 0; font-size: 13px; color: #94a3b8;">
+      Official Email: <a href="mailto:crowdcityai@gmail.com" style="color: #38bdf8;">crowdcityai@gmail.com</a>
+    </p>
+  `;
+  const userHtml = getEmailHtmlWrapper('Inquiry Received', userContentHtml);
+  const userText = `Hello ${name},\n\nWe have received your inquiry regarding "${subject}" (${category}). Our team will review your message and get back to you.\n\nOfficial Email: crowdcityai@gmail.com\n\nTeam CrowdCity`;
+
+  return sendResendEmail({
+    to: email,
+    subject: userSubject,
+    html: userHtml,
+    text: userText
+  });
+};

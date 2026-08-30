@@ -1862,6 +1862,9 @@ function updateAuthUI() {
               <a href="about.html" class="nav-dropdown-item">
                 <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> About Us
               </a>
+              <a href="contact.html" class="nav-dropdown-item">
+                <i class="fa-solid fa-envelope" style="width: 16px; color: var(--text-muted);"></i> Contact Us
+              </a>
               <div style="border-top: 1px solid var(--border-color); margin: 0.15rem 0;"></div>
               <button onclick="logoutUser()" class="nav-dropdown-item btn-logout">
                 <i class="fa-solid fa-right-from-bracket" style="width: 16px; color: #ef4444;"></i> ${tSignOut}
@@ -1958,6 +1961,9 @@ function updateAuthUI() {
             </a>
             <a href="about.html" class="nav-dropdown-item">
               <i class="fa-solid fa-circle-info" style="width: 16px; color: var(--primary, #0d9488);"></i> <span data-i18n="nav_about_us">${window.i18n ? window.i18n.t('nav_about_us') : 'About Us'}</span>
+            </a>
+            <a href="contact.html" class="nav-dropdown-item">
+              <i class="fa-solid fa-envelope" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_contact_us">${window.i18n ? window.i18n.t('nav_contact_us') : 'Contact Us'}</span>
             </a>
             <a href="settings.html" class="nav-dropdown-item">
               <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_settings">${window.i18n ? window.i18n.t('nav_settings') : 'Settings'}</span>
