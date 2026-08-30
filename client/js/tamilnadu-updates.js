@@ -195,25 +195,29 @@ function renderFilteredUpdates() {
       <article class="tn-update-card">
         <div>
           <div class="tn-card-meta">
-            <span class="tn-district-tag">
-              <i class="fa-solid fa-location-dot"></i> ${safeDistrict}
+            <span class="tn-district-pill">
+              <i class="fa-solid fa-location-dot"></i>
+              <span>${safeDistrict}</span>
             </span>
-            <span class="tn-source-pill">
-              <i class="fa-regular fa-newspaper"></i> ${safeSource}
+            <span class="tn-source-badge">
+              <i class="fa-regular fa-newspaper"></i>
+              <span>${safeSource}</span>
             </span>
           </div>
-          <h3 class="tn-card-title" style="margin-top: 0.75rem;">
+          <h3 class="tn-card-title">
             ${safeTitle}
           </h3>
         </div>
 
         <div class="tn-card-footer">
-          <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
-            <i class="fa-regular fa-clock"></i> ${relativeTime}
+          <span class="tn-time-meta">
+            <i class="fa-regular fa-clock"></i>
+            <span>${relativeTime}</span>
           </span>
           ${item.url ? `
-            <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="tn-read-link">
-              Read Story <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75rem;"></i>
+            <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="tn-read-story-btn">
+              <span>Read Story</span>
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
             </a>
           ` : ''}
         </div>
