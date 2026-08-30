@@ -129,11 +129,13 @@ function initAnalyticsMap() {
 function filterAndUpdateDashboard() {
   if (!rawData) return;
 
-  const activeCategory = document.getElementById('analytics-category-filter').value;
-  const activeRangeDays = document.getElementById('analytics-range-filter').value;
+  const categoryEl = document.getElementById('analytics-category-filter');
+  const rangeEl = document.getElementById('analytics-range-filter');
+  const activeCategory = categoryEl ? categoryEl.value : '';
+  const activeRangeDays = rangeEl ? rangeEl.value : 'all';
 
   // Filter issues list based on criteria
-  let filteredPoints = [...rawData.heatmapPoints];
+  let filteredPoints = Array.isArray(rawData.heatmapPoints) ? [...rawData.heatmapPoints] : [];
 
   // 1. Filter by Category
   if (activeCategory) {
@@ -141,13 +143,13 @@ function filterAndUpdateDashboard() {
   }
 
   // 2. Filter by Date range
-  if (activeRangeDays !== 'all') {
+  if (activeRangeDays && activeRangeDays !== 'all') {
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - parseInt(activeRangeDays));
+    cutoffDate.setDate(cutoffDate.getDate() - parseInt(activeRangeDays, 10));
     filteredPoints = filteredPoints.filter(p => {
-      if (!p.created_at) return false;
+      if (!p.created_at) return true; // Keep if no date for safety or fallback
       const created = new Date(p.created_at);
-      return created >= cutoffDate;
+      return isNaN(created.getTime()) ? true : created >= cutoffDate;
     });
   }
 

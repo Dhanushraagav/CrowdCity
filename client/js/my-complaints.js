@@ -118,10 +118,10 @@ async function loadAndRenderMyIssues() {
   }
 
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  const currentUserId = user ? (user.id || user.sub) : null;
-
-  const activeCategory = document.getElementById('my-issues-category-filter')?.value || '';
-  const activeStatus = document.getElementById('my-issues-status-filter')?.value || '';
+  const catSelect = document.getElementById('my-cat-filter') || document.getElementById('my-issues-category-filter');
+  const statusSelect = document.getElementById('my-status-filter') || document.getElementById('my-issues-status-filter');
+  const activeCategory = catSelect?.value || '';
+  const activeStatus = statusSelect?.value || '';
 
   // Deduplicate: if parameters match the last successfully loaded state, exit
   if (
