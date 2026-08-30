@@ -1604,6 +1604,27 @@ function updateAuthUI() {
     const isMinisters = path.includes('ministers');
     const isAbout = path.includes('about');
 
+    // If sidebar is already rendered (e.g. pre-rendered in HTML), just update active link classes without wiping DOM
+    const existingNav = sidebar.querySelector('.app-sidebar-nav');
+    if (existingNav) {
+      existingNav.querySelectorAll('.app-sidebar-link').forEach(link => {
+        const href = (link.getAttribute('href') || '').toLowerCase();
+        let active = false;
+        if (href.includes('citizen-dashboard') && isDashboard) active = true;
+        else if (href.includes('report.html') && isReport) active = true;
+        else if (href.includes('my-complaints.html') && isComplaints) active = true;
+        else if (href.includes('map.html') && isMap) active = true;
+        else if (href.includes('transportation.html') && isTransportation) active = true;
+        else if (href.includes('services.html') && isServices) active = true;
+        else if (href.includes('emergency-services.html') && isEmergency) active = true;
+        else if (href.includes('helplines.html') && isHelplines) active = true;
+        else if (href.includes('ministers.html') && isMinisters) active = true;
+        
+        link.classList.toggle('active', active);
+      });
+      return;
+    }
+
     // Sidebar remains PERMANENTLY EXPANDED (No auto-collapse / hover-expand)
     sidebar.classList.remove('collapsed', 'expanded');
     sidebar.onmouseenter = null;
