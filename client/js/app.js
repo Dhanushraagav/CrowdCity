@@ -939,26 +939,81 @@ function updateCommunityInsights(issues) {
   `;
 }
 
+// Government Typewriter Ticker Engine
+let _tickerTimer = null;
+let _tickerMessages = [];
+let _tickerMsgIdx = 0;
+let _tickerCharIdx = 0;
+let _tickerIsDeleting = false;
+
 function updateCivicIntelligenceFeed(issues) {
   const feedTextEl = document.getElementById('civic-intelligence-feed-text');
   if (!feedTextEl) return;
 
-  const resolvedIssues = issues.filter(i => i.status === 'resolved' || i.status === 'verified');
+  const msgs = [];
+  const resolvedIssues = (issues || []).filter(i => i.status === 'resolved' || i.status === 'verified');
   if (resolvedIssues.length > 0) {
     resolvedIssues.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    const latestResolved = resolvedIssues[0];
-    const categoryName = window.formatCategoryName ? window.formatCategoryName(latestResolved.category) : latestResolved.category;
-    if (window.i18n) {
-      feedTextEl.innerHTML = window.i18n.t('recently_resolved_ticker', {
-        title: escapeHTML(latestResolved.title),
-        category: categoryName,
-        address: escapeHTML(latestResolved.address || 'location')
-      });
-    } else {
-      feedTextEl.innerHTML = `Recently resolved: "<strong>${escapeHTML(latestResolved.title)}</strong>" (${categoryName}) at ${escapeHTML(latestResolved.address || 'location')}.`;
+    const topResolved = resolvedIssues.slice(0, 3);
+    topResolved.forEach(r => {
+      const categoryName = window.formatCategoryName ? window.formatCategoryName(r.category) : (r.category || 'General');
+      const loc = r.address ? ` at ${r.address}` : '';
+      msgs.push(`Recently resolved: "${r.title}" (${categoryName})${loc}.`);
+    });
+  }
+
+  msgs.push('All municipal civic dispatch services are active and operational across Tamil Nadu.');
+  msgs.push('Apply for Tamil Nadu Welfare Schemes & check eligibility in the Government Services Hub.');
+  msgs.push('24/7 Emergency Helplines: Ambulance 108 • Police 100 • Fire 101 • Citizen Helpline 112.');
+  msgs.push('AI Triage actively classifies road hazards, water supply, and streetlight outages in real-time.');
+
+  _tickerMessages = msgs;
+  
+  if (_tickerTimer) {
+    clearTimeout(_tickerTimer);
+    _tickerTimer = null;
+  }
+
+  _tickerMsgIdx = 0;
+  _tickerCharIdx = 0;
+  _tickerIsDeleting = false;
+  runTickerTypewriter();
+}
+
+function runTickerTypewriter() {
+  const feedTextEl = document.getElementById('civic-intelligence-feed-text');
+  if (!feedTextEl || !_tickerMessages || _tickerMessages.length === 0) return;
+
+  const currentMsg = _tickerMessages[_tickerMsgIdx % _tickerMessages.length];
+
+  if (!_tickerIsDeleting) {
+    // Typing forward
+    _tickerCharIdx++;
+    feedTextEl.textContent = currentMsg.slice(0, _tickerCharIdx);
+
+    if (_tickerCharIdx >= currentMsg.length) {
+      // Finished typing full message: pause for 4.5 seconds to read
+      _tickerIsDeleting = true;
+      _tickerTimer = setTimeout(runTickerTypewriter, 4500);
+      return;
     }
+    // Typing speed
+    _tickerTimer = setTimeout(runTickerTypewriter, 26);
   } else {
-    feedTextEl.textContent = window.i18n ? window.i18n.t('operational_ticker') : 'All municipal services are operational. Check the feed below for community reports.';
+    // Deleting backward
+    _tickerCharIdx -= 2;
+    if (_tickerCharIdx < 0) _tickerCharIdx = 0;
+    feedTextEl.textContent = currentMsg.slice(0, _tickerCharIdx);
+
+    if (_tickerCharIdx <= 0) {
+      // Finished deleting: move to next message
+      _tickerIsDeleting = false;
+      _tickerMsgIdx = (_tickerMsgIdx + 1) % _tickerMessages.length;
+      _tickerTimer = setTimeout(runTickerTypewriter, 350);
+      return;
+    }
+    // Fast delete speed
+    _tickerTimer = setTimeout(runTickerTypewriter, 14);
   }
 }
 
