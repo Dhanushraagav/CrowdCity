@@ -486,7 +486,7 @@ export const addComment = async (req, res) => {
  */
 export const updateIssueStatus = async (req, res) => {
   const { id } = req.params;
-  const { status, notes } = req.body;
+  const { status, notes, official_remarks } = req.body || {};
 
   const validStatuses = ['pending', 'assigned', 'in_progress', 'resolved', 'rejected', 'timeline_update'];
   if (!status || !validStatuses.includes(status)) {
@@ -513,12 +513,12 @@ export const updateIssueStatus = async (req, res) => {
 
     // Enforce mandatory proof image when status transitions to resolved
     if (targetStatus === 'resolved') {
-      if (!req.file && !incomingProof && !originalIssue.completion_proof_url && !originalIssue.completion_photo_url) {
+      if (!req.file && !incomingProof && !originalIssue.completion_proof_url) {
         return res.status(400).json({ error: 'Resolution proof image is strictly required to resolve a complaint.' });
       }
     }
 
-    let proofUrl = incomingProof || originalIssue.completion_proof_url || originalIssue.completion_photo_url || '';
+    let proofUrl = incomingProof || originalIssue.completion_proof_url || '';
 
     // Handle resolution image file upload if multipart file exists
     if (targetStatus === 'resolved' && req.file) {
@@ -582,9 +582,8 @@ export const updateIssueStatus = async (req, res) => {
     if (targetStatus === 'resolved') {
       if (proofUrl) {
         updates.completion_proof_url = proofUrl;
-        updates.completion_photo_url = proofUrl;
       }
-      updates.completion_notes = notes || official_remarks || req.body?.official_remarks || 'Complaint resolved successfully.';
+      updates.completion_notes = notes || official_remarks || 'Complaint resolved successfully.';
     }
 
     // 1. Update status
@@ -604,7 +603,7 @@ export const updateIssueStatus = async (req, res) => {
         issue_id: id,
         status: targetStatus,
         updated_by: req.user.id,
-        notes: notes || (status === 'timeline_update' ? 'Caselog timeline update posted.' : `Status updated to ${status.toUpperCase()} by authority dispatch.`)
+        notes: notes || official_remarks || (status === 'timeline_update' ? 'Caselog timeline update posted.' : `Status updated to ${status.toUpperCase()} by authority dispatch.`)
       });
 
     if (historyError) {
