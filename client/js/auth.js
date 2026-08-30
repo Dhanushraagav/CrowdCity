@@ -1603,9 +1603,20 @@ function updateAuthUI() {
     const isReport = path.includes('report') && !path.includes('reports');
     const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
     const isMap = path.includes('map');
-    const isTransportation = path.includes('transportation') && !path.includes('transportation-report') && !path.includes('my-transportation');
+    const isTransportation = path.includes('transportation');
     const isEmergency = path.includes('emergency-services');
-    const isServices = (path.includes('services') || path.includes('scheme') || path.includes('doc-verifier') || path.includes('app-tracker') || path.includes('office-locator') || path.includes('reminders') || path.includes('form-assistant')) && !isEmergency && !path.includes('services-admin');
+    const isServices = (
+      path.includes('services') ||
+      path.includes('scheme') ||
+      path.includes('document') ||
+      path.includes('doc-verifier') ||
+      path.includes('app-tracker') ||
+      path.includes('office-locator') ||
+      path.includes('reminders') ||
+      path.includes('form-assistant') ||
+      path.includes('assistant') ||
+      path.includes('wallet')
+    ) && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
     const isMinisters = path.includes('ministers');
     const isAbout = path.includes('about');
