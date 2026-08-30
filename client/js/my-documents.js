@@ -157,105 +157,188 @@
     }
   }
 
-  async function fetchUserDocuments() {
-    const container = document.getElementById('documents-grid-container');
-    if (container) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 4rem 1rem; grid-column: 1 / -1;">
-          <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
-          <p style="font-size: 0.95rem; color: var(--text-muted);">Loading your secure document wallet...</p>
-        </div>
-      `;
+  let _docFetchInFlight = null;
+  let _lastDocFetchAt = 0;
+  const _DOC_FETCH_COOLDOWN_MS = 6000;
+
+  async function fetchUserDocuments(isManualRetry = false) {
+    const now = Date.now();
+    // 1. Guard against rapid repeated automatic calls unless manual retry
+    if (!isManualRetry && _lastDocFetchAt && (now - _lastDocFetchAt < _DOC_FETCH_COOLDOWN_MS)) {
+      console.log('[DATA] Document Wallet FETCH SKIPPED (cooldown active)');
+      return;
     }
 
-    try {
-      if (typeof window.getOrInitSupabaseClient === 'function') {
-        const client = await window.getOrInitSupabaseClient();
-        if (client) {
-          const session = await client.auth.getSession();
-          let user = session?.data?.session?.user;
-          const userId = user?.id;
+    // 2. Return in-flight promise if a request is already executing (deduplication)
+    if (_docFetchInFlight) {
+      console.log('[DATA] Document Wallet FETCH JOIN (deduplicated in-flight)');
+      return _docFetchInFlight;
+    }
 
-          if (!userId) {
-            renderEmptyState("Please sign in to access your secure document wallet.");
-            return;
-          }
+    _docFetchInFlight = (async () => {
+      console.log('[DATA] Document Wallet FETCH START');
 
-          // Fetch fresh user profile from Supabase server to pull latest cloud metadata synced from other devices (e.g. mobile -> desktop)
-          try {
-            const { data: freshUserData } = await client.auth.getUser();
-            if (freshUserData?.user) {
-              user = freshUserData.user;
+      // Pre-load local cached documents immediately for fast 0ms paint
+      if (userDocuments.length === 0) {
+        try {
+          const local = localStorage.getItem('cc_user_uploaded_docs');
+          if (local) {
+            const parsed = JSON.parse(local);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              userDocuments = parsed;
+              renderDocumentsList();
             }
-          } catch (getUserErr) {
-            console.warn("[Doc Wallet] Auth getUser fresh sync warning:", getUserErr);
           }
+        } catch (e) {}
+      }
 
-          // Fetch and sync MPIN from account cloud metadata across devices
-          fetchUserMPINCloud();
+      // Show skeleton / loader only if we have zero documents in memory
+      const container = document.getElementById('documents-grid-container');
+      if (container && userDocuments.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 4rem 1rem; grid-column: 1 / -1;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <p style="font-size: 0.95rem; color: var(--text-muted);">Loading your secure document wallet...</p>
+          </div>
+        `;
+      }
 
-          let cloudDocs = [];
-
-          // 1. Primary DB Table Query
-          const { data, error } = await client
-            .from('user_document_wallet')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
-
-          if (!error && Array.isArray(data)) {
-            cloudDocs = data;
+      // Get authenticated user ID synchronously without extra network calls
+      let userId = null;
+      if (typeof getCurrentUser === 'function') {
+        const u = getCurrentUser();
+        if (u) userId = u.id || u.sub;
+      }
+      if (!userId && typeof getSession === 'function') {
+        const s = getSession();
+        if (s && s.user) userId = s.user.id || s.user.sub;
+      }
+      if (!userId) {
+        try {
+          const sessionStr = localStorage.getItem('cc_session');
+          if (sessionStr) {
+            const parsed = JSON.parse(sessionStr);
+            if (parsed && parsed.user) userId = parsed.user.id || parsed.user.sub;
           }
+        } catch (e) {}
+      }
 
-          // 2. Secondary Cloud Metadata Backup Check
-          const userMetaDocs = user?.user_metadata?.user_documents;
-          if (Array.isArray(userMetaDocs) && userMetaDocs.length > 0) {
-            userMetaDocs.forEach(metaDoc => {
-              if (!cloudDocs.some(d => d.id === metaDoc.id)) {
-                cloudDocs.push(metaDoc);
-              }
-            });
-          }
+      if (!userId) {
+        console.log('[DATA] Document Wallet FETCH ERROR: No authenticated user');
+        if (userDocuments.length === 0) {
+          renderEmptyState("Please sign in to access your secure document wallet.");
+        }
+        return;
+      }
 
-          if (cloudDocs.length > 0) {
-            userDocuments = cloudDocs;
-            saveLocalDocsIndex(userDocuments);
+      updateMPINHeaderButton();
 
-            // Auto-cache cloud document binary files to local IndexedDB on this device
-            for (const doc of userDocuments) {
-              if (doc.file_url && doc.file_url.startsWith('data:')) {
-                const existingInDb = await IndexedDocDB.getFile(doc.id);
-                if (!existingInDb) {
-                  const blob = dataURLToBlob(doc.file_url);
-                  if (blob) {
-                    await IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
+      let fetchSucceeded = false;
+      try {
+        if (typeof window.getOrInitSupabaseClient === 'function') {
+          const client = await window.getOrInitSupabaseClient();
+          if (client) {
+            const { data, error } = await client
+              .from('user_document_wallet')
+              .select('id, user_id, doc_type, doc_name, file_url, file_size, file_format, created_at')
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false });
+
+            if (!error && Array.isArray(data)) {
+              fetchSucceeded = true;
+              _lastDocFetchAt = Date.now();
+              console.log('[DATA] Document Wallet FETCH SUCCESS', data.length);
+
+              if (data.length > 0) {
+                userDocuments = data;
+                saveLocalDocsIndex(userDocuments);
+
+                // Asynchronously cache files to IndexedDB without blocking render
+                setTimeout(async () => {
+                  for (const doc of userDocuments) {
+                    if (doc.file_url && doc.file_url.startsWith('data:')) {
+                      try {
+                        const existingInDb = await IndexedDocDB.getFile(doc.id);
+                        if (!existingInDb) {
+                          const blob = dataURLToBlob(doc.file_url);
+                          if (blob) {
+                            await IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
+                          }
+                        }
+                      } catch (err) {}
+                    }
                   }
-                }
-              }
-            }
+                }, 80);
 
+                renderDocumentsList();
+                return;
+              } else {
+                userDocuments = [];
+                saveLocalDocsIndex(userDocuments);
+                renderEmptyState("You haven't uploaded any documents to your wallet yet. Upload your Aadhaar, Ration Card, or Income Certificate to prepare for government scheme applications.");
+                return;
+              }
+            } else if (error) {
+              console.warn('[DATA] Document Wallet FETCH ERROR from Supabase:', error);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[DATA] Document Wallet FETCH ERROR:', err);
+      }
+
+      _lastDocFetchAt = Date.now();
+
+      // If temporary network failure occurs, retain existing valid documents
+      if (userDocuments.length > 0) {
+        console.log('[DATA] Retaining existing in-memory/cached documents:', userDocuments.length);
+        renderDocumentsList();
+        return;
+      }
+
+      // Check local storage fallback
+      try {
+        const local = localStorage.getItem('cc_user_uploaded_docs');
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            userDocuments = parsed;
             renderDocumentsList();
             return;
           }
         }
-      }
-    } catch (err) {
-      console.warn("Supabase document fetch error, using local index fallback:", err);
+      } catch (e) {}
+
+      // Clean error state with manual Try Again action
+      renderErrorState("Unable to load documents. Please check your connection and try again.");
+    })().finally(() => {
+      _docFetchInFlight = null;
+    });
+
+    return _docFetchInFlight;
+  }
+
+  function renderErrorState(message) {
+    const container = document.getElementById('documents-grid-container');
+    const countElem = document.getElementById('docs-count-badge');
+    if (countElem) countElem.textContent = '0';
+    if (!container) return;
+
+    container.innerHTML = `
+      <div style="text-align: center; padding: 4rem 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; grid-column: 1 / -1;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.8rem; color: #ef4444; margin-bottom: 1rem;"></i>
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">Unable to Load Documents</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.5rem auto; line-height: 1.5;">${message}</p>
+        <button type="button" id="btn-doc-retry" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <i class="fa-solid fa-rotate-right"></i> <span>Try Again</span>
+        </button>
+      </div>
+    `;
+
+    const retryBtn = document.getElementById('btn-doc-retry');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => fetchUserDocuments(true));
     }
-
-    // Local Storage Index Fallback if database table is pending
-    try {
-      const local = localStorage.getItem('cc_user_uploaded_docs');
-      if (local) {
-        userDocuments = JSON.parse(local);
-        if (userDocuments.length > 0) {
-          renderDocumentsList();
-          return;
-        }
-      }
-    } catch (e) {}
-
-    renderEmptyState("You haven't uploaded any documents to your wallet yet. Upload your Aadhaar, Ration Card, or Income Certificate to prepare for government scheme applications.");
   }
 
   function renderEmptyState(message) {
@@ -395,7 +478,6 @@
       if (doc.file_url.startsWith('data:')) {
         const blob = dataURLToBlob(doc.file_url);
         if (blob) {
-          // Auto-cache to local IndexedDB for instant future views
           IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
           const blobUrl = URL.createObjectURL(blob);
           window.open(blobUrl, '_blank');
@@ -421,7 +503,6 @@
     } else if (doc.file_url && doc.file_url.startsWith('data:')) {
       const blob = dataURLToBlob(doc.file_url);
       if (blob) {
-        // Auto-cache to local IndexedDB
         IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
         a.href = URL.createObjectURL(blob);
       } else {
@@ -463,8 +544,15 @@
     // Store binary file Blob in local IndexedDB
     await IndexedDocDB.saveFile(docId, file, { docType, docName: cleanDocName });
 
+    let userId = null;
+    if (typeof getCurrentUser === 'function') {
+      const u = getCurrentUser();
+      if (u) userId = u.id || u.sub;
+    }
+
     const newDoc = {
       id: docId,
+      user_id: userId,
       doc_type: docType,
       doc_name: cleanDocName,
       file_url: fileDataUrl,
@@ -487,44 +575,25 @@
     if (window.showToast) window.showToast(`Document "${cleanDocName}" securely added to your wallet!`, "success");
     renderDocumentsList();
 
-    // Asynchronous Cloud Sync across all devices (Desktop, Laptop, Mobile, Tablet, PWA)
+    // Cloud Database Table Sync
     try {
-      if (typeof window.getOrInitSupabaseClient === 'function') {
+      if (typeof window.getOrInitSupabaseClient === 'function' && userId) {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
-          const session = await client.auth.getSession();
-          const userId = session?.data?.session?.user?.id;
-          if (userId) {
-            newDoc.user_id = userId;
+          const { error } = await client.from('user_document_wallet').upsert({
+            id: docId,
+            user_id: userId,
+            doc_type: docType,
+            doc_name: cleanDocName,
+            file_url: fileDataUrl,
+            file_size: file.size,
+            file_format: file.type || 'application/pdf'
+          });
 
-            // A. Primary Table Upsert
-            client.from('user_document_wallet').upsert({
-              id: docId,
-              user_id: userId,
-              doc_type: docType,
-              doc_name: cleanDocName,
-              file_url: fileDataUrl,
-              file_size: file.size,
-              file_format: file.type || 'pdf'
-            }).then(() => console.log('[Doc Wallet Sync] Document upserted to cloud table'))
-              .catch(e => console.warn('[Doc Wallet Sync Warning]', e));
-
-            // B. Secondary Account User Metadata Cloud Backup
-            const cleanUserDocs = userDocuments.map(d => ({
-              id: d.id,
-              user_id: userId,
-              doc_type: d.doc_type,
-              doc_name: d.doc_name,
-              file_url: d.file_url || fileDataUrl,
-              file_size: d.file_size,
-              file_format: d.file_format,
-              created_at: d.created_at
-            })).slice(0, 15);
-
-            client.auth.updateUser({
-              data: { user_documents: cleanUserDocs }
-            }).then(() => console.log('[Doc Wallet Sync] Document list synced to cloud account metadata'))
-              .catch(e => console.warn('[Doc Wallet Metadata Sync Warning]', e));
+          if (error) {
+            console.warn('[Doc Wallet Sync Warning]', error);
+          } else {
+            console.log('[Doc Wallet Sync] Document upserted to cloud table');
           }
         }
       }
@@ -558,31 +627,19 @@
     userDocuments = userDocuments.filter(d => d.id !== docId);
     saveLocalDocsIndex(userDocuments);
 
-    // Delete from Supabase table & cloud metadata if online
+    let userId = null;
+    if (typeof getCurrentUser === 'function') {
+      const u = getCurrentUser();
+      if (u) userId = u.id || u.sub;
+    }
+
+    // Delete from Supabase table if online
     try {
-      if (typeof window.getOrInitSupabaseClient === 'function') {
+      if (typeof window.getOrInitSupabaseClient === 'function' && userId) {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
-          const session = await client.auth.getSession();
-          const userId = session?.data?.session?.user?.id;
-          if (userId) {
-            await client.from('user_document_wallet').delete().eq('id', docId).eq('user_id', userId);
-
-            const cleanUserDocs = userDocuments.map(d => ({
-              id: d.id,
-              user_id: userId,
-              doc_type: d.doc_type,
-              doc_name: d.doc_name,
-              file_url: d.file_url,
-              file_size: d.file_size,
-              file_format: d.file_format,
-              created_at: d.created_at
-            }));
-
-            await client.auth.updateUser({
-              data: { user_documents: cleanUserDocs }
-            });
-          }
+          await client.from('user_document_wallet').delete().eq('id', docId).eq('user_id', userId);
+          console.log('[Doc Wallet Delete] Removed from cloud table');
         }
       }
     } catch (e) {}
@@ -593,16 +650,6 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     fetchUserDocuments();
-
-    // Auto-sync document wallet whenever switching between tabs or devices
-    window.addEventListener('focus', () => {
-      fetchUserDocuments();
-    });
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        fetchUserDocuments();
-      }
-    });
 
     // File Input & Drag and Drop Setup
     const fileInput = document.getElementById('doc-file-input');
@@ -750,69 +797,45 @@
   let activeEmailOTP = '';
   let cachedUserMPIN = '';
 
-  async function fetchUserMPINCloud() {
+  function fetchUserMPINCloud() {
     try {
-      if (typeof window.getOrInitSupabaseClient === 'function') {
-        const client = await window.getOrInitSupabaseClient();
-        if (client) {
-          const session = await client.auth.getSession();
-          const user = session?.data?.session?.user;
-          if (user) {
-            const cloudPin = user.user_metadata?.wallet_mpin || '';
-            const userKey = `cc_doc_wallet_mpin_${user.id}`;
-            const localUserPin = localStorage.getItem(userKey) || '';
-            const fallbackPin = localStorage.getItem(MPIN_STORAGE_KEY) || '';
-
-            const activePin = cloudPin || localUserPin || fallbackPin;
-            if (activePin) {
-              cachedUserMPIN = activePin;
-              localStorage.setItem(userKey, activePin);
-              localStorage.setItem(MPIN_STORAGE_KEY, activePin);
-              updateMPINHeaderButton();
-
-              // If cloud metadata didn't have it but local did, sync to cloud account metadata
-              if (!cloudPin && activePin) {
-                client.auth.updateUser({ data: { wallet_mpin: activePin } })
-                  .then(() => console.log('[MPIN Sync] Synchronized local MPIN to cloud account metadata'))
-                  .catch(e => console.warn('[MPIN Sync Warning]', e));
-              }
-            }
-          }
-        }
+      let userId = null;
+      if (typeof getCurrentUser === 'function') {
+        const u = getCurrentUser();
+        if (u) userId = u.id || u.sub;
       }
-    } catch (e) {
-      console.warn("MPIN cloud fetch error:", e);
-    }
+      const userKey = userId ? `cc_doc_wallet_mpin_${userId}` : MPIN_STORAGE_KEY;
+      const activePin = localStorage.getItem(userKey) || localStorage.getItem(MPIN_STORAGE_KEY) || '';
+      if (activePin) {
+        cachedUserMPIN = activePin;
+        updateMPINHeaderButton();
+      }
+    } catch (e) {}
   }
 
   function getStoredMPIN() {
     if (cachedUserMPIN) return cachedUserMPIN;
-    return localStorage.getItem(MPIN_STORAGE_KEY) || '';
+    let userId = null;
+    if (typeof getCurrentUser === 'function') {
+      const u = getCurrentUser();
+      if (u) userId = u.id || u.sub;
+    }
+    const userKey = userId ? `cc_doc_wallet_mpin_${userId}` : MPIN_STORAGE_KEY;
+    return localStorage.getItem(userKey) || localStorage.getItem(MPIN_STORAGE_KEY) || '';
   }
 
   async function saveStoredMPIN(pin) {
     cachedUserMPIN = pin;
     localStorage.setItem(MPIN_STORAGE_KEY, pin);
-
-    try {
-      if (typeof window.getOrInitSupabaseClient === 'function') {
-        const client = await window.getOrInitSupabaseClient();
-        if (client) {
-          const session = await client.auth.getSession();
-          const userId = session?.data?.session?.user?.id;
-          if (userId) {
-            localStorage.setItem(`cc_doc_wallet_mpin_${userId}`, pin);
-          }
-          // Sync across all devices (Desktop, Mobile, Tablet) via Supabase User Metadata
-          await client.auth.updateUser({
-            data: { wallet_mpin: pin }
-          });
-          console.log('[MPIN Sync] Successfully saved MPIN to cloud account across all devices');
-        }
-      }
-    } catch (err) {
-      console.warn('[MPIN Sync Error] Cloud sync fallback:', err);
+    let userId = null;
+    if (typeof getCurrentUser === 'function') {
+      const u = getCurrentUser();
+      if (u) userId = u.id || u.sub;
     }
+    if (userId) {
+      localStorage.setItem(`cc_doc_wallet_mpin_${userId}`, pin);
+    }
+    updateMPINHeaderButton();
   }
 
   function isSessionUnlocked() {
