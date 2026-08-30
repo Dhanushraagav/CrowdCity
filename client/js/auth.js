@@ -2305,6 +2305,67 @@ window.addEventListener('language-change', () => {
   initHeaderClock();
 });
 
+window.openProfilePhotoViewer = function(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const user = getCurrentUser();
+  let cachedProfile = null;
+  try {
+    const profileStr = localStorage.getItem('cc_user_profile');
+    if (profileStr) cachedProfile = JSON.parse(profileStr);
+  } catch (err) {}
+  
+  const avatarUrl = cachedProfile?.avatar_url || user?.user_metadata?.avatar_url || user?.avatar_url || '';
+  const fullName = cachedProfile?.full_name || user?.user_metadata?.full_name || 'Citizen';
+  
+  let modal = document.getElementById('cc-photo-viewer-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'cc-photo-viewer-modal';
+    modal.className = 'cc-photo-viewer-overlay hidden';
+    modal.innerHTML = `
+      <div class="cc-photo-viewer-backdrop" onclick="window.closeProfilePhotoViewer()"></div>
+      <div class="cc-photo-viewer-dialog">
+        <button class="cc-photo-viewer-close" onclick="window.closeProfilePhotoViewer()" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="cc-photo-viewer-body">
+          <img id="cc-photo-viewer-img" src="" alt="Profile Photo" />
+          <div id="cc-photo-viewer-caption"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  
+  const imgEl = document.getElementById('cc-photo-viewer-img');
+  const captionEl = document.getElementById('cc-photo-viewer-caption');
+  
+  if (avatarUrl) {
+    if (imgEl) {
+      imgEl.src = avatarUrl;
+      imgEl.style.display = 'block';
+    }
+  } else {
+    if (imgEl) imgEl.style.display = 'none';
+  }
+  
+  if (captionEl) captionEl.textContent = fullName;
+  
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeProfilePhotoViewer = function() {
+  const modal = document.getElementById('cc-photo-viewer-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+  document.body.style.overflow = '';
+};
+
 // MD3 Responsive Side Drawer Helper Functions
 function initResponsiveSidebar() {
   const isMobile = window.innerWidth < 768;
@@ -2371,7 +2432,7 @@ function initResponsiveSidebar() {
     const tLogout = window.i18n ? window.i18n.t('nav_logout') : 'Logout';
     
     const mobileHtml = `
-      <a href="${profileHref}" class="mobile-drawer-header-link" style="text-decoration: none; color: inherit; display: block; width: 100%;">
+      <div class="mobile-drawer-header-link" onclick="window.openProfilePhotoViewer(event)" style="cursor: pointer; text-decoration: none; color: inherit; display: block; width: 100%;">
         <div class="mobile-drawer-header" style="cursor: pointer;">
           <div class="mobile-drawer-avatar">${avatarHtml}</div>
           <div class="mobile-drawer-profile-info">
@@ -2379,7 +2440,7 @@ function initResponsiveSidebar() {
             <div class="mobile-drawer-useremail">${userEmail}</div>
           </div>
         </div>
-      </a>
+      </div>
       <div class="mobile-drawer-divider"></div>
       <nav class="mobile-drawer-nav">
         ${linksHtml}

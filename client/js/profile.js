@@ -122,6 +122,12 @@ function renderProfileFields(displayName, email, avatarUrl, points, role, create
 
   const avatarDisplay = document.getElementById('profile-avatar-display');
   if (avatarDisplay) {
+    avatarDisplay.style.cursor = 'pointer';
+    avatarDisplay.onclick = (e) => {
+      if (typeof window.openProfilePhotoViewer === 'function') {
+        window.openProfilePhotoViewer(e);
+      }
+    };
     if (avatarUrl) {
       avatarDisplay.innerHTML = `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover; border-radius: 50%;">`;
     } else {
