@@ -1,10 +1,16 @@
 let currentComplaintsTab = 'civic'; // 'civic' or 'transportation'
 let lastLoadId = 0;
-let lastLoadedState = { userId: undefined, category: undefined, status: undefined };
+let lastLoadedState = { userId: undefined, category: undefined, status: undefined, tab: undefined };
 let myComplaintsRealtimeChannel = null;
 
+// In-memory cache for ultra-fast 0ms tab switching
+let _memoryCacheCivic = null;
+let _memoryCacheTrans = null;
+
 window.switchComplaintsTab = function(tab) {
+  if (currentComplaintsTab === tab && lastLoadedState.tab === tab) return;
   currentComplaintsTab = tab;
+
   const civicBtn = document.getElementById('tab-btn-civic');
   const transBtn = document.getElementById('tab-btn-transportation');
 
@@ -28,8 +34,27 @@ window.switchComplaintsTab = function(tab) {
     }
   }
 
-  // Reset state to force reload for selected tab
-  lastLoadedState = { userId: undefined, category: undefined, status: undefined };
+  // Instant SWR paint from in-memory or localStorage cache for 0ms transition
+  const cached = (tab === 'transportation') ? _memoryCacheTrans : _memoryCacheCivic;
+  const storageKey = (tab === 'transportation') ? 'cc_my_complaints_trans' : 'cc_my_complaints_civic';
+  
+  if (Array.isArray(cached) && cached.length > 0) {
+    renderMyIssuesList(cached);
+  } else {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (tab === 'transportation') _memoryCacheTrans = parsed;
+          else _memoryCacheCivic = parsed;
+          renderMyIssuesList(parsed);
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Trigger fast background revalidation
   loadAndRenderMyIssues();
 };
 
@@ -39,7 +64,40 @@ async function initMyComplaints() {
   const tabParam = urlParams.get('tab');
   if (tabParam === 'transportation') {
     window.switchComplaintsTab('transportation');
+  } else {
+    // Warm up the other tab in the background so switching is 0ms
+    setTimeout(() => {
+      prefetchTransportationComplaints();
+    }, 800);
   }
+}
+
+async function prefetchTransportationComplaints() {
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (!user || !user.id || _memoryCacheTrans) return;
+  try {
+    const res = await window.API.getTransportationReports({ user_id: user.id });
+    const reports = (res && res.data && res.data.reports) ? res.data.reports : ((res && res.reports) ? res.reports : []);
+    const normalized = reports.map(r => ({
+      id: r.id,
+      tracking_number: r.report_number || r.id,
+      title: r.title,
+      description: r.description,
+      category: r.category,
+      status: r.status,
+      priority: r.priority || 'Medium',
+      address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : r.address,
+      created_at: r.created_at,
+      assigned_department: r.responsible_department || 'Roads Dept',
+      assigned_officer: r.assigned_to,
+      photo_urls: r.photo_urls,
+      ai_summary: r.summary,
+      suggested_resolution: r.suggested_resolution,
+      is_transportation: true
+    }));
+    _memoryCacheTrans = normalized;
+    localStorage.setItem('cc_my_complaints_trans', JSON.stringify(normalized));
+  } catch (e) {}
 }
 
 // Fetch only user reported complaints
@@ -60,7 +118,7 @@ async function loadAndRenderMyIssues() {
   }
 
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  const currentUserId = user ? user.id : null;
+  const currentUserId = user ? (user.id || user.sub) : null;
 
   const activeCategory = document.getElementById('my-issues-category-filter')?.value || '';
   const activeStatus = document.getElementById('my-issues-status-filter')?.value || '';
@@ -75,23 +133,35 @@ async function loadAndRenderMyIssues() {
     return;
   }
 
-  // Cache-first: render cached complaints if they exist and no filters are active
+  const storageKey = (currentComplaintsTab === 'transportation') ? 'cc_my_complaints_trans' : 'cc_my_complaints_civic';
+  const memCached = (currentComplaintsTab === 'transportation') ? _memoryCacheTrans : _memoryCacheCivic;
+
+  // Cache-first: render cached complaints if they exist
   let hasCachedData = false;
   if (!activeCategory && !activeStatus) {
-    const cachedMyComplaints = localStorage.getItem('cc_my_complaints');
-    if (cachedMyComplaints) {
-      try {
-        const issues = JSON.parse(cachedMyComplaints);
-        renderMyIssuesList(issues);
-        hasCachedData = true;
-      } catch (e) {
-        console.warn("Failed to parse cached complaints:", e);
+    if (Array.isArray(memCached) && memCached.length > 0) {
+      renderMyIssuesList(memCached);
+      hasCachedData = true;
+    } else {
+      const cachedStr = localStorage.getItem(storageKey);
+      if (cachedStr) {
+        try {
+          const issues = JSON.parse(cachedStr);
+          if (Array.isArray(issues)) {
+            if (currentComplaintsTab === 'transportation') _memoryCacheTrans = issues;
+            else _memoryCacheCivic = issues;
+            renderMyIssuesList(issues);
+            hasCachedData = true;
+          }
+        } catch (e) {
+          console.warn("Failed to parse cached complaints:", e);
+        }
       }
     }
   }
 
-  // Draw shimming skeletons only if parameters changed or we don't have cached data
-  if (!hasCachedData || activeCategory || activeStatus) {
+  // Draw shimming skeletons ONLY if we have zero cached data to show
+  if (!hasCachedData && (activeCategory || activeStatus || !memCached)) {
     container.innerHTML = `
         <div class="issue-card" style="cursor: default; pointer-events: none; display: flex; flex-direction: column; gap: 12px; padding: 1.25rem; border: 1px solid var(--border-color);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -147,7 +217,7 @@ async function loadAndRenderMyIssues() {
   if (currentComplaintsTab === 'transportation') {
     try {
       const res = await window.API.getTransportationReports({
-        user_id: user.id,
+        user_id: currentUserId,
         category: activeCategory,
         status: activeStatus
       });
@@ -175,7 +245,7 @@ async function loadAndRenderMyIssues() {
     }
   } else {
     const res = await window.API.getIssues({
-      reporter_id: user.id,
+      reporter_id: currentUserId,
       category: activeCategory,
       status: activeStatus
     });
@@ -190,7 +260,6 @@ async function loadAndRenderMyIssues() {
 
   if (error || !issues) {
     console.error(`[My Complaints Load] Failed to load issues. loadId: ${loadId}. Error:`, error);
-    // If we already have cached data displayed, don't show the error panel
     if (hasCachedData) {
       return;
     }
@@ -206,32 +275,25 @@ async function loadAndRenderMyIssues() {
     return;
   }
 
-  // Check if fresh issues match the cached issues to avoid duplicate render
-  const freshComplaintsStr = JSON.stringify(issues);
-  const cachedMyComplaints = localStorage.getItem('cc_my_complaints');
-  if (hasCachedData && cachedMyComplaints === freshComplaintsStr) {
-    lastLoadedState = {
-      userId: currentUserId,
-      category: activeCategory,
-      status: activeStatus
-    };
-    document.body.classList.add('ready');
-    document.body.style.visibility = 'visible';
-    return;
+  // Save to in-memory & localStorage cache
+  if (currentComplaintsTab === 'transportation') {
+    _memoryCacheTrans = issues;
+  } else {
+    _memoryCacheCivic = issues;
+  }
+
+  if (!activeCategory && !activeStatus) {
+    localStorage.setItem(storageKey, JSON.stringify(issues));
   }
 
   renderMyIssuesList(issues);
   
-  // Cache the result for default category + status
-  if (!activeCategory && !activeStatus) {
-    localStorage.setItem('cc_my_complaints', freshComplaintsStr);
-  }
-
   // Update last successfully loaded state
   lastLoadedState = {
     userId: currentUserId,
     category: activeCategory,
-    status: activeStatus
+    status: activeStatus,
+    tab: currentComplaintsTab
   };
 
   document.body.classList.add('ready');
