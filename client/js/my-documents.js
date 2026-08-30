@@ -157,6 +157,16 @@
     }
   }
 
+  function generateDocUUID() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
   let _docFetchInFlight = null;
   let _lastDocFetchAt = 0;
   const _DOC_FETCH_COOLDOWN_MS = 6000;
@@ -249,35 +259,23 @@
               _lastDocFetchAt = Date.now();
               console.log('[DATA] Document Wallet FETCH SUCCESS', data.length);
 
-              if (data.length > 0) {
-                userDocuments = data;
-                saveLocalDocsIndex(userDocuments);
+              // Mark cloud documents as synced
+              const cloudDocs = data.map(d => ({ ...d, sync_status: 'synced' }));
 
-                // Asynchronously cache files to IndexedDB without blocking render
-                setTimeout(async () => {
-                  for (const doc of userDocuments) {
-                    if (doc.file_url && doc.file_url.startsWith('data:')) {
-                      try {
-                        const existingInDb = await IndexedDocDB.getFile(doc.id);
-                        if (!existingInDb) {
-                          const blob = dataURLToBlob(doc.file_url);
-                          if (blob) {
-                            await IndexedDocDB.saveFile(doc.id, blob, { docType: doc.doc_type, docName: doc.doc_name });
-                          }
-                        }
-                      } catch (err) {}
-                    }
-                  }
-                }, 80);
+              // Retain any local-only pending documents that haven't synced yet
+              const pendingDocs = userDocuments.filter(localDoc => 
+                localDoc.sync_status === 'pending_sync' && !cloudDocs.some(cd => cd.id === localDoc.id)
+              );
 
+              userDocuments = [...pendingDocs, ...cloudDocs];
+              saveLocalDocsIndex(userDocuments);
+
+              if (userDocuments.length > 0) {
                 renderDocumentsList();
-                return;
               } else {
-                userDocuments = [];
-                saveLocalDocsIndex(userDocuments);
                 renderEmptyState("You haven't uploaded any documents to your wallet yet. Upload your Aadhaar, Ration Card, or Income Certificate to prepare for government scheme applications.");
-                return;
               }
+              return;
             } else if (error) {
               console.warn('[DATA] Document Wallet FETCH ERROR from Supabase:', error);
             }
@@ -385,15 +383,17 @@
       const typeInfo = documentTypesList.find(t => t.code === doc.doc_type) || { name: doc.doc_name };
       const formattedDate = new Date(doc.created_at || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
       const sizeStr = doc.file_size ? `${(doc.file_size / 1024).toFixed(0)} KB` : 'Document File';
+      const isSynced = doc.sync_status !== 'pending_sync';
+      const statusBadge = isSynced
+        ? `<span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(13, 148, 136, 0.12); color: var(--primary);"><i class="fa-solid fa-cloud-check" style="margin-right: 4px;"></i> Available</span>`
+        : `<span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(245, 158, 11, 0.12); color: #d97706;" title="Saved locally on this device"><i class="fa-solid fa-hard-drive" style="margin-right: 4px;"></i> Local (Sync Pending)</span>`;
 
       return `
         <div class="doc-wallet-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 6px 20px rgba(0,0,0,0.03);">
           
           <div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(13, 148, 136, 0.12); color: var(--primary);">
-                Available
-              </span>
+              ${statusBadge}
 
               <button type="button" class="btn-delete-doc" data-id="${doc.id}" title="Delete Document" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
                 <i class="fa-solid fa-trash-can"></i>
@@ -473,8 +473,8 @@
       return;
     }
 
-    // 2. Fallback to file_url (cloud Base64 Data URL)
-    if (doc.file_url) {
+    // 2. Fallback to file_url (cloud Base64 Data URL or link)
+    if (doc.file_url && !doc.file_url.startsWith('indexeddb://')) {
       if (doc.file_url.startsWith('data:')) {
         const blob = dataURLToBlob(doc.file_url);
         if (blob) {
@@ -488,7 +488,7 @@
       return;
     }
 
-    if (window.showToast) window.showToast("Document preview unavailable.", "warning");
+    if (window.showToast) window.showToast("Document preview unavailable on this device.", "warning");
   }
 
   async function downloadDocumentFile(doc) {
@@ -508,10 +508,10 @@
       } else {
         a.href = doc.file_url;
       }
-    } else if (doc.file_url) {
+    } else if (doc.file_url && !doc.file_url.startsWith('indexeddb://')) {
       a.href = doc.file_url;
     } else {
-      if (window.showToast) window.showToast("File data unavailable for download.", "error");
+      if (window.showToast) window.showToast("File data unavailable for download on this device.", "error");
       return;
     }
 
@@ -529,77 +529,106 @@
       return;
     }
 
-    const docId = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    const docUuid = generateDocUUID();
     const cleanDocName = docName || file.name || 'Uploaded Document';
-
-    // Convert and compress file to Base64 Data URL for cross-device cloud sync
-    let fileDataUrl = '';
-    try {
-      fileDataUrl = await compressImageFile(file);
-    } catch (e) {
-      console.warn("File compression warning:", e);
-      fileDataUrl = await fileToDataURL(file);
-    }
-
-    // Store binary file Blob in local IndexedDB
-    await IndexedDocDB.saveFile(docId, file, { docType, docName: cleanDocName });
+    const mimeType = file.type || 'application/pdf';
 
     let userId = null;
     if (typeof getCurrentUser === 'function') {
       const u = getCurrentUser();
       if (u) userId = u.id || u.sub;
     }
+    if (!userId && typeof getSession === 'function') {
+      const s = getSession();
+      if (s && s.user) userId = s.user.id || s.user.sub;
+    }
+
+    console.log('[DATA] Document Upload START', {
+      docId: docUuid,
+      hasUserId: !!userId,
+      docType: docType,
+      docName: cleanDocName,
+      fileSize: file.size,
+      mimeType: mimeType
+    });
+
+    // 1. Store full binary file Blob in local IndexedDB
+    try {
+      await IndexedDocDB.saveFile(docUuid, file, { docType, docName: cleanDocName });
+      console.log('[DATA] Document Upload LOCAL SUCCESS');
+    } catch (dbErr) {
+      console.warn('[DATA] Document Upload LOCAL DB WARNING:', dbErr);
+    }
 
     const newDoc = {
-      id: docId,
+      id: docUuid,
       user_id: userId,
       doc_type: docType,
       doc_name: cleanDocName,
-      file_url: fileDataUrl,
+      file_url: `indexeddb://${docUuid}`,
       file_size: file.size,
-      file_format: file.type || 'application/pdf',
+      file_format: mimeType,
+      sync_status: 'pending_sync',
       created_at: new Date().toISOString()
     };
 
-    // Instant Optimistic UI Update: Render document in grid immediately
-    const exists = userDocuments.some(d => d.id === docId);
+    // Render document in grid immediately
+    const exists = userDocuments.some(d => d.id === docUuid);
     if (!exists) {
       userDocuments.unshift(newDoc);
     }
     saveLocalDocsIndex(userDocuments);
 
-    // Reset file input so user can select files again immediately
+    // Reset file input
     const fileInput = document.getElementById('doc-file-input');
     if (fileInput) fileInput.value = '';
 
-    if (window.showToast) window.showToast(`Document "${cleanDocName}" securely added to your wallet!`, "success");
     renderDocumentsList();
 
-    // Cloud Database Table Sync
-    try {
-      if (typeof window.getOrInitSupabaseClient === 'function' && userId) {
-        const client = await window.getOrInitSupabaseClient();
-        if (client) {
-          const { error } = await client.from('user_document_wallet').upsert({
-            id: docId,
-            user_id: userId,
-            doc_type: docType,
-            doc_name: cleanDocName,
-            file_url: fileDataUrl,
-            file_size: file.size,
-            file_format: file.type || 'application/pdf'
-          });
+    // 2. Cloud Metadata Synchronization (Single bounded INSERT)
+    if (userId) {
+      console.log('[DATA] Document Upload CLOUD INSERT START');
+      try {
+        if (typeof window.getOrInitSupabaseClient === 'function') {
+          const client = await window.getOrInitSupabaseClient();
+          if (client) {
+            const { data, error } = await client.from('user_document_wallet').insert([{
+              id: docUuid,
+              user_id: userId,
+              doc_type: docType,
+              doc_name: cleanDocName,
+              file_url: `indexeddb://${docUuid}`,
+              file_path: `doc_wallet/${cleanDocName}`,
+              file_size: file.size,
+              file_format: mimeType
+            }]);
 
-          if (error) {
-            console.warn('[Doc Wallet Sync Warning]', error);
-          } else {
-            console.log('[Doc Wallet Sync] Document upserted to cloud table');
+            if (!error) {
+              console.log('[DATA] Document Upload CLOUD INSERT SUCCESS');
+              console.log('[DATA] Document Upload COMPLETE');
+              newDoc.sync_status = 'synced';
+              saveLocalDocsIndex(userDocuments);
+              renderDocumentsList();
+              if (window.showToast) window.showToast(`Document "${cleanDocName}" securely added to your wallet!`, "success");
+              return;
+            } else {
+              console.warn('[DATA] Document Upload CLOUD INSERT FAILED', error);
+              console.log('[DATA] Document Upload STATUS: PENDING_SYNC');
+            }
           }
         }
+      } catch (cloudErr) {
+        console.warn('[DATA] Document Upload CLOUD INSERT FAILED', cloudErr);
+        console.log('[DATA] Document Upload STATUS: PENDING_SYNC');
       }
-    } catch (e) {
-      console.warn("Cloud sync error:", e);
+    } else {
+      console.log('[DATA] Document Upload STATUS: PENDING_SYNC (No user ID)');
     }
+
+    newDoc.sync_status = 'pending_sync';
+    saveLocalDocsIndex(userDocuments);
+    renderDocumentsList();
+    if (window.showToast) window.showToast("Saved locally — cloud sync pending", "info");
   }
 
   function saveLocalDocsIndex(docsArray) {
@@ -612,6 +641,7 @@
         file_url: d.file_url,
         file_size: d.file_size,
         file_format: d.file_format,
+        sync_status: d.sync_status,
         created_at: d.created_at
       }));
       localStorage.setItem('cc_user_uploaded_docs', JSON.stringify(cleanIndex));
@@ -621,9 +651,11 @@
   }
 
   async function deleteDocument(docId) {
-    // Delete binary file from IndexedDB
+    console.log('[DATA] Document Delete START', { docId });
+    // 1. Delete binary file from IndexedDB
     await IndexedDocDB.deleteFile(docId);
 
+    const targetDoc = userDocuments.find(d => d.id === docId);
     userDocuments = userDocuments.filter(d => d.id !== docId);
     saveLocalDocsIndex(userDocuments);
 
@@ -633,16 +665,20 @@
       if (u) userId = u.id || u.sub;
     }
 
-    // Delete from Supabase table if online
-    try {
-      if (typeof window.getOrInitSupabaseClient === 'function' && userId) {
-        const client = await window.getOrInitSupabaseClient();
-        if (client) {
-          await client.from('user_document_wallet').delete().eq('id', docId).eq('user_id', userId);
-          console.log('[Doc Wallet Delete] Removed from cloud table');
+    // 2. Delete from Supabase table if cloud synced
+    if (userId && targetDoc && targetDoc.sync_status !== 'pending_sync') {
+      try {
+        if (typeof window.getOrInitSupabaseClient === 'function') {
+          const client = await window.getOrInitSupabaseClient();
+          if (client) {
+            await client.from('user_document_wallet').delete().eq('id', docId).eq('user_id', userId);
+            console.log('[DATA] Document Delete CLOUD SUCCESS');
+          }
         }
+      } catch (e) {
+        console.warn('[DATA] Document Delete CLOUD WARNING:', e);
       }
-    } catch (e) {}
+    }
 
     if (window.showToast) window.showToast("Document deleted from wallet.", "info");
     renderDocumentsList();
