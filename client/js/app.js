@@ -1031,10 +1031,11 @@ function initMobileMarqueeTicker() {
     _tickerTimer = null;
   }
 
-  // Combine top live messages with a premium divider
-  const combined = _tickerMessages.slice(0, 15).join('   ✦   ');
+  // Premium separator with bolt lightning emblem and subtle glowing dots
+  const sep = `<span class="ticker-separator"><i class="fa-solid fa-bolt-lightning"></i></span>`;
+  const combined = _tickerMessages.slice(0, 15).map(m => `<span class="ticker-item">${m}</span>`).join(sep);
   // Duplicate for seamless 0-gap continuous CSS loop (-50% transform)
-  feedTextEl.innerHTML = `<span class="ticker-marquee-inner">${combined}   ✦   ${combined}   ✦   </span>`;
+  feedTextEl.innerHTML = `<span class="ticker-marquee-inner">${combined}${sep}${combined}${sep}</span>`;
 }
 
 function updateCivicIntelligenceFeed(issues) {

@@ -5707,8 +5707,8 @@ a,
     position: relative;
     display: flex;
     align-items: center;
-    mask-image: linear-gradient(90deg, transparent 0%, black 10px, black calc(100% - 10px), transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10px, black calc(100% - 10px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, black 14px, black calc(100% - 14px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 14px, black calc(100% - 14px), transparent 100%);
     min-width: 0;
   }
   .ticker-text {
@@ -5725,7 +5725,31 @@ a,
     align-items: center;
     white-space: nowrap;
     will-change: transform;
-    animation: ccContinuousMarquee 48s linear infinite;
+    animation: ccContinuousMarquee 150s linear infinite;
+  }
+  .ticker-item {
+    display: inline-block;
+    color: var(--text-main, #0f172a);
+    letter-spacing: -0.01em;
+  }
+  .ticker-separator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 1.85rem;
+    color: var(--primary, #0d9488);
+    font-size: 0.65rem;
+    vertical-align: middle;
+  }
+  .ticker-separator::before,
+  .ticker-separator::after {
+    content: "";
+    display: inline-block;
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background-color: var(--primary, #0d9488);
+    opacity: 0.45;
   }
   .ticker-banner:hover .ticker-marquee-inner,
   .ticker-banner:active .ticker-marquee-inner {
