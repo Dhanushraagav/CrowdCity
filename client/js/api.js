@@ -2,8 +2,15 @@
 
 const API_BASE = '/api';
 
-// In-flight GET request deduplication
+// In-flight GET request deduplication & Fast SWR memory caching
 const _inFlight = new Map();
+const _apiCache = new Map();
+const _CACHE_TTL_MS = 6000;
+
+function _clearApiCache() {
+  _apiCache.clear();
+}
+
 function _dedupFetch(key, fetcher) {
   if (_inFlight.has(key)) return _inFlight.get(key);
   const p = fetcher().finally(() => _inFlight.delete(key));
@@ -119,6 +126,12 @@ const API = {
     const endpoint = `/issues${qs ? `?${qs}` : ''}`;
     const dedupKey = `GET:${endpoint}`;
 
+    // Fast instant return from memory cache if recent (< 6s)
+    const cached = _apiCache.get(endpoint);
+    if (cached && (Date.now() - cached.timestamp < _CACHE_TTL_MS)) {
+      return Promise.resolve(cached.response);
+    }
+
     return _dedupFetch(dedupKey, async () => {
       console.log('[DATA] getIssues START', endpoint);
       const res = await request(endpoint, { method: 'GET', auth: false });
@@ -127,6 +140,7 @@ const API = {
       if (res.data) {
         const count = Array.isArray(res.data) ? res.data.length : (res.data.issues ? res.data.issues.length : 0);
         console.log(`[DATA] getIssues SUCCESS: ${count}`);
+        _apiCache.set(endpoint, { timestamp: Date.now(), response: res });
       } else {
         console.warn(`[DATA] getIssues ERROR: ${res.error}`);
       }
@@ -142,6 +156,7 @@ const API = {
 
   // 3. Report a new issue
   createIssue: async (issueData) => {
+    _clearApiCache();
     return request('/issues', {
       method: 'POST',
       body: issueData,
@@ -151,6 +166,7 @@ const API = {
 
   // 4. Toggle issue upvote
   upvoteIssue: async (id) => {
+    _clearApiCache();
     return request(`/issues/${id}/upvote`, {
       method: 'POST',
       auth: true
@@ -168,6 +184,7 @@ const API = {
 
   // 6. Update Issue Status (Authority/Admin Only)
   updateIssueStatus: async (id, statusData) => {
+    _clearApiCache();
     const isFormData = statusData instanceof FormData;
     return request(`/issues/${id}/status`, {
       method: 'PATCH',
@@ -178,6 +195,7 @@ const API = {
 
   // 7. Assign complaint (Authority/Admin Only)
   assignIssue: async (id, assignedTo = null) => {
+    _clearApiCache();
     const options = { method: 'POST', auth: true };
     if (assignedTo) {
       options.body = JSON.stringify({ assigned_to: assignedTo });
@@ -195,6 +213,7 @@ const API = {
 
   // 9. Delete Issue (Admin Only)
   deleteIssue: async (id) => {
+    _clearApiCache();
     return request(`/issues/${id}`, {
       method: 'DELETE',
       auth: true

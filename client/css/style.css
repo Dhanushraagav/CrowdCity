@@ -20,16 +20,17 @@
   --slate-900: #0f172a;
   --slate-950: #020617;
 
-  /* Theme Variables (Government Light Mode) */
-  --bg-app: #F5F7FA;
+  /* Theme Variables (Modern SaaS Civic Light Mode) */
+  --bg-app: #f8fafc;
   --bg-surface: #ffffff;
-  --bg-surface-hover: #f1f5f9;
+  --bg-surface-hover: #f8fafc;
   --bg-header: #ffffff;
-  --border-color: #D1D5DB;
+  --border-color: #e2e8f0;
+  --border-color-hover: #cbd5e1;
   --bg-sidebar: #ffffff;
   
-  --text-main: #111827;
-  --text-muted: #4B5563;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
   --text-inverse: #ffffff;
 
   /* Polished Component Specific Variables */
@@ -38,28 +39,30 @@
   --btn-primary-text: #ffffff;
 
   --btn-secondary-bg: #ffffff;
-  --btn-secondary-border: #0F766E;
-  --btn-secondary-text: #0F766E;
-  --btn-secondary-hover: rgba(15, 118, 110, 0.05);
+  --btn-secondary-border: #e2e8f0;
+  --btn-secondary-text: #0f172a;
+  --btn-secondary-hover: #f8fafc;
 
   --input-bg: #ffffff;
-  --input-border: #D1D5DB;
+  --input-border: #e2e8f0;
   --input-focus-border: #0F766E;
-  --input-text: #111827;
+  --input-text: #0f172a;
 
   --card-bg: #ffffff;
-  --card-border: #D1D5DB;
+  --card-border: #e2e8f0;
   
   /* Linear/Notion Panel tokens */
   --glass-bg: #ffffff;
-  --glass-border: #D1D5DB;
-  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --glass-border: #e2e8f0;
+  --glass-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
   --glass-blur: none;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-  --shadow-glow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
+  --shadow-hover: 0 10px 20px -3px rgba(15, 118, 110, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-glow: 0 0 0 3px rgba(15, 118, 110, 0.12);
 
   /* Category Colors */
   --color-roads: #475569;

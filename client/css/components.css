@@ -2971,23 +2971,19 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   .icon-blue { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
   .icon-amber { background: rgba(245, 158, 11, 0.12); color: #d97706; }
 
-
-
   .stitch-stat-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
-    animation: desktopKpiEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    background: #ffffff;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    animation: desktopKpiEntrance 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
     cursor: pointer;
   }
 
-  .stitch-stat-card:nth-child(1) { animation-delay: 0.05s; }
-  .stitch-stat-card:nth-child(2) { animation-delay: 0.15s; }
-  .stitch-stat-card:nth-child(3) { animation-delay: 0.25s; }
+  .stitch-stat-card:nth-child(1) { animation-delay: 0.02s; }
+  .stitch-stat-card:nth-child(2) { animation-delay: 0.05s; }
+  .stitch-stat-card:nth-child(3) { animation-delay: 0.08s; }
 
   @keyframes desktopKpiEntrance {
-    0% { opacity: 0; transform: translateY(18px); }
+    0% { opacity: 0; transform: translateY(8px); }
     100% { opacity: 1; transform: translateY(0); }
   }
 
@@ -2998,14 +2994,14 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     bottom: 0;
     left: 50%;
     width: 0%;
-    height: 3px;
-    border-radius: 3px;
-    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 2px;
+    border-radius: 2px;
+    transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .stat-card-teal::after { background: linear-gradient(90deg, #0d9488, #14b8a6); }
-  .stat-card-blue::after { background: linear-gradient(90deg, #2563eb, #60a5fa); }
-  .stat-card-amber::after { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .stat-card-teal::after { background: #0d9488; }
+  .stat-card-blue::after { background: #2563eb; }
+  .stat-card-amber::after { background: #d97706; }
 
   .stitch-stat-card:hover::after {
     width: 100%;
@@ -3013,18 +3009,13 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   }
 
   .stitch-stat-card:hover {
-    transform: translateY(-8px) scale(1.025);
-    border-color: rgba(13, 148, 136, 0.4) !important;
-    box-shadow: 0 18px 38px -8px rgba(13, 148, 136, 0.22), 0 6px 14px rgba(0, 0, 0, 0.04) !important;
+    transform: translateY(-2px);
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 8px 18px -4px rgba(15, 118, 110, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
   }
 
   .stitch-stat-card:hover .minimal-desktop-icon {
-    transform: scale(1.2) rotate(10deg);
-  }
-
-  .stitch-stat-card:hover .kpi-ambient-glow {
-    opacity: 0.65;
-    transform: scale(1.4);
+    transform: scale(1.06);
   }
 }
 
@@ -3124,8 +3115,6 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 
 .kpi-mini-footer.purple-tier {
   color: #7e22ce;
-}
-  gap: 0.25rem;
 }
 
 .stitch-split-grid {
