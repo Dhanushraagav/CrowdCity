@@ -1895,10 +1895,19 @@ function updateAuthUI() {
     const tNoNotifications = window.i18n ? window.i18n.t('no_notifications') : 'No new notifications';
     const tProfile = window.i18n ? window.i18n.t('nav_profile') : 'Profile';
     const tSettings = window.i18n ? window.i18n.t('nav_settings') : 'Settings';
-    const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
+    const currentPath = window.location.pathname;
+    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || currentPath.endsWith('/') || currentPath.endsWith('/index.html') || currentPath.endsWith('/index');
+    const tnUpdatesBtnHtml = isCitizenDashboardOnly
+      ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn" title="Tamil Nadu Government & Civic Updates">
+          <i class="fa-solid fa-newspaper"></i>
+          <span class="tn-updates-btn-text">TN Updates</span>
+        </a>`
+      : '';
 
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
+        ${tnUpdatesBtnHtml}
+
         <!-- Notification Bell Container -->
         <div class="notification-bell-wrapper" id="bell-wrapper">
           <button class="bell-btn" id="bell-btn" aria-label="${tNotifications}" onclick="toggleNotificationDropdown(event)">
@@ -1960,9 +1969,20 @@ function updateAuthUI() {
       </div>
     `;
   } else {
+    const currentPath = window.location.pathname;
+    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || currentPath.endsWith('/') || currentPath.endsWith('/index.html') || currentPath.endsWith('/index');
+    const tnUpdatesBtnHtml = isCitizenDashboardOnly
+      ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn" title="Tamil Nadu Government & Civic Updates">
+          <i class="fa-solid fa-newspaper"></i>
+          <span class="tn-updates-btn-text">TN Updates</span>
+        </a>`
+      : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
     finalContainer.innerHTML = `
-      <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
+      <div class="auth-nav-wrapper">
+        ${tnUpdatesBtnHtml}
+        <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
+      </div>
     `;
   }
 
