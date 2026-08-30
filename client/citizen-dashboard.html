@@ -123,21 +123,21 @@
     <div class="app-main">
       <!-- Top Header inside main content -->
       <header class="app-header-main dashboard-header">
-        <a href="citizen-dashboard.html" class="app-header-logo-mobile">
-          <div style="display: flex; align-items: center; gap: 0.4rem;">
-            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" decoding="async" style="width: 28px; height: 28px; object-fit: contain;" />
-            <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 0.1rem;"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" decoding="async" style="width: 30px; height: 30px; object-fit: contain;" />
-          </div>
-        </a>
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
 
         <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
           <div id="auth-nav-container">
             <!-- Dynamic header actions populated by auth.js -->
           </div>
-          <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-            <i class="fa-solid fa-bars"></i>
-          </button>
+          <a href="citizen-dashboard.html" class="app-header-logo-mobile">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" decoding="async" style="width: 28px; height: 28px; object-fit: contain;" />
+              <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 0.1rem;"></div>
+              <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" decoding="async" style="width: 30px; height: 30px; object-fit: contain;" />
+            </div>
+          </a>
         </div>
       </header>
 

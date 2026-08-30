@@ -5277,15 +5277,15 @@ body.dark-theme .universal-mobile-back-btn svg {
     display: none !important;
   }
 
-  /* Show logo ONLY on Dashboard on the left side */
+  /* Show logo ONLY on Dashboard on the FAR RIGHT side */
   .dashboard-header .app-header-logo-mobile,
   body.dashboard-page .app-header-logo-mobile,
   .citizen-dashboard .app-header-logo-mobile {
     display: inline-flex !important;
     align-items: center !important;
     gap: 0.45rem !important;
-    margin-right: auto !important;
-    margin-left: 0 !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
     flex-shrink: 0 !important;
   }
 
@@ -5295,6 +5295,11 @@ body.dark-theme .universal-mobile-back-btn svg {
     justify-content: center !important;
     margin: 0 !important;
     flex-shrink: 0 !important;
+  }
+
+  .dashboard-header .mobile-menu-toggle {
+    margin-right: auto !important;
+    margin-left: 0 !important;
   }
 
   .app-header-actions {
