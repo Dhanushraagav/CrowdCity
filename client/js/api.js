@@ -34,26 +34,37 @@ async function request(endpoint, options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
-  // Authentication is STRICTLY OPT-IN (options.auth === true)
-  if (options.auth === true) {
-    let token = null;
-    if (typeof getAuthToken === 'function') {
-      token = getAuthToken();
-    }
-    if (!token && typeof getSession === 'function') {
-      const session = getSession();
-      token = session?.access_token || null;
-    }
+  // Resolve authentication token if available
+  let token = null;
+  if (typeof getAuthToken === 'function') {
+    token = getAuthToken();
+  }
+  if (!token && typeof getSession === 'function') {
+    const session = getSession();
+    token = session?.access_token || null;
+  }
+  if (!token && typeof localStorage !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('cc_access_token') || localStorage.getItem('supabase.auth.token');
+      if (stored) {
+        if (stored.startsWith('{')) {
+          const parsed = JSON.parse(stored);
+          token = parsed?.currentSession?.access_token || parsed?.access_token || null;
+        } else {
+          token = stored;
+        }
+      }
+    } catch (e) {}
+  }
 
-    if (token && typeof token === 'string' && token.split('.').length === 3) {
-      headers['Authorization'] = `Bearer ${token}`;
-    } else {
-      return {
-        data: null,
-        error: 'Authentication required',
-        status: 401
-      };
-    }
+  if (token && typeof token === 'string' && token.split('.').length === 3) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else if (options.auth === true) {
+    return {
+      data: null,
+      error: 'Authentication required',
+      status: 401
+    };
   }
 
   const controller = new AbortController();

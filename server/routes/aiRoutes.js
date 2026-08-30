@@ -5,9 +5,9 @@ import { validateAnalyzeIssue, validateChatPayload } from '../middlewares/valida
 
 const router = express.Router();
 
-// Require user authentication for AI calls
-router.post('/analyze', requireAuth, validateAnalyzeIssue, analyzeIssue);
-router.post('/analyze-complaint', requireAuth, validateAnalyzeIssue, analyzeComplaintController);
+// AI Categorization & Analysis Endpoints
+router.post('/analyze', validateAnalyzeIssue, analyzeIssue);
+router.post('/analyze-complaint', validateAnalyzeIssue, analyzeComplaintController);
 router.post('/explain-scheme', explainSchemeController);
 router.post('/assistant-chat', assistantChatController);
 router.post('/verify-document', verifyDocumentController);
