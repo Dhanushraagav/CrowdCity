@@ -1606,7 +1606,7 @@ function updateAuthUI() {
       path.includes('wallet')
     ) && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
-    const isMinisters = path.includes('ministers');
+    const isAnalytics = path.includes('analytics');
     const isAbout = path.includes('about');
 
     // If sidebar is already rendered (e.g. pre-rendered in HTML), just update active link classes without wiping DOM
@@ -1623,7 +1623,7 @@ function updateAuthUI() {
         else if (href.includes('services.html') && isServices) active = true;
         else if (href.includes('emergency-services.html') && isEmergency) active = true;
         else if (href.includes('helplines.html') && isHelplines) active = true;
-        else if (href.includes('ministers.html') && isMinisters) active = true;
+        else if (href.includes('analytics.html') && isAnalytics) active = true;
         
         link.classList.toggle('active', active);
       });
@@ -1677,8 +1677,8 @@ function updateAuthUI() {
         <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
           <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
         </a>
-        <a href="ministers.html" class="app-sidebar-link ${isMinisters ? 'active' : ''}" title="Council of Ministers">
-          <i class="fa-solid fa-user-tie"></i> <span data-i18n="nav_ministers">Council of Ministers</span>
+        <a href="analytics.html" class="app-sidebar-link ${isAnalytics ? 'active' : ''}" title="Analytics & Insights">
+          <i class="fa-solid fa-chart-line"></i> <span data-i18n="nav_analytics">Analytics & Insights</span>
         </a>
       </nav>
     `;
@@ -2359,6 +2359,7 @@ function initResponsiveSidebar() {
       { href: 'citizen-dashboard.html', icon: 'fa-house-chimney', label: 'Dashboard', key: 'nav_dashboard' },
       { href: 'report.html', icon: 'fa-plus', label: 'Report Issue', key: 'nav_report' },
       { href: 'my-complaints.html', icon: 'fa-clipboard-list', label: 'My Complaints', key: 'nav_my_complaints' },
+      { href: 'analytics.html', icon: 'fa-chart-line', label: 'Analytics & Insights', key: 'nav_analytics' },
       { href: 'my-documents.html', icon: 'fa-folder-closed', label: 'Documents', key: 'nav_documents' },
       { href: 'notifications.html', icon: 'fa-bell', label: 'Notifications', key: 'nav_notifications' },
       { href: 'settings.html', icon: 'fa-gear', label: 'Settings', key: 'nav_settings' }
