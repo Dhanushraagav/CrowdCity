@@ -1038,35 +1038,45 @@ function runTickerTypewriter() {
   if (!feedTextEl || !_tickerMessages || _tickerMessages.length === 0) return;
 
   const currentMsg = _tickerMessages[_tickerMsgIdx % _tickerMessages.length];
+  
+  // Use Intl.Segmenter or Array.from for complete Tamil grapheme cluster typing
+  let chars;
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter('ta', { granularity: 'grapheme' });
+    chars = Array.from(segmenter.segment(currentMsg), s => s.segment);
+  } else {
+    chars = Array.from(currentMsg);
+  }
 
   if (!_tickerIsDeleting) {
-    // Typing forward
+    // Typing forward like live input
     _tickerCharIdx++;
-    feedTextEl.textContent = currentMsg.slice(0, _tickerCharIdx);
+    feedTextEl.textContent = chars.slice(0, _tickerCharIdx).join('');
 
-    if (_tickerCharIdx >= currentMsg.length) {
-      // Finished typing full message: pause for 4 seconds to comfortably read
+    if (_tickerCharIdx >= chars.length) {
+      // Finished typing full message: pause for 4.5 seconds to comfortably read
       _tickerIsDeleting = true;
-      _tickerTimer = setTimeout(runTickerTypewriter, 4000);
+      _tickerTimer = setTimeout(runTickerTypewriter, 4500);
       return;
     }
-    // Smooth typing speed
-    _tickerTimer = setTimeout(runTickerTypewriter, 24);
+    // Realistic live keystroke typing speed (30ms - 45ms)
+    const variance = Math.floor(Math.random() * 15);
+    _tickerTimer = setTimeout(runTickerTypewriter, 32 + variance);
   } else {
-    // Deleting backward
+    // Erasing backward cleanly
     _tickerCharIdx -= 2;
     if (_tickerCharIdx < 0) _tickerCharIdx = 0;
-    feedTextEl.textContent = currentMsg.slice(0, _tickerCharIdx);
+    feedTextEl.textContent = chars.slice(0, _tickerCharIdx).join('');
 
     if (_tickerCharIdx <= 0) {
       // Finished deleting: move to next message
       _tickerIsDeleting = false;
       _tickerMsgIdx = (_tickerMsgIdx + 1) % _tickerMessages.length;
-      _tickerTimer = setTimeout(runTickerTypewriter, 300);
+      _tickerTimer = setTimeout(runTickerTypewriter, 350);
       return;
     }
     // Fast erase speed
-    _tickerTimer = setTimeout(runTickerTypewriter, 12);
+    _tickerTimer = setTimeout(runTickerTypewriter, 14);
   }
 }
 

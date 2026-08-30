@@ -1443,37 +1443,10 @@ function updateAuthUI() {
     sidebarFooter.insertBefore(helplineCard, sidebarFooter.firstChild);
   };
 
-  // Run dynamic government news cycler inside the ticker banner
-  const initNewsTicker = () => {
-    const tickerText = document.getElementById('civic-intelligence-feed-text');
-    if (!tickerText || window.cc_ticker_initialized) return;
-    window.cc_ticker_initialized = true;
-    
-    const newsItems = [
-      "All municipal services are operational. Check the feed below for community reports.",
-      "State Government allocates ₹150 Crore for urban road repair and pothole filling.",
-      "Namakkal Municipal Corporation launches 24/7 civic helpline (1913).",
-      "Smart City project integrations completed for Chennai, Coimbatore, and Madurai.",
-      "Public satisfaction rating for resolved municipal grievances reaches 92.4%."
-    ];
-    
-    let currentIndex = 0;
-    tickerText.style.transition = 'opacity 0.3s ease';
-    setInterval(() => {
-      tickerText.style.opacity = 0;
-      setTimeout(() => {
-        currentIndex = (currentIndex + 1) % newsItems.length;
-        tickerText.textContent = newsItems[currentIndex];
-        tickerText.style.opacity = 1;
-      }, 300);
-    }, 6000);
-  };
-
   // Run dynamic branding injections
   injectGovtBranding();
   injectGovtBanner();
   injectHelplineWidget();
-  initNewsTicker();
 
   const injectPortalBadge = () => {
     const path = window.location.pathname;
