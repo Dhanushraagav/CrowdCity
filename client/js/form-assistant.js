@@ -69,18 +69,30 @@
       profile = JSON.parse(sessionStorage.getItem('cc_scheme_checker_profile') || '{}');
     } catch (e) {}
 
+    let userProfile = {};
+    try {
+      userProfile = JSON.parse(localStorage.getItem('cc_user_profile') || '{}');
+    } catch (e) {}
+
     const formDef = schemeFormsMap[currentSchemeId] || schemeFormsMap['tn-kmut'];
+
+    const fullName = profile.fullName || userProfile.full_name || '';
+    const district = profile.district || userProfile.district || '';
+    const aadhaar = profile.aadhaar || userProfile.aadhaar || '';
 
     formDef.fields.forEach(field => {
       const inputElem = document.getElementById(`field_${field.id}`);
       if (!inputElem) return;
 
-      if (field.id.includes('name') && profile.fullName) {
-        inputElem.value = profile.fullName;
-        formDataDraft[field.id] = profile.fullName;
-      } else if (field.id.includes('district') && profile.district) {
-        inputElem.value = profile.district;
-        formDataDraft[field.id] = profile.district;
+      if (field.id.includes('name') && fullName) {
+        inputElem.value = fullName;
+        formDataDraft[field.id] = fullName;
+      } else if (field.id.includes('district') && district) {
+        inputElem.value = district;
+        formDataDraft[field.id] = district;
+      } else if (field.id.includes('aadhaar') && aadhaar) {
+        inputElem.value = aadhaar;
+        formDataDraft[field.id] = aadhaar;
       }
     });
 
@@ -109,14 +121,14 @@
             <label style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">
               ${field.label} ${field.required ? '<span style="color:#ef4444;">*</span>' : '<span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">(Optional)</span>'}
             </label>
-            <button type="button" class="btn-field-ai-help" data-field="${field.label}" style="background: rgba(13, 148, 136, 0.1); border: 1px solid rgba(13, 148, 136, 0.25); color: var(--primary); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 8px; cursor: pointer;">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> AI Guidance
+            <button type="button" class="btn-field-ai-help" data-field="${field.label}" style="background: rgba(13, 148, 136, 0.1); border: 1px solid rgba(13, 148, 136, 0.25); color: var(--primary); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <i class="fa-solid fa-brain"></i> AI Guidance
             </button>
           </div>
 
           <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.85rem 0;">${field.hint}</p>
 
-          <input id="field_${field.id}" type="${field.type}" class="form-control field-input-item" data-field-id="${field.id}" value="${val}" placeholder="${field.placeholder}" style="padding: 0.75rem 1rem; font-size: 0.9rem; border-radius: 10px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main); width: 100%;" />
+          <input id="field_${field.id}" type="${field.type}" class="form-control field-input-item" data-field-id="${field.id}" value="${val}" placeholder="${field.placeholder}" style="padding: 0.75rem 1rem; font-size: 0.9rem; border-radius: 10px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-main); width: 100%; box-sizing: border-box;" />
         </div>
       `;
     }).join('');
@@ -181,8 +193,8 @@
     if (!content) return;
 
     content.innerHTML = `
-      <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0 0 1rem 0;">
-        <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> AI Guidance: ${fieldLabel}
+      <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-brain" style="color: var(--primary);"></i> <span>AI Guidance: ${fieldLabel}</span>
       </h3>
       <p style="font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 1rem;">${g.explanation}</p>
       
