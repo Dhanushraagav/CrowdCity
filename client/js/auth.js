@@ -1266,13 +1266,19 @@ function updateAuthUI() {
       if (logo.dataset.tnBranded) return;
       logo.dataset.tnBranded = "true";
       
-      logo.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.55rem;">
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
-          <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2); margin: 0 0.1rem;"></div>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 32px; height: 32px; object-fit: contain;" />
-        </div>
-      `;
+      // Ensure full brand emblems wrap AND brand text container are preserved
+      if (!logo.querySelector('.brand-text-container')) {
+        logo.innerHTML = `
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" />
+          </div>
+          <div class="brand-text-container">
+            <span class="brand-title">CROWDCITY</span>
+            <span class="brand-subtitle">CITIZEN PORTAL</span>
+          </div>
+        `;
+      }
     });
 
     // 2. Mobile Header Logos
