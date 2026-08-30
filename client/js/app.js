@@ -66,59 +66,108 @@ function initDashboard() {
   try { setupFeedTabs(); } catch (e) {}
   
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  lastLoadedUserIdApp = user ? user.id : null;
+  lastLoadedUserIdApp = user ? (user.id || user.sub) : null;
   
   // Show body immediately to display page shell and skeleton loaders!
   document.body.classList.add('ready');
   document.body.style.visibility = 'visible';
 
-  // Load initial datasets cleanly once
-  loadAndRenderIssues().catch(err => console.error("Error in loadAndRenderIssues:", err));
+  // Render initial cached stats instantly
+  try { loadUserStats(); } catch (e) {}
+
+  // Load initial datasets from real database and refresh stats
+  loadAndRenderIssues().then(() => {
+    try { loadUserStats(); } catch (e) {}
+  }).catch(err => console.error("Error in loadAndRenderIssues:", err));
+
   if (user) {
-    loadUserStats().catch(err => console.error("Error in loadUserStats:", err));
     loadRecentNotifications().catch(err => console.error("Error in loadRecentNotifications:", err));
   }
 
   initRealtimeDashboard();
 }
 
-// Fetch user profile and display points
-async function loadUserStats(isLanguageChange = false) {
+// Fetch user profile and compute real database statistics
+function loadUserStats(isLanguageChange = false) {
   const pointsCardNum = document.getElementById('stat-user-points');
   const rankEl = document.getElementById('stat-community-rank');
-  if (!pointsCardNum) return;
-
   const totalEl = document.getElementById('stat-total-reports');
   const resolvedEl = document.getElementById('stat-resolved-issues');
   const activeEl = document.getElementById('stat-active-complaints');
+  const rateEl = document.getElementById('stat-resolved-rate');
+  const heroDesc = document.getElementById('hero-desc');
 
+  // Retrieve authenticated user ID
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  let userId = user ? (user.id || user.sub) : null;
+  if (!userId) {
+    try {
+      const sessionStr = localStorage.getItem('cc_session');
+      if (sessionStr) {
+        const parsed = JSON.parse(sessionStr);
+        if (parsed && parsed.user) userId = parsed.user.id || parsed.user.sub;
+      }
+    } catch (e) {}
+  }
+
+  // Load cached profile points
+  const cachedProfileStr = localStorage.getItem('cc_user_profile');
+  let userPoints = 0;
+  if (cachedProfileStr) {
+    try {
+      const cachedProfile = JSON.parse(cachedProfileStr);
+      if (cachedProfile && typeof cachedProfile.points === 'number') {
+        userPoints = cachedProfile.points;
+      }
+    } catch (e) {}
+  }
+
+  if (pointsCardNum) {
+    animateCountUp(pointsCardNum, userPoints);
+    updateProgressionUI(userPoints);
+    if (rankEl) {
+      const progression = calculateProgression(userPoints);
+      rankEl.textContent = progression.levelName;
+    }
+  }
+
+  // If user is not authenticated, show zeroes
+  if (!userId) {
+    if (totalEl) animateCountUp(totalEl, 0);
+    if (resolvedEl) animateCountUp(resolvedEl, 0);
+    if (activeEl) animateCountUp(activeEl, 0);
+    if (rateEl) rateEl.textContent = '';
+    return;
+  }
+
+  // If language changed and we have cached user issues, recalculate text strings
   if (isLanguageChange && lastUserIssues && lastUserIssues.length > 0) {
     const total = lastUserIssues.length;
-    const resolved = lastUserIssues.filter(i => i.status === 'resolved' || i.status === 'verified').length;
-    const active = lastUserIssues.filter(i => i.status === 'pending' || i.status === 'assigned' || i.status === 'in_progress').length;
+    const resolved = lastUserIssues.filter(i => {
+      const s = (i.status || '').toLowerCase();
+      return s === 'resolved' || s === 'verified' || s === 'closed';
+    }).length;
+    const active = lastUserIssues.filter(i => {
+      const s = (i.status || '').toLowerCase();
+      return s === 'pending' || s === 'assigned' || s === 'in_progress';
+    }).length;
 
     if (totalEl) animateCountUp(totalEl, total);
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
     if (activeEl) animateCountUp(activeEl, active);
 
-    const rateEl = document.getElementById('stat-resolved-rate');
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
       const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
       rateEl.textContent = total > 0 ? `${rate}% ${tRate}` : '';
     }
 
-    const heroDesc = document.getElementById('hero-desc');
     if (heroDesc) {
       if (total === 0) {
         heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Start reporting civic issues in your area. Every report builds a more responsive city for everyone.';
       } else {
         if (window.i18n) {
-          heroDesc.textContent = window.i18n.t('hero_desc_stats', {
-            total: total,
-            s: total !== 1 ? 's' : '',
-            resolved: resolved
-          });
+          heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
         } else {
           heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
         }
@@ -128,98 +177,36 @@ async function loadUserStats(isLanguageChange = false) {
     return;
   }
 
-  // Render from cached profile immediately to prevent visual flashing
-  const cachedProfileStr = localStorage.getItem('cc_user_profile');
-  let cachedPoints = 0;
-  if (cachedProfileStr) {
-    try {
-      const cachedProfile = JSON.parse(cachedProfileStr);
-      if (cachedProfile) {
-        cachedPoints = cachedProfile.points || 0;
-        animateCountUp(pointsCardNum, cachedPoints);
-        updateProgressionUI(cachedPoints);
-        if (rankEl) {
-          const progression = calculateProgression(cachedPoints);
-          rankEl.textContent = progression.levelName;
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to parse cached profile for dashboard:", e);
-    }
-  }
-
-  // Load cached stats to prevent visual flashing
-  const cachedTotal = localStorage.getItem('cc_user_stat_total');
-  const cachedResolved = localStorage.getItem('cc_user_stat_resolved');
-  const cachedActive = localStorage.getItem('cc_user_stat_active');
-
-  if (totalEl && cachedTotal !== null) animateCountUp(totalEl, parseInt(cachedTotal) || 0);
-  if (resolvedEl && cachedResolved !== null) animateCountUp(resolvedEl, parseInt(cachedResolved) || 0);
-  if (activeEl && cachedActive !== null) animateCountUp(activeEl, parseInt(cachedActive) || 0);
-
-  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  if (!user) {
-    if (!cachedProfileStr) {
-      animateCountUp(pointsCardNum, 0);
-      updateProgressionUI(0);
-      if (rankEl) rankEl.textContent = '-';
-      if (totalEl) animateCountUp(totalEl, 0);
-      if (resolvedEl) animateCountUp(resolvedEl, 0);
-      if (activeEl) animateCountUp(activeEl, 0);
-    }
-    return;
-  }
-
-  const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-  if (!token) return;
-
-  let freshPoints = cachedPoints;
-  try {
-    const raw = localStorage.getItem('cc_user_profile');
-    if (raw) {
-      const profile = JSON.parse(raw);
-      freshPoints = profile.points || 0;
-      animateCountUp(pointsCardNum, freshPoints);
-      updateProgressionUI(freshPoints);
-      if (rankEl) {
-        const progression = calculateProgression(freshPoints);
-        rankEl.textContent = progression.levelName;
-      }
-    }
-  } catch (err) {}
-
-  // Compute accurate stats from in-memory issues for logged-in user without duplicate network fetch
-  try {
-    const userIssues = (currentIssues || []).filter(i => i && i.reporter_id === user.id);
+  // If issues are loaded in memory, calculate user statistics directly from real database records
+  if (Array.isArray(currentIssues) && currentIssues.length > 0) {
+    const userIssues = currentIssues.filter(i => i && (i.reporter_id === userId || i.user_id === userId));
     lastUserIssues = userIssues;
     const total = userIssues.length;
-    const resolved = userIssues.filter(i => i.status === 'resolved' || i.status === 'verified').length;
-    const active = userIssues.filter(i => i.status === 'pending' || i.status === 'assigned' || i.status === 'in_progress').length;
+    const resolved = userIssues.filter(i => {
+      const s = (i.status || '').toLowerCase();
+      return s === 'resolved' || s === 'verified' || s === 'closed';
+    }).length;
+    const active = userIssues.filter(i => {
+      const s = (i.status || '').toLowerCase();
+      return s === 'pending' || s === 'assigned' || s === 'in_progress';
+    }).length;
 
     if (totalEl) animateCountUp(totalEl, total);
     if (resolvedEl) animateCountUp(resolvedEl, resolved);
     if (activeEl) animateCountUp(activeEl, active);
 
-    // Update resolved rate badge dynamically
-    const rateEl = document.getElementById('stat-resolved-rate');
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
       const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
       rateEl.textContent = total > 0 ? `${rate}% ${tRate}` : '';
     }
 
-    // Update hero description with real stats
-    const heroDesc = document.getElementById('hero-desc');
     if (heroDesc) {
       if (total === 0) {
         heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Start reporting civic issues in your area. Every report builds a more responsive city for everyone.';
       } else {
         if (window.i18n) {
-          heroDesc.textContent = window.i18n.t('hero_desc_stats', {
-            total: total,
-            s: total !== 1 ? 's' : '',
-            resolved: resolved
-          });
+          heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
         } else {
           heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
         }
@@ -231,8 +218,26 @@ async function loadUserStats(isLanguageChange = false) {
     localStorage.setItem('cc_user_stat_active', active.toString());
 
     renderRecentComplaints(userIssues);
-  } catch (err) {
-    console.error('Failed to compute user stats:', err);
+    return;
+  }
+
+  // Otherwise, load last known cached stats while data is fetching
+  const cachedTotal = localStorage.getItem('cc_user_stat_total');
+  const cachedResolved = localStorage.getItem('cc_user_stat_resolved');
+  const cachedActive = localStorage.getItem('cc_user_stat_active');
+
+  if (totalEl && cachedTotal !== null) animateCountUp(totalEl, parseInt(cachedTotal, 10) || 0);
+  if (resolvedEl && cachedResolved !== null) animateCountUp(resolvedEl, parseInt(cachedResolved, 10) || 0);
+  if (activeEl && cachedActive !== null) animateCountUp(activeEl, parseInt(cachedActive, 10) || 0);
+
+  if (cachedTotal !== null && cachedResolved !== null) {
+    const total = parseInt(cachedTotal, 10) || 0;
+    const resolved = parseInt(cachedResolved, 10) || 0;
+    if (rateEl && total > 0) {
+      const rate = Math.round((resolved / total) * 100);
+      const tRate = window.i18n ? window.i18n.t('rate_suffix') : 'Rate';
+      rateEl.textContent = `${rate}% ${tRate}`;
+    }
   }
 }
 
