@@ -809,7 +809,7 @@ export const checkAuthMethods = async (req, res) => {
  */
 export const submitContactInquiry = async (req, res) => {
   try {
-    const { name, email, category, subject, message, attachmentUrl } = req.body || {};
+    const { name, email, category, subject, message, attachmentUrl, attachmentName, attachmentType } = req.body || {};
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ error: 'Name is required.' });
@@ -827,13 +827,65 @@ export const submitContactInquiry = async (req, res) => {
       return res.status(400).json({ error: 'Message is required.' });
     }
 
+    let uploadedPublicUrl = null;
+    let rawAttachment = null;
+
+    if (attachmentUrl && typeof attachmentUrl === 'string' && attachmentUrl.startsWith('data:')) {
+      try {
+        const matches = attachmentUrl.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          const mimeType = matches[1];
+          const base64Data = matches[2];
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          let ext = 'pdf';
+          if (mimeType.includes('pdf')) ext = 'pdf';
+          else if (mimeType.includes('png')) ext = 'png';
+          else if (mimeType.includes('jpeg') || mimeType.includes('jpg')) ext = 'jpg';
+          else if (mimeType.includes('doc')) ext = 'docx';
+
+          const safeFilename = `inquiry-${Date.now()}.${ext}`;
+          const uploadPath = `contact-attachments/${safeFilename}`;
+
+          if (supabaseAdmin) {
+            const { error: uploadError } = await supabaseAdmin.storage
+              .from('issue-images')
+              .upload(uploadPath, buffer, { contentType: mimeType, upsert: true });
+
+            if (!uploadError) {
+              const { data: publicData } = supabaseAdmin.storage
+                .from('issue-images')
+                .getPublicUrl(uploadPath);
+
+              if (publicData && publicData.publicUrl) {
+                uploadedPublicUrl = publicData.publicUrl;
+              }
+            } else {
+              logger.warn(`[Contact] Supabase storage upload error: ${uploadError.message}`);
+            }
+          }
+
+          rawAttachment = {
+            filename: attachmentName || `attachment.${ext}`,
+            content: base64Data
+          };
+        }
+      } catch (uploadEx) {
+        logger.warn(`[Contact] Exception during attachment processing: ${uploadEx.message}`);
+      }
+    } else if (attachmentUrl && (attachmentUrl.startsWith('http://') || attachmentUrl.startsWith('https://'))) {
+      uploadedPublicUrl = attachmentUrl;
+    }
+
     const cleanData = {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       category: category.trim(),
       subject: subject.trim(),
       message: message.trim(),
-      attachmentUrl: attachmentUrl ? String(attachmentUrl).trim() : null
+      attachmentUrl: uploadedPublicUrl,
+      attachmentName: attachmentName || 'attachment.pdf',
+      rawAttachment
     };
 
     logger.info(`[Contact] Processing inquiry from "${cleanData.name}" <${cleanData.email}> - Category: ${cleanData.category}`);

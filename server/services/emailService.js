@@ -4,7 +4,7 @@ import { supabaseAdmin } from '../config/supabase.js';
 /**
  * Shared helper to send emails via Resend API
  */
-async function sendResendEmail({ to, subject, html, text }) {
+async function sendResendEmail({ to, subject, html, text, attachments }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || apiKey.includes('placeholder') || apiKey === '') {
     logger.warn(`[Email Service] Resend API key is not configured. Logging email contents instead:
@@ -17,19 +17,25 @@ async function sendResendEmail({ to, subject, html, text }) {
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'CrowdCity AI <onboarding@resend.dev>';
 
   try {
+    const payload = {
+      from: fromEmail,
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html,
+      text
+    };
+
+    if (Array.isArray(attachments) && attachments.length > 0) {
+      payload.attachments = attachments;
+    }
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: Array.isArray(to) ? to : [to],
-        subject,
-        html,
-        text
-      })
+      body: JSON.stringify(payload)
     });
 
     if (response.ok) {
@@ -467,8 +473,12 @@ export const sendIssueWithdrawnEmail = async (email, fullName, issue) => {
 /**
  * 9. Contact Us Inquiry Email Notification (Delivered to crowdcityai@gmail.com and citizen receipt)
  */
-export const sendContactInquiryEmail = async ({ name, email, category, subject, message, attachmentUrl }) => {
+export const sendContactInquiryEmail = async ({ name, email, category, subject, message, attachmentUrl, attachmentName, rawAttachment }) => {
   const adminSubject = `[CrowdCity Contact Inquiry] ${category}: ${subject}`;
+  const hasAttachmentLink = attachmentUrl && (String(attachmentUrl).startsWith('http://') || String(attachmentUrl).startsWith('https://'));
+  const hasRawAttachment = rawAttachment && rawAttachment.content;
+  const fileName = attachmentName || (rawAttachment && rawAttachment.filename) || 'Attachment';
+
   const adminContentHtml = `
     <h1 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: #ffffff; text-align: left; letter-spacing: -0.5px; line-height: 1.25;">
       New Contact Form Inquiry
@@ -482,18 +492,38 @@ export const sendContactInquiryEmail = async ({ name, email, category, subject, 
         <strong style="color: #ffffff;">Message:</strong>
         <p style="margin: 8px 0 0 0; white-space: pre-wrap; color: #e2e8f0;">${message}</p>
       </div>
-      ${attachmentUrl ? `<p style="margin: 12px 0 0 0;"><strong style="color: #ffffff;">Attachment:</strong> <a href="${attachmentUrl}" target="_blank" style="color: #38bdf8;">View Attachment</a></p>` : ''}
+      ${hasAttachmentLink ? `
+      <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #202731;">
+        <strong style="color: #ffffff;">Attached File:</strong>
+        <div style="margin-top: 8px;">
+          <a href="${attachmentUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #0F766E; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px;">
+            📄 View / Download ${fileName}
+          </a>
+        </div>
+      </div>` : (hasRawAttachment ? `
+      <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #202731;">
+        <p style="margin: 0; color: #38bdf8; font-weight: 600;">📎 Attached file: ${fileName} (included in email)</p>
+      </div>` : '')}
     </div>
   `;
   const adminHtml = getEmailHtmlWrapper('Contact Inquiry', adminContentHtml);
-  const adminText = `New Contact Inquiry\n\nName: ${name}\nEmail: ${email}\nCategory: ${category}\nSubject: ${subject}\n\nMessage:\n${message}\n${attachmentUrl ? `Attachment: ${attachmentUrl}` : ''}`;
+  const adminText = `New Contact Inquiry\n\nName: ${name}\nEmail: ${email}\nCategory: ${category}\nSubject: ${subject}\n\nMessage:\n${message}\n${hasAttachmentLink ? `\nAttachment URL: ${attachmentUrl}` : (hasRawAttachment ? `\nAttachment: ${fileName} (included)` : '')}`;
+
+  const emailAttachments = [];
+  if (hasRawAttachment) {
+    emailAttachments.push({
+      filename: fileName,
+      content: rawAttachment.content
+    });
+  }
 
   // Send to official inbox crowdcityai@gmail.com
   await sendResendEmail({
     to: 'crowdcityai@gmail.com',
     subject: adminSubject,
     html: adminHtml,
-    text: adminText
+    text: adminText,
+    attachments: emailAttachments
   });
 
   // Automated confirmation receipt to sender

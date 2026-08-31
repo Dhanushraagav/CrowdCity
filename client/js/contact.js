@@ -161,10 +161,14 @@ async function handleContactFormSubmit(e) {
 
   try {
     let attachmentUrl = null;
+    let attachmentName = null;
+    let attachmentType = null;
 
     // Convert file to base64 data URL if present
     if (attachmentInput && attachmentInput.files && attachmentInput.files[0]) {
       const file = attachmentInput.files[0];
+      attachmentName = file.name;
+      attachmentType = file.type;
       attachmentUrl = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
@@ -179,7 +183,9 @@ async function handleContactFormSubmit(e) {
       category,
       subject,
       message,
-      attachmentUrl
+      attachmentUrl,
+      attachmentName,
+      attachmentType
     };
 
     const response = await fetch('/api/auth/contact', {
