@@ -64,15 +64,18 @@ function initDashboard() {
   try { setupFilterListeners(); } catch (e) {}
   try { setupSearchListener(); } catch (e) {}
   try { setupFeedTabs(); } catch (e) {}
+
+  // 0ms instant news ticker startup!
+  try { updateCivicIntelligenceFeed([]); } catch (e) {}
   
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   lastLoadedUserIdApp = user ? (user.id || user.sub) : null;
   
-  // Show body immediately to display page shell and skeleton loaders!
+  // Show body immediately to display page shell
   document.body.classList.add('ready');
   document.body.style.visibility = 'visible';
 
-  // Render initial cached stats instantly
+  // Render initial cached stats instantly with 0ms delay
   try { loadUserStats(); } catch (e) {}
 
   // Load initial datasets from real database and refresh stats
@@ -80,7 +83,7 @@ function initDashboard() {
     try { loadUserStats(); } catch (e) {}
   }).catch(err => console.error("Error in loadAndRenderIssues:", err));
 
-  if (user) {
+  if (user || localStorage.getItem('cc_session')) {
     loadRecentNotifications().catch(err => console.error("Error in loadRecentNotifications:", err));
   }
 
@@ -111,26 +114,17 @@ function loadUserStats(isLanguageChange = false) {
       }
     } catch (e) {}
   }
-
-  // If user is not authenticated, show zeroes
   if (!userId) {
-    const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
-    const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
-    const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-    const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
-
-    if (totalEl) animateCountUp(totalEl, 0);
-    if (weeklyEl) weeklyEl.textContent = `+0 ${tThisWeek}`;
-    if (resolvedEl) animateCountUp(resolvedEl, 0);
-    if (rateEl) rateEl.textContent = `0% ${tResolutionRate}`;
-    if (inprogressEl) animateCountUp(inprogressEl, 0);
-    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) animateCountUp(cityTotalEl, 0);
-    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
-    return;
+    try {
+      const profileStr = localStorage.getItem('cc_user_profile');
+      if (profileStr) {
+        const parsed = JSON.parse(profileStr);
+        if (parsed && (parsed.id || parsed.sub)) userId = parsed.id || parsed.sub;
+      }
+    } catch (e) {}
   }
 
-  // If language changed and we have cached user issues, recalculate text strings
+  // 1. If language changed and we have cached user issues, recalculate text strings
   if (isLanguageChange && lastUserIssues && lastUserIssues.length > 0) {
     const total = lastUserIssues.length;
     const now = Date.now();
@@ -149,12 +143,12 @@ function loadUserStats(isLanguageChange = false) {
     const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
     const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
 
-    if (totalEl) animateCountUp(totalEl, total);
+    if (totalEl) totalEl.textContent = total.toString();
     if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
-    if (resolvedEl) animateCountUp(resolvedEl, resolved);
-    if (inprogressEl) animateCountUp(inprogressEl, active);
+    if (resolvedEl) resolvedEl.textContent = resolved.toString();
+    if (inprogressEl) inprogressEl.textContent = active.toString();
     if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) animateCountUp(cityTotalEl, total);
+    if (cityTotalEl) cityTotalEl.textContent = total.toString();
     if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
     if (rateEl) {
@@ -177,8 +171,8 @@ function loadUserStats(isLanguageChange = false) {
     return;
   }
 
-  // If issues are loaded in memory, calculate user statistics directly from real database records
-  if (Array.isArray(currentIssues) && currentIssues.length > 0) {
+  // 2. If issues are loaded in memory, calculate user statistics directly from real database records
+  if (Array.isArray(currentIssues) && currentIssues.length > 0 && userId) {
     const userIssues = currentIssues.filter(i => i && (i.reporter_id === userId || i.user_id === userId));
     lastUserIssues = userIssues;
     const total = userIssues.length;
@@ -198,12 +192,12 @@ function loadUserStats(isLanguageChange = false) {
     const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
     const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
 
-    if (totalEl) animateCountUp(totalEl, total);
+    if (totalEl) totalEl.textContent = total.toString();
     if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
-    if (resolvedEl) animateCountUp(resolvedEl, resolved);
-    if (inprogressEl) animateCountUp(inprogressEl, active);
+    if (resolvedEl) resolvedEl.textContent = resolved.toString();
+    if (inprogressEl) inprogressEl.textContent = active.toString();
     if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) animateCountUp(cityTotalEl, total);
+    if (cityTotalEl) cityTotalEl.textContent = total.toString();
     if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
     if (rateEl) {
@@ -227,24 +221,70 @@ function loadUserStats(isLanguageChange = false) {
     localStorage.setItem('cc_user_stat_weekly', weeklyCount.toString());
     localStorage.setItem('cc_user_stat_resolved', resolved.toString());
     localStorage.setItem('cc_user_stat_active', active.toString());
-    localStorage.setItem('cc_city_stat_total', cityTotal.toString());
+    localStorage.setItem('cc_city_stat_total', total.toString());
 
     renderRecentComplaints(userIssues);
     return;
   }
 
-  // Otherwise, load last known cached stats while data is fetching
+  // 3. Instant 0ms Cache-First Pre-fill from localStorage (cc_my_complaints_civic / cc_user_stat_*)
+  if (userId) {
+    try {
+      const cachedCivicStr = localStorage.getItem('cc_my_complaints_civic');
+      if (cachedCivicStr) {
+        const cachedIssues = JSON.parse(cachedCivicStr);
+        if (Array.isArray(cachedIssues) && cachedIssues.length > 0) {
+          const total = cachedIssues.length;
+          const now = Date.now();
+          const weeklyCount = cachedIssues.filter(i => (now - new Date(i.created_at).getTime()) <= 7 * 86400000).length;
+          const resolved = cachedIssues.filter(i => {
+            const s = (i.status || '').toLowerCase();
+            return s === 'resolved' || s === 'verified' || s === 'closed';
+          }).length;
+          const active = cachedIssues.filter(i => {
+            const s = (i.status || '').toLowerCase();
+            return s === 'pending' || s === 'assigned' || s === 'in_progress';
+          }).length;
+
+          const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
+          const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
+          const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
+          const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
+
+          if (totalEl) totalEl.textContent = total.toString();
+          if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
+          if (resolvedEl) resolvedEl.textContent = resolved.toString();
+          if (inprogressEl) inprogressEl.textContent = active.toString();
+          if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
+          if (cityTotalEl) cityTotalEl.textContent = total.toString();
+          if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
+
+          if (rateEl) {
+            const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+            rateEl.textContent = `${rate}% ${tResolutionRate}`;
+          }
+
+          if (heroDesc) {
+            heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
+          }
+          return;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 4. Otherwise, load last known cached stats
   const cachedTotal = localStorage.getItem('cc_user_stat_total');
   const cachedWeekly = localStorage.getItem('cc_user_stat_weekly');
   const cachedResolved = localStorage.getItem('cc_user_stat_resolved');
   const cachedActive = localStorage.getItem('cc_user_stat_active');
   const cachedCityTotal = localStorage.getItem('cc_city_stat_total');
 
-  if (totalEl && cachedTotal !== null) animateCountUp(totalEl, parseInt(cachedTotal, 10) || 0);
+  if (totalEl && cachedTotal !== null) totalEl.textContent = cachedTotal;
   if (weeklyEl && cachedWeekly !== null) weeklyEl.textContent = `+${parseInt(cachedWeekly, 10) || 0} this week`;
-  if (resolvedEl && cachedResolved !== null) animateCountUp(resolvedEl, parseInt(cachedResolved, 10) || 0);
-  if (inprogressEl && cachedActive !== null) animateCountUp(inprogressEl, parseInt(cachedActive, 10) || 0);
-  if (cityTotalEl && cachedCityTotal !== null) animateCountUp(cityTotalEl, parseInt(cachedCityTotal, 10) || 0);
+  if (resolvedEl && cachedResolved !== null) resolvedEl.textContent = cachedResolved;
+  if (inprogressEl && cachedActive !== null) inprogressEl.textContent = cachedActive;
+  if (cityTotalEl && cachedCityTotal !== null) cityTotalEl.textContent = cachedCityTotal;
 
   if (cachedTotal !== null && cachedResolved !== null) {
     const total = parseInt(cachedTotal, 10) || 0;
@@ -252,6 +292,9 @@ function loadUserStats(isLanguageChange = false) {
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
       rateEl.textContent = `${rate}% Resolution Rate`;
+    }
+    if (heroDesc && total > 0) {
+      heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
     }
   }
 }
