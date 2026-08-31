@@ -355,15 +355,18 @@
     }
 
     .contact-info-value {
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 600;
       color: var(--text-main);
-      word-break: break-all;
+      word-break: normal;
+      overflow-wrap: break-word;
+      line-height: 1.4;
     }
 
     .contact-info-value a {
       color: var(--primary, #0d9488);
       text-decoration: none;
+      word-break: break-all;
     }
 
     .contact-info-value a:hover {
@@ -452,6 +455,9 @@
       }
       .contact-hero-banner {
         padding: 1.5rem 1.25rem;
+      }
+      .contact-info-value {
+        font-size: 0.82rem;
       }
     }
   </style>
@@ -673,7 +679,7 @@
                   </div>
                   <div>
                     <div class="contact-info-label">Response Hours</div>
-                    <div class="contact-info-value">Monday to Saturday, 9:00 AM - 6:00 PM IST</div>
+                    <div class="contact-info-value" style="white-space: nowrap;">Monday to Saturday, 9:00 AM - 6:00 PM IST</div>
                   </div>
                 </div>
 
