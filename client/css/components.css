@@ -55,29 +55,29 @@
   font-size: 0.9rem;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .btn:active {
-  transform: scale(0.95);
+  transform: scale(0.985);
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(13, 148, 136, 0.12);
 }
 
 .btn-primary {
   background-color: var(--btn-primary-bg);
   color: var(--btn-primary-text);
   border-color: var(--btn-primary-bg);
-  box-shadow: 0 2px 4px rgba(13, 148, 136, 0.1);
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.15);
 }
 
 .btn-primary:hover {
   background-color: var(--btn-primary-hover);
   border-color: var(--btn-primary-hover);
-  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.25);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.22);
 }
 
 .btn-secondary {
@@ -88,8 +88,8 @@
 
 .btn-secondary:hover {
   background-color: var(--btn-secondary-hover);
-  border-color: var(--btn-secondary-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: var(--border-color-hover, #cbd5e1);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-danger {
@@ -212,13 +212,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .issue-card:hover {
-  border-color: var(--slate-400);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-color: var(--border-color-hover, #cbd5e1);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1.5px);
 }
 
 .issue-card.active {
@@ -2988,7 +2989,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 
 .stitch-stat-card {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 14px;
   padding: 1.25rem 1.35rem;
@@ -2996,10 +2997,16 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   flex-direction: row;
   align-items: center;
   gap: 1.1rem;
-  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-xs);
   overflow: hidden;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
   cursor: pointer;
+}
+
+.stitch-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-color-hover, #cbd5e1);
 }
 
 .kpi-icon-circle {
