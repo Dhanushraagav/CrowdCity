@@ -285,6 +285,7 @@ class I18nService {
       const targets = document.querySelectorAll(selector);
       targets.forEach(el => {
         if (el.hasAttribute('data-i18n')) return;
+        if (el.id === 'hero-greeting' || el.id === 'hero-desc' || el.id === 'civic-intelligence-feed-text' || el.closest('#hero-greeting') || el.closest('#hero-desc') || el.classList.contains('user-greeting-name') || el.closest('.user-greeting-name')) return;
         
         // Skip auto-stamping container links/buttons with child icon elements
         if (el.children.length > 0 && (el.tagName === 'A' || el.tagName === 'BUTTON' || el.classList.contains('app-sidebar-link') || el.classList.contains('bell-btn'))) {

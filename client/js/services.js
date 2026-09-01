@@ -133,12 +133,25 @@
       });
     });
 
+    window.addEventListener('language-change', () => {
+      renderSchemes();
+    });
+
     renderSchemes();
   }
 
   function renderSchemes() {
     const container = document.getElementById('schemes-container');
     if (!container) return;
+
+    const tCheck = window.i18n ? window.i18n.t('services_btn_check_eligibility') : 'Check Eligibility';
+    const tSave = window.i18n ? window.i18n.t('services_btn_save_scheme') : 'Save Scheme';
+    const tPortal = window.i18n ? window.i18n.t('services_btn_official_portal') : 'Official Portal';
+    const tBenefits = window.i18n ? window.i18n.t('services_lbl_key_benefits') : 'Key Benefits';
+    const tEligibility = window.i18n ? window.i18n.t('services_lbl_eligibility_criteria') : 'Eligibility Criteria';
+    const tDocuments = window.i18n ? window.i18n.t('services_lbl_required_documents') : 'Required Documents';
+    const tNoSchemes = window.i18n ? window.i18n.t('services_no_schemes_found') : 'No Government Schemes Found';
+    const tNoSchemesDesc = window.i18n ? window.i18n.t('services_no_schemes_desc') : "Try searching for a different keyword or selecting 'All Schemes'.";
 
     const filtered = GOVERNMENT_SCHEMES.filter(sch => {
       const matchCat = currentCategory === 'all' || sch.category === currentCategory;
@@ -150,8 +163,8 @@
     if (filtered.length === 0) {
       container.innerHTML = `
         <div style="grid-column: 1 / -1; padding: 2.5rem 1rem; text-align: center; background: var(--srv-bg-surface); border: 1px solid var(--srv-border); border-radius: 16px;">
-          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--srv-text-main); margin: 0 0 0.5rem 0;">No Government Schemes Found</h3>
-          <p style="font-size: 0.85rem; color: var(--srv-text-muted); margin: 0;">Try searching for a different keyword or selecting 'All Schemes'.</p>
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--srv-text-main); margin: 0 0 0.5rem 0;">${tNoSchemes}</h3>
+          <p style="font-size: 0.85rem; color: var(--srv-text-muted); margin: 0;">${tNoSchemesDesc}</p>
         </div>
       `;
       return;
@@ -169,25 +182,25 @@
           <div class="scheme-dept">${sch.dept}</div>
 
           <div class="scheme-benefits">
-            <strong style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--srv-primary); margin-bottom: 0.25rem;">Key Benefits</strong>
+            <strong style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--srv-primary); margin-bottom: 0.25rem;">${tBenefits}</strong>
             ${sch.benefits}
           </div>
 
           <div class="scheme-details-list">
-            <div><strong>Eligibility Criteria:</strong> ${sch.ageLimit} | ${sch.incomeLimit}</div>
-            <div style="margin-top: 0.35rem;"><strong>Required Documents:</strong> ${sch.documents.join(', ')}</div>
+            <div><strong>${tEligibility}:</strong> ${sch.ageLimit} | ${sch.incomeLimit}</div>
+            <div style="margin-top: 0.35rem;"><strong>${tDocuments}:</strong> ${sch.documents.join(', ')}</div>
           </div>
         </div>
 
         <div class="scheme-actions">
           <a href="scheme-checker.html?scheme=${sch.id}" class="btn-srv btn-srv-primary">
-            Check Eligibility
+            ${tCheck}
           </a>
           <button type="button" class="btn-srv btn-srv-outline" onclick="bookmarkScheme('${sch.id}', '${sch.name}')">
-            Save Scheme
+            ${tSave}
           </button>
           <a href="${sch.portal}" target="_blank" rel="noopener noreferrer" class="btn-srv btn-srv-outline">
-            Official Portal
+            ${tPortal}
           </a>
         </div>
       </div>

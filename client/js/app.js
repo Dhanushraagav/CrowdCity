@@ -1263,7 +1263,8 @@ function updateHeroGreeting() {
     greeting = 'Good Afternoon';
   }
 
-  const defaultCitizen = window.i18n ? window.i18n.t('role_citizen') : 'Citizen';
+  const isTa = window.i18n && window.i18n.getLanguage() === 'ta';
+  const defaultCitizen = isTa ? 'குடிமகன்' : 'Citizen';
   let fullName = defaultCitizen;
   const profileStr = localStorage.getItem('cc_user_profile');
   if (profileStr) {
@@ -1283,8 +1284,14 @@ function updateHeroGreeting() {
   }
 
   const safeName = `<span class="user-greeting-name">${escapeHTML(fullName)}</span>`;
-  if (window.i18n) {
-    heroGreeting.innerHTML = window.i18n.t(greetingKey, { name: safeName });
+  if (isTa) {
+    const taGreetings = {
+      hero_greeting_morning: 'காலை வணக்கம்',
+      hero_greeting_afternoon: 'மதிய வணக்கம்',
+      hero_greeting_evening: 'மாலை வணக்கம்'
+    };
+    const taWord = taGreetings[greetingKey] || 'வணக்கம்';
+    heroGreeting.innerHTML = `${taWord}, ${safeName}`;
   } else {
     heroGreeting.innerHTML = `${escapeHTML(greeting)}, ${safeName}`;
   }
