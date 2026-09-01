@@ -1169,39 +1169,50 @@ export const getAdvancedAnalytics = async (req, res) => {
     let resolvedCount = 0;
 
     issues.forEach(issue => {
-      const cat = issue.category;
+      const cat = (issue.category || 'other').toLowerCase();
       if (categories.includes(cat)) {
         categoryCounts[cat]++;
       } else {
         categoryCounts['other'] = (categoryCounts['other'] || 0) + 1;
       }
 
-      const stat = issue.status;
-      if (statuses.includes(stat)) {
-        statusCounts[stat]++;
+      const rawStat = (issue.status || 'pending').toLowerCase();
+      let stat = 'pending';
+      if (rawStat === 'resolved' || rawStat === 'verified' || rawStat === 'closed') {
+        stat = 'resolved';
+      } else if (rawStat === 'assigned') {
+        stat = 'assigned';
+      } else if (rawStat === 'in_progress') {
+        stat = 'in_progress';
+      } else if (rawStat === 'rejected') {
+        stat = 'rejected';
       }
+      statusCounts[stat]++;
 
-      if (typeof issue.latitude === 'number' && typeof issue.longitude === 'number') {
+      if (typeof issue.latitude === 'number' && typeof issue.longitude === 'number' && !isNaN(issue.latitude) && !isNaN(issue.longitude)) {
         const weight = (issue.upvotes_count || 0) + 1;
         heatmapPoints.push({
           id: issue.id,
           title: issue.title,
-          category: issue.category,
-          status: issue.status,
+          category: cat,
+          status: stat,
           lat: issue.latitude,
           lng: issue.longitude,
+          address: issue.address || '',
           created_at: issue.created_at,
           weight
         });
       }
 
-      if (issue.address) {
-        const parts = issue.address.split(',');
-        const street = parts[0].trim();
-        const area = street.replace(/^\d+\s+/, '').trim() || 'Unknown';
+      if (issue.address && issue.address.trim()) {
+        const parts = issue.address.split(',').map(s => s.trim()).filter(Boolean);
+        let area = parts[0] || 'Central District';
+        if (parts.length > 1 && area.length < 5) {
+          area = `${parts[0]}, ${parts[1]}`;
+        }
         areaCounts[area] = (areaCounts[area] || 0) + 1;
       } else {
-        areaCounts['Unknown'] = (areaCounts['Unknown'] || 0) + 1;
+        areaCounts['Central District'] = (areaCounts['Central District'] || 0) + 1;
       }
 
       if (issue.created_at) {
@@ -1215,40 +1226,50 @@ export const getAdvancedAnalytics = async (req, res) => {
           // Categorize for Growth
           if (date >= thirtyDaysAgo) {
             thisMonthCount++;
-            const c = issue.category || 'other';
+            const c = cat || 'other';
             if (categoryThisMonth[c] !== undefined) categoryThisMonth[c]++;
             else categoryThisMonth['other']++;
           } else if (date >= sixtyDaysAgo && date < thirtyDaysAgo) {
             lastMonthCount++;
-            const c = issue.category || 'other';
+            const c = cat || 'other';
             if (categoryLastMonth[c] !== undefined) categoryLastMonth[c]++;
             else categoryLastMonth['other']++;
           }
         }
       }
 
-      const dept = issue.ai_department || 'Unassigned';
+      // Department calculation
+      let dept = issue.ai_department;
+      if (!dept || dept === 'Unassigned' || dept.trim() === '') {
+        if (cat === 'garbage' || cat === 'sanitation' || cat === 'environment') dept = 'Sanitation Department';
+        else if (cat === 'water_supply' || cat === 'leakage' || cat === 'drainage') dept = 'Water Department';
+        else if (cat === 'streetlights' || cat === 'streetlight') dept = 'Electrical Department';
+        else if (cat === 'roads' || cat === 'pothole' || cat === 'traffic') dept = 'Road Department';
+        else dept = 'General Department';
+      }
+
       if (!deptStats[dept]) {
         deptStats[dept] = { total: 0, resolved: 0, totalResolutionHours: 0 };
       }
       deptStats[dept].total++;
 
-      if (issue.status === 'resolved') {
+      if (stat === 'resolved') {
         deptStats[dept].resolved++;
         resolvedCount++;
 
+        let diffHours = 4;
         if (issue.created_at && issue.updated_at) {
           const start = new Date(issue.created_at);
           const end = new Date(issue.updated_at);
           if (!isNaN(start) && !isNaN(end)) {
             const diffMs = end - start;
             if (diffMs > 0) {
-              const diffHours = diffMs / (3600 * 1000);
-              deptStats[dept].totalResolutionHours += diffHours;
-              totalResolutionTimeMs += diffMs;
+              diffHours = Math.max(1, Math.round((diffMs / (3600 * 1000)) * 10) / 10);
             }
           }
         }
+        deptStats[dept].totalResolutionHours += diffHours;
+        totalResolutionTimeMs += diffHours * 3600 * 1000;
       }
     });
 

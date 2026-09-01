@@ -2,6 +2,7 @@
 
 let map = null;
 let heatmapLayer = null;
+let heatmapMarkersLayer = null;
 let showHeatmap = true;
 
 // Raw fetched data buffers for client-side filtering
@@ -88,12 +89,12 @@ async function loadAnalyticsDashboard() {
 }
 
 /**
- * Initialize Leaflet map focused on San Francisco
+ * Initialize Leaflet map focused on Tamil Nadu civic center
  */
 function initAnalyticsMap() {
   if (map) return;
 
-  const defaultCenter = [11.0168, 76.9558]; // Coimbatore, India
+  const defaultCenter = [11.0168, 76.9558]; // Coimbatore, Tamil Nadu
   map = L.map('analytics-map', {
     scrollWheelZoom: false
   }).setView(defaultCenter, 13);
@@ -156,7 +157,7 @@ function filterAndUpdateDashboard() {
   // Recalculate KPI metrics on filtered list
   updateKPIs(filteredPoints, activeCategory);
 
-  // Redraw Heatmap Overlay
+  // Redraw Heatmap Overlay & Hotspot Pins
   renderHeatmap(filteredPoints);
 
   // Redraw Neighborhood List
@@ -176,44 +177,100 @@ function updateKPIs(points, category) {
   const hotspotsEl = document.getElementById('kpi-hotspots-count');
 
   const total = points.length;
-  const resolved = points.filter(p => p.status === 'resolved').length;
+  const resolved = points.filter(p => {
+    const s = (p.status || '').toLowerCase();
+    return s === 'resolved' || s === 'verified' || s === 'closed';
+  }).length;
   
   let avgHours = rawData.averageResolutionTimeHours || 0;
 
   if (totalEl) totalEl.textContent = total;
   if (resolvedEl) resolvedEl.textContent = resolved;
   if (avgEl) avgEl.textContent = avgHours > 24 ? `${Math.round(avgHours / 24 * 10) / 10} days` : `${avgHours} hr`;
-  if (hotspotsEl) hotspotsEl.textContent = points.filter(p => p.weight > 5).length;
+  if (hotspotsEl) hotspotsEl.textContent = total;
 }
 
 /**
- * Render toggable Leaflet Heatmap Layer
+ * Render toggable Leaflet Heatmap Layer and Hotspot pins
  */
 function renderHeatmap(points) {
   if (!map) return;
 
-  // Clear existing layer if present
+  // Clear existing layers if present
   if (heatmapLayer) {
     map.removeLayer(heatmapLayer);
+    heatmapLayer = null;
+  }
+  if (heatmapMarkersLayer) {
+    map.removeLayer(heatmapMarkersLayer);
+    heatmapMarkersLayer = null;
   }
 
   if (!showHeatmap) return;
 
-  // Format array for Leaflet.heat: [lat, lng, intensity]
-  const heatData = points.map(p => [p.lat, p.lng, p.weight ? Math.min(p.weight / 10, 1.0) : 0.2]);
+  const validPoints = points.filter(p => 
+    p && typeof p.lat === 'number' && typeof p.lng === 'number' &&
+    !isNaN(p.lat) && !isNaN(p.lng) &&
+    (p.lat !== 0 || p.lng !== 0)
+  );
 
-  heatmapLayer = L.heatLayer(heatData, {
-    radius: 25,
-    blur: 15,
-    maxZoom: 15,
-    max: 1.0,
-    gradient: {
-      0.4: 'blue',
-      0.65: 'lime',
-      0.85: 'orange',
-      1.0: 'red'
-    }
-  }).addTo(map);
+  if (validPoints.length === 0) return;
+
+  // 1. Format array for Leaflet.heat: [lat, lng, intensity]
+  const heatData = validPoints.map(p => [
+    p.lat, 
+    p.lng, 
+    Math.max(0.6, Math.min((p.weight || 1) / 3, 1.0))
+  ]);
+
+  if (typeof L.heatLayer === 'function') {
+    heatmapLayer = L.heatLayer(heatData, {
+      radius: 35,
+      blur: 20,
+      maxZoom: 16,
+      minOpacity: 0.4,
+      gradient: {
+        0.3: '#3b82f6',
+        0.5: '#06b6d4',
+        0.7: '#f59e0b',
+        1.0: '#ef4444'
+      }
+    }).addTo(map);
+  }
+
+  // 2. Add visible hotspot markers with informative popups
+  heatmapMarkersLayer = L.layerGroup();
+  validPoints.forEach(p => {
+    const s = (p.status || '').toLowerCase();
+    const isResolved = s === 'resolved' || s === 'verified' || s === 'closed';
+    const markerColor = isResolved ? '#22c55e' : (s === 'assigned' ? '#3b82f6' : '#f59e0b');
+    
+    const circleMarker = L.circleMarker([p.lat, p.lng], {
+      radius: 8,
+      fillColor: markerColor,
+      color: '#ffffff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.95
+    });
+
+    const statusBadge = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; background:${markerColor}22; color:${markerColor}; text-transform:uppercase;">${p.status || 'Active'}</span>`;
+    
+    circleMarker.bindPopup(`
+      <div style="font-family:'Inter',sans-serif; min-width:180px; padding:4px;">
+        <h4 style="margin:0 0 6px 0; font-size:13px; font-weight:700; color:#0f172a;">${escapeHTML(p.title || 'Civic Issue')}</h4>
+        <div style="margin-bottom:6px; font-size:12px; color:#64748b;">${escapeHTML(p.address || 'Reported Location')}</div>
+        <div>${statusBadge}</div>
+      </div>
+    `);
+
+    heatmapMarkersLayer.addLayer(circleMarker);
+  });
+  heatmapMarkersLayer.addTo(map);
+
+  // 3. Auto-fit map viewport to active points
+  const bounds = L.latLngBounds(validPoints.map(p => [p.lat, p.lng]));
+  map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
 }
 
 /**
@@ -238,8 +295,14 @@ function renderNeighborhoodsList(points) {
 
   const areaCounts = {};
   points.forEach(p => {
-    const match = rawData.areaDistribution.find(a => p.title && p.title.toLowerCase().includes(a.area.toLowerCase()));
-    const area = match ? match.area : 'Downtown Area';
+    let area = 'Central District';
+    if (p.address && p.address.trim()) {
+      const parts = p.address.split(',').map(s => s.trim()).filter(Boolean);
+      area = parts[0] || 'Central District';
+    } else if (rawData.areaDistribution && rawData.areaDistribution.length > 0) {
+      const match = rawData.areaDistribution.find(a => p.title && p.title.toLowerCase().includes(a.area.toLowerCase()));
+      area = match ? match.area : rawData.areaDistribution[0].area;
+    }
     areaCounts[area] = (areaCounts[area] || 0) + 1;
   });
 
@@ -257,8 +320,8 @@ function renderNeighborhoodsList(points) {
   sortedAreas.forEach(item => {
     html += `
       <div class="area-item">
-        <span class="area-name"><i class="fa-solid fa-location-dot"></i> ${item.area}</span>
-        <span class="area-count">${item.count} issues</span>
+        <span class="area-name"><i class="fa-solid fa-location-dot"></i> ${escapeHTML(item.area)}</span>
+        <span class="area-count">${item.count} ${item.count === 1 ? 'issue' : 'issues'}</span>
       </div>
     `;
   });
@@ -355,10 +418,18 @@ function updateCharts(points) {
   Object.keys(STATUS_COLORS).forEach(s => statusCounts[s] = 0);
 
   points.forEach(p => {
-    if (categoryCounts[p.category] !== undefined) categoryCounts[p.category]++;
+    const cat = (p.category || 'other').toLowerCase();
+    if (categoryCounts[cat] !== undefined) categoryCounts[cat]++;
     else categoryCounts.other++;
 
-    if (statusCounts[p.status] !== undefined) statusCounts[p.status]++;
+    const s = (p.status || 'pending').toLowerCase();
+    let normStat = 'pending';
+    if (s === 'resolved' || s === 'verified' || s === 'closed') normStat = 'resolved';
+    else if (s === 'assigned') normStat = 'assigned';
+    else if (s === 'in_progress') normStat = 'in_progress';
+    else if (s === 'rejected') normStat = 'rejected';
+
+    if (statusCounts[normStat] !== undefined) statusCounts[normStat]++;
   });
 
   // Re-group Monthly Trends on filtered points
@@ -382,17 +453,19 @@ function updateCharts(points) {
   // Re-group Department stats on filtered points
   const deptStats = {};
   points.forEach(p => {
+    const cat = (p.category || '').toLowerCase();
     let dept = 'Road Department';
-    if (p.category === 'garbage' || p.category === 'sanitation' || p.category === 'environment') dept = 'Sanitation Department';
-    else if (p.category === 'water_supply' || p.category === 'leakage' || p.category === 'drainage') dept = 'Water Department';
-    else if (p.category === 'streetlights' || p.category === 'streetlight') dept = 'Electrical Department';
-    else if (p.category === 'other') dept = 'General Department';
+    if (cat === 'garbage' || cat === 'sanitation' || cat === 'environment') dept = 'Sanitation Department';
+    else if (cat === 'water_supply' || cat === 'leakage' || cat === 'drainage') dept = 'Water Department';
+    else if (cat === 'streetlights' || cat === 'streetlight') dept = 'Electrical Department';
+    else if (cat === 'other') dept = 'General Department';
     
     if (!deptStats[dept]) {
       deptStats[dept] = { total: 0, resolved: 0 };
     }
     deptStats[dept].total++;
-    if (p.status === 'resolved') {
+    const s = (p.status || '').toLowerCase();
+    if (s === 'resolved' || s === 'verified' || s === 'closed') {
       deptStats[dept].resolved++;
     }
   });
