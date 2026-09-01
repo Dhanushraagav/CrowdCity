@@ -1,5 +1,15 @@
 // CrowdCity - Advanced Analytics Page Controller
 
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 let map = null;
 let heatmapLayer = null;
 let heatmapMarkersLayer = null;
@@ -491,7 +501,7 @@ function renderCategoriesChart(counts) {
 
   if (categoriesChart) categoriesChart.destroy();
 
-  const labels = Object.keys(counts).map(k => window.formatCategoryName(k));
+  const labels = Object.keys(counts).map(k => (window.formatCategoryName ? window.formatCategoryName(k) : (window.i18n ? window.i18n.t('category_' + k) : k)));
   const data = Object.values(counts);
   const colors = Object.keys(counts).map(k => CATEGORY_COLORS[k] || CATEGORY_COLORS.other);
 
