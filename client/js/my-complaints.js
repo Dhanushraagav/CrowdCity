@@ -356,7 +356,12 @@ async function loadAndRenderMyIssues() {
     return `
       <article class="issue-card ${issue.is_emergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='issue-details.html?id=${issue.id}'">
         <div class="issue-card-header">
-          <span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span>
+          <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+            <span class="badge badge-category ${issue.category}">${window.formatCategoryName(issue.category)}</span>
+            <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: var(--primary); background: rgba(13,148,136,0.1); padding: 0.2rem 0.5rem; border-radius: 4px;">${escapeHTML(issue.complaint_id || issue.id)}</span>
+            <span style="font-size: 0.75rem; font-weight: 700; color: #10b981; background: rgba(16,185,129,0.1); padding: 0.2rem 0.5rem; border-radius: 50px;"><i class="fa-solid fa-users"></i> ${issue.citizen_count || 1}</span>
+            ${issue.is_supporting_report ? `<span style="font-size: 0.72rem; font-weight: 700; color: #6366f1; background: rgba(99,102,241,0.1); padding: 0.2rem 0.5rem; border-radius: 4px;"><i class="fa-solid fa-link"></i> Co-Reported</span>` : ''}
+          </div>
           <div style="display: flex; gap: 0.5rem; align-items: center;">
             ${issue.is_emergency ? `<span class="badge badge-status critical" style="background-color: #dc2626 !important; color: #ffffff !important; font-weight: 900 !important; font-size: 0.75rem !important; padding: 0.35rem 0.75rem !important; border-radius: 6px !important; letter-spacing: 0.5px !important; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4) !important; display: inline-flex !important; align-items: center !important; gap: 0.4rem !important;"><i class="fa-solid fa-triangle-exclamation" style="color: #ffffff !important;"></i> EMERGENCY</span>` : ''}
             <span class="badge badge-status ${issue.status}">${tStatus}</span>

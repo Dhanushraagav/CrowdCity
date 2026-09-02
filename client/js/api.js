@@ -175,6 +175,25 @@ const API = {
     });
   },
 
+  // Check for existing duplicate civic issue nearby
+  checkDuplicateIssue: async (data) => {
+    return request('/issues/check-duplicate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: true
+    });
+  },
+
+  // Attach report as a supporting citizen on an existing master complaint
+  supportExistingIssue: async (id, formData) => {
+    _clearApiCache();
+    return request(`/issues/${id}/support`, {
+      method: 'POST',
+      body: formData,
+      auth: true
+    });
+  },
+
   // 4. Toggle issue upvote
   upvoteIssue: async (id) => {
     _clearApiCache();

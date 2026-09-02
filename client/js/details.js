@@ -60,6 +60,42 @@ async function loadIssueDetails() {
   document.getElementById('issue-lng').textContent = issue.longitude.toFixed(5);
   document.getElementById('upvotes-count').textContent = issue.upvotes_count || 0;
   
+  // Complaint ID & Citizen Count
+  const compIdEl = document.getElementById('issue-complaint-id');
+  if (compIdEl) {
+    compIdEl.textContent = issue.complaint_id || issue.id;
+  }
+  const citizenCountEl = document.getElementById('issue-citizen-count');
+  if (citizenCountEl) {
+    const count = issue.citizen_count || 1;
+    citizenCountEl.textContent = `${count} ${count === 1 ? 'citizen' : 'citizens'}`;
+  }
+
+  // Supporting reports list
+  const supportingSection = document.getElementById('supporting-reports-section');
+  const supportingList = document.getElementById('supporting-reports-list');
+  const supportingCountEl = document.getElementById('supporting-reports-count');
+
+  if (supportingSection && supportingList && supportingCountEl) {
+    const reports = Array.isArray(issue.supporting_reports) ? issue.supporting_reports : [];
+    supportingCountEl.textContent = reports.length;
+    if (reports.length > 0) {
+      supportingSection.classList.remove('hidden');
+      supportingList.innerHTML = reports.map(r => `
+        <div style="background: var(--bg-surface-hover); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+            <strong style="color: var(--text-main);"><i class="fa-solid fa-user-check" style="color: #10b981; margin-right: 0.35rem;"></i>${escapeHTML(r.citizen_name || 'Citizen')}</strong>
+            <span style="color: var(--text-muted); font-size: 0.78rem;">${formatDate(new Date(r.created_at))}</span>
+          </div>
+          <p style="margin: 0; font-size: 0.88rem; color: var(--slate-600); line-height: 1.5;">${escapeHTML(r.comment || 'Confirmed identical issue.')}</p>
+          ${r.image_url ? `<a href="${r.image_url}" target="_blank" style="color: var(--primary); font-size: 0.8rem; font-weight: 700; margin-top: 0.25rem; display: inline-flex; align-items: center; gap: 0.35rem;"><i class="fa-solid fa-image"></i> View Co-Reporter Photo Attachment</a>` : ''}
+        </div>
+      `).join('');
+    } else {
+      supportingSection.classList.add('hidden');
+    }
+  }
+
   // Reporter info
   const reporterName = issue.reporter?.full_name || 'Anonymous Citizen';
   document.getElementById('reporter-name').textContent = reporterName;

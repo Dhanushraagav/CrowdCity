@@ -23,7 +23,9 @@ import {
   uploadEvidence,
   getIssueReceipt,
   getChatMessages,
-  sendChatMessage
+  sendChatMessage,
+  checkIssueDuplicate,
+  supportExistingIssue
 } from '../controllers/issueController.js';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 import { upload, handleUploadError } from '../middlewares/uploadMiddleware.js';
@@ -40,10 +42,15 @@ const router = express.Router();
 // Public routes
 router.get('/', getAllIssues);
 router.get('/analytics', getAdvancedAnalytics);
+
+// Duplicate check route (registered before parameterized ID route)
+router.post('/check-duplicate', requireAuth, checkIssueDuplicate);
+
 router.get('/:id', validateIdParam('id'), getIssueById);
 
 // Authenticated routes (All citizens/roles)
 router.post('/', requireAuth, upload.array('image', 5), handleUploadError, validateCreateIssue, createIssue);
+router.post('/:id/support', requireAuth, validateIdParam('id'), upload.array('image', 3), handleUploadError, supportExistingIssue);
 router.post('/:id/upvote', requireAuth, validateIdParam('id'), upvoteIssue);
 router.get('/:id/comments', getIssueComments);
 router.post('/:id/comments', requireAuth, validateAddComment, addComment);

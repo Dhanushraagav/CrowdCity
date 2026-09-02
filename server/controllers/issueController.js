@@ -5,6 +5,8 @@ import logger from '../config/logger.js';
 import { analyzeComplaint } from '../services/groqService.js';
 import { validateServiceArea } from '../services/serviceAreaService.js';
 import { getUserEmail, sendIssueCreatedEmail, sendIssueStatusUpdateEmail, sendIssueWithdrawnEmail, sendNewChatMessageEmail } from '../services/emailService.js';
+import { generateNextComplaintId, normalizeComplaintRecord } from '../services/complaintIdService.js';
+import { findDuplicateCandidate } from '../services/duplicateDetectionService.js';
 
 /**
  * Get all reported civic issues.
@@ -47,7 +49,24 @@ export const getAllIssues = async (req, res) => {
         query = query.eq('status', status);
       }
     }
-    if (reporter_id) query = query.eq('reporter_id', reporter_id);
+    let userSupportingIssueIds = [];
+    if (reporter_id) {
+      try {
+        const { data: supData } = await activeClient
+          .from('issue_supporting_reports')
+          .select('issue_id')
+          .eq('citizen_id', reporter_id);
+        if (supData && supData.length > 0) {
+          userSupportingIssueIds = supData.map(s => s.issue_id);
+        }
+      } catch (e) {}
+
+      if (userSupportingIssueIds.length > 0) {
+        query = query.or(`reporter_id.eq.${reporter_id},id.in.(${userSupportingIssueIds.join(',')})`);
+      } else {
+        query = query.eq('reporter_id', reporter_id);
+      }
+    }
     if (assigned_to) query = query.eq('assigned_to', assigned_to);
 
     const orderByColumn = sort_by === 'popularity' ? 'upvotes_count' : 'created_at';
@@ -78,15 +97,15 @@ export const getAllIssues = async (req, res) => {
     const userVotes = votesRes.data;
     const votesError = votesRes.error;
 
-    // Populate user_has_upvoted
-    if (userId && data && data.length > 0 && !votesError && userVotes) {
-      const votedIssueIds = new Set(userVotes.map(v => v.issue_id));
+    // Populate user_has_upvoted and normalize complaint_id
+    if (data && data.length > 0) {
+      const votedIssueIds = (userId && !votesError && userVotes) ? new Set(userVotes.map(v => v.issue_id)) : new Set();
       data.forEach(issue => {
+        normalizeComplaintRecord(issue);
         issue.user_has_upvoted = votedIssueIds.has(issue.id);
-      });
-    } else if (data) {
-      data.forEach(issue => {
-        issue.user_has_upvoted = false;
+        if (userSupportingIssueIds.includes(issue.id) && issue.reporter_id !== reporter_id) {
+          issue.is_supporting_report = true;
+        }
       });
     }
 
@@ -98,7 +117,7 @@ export const getAllIssues = async (req, res) => {
 };
 
 /**
- * Get issue details by ID.
+ * Get issue details by ID (UUID or Complaint ID CC-YYYY-NNNNNN).
  */
 export const getIssueById = async (req, res) => {
   const { id } = req.params;
@@ -116,11 +135,17 @@ export const getIssueById = async (req, res) => {
 
   try {
     const activeClient = getSupabaseClient(req);
-    const { data: issue, error: issueError } = await activeClient
+    let issueQuery = activeClient
       .from('issues')
-      .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url)')
-      .eq('id', id)
-      .single();
+      .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url)');
+
+    if (typeof id === 'string' && id.toUpperCase().startsWith('CC-')) {
+      issueQuery = issueQuery.eq('complaint_id', id.toUpperCase());
+    } else {
+      issueQuery = issueQuery.eq('id', id);
+    }
+
+    const { data: issue, error: issueError } = await issueQuery.single();
 
     if (issueError) {
       logger.error('getIssueById DB Error: %O', issueError);
@@ -131,16 +156,30 @@ export const getIssueById = async (req, res) => {
       return res.status(404).json({ error: 'Issue not found' });
     }
 
+    normalizeComplaintRecord(issue);
+
+    // Fetch supporting community reports
+    let supportingReports = [];
+    try {
+      const { data: supData } = await activeClient
+        .from('issue_supporting_reports')
+        .select('*')
+        .eq('issue_id', issue.id)
+        .order('created_at', { ascending: true });
+      if (supData) supportingReports = supData;
+    } catch (e) {}
+    issue.supporting_reports = supportingReports;
+
     const { data: comments, error: commentsError } = await activeClient
       .from('comments')
       .select('*, profiles:profiles(full_name, avatar_url)')
-      .eq('issue_id', id)
+      .eq('issue_id', issue.id)
       .order('created_at', { ascending: true });
 
     const { data: history, error: historyError } = await activeClient
       .from('status_history')
       .select('*, profiles:profiles(full_name, avatar_url)')
-      .eq('issue_id', id)
+      .eq('issue_id', issue.id)
       .order('created_at', { ascending: true });
 
     // Check if user has upvoted
@@ -308,8 +347,13 @@ export const createIssue = async (req, res) => {
     // Perform AI analysis on submission
     const aiResult = await performGroqAnalysis(title, description);
 
+    // Generate authoritative Complaint ID (CC-YYYY-NNNNNN)
+    const generatedComplaintId = await generateNextComplaintId();
+
     const newIssue = {
       reporter_id,
+      complaint_id: generatedComplaintId,
+      citizen_count: 1,
       title: title.trim(),
       description: description.trim(),
       category,
@@ -333,13 +377,29 @@ export const createIssue = async (req, res) => {
 
     // Production flow: insert to Supabase using request-scoped client
     const activeClient = getSupabaseClient(req);
-    const { data: issue, error } = await activeClient
+    let { data: issue, error } = await activeClient
       .from('issues')
       .insert(newIssue)
       .select()
       .single();
 
-    if (error) {
+    if (error && error.code === '42703') {
+      logger.warn('complaint_id or citizen_count column not found in Supabase schema, retrying without them:', error.message);
+      delete newIssue.complaint_id;
+      delete newIssue.citizen_count;
+      const retry = await activeClient.from('issues').insert(newIssue).select().single();
+      if (retry.error) {
+        logger.error('Failed to insert issue into Supabase on fallback: %O', retry.error);
+        return res.status(400).json({
+          error: `Supabase insert failed: ${retry.error.message}`,
+          details: retry.error.details,
+          hint: retry.error.hint
+        });
+      }
+      issue = retry.data;
+      issue.complaint_id = generatedComplaintId;
+      issue.citizen_count = 1;
+    } else if (error) {
       logger.error('Failed to insert issue into Supabase: %O', error);
       return res.status(400).json({
         error: `Supabase insert failed: ${error.message}`,
@@ -347,6 +407,8 @@ export const createIssue = async (req, res) => {
         hint: error.hint
       });
     }
+
+    normalizeComplaintRecord(issue);
 
     // Insert additional attachments if any were uploaded
     if (uploadedAttachments.length > 0) {
@@ -611,11 +673,13 @@ export const updateIssueStatus = async (req, res) => {
     }
 
     // 3. Notify the citizen reporter
+    normalizeComplaintRecord(issue);
+    const cidTag = issue.complaint_id ? `[${issue.complaint_id}] ` : '';
     const isTimelineUpdate = status === 'timeline_update';
-    const notifTitle = isTimelineUpdate ? "Complaint Timeline Update" : "Complaint Status Update";
+    const notifTitle = isTimelineUpdate ? `${cidTag}Complaint Timeline Update` : `${cidTag}Complaint Status Update`;
     const notifBody = isTimelineUpdate
-      ? `A progress update has been added to your complaint '${issue.title}': "${notes || 'No notes provided'}"`
-      : `Your reported complaint '${issue.title}' has been updated to ${status.toUpperCase()}.`;
+      ? `A progress update has been added to your complaint ${issue.complaint_id ? '(' + issue.complaint_id + ') ' : ''}'${issue.title}': "${notes || 'No notes provided'}"`
+      : `Your reported complaint ${issue.complaint_id ? '(' + issue.complaint_id + ') ' : ''}'${issue.title}' has been updated to ${status.toUpperCase()}.`;
 
     await createNotification(
       issue.reporter_id,
@@ -2061,6 +2125,8 @@ export const getIssueReceipt = async (req, res) => {
       return res.status(404).json({ error: 'Issue not found' });
     }
 
+    normalizeComplaintRecord(issue);
+
     const statusColors = {
       pending: '#f59e0b',
       assigned: '#3b82f6',
@@ -2144,7 +2210,7 @@ export const getIssueReceipt = async (req, res) => {
     <div class="detail-grid">
       <div>
         <div class="detail-label">Complaint ID</div>
-        <div class="detail-value" style="font-family: monospace; font-size: 13px; font-weight: 600; color: #0f766e;">${issue.id}</div>
+        <div class="detail-value" style="font-family: monospace; font-size: 14px; font-weight: 700; color: #0f766e; letter-spacing: 0.5px;">${issue.complaint_id || issue.id}</div>
       </div>
       <div>
         <div class="detail-label">Status</div>
@@ -2357,4 +2423,171 @@ export const getIssueComments = async (req, res) => {
     return res.status(200).json([]);
   }
 };
+
+/**
+ * POST /api/issues/check-duplicate
+ * Checks if a civic issue being drafted matches any active master complaint nearby.
+ */
+export const checkIssueDuplicate = async (req, res) => {
+  const { latitude, longitude, category, title, description } = req.body;
+
+  if (!latitude || !longitude || !category) {
+    return res.status(400).json({ error: 'Latitude, longitude, and category are required for duplicate checking.' });
+  }
+
+  try {
+    const result = await findDuplicateCandidate({
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
+      category,
+      title: title || '',
+      description: description || ''
+    });
+
+    if (result.is_duplicate && result.candidate) {
+      normalizeComplaintRecord(result.candidate);
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    logger.error('checkIssueDuplicate Error: %O', err);
+    return res.status(500).json({ error: 'Failed to check for duplicate complaints' });
+  }
+};
+
+/**
+ * POST /api/issues/:id/support
+ * Attaches a citizen's report to an existing master complaint.
+ * Concurrency-safe: prevents duplicate incrementing and preserves citizen references.
+ */
+export const supportExistingIssue = async (req, res) => {
+  const { id } = req.params;
+  const citizen_id = req.user.id;
+  const { comment, latitude, longitude, address } = req.body;
+
+  try {
+    const activeClient = supabaseAdmin || getSupabaseClient(req);
+
+    // 1. Resolve master issue by UUID or Complaint ID
+    let query = activeClient.from('issues').select('*');
+    if (typeof id === 'string' && id.toUpperCase().startsWith('CC-')) {
+      query = query.eq('complaint_id', id.toUpperCase());
+    } else {
+      query = query.eq('id', id);
+    }
+
+    const { data: masterIssue, error: issueErr } = await query.single();
+
+    if (issueErr || !masterIssue) {
+      return res.status(404).json({ error: 'Master complaint not found.' });
+    }
+
+    normalizeComplaintRecord(masterIssue);
+
+    // 2. Prevent user from reporting if they are already the primary reporter
+    if (masterIssue.reporter_id === citizen_id) {
+      return res.status(409).json({
+        error: 'You are the primary reporter of this complaint. You cannot report it again.',
+        complaint_id: masterIssue.complaint_id,
+        citizen_count: masterIssue.citizen_count
+      });
+    }
+
+    // 3. Prevent duplicate supporting report by same user
+    try {
+      const { data: existingSupport } = await activeClient
+        .from('issue_supporting_reports')
+        .select('id')
+        .eq('issue_id', masterIssue.id)
+        .eq('citizen_id', citizen_id)
+        .maybeSingle();
+
+      if (existingSupport) {
+        return res.status(409).json({
+          error: 'You have already submitted a supporting report for this complaint.',
+          complaint_id: masterIssue.complaint_id,
+          citizen_count: masterIssue.citizen_count
+        });
+      }
+    } catch (checkErr) {
+      logger.warn('issue_supporting_reports duplicate check note:', checkErr.message);
+    }
+
+    // 4. Handle optional supporting image upload
+    let supportingImageUrl = null;
+    if (req.files && req.files.length > 0) {
+      const file = req.files[0];
+      const fileExt = file.originalname.split('.').pop();
+      const fileName = `support-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `reports/${fileName}`;
+
+      const { data: upData, error: upErr } = await activeClient.storage
+        .from('issue-images')
+        .upload(filePath, file.buffer, { contentType: file.mimetype, upsert: true });
+
+      if (!upErr) {
+        const { data: { publicUrl } } = activeClient.storage.from('issue-images').getPublicUrl(filePath);
+        supportingImageUrl = publicUrl;
+      }
+    }
+
+    // 5. Insert supporting report record
+    const supportingRecord = {
+      issue_id: masterIssue.id,
+      citizen_id,
+      citizen_name: req.user.user_metadata?.full_name || req.user.user_metadata?.name || 'Citizen',
+      citizen_email: req.user.email || '',
+      comment: comment ? comment.trim() : 'Confirmed identical civic issue at this location.',
+      image_url: supportingImageUrl,
+      latitude: latitude ? parseFloat(latitude) : masterIssue.latitude,
+      longitude: longitude ? parseFloat(longitude) : masterIssue.longitude,
+      address: address ? address.trim() : masterIssue.address
+    };
+
+    let newCount = (masterIssue.citizen_count || 1) + 1;
+
+    try {
+      await activeClient.from('issue_supporting_reports').insert(supportingRecord);
+      // Explicitly update citizen_count on master issue for safety
+      await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id);
+    } catch (insertErr) {
+      logger.warn('issue_supporting_reports table not ready or trigger active:', insertErr.message);
+      // Fallback: also save to issue_attachments so uploaded photo is never lost
+      if (supportingImageUrl) {
+        await activeClient.from('issue_attachments').insert({
+          issue_id: masterIssue.id,
+          uploaded_by: citizen_id,
+          file_url: supportingImageUrl,
+          file_name: 'Supporting Citizen Report'
+        }).catch(() => {});
+      }
+      await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id).catch(() => {});
+    }
+
+    masterIssue.citizen_count = newCount;
+
+    // 6. Add status history timeline event
+    const activeAdmin = supabaseAdmin || supabase;
+    await activeAdmin.from('status_history').insert({
+      issue_id: masterIssue.id,
+      status: masterIssue.status,
+      notes: `Additional supporting report submitted by citizen (${supportingRecord.citizen_name}). Total citizens affected: ${newCount}.`
+    }).catch(() => {});
+
+    // 7. Award community points
+    awardPointsAndCheckBadges(citizen_id, 5, 'report', req).catch(() => {});
+
+    return res.status(200).json({
+      success: true,
+      message: 'Your report has been successfully attached to the existing complaint.',
+      complaint_id: masterIssue.complaint_id,
+      citizen_count: newCount,
+      issue: masterIssue
+    });
+  } catch (err) {
+    logger.error('supportExistingIssue Error: %O', err);
+    return res.status(500).json({ error: 'Failed to attach report to existing complaint.' });
+  }
+};
+
 

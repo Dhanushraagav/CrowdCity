@@ -333,6 +333,8 @@ export const sendIssueCreatedEmail = async (email, fullName, issue) => {
       Hi ${fullName || 'Citizen'}, your complaint has been successfully submitted and is now being reviewed.
     </p>
     <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 4px; padding: 20px; margin: 24px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Complaint ID</p>
+      <p style="margin: 0 0 16px 0; font-size: 16px; color: #0D9488; font-weight: 700; font-family: monospace;">${issue.complaint_id || issue.id}</p>
       <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Title</p>
       <p style="margin: 0 0 16px 0; font-size: 15px; color: #ffffff; font-weight: 600;">${issue.title || 'Untitled'}</p>
       <p style="margin: 0 0 8px 0; font-size: 13px; color: #9AA4B2;">Category</p>

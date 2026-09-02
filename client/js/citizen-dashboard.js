@@ -101,11 +101,12 @@
         `;
       } else {
         recentListEl.innerHTML = cityIssues.slice(0, 4).map(item => `
-          <div class="activity-item">
+          <div class="activity-item" style="cursor: pointer;" onclick="window.location.href='issue-details.html?id=${item.id}'">
             <div class="activity-item-details">
               <h4 class="activity-item-title">${escapeHtml(item.title || 'Reported Issue')}</h4>
               <div class="activity-item-meta">
-                <span>#CMP-${item.id}</span> &bull; 
+                <span style="font-family: monospace; font-weight: 700; color: var(--primary);">${escapeHtml(item.complaint_id || ('#CMP-' + (item.id || '').substring(0, 8)))}</span> &bull; 
+                <span><i class="fa-solid fa-users"></i> ${item.citizen_count || 1} ${item.citizen_count === 1 ? 'citizen' : 'citizens'}</span> &bull; 
                 <span>${escapeHtml(item.department || item.category || 'Civic Dept')}</span> &bull; 
                 <span>${formatRelativeTime(item.created_at || item.updated_at)}</span>
               </div>
@@ -123,8 +124,8 @@
     if (myActiveListEl) {
       const myIssues = issues.filter(item => {
         if (!item) return false;
-        const isMyIssue = user ? (item.reporter_id === user.id || item.user_email === user.email) : true;
-        const isActive = item.status !== 'RESOLVED' && item.status !== 'CLOSED';
+        const isMyIssue = user ? (item.reporter_id === user.id || item.user_email === user.email || item.is_supporting_report) : true;
+        const isActive = item.status !== 'RESOLVED' && item.status !== 'CLOSED' && item.status !== 'verified';
         return isMyIssue && isActive;
       });
 
@@ -143,10 +144,12 @@
             : `Updated ${formatRelativeTime(item.updated_at || item.created_at)}`;
 
           return `
-            <div class="activity-item" style="background: #ffffff;">
+            <div class="activity-item" style="background: #ffffff; cursor: pointer;" onclick="window.location.href='issue-details.html?id=${item.id}'">
               <div class="activity-item-details">
                 <h4 class="activity-item-title">${escapeHtml(item.title || 'Active Complaint')}</h4>
                 <div class="activity-item-meta">
+                  <span style="font-family: monospace; font-weight: 700; color: var(--primary);">${escapeHtml(item.complaint_id || ('#CMP-' + (item.id || '').substring(0, 8)))}</span> &bull; 
+                  <span><i class="fa-solid fa-users"></i> ${item.citizen_count || 1} ${item.citizen_count === 1 ? 'citizen' : 'citizens'}</span> &bull; 
                   <span>Assigned: ${escapeHtml(officer)}</span>
                 </div>
                 <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">

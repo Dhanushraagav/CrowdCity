@@ -1488,94 +1488,240 @@ function setupFormSubmit() {
       });
     }
 
-    // --- NEW LOGIC FOR AI LOADING OVERLAY ---
+    // --- AI LOADING OVERLAY & DUPLICATE DETECTION STAGE ---
     const overlay = document.getElementById('ai-modal-overlay');
     const loaderStage = document.getElementById('ai-loader-stage');
     const resultsStage = document.getElementById('ai-results-stage');
+    const dupStage = document.getElementById('duplicate-confirm-stage');
     
+    // Check for existing duplicate civic issue nearby
+    if (currentReportMode !== 'transportation' && window.API && typeof window.API.checkDuplicateIssue === 'function') {
+      submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking nearby reports...';
+      try {
+        const dupRes = await window.API.checkDuplicateIssue({
+          latitude: finalLat,
+          longitude: finalLng,
+          category,
+          title,
+          description
+        });
+
+        if (dupRes && dupRes.data && dupRes.data.is_duplicate && dupRes.data.candidate) {
+          const cand = dupRes.data.candidate;
+          if (overlay && dupStage && loaderStage && resultsStage) {
+            overlay.classList.remove('hidden');
+            loaderStage.classList.add('hidden');
+            resultsStage.classList.add('hidden');
+            dupStage.classList.remove('hidden');
+
+            const dupIdEl = document.getElementById('dup-complaint-id');
+            const dupCountEl = document.getElementById('dup-citizen-count');
+            const dupTitleEl = document.getElementById('dup-title');
+            const dupLocEl = document.getElementById('dup-location');
+
+            if (dupIdEl) dupIdEl.textContent = cand.complaint_id || 'CC-2026-000127';
+            if (dupCountEl) dupCountEl.innerHTML = `<i class="fa-solid fa-users"></i> Reported by ${cand.citizen_count || 1} citizens`;
+            if (dupTitleEl) dupTitleEl.textContent = cand.title || 'Civic Issue';
+            if (dupLocEl) dupLocEl.textContent = cand.address || 'Location detected nearby';
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+
+            // Bind 'View Complaint'
+            const btnView = document.getElementById('btn-dup-view');
+            if (btnView) {
+              btnView.onclick = () => {
+                window.open(`issue-details.html?id=${cand.id}`, '_blank');
+              };
+            }
+
+            // Bind 'Report This Issue Too'
+            const btnAttach = document.getElementById('btn-dup-attach');
+            if (btnAttach) {
+              btnAttach.onclick = async () => {
+                btnAttach.disabled = true;
+                btnAttach.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Attaching report...';
+
+                try {
+                  const supportRes = await window.API.supportExistingIssue(cand.id, formData);
+                  if (supportRes.error) {
+                    alert(supportRes.error);
+                    btnAttach.disabled = false;
+                    btnAttach.innerHTML = '<i class="fa-solid fa-circle-check"></i> Report This Issue Too (Attach to Complaint)';
+                    return;
+                  }
+
+                  dupStage.classList.add('hidden');
+                  resultsStage.classList.remove('hidden');
+                  
+                  const compIdDisplay = document.getElementById('ai-res-complaint-id');
+                  if (compIdDisplay) compIdDisplay.textContent = cand.complaint_id || 'CC-2026-000127';
+                  
+                  const sumEl = document.getElementById('ai-res-summary');
+                  if (sumEl) sumEl.textContent = `Your report has been successfully attached to Master Complaint ${cand.complaint_id}. Citizen count is now ${supportRes.data?.citizen_count || (cand.citizen_count || 1) + 1}.`;
+                  
+                  const catEl = document.getElementById('ai-res-category');
+                  if (catEl) catEl.textContent = cand.category || category;
+                  
+                  const deptEl = document.getElementById('ai-res-department');
+                  if (deptEl) deptEl.textContent = 'Assigned Department';
+
+                  const priorityBadge = document.getElementById('ai-res-priority');
+                  if (priorityBadge) {
+                    priorityBadge.textContent = 'Linked';
+                    priorityBadge.style.backgroundColor = '#0D9488';
+                  }
+
+                  let count = 5;
+                  const countdownEl = document.getElementById('ai-redirect-countdown');
+                  const interval = setInterval(() => {
+                    count--;
+                    if (countdownEl) {
+                      countdownEl.textContent = `Redirecting to Complaint Details in ${count} seconds...`;
+                    }
+                    if (count <= 0) {
+                      clearInterval(interval);
+                      window.location.href = `issue-details.html?id=${cand.id}`;
+                    }
+                  }, 1000);
+                } catch (attachErr) {
+                  alert('Failed to attach report: ' + (attachErr.message || attachErr));
+                  btnAttach.disabled = false;
+                  btnAttach.innerHTML = '<i class="fa-solid fa-circle-check"></i> Report This Issue Too (Attach to Complaint)';
+                }
+              };
+            }
+
+            // Bind 'This is a Different Issue'
+            const btnProceedNew = document.getElementById('btn-dup-proceed-new');
+            if (btnProceedNew) {
+              btnProceedNew.onclick = () => {
+                dupStage.classList.add('hidden');
+                loaderStage.classList.remove('hidden');
+                executeFinalSubmission();
+              };
+            }
+
+            return; // Wait for citizen confirmation
+          }
+        }
+      } catch (dupErr) {
+        console.warn('Duplicate check non-blocking error:', dupErr);
+      }
+    }
+
+    // Direct submission path
     if (overlay && loaderStage && resultsStage) {
       overlay.classList.remove('hidden');
+      if (dupStage) dupStage.classList.add('hidden');
       loaderStage.classList.remove('hidden');
       resultsStage.classList.add('hidden');
     }
 
-    let data = null;
-    let error = null;
+    async function executeFinalSubmission() {
+      let data = null;
+      let error = null;
 
-    if (currentReportMode === 'transportation') {
-      const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-      try {
-        const transRes = await window.API.createTransportationReport({
-          title,
-          category,
-          description,
-          address: finalAddress,
-          latitude: finalLat,
-          longitude: finalLng,
-          user_id: user ? user.id : 'anonymous'
-        });
-        const rep = (transRes && transRes.data && transRes.data.report) ? transRes.data.report : (transRes && transRes.report ? transRes.report : null);
-        if (rep) {
-          data = {
-            ai_summary: rep.summary || rep.description,
-            ai_category: rep.category,
-            ai_department: rep.responsible_department || 'Roads Department',
-            ai_priority: rep.priority || 'Medium'
-          };
-        } else {
-          error = 'Transportation report creation failed.';
+      if (currentReportMode === 'transportation') {
+        const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
+        try {
+          const transRes = await window.API.createTransportationReport({
+            title,
+            category,
+            description,
+            address: finalAddress,
+            latitude: finalLat,
+            longitude: finalLng,
+            user_id: user ? user.id : 'anonymous'
+          });
+          const rep = (transRes && transRes.data && transRes.data.report) ? transRes.data.report : (transRes && transRes.report ? transRes.report : null);
+          if (rep) {
+            data = {
+              complaint_id: rep.report_number,
+              ai_summary: rep.summary || rep.description,
+              ai_category: rep.category,
+              ai_department: rep.responsible_department || 'Roads Department',
+              ai_priority: rep.priority || 'Medium'
+            };
+          } else {
+            error = 'Transportation report creation failed.';
+          }
+        } catch (e) {
+          error = e.message || 'Transportation report submission error.';
         }
-      } catch (e) {
-        error = e.message || 'Transportation report submission error.';
+      } else {
+        const res = await window.API.createIssue(formData);
+        data = res.data;
+        error = res.error;
       }
-    } else {
-      const res = await window.API.createIssue(formData);
-      data = res.data;
-      error = res.error;
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+
+      if (error) {
+        if (overlay) overlay.classList.add('hidden');
+        alertBanner.textContent = `Submission failed: ${error}`;
+        alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+        alertBanner.style.color = '#ef4444';
+        alertBanner.classList.remove('hidden');
+      } else {
+        selectedFiles = [];
+        
+        if (overlay && loaderStage && resultsStage) {
+          loaderStage.classList.add('hidden');
+          resultsStage.classList.remove('hidden');
+          
+          const compIdDisplay = document.getElementById('ai-res-complaint-id');
+          if (compIdDisplay) {
+            compIdDisplay.textContent = data.complaint_id || 'CC-2026-000001';
+          }
+          
+          document.getElementById('ai-res-summary').textContent = data.ai_summary || 'No summary generated.';
+          document.getElementById('ai-res-category').textContent = data.ai_category || 'Other';
+          document.getElementById('ai-res-department').textContent = data.ai_department || 'General Department';
+          
+          const priorityBadge = document.getElementById('ai-res-priority');
+          const priority = (data.ai_priority || 'Medium').toLowerCase();
+          priorityBadge.textContent = priority;
+          
+          let bgStyle = '';
+          if (priority === 'low') {
+            bgStyle = '#10b981';
+          } else if (priority === 'medium') {
+            bgStyle = '#f59e0b';
+          } else if (priority === 'high') {
+            bgStyle = '#ef4444';
+          } else if (priority === 'critical') {
+            bgStyle = '#7f1d1d';
+            priorityBadge.style.animation = 'pulse 1s infinite';
+          }
+          priorityBadge.style.backgroundColor = bgStyle;
+
+          let count = 5;
+          const countdownEl = document.getElementById('ai-redirect-countdown');
+          const interval = setInterval(() => {
+            count--;
+            if (countdownEl) {
+              countdownEl.textContent = `Redirecting to Home Dashboard in ${count} seconds...`;
+            }
+            if (count <= 0) {
+              clearInterval(interval);
+              window.location.href = 'citizen-dashboard.html';
+            }
+          }, 1000);
+        } else {
+          alertBanner.textContent = 'Issue reported successfully! Redirecting to dashboard...';
+          alertBanner.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+          alertBanner.style.color = '#10b981';
+          alertBanner.classList.remove('hidden');
+          setTimeout(() => {
+            window.location.href = 'citizen-dashboard.html';
+          }, 2000);
+        }
+      }
     }
 
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
-
-    if (error) {
-      // Hide the overlay if it was shown
-      if (overlay) overlay.classList.add('hidden');
-      
-      alertBanner.textContent = `Submission failed: ${error}`;
-      alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-      alertBanner.style.color = '#ef4444';
-      alertBanner.classList.remove('hidden');
-    } else {
-      // Clear local file uploads on success
-      selectedFiles = [];
-      
-      // Transition to Stage 2: Results
-      if (overlay && loaderStage && resultsStage) {
-        loaderStage.classList.add('hidden');
-        resultsStage.classList.remove('hidden');
-        
-        // Populate fields
-        document.getElementById('ai-res-summary').textContent = data.ai_summary || 'No summary generated.';
-        document.getElementById('ai-res-category').textContent = data.ai_category || 'Other';
-        document.getElementById('ai-res-department').textContent = data.ai_department || 'General Department';
-        
-        const priorityBadge = document.getElementById('ai-res-priority');
-        const priority = (data.ai_priority || 'Medium').toLowerCase();
-        priorityBadge.textContent = priority;
-        
-        // Set styling based on priority
-        let bgStyle = '';
-        if (priority === 'low') {
-          bgStyle = '#10b981'; // Green
-        } else if (priority === 'medium') {
-          bgStyle = '#f59e0b'; // Amber
-        } else if (priority === 'high') {
-          bgStyle = '#ef4444'; // Red
-        } else if (priority === 'critical') {
-          bgStyle = '#7f1d1d'; // Dark Red / Crimson
-          priorityBadge.style.animation = 'pulse 1s infinite';
-        }
-        priorityBadge.style.backgroundColor = bgStyle;
+    executeFinalSubmission();
 
         // Start 5-second countdown
         let count = 5;

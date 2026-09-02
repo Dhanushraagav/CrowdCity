@@ -107,8 +107,8 @@ const validateSchema = (schema) => {
   };
 };
 
-// UUID validation regex (allows standard UUIDs and mock-user-* or mock-c-* formats)
-const idRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$|^mock-[a-zA-Z0-9\-]+$/;
+// UUID validation regex (allows standard UUIDs, mock IDs, and official CC-YYYY-NNNNNN Complaint IDs)
+const idRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$|^mock-[a-zA-Z0-9\-]+$|^CC-\d{4}-\d{6}$/i;
 
 // Common validation schemas
 export const validateCreateIssue = validateSchema({

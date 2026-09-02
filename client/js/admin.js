@@ -410,7 +410,7 @@
 
             return `
               <tr>
-                <td><strong>#${(c.id || '').substring(0, 8)}</strong></td>
+                <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
                 <td><strong>${escapeHTML(c.title)}</strong></td>
                 <td>${formatCategory(c.category)}</td>
                 <td>${isEmerg ? `<span class="status-badge status-emergency">EMERGENCY</span>` : 'Normal'}</td>
@@ -434,7 +434,7 @@
         activityList.innerHTML = sorted.map(c => `
           <div style="padding: 0.5rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between;">
             <div>
-              <strong>Complaint #${(c.id || '').substring(0, 8)}:</strong> ${escapeHTML(c.title)}
+              <strong>Complaint ${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}:</strong> ${escapeHTML(c.title)}
             </div>
             <div style="color: var(--text-light); font-size: 0.78rem;">${new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
           </div>
@@ -669,7 +669,7 @@
 
         return `
           <tr>
-            <td><strong>#${(c.id || '').substring(0, 8)}</strong></td>
+            <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
             <td>
               <div style="font-weight: 700; color: var(--text-main);">${escapeHTML(c.title)}</div>
               <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(c.description)}</div>
@@ -711,7 +711,7 @@
 
         return `
           <tr>
-            <td><strong>#${(c.id || '').substring(0, 8)}</strong></td>
+            <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
             <td><strong>${escapeHTML(c.title)}</strong></td>
             <td>${formatCategory(c.category)}</td>
             <td>${isEmerg ? `<span class="status-badge status-emergency">EMERGENCY</span>` : 'Normal'}</td>
@@ -829,7 +829,15 @@
       }
 
       document.getElementById('detail-title').textContent = issue.title || 'Complaint Details';
-      document.getElementById('detail-ticket-id').textContent = `Ticket #${(issue.id || '').substring(0, 8)}`;
+      const ticketIdEl = document.getElementById('detail-ticket-id');
+      if (ticketIdEl) {
+        ticketIdEl.textContent = issue.complaint_id || `Ticket #${(issue.id || '').substring(0, 8)}`;
+      }
+      const citizenCountEl = document.getElementById('detail-citizen-count');
+      if (citizenCountEl) {
+        const cCount = issue.citizen_count || 1;
+        citizenCountEl.innerHTML = `<i class="fa-solid fa-users"></i> Reported by ${cCount} ${cCount === 1 ? 'citizen' : 'citizens'}`;
+      }
       document.getElementById('detail-description').textContent = issue.description || 'No detailed description provided.';
       
       const emerBadge = document.getElementById('detail-emergency-badge');
@@ -933,8 +941,8 @@
 
       const recipientEmail = issue.reporter ? (issue.reporter.email || 'citizen@crowdcity.gov.in') : 'citizen@crowdcity.gov.in';
       document.getElementById('email-recipient-input').value = recipientEmail;
-      document.getElementById('email-subject-input').value = `Regarding Complaint #${(issue.id || '').substring(0, 8)}: ${issue.title}`;
-      document.getElementById('email-body-input').value = `Dear ${issue.reporter ? (issue.reporter.full_name || 'Citizen') : 'Citizen'},\n\nThis is an official update from the Department of Municipal Administration regarding your registered complaint "${issue.title}".\n\nStatus: ${(issue.status || 'pending').replace('_', ' ').toUpperCase()}\n\nOfficial Remarks: ${issue.official_remarks || 'Inspection in progress.'}\n\nThank you for assisting in maintaining civic infrastructure.`;
+      document.getElementById('email-subject-input').value = `Regarding Complaint ${issue.complaint_id || '#' + (issue.id || '').substring(0, 8)}: ${issue.title}`;
+      document.getElementById('email-body-input').value = `Dear ${issue.reporter ? (issue.reporter.full_name || 'Citizen') : 'Citizen'},\n\nThis is an official update from the Department of Municipal Administration regarding your registered complaint "${issue.title}".\n\nComplaint ID: ${issue.complaint_id || '#' + (issue.id || '').substring(0, 8)}\nStatus: ${(issue.status || 'pending').replace('_', ' ').toUpperCase()}\n\nOfficial Remarks: ${issue.official_remarks || 'Inspection in progress.'}\n\nThank you for assisting in maintaining civic infrastructure.`;
 
       const modal = document.getElementById('modal-email-citizen');
       if (modal) modal.style.display = 'flex';

@@ -962,12 +962,64 @@
         </div>
       </div>
 
+      <!-- Stage: Duplicate Candidate Confirmation -->
+      <div id="duplicate-confirm-stage" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; text-align: left;">
+        <div style="font-size: 2.2rem; color: #f59e0b; text-align: center; width: 100%;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div style="text-align: center; width: 100%;">
+          <h3 style="font-size: 1.25rem; font-family: var(--font-heading); font-weight: 800; margin: 0; color: var(--text-main);">Similar Complaint Already Reported</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.35rem; line-height: 1.5;">
+            An active civic complaint matching this issue and location has already been registered by fellow citizens.
+          </p>
+        </div>
+
+        <!-- Master Complaint Summary Card -->
+        <div style="width: 100%; background: var(--bg-surface-hover); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="dup-complaint-id" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: var(--primary); background: rgba(13,148,136,0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">CC-2026-000127</span>
+            <span id="dup-citizen-count" style="font-size: 0.8rem; font-weight: 700; color: #10b981; background: rgba(16,185,129,0.1); padding: 0.25rem 0.6rem; border-radius: 50px;">
+              <i class="fa-solid fa-users"></i> Reported by 10 citizens
+            </span>
+          </div>
+
+          <div>
+            <h4 id="dup-title" style="margin: 0 0 0.25rem 0; font-size: 1rem; font-weight: 700; color: var(--text-main);">Pothole on Main Road</h4>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem;">
+              <i class="fa-solid fa-location-dot"></i> <span id="dup-location">Near Cross Cut Road</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; flex-direction: column; gap: 0.65rem; width: 100%;">
+          <button type="button" id="btn-dup-attach" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i class="fa-solid fa-circle-check"></i> Report This Issue Too (Attach to Complaint)
+          </button>
+          
+          <div style="display: flex; gap: 0.5rem; width: 100%;">
+            <button type="button" id="btn-dup-view" class="btn btn-secondary" style="flex: 1; padding: 0.6rem; font-size: 0.82rem; font-weight: 600;">
+              <i class="fa-solid fa-up-right-from-square"></i> View Complaint
+            </button>
+            <button type="button" id="btn-dup-proceed-new" class="btn btn-secondary" style="flex: 1.2; padding: 0.6rem; font-size: 0.82rem; font-weight: 600;">
+              This is a Different Issue
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Stage 2: Results -->
       <div id="ai-results-stage" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; text-align: left;">
         <div style="font-size: 2.5rem; color: #10b981; text-align: center; width: 100%;">
           <i class="fa-solid fa-circle-check"></i>
         </div>
         <h3 style="font-size: 1.25rem; font-family: var(--font-heading); font-weight: 700; margin: 0; text-align: center; width: 100%;" data-i18n="ai_analysis_complete">AI Analysis Complete!</h3>
+
+        <!-- Official Complaint ID Banner -->
+        <div style="width: 100%; text-align: center; background: rgba(13, 148, 136, 0.08); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(13, 148, 136, 0.25);">
+          <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block;">Official Complaint ID</span>
+          <span id="ai-res-complaint-id" style="font-size: 1.3rem; font-weight: 800; font-family: monospace; color: var(--primary); letter-spacing: 1px;">CC-2026-000001</span>
+        </div>
 
         <!-- Summary -->
         <div style="width: 100%; background: var(--bg-surface-hover); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
