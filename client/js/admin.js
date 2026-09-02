@@ -908,10 +908,43 @@
       document.getElementById('detail-reporter').textContent = reporterName;
       document.getElementById('detail-date').textContent = new Date(issue.created_at).toLocaleString();
 
-      // Populate SLA Response & Escalation Tracker
+      // Populate SLA Response & Escalation Tracker (with defensive fallback computation)
+      if (!issue.sla_deadline_formatted) {
+        const priority = (issue.ai_priority || issue.priority || 'medium').toLowerCase();
+        const durationHours = priority === 'critical' ? 4 : (priority === 'high' ? 24 : (priority === 'low' ? 168 : 72));
+        const createdMs = issue.created_at ? new Date(issue.created_at).getTime() : Date.now();
+        const deadlineDate = issue.sla_deadline ? new Date(issue.sla_deadline) : new Date(createdMs + durationHours * 3600000);
+        
+        issue.sla_deadline = deadlineDate.toISOString();
+        issue.sla_deadline_formatted = deadlineDate.toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+
+        if (!issue.time_remaining_label) {
+          const diffMs = deadlineDate.getTime() - Date.now();
+          if (issue.status === 'assigned' || issue.status === 'in_progress' || issue.status === 'resolved') {
+            issue.time_remaining_label = 'Met SLA';
+          } else if (diffMs > 0) {
+            const h = Math.floor(diffMs / 3600000);
+            const m = Math.floor((diffMs % 3600000) / 60000);
+            issue.time_remaining_label = `${h}h ${m}m remaining`;
+          } else {
+            const oh = Math.floor(Math.abs(diffMs) / 3600000);
+            const om = Math.floor((Math.abs(diffMs) % 3600000) / 60000);
+            issue.time_remaining_label = `Overdue by ${oh}h ${om}m`;
+          }
+        }
+      }
+
       const slaDeadlineEl = document.getElementById('detail-sla-deadline');
       if (slaDeadlineEl) {
-        slaDeadlineEl.textContent = issue.sla_deadline_formatted || (issue.sla_deadline ? new Date(issue.sla_deadline).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'Not Assigned');
+        slaDeadlineEl.textContent = issue.sla_deadline_formatted;
       }
 
       const slaClockEl = document.getElementById('detail-sla-time-remaining');
