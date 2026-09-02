@@ -132,6 +132,32 @@
                 </div>
               </div>
 
+              <!-- SLA Response & Escalation Tracker -->
+              <div class="content-card" style="border-left: 3px solid var(--primary);">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>SLA Response & Escalation Tracker</span>
+                  <span id="detail-sla-status-badge" class="status-badge status-pending" style="font-size: 0.72rem;">Within SLA</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem; margin-top: 0.5rem;">
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Response Deadline</div>
+                    <strong id="detail-sla-deadline" style="color: var(--text-main); font-family: monospace;">Loading...</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">SLA Clock</div>
+                    <strong id="detail-sla-time-remaining" style="color: var(--primary);">Loading...</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">First Authority Action</div>
+                    <span id="detail-sla-responded-at" style="color: var(--text-main);">Pending response</span>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Escalation Status</div>
+                    <span id="detail-sla-escalation-status" style="color: var(--text-main);">Normal (Level 0)</span>
+                  </div>
+                </div>
+              </div>
+
               <!-- AI Auto-Triage Box -->
               <div class="content-card">
                 <div class="card-title">Automated AI Triage Analysis</div>

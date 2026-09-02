@@ -364,7 +364,11 @@ async function loadAndRenderMyIssues() {
           </div>
           <div style="display: flex; gap: 0.5rem; align-items: center;">
             ${issue.is_emergency ? `<span class="badge badge-status critical" style="background-color: #dc2626 !important; color: #ffffff !important; font-weight: 900 !important; font-size: 0.75rem !important; padding: 0.35rem 0.75rem !important; border-radius: 6px !important; letter-spacing: 0.5px !important; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4) !important; display: inline-flex !important; align-items: center !important; gap: 0.4rem !important;"><i class="fa-solid fa-triangle-exclamation" style="color: #ffffff !important;"></i> EMERGENCY</span>` : ''}
-            <span class="badge badge-status ${issue.status}">${tStatus}</span>
+            ${(issue.status === 'escalated' || issue.is_escalated)
+              ? `<span class="badge badge-status" style="background-color: #7f1d1d !important; color: #ffffff !important; font-weight: 800;">ESCALATED</span>`
+              : ((issue.status === 'overdue' || issue.is_overdue)
+                ? `<span class="badge badge-status" style="background-color: #dc2626 !important; color: #ffffff !important; font-weight: 800;">OVERDUE</span>`
+                : `<span class="badge badge-status ${issue.status}">${tStatus}</span>`)}
           </div>
         </div>
         <h3 class="issue-card-title">${escapeHTML(issue.title)}</h3>

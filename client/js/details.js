@@ -116,10 +116,41 @@ async function loadIssueDetails() {
   categoryBadge.textContent = window.formatCategoryName(issue.category);
   categoryBadge.className = `badge badge-category ${issue.category}`;
 
+  // SLA Response Deadline
+  const slaDeadlineEl = document.getElementById('issue-sla-deadline');
+  if (slaDeadlineEl) {
+    if (issue.sla_deadline_formatted) {
+      slaDeadlineEl.textContent = `Response Deadline: ${issue.sla_deadline_formatted}`;
+    } else if (issue.sla_deadline) {
+      const formatted = new Date(issue.sla_deadline).toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      slaDeadlineEl.textContent = `Response Deadline: ${formatted}`;
+    } else {
+      slaDeadlineEl.textContent = 'Response Deadline: Pending Review';
+    }
+  }
+
   const statusBadge = document.getElementById('issue-status-badge');
-  const statusKey = `status_${issue.status}`;
-  statusBadge.textContent = window.i18n ? window.i18n.t(statusKey) : issue.status.replace('_', ' ');
-  statusBadge.className = `badge badge-status ${issue.status}`;
+  const st = (issue.status || 'pending').toLowerCase();
+  const statusKey = `status_${st}`;
+  statusBadge.textContent = window.i18n ? window.i18n.t(statusKey) : st.replace('_', ' ').toUpperCase();
+  statusBadge.className = `badge badge-status ${st}`;
+
+  if (st === 'escalated' || issue.is_escalated) {
+    statusBadge.textContent = 'ESCALATED';
+    statusBadge.style.backgroundColor = '#7f1d1d';
+    statusBadge.style.color = '#ffffff';
+  } else if (st === 'overdue' || issue.is_overdue) {
+    statusBadge.textContent = 'OVERDUE';
+    statusBadge.style.backgroundColor = '#dc2626';
+    statusBadge.style.color = '#ffffff';
+  }
 
   // Update visual stepper
   updateStepperUI(issue.status);

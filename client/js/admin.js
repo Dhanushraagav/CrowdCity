@@ -390,6 +390,41 @@
       setElText('kpi-rejected', rejected);
       setElText('kpi-emergency', emergency);
 
+      // Compute SLA Statistics (Database-driven)
+      let slaPending = 0;
+      let slaOverdue = 0;
+      let slaEscalated = 0;
+      let slaMet = 0;
+      let slaBreached = 0;
+
+      const now = new Date();
+      currentComplaints.forEach(c => {
+        const st = (c.status || '').toLowerCase();
+        const slaSt = (c.sla_status || '').toLowerCase();
+
+        if (st === 'escalated' || slaSt === 'escalated' || c.is_escalated) {
+          slaEscalated++;
+        } else if (st === 'overdue' || slaSt === 'overdue' || c.is_overdue) {
+          slaOverdue++;
+        } else if (st === 'pending' || slaSt === 'within_sla') {
+          slaPending++;
+        }
+
+        if (slaSt === 'met' || st === 'resolved' || st === 'verified') {
+          slaMet++;
+        } else if (slaSt === 'breached' || st === 'overdue' || st === 'escalated' || c.is_overdue) {
+          slaBreached++;
+        }
+      });
+
+      const totalSlaEvaluated = slaMet + slaBreached;
+      const complianceRate = totalSlaEvaluated > 0 ? Math.round((slaMet / totalSlaEvaluated) * 100) : 100;
+
+      setElText('kpi-sla-compliance', `${complianceRate}%`);
+      setElText('kpi-sla-pending', slaPending);
+      setElText('kpi-sla-overdue', slaOverdue);
+      setElText('kpi-sla-escalated', slaEscalated);
+
       // Render Operational SVG Charts
       this.renderCategoryChart(categoryCounts);
       this.renderStatusChart(statusCounts);
@@ -676,7 +711,10 @@
             </td>
             <td>${formatCategory(c.category)}</td>
             <td>${isEmerg ? `<span class="status-badge status-emergency">EMERGENCY</span>` : 'Normal'}</td>
-            <td><span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span></td>
+            <td>
+              <span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span>
+              ${c.time_remaining_label ? `<div style="font-size: 0.72rem; color: ${c.is_escalated ? '#7f1d1d' : (c.is_overdue ? '#dc2626' : (c.sla_status === 'met' ? '#059669' : '#d97706'))}; font-weight: 700; margin-top: 0.25rem;">${escapeHTML(c.time_remaining_label)}</div>` : ''}
+            </td>
             <td>${escapeHTML(c.address || 'Location recorded')}</td>
             <td>${assignedUser ? escapeHTML(assignedUser.full_name) : 'Unassigned'}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
@@ -715,7 +753,10 @@
             <td><strong>${escapeHTML(c.title)}</strong></td>
             <td>${formatCategory(c.category)}</td>
             <td>${isEmerg ? `<span class="status-badge status-emergency">EMERGENCY</span>` : 'Normal'}</td>
-            <td><span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span></td>
+            <td>
+              <span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span>
+              ${c.time_remaining_label ? `<div style="font-size: 0.72rem; color: ${c.is_escalated ? '#7f1d1d' : (c.is_overdue ? '#dc2626' : (c.sla_status === 'met' ? '#059669' : '#d97706'))}; font-weight: 700; margin-top: 0.25rem;">${escapeHTML(c.time_remaining_label)}</div>` : ''}
+            </td>
             <td>${escapeHTML(c.address || 'Location recorded')}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td>
@@ -866,6 +907,68 @@
       const reporterName = issue.reporter ? (issue.reporter.full_name || 'Anonymous Citizen') : 'Anonymous Citizen';
       document.getElementById('detail-reporter').textContent = reporterName;
       document.getElementById('detail-date').textContent = new Date(issue.created_at).toLocaleString();
+
+      // Populate SLA Response & Escalation Tracker
+      const slaDeadlineEl = document.getElementById('detail-sla-deadline');
+      if (slaDeadlineEl) {
+        slaDeadlineEl.textContent = issue.sla_deadline_formatted || (issue.sla_deadline ? new Date(issue.sla_deadline).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'Not Assigned');
+      }
+
+      const slaClockEl = document.getElementById('detail-sla-time-remaining');
+      if (slaClockEl) {
+        slaClockEl.textContent = issue.time_remaining_label || 'Within SLA';
+        if (issue.is_escalated || issue.status === 'escalated') {
+          slaClockEl.style.color = '#7f1d1d';
+        } else if (issue.is_overdue || issue.status === 'overdue') {
+          slaClockEl.style.color = '#dc2626';
+        } else {
+          slaClockEl.style.color = 'var(--primary)';
+        }
+      }
+
+      const slaRespondedEl = document.getElementById('detail-sla-responded-at');
+      if (slaRespondedEl) {
+        if (issue.responded_at) {
+          slaRespondedEl.textContent = new Date(issue.responded_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        } else if (issue.assigned_to) {
+          slaRespondedEl.textContent = 'Assigned (Action Taken)';
+        } else {
+          slaRespondedEl.textContent = 'Pending first authority action';
+        }
+      }
+
+      const slaEscalationEl = document.getElementById('detail-sla-escalation-status');
+      if (slaEscalationEl) {
+        if (issue.is_escalated || issue.status === 'escalated') {
+          slaEscalationEl.innerHTML = `<strong style="color: #7f1d1d;">Level 1 Escalated (Senior Authority)</strong>`;
+        } else if (issue.is_overdue || issue.status === 'overdue') {
+          slaEscalationEl.innerHTML = `<strong style="color: #dc2626;">Overdue (Awaiting Escalation)</strong>`;
+        } else {
+          slaEscalationEl.textContent = 'Normal (Within SLA)';
+        }
+      }
+
+      const slaStatusBadge = document.getElementById('detail-sla-status-badge');
+      if (slaStatusBadge) {
+        const slaSt = (issue.sla_status || 'within_sla').toLowerCase();
+        if (issue.is_escalated || issue.status === 'escalated') {
+          slaStatusBadge.textContent = 'ESCALATED';
+          slaStatusBadge.className = 'status-badge status-emergency';
+          slaStatusBadge.style.backgroundColor = '#7f1d1d';
+        } else if (issue.is_overdue || issue.status === 'overdue') {
+          slaStatusBadge.textContent = 'OVERDUE';
+          slaStatusBadge.className = 'status-badge status-emergency';
+          slaStatusBadge.style.backgroundColor = '#dc2626';
+        } else if (slaSt === 'met') {
+          slaStatusBadge.textContent = 'MET SLA';
+          slaStatusBadge.className = 'status-badge status-resolved';
+          slaStatusBadge.style.backgroundColor = '#059669';
+        } else {
+          slaStatusBadge.textContent = 'WITHIN SLA';
+          slaStatusBadge.className = 'status-badge status-pending';
+          slaStatusBadge.style.backgroundColor = '#d97706';
+        }
+      }
 
       // Presence Badge Update
       this.updatePresenceStatus(issue.reporter ? issue.reporter.id : null);

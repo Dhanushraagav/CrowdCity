@@ -24,10 +24,16 @@
   // 2. Status Badge Class Helper
   function getStatusBadge(status) {
     const s = (status || '').toUpperCase();
+    if (s === 'ESCALATED') {
+      return '<span class="status-badge-sm" style="background: rgba(127,29,29,0.15); color: #7f1d1d; border: 1px solid rgba(127,29,29,0.3); font-weight: 800;">Escalated</span>';
+    }
+    if (s === 'OVERDUE') {
+      return '<span class="status-badge-sm" style="background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); font-weight: 800;">Overdue</span>';
+    }
     if (s === 'IN_PROGRESS' || s === 'PROGRESS') {
       return '<span class="status-badge-sm badge-progress">In Progress</span>';
     }
-    if (s === 'RESOLVED' || s === 'CLOSED') {
+    if (s === 'RESOLVED' || s === 'CLOSED' || s === 'VERIFIED') {
       return '<span class="status-badge-sm badge-resolved">Resolved</span>';
     }
     return '<span class="status-badge-sm badge-pending">Under Review</span>';

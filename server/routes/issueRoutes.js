@@ -25,7 +25,9 @@ import {
   getChatMessages,
   sendChatMessage,
   checkIssueDuplicate,
-  supportExistingIssue
+  supportExistingIssue,
+  getSlaSummary,
+  triggerSlaSweep
 } from '../controllers/issueController.js';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 import { upload, handleUploadError } from '../middlewares/uploadMiddleware.js';
@@ -42,6 +44,10 @@ const router = express.Router();
 // Public routes
 router.get('/', getAllIssues);
 router.get('/analytics', getAdvancedAnalytics);
+
+// SLA routes (registered before parameterized ID route)
+router.get('/sla/summary', getSlaSummary);
+router.post('/sla/sweep', requireAuth, requireRole(['authority', 'admin']), triggerSlaSweep);
 
 // Duplicate check route (registered before parameterized ID route)
 router.post('/check-duplicate', requireAuth, checkIssueDuplicate);

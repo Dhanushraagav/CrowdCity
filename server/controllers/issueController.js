@@ -7,6 +7,8 @@ import { validateServiceArea } from '../services/serviceAreaService.js';
 import { getUserEmail, sendIssueCreatedEmail, sendIssueStatusUpdateEmail, sendIssueWithdrawnEmail, sendNewChatMessageEmail } from '../services/emailService.js';
 import { generateNextComplaintId, normalizeComplaintRecord } from '../services/complaintIdService.js';
 import { findDuplicateCandidate } from '../services/duplicateDetectionService.js';
+import { calculateSlaDeadline, resolveIssuePriority } from '../config/slaConfig.js';
+import { computeSlaState, checkAndProcessSlaEscalations, calculateSlaMetrics } from '../services/slaService.js';
 
 /**
  * Get all reported civic issues.
@@ -102,6 +104,7 @@ export const getAllIssues = async (req, res) => {
       const votedIssueIds = (userId && !votesError && userVotes) ? new Set(userVotes.map(v => v.issue_id)) : new Set();
       data.forEach(issue => {
         normalizeComplaintRecord(issue);
+        computeSlaState(issue);
         issue.user_has_upvoted = votedIssueIds.has(issue.id);
         if (userSupportingIssueIds.includes(issue.id) && issue.reporter_id !== reporter_id) {
           issue.is_supporting_report = true;
@@ -157,6 +160,7 @@ export const getIssueById = async (req, res) => {
     }
 
     normalizeComplaintRecord(issue);
+    computeSlaState(issue);
 
     // Fetch supporting community reports
     let supportingReports = [];
@@ -350,6 +354,9 @@ export const createIssue = async (req, res) => {
     // Generate authoritative Complaint ID (CC-YYYY-NNNNNN)
     const generatedComplaintId = await generateNextComplaintId();
 
+    const resolvedPriority = (is_emergency === 'true' || is_emergency === true) ? 'critical' : (aiResult.priority ? aiResult.priority.toLowerCase() : 'medium');
+    const calculatedSlaDeadline = calculateSlaDeadline(new Date(), resolvedPriority, is_emergency);
+
     const newIssue = {
       reporter_id,
       complaint_id: generatedComplaintId,
@@ -367,11 +374,16 @@ export const createIssue = async (req, res) => {
       completion_proof_url: null,
       completion_notes: null,
       
+      // Authoritative SLA fields
+      sla_deadline: calculatedSlaDeadline.toISOString(),
+      sla_status: 'within_sla',
+      escalation_level: 0,
+      
       // Store AI results
       ai_summary: aiResult.summary,
       ai_category: aiResult.category,
       ai_department: aiResult.department,
-      ai_priority: (is_emergency === 'true' || is_emergency === true) ? 'critical' : (aiResult.priority ? aiResult.priority.toLowerCase() : 'medium'),
+      ai_priority: resolvedPriority,
       is_emergency: is_emergency === 'true' || is_emergency === true
     };
 
@@ -384,9 +396,12 @@ export const createIssue = async (req, res) => {
       .single();
 
     if (error && error.code === '42703') {
-      logger.warn('complaint_id or citizen_count column not found in Supabase schema, retrying without them:', error.message);
+      logger.warn('complaint_id, citizen_count or SLA columns not found in Supabase schema, retrying without them:', error.message);
       delete newIssue.complaint_id;
       delete newIssue.citizen_count;
+      delete newIssue.sla_deadline;
+      delete newIssue.sla_status;
+      delete newIssue.escalation_level;
       const retry = await activeClient.from('issues').insert(newIssue).select().single();
       if (retry.error) {
         logger.error('Failed to insert issue into Supabase on fallback: %O', retry.error);
@@ -399,6 +414,8 @@ export const createIssue = async (req, res) => {
       issue = retry.data;
       issue.complaint_id = generatedComplaintId;
       issue.citizen_count = 1;
+      issue.sla_deadline = calculatedSlaDeadline.toISOString();
+      issue.sla_status = 'within_sla';
     } else if (error) {
       logger.error('Failed to insert issue into Supabase: %O', error);
       return res.status(400).json({
@@ -409,6 +426,7 @@ export const createIssue = async (req, res) => {
     }
 
     normalizeComplaintRecord(issue);
+    computeSlaState(issue);
 
     // Insert additional attachments if any were uploaded
     if (uploadedAttachments.length > 0) {
@@ -636,10 +654,18 @@ export const updateIssueStatus = async (req, res) => {
       }
     }
 
+    const now = new Date();
     const updates = { 
       status: targetStatus, 
-      updated_at: new Date() 
+      updated_at: now 
     };
+
+    // First authority response satisfies/stops the response SLA
+    if (!originalIssue.responded_at && ['assigned', 'in_progress', 'resolved', 'verified', 'rejected'].includes(targetStatus)) {
+      updates.responded_at = now.toISOString();
+      const isPast = originalIssue.sla_deadline && new Date(originalIssue.sla_deadline).getTime() < now.getTime();
+      updates.sla_status = isPast ? 'breached' : 'met';
+    }
 
     if (targetStatus === 'resolved') {
       if (proofUrl) {
@@ -648,15 +674,26 @@ export const updateIssueStatus = async (req, res) => {
       updates.completion_notes = notes || official_remarks || 'Complaint resolved successfully.';
     }
 
-    // 1. Update status
-    const { data: issue, error: issueError } = await activeClient
+    // 1. Update status (with schema fallback if SLA columns pending migration)
+    let issue = null;
+    let { data: updatedData, error: issueError } = await activeClient
       .from('issues')
       .update(updates)
       .eq('id', id)
       .select()
       .single();
 
-    if (issueError) throw issueError;
+    if (issueError && issueError.code === '42703') {
+      delete updates.responded_at;
+      delete updates.sla_status;
+      const retry = await activeClient.from('issues').update(updates).eq('id', id).select().single();
+      if (retry.error) throw retry.error;
+      issue = retry.data;
+    } else if (issueError) {
+      throw issueError;
+    } else {
+      issue = updatedData;
+    }
 
     // 2. Insert timeline tracking entry using request-scoped client
     const { error: historyError } = await activeClient
@@ -742,7 +779,7 @@ export const assignIssue = async (req, res) => {
     // Verify if the issue exists and check its record count
     const { data: checkIssue, error: checkError } = await activeClient
       .from('issues')
-      .select('id, reporter_id, title')
+      .select('id, reporter_id, title, sla_deadline, responded_at, status')
       .eq('id', id);
 
     if (checkError) {
@@ -754,18 +791,37 @@ export const assignIssue = async (req, res) => {
       return res.status(404).json({ error: `Issue not found in database for ID: ${id}` });
     }
 
+    const now = new Date();
+    const existing = checkIssue[0];
+    const isPastDeadline = existing.sla_deadline && new Date(existing.sla_deadline).getTime() < now.getTime();
+
     const updatePayload = { 
       assigned_to: authorityId, 
-      status: 'assigned', 
-      updated_at: new Date() 
+      status: 'assigned',
+      responded_at: existing.responded_at || now.toISOString(),
+      sla_status: isPastDeadline ? 'breached' : 'met',
+      updated_at: now 
     };
 
-    // 1. Update assignment
-    const { data: updateData, error: updateError } = await activeClient
+    // 1. Update assignment (with schema fallback)
+    let updateData = null;
+    let { data: assignRes, error: updateError } = await activeClient
       .from('issues')
       .update(updatePayload)
       .eq('id', id)
       .select();
+
+    if (updateError && updateError.code === '42703') {
+      delete updatePayload.responded_at;
+      delete updatePayload.sla_status;
+      const retry = await activeClient.from('issues').update(updatePayload).eq('id', id).select();
+      if (retry.error) throw retry.error;
+      updateData = retry.data;
+    } else if (updateError) {
+      throw updateError;
+    } else {
+      updateData = assignRes;
+    }
 
     if (updateError) {
       throw updateError;
@@ -2589,5 +2645,44 @@ export const supportExistingIssue = async (req, res) => {
     return res.status(500).json({ error: 'Failed to attach report to existing complaint.' });
   }
 };
+
+/**
+ * GET /api/issues/sla/summary
+ * Returns SLA metrics calculated from real database records for the Authority Dashboard.
+ */
+export const getSlaSummary = async (req, res) => {
+  try {
+    const activeClient = supabaseAdmin || getSupabaseClient(req);
+    const { data: issues, error } = await activeClient
+      .from('issues')
+      .select('id, status, priority, ai_priority, is_emergency, created_at, sla_deadline, sla_status, responded_at, assigned_to');
+
+    if (error) {
+      logger.error('getSlaSummary error: %O', error);
+      return res.status(500).json({ error: 'Failed to fetch SLA summary' });
+    }
+
+    const metrics = calculateSlaMetrics(issues || []);
+    return res.status(200).json({ success: true, ...metrics });
+  } catch (err) {
+    logger.error('getSlaSummary exception: %O', err);
+    return res.status(500).json({ error: 'Server error retrieving SLA summary' });
+  }
+};
+
+/**
+ * POST /api/issues/sla/sweep
+ * Triggers authoritative backend check for overdue and escalated complaints.
+ */
+export const triggerSlaSweep = async (req, res) => {
+  try {
+    const result = await checkAndProcessSlaEscalations();
+    return res.status(200).json(result);
+  } catch (err) {
+    logger.error('triggerSlaSweep error: %O', err);
+    return res.status(500).json({ error: 'SLA sweep failed' });
+  }
+};
+
 
 
