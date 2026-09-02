@@ -1722,31 +1722,6 @@ function setupFormSubmit() {
     }
 
     executeFinalSubmission();
-
-        // Start 5-second countdown
-        let count = 5;
-        const countdownEl = document.getElementById('ai-redirect-countdown');
-        const interval = setInterval(() => {
-          count--;
-          if (countdownEl) {
-            countdownEl.textContent = `Redirecting to Home Dashboard in ${count} seconds...`;
-          }
-          if (count <= 0) {
-            clearInterval(interval);
-            window.location.href = 'citizen-dashboard.html';
-          }
-        }, 1000);
-      } else {
-        // Fallback if elements don't exist
-        alertBanner.textContent = 'Issue reported successfully! Redirecting to dashboard...';
-        alertBanner.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
-        alertBanner.style.color = '#10b981';
-        alertBanner.classList.remove('hidden');
-        setTimeout(() => {
-          window.location.href = 'citizen-dashboard.html';
-        }, 1500);
-      }
-    }
   });
 }
 
