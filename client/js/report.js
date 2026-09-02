@@ -1655,15 +1655,26 @@ function setupFormSubmit() {
         error = res.error;
       }
 
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+      const finalSubmitBtn = document.getElementById('btn-final-submit');
+      if (finalSubmitBtn) {
+        finalSubmitBtn.disabled = false;
+        finalSubmitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report & Dispatch';
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+      }
 
       if (error) {
         if (overlay) overlay.classList.add('hidden');
-        alertBanner.textContent = `Submission failed: ${error}`;
-        alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-        alertBanner.style.color = '#ef4444';
-        alertBanner.classList.remove('hidden');
+        window.goToWizardStep2();
+        if (alertBanner) {
+          alertBanner.textContent = `Submission failed: ${error}`;
+          alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+          alertBanner.style.color = '#ef4444';
+          alertBanner.classList.remove('hidden');
+          alertBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       } else {
         selectedFiles = [];
         

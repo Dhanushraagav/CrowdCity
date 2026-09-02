@@ -257,6 +257,13 @@ function getCategoryDefaultImage(category) {
   }
 }
 
+const isSchemaMissingColumnError = (err) => {
+  if (!err) return false;
+  if (err.code === '42703' || err.code === 'PGRST204') return true;
+  const msg = (err.message || '').toLowerCase();
+  return msg.includes('column') || msg.includes('schema cache') || msg.includes('does not exist');
+};
+
 /**
  * Report a new issue.
  */
@@ -395,7 +402,7 @@ export const createIssue = async (req, res) => {
       .select()
       .single();
 
-    if (error && error.code === '42703') {
+    if (isSchemaMissingColumnError(error)) {
       logger.warn('complaint_id, citizen_count or SLA columns not found in Supabase schema, retrying without them:', error.message);
       delete newIssue.complaint_id;
       delete newIssue.citizen_count;
@@ -683,7 +690,7 @@ export const updateIssueStatus = async (req, res) => {
       .select()
       .single();
 
-    if (issueError && issueError.code === '42703') {
+    if (isSchemaMissingColumnError(issueError)) {
       delete updates.responded_at;
       delete updates.sla_status;
       const retry = await activeClient.from('issues').update(updates).eq('id', id).select().single();
@@ -811,7 +818,7 @@ export const assignIssue = async (req, res) => {
       .eq('id', id)
       .select();
 
-    if (updateError && updateError.code === '42703') {
+    if (isSchemaMissingColumnError(updateError)) {
       delete updatePayload.responded_at;
       delete updatePayload.sla_status;
       const retry = await activeClient.from('issues').update(updatePayload).eq('id', id).select();
