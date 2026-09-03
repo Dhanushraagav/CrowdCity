@@ -17,6 +17,7 @@ import gamificationRoutes from './routes/gamificationRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
 import transportationRoutes from './routes/transportationRoutes.js';
 import tnInfoRoutes from './routes/tnInfoRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
 // ES Module dirname workaround
@@ -110,6 +111,7 @@ app.use('/api/gamification', gamificationRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/transportation', transportationRoutes);
 app.use('/api/tamilnadu-updates', tnInfoRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Static client file server with caching and html extension resolution
 app.use(express.static(path.join(__dirname, '../client'), {

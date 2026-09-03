@@ -1606,6 +1606,7 @@ function updateAuthUI() {
       path.includes('wallet')
     ) && !isEmergency && !path.includes('services-admin');
     const isHelplines = path.includes('helplines');
+    const isCivicIntelligence = path.includes('civic-intelligence');
     const isAnalytics = path.includes('analytics');
     const isAbout = path.includes('about');
 
@@ -1624,6 +1625,7 @@ function updateAuthUI() {
         else if (href.includes('services.html') && isServices) active = true;
         else if (href.includes('emergency-services.html') && isEmergency) active = true;
         else if (href.includes('helplines.html') && isHelplines) active = true;
+        else if (href.includes('civic-intelligence.html') && isCivicIntelligence) active = true;
         
         link.classList.toggle('active', active);
       });
@@ -1676,6 +1678,9 @@ function updateAuthUI() {
         </a>
         <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
           <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <a href="civic-intelligence.html" class="app-sidebar-link ${isCivicIntelligence ? 'active' : ''}" title="Tamil Nadu Civic Intelligence">
+          <i class="fa-solid fa-chart-line"></i> <span>Civic Intelligence</span>
         </a>
       </nav>
     `;

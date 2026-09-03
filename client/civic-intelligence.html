@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tamil Nadu Civic Intelligence - CrowdCity</title>
+  <meta name="description" content="State-wide 38-district civic intelligence, resolution metrics, SLA compliance, and municipal analytics platform for Tamil Nadu.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/crowdcity_icon_transparent.png">
+
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Dedicated Styles for Civic Intelligence -->
+  <style>
+    .intelligence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .intelligence-title-group h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: var(--font-heading, 'Outfit', sans-serif);
+      margin: 0 0 0.4rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .intelligence-title-group p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
+    .intelligence-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .select-district-control,
+    .select-range-control {
+      padding: 0.65rem 1.15rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+      min-width: 170px;
+    }
+
+    .select-district-control:focus,
+    .select-range-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    }
+
+    /* State Overview KPI Grid */
+    .kpi-overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .kpi-overview-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      .kpi-overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .intel-kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .intel-kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .intel-kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .intel-kpi-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .intel-kpi-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .intel-kpi-value {
+      font-size: 1.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: var(--font-heading, 'Outfit', sans-serif);
+      line-height: 1.1;
+      margin-bottom: 0.35rem;
+    }
+
+    .intel-kpi-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Section Headers */
+    .intel-section-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      font-family: var(--font-heading, 'Outfit', sans-serif);
+      color: var(--text-main);
+      margin: 2rem 0 1.25rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    /* Deep Dive Analytical Cards */
+    .deep-dive-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .deep-dive-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      .deep-dive-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .analytical-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Two Column Breakdown */
+    .intel-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .intel-two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Visual Distribution Bar */
+    .dist-bar-item {
+      margin-bottom: 1rem;
+    }
+
+    .dist-bar-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .dist-bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--text-main);
+    }
+
+    .dist-bar-track {
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(148, 163, 184, 0.15);
+      overflow: hidden;
+    }
+
+    .dist-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--primary);
+      transition: width 0.4s ease;
+    }
+
+    /* Areas List */
+    .areas-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .area-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--bg-surface-hover, rgba(248, 250, 252, 0.6));
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.88rem;
+    }
+
+    .area-name {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .area-count-badge {
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      background: rgba(13, 148, 136, 0.12);
+      color: var(--primary);
+    }
+
+    /* 38 Districts Grid */
+    .districts-grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .district-card-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .district-card-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .district-card-item.selected {
+      border-color: var(--primary);
+      background: rgba(13, 148, 136, 0.04);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .district-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.85rem;
+    }
+
+    .district-name-text {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .district-name-ta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.15rem;
+    }
+
+    .district-metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      padding: 0.25rem 0;
+      color: var(--text-muted);
+      border-bottom: 1px dashed rgba(203, 213, 225, 0.4);
+    }
+
+    .district-metric-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .district-metric-row strong {
+      color: var(--text-main);
+    }
+
+    /* Comparison Table */
+    .comparison-table-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2.5rem;
+    }
+
+    .intel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    .intel-table th {
+      background: var(--bg-surface-hover, rgba(248, 250, 252, 0.8));
+      padding: 0.85rem 1.15rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .intel-table th:hover {
+      color: var(--primary);
+    }
+
+    .intel-table td {
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .intel-table tbody tr:hover {
+      background: rgba(13, 148, 136, 0.03);
+    }
+
+    .intel-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Filter Bar */
+    .filter-bar-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.75rem;
+    }
+
+    .filter-select {
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    /* Loading Overlay */
+    .intel-loading-shimmer {
+      opacity: 0.6;
+      pointer-events: none;
+      filter: blur(1px);
+      transition: all 0.2s ease;
+    }
+  </style>
+</head>
+<body class="protected-page">
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    })();
+  </script>
+
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn">
+          </div>
+          <div class="brand-text-container">
+            <span class="brand-title">CROWDCITY</span>
+            <span class="brand-subtitle">CITIZEN PORTAL</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Issue">
+          <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link" title="Transportation">
+          <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
+          <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <!-- Active Tamil Nadu Civic Intelligence Link -->
+        <a href="civic-intelligence.html" class="app-sidebar-link active" title="Tamil Nadu Civic Intelligence">
+          <i class="fa-solid fa-chart-line"></i> <span>Civic Intelligence</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <!-- Top Header inside main content -->
+      <header class="app-header-main dashboard-header">
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions">
+          <div id="auth-nav-container">
+            <!-- Dynamic header actions populated by auth.js -->
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Body Container -->
+      <main class="dashboard-content" id="intel-main-container" style="max-width: 1400px; margin: 0 auto; padding: 1.75rem 2rem;">
+        
+        <!-- Top Title & Global Controls -->
+        <div class="intelligence-header">
+          <div class="intelligence-title-group">
+            <h1>
+              <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i>
+              Tamil Nadu Civic Intelligence
+            </h1>
+            <p>Authoritative 38-district monitoring, automated SLA compliance tracking, and civic resolution analytics.</p>
+          </div>
+
+          <div class="intelligence-controls">
+            <!-- District Selector Dropdown -->
+            <select id="intel-district-select" class="select-district-control" aria-label="Select Tamil Nadu District">
+              <option value="all">All Tamil Nadu (38 Districts)</option>
+              <!-- Populated dynamically -->
+            </select>
+
+            <!-- Date Range Selector -->
+            <select id="intel-range-select" class="select-range-control" aria-label="Select Analytics Date Range">
+              <option value="all_time" selected>All Time</option>
+              <option value="today">Today (IST)</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="this_year">This Year (2026)</option>
+            </select>
+
+            <!-- Manual Refresh Button -->
+            <button id="btn-intel-refresh" type="button" class="btn btn-secondary" style="padding: 0.65rem 1rem; border-radius: 10px; font-weight: 700; gap: 0.45rem;" title="Refresh live intelligence">
+              <i class="fa-solid fa-arrows-rotate" id="intel-refresh-icon"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar-container">
+          <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-filter"></i> Filters:
+          </span>
+
+          <!-- Category Filter -->
+          <select id="filter-category" class="filter-select">
+            <option value="all">All Categories</option>
+            <option value="roads">Roads & Pavements</option>
+            <option value="streetlights">Streetlights & Electrical</option>
+            <option value="water_supply">Water Supply</option>
+            <option value="drainage">Drainage & Sewerage</option>
+            <option value="garbage">Garbage & Waste</option>
+            <option value="traffic">Traffic & Signals</option>
+            <option value="public_property">Public Property</option>
+            <option value="parks">Parks & Playgrounds</option>
+            <option value="sanitation">Sanitation</option>
+            <option value="safety_hazard">Safety Hazards</option>
+            <option value="environment">Environment & Pollution</option>
+            <option value="other">Other Concerns</option>
+          </select>
+
+          <!-- Status Filter -->
+          <select id="filter-status" class="filter-select">
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="assigned">Assigned</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="overdue">Overdue (SLA Breached)</option>
+            <option value="escalated">Escalated (Level 1)</option>
+          </select>
+
+          <!-- Priority Filter -->
+          <select id="filter-priority" class="filter-select">
+            <option value="all">All Priorities</option>
+            <option value="critical">Critical / Emergency</option>
+            <option value="high">High Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="low">Low Priority</option>
+          </select>
+
+          <!-- Reset Filters -->
+          <button id="btn-reset-filters" type="button" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; border-radius: 6px; margin-left: auto;">
+            Reset Filters
+          </button>
+        </div>
+
+        <!-- 1. State-Wide Tamil Nadu Overview (Top Section) -->
+        <div class="intel-section-title" style="margin-top: 0;">
+          <span>
+            <i class="fa-solid fa-landmark" style="color: var(--primary); margin-right: 0.5rem;"></i>
+            Tamil Nadu Civic Overview
+          </span>
+          <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;" id="intel-last-updated">
+            Live Database Synced
+          </span>
+        </div>
+
+        <div class="kpi-overview-grid">
+          <!-- Total Issues -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Total Issues</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(13, 148, 136, 0.12); color: var(--primary);">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-total-issues">0</div>
+            <div class="intel-kpi-subtext">All complaints registered in state</div>
+          </div>
+
+          <!-- Open Issues -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Open Issues</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">
+                <i class="fa-solid fa-hourglass-half"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-open-issues">0</div>
+            <div class="intel-kpi-subtext">Active casework requiring resolution</div>
+          </div>
+
+          <!-- Resolved Issues -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Resolved</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-resolved-issues">0</div>
+            <div class="intel-kpi-subtext">Verified & completed resolutions</div>
+          </div>
+
+          <!-- Overall Resolution Rate -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Resolution Rate</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(99, 102, 241, 0.12); color: #6366f1;">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-resolution-rate">0.0%</div>
+            <div class="intel-kpi-subtext">State-wide resolution percentage</div>
+          </div>
+
+          <!-- Overdue Complaints -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Overdue</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-overdue-issues" style="color: #ef4444;">0</div>
+            <div class="intel-kpi-subtext">Exceeded target SLA response time</div>
+          </div>
+
+          <!-- Escalated Complaints -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Escalated</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(127, 29, 29, 0.12); color: #7f1d1d;">
+                <i class="fa-solid fa-arrows-split-up-and-left"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-escalated-issues" style="color: #7f1d1d;">0</div>
+            <div class="intel-kpi-subtext">Dispatched to senior department officers</div>
+          </div>
+
+          <!-- Critical Issues -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Critical</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(220, 38, 38, 0.12); color: #dc2626;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-critical-issues" style="color: #dc2626;">0</div>
+            <div class="intel-kpi-subtext">Emergency priority & high severity</div>
+          </div>
+
+          <!-- Pending First Action -->
+          <div class="intel-kpi-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Pending First Action</span>
+              <div class="intel-kpi-icon-wrap" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+            </div>
+            <div class="intel-kpi-value" id="kpi-pending-issues" style="color: #f59e0b;">0</div>
+            <div class="intel-kpi-subtext">Awaiting authority triage & assignment</div>
+          </div>
+        </div>
+
+        <!-- 2. Selected District Deep Dive -->
+        <div class="intel-section-title">
+          <span>
+            <i class="fa-solid fa-city" style="color: var(--primary); margin-right: 0.5rem;"></i>
+            <span id="scope-header-title">All Tamil Nadu Analytical Profile</span>
+          </span>
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary); background: rgba(13, 148, 136, 0.1); padding: 0.3rem 0.75rem; border-radius: 20px;" id="scope-badge">
+            State Consolidated View
+          </span>
+        </div>
+
+        <!-- 4 Key Deep-Dive Metric Cards -->
+        <div class="deep-dive-grid">
+          <!-- Most Reported Issue -->
+          <div class="analytical-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Most Reported Issue</span>
+              <i class="fa-solid fa-fire" style="color: #f97316;"></i>
+            </div>
+            <div class="intel-kpi-value" id="scope-top-category" style="font-size: 1.5rem; text-transform: capitalize;">
+              None
+            </div>
+            <div class="intel-kpi-subtext" id="scope-top-category-count">0 reports recorded</div>
+          </div>
+
+          <!-- Resolution Rate Meter -->
+          <div class="analytical-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Resolution Rate</span>
+              <i class="fa-solid fa-percent" style="color: #10b981;"></i>
+            </div>
+            <div class="intel-kpi-value" id="scope-resolution-rate" style="font-size: 1.5rem; color: #10b981;">
+              0.0%
+            </div>
+            <div class="dist-bar-track" style="margin-top: 0.5rem;">
+              <div id="scope-resolution-bar" class="dist-bar-fill" style="width: 0%; background: #10b981;"></div>
+            </div>
+          </div>
+
+          <!-- Critical Issues -->
+          <div class="analytical-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">Critical Issues</span>
+              <i class="fa-solid fa-shield-virus" style="color: #dc2626;"></i>
+            </div>
+            <div class="intel-kpi-value" id="scope-critical-count" style="font-size: 1.5rem; color: #dc2626;">
+              0
+            </div>
+            <div class="intel-kpi-subtext">Immediate emergency response needed</div>
+          </div>
+
+          <!-- SLA Overdue Rate -->
+          <div class="analytical-card">
+            <div class="intel-kpi-header">
+              <span class="intel-kpi-label">SLA Breaches</span>
+              <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
+            </div>
+            <div class="intel-kpi-value" id="scope-overdue-count" style="font-size: 1.5rem; color: #ef4444;">
+              0
+            </div>
+            <div class="intel-kpi-subtext" id="scope-escalated-subtext">0 escalated to Level 1</div>
+          </div>
+        </div>
+
+        <!-- Two Column Deep Breakdown -->
+        <div class="intel-two-col">
+          <!-- Left Column: Category & Status Distribution -->
+          <div class="analytical-card">
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 1.25rem 0; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-chart-column" style="color: var(--primary);"></i>
+              Issue Category Distribution
+            </h3>
+            <div id="category-distribution-container">
+              <!-- Dynamically rendered bars -->
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); margin: 1.5rem 0 1.25rem 0;"></div>
+
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 1.25rem 0; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-list-check" style="color: #0284c7;"></i>
+              Casework Lifecycle Status
+            </h3>
+            <div id="status-distribution-container">
+              <!-- Dynamically rendered bars -->
+            </div>
+          </div>
+
+          <!-- Right Column: Most Affected Areas & Priorities -->
+          <div class="analytical-card">
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-map-pin" style="color: #e11d48;"></i>
+              Most Affected Areas & Localities
+            </h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
+              High-concentration civic reporting locations derived from real verified complaint addresses.
+            </p>
+
+            <div class="areas-list" id="most-affected-areas-list">
+              <!-- Dynamically populated rows -->
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); margin: 1.5rem 0 1.25rem 0;"></div>
+
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-flag" style="color: #f59e0b;"></i>
+              Priority & Severity Distribution
+            </h3>
+            <div id="priority-distribution-container" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+              <!-- Dynamically populated badges -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 38-District Overview Directory Grid -->
+        <div class="intel-section-title">
+          <span>
+            <i class="fa-solid fa-network-wired" style="color: var(--primary); margin-right: 0.5rem;"></i>
+            All 38 Tamil Nadu Districts
+          </span>
+
+          <!-- Instant Search Box for 38 Districts -->
+          <div style="position: relative; width: 260px;">
+            <input type="text" id="input-search-districts" placeholder="Filter 38 districts..." style="width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-muted);"></i>
+          </div>
+        </div>
+
+        <div class="districts-grid-container" id="districts-38-container">
+          <!-- 38 District Cards Populated Dynamically -->
+        </div>
+
+        <!-- 4. District Comparison Matrix -->
+        <div class="intel-section-title">
+          <span>
+            <i class="fa-solid fa-table-cells" style="color: var(--primary); margin-right: 0.5rem;"></i>
+            District Comparison Matrix
+          </span>
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">
+            Click table headers to sort rankings
+          </span>
+        </div>
+
+        <div class="comparison-table-wrap">
+          <table class="intel-table" id="comparison-matrix-table">
+            <thead>
+              <tr>
+                <th onclick="window.sortComparison('rank')">#</th>
+                <th onclick="window.sortComparison('district')">District <i class="fa-solid fa-sort"></i></th>
+                <th onclick="window.sortComparison('total_issues')">Total Complaints <i class="fa-solid fa-sort"></i></th>
+                <th onclick="window.sortComparison('resolved_issues')">Resolved <i class="fa-solid fa-sort"></i></th>
+                <th onclick="window.sortComparison('resolution_rate_numeric')">Resolution Rate <i class="fa-solid fa-sort"></i></th>
+                <th onclick="window.sortComparison('critical_issues')">Critical <i class="fa-solid fa-sort"></i></th>
+                <th onclick="window.sortComparison('overdue_issues')">Overdue <i class="fa-solid fa-sort"></i></th>
+                <th onclick="window.sortComparison('escalated_issues')">Escalated <i class="fa-solid fa-sort"></i></th>
+              </tr>
+            </thead>
+            <tbody id="comparison-table-body">
+              <!-- Dynamically populated matrix rows -->
+            </tbody>
+          </table>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Client Script files -->
+  <script src="js/auth.js?v=4.0.1"></script>
+  <script src="js/api.js?v=4.0.1"></script>
+  <script src="js/civic-intelligence.js?v=4.0.1"></script>
+
+  <!-- Mobile Hamburger Toggle -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('mobile-menu-btn');
+      const sidebar = document.querySelector('.app-sidebar');
+      if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', () => {
+          sidebar.classList.toggle('open');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

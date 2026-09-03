@@ -577,6 +577,35 @@ const API = {
       method: 'POST',
       body: JSON.stringify({ messages, userProfile, schemeKnowledge })
     });
+  },
+
+  // 39. Tamil Nadu 38-District Civic Intelligence Analytics
+  getCivicIntelligence: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.district && filters.district !== 'all') params.append('district', filters.district);
+    if (filters.date_range && filters.date_range !== 'all_time') params.append('date_range', filters.date_range);
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category);
+    if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters.priority && filters.priority !== 'all') params.append('priority', filters.priority);
+    if (filters.department && filters.department !== 'all') params.append('department', filters.department);
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+
+    const qs = params.toString();
+    const endpoint = `/analytics/tamilnadu${qs ? `?${qs}` : ''}`;
+    return request(endpoint, { method: 'GET', auth: false });
+  },
+
+  getDistrictCivicIntelligence: async (districtId, filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.date_range && filters.date_range !== 'all_time') params.append('date_range', filters.date_range);
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category);
+    if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters.priority && filters.priority !== 'all') params.append('priority', filters.priority);
+
+    const qs = params.toString();
+    const endpoint = `/analytics/district/${encodeURIComponent(districtId)}${qs ? `?${qs}` : ''}`;
+    return request(endpoint, { method: 'GET', auth: false });
   }
 };
 
