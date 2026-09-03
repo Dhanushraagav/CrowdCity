@@ -22,7 +22,7 @@
     streetlights: { label: 'Streetlights & Electrical', icon: 'fa-lightbulb', color: '#f59e0b' },
     water_supply: { label: 'Water Supply', icon: 'fa-faucet-drip', color: '#06b6d4' },
     drainage: { label: 'Drainage & Sewerage', icon: 'fa-water', color: '#6366f1' },
-    garbage: { label: 'Garbage & Sanitation', icon: 'fa-trash-can', color: '#10b981' },
+    garbage: { label: 'Garbage & Waste', icon: 'fa-trash-can', color: '#10b981' },
     traffic: { label: 'Traffic & Signals', icon: 'fa-traffic-light', color: '#ec4899' },
     public_property: { label: 'Public Property', icon: 'fa-building-shield', color: '#8b5cf6' },
     parks: { label: 'Parks & Playgrounds', icon: 'fa-tree', color: '#14b8a6' },
@@ -41,6 +41,8 @@
     const distParam = urlParams.get('district');
     if (distParam) {
       activeDistrict = distParam.toLowerCase();
+      const select = document.getElementById('intel-district-select');
+      if (select) select.value = activeDistrict;
     }
 
     bindControls();
@@ -127,29 +129,49 @@
   }
 
   /**
-   * Fetch data from /api/analytics/tamilnadu
+   * Fetch data with dual-fetch resilience (API client + Direct Fetch fallback)
    */
   async function fetchCivicIntelligence() {
     const mainContainer = document.getElementById('intel-main-container');
     if (mainContainer) mainContainer.classList.add('intel-loading-shimmer');
 
     try {
-      if (!window.API || typeof window.API.getCivicIntelligence !== 'function') {
-        console.warn('API client getCivicIntelligence not ready');
-        return;
+      let res = null;
+
+      // 1. Try unified window.API client first
+      if (window.API && typeof window.API.getCivicIntelligence === 'function') {
+        try {
+          res = await window.API.getCivicIntelligence({
+            district: activeDistrict,
+            date_range: activeDateRange,
+            category: activeCategory,
+            status: activeStatus,
+            priority: activePriority
+          });
+        } catch (apiErr) {
+          console.warn('API client call threw error, falling back to direct fetch:', apiErr);
+          res = null;
+        }
       }
 
-      const res = await window.API.getCivicIntelligence({
-        district: activeDistrict,
-        date_range: activeDateRange,
-        category: activeCategory,
-        status: activeStatus,
-        priority: activePriority
-      });
+      // 2. Direct fetch fallback ensuring zero-failure even with cached js files
+      if (!res || !res.data) {
+        const params = new URLSearchParams();
+        if (activeDistrict && activeDistrict !== 'all') params.append('district', activeDistrict);
+        if (activeDateRange && activeDateRange !== 'all_time') params.append('date_range', activeDateRange);
+        if (activeCategory && activeCategory !== 'all') params.append('category', activeCategory);
+        if (activeStatus && activeStatus !== 'all') params.append('status', activeStatus);
+        if (activePriority && activePriority !== 'all') params.append('priority', activePriority);
+
+        const raw = await fetch(`/api/analytics/tamilnadu?${params.toString()}`);
+        if (raw.ok) {
+          res = await raw.json();
+        }
+      }
 
       if (res && res.data) {
         currentData = res.data;
-        populateDistrictDropdown(currentData.districts);
+        updateDistrictDropdownSelection();
         renderStateOverview(currentData.state_overview);
         renderScopeDeepDive(currentData.selected_scope);
         render38DistrictsGrid(currentData.districts, districtSearchQuery);
@@ -168,19 +190,12 @@
   }
 
   /**
-   * Populate District Selector Dropdown once
+   * Sync active district with select dropdown
    */
-  function populateDistrictDropdown(districts = []) {
+  function updateDistrictDropdownSelection() {
     const select = document.getElementById('intel-district-select');
-    if (!select || select.options.length > 1) return;
-
-    districts.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = d.id;
-      opt.textContent = `${d.name} (${d.nameTa})`;
-      if (d.id === activeDistrict) opt.selected = true;
-      select.appendChild(opt);
-    });
+    if (!select) return;
+    select.value = activeDistrict;
   }
 
   /**
@@ -283,7 +298,7 @@
     }
 
     container.innerHTML = categories.map(catItem => {
-      const meta = CATEGORY_META[catItem.category.toLowerCase()] || { label: catItem.category, icon: 'fa-circle-dot', color: '#0d9488' };
+      const meta = CATEGORY_META[catItem.category.toLowerCase()] || { label: catItem.category, icon: 'fa-circle-dot', color: '#0f766e' };
       return `
         <div class="dist-bar-item">
           <div class="dist-bar-header">
@@ -350,7 +365,7 @@
     container.innerHTML = areas.map((area, idx) => {
       return `
         <div class="area-row">
-          <span class="area-name">
+          <span style="font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
             <span style="color: var(--text-muted); font-family: monospace; font-size: 0.78rem;">#${idx + 1}</span>
             <span>${escapeHtml(area.name)}</span>
           </span>
@@ -370,16 +385,16 @@
     if (!container) return;
 
     const cards = [
-      { key: 'critical', label: 'Critical', count: priorities.critical || 0, color: '#dc2626', bg: 'rgba(220, 38, 38, 0.1)' },
-      { key: 'high', label: 'High', count: priorities.high || 0, color: '#ea580c', bg: 'rgba(234, 88, 12, 0.1)' },
-      { key: 'medium', label: 'Medium', count: priorities.medium || 0, color: '#ca8a04', bg: 'rgba(202, 138, 4, 0.1)' },
-      { key: 'low', label: 'Low', count: priorities.low || 0, color: '#16a34a', bg: 'rgba(22, 163, 74, 0.1)' }
+      { key: 'critical', label: 'Critical', count: priorities.critical || 0, color: '#dc2626', bg: 'rgba(220, 38, 38, 0.08)' },
+      { key: 'high', label: 'High', count: priorities.high || 0, color: '#ea580c', bg: 'rgba(234, 88, 12, 0.08)' },
+      { key: 'medium', label: 'Medium', count: priorities.medium || 0, color: '#ca8a04', bg: 'rgba(202, 138, 4, 0.08)' },
+      { key: 'low', label: 'Low', count: priorities.low || 0, color: '#16a34a', bg: 'rgba(22, 163, 74, 0.08)' }
     ];
 
     container.innerHTML = cards.map(c => `
-      <div style="background: ${c.bg}; border: 1px solid ${c.color}22; border-radius: 10px; padding: 0.75rem 0.5rem; text-align: center;">
-        <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: ${c.color}; display: block;">${c.label}</span>
-        <strong style="font-size: 1.25rem; color: ${c.color};">${c.count}</strong>
+      <div style="background: ${c.bg}; border: 1px solid ${c.color}22; border-radius: 12px; padding: 0.85rem 0.5rem; text-align: center;">
+        <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: ${c.color}; display: block; margin-bottom: 0.25rem;">${c.label}</span>
+        <strong style="font-size: 1.35rem; color: ${c.color}; font-weight: 800;">${c.count}</strong>
       </div>
     `).join('');
   }
@@ -401,7 +416,7 @@
     }
 
     if (filtered.length === 0) {
-      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-muted);">No districts match your filter query.</div>`;
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted);">No districts match your filter query.</div>`;
       return;
     }
 
@@ -440,7 +455,7 @@
             </div>
           </div>
 
-          <button type="button" class="btn btn-secondary" style="width: 100%; padding: 0.4rem; font-size: 0.78rem; font-weight: 700; border-radius: 8px; justify-content: center; gap: 0.4rem;">
+          <button type="button" class="btn btn-secondary" style="width: 100%; padding: 0.45rem; font-size: 0.78rem; font-weight: 700; border-radius: 8px; justify-content: center; gap: 0.4rem;">
             <span>Inspect District</span>
             <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem;"></i>
           </button>
@@ -461,7 +476,6 @@
       return;
     }
 
-    // Sort comparison
     const sorted = [...comparison].sort((a, b) => {
       let valA = a[currentSortColumn];
       let valB = b[currentSortColumn];
@@ -479,7 +493,7 @@
       const rateColor = rateNum >= 70 ? '#10b981' : (rateNum >= 40 ? '#f59e0b' : '#64748b');
 
       return `
-        <tr style="cursor: pointer; ${isSelected ? 'background: rgba(13, 148, 136, 0.08); font-weight: 600;' : ''}" onclick="window.selectDistrict('${row.id}')">
+        <tr style="cursor: pointer; ${isSelected ? 'background: rgba(15, 118, 110, 0.08); font-weight: 600;' : ''}" onclick="window.selectDistrict('${row.id}')">
           <td style="color: var(--text-muted); font-family: monospace; font-size: 0.78rem;">#${idx + 1}</td>
           <td>
             <strong>${escapeHtml(row.district)}</strong>
@@ -518,7 +532,6 @@
     const select = document.getElementById('intel-district-select');
     if (select) select.value = distId;
 
-    // Scroll smoothly to deep dive section
     const target = document.getElementById('scope-header-title');
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });

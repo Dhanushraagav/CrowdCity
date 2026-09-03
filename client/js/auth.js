@@ -1614,6 +1614,17 @@ function updateAuthUI() {
     const existingNav = sidebar.querySelector('.app-sidebar-nav');
     if (existingNav) {
       existingNav.querySelectorAll('a[href*="analytics.html"], a[href*="analytics"]').forEach(el => el.remove());
+
+      // Ensure Civic Intelligence link is present in sidebar on all pages
+      if (!existingNav.querySelector('a[href*="civic-intelligence.html"]')) {
+        const intelLink = document.createElement('a');
+        intelLink.href = 'civic-intelligence.html';
+        intelLink.className = `app-sidebar-link ${isCivicIntelligence ? 'active' : ''}`;
+        intelLink.title = 'Tamil Nadu Civic Intelligence';
+        intelLink.innerHTML = '<i class="fa-solid fa-chart-line"></i> <span>Civic Intelligence</span>';
+        existingNav.appendChild(intelLink);
+      }
+
       existingNav.querySelectorAll('.app-sidebar-link').forEach(link => {
         const href = (link.getAttribute('href') || '').toLowerCase();
         let active = false;

@@ -1,42 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0F766E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tamil Nadu Civic Intelligence - CrowdCity</title>
   <meta name="description" content="State-wide 38-district civic intelligence, resolution metrics, SLA compliance, and municipal analytics platform for Tamil Nadu.">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="images/crowdcity_icon_transparent.png">
-
-  <!-- Google Fonts Inter -->
+  <!-- Core Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Core CSS -->
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/components.css">
+  <!-- Core CSS (Using exact production CSS tokens) -->
+  <link rel="stylesheet" href="css/style.css?v=5.0.0">
+  <link rel="stylesheet" href="css/components.css?v=5.0.0">
 
-  <!-- Dedicated Styles for Civic Intelligence -->
   <style>
-    .intelligence-header {
+    /* Consistent font family across entire page */
+    body, h1, h2, h3, h4, h5, h6, button, input, select, textarea, span, p, div {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+
+    .intel-page-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem 2rem;
+    }
+
+    /* Top Navigation bar */
+    .intel-top-bar {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
       flex-wrap: wrap;
     }
 
-    .intelligence-title-group h1 {
-      font-size: 1.85rem;
+    .intel-header-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-lg, 16px);
+      padding: 1.75rem 2rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .intel-header-info h1 {
+      font-size: 1.75rem;
       font-weight: 800;
-      color: var(--text-main);
-      font-family: var(--font-heading, 'Outfit', sans-serif);
+      color: var(--text-main, #0f172a);
       margin: 0 0 0.4rem 0;
       display: flex;
       align-items: center;
@@ -44,128 +72,70 @@
       letter-spacing: -0.02em;
     }
 
-    .intelligence-title-group p {
-      color: var(--text-muted);
-      font-size: 0.92rem;
+    .intel-header-info p {
+      color: var(--text-muted, #64748b);
+      font-size: 0.95rem;
       margin: 0;
     }
 
-    .intelligence-controls {
+    .intel-controls-row {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       flex-wrap: wrap;
     }
 
-    .select-district-control,
-    .select-range-control {
+    .intel-select {
       padding: 0.65rem 1.15rem;
       font-size: 0.88rem;
       font-weight: 600;
       border-radius: 10px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-surface);
-      color: var(--text-main);
+      border: 1px solid var(--border-color, #e2e8f0);
+      background: var(--bg-surface, #ffffff);
+      color: var(--text-main, #0f172a);
       cursor: pointer;
       outline: none;
       transition: all 0.2s ease;
-      min-width: 170px;
+      min-width: 200px;
     }
 
-    .select-district-control:focus,
-    .select-range-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    .intel-select:focus {
+      border-color: var(--primary, #0f766e);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
     }
 
-    /* State Overview KPI Grid */
-    .kpi-overview-grid {
+    /* 8-Card State KPI Grid (Using standard stitch-stat-card) */
+    .intel-kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
+      gap: 1.25rem;
+      margin-bottom: 2.25rem;
     }
 
-    @media (max-width: 1024px) {
-      .kpi-overview-grid {
+    @media (max-width: 1100px) {
+      .intel-kpi-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    @media (max-width: 580px) {
-      .kpi-overview-grid {
+    @media (max-width: 600px) {
+      .intel-kpi-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .intel-kpi-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+    .kpi-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .kpi-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .kpi-emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .kpi-indigo { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+    .kpi-darkred { background: rgba(127, 29, 29, 0.12); color: #7f1d1d; }
 
-    .intel-kpi-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .intel-kpi-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-    }
-
-    .intel-kpi-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
-
-    .intel-kpi-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-    }
-
-    .intel-kpi-value {
-      font-size: 1.95rem;
+    /* Section Headings */
+    .intel-section-heading {
+      font-size: 1.2rem;
       font-weight: 800;
-      color: var(--text-main);
-      font-family: var(--font-heading, 'Outfit', sans-serif);
-      line-height: 1.1;
-      margin-bottom: 0.35rem;
-    }
-
-    .intel-kpi-subtext {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    /* Section Headers */
-    .intel-section-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      font-family: var(--font-heading, 'Outfit', sans-serif);
-      color: var(--text-main);
-      margin: 2rem 0 1.25rem 0;
+      color: var(--text-main, #0f172a);
+      margin: 2.25rem 0 1.25rem 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -173,35 +143,52 @@
       gap: 0.75rem;
     }
 
-    /* Deep Dive Analytical Cards */
+    /* Filter Bar */
+    .intel-filter-bar {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-lg, 14px);
+      padding: 1rem 1.35rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .intel-filter-select {
+      padding: 0.5rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border-color, #e2e8f0);
+      background: var(--bg-app, #f8fafc);
+      color: var(--text-main, #0f172a);
+      cursor: pointer;
+    }
+
+    /* 4-Card Deep Dive Grid */
     .deep-dive-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      gap: 1.25rem;
       margin-bottom: 1.5rem;
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1100px) {
       .deep-dive-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    @media (max-width: 580px) {
+    @media (max-width: 600px) {
       .deep-dive-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .analytical-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* Two Column Breakdown */
+    /* Two-column analytical card */
     .intel-two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -215,9 +202,17 @@
       }
     }
 
-    /* Visual Distribution Bar */
+    .intel-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-lg, 16px);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Distribution Bars */
     .dist-bar-item {
-      margin-bottom: 1rem;
+      margin-bottom: 0.9rem;
     }
 
     .dist-bar-item:last-child {
@@ -227,50 +222,41 @@
     .dist-bar-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 600;
       margin-bottom: 0.35rem;
-      color: var(--text-main);
+      color: var(--text-main, #0f172a);
     }
 
     .dist-bar-track {
-      height: 8px;
+      height: 7px;
       border-radius: 4px;
-      background: rgba(148, 163, 184, 0.15);
+      background: rgba(148, 163, 184, 0.18);
       overflow: hidden;
     }
 
     .dist-bar-fill {
       height: 100%;
       border-radius: 4px;
-      background: var(--primary);
+      background: var(--primary, #0f766e);
       transition: width 0.4s ease;
     }
 
-    /* Areas List */
-    .areas-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
+    /* Area List */
     .area-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0.75rem 1rem;
-      background: var(--bg-surface-hover, rgba(248, 250, 252, 0.6));
-      border: 1px solid var(--border-color);
+      background: var(--bg-surface-hover, #f8fafc);
+      border: 1px solid var(--border-color, #e2e8f0);
       border-radius: 10px;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
+      margin-bottom: 0.6rem;
     }
 
-    .area-name {
-      font-weight: 600;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
+    .area-row:last-child {
+      margin-bottom: 0;
     }
 
     .area-count-badge {
@@ -278,41 +264,41 @@
       border-radius: 6px;
       font-weight: 700;
       font-size: 0.75rem;
-      background: rgba(13, 148, 136, 0.12);
-      color: var(--primary);
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--primary, #0f766e);
     }
 
     /* 38 Districts Grid */
     .districts-grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.15rem;
       margin-bottom: 2.5rem;
     }
 
     .district-card-item {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.15rem 1.25rem;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 1.25rem;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-xs);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
 
     .district-card-item:hover {
-      border-color: var(--primary);
+      border-color: var(--primary, #0f766e);
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
 
     .district-card-item.selected {
-      border-color: var(--primary);
-      background: rgba(13, 148, 136, 0.04);
-      box-shadow: 0 0 0 2px var(--primary);
+      border-color: var(--primary, #0f766e);
+      background: rgba(15, 118, 110, 0.04);
+      box-shadow: 0 0 0 2px var(--primary, #0f766e);
     }
 
     .district-card-header {
@@ -323,14 +309,14 @@
     }
 
     .district-name-text {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--text-main, #0f172a);
     }
 
     .district-name-ta {
-      font-size: 0.72rem;
-      color: var(--text-muted);
+      font-size: 0.75rem;
+      color: var(--text-muted, #64748b);
       display: block;
       margin-top: 0.15rem;
     }
@@ -339,9 +325,9 @@
       display: flex;
       justify-content: space-between;
       font-size: 0.82rem;
-      padding: 0.25rem 0;
-      color: var(--text-muted);
-      border-bottom: 1px dashed rgba(203, 213, 225, 0.4);
+      padding: 0.35rem 0;
+      color: var(--text-muted, #64748b);
+      border-bottom: 1px dashed rgba(203, 213, 225, 0.5);
     }
 
     .district-metric-row:last-child {
@@ -350,14 +336,14 @@
     }
 
     .district-metric-row strong {
-      color: var(--text-main);
+      color: var(--text-main, #0f172a);
     }
 
     /* Comparison Table */
     .comparison-table-wrap {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-lg, 16px);
       overflow-x: auto;
       box-shadow: var(--shadow-sm);
       margin-bottom: 2.5rem;
@@ -371,63 +357,38 @@
     }
 
     .intel-table th {
-      background: var(--bg-surface-hover, rgba(248, 250, 252, 0.8));
-      padding: 0.85rem 1.15rem;
+      background: var(--bg-surface-hover, #f8fafc);
+      padding: 0.95rem 1.25rem;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--text-muted, #64748b);
       font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      border-bottom: 1px solid var(--border-color);
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-color, #e2e8f0);
       cursor: pointer;
       user-select: none;
       white-space: nowrap;
     }
 
     .intel-table th:hover {
-      color: var(--primary);
+      color: var(--primary, #0f766e);
     }
 
     .intel-table td {
-      padding: 0.85rem 1.15rem;
-      border-bottom: 1px solid var(--border-color);
-      color: var(--text-main);
+      padding: 0.95rem 1.25rem;
+      border-bottom: 1px solid var(--border-color, #e2e8f0);
+      color: var(--text-main, #0f172a);
       white-space: nowrap;
     }
 
     .intel-table tbody tr:hover {
-      background: rgba(13, 148, 136, 0.03);
+      background: rgba(15, 118, 110, 0.03);
     }
 
     .intel-table tbody tr:last-child td {
       border-bottom: none;
     }
 
-    /* Filter Bar */
-    .filter-bar-container {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.75rem;
-    }
-
-    .filter-select {
-      padding: 0.45rem 0.85rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-main);
-      color: var(--text-main);
-      cursor: pointer;
-    }
-
-    /* Loading Overlay */
     .intel-loading-shimmer {
       opacity: 0.6;
       pointer-events: none;
@@ -510,12 +471,20 @@
         </div>
       </header>
 
-      <!-- Page Body Container -->
-      <main class="dashboard-content" id="intel-main-container" style="max-width: 1400px; margin: 0 auto; padding: 1.75rem 2rem;">
+      <!-- Main Container -->
+      <main class="dashboard-content intel-page-container" id="intel-main-container">
         
-        <!-- Top Title & Global Controls -->
-        <div class="intelligence-header">
-          <div class="intelligence-title-group">
+        <!-- Back Button Row -->
+        <div class="intel-top-bar">
+          <button type="button" onclick="history.back()" class="btn btn-secondary" style="padding: 0.5rem 1.1rem; border-radius: 10px; font-weight: 700; gap: 0.5rem;">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
+        <!-- Header Card with Title & Global Controls -->
+        <div class="intel-header-card">
+          <div class="intel-header-info">
             <h1>
               <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i>
               Tamil Nadu Civic Intelligence
@@ -523,15 +492,52 @@
             <p>Authoritative 38-district monitoring, automated SLA compliance tracking, and civic resolution analytics.</p>
           </div>
 
-          <div class="intelligence-controls">
-            <!-- District Selector Dropdown -->
-            <select id="intel-district-select" class="select-district-control" aria-label="Select Tamil Nadu District">
-              <option value="all">All Tamil Nadu (38 Districts)</option>
-              <!-- Populated dynamically -->
+          <div class="intel-controls-row">
+            <!-- District Selector Dropdown (Pre-populated with all 38 districts) -->
+            <select id="intel-district-select" class="intel-select" aria-label="Select Tamil Nadu District">
+              <option value="all" selected>All Tamil Nadu (38 Districts)</option>
+              <option value="ariyalur">Ariyalur (அரியலூர்)</option>
+              <option value="chengalpattu">Chengalpattu (செங்கல்பட்டு)</option>
+              <option value="chennai">Chennai (சென்னை)</option>
+              <option value="coimbatore">Coimbatore (கோயம்புத்தூர்)</option>
+              <option value="cuddalore">Cuddalore (கடலூர்)</option>
+              <option value="dharmapuri">Dharmapuri (தர்மபுரி)</option>
+              <option value="dindigul">Dindigul (திண்டுக்கல்)</option>
+              <option value="erode">Erode (ஈரோடு)</option>
+              <option value="kallakurichi">Kallakurichi (கள்ளக்குறிச்சி)</option>
+              <option value="kancheepuram">Kancheepuram (காஞ்சிபுரம்)</option>
+              <option value="kanniyakumari">Kanniyakumari (கன்னியாகுமரி)</option>
+              <option value="karur">Karur (கரூர்)</option>
+              <option value="krishnagiri">Krishnagiri (கிருஷ்ணகிரி)</option>
+              <option value="madurai">Madurai (மதுரை)</option>
+              <option value="mayiladuthurai">Mayiladuthurai (மயிலாடுதுறை)</option>
+              <option value="nagapattinam">Nagapattinam (நாகப்பட்டினம்)</option>
+              <option value="namakkal">Namakkal (நாமக்கல்)</option>
+              <option value="nilgiris">The Nilgiris (நீலகிரி)</option>
+              <option value="perambalur">Perambalur (பெரம்பலூர்)</option>
+              <option value="pudukkottai">Pudukkottai (புதுக்கோட்டை)</option>
+              <option value="ramanathapuram">Ramanathapuram (இராமநாதபுரம்)</option>
+              <option value="ranipet">Ranipet (ராணிப்பேட்டை)</option>
+              <option value="salem">Salem (சேலம்)</option>
+              <option value="sivaganga">Sivaganga (சிவகங்கை)</option>
+              <option value="tenkasi">Tenkasi (தென்காசி)</option>
+              <option value="thanjavur">Thanjavur (தஞ்சாவூர்)</option>
+              <option value="theni">Theni (தேனி)</option>
+              <option value="thoothukudi">Thoothukudi (தூத்துக்குடி)</option>
+              <option value="tiruchirappalli">Tiruchirappalli (திருச்சிராப்பள்ளி)</option>
+              <option value="tirunelveli">Tirunelveli (திருநெல்வேலி)</option>
+              <option value="tirupathur">Tirupathur (திருப்பத்தூர்)</option>
+              <option value="tiruppur">Tiruppur (திருப்பூர்)</option>
+              <option value="tiruvallur">Tiruvallur (திருவள்ளூர்)</option>
+              <option value="tiruvannamalai">Tiruvannamalai (திருவண்ணாமலை)</option>
+              <option value="tiruvarur">Tiruvarur (திருவாரூர்)</option>
+              <option value="vellore">Vellore (வேலூர்)</option>
+              <option value="viluppuram">Viluppuram (விழுப்புரம்)</option>
+              <option value="virudhunagar">Virudhunagar (விருதுநகர்)</option>
             </select>
 
             <!-- Date Range Selector -->
-            <select id="intel-range-select" class="select-range-control" aria-label="Select Analytics Date Range">
+            <select id="intel-range-select" class="intel-select" style="min-width: 160px;" aria-label="Select Analytics Date Range">
               <option value="all_time" selected>All Time</option>
               <option value="today">Today (IST)</option>
               <option value="7d">Last 7 Days</option>
@@ -540,7 +546,7 @@
             </select>
 
             <!-- Manual Refresh Button -->
-            <button id="btn-intel-refresh" type="button" class="btn btn-secondary" style="padding: 0.65rem 1rem; border-radius: 10px; font-weight: 700; gap: 0.45rem;" title="Refresh live intelligence">
+            <button id="btn-intel-refresh" type="button" class="btn btn-secondary" style="padding: 0.65rem 1.1rem; border-radius: 10px; font-weight: 700; gap: 0.45rem;">
               <i class="fa-solid fa-arrows-rotate" id="intel-refresh-icon"></i>
               <span>Refresh</span>
             </button>
@@ -548,13 +554,13 @@
         </div>
 
         <!-- Filter Bar -->
-        <div class="filter-bar-container">
+        <div class="intel-filter-bar">
           <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
             <i class="fa-solid fa-filter"></i> Filters:
           </span>
 
           <!-- Category Filter -->
-          <select id="filter-category" class="filter-select">
+          <select id="filter-category" class="intel-filter-select">
             <option value="all">All Categories</option>
             <option value="roads">Roads & Pavements</option>
             <option value="streetlights">Streetlights & Electrical</option>
@@ -571,7 +577,7 @@
           </select>
 
           <!-- Status Filter -->
-          <select id="filter-status" class="filter-select">
+          <select id="filter-status" class="intel-filter-select">
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="assigned">Assigned</option>
@@ -582,7 +588,7 @@
           </select>
 
           <!-- Priority Filter -->
-          <select id="filter-priority" class="filter-select">
+          <select id="filter-priority" class="intel-filter-select">
             <option value="all">All Priorities</option>
             <option value="critical">Critical / Emergency</option>
             <option value="high">High Priority</option>
@@ -591,188 +597,188 @@
           </select>
 
           <!-- Reset Filters -->
-          <button id="btn-reset-filters" type="button" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; border-radius: 6px; margin-left: auto;">
+          <button id="btn-reset-filters" type="button" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.78rem; border-radius: 8px; margin-left: auto;">
             Reset Filters
           </button>
         </div>
 
-        <!-- 1. State-Wide Tamil Nadu Overview (Top Section) -->
-        <div class="intel-section-title" style="margin-top: 0;">
+        <!-- 1. State-Wide Overview (Using exact stitch-stat-card from citizen-dashboard) -->
+        <div class="intel-section-heading" style="margin-top: 0;">
           <span>
             <i class="fa-solid fa-landmark" style="color: var(--primary); margin-right: 0.5rem;"></i>
             Tamil Nadu Civic Overview
           </span>
-          <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;" id="intel-last-updated">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;" id="intel-last-updated">
             Live Database Synced
           </span>
         </div>
 
-        <div class="kpi-overview-grid">
+        <div class="intel-kpi-grid">
           <!-- Total Issues -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Total Issues</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(13, 148, 136, 0.12); color: var(--primary);">
-                <i class="fa-solid fa-file-lines"></i>
-              </div>
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle icon-teal">
+              <i class="fa-solid fa-file-lines"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-total-issues">0</div>
-            <div class="intel-kpi-subtext">All complaints registered in state</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">TOTAL ISSUES</span>
+              <span class="stitch-stat-value" id="kpi-total-issues">0</span>
+              <span class="kpi-subtext">All registered complaints</span>
+            </div>
           </div>
 
           <!-- Open Issues -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Open Issues</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">
-                <i class="fa-solid fa-hourglass-half"></i>
-              </div>
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle icon-blue">
+              <i class="fa-solid fa-hourglass-half"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-open-issues">0</div>
-            <div class="intel-kpi-subtext">Active casework requiring resolution</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">OPEN ISSUES</span>
+              <span class="stitch-stat-value" id="kpi-open-issues">0</span>
+              <span class="kpi-subtext">Active casework requiring action</span>
+            </div>
           </div>
 
-          <!-- Resolved Issues -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Resolved</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
-                <i class="fa-solid fa-circle-check"></i>
-              </div>
+          <!-- Resolved -->
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle kpi-emerald">
+              <i class="fa-solid fa-circle-check"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-resolved-issues">0</div>
-            <div class="intel-kpi-subtext">Verified & completed resolutions</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">RESOLVED</span>
+              <span class="stitch-stat-value" id="kpi-resolved-issues">0</span>
+              <span class="kpi-subtext">Verified & completed resolutions</span>
+            </div>
           </div>
 
-          <!-- Overall Resolution Rate -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Resolution Rate</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(99, 102, 241, 0.12); color: #6366f1;">
-                <i class="fa-solid fa-chart-pie"></i>
-              </div>
+          <!-- Resolution Rate -->
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle kpi-indigo">
+              <i class="fa-solid fa-chart-pie"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-resolution-rate">0.0%</div>
-            <div class="intel-kpi-subtext">State-wide resolution percentage</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">RESOLUTION RATE</span>
+              <span class="stitch-stat-value" id="kpi-resolution-rate">0.0%</span>
+              <span class="kpi-subtext">State-wide resolution efficiency</span>
+            </div>
           </div>
 
-          <!-- Overdue Complaints -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Overdue</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
-                <i class="fa-solid fa-clock-rotate-left"></i>
-              </div>
+          <!-- Overdue -->
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle kpi-red">
+              <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-overdue-issues" style="color: #ef4444;">0</div>
-            <div class="intel-kpi-subtext">Exceeded target SLA response time</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">OVERDUE</span>
+              <span class="stitch-stat-value" id="kpi-overdue-issues" style="color: #ef4444;">0</span>
+              <span class="kpi-subtext">Exceeded target SLA response time</span>
+            </div>
           </div>
 
-          <!-- Escalated Complaints -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Escalated</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(127, 29, 29, 0.12); color: #7f1d1d;">
-                <i class="fa-solid fa-arrows-split-up-and-left"></i>
-              </div>
+          <!-- Escalated -->
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle kpi-darkred">
+              <i class="fa-solid fa-arrows-split-up-and-left"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-escalated-issues" style="color: #7f1d1d;">0</div>
-            <div class="intel-kpi-subtext">Dispatched to senior department officers</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">ESCALATED</span>
+              <span class="stitch-stat-value" id="kpi-escalated-issues" style="color: #7f1d1d;">0</span>
+              <span class="kpi-subtext">Escalated to senior authority</span>
+            </div>
           </div>
 
-          <!-- Critical Issues -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Critical</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(220, 38, 38, 0.12); color: #dc2626;">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-              </div>
+          <!-- Critical -->
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle kpi-red">
+              <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-critical-issues" style="color: #dc2626;">0</div>
-            <div class="intel-kpi-subtext">Emergency priority & high severity</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">CRITICAL</span>
+              <span class="stitch-stat-value" id="kpi-critical-issues" style="color: #dc2626;">0</span>
+              <span class="kpi-subtext">Emergency priority & high severity</span>
+            </div>
           </div>
 
           <!-- Pending First Action -->
-          <div class="intel-kpi-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Pending First Action</span>
-              <div class="intel-kpi-icon-wrap" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
-                <i class="fa-solid fa-bell"></i>
-              </div>
+          <div class="stitch-stat-card">
+            <div class="kpi-icon-circle kpi-amber">
+              <i class="fa-solid fa-bell"></i>
             </div>
-            <div class="intel-kpi-value" id="kpi-pending-issues" style="color: #f59e0b;">0</div>
-            <div class="intel-kpi-subtext">Awaiting authority triage & assignment</div>
+            <div class="kpi-info-col">
+              <span class="stitch-stat-label">PENDING FIRST ACTION</span>
+              <span class="stitch-stat-value" id="kpi-pending-issues" style="color: #f59e0b;">0</span>
+              <span class="kpi-subtext">Awaiting initial dispatch</span>
+            </div>
           </div>
         </div>
 
         <!-- 2. Selected District Deep Dive -->
-        <div class="intel-section-title">
+        <div class="intel-section-heading">
           <span>
             <i class="fa-solid fa-city" style="color: var(--primary); margin-right: 0.5rem;"></i>
             <span id="scope-header-title">All Tamil Nadu Analytical Profile</span>
           </span>
-          <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary); background: rgba(13, 148, 136, 0.1); padding: 0.3rem 0.75rem; border-radius: 20px;" id="scope-badge">
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary); background: rgba(15, 118, 110, 0.1); padding: 0.35rem 0.85rem; border-radius: 20px;" id="scope-badge">
             State Consolidated View
           </span>
         </div>
 
-        <!-- 4 Key Deep-Dive Metric Cards -->
+        <!-- 4 Key Analytical Cards -->
         <div class="deep-dive-grid">
           <!-- Most Reported Issue -->
-          <div class="analytical-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Most Reported Issue</span>
+          <div class="intel-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <span class="stitch-stat-label">MOST REPORTED ISSUE</span>
               <i class="fa-solid fa-fire" style="color: #f97316;"></i>
             </div>
-            <div class="intel-kpi-value" id="scope-top-category" style="font-size: 1.5rem; text-transform: capitalize;">
+            <div class="stitch-stat-value" id="scope-top-category" style="font-size: 1.45rem; text-transform: capitalize; margin-bottom: 0.35rem;">
               None
             </div>
-            <div class="intel-kpi-subtext" id="scope-top-category-count">0 reports recorded</div>
+            <span class="kpi-subtext" id="scope-top-category-count">0 reports recorded</span>
           </div>
 
-          <!-- Resolution Rate Meter -->
-          <div class="analytical-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Resolution Rate</span>
+          <!-- Resolution Rate -->
+          <div class="intel-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <span class="stitch-stat-label">RESOLUTION RATE</span>
               <i class="fa-solid fa-percent" style="color: #10b981;"></i>
             </div>
-            <div class="intel-kpi-value" id="scope-resolution-rate" style="font-size: 1.5rem; color: #10b981;">
+            <div class="stitch-stat-value" id="scope-resolution-rate" style="font-size: 1.45rem; color: #10b981; margin-bottom: 0.5rem;">
               0.0%
             </div>
-            <div class="dist-bar-track" style="margin-top: 0.5rem;">
+            <div class="dist-bar-track">
               <div id="scope-resolution-bar" class="dist-bar-fill" style="width: 0%; background: #10b981;"></div>
             </div>
           </div>
 
           <!-- Critical Issues -->
-          <div class="analytical-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">Critical Issues</span>
+          <div class="intel-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <span class="stitch-stat-label">CRITICAL ISSUES</span>
               <i class="fa-solid fa-shield-virus" style="color: #dc2626;"></i>
             </div>
-            <div class="intel-kpi-value" id="scope-critical-count" style="font-size: 1.5rem; color: #dc2626;">
+            <div class="stitch-stat-value" id="scope-critical-count" style="font-size: 1.45rem; color: #dc2626; margin-bottom: 0.35rem;">
               0
             </div>
-            <div class="intel-kpi-subtext">Immediate emergency response needed</div>
+            <span class="kpi-subtext">Immediate emergency response</span>
           </div>
 
           <!-- SLA Overdue Rate -->
-          <div class="analytical-card">
-            <div class="intel-kpi-header">
-              <span class="intel-kpi-label">SLA Breaches</span>
+          <div class="intel-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <span class="stitch-stat-label">SLA BREACHES</span>
               <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
             </div>
-            <div class="intel-kpi-value" id="scope-overdue-count" style="font-size: 1.5rem; color: #ef4444;">
+            <div class="stitch-stat-value" id="scope-overdue-count" style="font-size: 1.45rem; color: #ef4444; margin-bottom: 0.35rem;">
               0
             </div>
-            <div class="intel-kpi-subtext" id="scope-escalated-subtext">0 escalated to Level 1</div>
+            <span class="kpi-subtext" id="scope-escalated-subtext">0 escalated to Level 1</span>
           </div>
         </div>
 
         <!-- Two Column Deep Breakdown -->
         <div class="intel-two-col">
           <!-- Left Column: Category & Status Distribution -->
-          <div class="analytical-card">
+          <div class="intel-card">
             <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 1.25rem 0; display: flex; align-items: center; gap: 0.5rem;">
               <i class="fa-solid fa-chart-column" style="color: var(--primary);"></i>
               Issue Category Distribution
@@ -793,16 +799,16 @@
           </div>
 
           <!-- Right Column: Most Affected Areas & Priorities -->
-          <div class="analytical-card">
+          <div class="intel-card">
             <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
               <i class="fa-solid fa-map-pin" style="color: #e11d48;"></i>
               Most Affected Areas & Localities
             </h3>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
               High-concentration civic reporting locations derived from real verified complaint addresses.
             </p>
 
-            <div class="areas-list" id="most-affected-areas-list">
+            <div id="most-affected-areas-list">
               <!-- Dynamically populated rows -->
             </div>
 
@@ -819,7 +825,7 @@
         </div>
 
         <!-- 3. 38-District Overview Directory Grid -->
-        <div class="intel-section-title">
+        <div class="intel-section-heading">
           <span>
             <i class="fa-solid fa-network-wired" style="color: var(--primary); margin-right: 0.5rem;"></i>
             All 38 Tamil Nadu Districts
@@ -827,7 +833,7 @@
 
           <!-- Instant Search Box for 38 Districts -->
           <div style="position: relative; width: 260px;">
-            <input type="text" id="input-search-districts" placeholder="Filter 38 districts..." style="width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
+            <input type="text" id="input-search-districts" placeholder="Filter 38 districts..." style="width: 100%; padding: 0.55rem 0.85rem 0.55rem 2.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
             <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-muted);"></i>
           </div>
         </div>
@@ -837,7 +843,7 @@
         </div>
 
         <!-- 4. District Comparison Matrix -->
-        <div class="intel-section-title">
+        <div class="intel-section-heading">
           <span>
             <i class="fa-solid fa-table-cells" style="color: var(--primary); margin-right: 0.5rem;"></i>
             District Comparison Matrix
@@ -874,10 +880,10 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Client Script files -->
-  <script src="js/auth.js?v=4.0.1"></script>
-  <script src="js/api.js?v=4.0.1"></script>
-  <script src="js/civic-intelligence.js?v=4.0.1"></script>
+  <!-- Client Script files (v=5.0.0 for immediate cache busting) -->
+  <script src="js/auth.js?v=5.0.0"></script>
+  <script src="js/api.js?v=5.0.0"></script>
+  <script src="js/civic-intelligence.js?v=5.0.0"></script>
 
   <!-- Mobile Hamburger Toggle -->
   <script>
