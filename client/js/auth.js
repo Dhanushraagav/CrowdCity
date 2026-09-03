@@ -620,17 +620,59 @@ function getCurrentUser() {
 
 // Get User Role (Citizen, Authority, Admin)
 function getUserRole() {
-  const role = localStorage.getItem('cc_user_role') || localStorage.getItem('user_role');
-  if (role && role !== 'null' && role !== 'undefined') return role.toLowerCase();
-
+  // 1. Explicit URL parameter indicator (?portal=authority or ?portal=admin)
   try {
-    const profileStr = localStorage.getItem('cc_user_profile');
+    const urlParams = new URLSearchParams(window.location.search);
+    const portal = urlParams.get('portal');
+    if (portal === 'authority' || portal === 'admin') {
+      return portal;
+    }
+  } catch (e) {}
+
+  // 2. Check sessionStorage FIRST (auth-router proxies all auth keys here!)
+  try {
+    const sRole = sessionStorage.getItem('cc_user_role') || sessionStorage.getItem('user_role');
+    if (sRole && sRole !== 'null' && sRole !== 'undefined') return sRole.toLowerCase();
+  } catch (e) {}
+
+  // 3. Check localStorage
+  try {
+    const lRole = localStorage.getItem('cc_user_role') || localStorage.getItem('user_role');
+    if (lRole && lRole !== 'null' && lRole !== 'undefined') return lRole.toLowerCase();
+  } catch (e) {}
+
+  // 4. Check profile objects in sessionStorage and localStorage
+  try {
+    const profileStr = sessionStorage.getItem('cc_user_profile') || localStorage.getItem('cc_user_profile');
     if (profileStr) {
       const parsed = JSON.parse(profileStr);
       if (parsed?.role && parsed.role !== 'null' && parsed.role !== 'undefined') {
-        localStorage.setItem('cc_user_role', parsed.role.toLowerCase());
         return parsed.role.toLowerCase();
       }
+    }
+  } catch (e) {}
+
+  // 5. Check Supabase session tokens in storage
+  try {
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && k.includes('auth-token')) {
+        const item = sessionStorage.getItem(k);
+        if (item) {
+          const parsed = JSON.parse(item);
+          const u = parsed.user || (parsed.currentSession && parsed.currentSession.user);
+          const r = u?.user_metadata?.role || u?.app_metadata?.role;
+          if (r && r !== 'null' && r !== 'undefined') return r.toLowerCase();
+        }
+      }
+    }
+  } catch (e) {}
+
+  // 6. Check document.referrer: If navigating from any authority page, role is authority
+  try {
+    const ref = (document.referrer || '').toLowerCase();
+    if (ref && (ref.includes('authority-') || ref.includes('admin.html'))) {
+      return 'authority';
     }
   } catch (e) {}
 
@@ -1612,6 +1654,7 @@ function updateAuthUI() {
       const isAuthReports = path.includes('authority-reports');
       const isCivicIntel = path.includes('civic-intelligence');
 
+      sidebar.className = 'portal-sidebar';
       sidebar.classList.remove('collapsed', 'expanded');
       sidebar.onmouseenter = null;
       sidebar.onmouseleave = null;
@@ -1627,7 +1670,7 @@ function updateAuthUI() {
           <a href="authority-complaints.html" class="nav-item ${isAuthComplaints ? 'active' : ''}">Complaints Queue</a>
           <a href="authority-assigned.html" class="nav-item ${isAuthAssigned ? 'active' : ''}">Assigned Cases</a>
           <a href="authority-reports.html" class="nav-item ${isAuthReports ? 'active' : ''}">Operational Reports</a>
-          <a href="civic-intelligence.html" class="nav-item ${isCivicIntel ? 'active' : ''}">Civic Intelligence</a>
+          <a href="civic-intelligence.html?portal=authority" class="nav-item ${isCivicIntel ? 'active' : ''}">Civic Intelligence</a>
         </nav>
 
         <div class="sidebar-footer">

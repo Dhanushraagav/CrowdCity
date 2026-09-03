@@ -213,9 +213,10 @@ window.authRouter = {
   // Page classifications
 
   // Protect dashboard pages and sub-routes
+  const isSharedPage = normalizedPath.includes('civic-intelligence') || normalizedPath.includes('about') || normalizedPath.includes('contact');
   const isAdminPage = normalizedPath.includes('admin');
   const isAuthorityPage = (normalizedPath.includes('authority-') || normalizedPath.includes('authority')) && !isAuthorityLoginPage && !isResetPasswordPage;
-  const isCitizenPage = !isIndexPage && !isCitizenLoginPage && !isAuthorityLoginPage && !isResetPasswordPage && !isAuthorityPage && !isAdminPage;
+  const isCitizenPage = !isIndexPage && !isCitizenLoginPage && !isAuthorityLoginPage && !isResetPasswordPage && !isAuthorityPage && !isAdminPage && !isSharedPage;
 
   console.log(`[Auth Router] Path: "${path}", Active Session: ${sessionActive}, Role: "${role}"`);
 
