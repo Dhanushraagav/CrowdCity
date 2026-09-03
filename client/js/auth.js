@@ -1681,7 +1681,13 @@ function updateAuthUI() {
           <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
         </div>
       `;
+      sidebar.querySelectorAll('a[href*="civic-intelligence"]').forEach(el => el.remove());
       return;
+    }
+
+    // Safety: ensure no civic-intelligence link lingers in authority sidebar on any authority page
+    if (path.includes('authority-') || path.includes('admin')) {
+      document.querySelectorAll('.portal-sidebar a[href*="civic-intelligence"], .sidebar-nav a[href*="civic-intelligence"]').forEach(el => el.remove());
     }
 
     const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index') || path.endsWith('/index.html') || path.endsWith('/client') || path.endsWith('/client/');
