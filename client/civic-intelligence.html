@@ -126,17 +126,19 @@
       justify-content: center;
       gap: 0.35rem;
       box-shadow: var(--shadow-xs);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .intel-kpi-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08), 0 6px 12px -4px rgba(0, 0, 0, 0.04);
       border-color: var(--border-color-hover, #cbd5e1);
     }
 
+    /* Animated Top Accent Color Strip */
     .intel-kpi-card::before {
       content: '';
       position: absolute;
@@ -144,18 +146,48 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: var(--card-accent, var(--primary));
+      background: linear-gradient(90deg, var(--card-accent), var(--card-accent-light, var(--card-accent)), var(--card-accent));
+      background-size: 200% 100%;
       border-radius: 14px 14px 0 0;
+      transition: height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
     }
 
-    .card-accent-teal { --card-accent: #0f766e; }
-    .card-accent-blue { --card-accent: #0284c7; }
-    .card-accent-emerald { --card-accent: #10b981; }
-    .card-accent-indigo { --card-accent: #6366f1; }
-    .card-accent-red { --card-accent: #ef4444; }
-    .card-accent-darkred { --card-accent: #7f1d1d; }
-    .card-accent-crimson { --card-accent: #dc2626; }
-    .card-accent-amber { --card-accent: #f59e0b; }
+    .intel-kpi-card:hover::before {
+      height: 6px;
+      box-shadow: 0 4px 16px var(--card-accent);
+      animation: topBarFlow 2s ease-in-out infinite;
+    }
+
+    @keyframes topBarFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .intel-kpi-card .stitch-stat-value {
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-block;
+      transform-origin: left center;
+    }
+
+    .intel-kpi-card:hover .stitch-stat-value {
+      transform: scale(1.05);
+    }
+
+    .card-accent-teal { --card-accent: #0f766e; --card-accent-light: #2dd4bf; }
+    .card-accent-blue { --card-accent: #0284c7; --card-accent-light: #38bdf8; }
+    .card-accent-emerald { --card-accent: #10b981; --card-accent-light: #34d399; }
+    .card-accent-indigo { --card-accent: #6366f1; --card-accent-light: #a5b4fc; }
+    .card-accent-red { --card-accent: #ef4444; --card-accent-light: #fca5a5; }
+    .card-accent-darkred { --card-accent: #7f1d1d; --card-accent-light: #dc2626; }
+    .card-accent-crimson { --card-accent: #dc2626; --card-accent-light: #f87171; }
+    .card-accent-amber { --card-accent: #f59e0b; --card-accent-light: #fde68a; }
 
     /* Section Headings */
     .intel-section-heading {
@@ -890,10 +922,10 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Client Script files (v=5.0.4 for immediate cache busting) -->
-  <script src="js/auth.js?v=5.0.4"></script>
-  <script src="js/api.js?v=5.0.4"></script>
-  <script src="js/civic-intelligence.js?v=5.0.4"></script>
+  <!-- Client Script files (v=5.0.5 for immediate cache busting) -->
+  <script src="js/auth.js?v=5.0.5"></script>
+  <script src="js/api.js?v=5.0.5"></script>
+  <script src="js/civic-intelligence.js?v=5.0.5"></script>
 
   <!-- Mobile Hamburger Toggle -->
   <script>
