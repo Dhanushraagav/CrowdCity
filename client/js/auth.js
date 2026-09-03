@@ -620,16 +620,16 @@ function getCurrentUser() {
 
 // Get User Role (Citizen, Authority, Admin)
 function getUserRole() {
-  const role = localStorage.getItem('cc_user_role');
-  if (role && role !== 'null' && role !== 'undefined') return role;
+  const role = localStorage.getItem('cc_user_role') || localStorage.getItem('user_role');
+  if (role && role !== 'null' && role !== 'undefined') return role.toLowerCase();
 
   try {
     const profileStr = localStorage.getItem('cc_user_profile');
     if (profileStr) {
       const parsed = JSON.parse(profileStr);
       if (parsed?.role && parsed.role !== 'null' && parsed.role !== 'undefined') {
-        localStorage.setItem('cc_user_role', parsed.role);
-        return parsed.role;
+        localStorage.setItem('cc_user_role', parsed.role.toLowerCase());
+        return parsed.role.toLowerCase();
       }
     }
   } catch (e) {}
@@ -1597,10 +1597,47 @@ function updateAuthUI() {
 
   const injectCitizenSidebar = () => {
     if (document.body.classList.contains('admin-portal-body')) return;
-    const sidebar = document.querySelector('.app-sidebar');
+    const sidebar = document.querySelector('.app-sidebar, .portal-sidebar');
     if (!sidebar) return;
 
+    const rawRole = (typeof getUserRole === 'function') ? getUserRole() : (localStorage.getItem('cc_user_role') || localStorage.getItem('user_role') || 'citizen');
+    const isAuthority = rawRole === 'authority' || rawRole === 'admin';
     const path = window.location.pathname.toLowerCase();
+
+    // ─── STRICT SEPARATION: AUTHORITY / ADMIN PORTAL SIDEBAR ───────────────────
+    if (isAuthority) {
+      const isAuthDashboard = path.includes('authority-dashboard');
+      const isAuthComplaints = path.includes('authority-complaints');
+      const isAuthAssigned = path.includes('authority-assigned');
+      const isAuthReports = path.includes('authority-reports');
+      const isCivicIntel = path.includes('civic-intelligence');
+
+      sidebar.classList.remove('collapsed', 'expanded');
+      sidebar.onmouseenter = null;
+      sidebar.onmouseleave = null;
+
+      sidebar.innerHTML = `
+        <div class="sidebar-brand">
+          <span class="brand-title-text">CrowdCity</span>
+          <span class="brand-subtitle-text">Municipal Operations</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="authority-dashboard.html" class="nav-item ${isAuthDashboard ? 'active' : ''}">Dashboard</a>
+          <a href="authority-complaints.html" class="nav-item ${isAuthComplaints ? 'active' : ''}">Complaints Queue</a>
+          <a href="authority-assigned.html" class="nav-item ${isAuthAssigned ? 'active' : ''}">Assigned Cases</a>
+          <a href="authority-reports.html" class="nav-item ${isAuthReports ? 'active' : ''}">Operational Reports</a>
+          <a href="civic-intelligence.html" class="nav-item ${isCivicIntel ? 'active' : ''}">Civic Intelligence</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div>Department of Municipal Administration</div>
+          <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+        </div>
+      `;
+      return;
+    }
+
     const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index') || path.endsWith('/index.html') || path.endsWith('/client') || path.endsWith('/client/');
     const isReport = path.includes('report') && !path.includes('reports');
     const isComplaints = path.includes('my-complaints') || path.includes('issue-details');
@@ -2473,11 +2510,10 @@ window.handleUniversalBack = function() {
   const currentHost = window.location.host;
   const referrer = document.referrer;
   const path = window.location.pathname.toLowerCase();
+  const rawRole = (typeof getUserRole === 'function') ? getUserRole() : (localStorage.getItem('cc_user_role') || localStorage.getItem('user_role') || 'citizen');
+  const isAuthority = rawRole === 'authority' || rawRole === 'admin' || path.includes('authority-') || document.body.classList.contains('admin-portal-body');
 
-  let fallbackRoot = 'citizen-dashboard.html';
-  if (path.includes('authority-') || document.body.classList.contains('admin-portal-body')) {
-    fallbackRoot = 'admin.html';
-  }
+  let fallbackRoot = isAuthority ? 'authority-dashboard.html' : 'citizen-dashboard.html';
 
   if (window.history.length > 1 && referrer && referrer.includes(currentHost) && !referrer.includes(window.location.pathname)) {
     window.history.back();

@@ -24,6 +24,7 @@
   <!-- Core CSS (Using exact production CSS tokens) -->
   <link rel="stylesheet" href="css/style.css?v=5.0.0">
   <link rel="stylesheet" href="css/components.css?v=5.0.0">
+  <link rel="stylesheet" href="css/authority-portal.css?v=3.0.2">
   <link rel="stylesheet" href="css/global-search.css?v=6.0.0">
 
   <style>
@@ -520,8 +521,38 @@
   </script>
 
   <div class="app-layout">
-    <!-- Sidebar Navigation -->
-    <aside class="app-sidebar">
+    <!-- Sidebar Navigation (Role-Aware: Municipal Operations for Authority, Citizen Portal for Citizens) -->
+    <aside class="app-sidebar" id="portal-sidebar">
+      <script>
+        (function() {
+          try {
+            const r = localStorage.getItem('cc_user_role') || localStorage.getItem('user_role');
+            if (r === 'authority' || r === 'admin') {
+              const aside = document.getElementById('portal-sidebar');
+              if (aside) {
+                aside.className = 'portal-sidebar';
+                aside.innerHTML = `
+                  <div class="sidebar-brand">
+                    <span class="brand-title-text">CrowdCity</span>
+                    <span class="brand-subtitle-text">Municipal Operations</span>
+                  </div>
+                  <nav class="sidebar-nav">
+                    <a href="authority-dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="authority-complaints.html" class="nav-item">Complaints Queue</a>
+                    <a href="authority-assigned.html" class="nav-item">Assigned Cases</a>
+                    <a href="authority-reports.html" class="nav-item">Operational Reports</a>
+                    <a href="civic-intelligence.html" class="nav-item active">Civic Intelligence</a>
+                  </nav>
+                  <div class="sidebar-footer">
+                    <div>Department of Municipal Administration</div>
+                    <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+                  </div>
+                `;
+              }
+            }
+          } catch(e) {}
+        })();
+      </script>
       <div class="sidebar-header">
         <a href="citizen-dashboard.html" class="app-sidebar-logo">
           <div class="brand-emblems-wrap">

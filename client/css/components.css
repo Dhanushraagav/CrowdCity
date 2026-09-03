@@ -5337,7 +5337,7 @@ body.dark-theme .universal-mobile-back-btn svg {
   body.dashboard-page .app-header-logo-mobile,
   .citizen-dashboard .app-header-logo-mobile {
     display: inline-flex !important;
-    order: 2 !important;
+    order: 3 !important;
     margin: 0 !important;
     margin-left: auto !important;
     align-items: center !important;

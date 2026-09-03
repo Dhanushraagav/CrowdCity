@@ -1545,6 +1545,11 @@ function setupFormSubmit() {
                 try {
                   const supportRes = await window.API.supportExistingIssue(cand.id, formData);
                   if (supportRes.error) {
+                    if (supportRes.error.includes('already submitted') || supportRes.error.includes('primary reporter')) {
+                      alert(supportRes.error + ' Redirecting to complaint details...');
+                      window.location.href = `issue-details.html?id=${cand.id}`;
+                      return;
+                    }
                     alert(supportRes.error);
                     btnAttach.disabled = false;
                     btnAttach.innerHTML = '<i class="fa-solid fa-circle-check"></i> Report This Issue Too (Attach to Complaint)';

@@ -2639,35 +2639,49 @@ export const supportExistingIssue = async (req, res) => {
     let newCount = (masterIssue.citizen_count || 1) + 1;
 
     try {
-      await activeClient.from('issue_supporting_reports').insert(supportingRecord);
-      // Explicitly update citizen_count on master issue for safety
+      const insRes = await activeClient.from('issue_supporting_reports').insert(supportingRecord);
+      if (insRes && insRes.error) {
+        logger.warn('issue_supporting_reports insert notice: %s', insRes.error.message);
+      }
+      // Explicitly update citizen_count on master issue
       await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id);
     } catch (insertErr) {
-      logger.warn('issue_supporting_reports table not ready or trigger active:', insertErr.message);
-      // Fallback: also save to issue_attachments so uploaded photo is never lost
+      logger.warn('issue_supporting_reports fallback note: %s', insertErr.message);
       if (supportingImageUrl) {
-        await activeClient.from('issue_attachments').insert({
-          issue_id: masterIssue.id,
-          uploaded_by: citizen_id,
-          file_url: supportingImageUrl,
-          file_name: 'Supporting Citizen Report'
-        }).catch(() => {});
+        try {
+          await activeClient.from('issue_attachments').insert({
+            issue_id: masterIssue.id,
+            uploaded_by: citizen_id,
+            file_url: supportingImageUrl,
+            file_name: 'Supporting Citizen Report'
+          });
+        } catch (attErr) {}
       }
-      await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id).catch(() => {});
+      try {
+        await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id);
+      } catch (upErr) {}
     }
 
     masterIssue.citizen_count = newCount;
 
     // 6. Add status history timeline event
-    const activeAdmin = supabaseAdmin || supabase;
-    await activeAdmin.from('status_history').insert({
-      issue_id: masterIssue.id,
-      status: masterIssue.status,
-      notes: `Additional supporting report submitted by citizen (${supportingRecord.citizen_name}). Total citizens affected: ${newCount}.`
-    }).catch(() => {});
+    try {
+      const activeAdmin = supabaseAdmin || supabase;
+      await activeAdmin.from('status_history').insert({
+        issue_id: masterIssue.id,
+        status: masterIssue.status,
+        notes: `Additional supporting report submitted by citizen (${supportingRecord.citizen_name}). Total citizens affected: ${newCount}.`
+      });
+    } catch (shErr) {
+      logger.warn('status_history insert note: %s', shErr.message);
+    }
 
     // 7. Award community points
-    awardPointsAndCheckBadges(citizen_id, 5, 'report', req).catch(() => {});
+    try {
+      await awardPointsAndCheckBadges(citizen_id, 5, 'report', req);
+    } catch (badgeErr) {
+      logger.warn('awardPoints note: %s', badgeErr.message);
+    }
 
     return res.status(200).json({
       success: true,

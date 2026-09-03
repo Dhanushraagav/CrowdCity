@@ -104,6 +104,9 @@
     wrapper.id = 'global-civic-search-wrapper';
     wrapper.className = 'global-search-wrapper';
 
+    const isMobile = window.innerWidth <= 768;
+    const placeholderText = isMobile ? 'Search CrowdCity...' : 'Search CrowdCity (ID, Location, Category)...';
+
     wrapper.innerHTML = `
       <div class="global-search-input-box" id="global-search-box">
         <i class="fa-solid fa-magnifying-glass global-search-icon"></i>
@@ -111,7 +114,7 @@
           type="text" 
           id="global-search-input" 
           class="global-search-input" 
-          placeholder="Search CrowdCity (ID, Location, Category, Dept)..." 
+          placeholder="${placeholderText}" 
           autocomplete="off" 
           spellcheck="false" 
           aria-label="Global Civic Search"

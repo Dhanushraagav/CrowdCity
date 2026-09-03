@@ -48,13 +48,28 @@
 
 .global-search-input {
   width: 100%;
-  border: none;
-  background: transparent;
-  outline: none;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
   font-size: 0.86rem;
   font-weight: 500;
   color: var(--text-main, #0f172a);
   font-family: inherit;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100% !important;
+  line-height: normal !important;
+}
+
+.global-search-input:focus,
+.global-search-input:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .global-search-input::placeholder {
@@ -378,32 +393,93 @@
 
 /* 8. Mobile Responsiveness */
 @media (max-width: 768px) {
-  .global-search-wrapper {
-    margin: 0 0.5rem;
-    max-width: none;
+  /* Ensure header flex layout on mobile */
+  .dashboard-header,
+  .app-header-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 0.75rem !important;
+    height: 56px !important;
+    gap: 0.35rem !important;
+  }
+
+  /* 1. Hamburger Menu: STRICT FAR LEFT EDGE */
+  .mobile-menu-toggle,
+  #mobile-menu-btn,
+  .dashboard-header .mobile-menu-toggle,
+  .app-header-main .mobile-menu-toggle {
+    display: inline-flex !important;
+    order: 1 !important;
+    margin: 0 !important;
+    margin-right: 0.25rem !important;
+    flex-shrink: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-main, #0f172a) !important;
+    font-size: 1.25rem !important;
+  }
+
+  /* 2. Search Bar: STRICT CENTER */
+  .global-search-wrapper,
+  .dashboard-header .global-search-wrapper,
+  .app-header-main .global-search-wrapper {
+    display: flex !important;
+    order: 2 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 0.35rem !important;
+    z-index: 1050 !important;
   }
 
   .global-search-input-box {
-    height: 34px;
-    padding-left: 2rem;
+    height: 36px !important;
+    padding: 0 0.5rem 0 1.85rem !important;
+    border: 1px solid var(--border-color, #cbd5e1) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
   }
 
   .global-search-icon {
-    left: 0.65rem;
-    font-size: 0.78rem;
+    left: 0.6rem !important;
+    font-size: 0.75rem !important;
   }
 
   .global-search-input {
-    font-size: 0.8rem;
+    font-size: 0.78rem !important;
+    padding: 0 !important;
+    height: 100% !important;
+    line-height: normal !important;
   }
 
   .global-search-kbd {
-    display: none;
+    display: none !important;
+  }
+
+  /* 3. Logos: STRICT FAR RIGHT EDGE */
+  .app-header-logo-mobile,
+  .dashboard-header .app-header-logo-mobile,
+  .app-header-main .app-header-logo-mobile {
+    display: inline-flex !important;
+    order: 3 !important;
+    margin: 0 !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
   }
 
   .global-search-dropdown {
     position: fixed;
-    top: 60px;
+    top: 58px;
     left: 8px;
     right: 8px;
     width: auto;
