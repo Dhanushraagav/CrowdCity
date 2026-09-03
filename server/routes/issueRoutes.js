@@ -1,6 +1,7 @@
 import express from 'express';
 import { 
   getAllIssues, 
+  searchIssues,
   getIssueById, 
   createIssue, 
   upvoteIssue, 
@@ -43,6 +44,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getAllIssues);
+router.get('/search', searchIssues);
 router.get('/analytics', getAdvancedAnalytics);
 
 // SLA routes (registered before parameterized ID route)

@@ -606,6 +606,25 @@ const API = {
     const qs = params.toString();
     const endpoint = `/analytics/district/${encodeURIComponent(districtId)}${qs ? `?${qs}` : ''}`;
     return request(endpoint, { method: 'GET', auth: false });
+  },
+
+  // 40. Global Civic Search
+  searchIssues: async (params = {}, signal = null) => {
+    const qParams = new URLSearchParams();
+    if (params.q) qParams.append('q', params.q);
+    if (params.district && params.district !== 'all') qParams.append('district', params.district);
+    if (params.category && params.category !== 'all') qParams.append('category', params.category);
+    if (params.status && params.status !== 'all') qParams.append('status', params.status);
+    if (params.priority && params.priority !== 'all') qParams.append('priority', params.priority);
+    if (params.department && params.department !== 'all') qParams.append('department', params.department);
+    if (params.start_date) qParams.append('start_date', params.start_date);
+    if (params.end_date) qParams.append('end_date', params.end_date);
+    if (params.limit) qParams.append('limit', params.limit);
+    if (params.page) qParams.append('page', params.page);
+
+    const qs = qParams.toString();
+    const endpoint = `/issues/search${qs ? `?${qs}` : ''}`;
+    return request(endpoint, { method: 'GET', auth: false, signal });
   }
 };
 

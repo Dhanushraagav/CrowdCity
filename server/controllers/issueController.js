@@ -9,6 +9,7 @@ import { generateNextComplaintId, normalizeComplaintRecord } from '../services/c
 import { findDuplicateCandidate } from '../services/duplicateDetectionService.js';
 import { calculateSlaDeadline, resolveIssuePriority } from '../config/slaConfig.js';
 import { computeSlaState, checkAndProcessSlaEscalations, calculateSlaMetrics } from '../services/slaService.js';
+import { searchCivicIssues } from '../services/searchService.js';
 
 /**
  * Get all reported civic issues.
@@ -116,6 +117,34 @@ export const getAllIssues = async (req, res) => {
   } catch (err) {
     logger.error('getAllIssues Error: %O', err);
     return res.status(500).json({ error: 'Server error fetching issues' });
+  }
+};
+
+/**
+ * Global Civic Search Controller
+ * GET /api/issues/search?q=...&district=...&category=...&status=...
+ */
+export const searchIssues = async (req, res) => {
+  try {
+    let user = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser(token);
+        if (authUser) user = authUser;
+      } catch (e) {}
+    }
+
+    const result = await searchCivicIssues(req.query, user);
+    return res.status(200).json(result);
+  } catch (err) {
+    logger.error('searchIssues Controller Error: %O', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to perform civic search',
+      details: err.message
+    });
   }
 };
 

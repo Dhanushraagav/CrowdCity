@@ -2715,4 +2715,39 @@ window.onloadTurnstileCallback = function() {
   }
 };
 
+/**
+ * Initialize Global Civic Search across all application pages
+ */
+function initGlobalCivicSearch() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+  // Avoid running on purely static landing pages without header
+  const hasHeader = document.querySelector('.app-header-main, .dashboard-header, header.app-header');
+  if (!hasHeader) return;
+
+  // 1. Ensure global-search.css is loaded
+  if (!document.getElementById('global-civic-search-css')) {
+    const link = document.createElement('link');
+    link.id = 'global-civic-search-css';
+    link.rel = 'stylesheet';
+    link.href = 'css/global-search.css?v=6.0.0';
+    document.head.appendChild(link);
+  }
+
+  // 2. Ensure global-search.js is loaded
+  if (!document.getElementById('global-civic-search-js') && !window.CrowdCityGlobalSearchInitialized) {
+    const script = document.createElement('script');
+    script.id = 'global-civic-search-js';
+    script.src = 'js/global-search.js?v=6.0.0';
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGlobalCivicSearch);
+} else {
+  initGlobalCivicSearch();
+}
+
 
