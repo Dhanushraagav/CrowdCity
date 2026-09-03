@@ -1649,16 +1649,20 @@ function updateAuthUI() {
 
     // ─── STRICT SEPARATION: AUTHORITY / ADMIN PORTAL SIDEBAR ───────────────────
     if (isAuthority) {
-      const isAuthDashboard = path.includes('authority-dashboard');
-      const isAuthComplaints = path.includes('authority-complaints');
-      const isAuthAssigned = path.includes('authority-assigned');
-      const isAuthReports = path.includes('authority-reports');
-      const isCivicIntel = path.includes('civic-intelligence');
+      document.body.classList.add('authority-portal-mode');
+      const layout = document.getElementById('main-layout-container');
+      if (layout) layout.className = 'portal-layout';
 
       sidebar.className = 'portal-sidebar';
       sidebar.classList.remove('collapsed', 'expanded');
       sidebar.onmouseenter = null;
       sidebar.onmouseleave = null;
+
+      const isAuthDashboard = path.includes('authority-dashboard');
+      const isAuthComplaints = path.includes('authority-complaints');
+      const isAuthAssigned = path.includes('authority-assigned');
+      const isAuthReports = path.includes('authority-reports');
+      const isCivicIntel = path.includes('civic-intelligence');
 
       sidebar.innerHTML = `
         <div class="sidebar-brand">

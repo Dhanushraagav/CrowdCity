@@ -690,3 +690,14 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Ensure .app-main inside portal layout or with portal-sidebar has no margin-left gap */
+.portal-sidebar ~ .app-main,
+.portal-layout .app-main,
+body.authority-portal-mode .app-main,
+.portal-sidebar + .app-main {
+  margin-left: 0 !important;
+  width: calc(100% - 250px) !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}

@@ -24,7 +24,7 @@
   <!-- Core CSS (Using exact production CSS tokens) -->
   <link rel="stylesheet" href="css/style.css?v=5.0.0">
   <link rel="stylesheet" href="css/components.css?v=5.0.0">
-  <link rel="stylesheet" href="css/authority-portal.css?v=3.0.2">
+  <link rel="stylesheet" href="css/authority-portal.css?v=3.0.3">
   <link rel="stylesheet" href="css/global-search.css?v=6.0.0">
 
   <!-- Central Auth Router -->
@@ -36,10 +36,23 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }
 
+    /* Fix Left Side Gap when in Authority Mode or when portal-sidebar is used */
+    .portal-sidebar ~ .app-main,
+    .portal-layout .app-main,
+    body.authority-portal-mode .app-main,
+    .portal-sidebar + .app-main {
+      margin-left: 0 !important;
+      width: calc(100% - 250px) !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+    }
+
     .intel-page-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1.5rem 2rem 3rem 2rem;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      padding: 1.5rem 2rem 3rem 2rem !important;
+      margin: 0 !important;
     }
 
     /* Top Navigation bar */
@@ -523,7 +536,7 @@
     })();
   </script>
 
-  <div class="app-layout">
+  <div class="app-layout" id="main-layout-container">
     <!-- Sidebar Navigation (Strictly Separated: Municipal Operations for Authority, Citizen Portal for Citizens) -->
     <aside class="app-sidebar" id="portal-sidebar">
       <script>
@@ -547,6 +560,9 @@
           const isAuthority = isAuthParam || sRole === 'authority' || sRole === 'admin' || lRole === 'authority' || lRole === 'admin' || profRole === 'authority' || profRole === 'admin' || isRefAuth;
 
           if (isAuthority) {
+            document.body.classList.add('authority-portal-mode');
+            const layout = document.getElementById('main-layout-container');
+            if (layout) layout.className = 'portal-layout';
             aside.className = 'portal-sidebar';
             aside.innerHTML = `
               <div class="sidebar-brand">
@@ -970,11 +986,11 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Client Script files (v=7.1.0 for immediate cache busting) -->
-  <script src="js/auth.js?v=7.1.0"></script>
-  <script src="js/api.js?v=7.1.0"></script>
-  <script src="js/global-search.js?v=7.1.0"></script>
-  <script src="js/civic-intelligence.js?v=7.1.0"></script>
+  <!-- Client Script files (v=7.2.0 for immediate cache busting) -->
+  <script src="js/auth.js?v=7.2.0"></script>
+  <script src="js/api.js?v=7.2.0"></script>
+  <script src="js/global-search.js?v=7.2.0"></script>
+  <script src="js/civic-intelligence.js?v=7.2.0"></script>
 
   <!-- Mobile Hamburger Toggle -->
   <script>
