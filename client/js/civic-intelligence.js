@@ -13,9 +13,10 @@
   let activeStatus = 'all';
   let activePriority = 'all';
 
-  let currentSortColumn = 'total_issues';
-  let currentSortAsc = false;
   let districtSearchQuery = '';
+  let districtCurrentPage = 1;
+  const districtsPerPage = 8;
+  let districtFilterTab = 'all'; // 'all' or 'active'
 
   const CATEGORY_META = {
     roads: { label: 'Roads & Pavements', icon: 'fa-road', color: '#0284c7' },
@@ -121,6 +122,7 @@
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         districtSearchQuery = e.target.value.toLowerCase().trim();
+        districtCurrentPage = 1;
         if (currentData && currentData.districts) {
           render38DistrictsGrid(currentData.districts, districtSearchQuery);
         }
@@ -129,11 +131,11 @@
   }
 
   /**
-   * Fetch data with dual-fetch resilience (API client + Direct Fetch fallback)
+   * Fetch data with dual-fetch resilience (No blur or jarring animations)
    */
   async function fetchCivicIntelligence() {
-    const mainContainer = document.getElementById('intel-main-container');
-    if (mainContainer) mainContainer.classList.add('intel-loading-shimmer');
+    const refreshIcon = document.getElementById('intel-refresh-icon');
+    if (refreshIcon) refreshIcon.classList.add('fa-spin');
 
     try {
       let res = null;
@@ -187,7 +189,6 @@
         renderStateOverview(currentData.state_overview);
         renderScopeDeepDive(currentData.selected_scope);
         render38DistrictsGrid(currentData.districts, districtSearchQuery);
-        renderComparisonMatrix(currentData.comparison);
 
         const updatedEl = document.getElementById('intel-last-updated');
         if (updatedEl) {
@@ -197,7 +198,7 @@
     } catch (err) {
       console.error('Error loading civic intelligence:', err);
     } finally {
-      if (mainContainer) mainContainer.classList.remove('intel-loading-shimmer');
+      if (refreshIcon) refreshIcon.classList.remove('fa-spin');
     }
   }
 
@@ -414,27 +415,49 @@
   }
 
   /**
-   * 3. Render 38 Districts Directory Grid
+   * 3. Render 38 Districts Directory Grid with Pagination (Eliminates long scroll)
    */
   function render38DistrictsGrid(districts = [], filterQuery = '') {
     const container = document.getElementById('districts-38-container');
     if (!container) return;
 
+    // 1. Update active districts count in tab
+    const activeDistrictsCount = districts.filter(d => d.total_issues > 0).length;
+    const countActiveEl = document.getElementById('count-dist-active');
+    if (countActiveEl) countActiveEl.textContent = activeDistrictsCount;
+
+    // 2. Filter by tab ('all' vs 'active')
     let filtered = districts;
+    if (districtFilterTab === 'active') {
+      filtered = filtered.filter(d => d.total_issues > 0);
+    }
+
+    // 3. Filter by search query
     if (filterQuery) {
-      filtered = districts.filter(d => 
+      filtered = filtered.filter(d => 
         d.name.toLowerCase().includes(filterQuery) || 
         d.nameTa.includes(filterQuery) ||
         d.code.toLowerCase().includes(filterQuery)
       );
     }
 
-    if (filtered.length === 0) {
-      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted);">No districts match your filter query.</div>`;
+    const totalDistricts = filtered.length;
+    const totalPages = Math.ceil(totalDistricts / districtsPerPage) || 1;
+    if (districtCurrentPage > totalPages) districtCurrentPage = totalPages;
+    if (districtCurrentPage < 1) districtCurrentPage = 1;
+
+    // 4. Paginate items (8 per page)
+    const startIndex = (districtCurrentPage - 1) * districtsPerPage;
+    const endIndex = Math.min(startIndex + districtsPerPage, totalDistricts);
+    const pageItems = filtered.slice(startIndex, endIndex);
+
+    if (totalDistricts === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">No districts match your filter query.</div>`;
+      renderDistrictPagination(0, 0, 0, 1);
       return;
     }
 
-    container.innerHTML = filtered.map(d => {
+    container.innerHTML = pageItems.map(d => {
       const isSelected = activeDistrict === d.id;
       const rateColor = d.resolution_rate_numeric >= 70 ? '#10b981' : (d.resolution_rate_numeric >= 40 ? '#f59e0b' : '#64748b');
 
@@ -450,10 +473,10 @@
             </span>
           </div>
 
-          <div style="margin-bottom: 0.85rem;">
+          <div style="margin-bottom: 0.75rem;">
             <div class="district-metric-row">
               <span>Total Issues</span>
-              <strong>${d.total_issues}</strong>
+              <strong style="${d.total_issues > 0 ? 'color: var(--primary); font-size: 0.92rem;' : ''}">${d.total_issues}</strong>
             </div>
             <div class="district-metric-row">
               <span>Resolved</span>
@@ -469,73 +492,83 @@
             </div>
           </div>
 
-          <button type="button" class="btn btn-secondary" style="width: 100%; padding: 0.45rem; font-size: 0.78rem; font-weight: 700; border-radius: 8px; justify-content: center; gap: 0.4rem;">
-            <span>Inspect District</span>
+          <button type="button" class="btn btn-secondary" style="width: 100%; padding: 0.4rem; font-size: 0.78rem; font-weight: 700; border-radius: 8px; justify-content: center; gap: 0.4rem;">
+            <span>Select District</span>
             <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem;"></i>
           </button>
         </div>
       `;
     }).join('');
+
+    renderDistrictPagination(startIndex, endIndex, totalDistricts, totalPages);
   }
 
   /**
-   * 4. Render District Comparison Matrix
+   * Render Pagination Controls
    */
-  function renderComparisonMatrix(comparison = []) {
-    const tbody = document.getElementById('comparison-table-body');
-    if (!tbody) return;
+  function renderDistrictPagination(startIndex, endIndex, totalDistricts, totalPages) {
+    const infoEl = document.getElementById('district-page-info');
+    const controlsEl = document.getElementById('district-page-controls');
+    if (!infoEl || !controlsEl) return;
 
-    if (comparison.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">No district comparison metrics available.</td></tr>`;
+    infoEl.textContent = totalDistricts > 0 
+      ? `Showing ${startIndex + 1}–${endIndex} of ${totalDistricts} districts (Page ${districtCurrentPage} of ${totalPages})`
+      : 'No districts to display';
+
+    if (totalPages <= 1) {
+      controlsEl.innerHTML = '';
       return;
     }
 
-    const sorted = [...comparison].sort((a, b) => {
-      let valA = a[currentSortColumn];
-      let valB = b[currentSortColumn];
-      if (typeof valA === 'string') valA = valA.toLowerCase();
-      if (typeof valB === 'string') valB = valB.toLowerCase();
+    let buttonsHtml = `
+      <button type="button" class="district-page-btn" ${districtCurrentPage === 1 ? 'disabled' : ''} onclick="window.goToDistrictPage(${districtCurrentPage - 1})" title="Previous Page">
+        <i class="fa-solid fa-chevron-left" style="font-size: 0.72rem;"></i>
+      </button>
+    `;
 
-      if (valA < valB) return currentSortAsc ? -1 : 1;
-      if (valA > valB) return currentSortAsc ? 1 : -1;
-      return 0;
-    });
-
-    tbody.innerHTML = sorted.map((row, idx) => {
-      const isSelected = activeDistrict === row.id;
-      const rateNum = row.resolution_rate_numeric || 0;
-      const rateColor = rateNum >= 70 ? '#10b981' : (rateNum >= 40 ? '#f59e0b' : '#64748b');
-
-      return `
-        <tr style="cursor: pointer; ${isSelected ? 'background: rgba(15, 118, 110, 0.08); font-weight: 600;' : ''}" onclick="window.selectDistrict('${row.id}')">
-          <td style="color: var(--text-muted); font-family: monospace; font-size: 0.78rem;">#${idx + 1}</td>
-          <td>
-            <strong>${escapeHtml(row.district)}</strong>
-            <span style="color: var(--text-muted); font-size: 0.72rem; margin-left: 0.35rem; text-transform: uppercase;">(${escapeHtml(row.district_code)})</span>
-          </td>
-          <td><strong>${Number(row.total_issues || 0).toLocaleString('en-IN')}</strong></td>
-          <td style="color: #10b981; font-weight: 600;">${Number(row.resolved_issues || 0).toLocaleString('en-IN')}</td>
-          <td>
-            <span style="display: inline-flex; align-items: center; gap: 0.4rem;">
-              <span style="font-weight: 700; color: ${rateColor};">${row.resolution_rate}</span>
-              <span style="width: 45px; height: 6px; background: rgba(148, 163, 184, 0.2); border-radius: 3px; display: inline-block; overflow: hidden;">
-                <span style="width: ${rateNum}%; height: 100%; background: ${rateColor}; display: block;"></span>
-              </span>
-            </span>
-          </td>
-          <td style="color: ${row.critical_issues > 0 ? '#dc2626' : 'inherit'}; font-weight: ${row.critical_issues > 0 ? '700' : 'normal'};">
-            ${row.critical_issues}
-          </td>
-          <td style="color: ${row.overdue_issues > 0 ? '#ef4444' : 'inherit'};">
-            ${row.overdue_issues}
-          </td>
-          <td style="color: ${row.escalated_issues > 0 ? '#7f1d1d' : 'inherit'}; font-weight: ${row.escalated_issues > 0 ? '700' : 'normal'};">
-            ${row.escalated_issues}
-          </td>
-        </tr>
+    for (let p = 1; p <= totalPages; p++) {
+      buttonsHtml += `
+        <button type="button" class="district-page-btn ${p === districtCurrentPage ? 'active' : ''}" onclick="window.goToDistrictPage(${p})">
+          ${p}
+        </button>
       `;
-    }).join('');
+    }
+
+    buttonsHtml += `
+      <button type="button" class="district-page-btn" ${districtCurrentPage === totalPages ? 'disabled' : ''} onclick="window.goToDistrictPage(${districtCurrentPage + 1})" title="Next Page">
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.72rem;"></i>
+      </button>
+    `;
+
+    controlsEl.innerHTML = buttonsHtml;
   }
+
+  /**
+   * Switch between All Districts and Active Districts tabs
+   */
+  window.setDistrictFilterTab = function(tab) {
+    districtFilterTab = tab;
+    districtCurrentPage = 1;
+
+    const tabAll = document.getElementById('tab-dist-all');
+    const tabActive = document.getElementById('tab-dist-active');
+    if (tabAll) tabAll.classList.toggle('active', tab === 'all');
+    if (tabActive) tabActive.classList.toggle('active', tab === 'active');
+
+    if (currentData && currentData.districts) {
+      render38DistrictsGrid(currentData.districts, districtSearchQuery);
+    }
+  };
+
+  /**
+   * Page Navigation
+   */
+  window.goToDistrictPage = function(page) {
+    districtCurrentPage = page;
+    if (currentData && currentData.districts) {
+      render38DistrictsGrid(currentData.districts, districtSearchQuery);
+    }
+  };
 
   /**
    * Helper to select district programmatically
@@ -552,25 +585,6 @@
     }
 
     fetchCivicIntelligence();
-  };
-
-  /**
-   * Helper to sort comparison matrix
-   */
-  window.sortComparison = function(column) {
-    if (column === 'rank') {
-      currentSortColumn = 'total_issues';
-      currentSortAsc = false;
-    } else if (currentSortColumn === column) {
-      currentSortAsc = !currentSortAsc;
-    } else {
-      currentSortColumn = column;
-      currentSortAsc = false;
-    }
-
-    if (currentData && currentData.comparison) {
-      renderComparisonMatrix(currentData.comparison);
-    }
   };
 
   /**

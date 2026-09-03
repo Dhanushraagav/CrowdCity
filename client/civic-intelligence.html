@@ -341,51 +341,104 @@
       margin-bottom: 2.5rem;
     }
 
-    .intel-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-      text-align: left;
+    /* District Directory Controls & Pagination */
+    .district-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
     }
 
-    .intel-table th {
-      background: var(--bg-surface-hover, #f8fafc);
-      padding: 0.95rem 1.25rem;
-      font-weight: 700;
+    .district-filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .district-tab-btn {
+      padding: 0.45rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color, #e2e8f0);
+      background: var(--bg-surface, #ffffff);
       color: var(--text-muted, #64748b);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border-color, #e2e8f0);
+      font-size: 0.82rem;
+      font-weight: 600;
       cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
+      transition: all 0.15s ease;
     }
 
-    .intel-table th:hover {
+    .district-tab-btn:hover {
+      border-color: var(--primary, #0f766e);
       color: var(--primary, #0f766e);
     }
 
-    .intel-table td {
-      padding: 0.95rem 1.25rem;
-      border-bottom: 1px solid var(--border-color, #e2e8f0);
+    .district-tab-btn.active {
+      background: rgba(15, 118, 110, 0.1);
+      color: var(--primary, #0f766e);
+      border-color: var(--primary, #0f766e);
+      font-weight: 700;
+    }
+
+    .district-pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      margin-bottom: 2rem;
+      padding: 0.85rem 1.25rem;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-md, 12px);
+      box-shadow: var(--shadow-xs);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .district-page-info {
+      font-size: 0.84rem;
+      color: var(--text-muted, #64748b);
+      font-weight: 500;
+    }
+
+    .district-page-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .district-page-btn {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 0.6rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color, #e2e8f0);
+      background: var(--bg-surface, #ffffff);
       color: var(--text-main, #0f172a);
-      white-space: nowrap;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
     }
 
-    .intel-table tbody tr:hover {
-      background: rgba(15, 118, 110, 0.03);
+    .district-page-btn:hover:not(:disabled) {
+      border-color: var(--primary, #0f766e);
+      color: var(--primary, #0f766e);
     }
 
-    .intel-table tbody tr:last-child td {
-      border-bottom: none;
+    .district-page-btn.active {
+      background: var(--primary, #0f766e);
+      color: #ffffff;
+      border-color: var(--primary, #0f766e);
     }
 
-    .intel-loading-shimmer {
-      opacity: 0.6;
-      pointer-events: none;
-      filter: blur(1px);
-      transition: all 0.2s ease;
+    .district-page-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -805,53 +858,43 @@
           </div>
         </div>
 
-        <!-- 3. 38-District Overview Directory Grid -->
+        <!-- 3. 38-District Directory (Compact with pagination) -->
         <div class="intel-section-heading">
           <span>
             <i class="fa-solid fa-network-wired" style="color: var(--primary); margin-right: 0.5rem;"></i>
             All 38 Tamil Nadu Districts
           </span>
+        </div>
 
-          <!-- Instant Search Box for 38 Districts -->
+        <div class="district-controls-bar">
+          <!-- Filter Tabs -->
+          <div class="district-filter-tabs">
+            <button type="button" id="tab-dist-all" class="district-tab-btn active" onclick="window.setDistrictFilterTab('all')">
+              All Districts (38)
+            </button>
+            <button type="button" id="tab-dist-active" class="district-tab-btn" onclick="window.setDistrictFilterTab('active')">
+              With Complaints (<span id="count-dist-active">1</span>)
+            </button>
+          </div>
+
+          <!-- Instant Search Box -->
           <div style="position: relative; width: 260px;">
-            <input type="text" id="input-search-districts" placeholder="Filter 38 districts..." style="width: 100%; padding: 0.55rem 0.85rem 0.55rem 2.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
+            <input type="text" id="input-search-districts" placeholder="Search 38 districts..." style="width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
             <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-muted);"></i>
           </div>
         </div>
 
+        <!-- Compact 8-card grid per page (Prevents long scroll) -->
         <div class="districts-grid-container" id="districts-38-container">
-          <!-- 38 District Cards Populated Dynamically -->
+          <!-- Populated Dynamically -->
         </div>
 
-        <!-- 4. District Comparison Matrix -->
-        <div class="intel-section-heading">
-          <span>
-            <i class="fa-solid fa-table-cells" style="color: var(--primary); margin-right: 0.5rem;"></i>
-            District Comparison Matrix
-          </span>
-          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">
-            Click table headers to sort rankings
-          </span>
-        </div>
-
-        <div class="comparison-table-wrap">
-          <table class="intel-table" id="comparison-matrix-table">
-            <thead>
-              <tr>
-                <th onclick="window.sortComparison('rank')">#</th>
-                <th onclick="window.sortComparison('district')">District <i class="fa-solid fa-sort"></i></th>
-                <th onclick="window.sortComparison('total_issues')">Total Complaints <i class="fa-solid fa-sort"></i></th>
-                <th onclick="window.sortComparison('resolved_issues')">Resolved <i class="fa-solid fa-sort"></i></th>
-                <th onclick="window.sortComparison('resolution_rate_numeric')">Resolution Rate <i class="fa-solid fa-sort"></i></th>
-                <th onclick="window.sortComparison('critical_issues')">Critical <i class="fa-solid fa-sort"></i></th>
-                <th onclick="window.sortComparison('overdue_issues')">Overdue <i class="fa-solid fa-sort"></i></th>
-                <th onclick="window.sortComparison('escalated_issues')">Escalated <i class="fa-solid fa-sort"></i></th>
-              </tr>
-            </thead>
-            <tbody id="comparison-table-body">
-              <!-- Dynamically populated matrix rows -->
-            </tbody>
-          </table>
+        <!-- District Pagination Bar -->
+        <div class="district-pagination-bar" id="district-pagination-container">
+          <span class="district-page-info" id="district-page-info">Showing 1-8 of 38 districts</span>
+          <div class="district-page-controls" id="district-page-controls">
+            <!-- Populated dynamically: Prev, [1], [2], [3], Next -->
+          </div>
         </div>
 
       </main>
@@ -861,10 +904,10 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Client Script files (v=5.0.2 for immediate cache busting) -->
-  <script src="js/auth.js?v=5.0.2"></script>
-  <script src="js/api.js?v=5.0.2"></script>
-  <script src="js/civic-intelligence.js?v=5.0.2"></script>
+  <!-- Client Script files (v=5.0.3 for immediate cache busting) -->
+  <script src="js/auth.js?v=5.0.3"></script>
+  <script src="js/api.js?v=5.0.3"></script>
+  <script src="js/civic-intelligence.js?v=5.0.3"></script>
 
   <!-- Mobile Hamburger Toggle -->
   <script>
