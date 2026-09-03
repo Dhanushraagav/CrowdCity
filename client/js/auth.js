@@ -761,7 +761,7 @@ function verifyRoleForCurrentPage(role) {
     return;
   }
 
-  const isSharedPage = normalizedPath.includes('civic-intelligence') || normalizedPath.includes('about') || normalizedPath.includes('contact');
+  const isSharedPage = normalizedPath.includes('about') || normalizedPath.includes('contact');
   const isAdminPage = normalizedPath.includes('admin');
   const isAuthorityPage = (normalizedPath.includes('authority-') || normalizedPath.includes('authority')) && !isAuthorityLoginPage && !isResetPasswordPage;
   const isCitizenPage = !isIndexPage && !isCitizenLoginPage && !isAuthorityLoginPage && !isResetPasswordPage && !isAuthorityPage && !isAdminPage && !isSharedPage;
@@ -1662,7 +1662,6 @@ function updateAuthUI() {
       const isAuthComplaints = path.includes('authority-complaints');
       const isAuthAssigned = path.includes('authority-assigned');
       const isAuthReports = path.includes('authority-reports');
-      const isCivicIntel = path.includes('civic-intelligence');
 
       sidebar.innerHTML = `
         <div class="sidebar-brand">
@@ -1675,7 +1674,6 @@ function updateAuthUI() {
           <a href="authority-complaints.html" class="nav-item ${isAuthComplaints ? 'active' : ''}">Complaints Queue</a>
           <a href="authority-assigned.html" class="nav-item ${isAuthAssigned ? 'active' : ''}">Assigned Cases</a>
           <a href="authority-reports.html" class="nav-item ${isAuthReports ? 'active' : ''}">Operational Reports</a>
-          <a href="civic-intelligence.html?portal=authority" class="nav-item ${isCivicIntel ? 'active' : ''}">Civic Intelligence</a>
         </nav>
 
         <div class="sidebar-footer">

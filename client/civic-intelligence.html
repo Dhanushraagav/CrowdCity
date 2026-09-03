@@ -24,11 +24,10 @@
   <!-- Core CSS (Using exact production CSS tokens) -->
   <link rel="stylesheet" href="css/style.css?v=5.0.0">
   <link rel="stylesheet" href="css/components.css?v=5.0.0">
-  <link rel="stylesheet" href="css/authority-portal.css?v=3.0.3">
   <link rel="stylesheet" href="css/global-search.css?v=6.0.0">
 
   <!-- Central Auth Router -->
-  <script src="js/auth-router.js?v=3.2.0"></script>
+  <script src="js/auth-router.js?v=3.2.1"></script>
 
   <style>
     /* Consistent font family across entire page */
@@ -36,23 +35,10 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }
 
-    /* Fix Left Side Gap when in Authority Mode or when portal-sidebar is used */
-    .portal-sidebar ~ .app-main,
-    .portal-layout .app-main,
-    body.authority-portal-mode .app-main,
-    .portal-sidebar + .app-main {
-      margin-left: 0 !important;
-      width: calc(100% - 250px) !important;
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-    }
-
     .intel-page-container {
-      width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
-      padding: 1.5rem 2rem 3rem 2rem !important;
-      margin: 0 !important;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 1.5rem 2rem 3rem 2rem;
     }
 
     /* Top Navigation bar */
@@ -536,100 +522,53 @@
     })();
   </script>
 
-  <div class="app-layout" id="main-layout-container">
-    <!-- Sidebar Navigation (Strictly Separated: Municipal Operations for Authority, Citizen Portal for Citizens) -->
+  <div class="app-layout">
+    <!-- Sidebar Navigation (Citizen Portal) -->
     <aside class="app-sidebar" id="portal-sidebar">
-      <script>
-        (function() {
-          const aside = document.getElementById('portal-sidebar');
-          if (!aside) return;
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn">
+          </div>
+          <div class="brand-text-container">
+            <span class="brand-title">CROWDCITY</span>
+            <span class="brand-subtitle">CITIZEN PORTAL</span>
+          </div>
+        </a>
+      </div>
 
-          const urlParams = new URLSearchParams(window.location.search);
-          const isAuthParam = urlParams.get('portal') === 'authority' || urlParams.get('portal') === 'admin';
-          const sRole = (sessionStorage.getItem('cc_user_role') || sessionStorage.getItem('user_role') || '').toLowerCase();
-          const lRole = (localStorage.getItem('cc_user_role') || localStorage.getItem('user_role') || '').toLowerCase();
-          const ref = (document.referrer || '').toLowerCase();
-          const isRefAuth = ref.includes('authority-') || ref.includes('admin');
-          
-          let profRole = '';
-          try {
-            const p = JSON.parse(sessionStorage.getItem('cc_user_profile') || localStorage.getItem('cc_user_profile') || '{}');
-            profRole = (p.role || '').toLowerCase();
-          } catch(e) {}
+      <div class="sidebar-divider"></div>
 
-          const isAuthority = isAuthParam || sRole === 'authority' || sRole === 'admin' || lRole === 'authority' || lRole === 'admin' || profRole === 'authority' || profRole === 'admin' || isRefAuth;
-
-          if (isAuthority) {
-            document.body.classList.add('authority-portal-mode');
-            const layout = document.getElementById('main-layout-container');
-            if (layout) layout.className = 'portal-layout';
-            aside.className = 'portal-sidebar';
-            aside.innerHTML = `
-              <div class="sidebar-brand">
-                <span class="brand-title-text">CrowdCity</span>
-                <span class="brand-subtitle-text">Municipal Operations</span>
-              </div>
-              <nav class="sidebar-nav">
-                <a href="authority-dashboard.html" class="nav-item">Dashboard</a>
-                <a href="authority-complaints.html" class="nav-item">Complaints Queue</a>
-                <a href="authority-assigned.html" class="nav-item">Assigned Cases</a>
-                <a href="authority-reports.html" class="nav-item">Operational Reports</a>
-                <a href="civic-intelligence.html?portal=authority" class="nav-item active">Civic Intelligence</a>
-              </nav>
-              <div class="sidebar-footer">
-                <div>Department of Municipal Administration</div>
-                <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
-              </div>
-            `;
-          } else {
-            aside.className = 'app-sidebar';
-            aside.innerHTML = `
-              <div class="sidebar-header">
-                <a href="citizen-dashboard.html" class="app-sidebar-logo">
-                  <div class="brand-emblems-wrap">
-                    <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn">
-                  </div>
-                  <div class="brand-text-container">
-                    <span class="brand-title">CROWDCITY</span>
-                    <span class="brand-subtitle">CITIZEN PORTAL</span>
-                  </div>
-                </a>
-              </div>
-              <div class="sidebar-divider"></div>
-              <nav class="app-sidebar-nav">
-                <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
-                  <i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav_dashboard">Dashboard</span>
-                </a>
-                <a href="report.html" class="app-sidebar-link" title="Report Issue">
-                  <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
-                </a>
-                <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
-                  <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
-                </a>
-                <a href="map.html" class="app-sidebar-link" title="Map">
-                  <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
-                </a>
-                <a href="transportation.html" class="app-sidebar-link" title="Transportation">
-                  <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
-                </a>
-                <a href="services.html" class="app-sidebar-link" title="Government Services">
-                  <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
-                </a>
-                <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
-                  <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
-                </a>
-                <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
-                  <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
-                </a>
-                <a href="civic-intelligence.html" class="app-sidebar-link active" title="Tamil Nadu Civic Intelligence">
-                  <i class="fa-solid fa-chart-line"></i> <span>Civic Intelligence</span>
-                </a>
-              </nav>
-            `;
-          }
-        })();
-      </script>
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Issue">
+          <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link" title="Transportation">
+          <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
+          <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <a href="civic-intelligence.html" class="app-sidebar-link active" title="Tamil Nadu Civic Intelligence">
+          <i class="fa-solid fa-chart-line"></i> <span>Civic Intelligence</span>
+        </a>
+      </nav>
     </aside>
 
     <!-- Main Content Area -->
@@ -986,11 +925,11 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Client Script files (v=7.2.0 for immediate cache busting) -->
-  <script src="js/auth.js?v=7.2.0"></script>
-  <script src="js/api.js?v=7.2.0"></script>
-  <script src="js/global-search.js?v=7.2.0"></script>
-  <script src="js/civic-intelligence.js?v=7.2.0"></script>
+  <!-- Client Script files (v=7.3.0 for immediate cache busting) -->
+  <script src="js/auth.js?v=7.3.0"></script>
+  <script src="js/api.js?v=7.3.0"></script>
+  <script src="js/global-search.js?v=7.3.0"></script>
+  <script src="js/civic-intelligence.js?v=7.3.0"></script>
 
   <!-- Mobile Hamburger Toggle -->
   <script>
