@@ -246,6 +246,13 @@
    * 2. Render District Deep Dive
    */
   function renderScopeDeepDive(scope = {}) {
+    const overviewTitle = document.getElementById('overview-heading-title');
+    if (overviewTitle) {
+      overviewTitle.textContent = (!scope.district_id || scope.district_id === 'all')
+        ? 'Tamil Nadu Civic Overview'
+        : `${scope.district_name || 'District'} Civic Overview`;
+    }
+
     const titleEl = document.getElementById('scope-header-title');
     if (titleEl) {
       titleEl.textContent = `${scope.district_name || 'Tamil Nadu'} Analytical Profile`;

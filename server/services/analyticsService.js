@@ -136,11 +136,13 @@ export async function getTamilNaduCivicIntelligence(filters = {}) {
   }
 
   if (filters.status && filters.status !== 'all') {
+    const filterStatus = filters.status.toLowerCase();
     filteredIssues = filteredIssues.filter(i => {
       const st = (i.status || 'pending').toLowerCase();
-      if (filters.status === 'overdue') return i.is_overdue || i.sla_status === 'overdue' || i.sla_status === 'breached';
-      if (filters.status === 'escalated') return i.is_escalated || i.escalation_level > 0 || i.sla_status === 'escalated';
-      return st === filters.status.toLowerCase();
+      if (filterStatus === 'overdue') return i.is_overdue || i.sla_status === 'overdue' || i.sla_status === 'breached';
+      if (filterStatus === 'escalated') return i.is_escalated || i.escalation_level > 0 || i.sla_status === 'escalated';
+      if (filterStatus === 'resolved' || filterStatus === 'verified') return st === 'resolved' || st === 'verified';
+      return st === filterStatus;
     });
   }
 
@@ -151,8 +153,13 @@ export async function getTamilNaduCivicIntelligence(filters = {}) {
     });
   }
 
-  // 5. Compute State-Wide Overall Overview (Top of page)
-  const tnTotal = filteredIssues.length;
+  // 5. Compute Overview (Scope-aware: reflects selected district if filtered, or All Tamil Nadu)
+  const selectedDistrictId = filters.district && filters.district !== 'all' ? filters.district.toLowerCase() : null;
+  const overviewIssues = selectedDistrictId
+    ? filteredIssues.filter(i => i.district_id === selectedDistrictId)
+    : filteredIssues;
+
+  const tnTotal = overviewIssues.length;
   let tnResolved = 0;
   let tnPending = 0;
   let tnOpen = 0;
@@ -160,9 +167,10 @@ export async function getTamilNaduCivicIntelligence(filters = {}) {
   let tnEscalated = 0;
   let tnCritical = 0;
 
-  filteredIssues.forEach(issue => {
+  overviewIssues.forEach(issue => {
     const st = (issue.status || 'pending').toLowerCase();
-    if (st === 'resolved') {
+    const isResolved = st === 'resolved' || st === 'verified';
+    if (isResolved) {
       tnResolved++;
     } else {
       tnOpen++;
@@ -225,7 +233,8 @@ export async function getTamilNaduCivicIntelligence(filters = {}) {
 
     distData.total_issues++;
     const st = (issue.status || 'pending').toLowerCase();
-    if (st === 'resolved') {
+    const isResolved = st === 'resolved' || st === 'verified';
+    if (isResolved) {
       distData.resolved_issues++;
     } else {
       distData.open_issues++;
@@ -291,7 +300,6 @@ export async function getTamilNaduCivicIntelligence(filters = {}) {
   });
 
   // 7. Selected District Scope (or All Tamil Nadu if 'all')
-  const selectedDistrictId = filters.district && filters.district !== 'all' ? filters.district.toLowerCase() : null;
   const targetIssues = selectedDistrictId
     ? filteredIssues.filter(i => i.district_id === selectedDistrictId)
     : filteredIssues;
@@ -312,7 +320,8 @@ export async function getTamilNaduCivicIntelligence(filters = {}) {
 
   targetIssues.forEach(i => {
     const st = (i.status || 'pending').toLowerCase();
-    if (st === 'resolved') {
+    const isResolved = st === 'resolved' || st === 'verified';
+    if (isResolved) {
       scopeResolved++;
     } else {
       scopeOpen++;
@@ -342,7 +351,8 @@ export async function getTamilNaduCivicIntelligence(filters = {}) {
     categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
 
     // Status
-    statusCounts[st] = (statusCounts[st] || 0) + 1;
+    const displayStatus = (st === 'verified') ? 'resolved' : st;
+    statusCounts[displayStatus] = (statusCounts[displayStatus] || 0) + 1;
 
     // Area
     const area = extractAreaName(i.address);
