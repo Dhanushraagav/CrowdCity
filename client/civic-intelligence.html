@@ -96,7 +96,7 @@
       box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
     }
 
-    /* 8-Card State KPI Grid (Using standard stitch-stat-card) */
+    /* 8-Card State KPI Grid (Clean, minimalist typography without cluttering icons) */
     .intel-kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -116,11 +116,46 @@
       }
     }
 
-    .kpi-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-    .kpi-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-    .kpi-emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-    .kpi-indigo { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
-    .kpi-darkred { background: rgba(127, 29, 29, 0.12); color: #7f1d1d; }
+    .intel-kpi-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.35rem;
+      box-shadow: var(--shadow-xs);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intel-kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-color-hover, #cbd5e1);
+    }
+
+    .intel-kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--card-accent, var(--primary));
+      border-radius: 14px 14px 0 0;
+    }
+
+    .card-accent-teal { --card-accent: #0f766e; }
+    .card-accent-blue { --card-accent: #0284c7; }
+    .card-accent-emerald { --card-accent: #10b981; }
+    .card-accent-indigo { --card-accent: #6366f1; }
+    .card-accent-red { --card-accent: #ef4444; }
+    .card-accent-darkred { --card-accent: #7f1d1d; }
+    .card-accent-crimson { --card-accent: #dc2626; }
+    .card-accent-amber { --card-accent: #f59e0b; }
 
     /* Section Headings */
     .intel-section-heading {
@@ -636,12 +671,9 @@
           </button>
         </div>
 
-        <!-- 1. State-Wide Overview (Using exact stitch-stat-card from citizen-dashboard) -->
+        <!-- 1. State-Wide Overview -->
         <div class="intel-section-heading" style="margin-top: 0;">
-          <span>
-            <i class="fa-solid fa-landmark" style="color: var(--primary); margin-right: 0.5rem;"></i>
-            Tamil Nadu Civic Overview
-          </span>
+          <span>Tamil Nadu Civic Overview</span>
           <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;" id="intel-last-updated">
             Live Database Synced
           </span>
@@ -649,108 +681,65 @@
 
         <div class="intel-kpi-grid">
           <!-- Total Issues -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle icon-teal">
-              <i class="fa-solid fa-file-lines"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">TOTAL ISSUES</span>
-              <span class="stitch-stat-value" id="kpi-total-issues">0</span>
-              <span class="kpi-subtext">All registered complaints</span>
-            </div>
+          <div class="intel-kpi-card card-accent-teal">
+            <span class="stitch-stat-label">TOTAL ISSUES</span>
+            <span class="stitch-stat-value" id="kpi-total-issues">0</span>
+            <span class="kpi-subtext">All registered complaints</span>
           </div>
 
           <!-- Open Issues -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle icon-blue">
-              <i class="fa-solid fa-hourglass-half"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">OPEN ISSUES</span>
-              <span class="stitch-stat-value" id="kpi-open-issues">0</span>
-              <span class="kpi-subtext">Active casework requiring action</span>
-            </div>
+          <div class="intel-kpi-card card-accent-blue">
+            <span class="stitch-stat-label">OPEN ISSUES</span>
+            <span class="stitch-stat-value" id="kpi-open-issues">0</span>
+            <span class="kpi-subtext">Active casework requiring action</span>
           </div>
 
           <!-- Resolved -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle kpi-emerald">
-              <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">RESOLVED</span>
-              <span class="stitch-stat-value" id="kpi-resolved-issues">0</span>
-              <span class="kpi-subtext">Verified & completed resolutions</span>
-            </div>
+          <div class="intel-kpi-card card-accent-emerald">
+            <span class="stitch-stat-label">RESOLVED</span>
+            <span class="stitch-stat-value" id="kpi-resolved-issues">0</span>
+            <span class="kpi-subtext">Verified & completed resolutions</span>
           </div>
 
           <!-- Resolution Rate -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle kpi-indigo">
-              <i class="fa-solid fa-chart-pie"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">RESOLUTION RATE</span>
-              <span class="stitch-stat-value" id="kpi-resolution-rate">0.0%</span>
-              <span class="kpi-subtext">State-wide resolution efficiency</span>
-            </div>
+          <div class="intel-kpi-card card-accent-indigo">
+            <span class="stitch-stat-label">RESOLUTION RATE</span>
+            <span class="stitch-stat-value" id="kpi-resolution-rate">0.0%</span>
+            <span class="kpi-subtext">State-wide resolution efficiency</span>
           </div>
 
           <!-- Overdue -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle kpi-red">
-              <i class="fa-solid fa-clock-rotate-left"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">OVERDUE</span>
-              <span class="stitch-stat-value" id="kpi-overdue-issues" style="color: #ef4444;">0</span>
-              <span class="kpi-subtext">Exceeded target SLA response time</span>
-            </div>
+          <div class="intel-kpi-card card-accent-red">
+            <span class="stitch-stat-label">OVERDUE</span>
+            <span class="stitch-stat-value" id="kpi-overdue-issues" style="color: #ef4444;">0</span>
+            <span class="kpi-subtext">Exceeded target SLA response time</span>
           </div>
 
           <!-- Escalated -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle kpi-darkred">
-              <i class="fa-solid fa-arrows-split-up-and-left"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">ESCALATED</span>
-              <span class="stitch-stat-value" id="kpi-escalated-issues" style="color: #7f1d1d;">0</span>
-              <span class="kpi-subtext">Escalated to senior authority</span>
-            </div>
+          <div class="intel-kpi-card card-accent-darkred">
+            <span class="stitch-stat-label">ESCALATED</span>
+            <span class="stitch-stat-value" id="kpi-escalated-issues" style="color: #7f1d1d;">0</span>
+            <span class="kpi-subtext">Escalated to senior authority</span>
           </div>
 
           <!-- Critical -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle kpi-red">
-              <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">CRITICAL</span>
-              <span class="stitch-stat-value" id="kpi-critical-issues" style="color: #dc2626;">0</span>
-              <span class="kpi-subtext">Emergency priority & high severity</span>
-            </div>
+          <div class="intel-kpi-card card-accent-crimson">
+            <span class="stitch-stat-label">CRITICAL</span>
+            <span class="stitch-stat-value" id="kpi-critical-issues" style="color: #dc2626;">0</span>
+            <span class="kpi-subtext">Emergency priority & high severity</span>
           </div>
 
           <!-- Pending First Action -->
-          <div class="stitch-stat-card">
-            <div class="kpi-icon-circle kpi-amber">
-              <i class="fa-solid fa-bell"></i>
-            </div>
-            <div class="kpi-info-col">
-              <span class="stitch-stat-label">PENDING FIRST ACTION</span>
-              <span class="stitch-stat-value" id="kpi-pending-issues" style="color: #f59e0b;">0</span>
-              <span class="kpi-subtext">Awaiting initial dispatch</span>
-            </div>
+          <div class="intel-kpi-card card-accent-amber">
+            <span class="stitch-stat-label">PENDING FIRST ACTION</span>
+            <span class="stitch-stat-value" id="kpi-pending-issues" style="color: #f59e0b;">0</span>
+            <span class="kpi-subtext">Awaiting initial dispatch</span>
           </div>
         </div>
 
         <!-- 2. Selected District Deep Dive -->
         <div class="intel-section-heading">
-          <span>
-            <i class="fa-solid fa-city" style="color: var(--primary); margin-right: 0.5rem;"></i>
-            <span id="scope-header-title">All Tamil Nadu Analytical Profile</span>
-          </span>
+          <span><span id="scope-header-title">All Tamil Nadu Analytical Profile</span></span>
           <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary); background: rgba(15, 118, 110, 0.1); padding: 0.35rem 0.85rem; border-radius: 20px;" id="scope-badge">
             State Consolidated View
           </span>
@@ -860,10 +849,7 @@
 
         <!-- 3. 38-District Directory (Compact with pagination) -->
         <div class="intel-section-heading">
-          <span>
-            <i class="fa-solid fa-network-wired" style="color: var(--primary); margin-right: 0.5rem;"></i>
-            All 38 Tamil Nadu Districts
-          </span>
+          <span>All 38 Tamil Nadu Districts</span>
         </div>
 
         <div class="district-controls-bar">
@@ -904,10 +890,10 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Client Script files (v=5.0.3 for immediate cache busting) -->
-  <script src="js/auth.js?v=5.0.3"></script>
-  <script src="js/api.js?v=5.0.3"></script>
-  <script src="js/civic-intelligence.js?v=5.0.3"></script>
+  <!-- Client Script files (v=5.0.4 for immediate cache busting) -->
+  <script src="js/auth.js?v=5.0.4"></script>
+  <script src="js/api.js?v=5.0.4"></script>
+  <script src="js/civic-intelligence.js?v=5.0.4"></script>
 
   <!-- Mobile Hamburger Toggle -->
   <script>
