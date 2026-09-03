@@ -47,17 +47,12 @@
       flex-wrap: wrap;
     }
 
-    .intel-header-card {
-      background: var(--bg-surface, #ffffff);
-      border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: var(--radius-lg, 16px);
-      padding: 1.75rem 2rem;
-      box-shadow: var(--shadow-sm);
+    .intel-page-header {
       margin-bottom: 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 2rem;
+      gap: 1.5rem;
       flex-wrap: wrap;
     }
 
@@ -65,10 +60,7 @@
       font-size: 1.75rem;
       font-weight: 800;
       color: var(--text-main, #0f172a);
-      margin: 0 0 0.4rem 0;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+      margin: 0 0 0.35rem 0;
       letter-spacing: -0.02em;
     }
 
@@ -474,21 +466,10 @@
       <!-- Main Container -->
       <main class="dashboard-content intel-page-container" id="intel-main-container">
         
-        <!-- Back Button Row -->
-        <div class="intel-top-bar">
-          <button type="button" onclick="history.back()" class="btn btn-secondary" style="padding: 0.5rem 1.1rem; border-radius: 10px; font-weight: 700; gap: 0.5rem;">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Back</span>
-          </button>
-        </div>
-
-        <!-- Header Card with Title & Global Controls -->
-        <div class="intel-header-card">
+        <!-- Header with Title & Global Controls -->
+        <div class="intel-page-header">
           <div class="intel-header-info">
-            <h1>
-              <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i>
-              Tamil Nadu Civic Intelligence
-            </h1>
+            <h1>Tamil Nadu Civic Intelligence</h1>
             <p>Authoritative 38-district monitoring, automated SLA compliance tracking, and civic resolution analytics.</p>
           </div>
 
@@ -880,10 +861,10 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Client Script files (v=5.0.0 for immediate cache busting) -->
-  <script src="js/auth.js?v=5.0.0"></script>
-  <script src="js/api.js?v=5.0.0"></script>
-  <script src="js/civic-intelligence.js?v=5.0.0"></script>
+  <!-- Client Script files (v=5.0.2 for immediate cache busting) -->
+  <script src="js/auth.js?v=5.0.2"></script>
+  <script src="js/api.js?v=5.0.2"></script>
+  <script src="js/civic-intelligence.js?v=5.0.2"></script>
 
   <!-- Mobile Hamburger Toggle -->
   <script>

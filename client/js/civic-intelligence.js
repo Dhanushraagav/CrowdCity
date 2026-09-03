@@ -169,8 +169,20 @@
         }
       }
 
-      if (res && res.data) {
-        currentData = res.data;
+      // Resolve payload safely whether wrapped by window.API or direct fetch
+      let payload = null;
+      if (res) {
+        if (res.data && res.data.data && res.data.data.state_overview) {
+          payload = res.data.data;
+        } else if (res.data && res.data.state_overview) {
+          payload = res.data;
+        } else if (res.state_overview) {
+          payload = res;
+        }
+      }
+
+      if (payload && payload.state_overview) {
+        currentData = payload;
         updateDistrictDropdownSelection();
         renderStateOverview(currentData.state_overview);
         renderScopeDeepDive(currentData.selected_scope);
@@ -240,7 +252,9 @@
 
     const badgeEl = document.getElementById('scope-badge');
     if (badgeEl) {
-      badgeEl.textContent = scope.district_id === 'all' ? 'State Consolidated View' : `${scope.district_name} District Active`;
+      const isAll = !scope.district_id || scope.district_id === 'all';
+      const dName = scope.district_name || 'Selected';
+      badgeEl.textContent = isAll ? 'State Consolidated View' : `${dName} District Active`;
     }
 
     // Top Category Card

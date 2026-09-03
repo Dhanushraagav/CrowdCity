@@ -620,7 +620,21 @@ function getCurrentUser() {
 
 // Get User Role (Citizen, Authority, Admin)
 function getUserRole() {
-  return localStorage.getItem('cc_user_role');
+  const role = localStorage.getItem('cc_user_role');
+  if (role && role !== 'null' && role !== 'undefined') return role;
+
+  try {
+    const profileStr = localStorage.getItem('cc_user_profile');
+    if (profileStr) {
+      const parsed = JSON.parse(profileStr);
+      if (parsed?.role && parsed.role !== 'null' && parsed.role !== 'undefined') {
+        localStorage.setItem('cc_user_role', parsed.role);
+        return parsed.role;
+      }
+    }
+  } catch (e) {}
+
+  return 'citizen';
 }
 
 // Global flag to prevent multiple routing triggers
@@ -1817,7 +1831,8 @@ function updateAuthUI() {
   if (!finalContainer) return;
 
   if (user) {
-    const role = getUserRole();
+    const rawRole = getUserRole();
+    const role = (rawRole && rawRole !== 'null' && rawRole !== 'undefined') ? rawRole : 'citizen';
     
     // Retrieve cached profile data
     let cachedProfile = null;
@@ -1892,7 +1907,7 @@ function updateAuthUI() {
       return;
     }
 
-    const tRole = window.i18n ? window.i18n.t('role_' + role) : role;
+    const tRole = (window.i18n && window.i18n.t('role_' + role)) || (role.charAt(0).toUpperCase() + role.slice(1));
     const tCitizenOpt = window.i18n ? window.i18n.t('role_citizen') : 'Citizen';
     const tAuthorityOpt = window.i18n ? window.i18n.t('role_authority') : 'Authority';
     const tAdminOpt = window.i18n ? window.i18n.t('role_admin') : 'Admin';
