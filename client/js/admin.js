@@ -117,6 +117,9 @@
         await this.openCaseDetails(issueId);
       } else {
         const path = window.location.pathname;
+        if (path.includes('authority-civic-intelligence')) {
+          return;
+        }
         let paneId = 'pane-dashboard';
         if (path.includes('authority-complaints')) paneId = 'pane-complaints';
         else if (path.includes('authority-assigned')) paneId = 'pane-assigned';
@@ -140,6 +143,9 @@
     },
 
     showPane: function(paneId, updateHash = true) {
+      if (window.location.pathname.includes('authority-civic-intelligence')) {
+        return;
+      }
       const targetPane = document.getElementById(paneId);
 
       if (targetPane) {

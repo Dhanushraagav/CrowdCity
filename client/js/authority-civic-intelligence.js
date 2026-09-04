@@ -78,31 +78,25 @@
 
   const AuthorityCivicIntel = {
     init: async function () {
-      // 1. Check Authority Authentication
-      const user = window.getCurrentUser ? window.getCurrentUser() : null;
-      const rawRole = (typeof getUserRole === 'function') ? getUserRole() : (localStorage.getItem('cc_user_role') || 'authority');
-      const isAuth = rawRole === 'authority' || rawRole === 'admin';
+      // 1. Set Officer Identity in Header
+      const user = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+      const role = (typeof getUserRole === 'function') ? getUserRole() : (sessionStorage.getItem('cc_user_role') || localStorage.getItem('cc_user_role') || 'authority');
 
-      if (!isAuth) {
-        window.location.replace('authority-login.html');
-        return;
-      }
-
-      // 2. Set Officer Identity in Header
       const officerNameEl = document.getElementById('header-user-name');
       if (officerNameEl) {
-        const name = (user && (user.full_name || user.email)) || localStorage.getItem('cc_user_name') || 'Municipal Officer';
-        officerNameEl.textContent = name;
+        const name = (user && (user.full_name || user.email)) || sessionStorage.getItem('cc_user_name') || localStorage.getItem('cc_user_name') || 'Officer';
+        const roleLabel = (role || 'authority').toUpperCase();
+        officerNameEl.textContent = `${name} (${roleLabel})`;
       }
 
-      // 3. Populate Dropdowns
+      // 2. Populate Dropdowns
       this.populateDistrictDropdown();
       this.populateDepartmentDropdown();
 
-      // 4. Fetch and Render Live Data
+      // 3. Fetch and Render Live Data
       await this.loadData();
 
-      // 5. Check Unread Notifications
+      // 4. Check Unread Notifications
       this.checkUnreadNotifications();
     },
 
