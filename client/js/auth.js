@@ -1662,6 +1662,7 @@ function updateAuthUI() {
       const isAuthComplaints = path.includes('authority-complaints');
       const isAuthAssigned = path.includes('authority-assigned');
       const isAuthReports = path.includes('authority-reports');
+      const isAuthCivicIntel = path.includes('authority-civic-intelligence');
 
       sidebar.innerHTML = `
         <div class="sidebar-brand">
@@ -1674,6 +1675,7 @@ function updateAuthUI() {
           <a href="authority-complaints.html" class="nav-item ${isAuthComplaints ? 'active' : ''}">Complaints Queue</a>
           <a href="authority-assigned.html" class="nav-item ${isAuthAssigned ? 'active' : ''}">Assigned Cases</a>
           <a href="authority-reports.html" class="nav-item ${isAuthReports ? 'active' : ''}">Operational Reports</a>
+          <a href="authority-civic-intelligence.html" class="nav-item ${isAuthCivicIntel ? 'active' : ''}">Civic Intelligence</a>
         </nav>
 
         <div class="sidebar-footer">
@@ -1681,13 +1683,13 @@ function updateAuthUI() {
           <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
         </div>
       `;
-      sidebar.querySelectorAll('a[href*="civic-intelligence"]').forEach(el => el.remove());
+      sidebar.querySelectorAll('a[href="civic-intelligence.html"], a[href="civic-intelligence"]').forEach(el => el.remove());
       return;
     }
 
-    // Safety: ensure no civic-intelligence link lingers in authority sidebar on any authority page
+    // Safety: ensure citizen civic-intelligence link never lingers in authority sidebar on any authority page
     if (path.includes('authority-') || path.includes('admin')) {
-      document.querySelectorAll('.portal-sidebar a[href*="civic-intelligence"], .sidebar-nav a[href*="civic-intelligence"]').forEach(el => el.remove());
+      document.querySelectorAll('.portal-sidebar a[href="civic-intelligence.html"], .sidebar-nav a[href="civic-intelligence.html"]').forEach(el => el.remove());
     }
 
     const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index') || path.endsWith('/index.html') || path.endsWith('/client') || path.endsWith('/client/');

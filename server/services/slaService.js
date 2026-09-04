@@ -268,18 +268,20 @@ async function sendSafeNotification(userId, title, message, type, issueId) {
  * @param {Array} complaintsList
  * @returns {Object} SLA metrics { complianceRate, pendingSla, overdue, escalated }
  */
-export function calculateSlaMetrics(complaintsList = []) {
+export function calculateSlaMetrics(complaintsList = [], currentTime = new Date()) {
   let pendingSla = 0;
   let overdue = 0;
   let escalated = 0;
   let metCount = 0;
   let breachedCount = 0;
 
-  const now = new Date();
+  const now = currentTime ? new Date(currentTime) : new Date();
 
   complaintsList.forEach(c => {
     if (!c) return;
-    computeSlaState(c, now);
+    if (!c.sla_status) {
+      computeSlaState(c, now);
+    }
 
     const st = (c.status || '').toLowerCase();
     const slaSt = c.sla_status;

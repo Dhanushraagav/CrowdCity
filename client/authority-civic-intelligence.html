@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Civic Intelligence & Analytics — CrowdCity Municipal Operations</title>
+  
+  <!-- Favicon & Meta Tags -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E">
+  <meta name="description" content="Municipal civic intelligence, issue hotspot analytics, SLA tracking, and operational decision-support console for Tamil Nadu administration.">
+  
+  <!-- Premium Typography — Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Authority Portal Stylesheet -->
+  <link rel="stylesheet" href="css/authority-portal.css?v=3.1.0">
+
+  <!-- Central Auth Router -->
+  <script src="js/auth-router.js?v=3.4.0"></script>
+</head>
+<body>
+
+  <!-- Floating Toast Popup Container -->
+  <div class="toast-popup-container">
+    <div id="toast-message" class="toast-box" style="display: none;"></div>
+  </div>
+
+  <div class="portal-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="portal-sidebar" id="portal-sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-title-text">CrowdCity</span>
+        <span class="brand-subtitle-text">Municipal Operations</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="authority-dashboard.html" class="nav-item">Dashboard</a>
+        <a href="authority-complaints.html" class="nav-item">Complaints Queue</a>
+        <a href="authority-assigned.html" class="nav-item">Assigned Cases</a>
+        <a href="authority-reports.html" class="nav-item">Operational Reports</a>
+        <a href="authority-civic-intelligence.html" class="nav-item active">Civic Intelligence</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>Department of Municipal Administration</div>
+        <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+      </div>
+    </aside>
+
+    <!-- Overlay backdrop for mobile -->
+    <div id="sidebar-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 90;" onclick="window.AuthorityCivicIntel.toggleMobileSidebar(false)"></div>
+
+    <!-- Main Content Area -->
+    <main class="portal-main">
+      <header class="portal-header">
+        <div class="header-title-area">
+          <button class="mobile-menu-btn" onclick="window.AuthorityCivicIntel.toggleMobileSidebar(true)" aria-label="Toggle Navigation Menu">Toggle Menu</button>
+          <span class="header-title">Civic Intelligence & Analytics</span>
+        </div>
+        
+        <!-- Top-Right Header Navigation Controls -->
+        <div class="header-user-info">
+          <!-- Notifications Bell Button with Dynamic Unread Badge -->
+          <button type="button" id="header-notif-btn" class="btn-secondary" style="position: relative; padding: 0.4rem 0.75rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem;" onclick="event.stopPropagation(); window.location.href='authority-notifications.html'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span>Notifications</span>
+            <span id="header-notif-badge" style="display: none; background: #dc2626; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 999px; margin-left: 0.2rem;">0</span>
+          </button>
+
+          <!-- Officer Profile Dropdown Trigger -->
+          <div style="position: relative;">
+            <button type="button" id="header-profile-btn" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;" onclick="window.AuthorityCivicIntel.toggleProfileDropdown(event)">
+              <span id="header-user-name">Officer Loading...</span>
+              <span style="font-size: 0.65rem; color: var(--text-light);">▼</span>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
+              <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="event.stopPropagation(); window.location.href='authority-profile.html'">
+                Profile & Security
+              </button>
+              <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: #991b1b; background: none; border: none; cursor: pointer;" onclick="logoutUser()">
+                Logout Session
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="portal-body">
+
+        <!-- Authority Scope Status Banner -->
+        <div id="intel-scope-banner" style="background: var(--bg-card); border: 1px solid var(--border-light); border-left: 4px solid var(--primary); padding: 0.75rem 1.1rem; border-radius: 6px; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.84rem;">
+          <div>
+            <span style="font-weight: 700; color: var(--text-main);">Jurisdiction Scope:</span>
+            <span id="intel-jurisdiction-label" style="font-weight: 600; color: var(--primary); margin-left: 0.35rem;">Statewide (All 38 Districts)</span>
+          </div>
+          <div style="color: var(--text-light); font-size: 0.78rem;">
+            <span>Last Analyzed: </span>
+            <span id="intel-last-updated" style="font-weight: 600; color: var(--text-muted);">Syncing live data...</span>
+          </div>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div class="filter-bar" style="display: flex; flex-wrap: wrap; gap: 0.65rem; align-items: center;">
+          <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <label for="filter-intel-daterange" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Date Range</label>
+            <select id="filter-intel-daterange" class="form-select" style="min-width: 130px;" onchange="window.AuthorityCivicIntel.loadData()">
+              <option value="all_time" selected>All Time</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="90d">Last 90 Days</option>
+              <option value="this_year">This Year</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.2rem;" id="district-filter-group">
+            <label for="filter-intel-district" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">District</label>
+            <select id="filter-intel-district" class="form-select" style="min-width: 150px;" onchange="window.AuthorityCivicIntel.loadData()">
+              <option value="all" selected>All 38 Districts</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <label for="filter-intel-department" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Department</label>
+            <select id="filter-intel-department" class="form-select" style="min-width: 150px;" onchange="window.AuthorityCivicIntel.loadData()">
+              <option value="all" selected>All Departments</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <label for="filter-intel-category" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Category</label>
+            <select id="filter-intel-category" class="form-select" style="min-width: 130px;" onchange="window.AuthorityCivicIntel.loadData()">
+              <option value="all" selected>All Categories</option>
+              <option value="roads">Roads</option>
+              <option value="streetlights">Streetlights</option>
+              <option value="water_supply">Water Supply</option>
+              <option value="drainage">Drainage</option>
+              <option value="garbage">Garbage</option>
+              <option value="traffic">Traffic</option>
+              <option value="public_property">Public Property</option>
+              <option value="parks">Parks</option>
+              <option value="sanitation">Sanitation</option>
+              <option value="safety_hazard">Safety Hazard</option>
+              <option value="environment">Environment</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <label for="filter-intel-priority" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Priority</label>
+            <select id="filter-intel-priority" class="form-select" style="min-width: 120px;" onchange="window.AuthorityCivicIntel.loadData()">
+              <option value="all" selected>All Priorities</option>
+              <option value="critical">Critical / Emergency</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <label for="filter-intel-status" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Status</label>
+            <select id="filter-intel-status" class="form-select" style="min-width: 130px;" onchange="window.AuthorityCivicIntel.loadData()">
+              <option value="all" selected>All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="assigned">Assigned</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="overdue">Overdue (SLA Breached)</option>
+              <option value="escalated">Escalated</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: flex-end; margin-left: auto; gap: 0.5rem; margin-top: auto;">
+            <button type="button" class="btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.82rem; font-weight: 600;" onclick="window.AuthorityCivicIntel.resetFilters()">
+              Reset
+            </button>
+            <button type="button" class="btn-action" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700;" onclick="window.AuthorityCivicIntel.loadData()">
+              Apply Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 1: Authority Operational Overview (8 Metric Boxes) -->
+        <div class="metric-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+          <div class="metric-box">
+            <div class="metric-box-title">Total Complaints</div>
+            <div class="metric-box-value" id="kpi-intel-total">0</div>
+            <div class="metric-box-subtext">Cumulative registered</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-box-title">Active Cases</div>
+            <div class="metric-box-value" id="kpi-intel-active" style="color: #2563eb;">0</div>
+            <div class="metric-box-subtext">Open under action</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-box-title">Resolved Cases</div>
+            <div class="metric-box-value" id="kpi-intel-resolved" style="color: #059669;">0</div>
+            <div class="metric-box-subtext">Completed & verified</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-box-title">Resolution Rate</div>
+            <div class="metric-box-value" id="kpi-intel-resolution-rate" style="color: #059669;">0.0%</div>
+            <div class="metric-box-subtext">Efficiency benchmark</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-box-title">Critical Complaints</div>
+            <div class="metric-box-value" id="kpi-intel-critical" style="color: #dc2626;">0</div>
+            <div class="metric-box-subtext">Urgent & emergency</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-box-title">Overdue Cases</div>
+            <div class="metric-box-value" id="kpi-intel-overdue" style="color: #d97706;">0</div>
+            <div class="metric-box-subtext">SLA deadline breached</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-box-title">Escalated Cases</div>
+            <div class="metric-box-value" id="kpi-intel-escalated" style="color: #991b1b;">0</div>
+            <div class="metric-box-subtext">Level 1/2 escalated</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-box-title">SLA Compliance</div>
+            <div class="metric-box-value" id="kpi-intel-sla-compliance" style="color: #0284c7;">100%</div>
+            <div class="metric-box-subtext">On-track resolution</div>
+          </div>
+        </div>
+
+        <!-- Section 2: Categories Breakdown & Civic Hotspots -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+          <!-- Category Analytics Card -->
+          <div class="content-card" style="margin-bottom: 0;">
+            <div class="card-title">
+              <span>Most Reported Issue Categories</span>
+              <span id="intel-cat-total-count" style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">0 Categories</span>
+            </div>
+            <div id="chart-intel-categories" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center;">
+              <div style="text-align: center; color: var(--text-light); font-size: 0.85rem; padding: 2rem 0;">Analyzing issue categories...</div>
+            </div>
+          </div>
+
+          <!-- Civic Hotspots Card -->
+          <div class="content-card" style="margin-bottom: 0;">
+            <div class="card-title">
+              <span>Top Civic Hotspots & Affected Areas</span>
+              <span id="intel-hotspots-count" style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">Location Analysis</span>
+            </div>
+            <div id="chart-intel-hotspots" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center;">
+              <div style="text-align: center; color: var(--text-light); font-size: 0.85rem; padding: 2rem 0;">Extracting geographic clusters...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: SLA & Resolution Operational Analytics -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+          <!-- SLA Intelligence Card -->
+          <div class="content-card" style="margin-bottom: 0;">
+            <div class="card-title">
+              <span>SLA & Escalation Performance</span>
+              <span id="intel-sla-ratio" style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">Target: &gt;95%</span>
+            </div>
+            <div id="chart-intel-sla" style="min-height: 180px; display: flex; flex-direction: column; justify-content: center;">
+              <div style="text-align: center; color: var(--text-light); font-size: 0.85rem; padding: 2rem 0;">Calculating SLA compliance...</div>
+            </div>
+            <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <div>Average Resolution Time: <strong id="intel-avg-resolution-time" style="color: var(--text-main);">0 hrs</strong></div>
+              <div>Pending SLA Queue: <strong id="intel-pending-sla-count" style="color: #2563eb;">0</strong></div>
+            </div>
+          </div>
+
+          <!-- Time Trends Card -->
+          <div class="content-card" style="margin-bottom: 0;">
+            <div class="card-title">
+              <span>Activity Timeline & Trend Analysis</span>
+              <span id="intel-trend-period" style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">Daily Volume</span>
+            </div>
+            <div id="chart-intel-timeline" class="svg-chart-container" style="min-height: 180px;">
+              <div style="text-align: center; color: var(--text-light); font-size: 0.85rem;">Generating timeline trends...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: District Intelligence & Comparison Matrix (For Admins & Authorized Authorities) -->
+        <div class="content-card" id="district-comparison-section" style="margin-bottom: 1.25rem;">
+          <div class="card-title">
+            <span id="district-table-heading">Tamil Nadu 38-District Operational Intelligence</span>
+            <span style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">Sortable Performance Matrix</span>
+          </div>
+          <div class="table-container" style="max-height: 420px; overflow-y: auto;">
+            <table class="data-table" id="table-district-intelligence">
+              <thead>
+                <tr>
+                  <th onclick="window.AuthorityCivicIntel.sortDistrictTable('district')" style="cursor: pointer;">District</th>
+                  <th onclick="window.AuthorityCivicIntel.sortDistrictTable('total_issues')" style="cursor: pointer; text-align: right;">Total Issues</th>
+                  <th onclick="window.AuthorityCivicIntel.sortDistrictTable('resolved_issues')" style="cursor: pointer; text-align: right;">Resolved</th>
+                  <th onclick="window.AuthorityCivicIntel.sortDistrictTable('resolution_rate_numeric')" style="cursor: pointer; text-align: right;">Resolution Rate</th>
+                  <th onclick="window.AuthorityCivicIntel.sortDistrictTable('critical_issues')" style="cursor: pointer; text-align: right;">Critical</th>
+                  <th onclick="window.AuthorityCivicIntel.sortDistrictTable('overdue_issues')" style="cursor: pointer; text-align: right;">Overdue</th>
+                  <th onclick="window.AuthorityCivicIntel.sortDistrictTable('escalated_issues')" style="cursor: pointer; text-align: right;">Escalated</th>
+                  <th>Top Category</th>
+                  <th style="text-align: right;">Avg Time</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-district-intelligence">
+                <tr>
+                  <td colspan="9" style="text-align: center; color: var(--text-light); padding: 2rem;">Loading district metrics...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 5: Department Operational Bottleneck Performance -->
+        <div class="content-card" style="margin-bottom: 1.25rem;">
+          <div class="card-title">
+            <span>Department Operational Performance</span>
+            <span style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">Workload & Efficiency Analysis</span>
+          </div>
+          <div class="table-container">
+            <table class="data-table" id="table-department-performance">
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th style="text-align: right;">Total Cases</th>
+                  <th style="text-align: right;">Resolved</th>
+                  <th style="text-align: right;">Pending</th>
+                  <th style="text-align: right;">Overdue</th>
+                  <th style="text-align: right;">Escalated</th>
+                  <th style="text-align: right;">Resolution Rate</th>
+                  <th style="text-align: right;">SLA Compliance</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-department-performance">
+                <tr>
+                  <td colspan="8" style="text-align: center; color: var(--text-light); padding: 2rem;">Loading department performance data...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Client Script files -->
+  <script src="js/auth.js?v=7.5.0"></script>
+  <script src="js/api.js?v=3.5.0"></script>
+  <script src="js/notifications.js?v=3.4.0"></script>
+  <script src="js/admin.js?v=3.4.0"></script>
+  <script src="js/authority-civic-intelligence.js?v=1.0.0"></script>
+
+</body>
+</html>

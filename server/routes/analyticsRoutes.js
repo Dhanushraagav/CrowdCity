@@ -1,5 +1,6 @@
 import express from 'express';
-import { getTamilNaduAnalytics, getDistrictAnalytics } from '../controllers/analyticsController.js';
+import { getTamilNaduAnalytics, getDistrictAnalytics, getAuthorityCivicIntelligenceController } from '../controllers/analyticsController.js';
+import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -16,5 +17,17 @@ router.get('/tamilnadu', getTamilNaduAnalytics);
  * @access  Public / Authenticated
  */
 router.get('/district/:districtId', getDistrictAnalytics);
+
+/**
+ * @route   GET /api/analytics/authority/civic-intelligence
+ * @desc    Get dynamic Civic Intelligence tailored for Municipal Authorities and Admins
+ * @access  Private (Authority & Admin only)
+ */
+router.get(
+  '/authority/civic-intelligence',
+  requireAuth,
+  requireRole(['authority', 'admin']),
+  getAuthorityCivicIntelligenceController
+);
 
 export default router;

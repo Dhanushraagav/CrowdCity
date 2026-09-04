@@ -112,6 +112,10 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/transportation', transportationRoutes);
 app.use('/api/tamilnadu-updates', tnInfoRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/authority/civic-intelligence', (req, res, next) => {
+  req.url = '/authority/civic-intelligence';
+  return analyticsRoutes(req, res, next);
+});
 
 // Static client file server with caching and html extension resolution
 app.use(express.static(path.join(__dirname, '../client'), {

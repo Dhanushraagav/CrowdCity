@@ -617,14 +617,29 @@ const API = {
     if (params.status && params.status !== 'all') qParams.append('status', params.status);
     if (params.priority && params.priority !== 'all') qParams.append('priority', params.priority);
     if (params.department && params.department !== 'all') qParams.append('department', params.department);
-    if (params.start_date) qParams.append('start_date', params.start_date);
-    if (params.end_date) qParams.append('end_date', params.end_date);
     if (params.limit) qParams.append('limit', params.limit);
-    if (params.page) qParams.append('page', params.page);
+    if (params.offset) qParams.append('offset', params.offset);
 
     const qs = qParams.toString();
     const endpoint = `/issues/search${qs ? `?${qs}` : ''}`;
     return request(endpoint, { method: 'GET', auth: false, signal });
+  },
+
+  // 41. Authority Dedicated Civic Intelligence Analytics (RBAC Protected)
+  getAuthorityCivicIntelligence: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.district && filters.district !== 'all') params.append('district', filters.district);
+    if (filters.date_range && filters.date_range !== 'all_time') params.append('date_range', filters.date_range);
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category);
+    if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters.priority && filters.priority !== 'all') params.append('priority', filters.priority);
+    if (filters.department && filters.department !== 'all') params.append('department', filters.department);
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+
+    const qs = params.toString();
+    const endpoint = `/analytics/authority/civic-intelligence${qs ? `?${qs}` : ''}`;
+    return request(endpoint, { method: 'GET', auth: true });
   }
 };
 

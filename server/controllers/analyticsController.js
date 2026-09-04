@@ -1,4 +1,4 @@
-import { getTamilNaduCivicIntelligence } from '../services/analyticsService.js';
+import { getTamilNaduCivicIntelligence, getAuthorityCivicIntelligence } from '../services/analyticsService.js';
 import logger from '../config/logger.js';
 
 /**
@@ -61,6 +61,47 @@ export const getDistrictAnalytics = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve district analytics',
+      details: err.message
+    });
+  }
+};
+
+/**
+ * Controller for Dedicated Authority Civic Intelligence
+ * Enforces server-side RBAC and data scoping
+ */
+export const getAuthorityCivicIntelligenceController = async (req, res) => {
+  try {
+    const officerContext = {
+      id: req.user?.id,
+      role: req.userProfile?.role || req.user?.role || 'authority',
+      district: req.userProfile?.district || req.user?.user_metadata?.district || null,
+      department: req.userProfile?.department || req.user?.user_metadata?.department || null,
+      department_id: req.userProfile?.department_id || null
+    };
+
+    const { district, date_range, category, status, priority, department, start_date, end_date } = req.query;
+
+    const analyticsData = await getAuthorityCivicIntelligence(officerContext, {
+      district,
+      date_range: date_range || 'all_time',
+      category: category || 'all',
+      status: status || 'all',
+      priority: priority || 'all',
+      department: department || 'all',
+      start_date,
+      end_date
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: analyticsData
+    });
+  } catch (err) {
+    logger.error('[Authority Analytics] Controller error: %O', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate authority civic intelligence',
       details: err.message
     });
   }
