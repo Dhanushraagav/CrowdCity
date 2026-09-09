@@ -22,6 +22,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
   <link rel="stylesheet" href="css/components.css?v=3.1.0">
+  <link rel="stylesheet" href="css/location-authority.css?v=1.0.0">
 
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -677,50 +678,155 @@
               ></textarea>
             </div>
 
-            <!-- Location -->
+            <!-- Location & Responsible Authority -->
             <div class="location-group">
               <div class="location-header">
-                <label for="report-address" class="field-label" style="margin-bottom: 0;" data-i18n="location">Location</label>
+                <label for="report-address" class="field-label" style="margin-bottom: 0;" data-i18n="location">Location & Jurisdiction</label>
                 <button type="button" id="btn-use-gps" class="btn-gps">
                   <i class="fa-solid fa-location-crosshairs"></i> <span data-i18n="use_gps">Use GPS</span>
                 </button>
               </div>
 
-              <!-- Address field -->
-              <div class="address-field-wrapper" style="position: relative; margin-bottom: 0.65rem; display: flex; gap: 0.5rem; align-items: center;">
-                <div class="address-input-wrapper" style="position: relative; flex: 1;">
-                  <i class="fa-solid fa-location-dot" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none;"></i>
-                  <input
-                    type="text"
-                    id="report-address"
-                    class="form-input"
-                    data-i18n-placeholder="enter_address_placeholder"
-                    placeholder="Enter address or pinpoint on map"
-                    style="padding-left: 2.25rem; width: 100%;"
-                  >
-                </div>
-                <button type="button" id="btn-search-address" class="btn btn-secondary" style="padding: 0.68rem 1rem; flex-shrink: 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem; margin: 0; height: 100%;" title="Search address">
-                  <i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="search">Search</span>
-                </button>
-              </div>
-
-              <!-- Map -->
-              <div class="map-container">
-                <div id="map-selector"></div>
-                <div class="map-pin-hint" data-i18n="click_to_set_pin">Click to set pin</div>
-              </div>
-
-              <!-- Lat / Lng -->
-              <div class="coords-row">
-                <div>
-                  <label for="report-latitude" class="field-label" data-i18n="latitude">Latitude</label>
-                  <input type="text" id="report-latitude" class="form-input" readonly placeholder="Click map" required style="font-size: 0.82rem; opacity: 0.75;">
+              <!-- Mode Toggle Bar -->
+              <div class="la-mode-toggle-bar">
+                <div class="la-mode-status">
+                  <i class="fa-solid fa-map-pin"></i>
+                  <span id="la-current-mode-label">Tamil Nadu Administrative Identification</span>
                 </div>
                 <div>
-                  <label for="report-longitude" class="field-label" data-i18n="longitude">Longitude</label>
-                  <input type="text" id="report-longitude" class="form-input" readonly placeholder="Click map" required style="font-size: 0.82rem; opacity: 0.75;">
+                  <button type="button" id="btn-toggle-manual-location" class="la-toggle-btn" title="Override with 4-tier dropdown selectors">
+                    <i class="fa-solid fa-sliders"></i> <span>Change Location Manually</span>
+                  </button>
+                  <button type="button" id="btn-toggle-auto-location" class="la-toggle-btn hidden" title="Switch back to automated GPS/Map pin">
+                    <i class="fa-solid fa-location-crosshairs"></i> <span>Use My Current Location</span>
+                  </button>
                 </div>
               </div>
+
+              <!-- Manual 4-Tier Cascade Hierarchy Dropdowns -->
+              <div id="la-manual-mode-container" class="la-manual-grid hidden">
+                <div class="la-form-group">
+                  <label for="la-district-select">1. District (மாவட்டம்) *</label>
+                  <select id="la-district-select" class="la-select">
+                    <option value="" disabled selected>Select District...</option>
+                  </select>
+                </div>
+                <div class="la-form-group">
+                  <label for="la-subdivision-select">2. Taluk / Block (வட்டம் / ஒன்றியம்)</label>
+                  <select id="la-subdivision-select" class="la-select" disabled>
+                    <option value="" disabled selected>Select District first...</option>
+                  </select>
+                </div>
+                <div class="la-form-group">
+                  <label for="la-village-input">3. Village / Town (கிராமம் / நகரம்)</label>
+                  <input type="text" id="la-village-input" class="la-input" placeholder="e.g. Kannampalayam, Sulur, Royapuram">
+                </div>
+                <div class="la-form-group">
+                  <label for="la-localbody-select">4. Local Body (உள்ளாட்சி அமைப்பு)</label>
+                  <select id="la-localbody-select" class="la-select" disabled>
+                    <option value="" disabled selected>Select Taluk / Block first...</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Auto Mode Map & Pin Container -->
+              <div id="la-auto-mode-container">
+                <!-- Address field -->
+                <div class="address-field-wrapper" style="position: relative; margin-bottom: 0.65rem; display: flex; gap: 0.5rem; align-items: center;">
+                  <div class="address-input-wrapper" style="position: relative; flex: 1;">
+                    <i class="fa-solid fa-location-dot" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none;"></i>
+                    <input
+                      type="text"
+                      id="report-address"
+                      class="form-input"
+                      data-i18n-placeholder="enter_address_placeholder"
+                      placeholder="Enter address or pinpoint on map"
+                      style="padding-left: 2.25rem; width: 100%;"
+                    >
+                  </div>
+                  <button type="button" id="btn-search-address" class="btn btn-secondary" style="padding: 0.68rem 1rem; flex-shrink: 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem; margin: 0; height: 100%;" title="Search address">
+                    <i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="search">Search</span>
+                  </button>
+                </div>
+
+                <!-- Map -->
+                <div class="map-container">
+                  <div id="map-selector"></div>
+                  <div class="map-pin-hint" data-i18n="click_to_set_pin">Click to set pin</div>
+                </div>
+
+                <!-- Lat / Lng -->
+                <div class="coords-row">
+                  <div>
+                    <label for="report-latitude" class="field-label" data-i18n="latitude">Latitude</label>
+                    <input type="text" id="report-latitude" class="form-input" readonly placeholder="Click map" required style="font-size: 0.82rem; opacity: 0.75;">
+                  </div>
+                  <div>
+                    <label for="report-longitude" class="field-label" data-i18n="longitude">Longitude</label>
+                    <input type="text" id="report-longitude" class="form-input" readonly placeholder="Click map" required style="font-size: 0.82rem; opacity: 0.75;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Official Verified Responsible Authority Card -->
+              <div id="la-authority-card-container" class="la-authority-card hidden">
+                <div id="la-authority-card-loader" class="la-loader hidden">
+                  <i class="fa-solid fa-circle-notch fa-spin"></i>
+                  <span>Resolving verified government authority & contacts...</span>
+                </div>
+                <div id="la-authority-card-content">
+                  <!-- Hierarchy Badges -->
+                  <div id="la-card-hierarchy-badges" class="la-hierarchy-badges"></div>
+
+                  <!-- Fallback Notification Banner -->
+                  <div id="la-card-fallback-banner" class="la-fallback-banner hidden"></div>
+
+                  <!-- Card Header -->
+                  <div class="la-card-header">
+                    <div class="la-card-header-left">
+                      <div class="la-card-icon">
+                        <i class="fa-solid fa-landmark"></i>
+                      </div>
+                      <div>
+                        <div class="la-card-title">Responsible Administrative Authority</div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">Direct executive government jurisdiction</div>
+                      </div>
+                    </div>
+                    <span class="la-badge-verified">
+                      <i class="fa-solid fa-shield-halved"></i> Verified Govt Registry
+                    </span>
+                  </div>
+
+                  <!-- Primary Administrative / Service Authority -->
+                  <div class="la-auth-info">
+                    <div id="la-card-auth-office" class="la-auth-office">Administrative Office</div>
+                    <div id="la-card-auth-designation" class="la-auth-desig">Executive Officer</div>
+                    <div id="la-card-auth-department" class="la-dept-tag">Municipal Services</div>
+
+                    <!-- Contact Actions -->
+                    <div class="la-contact-row">
+                      <div id="la-card-auth-phone"></div>
+                      <div id="la-card-auth-email"></div>
+                    </div>
+
+                    <!-- Source URL & Verification Timestamp -->
+                    <div class="la-verify-meta">
+                      <div id="la-card-auth-source"></div>
+                      <div id="la-card-auth-verified-time">Record Verified: March 2026</div>
+                    </div>
+                  </div>
+
+                  <!-- Elected Representative Section -->
+                  <div id="la-card-elected-box" class="hidden"></div>
+
+                  <!-- Level 1 Escalation Section -->
+                  <div id="la-card-escalation-box" class="la-section-divider"></div>
+
+                  <!-- CrowdCity 24/7 Helpline -->
+                  <div id="la-card-support-box"></div>
+                </div>
+              </div>
+
             </div>
 
             <!-- Photo Evidence -->
@@ -868,7 +974,7 @@
             <span id="step3-ai-department" style="font-weight: 700; color: var(--text-main, #0f172a); font-size: 0.88rem;">Municipal Corporation</span>
           </div>
 
-          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
+                  <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
             <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">AI Model Certainty</span>
             <span id="step3-ai-confidence" style="font-weight: 700; color: #0369a1; font-size: 0.88rem;">96.8%</span>
           </div>
@@ -876,6 +982,16 @@
           <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
             <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Spatial Duplicate Check</span>
             <span id="step3-ai-duplicate" style="font-weight: 700; color: #0d9488; font-size: 0.88rem;">0 Duplicates (Unique)</span>
+          </div>
+
+          <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0); grid-column: 1 / -1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Responsible Authority & Government Jurisdiction</span>
+                <span id="step3-ai-authority" style="font-weight: 800; color: #0f172a; font-size: 0.92rem;">Resolving authority...</span>
+              </div>
+              <span id="step3-ai-jurisdiction" style="font-size: 0.78rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid #bae6fd;">Tamil Nadu</span>
+            </div>
           </div>
         </div>
 
@@ -928,6 +1044,7 @@
   <script src="js/auth.js?v=4.0.1"></script>
   <script src="js/api.js?v=4.0.1"></script>
   <script src="js/notifications.js?v=4.0.1"></script>
+  <script src="js/locationAuthority.js?v=1.0.0"></script>
   <script src="js/report.js?v=4.0.1"></script>
   <script src="js/chat-widget.js?v=4.0.1"></script>
 

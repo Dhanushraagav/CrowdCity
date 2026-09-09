@@ -133,6 +133,47 @@
                 </div>
               </div>
 
+              <!-- Administrative Jurisdiction & Responsible Authority Card -->
+              <div class="content-card" style="border-left: 3px solid #0284c7;">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span><i class="fa-solid fa-landmark"></i> Administrative Jurisdiction & Authority</span>
+                  <span id="detail-localbody-type-badge" class="status-badge" style="background: #e0f2fe; color: #0369a1; font-size: 0.72rem;">Local Body</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem; margin-top: 0.75rem;">
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">District (மாவட்டம்)</div>
+                    <strong id="detail-district" style="color: var(--text-main);">Tamil Nadu</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Taluk / Block (வட்டம்)</div>
+                    <strong id="detail-taluk" style="color: var(--text-main);">-</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Village / Town</div>
+                    <span id="detail-village-town" style="color: var(--text-main);">-</span>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Local Body Name</div>
+                    <strong id="detail-local-body" style="color: var(--text-main);">-</strong>
+                  </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-light); margin-top: 0.75rem; padding-top: 0.75rem;">
+                  <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem;">Responsible Authority Office</div>
+                  <strong id="detail-authority-name" style="color: var(--primary); font-size: 0.95rem; display: block;">Local Administrative Authority</strong>
+                  <div style="display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.82rem; flex-wrap: wrap;">
+                    <span id="detail-authority-phone-wrap"><i class="fa-solid fa-phone" style="color: #0d9488;"></i> <a id="detail-authority-phone" href="#" style="color: var(--primary); font-weight: 600;">Phone</a></span>
+                    <span id="detail-authority-email-wrap"><i class="fa-solid fa-envelope" style="color: #0284c7;"></i> <a id="detail-authority-email" href="#" style="color: #0284c7; font-weight: 600;">Email</a></span>
+                  </div>
+                </div>
+
+                <div id="detail-higher-auth-section" style="border-top: 1px dashed var(--border-light); margin-top: 0.75rem; padding-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+                  <span>Level 1 Escalation Officer: </span>
+                  <strong id="detail-higher-authority" style="color: var(--text-main);">District Collectorate</strong>
+                </div>
+              </div>
+
               <!-- SLA Response & Escalation Tracker -->
               <div class="content-card" style="border-left: 3px solid var(--primary);">
                 <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">

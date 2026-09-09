@@ -18,6 +18,7 @@ import departmentRoutes from './routes/departmentRoutes.js';
 import transportationRoutes from './routes/transportationRoutes.js';
 import tnInfoRoutes from './routes/tnInfoRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import authorityRoutes from './routes/authorityRoutes.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
 // ES Module dirname workaround
@@ -116,6 +117,7 @@ app.use('/api/authority/civic-intelligence', (req, res, next) => {
   req.url = '/authority/civic-intelligence';
   return analyticsRoutes(req, res, next);
 });
+app.use('/api/authorities', authorityRoutes);
 
 // Static client file server with caching and html extension resolution
 app.use(express.static(path.join(__dirname, '../client'), {

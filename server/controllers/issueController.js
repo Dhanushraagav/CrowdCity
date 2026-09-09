@@ -10,6 +10,7 @@ import { findDuplicateCandidate } from '../services/duplicateDetectionService.js
 import { calculateSlaDeadline, resolveIssuePriority } from '../config/slaConfig.js';
 import { computeSlaState, checkAndProcessSlaEscalations, calculateSlaMetrics } from '../services/slaService.js';
 import { searchCivicIssues } from '../services/searchService.js';
+import { resolveResponsibleAuthority } from '../services/authorityDirectoryService.js';
 
 /**
  * Get all reported civic issues.
@@ -236,8 +237,29 @@ export const getIssueById = async (req, res) => {
       .eq('issue_id', id)
       .order('created_at', { ascending: true });
 
+    let authorityResolution = null;
+    try {
+      if (issue.latitude && issue.longitude) {
+        authorityResolution = await resolveResponsibleAuthority({
+          latitude: issue.latitude,
+          longitude: issue.longitude,
+          address: issue.address,
+          category: issue.category,
+          manualSelection: issue.district ? {
+            districtId: issue.district,
+            subdivisionId: issue.taluk,
+            localBodyId: issue.local_body,
+            villageOrTown: issue.village_or_town
+          } : null
+        });
+      }
+    } catch (authErr) {
+      logger.warn('Failed to resolve authority in getIssueById:', authErr.message);
+    }
+
     return res.status(200).json({
       ...issue,
+      authority_resolution: authorityResolution,
       comments: commentsError ? [] : comments,
       history: historyError ? [] : history,
       attachments: attachError ? [] : (attachments || []),
@@ -297,7 +319,24 @@ const isSchemaMissingColumnError = (err) => {
  * Report a new issue.
  */
 export const createIssue = async (req, res) => {
-  const { title, description, category, latitude, longitude, address, is_emergency } = req.body;
+  const {
+    title,
+    description,
+    category,
+    latitude,
+    longitude,
+    address,
+    is_emergency,
+    district,
+    taluk,
+    village_or_town,
+    local_body,
+    local_body_type,
+    responsible_authority_name,
+    authority_phone,
+    authority_email,
+    higher_authority_name
+  } = req.body;
   const reporter_id = req.user.id;
 
   if (!title || title.trim().length < 5 || title.trim().length > 100) {
@@ -387,6 +426,35 @@ export const createIssue = async (req, res) => {
     // Perform AI analysis on submission
     const aiResult = await performGroqAnalysis(title, description);
 
+    // Resolve Location & Responsible Civic Authority
+    let authHierarchy = null;
+    try {
+      authHierarchy = await resolveResponsibleAuthority({
+        latitude: lat,
+        longitude: lng,
+        address,
+        category,
+        manualSelection: district ? {
+          districtId: district,
+          subdivisionId: taluk,
+          localBodyId: local_body,
+          villageOrTown: village_or_town
+        } : null
+      });
+    } catch (authErr) {
+      logger.warn('Authority resolution failed in createIssue:', authErr.message);
+    }
+
+    const finalDistrict = district || authHierarchy?.jurisdiction?.district || null;
+    const finalTaluk = taluk || authHierarchy?.jurisdiction?.taluk || null;
+    const finalVillageTown = village_or_town || authHierarchy?.jurisdiction?.villageOrTown || null;
+    const finalLocalBody = local_body || authHierarchy?.jurisdiction?.localBody || null;
+    const finalLocalBodyType = local_body_type || authHierarchy?.jurisdiction?.localBodyType || null;
+    const finalAuthorityName = responsible_authority_name || authHierarchy?.administrativeAuthority?.office || null;
+    const finalAuthorityPhone = authority_phone || authHierarchy?.administrativeAuthority?.phone || null;
+    const finalAuthorityEmail = authority_email || authHierarchy?.administrativeAuthority?.email || null;
+    const finalHigherAuthority = higher_authority_name || authHierarchy?.escalationContact?.office || null;
+
     // Generate authoritative Complaint ID (CC-YYYY-NNNNNN)
     const generatedComplaintId = await generateNextComplaintId();
 
@@ -420,7 +488,18 @@ export const createIssue = async (req, res) => {
       ai_category: aiResult.category,
       ai_department: aiResult.department,
       ai_priority: resolvedPriority,
-      is_emergency: is_emergency === 'true' || is_emergency === true
+      is_emergency: is_emergency === 'true' || is_emergency === true,
+
+      // Location-Aware Authority fields
+      district: finalDistrict,
+      taluk: finalTaluk,
+      village_or_town: finalVillageTown,
+      local_body: finalLocalBody,
+      local_body_type: finalLocalBodyType,
+      responsible_authority_name: finalAuthorityName,
+      authority_phone: finalAuthorityPhone,
+      authority_email: finalAuthorityEmail,
+      higher_authority_name: finalHigherAuthority
     };
 
     // Production flow: insert to Supabase using request-scoped client
@@ -432,12 +511,20 @@ export const createIssue = async (req, res) => {
       .single();
 
     if (isSchemaMissingColumnError(error)) {
-      logger.warn('complaint_id, citizen_count or SLA columns not found in Supabase schema, retrying without them:', error.message);
+      logger.warn('Extended columns not found in Supabase schema, retrying without them:', error.message);
       delete newIssue.complaint_id;
       delete newIssue.citizen_count;
       delete newIssue.sla_deadline;
       delete newIssue.sla_status;
       delete newIssue.escalation_level;
+      delete newIssue.taluk;
+      delete newIssue.village_or_town;
+      delete newIssue.local_body;
+      delete newIssue.local_body_type;
+      delete newIssue.responsible_authority_name;
+      delete newIssue.authority_phone;
+      delete newIssue.authority_email;
+      delete newIssue.higher_authority_name;
       const retry = await activeClient.from('issues').insert(newIssue).select().single();
       if (retry.error) {
         logger.error('Failed to insert issue into Supabase on fallback: %O', retry.error);
@@ -463,6 +550,17 @@ export const createIssue = async (req, res) => {
 
     normalizeComplaintRecord(issue);
     computeSlaState(issue);
+
+    issue.district = finalDistrict;
+    issue.taluk = finalTaluk;
+    issue.village_or_town = finalVillageTown;
+    issue.local_body = finalLocalBody;
+    issue.local_body_type = finalLocalBodyType;
+    issue.responsible_authority_name = finalAuthorityName;
+    issue.authority_phone = finalAuthorityPhone;
+    issue.authority_email = finalAuthorityEmail;
+    issue.higher_authority_name = finalHigherAuthority;
+    issue.authority_resolution = authHierarchy;
 
     // Insert additional attachments if any were uploaded
     if (uploadedAttachments.length > 0) {

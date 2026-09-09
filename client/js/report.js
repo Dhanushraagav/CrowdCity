@@ -228,6 +228,17 @@ async function runStep3AiTriagePreview(category, description) {
 
   if (deptEl) deptEl.textContent = departmentName;
 
+  // Override department and authority with verified location authority if resolved
+  if (window.LocationAuthority && typeof window.LocationAuthority.getCurrentResolution === 'function') {
+    const res = window.LocationAuthority.getCurrentResolution();
+    if (res) {
+      window.LocationAuthority.updateStep3Preview(res);
+      if (res.administrativeAuthority && res.administrativeAuthority.serviceDepartment) {
+        departmentName = `${res.jurisdiction?.localBody || 'Municipal Admin'} (${res.administrativeAuthority.serviceDepartment})`;
+      }
+    }
+  }
+
   // 2. Priority & Severity Scoring
   const isEmergency = document.getElementById('report-emergency-checkbox')?.checked;
   const isHighPriorityCat = ['safety_hazard', 'traffic_signal', 'road_block', 'waterlogging', 'drainage'].includes(catLower);
@@ -1030,6 +1041,11 @@ async function reverseGeocode(lat, lng) {
       console.log("GPS:", lat, lng);
       console.log("Resolved Address:", addressStr);
 
+      // Trigger Location Authority Resolution
+      if (window.LocationAuthority && typeof window.LocationAuthority.onGeocodeResolved === 'function') {
+        window.LocationAuthority.onGeocodeResolved(lat, lng, addressStr, data);
+      }
+
       // Verify Service Area immediately
       const alertBanner = document.getElementById('report-alert');
       const serviceAreaMsg = window.i18n ? window.i18n.t('outside_service_area_error') : "Currently, CrowdCity AI supports reporting only within Tamil Nadu. We are expanding to other states soon.";
@@ -1063,6 +1079,10 @@ async function reverseGeocode(lat, lng) {
     isAddressManuallyEntered = false;
     console.log("GPS:", lat, lng);
     console.log("Resolved Address:", fallbackStr);
+
+    if (window.LocationAuthority && typeof window.LocationAuthority.onGeocodeResolved === 'function') {
+      window.LocationAuthority.onGeocodeResolved(lat, lng, fallbackStr, null);
+    }
 
     // Bounding box validation fallback
     const validation = await window.ServiceArea.validateCoordinates(lat, lng);
@@ -1481,6 +1501,22 @@ function setupFormSubmit() {
     
     const isEmergencyCheckbox = document.getElementById('report-emergency');
     formData.append('is_emergency', isEmergencyCheckbox ? isEmergencyCheckbox.checked : false);
+
+    // Append verified location & authority hierarchy fields if available
+    if (window.LocationAuthority && typeof window.LocationAuthority.getSubmissionPayload === 'function') {
+      const authPayload = window.LocationAuthority.getSubmissionPayload();
+      if (authPayload) {
+        if (authPayload.district) formData.append('district', authPayload.district);
+        if (authPayload.taluk) formData.append('taluk', authPayload.taluk);
+        if (authPayload.village_or_town) formData.append('village_or_town', authPayload.village_or_town);
+        if (authPayload.local_body) formData.append('local_body', authPayload.local_body);
+        if (authPayload.local_body_type) formData.append('local_body_type', authPayload.local_body_type);
+        if (authPayload.responsible_authority_name) formData.append('responsible_authority_name', authPayload.responsible_authority_name);
+        if (authPayload.authority_phone) formData.append('authority_phone', authPayload.authority_phone);
+        if (authPayload.authority_email) formData.append('authority_email', authPayload.authority_email);
+        if (authPayload.higher_authority_name) formData.append('higher_authority_name', authPayload.higher_authority_name);
+      }
+    }
 
     if (selectedFiles.length) {
       selectedFiles.forEach(file => {
