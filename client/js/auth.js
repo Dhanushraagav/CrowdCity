@@ -1726,9 +1726,30 @@ function updateAuthUI() {
         intelLink.href = 'civic-intelligence.html';
         intelLink.className = `app-sidebar-link ${isCivicIntelligence ? 'active' : ''}`;
         intelLink.title = 'Tamil Nadu Civic Intelligence';
-        intelLink.innerHTML = '<i class="fa-solid fa-chart-line"></i> <span>Civic Intelligence</span>';
+        intelLink.innerHTML = '<i class="fa-solid fa-chart-column"></i> <span>Civic Intelligence</span>';
         existingNav.appendChild(intelLink);
       }
+
+      // Upgrade any legacy icons to the new professional icons
+      const iconMap = {
+        'fa-gauge-high': 'fa-table-columns',
+        'fa-circle-exclamation': 'fa-pen-to-square',
+        'fa-clipboard-check': 'fa-list-check',
+        'fa-map-location-dot': 'fa-location-dot',
+        'fa-bus-simple': 'fa-bus',
+        'fa-building-columns': 'fa-building-flag',
+        'fa-truck-medical': 'fa-shield-halved',
+        'fa-headset': 'fa-phone-volume',
+        'fa-chart-line': 'fa-chart-column'
+      };
+      existingNav.querySelectorAll('i').forEach(icon => {
+        for (const [oldClass, newClass] of Object.entries(iconMap)) {
+          if (icon.classList.contains(oldClass)) {
+            icon.classList.remove(oldClass);
+            icon.classList.add(newClass);
+          }
+        }
+      });
 
       existingNav.querySelectorAll('.app-sidebar-link').forEach(link => {
         const href = (link.getAttribute('href') || '').toLowerCase();
@@ -1771,32 +1792,32 @@ function updateAuthUI() {
 
       <nav class="app-sidebar-nav">
         <a href="citizen-dashboard.html" class="app-sidebar-link ${isDashboard ? 'active' : ''}" title="Dashboard">
-          <i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+          <i class="fa-solid fa-table-columns"></i> <span data-i18n="nav_dashboard">Dashboard</span>
         </a>
         <a href="report.html" class="app-sidebar-link ${isReport ? 'active' : ''}" title="Report Issue">
-          <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="nav_report">Report Issue</span>
+          <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="nav_report">Report Issue</span>
         </a>
         <a href="my-complaints.html" class="app-sidebar-link ${isComplaints ? 'active' : ''}" title="My Complaints">
-          <i class="fa-solid fa-clipboard-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+          <i class="fa-solid fa-list-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
         </a>
         <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
-          <i class="fa-solid fa-map-location-dot"></i> <span data-i18n="nav_map">Map</span>
+          <i class="fa-solid fa-location-dot"></i> <span data-i18n="nav_map">Map</span>
         </a>
         <a href="transportation.html" class="app-sidebar-link ${isTransportation ? 'active' : ''}" title="Transportation">
-          <i class="fa-solid fa-bus-simple"></i> <span data-i18n="nav_transportation">Transportation</span>
+          <i class="fa-solid fa-bus"></i> <span data-i18n="nav_transportation">Transportation</span>
         </a>
 
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
-          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
+          <i class="fa-solid fa-building-flag"></i> <span data-i18n="nav_services">Government Services</span>
         </a>
         <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
-          <i class="fa-solid fa-truck-medical"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+          <i class="fa-solid fa-shield-halved"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
         </a>
         <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
-          <i class="fa-solid fa-headset"></i> <span data-i18n="district_helplines">District Helplines</span>
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
         </a>
         <a href="civic-intelligence.html" class="app-sidebar-link ${isCivicIntelligence ? 'active' : ''}" title="Tamil Nadu Civic Intelligence">
-          <i class="fa-solid fa-chart-line"></i> <span>Civic Intelligence</span>
+          <i class="fa-solid fa-chart-column"></i> <span>Civic Intelligence</span>
         </a>
       </nav>
     `;

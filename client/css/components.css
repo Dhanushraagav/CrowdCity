@@ -2479,8 +2479,12 @@ body:not(.admin-portal-body) .app-sidebar {
 }
 
 .app-sidebar-link i {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   flex-shrink: 0;
   color: var(--primary, #0d9488);
@@ -2508,6 +2512,7 @@ body:not(.admin-portal-body) .app-sidebar {
 
 .app-sidebar-link:hover i {
   color: var(--primary, #0d9488);
+  transform: translateX(1px);
   background: transparent !important;
 }
 
@@ -2524,6 +2529,7 @@ body:not(.admin-portal-body) .app-sidebar {
   color: #ffffff !important;
   background: transparent !important;
   border: none !important;
+  transform: none;
 }
 
 .app-sidebar-link.active::before {
