@@ -422,18 +422,41 @@ function resizeImageForAi(file) {
 function initAiCameraDetection() {
   const cameraBtn = document.getElementById('btn-ai-camera-trigger');
   const uploadBtn = document.getElementById('btn-ai-upload-trigger');
-  const cameraInput = document.getElementById('ai-camera-file-input');
-  const uploadInput = document.getElementById('ai-upload-file-input');
+  const modal = document.getElementById('ai-upcoming-feature-modal');
+  const closeBtn = document.getElementById('btn-close-upcoming-modal');
+  const closeBtnX = document.getElementById('btn-close-upcoming-modal-x');
 
-  if (cameraBtn && cameraInput) {
-    cameraBtn.addEventListener('click', () => cameraInput.click());
-    cameraInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0], cameraInput));
+  function openUpcomingModal(e) {
+    if (e) e.preventDefault();
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
   }
 
-  if (uploadBtn && uploadInput) {
-    uploadBtn.addEventListener('click', () => uploadInput.click());
-    uploadInput.addEventListener('change', (e) => handleAiImageFile(e.target.files[0], uploadInput));
+  function closeUpcomingModal() {
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
   }
+
+  if (cameraBtn) cameraBtn.addEventListener('click', openUpcomingModal);
+  if (uploadBtn) uploadBtn.addEventListener('click', openUpcomingModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeUpcomingModal);
+  if (closeBtnX) closeBtnX.addEventListener('click', closeUpcomingModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeUpcomingModal();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+      closeUpcomingModal();
+    }
+  });
 
   async function handleAiImageFile(file, inputElem) {
     if (!file) return;
@@ -523,6 +546,7 @@ function initVoiceRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const voiceBtn = document.getElementById('btn-voice-input');
   const voiceStatus = document.getElementById('voice-status-text');
+  const voiceLangSelect = document.getElementById('voice-lang-select');
   const descField = document.getElementById('report-description');
 
   if (!voiceBtn) return;
@@ -530,21 +554,30 @@ function initVoiceRecognition() {
   if (!SpeechRecognition) {
     console.warn("Speech Recognition API is not supported in this browser.");
     voiceBtn.style.display = 'none';
+    if (voiceLangSelect) voiceLangSelect.style.display = 'none';
     return;
   }
 
   let recognition = null;
   let isListening = false;
+  let latestTranscript = '';
 
   try {
     recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'ta-IN'; // Supports Tamil script, Tanglish, & Indian English speech
+    recognition.lang = voiceLangSelect ? voiceLangSelect.value : 'en-IN';
   } catch (e) {
     console.warn("Failed to initialize SpeechRecognition:", e);
     voiceBtn.style.display = 'none';
+    if (voiceLangSelect) voiceLangSelect.style.display = 'none';
     return;
+  }
+
+  if (voiceLangSelect) {
+    voiceLangSelect.addEventListener('change', (e) => {
+      if (recognition) recognition.lang = e.target.value;
+    });
   }
 
   voiceBtn.addEventListener('click', () => {
@@ -552,6 +585,8 @@ function initVoiceRecognition() {
       try { recognition.stop(); } catch (err) {}
     } else {
       try {
+        if (voiceLangSelect) recognition.lang = voiceLangSelect.value;
+        latestTranscript = '';
         recognition.start();
       } catch (err) {
         console.error("Speech start error:", err);
@@ -561,11 +596,12 @@ function initVoiceRecognition() {
 
   recognition.onstart = () => {
     isListening = true;
+    latestTranscript = '';
     voiceBtn.classList.add('recording-pulse');
     voiceBtn.innerHTML = `<i class="fa-solid fa-microphone-slash fa-beat" style="color: #ef4444;"></i> <span>Listening...</span>`;
     if (voiceStatus) {
       voiceStatus.style.display = 'block';
-      voiceStatus.textContent = 'Listening... Speak naturally in Tamil, Tanglish, or English.';
+      voiceStatus.textContent = 'Listening... Speak in English, Tanglish, or Tamil. Description will be in English.';
       voiceStatus.style.color = 'var(--primary, #0d9488)';
     }
   };
@@ -575,8 +611,18 @@ function initVoiceRecognition() {
     for (let i = event.resultIndex; i < event.results.length; i++) {
       transcript += event.results[i][0].transcript;
     }
-    if (descField && transcript) {
-      descField.value = transcript;
+    if (transcript) {
+      latestTranscript = transcript;
+      const hasTamil = /[\u0B80-\u0BFF]/.test(transcript);
+      if (hasTamil) {
+        if (voiceStatus) {
+          voiceStatus.style.display = 'block';
+          voiceStatus.textContent = `Listening: "${transcript}" (Translating to English...)`;
+          voiceStatus.style.color = 'var(--primary, #0d9488)';
+        }
+      } else {
+        if (descField) descField.value = transcript;
+      }
     }
   };
 
@@ -599,45 +645,75 @@ function initVoiceRecognition() {
     voiceBtn.classList.remove('recording-pulse');
     voiceBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> <span>Voice Report</span>`;
 
-    const spokenText = descField ? descField.value.trim() : '';
-    if (spokenText && isMeaningfulCivicDescription(spokenText)) {
-      if (voiceStatus) {
-        voiceStatus.style.display = 'block';
-        voiceStatus.textContent = 'AI is translating Tamil/Tanglish & polishing into clear English...';
-        voiceStatus.style.color = 'var(--primary, #0d9488)';
-      }
+    const spokenText = (latestTranscript || (descField ? descField.value : '')).trim();
+    latestTranscript = '';
+    if (!spokenText) return;
 
-      try {
-        if (window.API && typeof window.API.translateVoiceText === 'function') {
-          const res = await window.API.translateVoiceText(spokenText);
-          if (res && res.englishText) {
-            descField.value = res.englishText;
-            if (voiceStatus) {
-              voiceStatus.textContent = 'Transcribed & translated into clear English!';
-              voiceStatus.style.color = '#10b981';
-            }
-            // Auto-trigger AI categorizer to set category & department if text describes a real civic issue!
-            if (isMeaningfulCivicDescription(res.englishText)) {
-              const aiBtn = document.getElementById('btn-ai-assist');
-              if (aiBtn) aiBtn.click();
-            }
+    if (voiceStatus) {
+      voiceStatus.style.display = 'block';
+      voiceStatus.textContent = 'AI is translating & formatting into clear English...';
+      voiceStatus.style.color = 'var(--primary, #0d9488)';
+    }
+
+    try {
+      if (window.API && typeof window.API.translateVoiceText === 'function') {
+        const res = await window.API.translateVoiceText(spokenText);
+        const englishText = res?.data?.englishText || res?.englishText;
+        if (englishText && typeof englishText === 'string') {
+          if (descField) descField.value = englishText;
+          if (voiceStatus) {
+            voiceStatus.textContent = 'Transcribed in clear English!';
+            voiceStatus.style.color = '#10b981';
+            setTimeout(() => {
+              if (voiceStatus && voiceStatus.textContent.includes('Transcribed')) {
+                voiceStatus.style.display = 'none';
+              }
+            }, 4000);
           }
-        }
-      } catch (err) {
-        console.error("Voice translation call failed:", err);
-        if (voiceStatus) {
-          voiceStatus.textContent = 'Voice text added to description.';
-          voiceStatus.style.color = 'var(--text-muted)';
+          // Auto-trigger AI categorizer to set category & department if text describes a real civic issue!
+          if (isMeaningfulCivicDescription(englishText)) {
+            const aiBtn = document.getElementById('btn-ai-assist');
+            if (aiBtn) aiBtn.click();
+          }
+          return;
         }
       }
-    } else if (spokenText) {
+    } catch (err) {
+      console.error("Voice translation call failed:", err);
+    }
+
+    // Fallback if network call failed or Groq was unavailable: ensure Tamil script is never left in description
+    if (/[\u0B80-\u0BFF]/.test(spokenText)) {
+      const cleaned = fallbackTamilScriptToEnglish(spokenText);
+      if (descField) descField.value = cleaned;
       if (voiceStatus) {
-        voiceStatus.style.display = 'block';
-        voiceStatus.textContent = 'Voice captured. Please describe a specific civic issue (e.g. damaged road, streetlight issue, garbage leak).';
-        voiceStatus.style.color = '#d97706';
+        voiceStatus.textContent = 'Transcribed in English.';
+        voiceStatus.style.color = '#10b981';
       }
+    } else {
+      if (descField) descField.value = spokenText;
     }
   };
+}
+
+function fallbackTamilScriptToEnglish(text) {
+  if (!text) return text;
+  let s = text;
+  const commonMap = [
+    [/ஹாய்/gi, 'Hi'],
+    [/ஹலோ/gi, 'Hello'],
+    [/வெல்கம்/gi, 'Welcome'],
+    [/ரோடு|சாலையில்|ரோட்டில்/gi, 'road'],
+    [/குழி|பள்ளம்/gi, 'pothole'],
+    [/தண்ணீர்/gi, 'water leakage'],
+    [/விளக்கு/gi, 'street light'],
+    [/குப்பை/gi, 'garbage'],
+    [/வடிகால்/gi, 'drainage']
+  ];
+  commonMap.forEach(([pat, rep]) => {
+    s = s.replace(pat, rep);
+  });
+  return s;
 }
 
 /**
@@ -1345,7 +1421,7 @@ function setupAiAssistant() {
     const { data, error } = await window.API.analyzeWithAi("Civic Issue", description);
 
     aiBtn.disabled = false;
-    aiBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Categorize with AI';
+    aiBtn.innerHTML = '<i class="fa-solid fa-brain"></i> Auto-Categorize with AI';
 
     if (error) {
       alertBanner.textContent = `AI analysis failed: ${error}`;

@@ -117,17 +117,18 @@ export const translateAndCleanVoiceText = async (rawText = '') => {
 
   const groq = getGroqClient();
   if (!groq) {
-    return { englishText: rawText.trim() };
+    return { englishText: fallbackTranslateTamilScript(rawText.trim()) };
   }
 
-  const systemPrompt = `You are a professional Tamil-to-English and English speech correction AI for CrowdCity AI municipal portal.
+  const systemPrompt = `You are a professional Tamil-to-English and English speech correction AI for the CrowdCity civic portal.
 
 Task instructions:
-1. Input text may be spoken Tamil script (e.g. "ரோட்டில் பெரிய குழி உள்ளது"), Tanglish / Tamil in Roman letters (e.g. "roattil periya kuzhi irukku"), or English with speech recognition acoustic errors (e.g. "were is a", "water leak in road").
-2. Translate Tamil script or Tanglish into clear, natural, grammatically flawless ENGLISH.
-3. If input is already in English, correct any speech recognition typos or misheard words into perfect professional ENGLISH.
-4. Output MUST ALWAYS be exclusively in clear, professional ENGLISH.
-5. Output MUST be a single raw JSON object matching:
+1. Input text may be spoken Tamil script (e.g. "ரோட்டில் பெரிய குழி உள்ளது"), English words written phonetically in Tamil (e.g. "ஹாய் ஹலோ வெல்கம்"), Tanglish in Roman letters (e.g. "roattil periya kuzhi irukku"), or English with speech recognition typos.
+2. If input is phonetically written English words in Tamil script (e.g. "ஹாய் ஹலோ வெல்கம்"), convert directly to clear English words ("Hi, hello, welcome").
+3. Translate any Tamil words or Tanglish into clear, natural, grammatically flawless ENGLISH.
+4. If input is already in English, correct any speech recognition typos or misheard words into perfect professional ENGLISH.
+5. The output MUST ALWAYS be 100% EXCLUSIVELY in clear, professional ENGLISH. Never output Tamil script.
+6. Output MUST be a single raw JSON object:
 {
   "englishText": "The translated or corrected clear English sentence."
 }`;
@@ -146,13 +147,33 @@ Task instructions:
     const aiData = JSON.parse(responseText);
 
     return {
-      englishText: aiData.englishText || rawText
+      englishText: aiData.englishText || fallbackTranslateTamilScript(rawText)
     };
   } catch (err) {
     logger.error('translateAndCleanVoiceText Error: %O', err);
-    return { englishText: rawText };
+    return { englishText: fallbackTranslateTamilScript(rawText) };
   }
 };
+
+function fallbackTranslateTamilScript(text = '') {
+  if (!text) return '';
+  let s = text;
+  const map = [
+    [/ஹாய்/gi, 'Hi'],
+    [/ஹலோ/gi, 'Hello'],
+    [/வெல்கம்/gi, 'Welcome'],
+    [/ரோடு|சாலையில்|ரோட்டில்/gi, 'road'],
+    [/குழி|பள்ளம்/gi, 'pothole'],
+    [/தண்ணீர்/gi, 'water leakage'],
+    [/விளக்கு/gi, 'street light'],
+    [/குப்பை/gi, 'garbage'],
+    [/வடிகால்/gi, 'drainage']
+  ];
+  map.forEach(([pat, rep]) => {
+    s = s.replace(pat, rep);
+  });
+  return s;
+}
 
 /**
  * Groq AI Image Complaint Analysis
