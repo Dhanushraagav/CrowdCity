@@ -17,6 +17,22 @@
 
   const API_BASE = '/api/authorities';
 
+  // Centralized CrowdCity 24/7 Support Configuration
+  const CROWDCITY_SUPPORT_CONFIG = (typeof window !== 'undefined' && window.CROWDCITY_CONFIG?.SUPPORT) || {
+    label: 'CrowdCity Support',
+    title: 'CrowdCity 24/7 Support',
+    phone: '+91 9025132196',
+    get tel() {
+      return `tel:${this.phone.replace(/[^0-9+]/g, '')}`;
+    },
+    actionText: 'Call CrowdCity Support'
+  };
+
+  if (typeof window !== 'undefined') {
+    window.CROWDCITY_CONFIG = window.CROWDCITY_CONFIG || {};
+    window.CROWDCITY_CONFIG.SUPPORT = CROWDCITY_SUPPORT_CONFIG;
+  }
+
   // 38 Verified Tamil Nadu Districts (Instant Fallback / Zero Latency)
   const DEFAULT_TN_DISTRICTS = [
     { id: 'ariyalur', name: 'Ariyalur', nameTa: 'அரியலூர்' },
@@ -575,13 +591,24 @@
         `;
       }
 
-      // 6. CrowdCity 24/7 Support Fallback
+      // 6. CrowdCity 24/7 Support Card
       const supBox = document.getElementById('la-card-support-box');
       if (supBox && sup) {
+        const supportConfig = (typeof window !== 'undefined' && window.CROWDCITY_CONFIG?.SUPPORT) || CROWDCITY_SUPPORT_CONFIG;
+        const telUri = sup.tel || (sup.phone ? `tel:${sup.phone.replace(/[^0-9+]/g, '')}` : supportConfig.tel);
+        const titleText = sup.title || supportConfig.title || 'CrowdCity 24/7 Support';
+        const actionText = supportConfig.actionText || 'Call CrowdCity Support';
+
         supBox.innerHTML = `
           <div class="la-support-line">
-            <i class="fa-solid fa-headset"></i>
-            <span><strong>CrowdCity 24/7 Citizen Helpline:</strong> ${sup.phone ? `<a href="tel:${sup.phone}">${sup.phone}</a>` : 'Available for escalation assistance'}</span>
+            <div class="la-support-info">
+              <i class="fa-solid fa-headset" aria-hidden="true"></i>
+              <span class="la-support-title"><strong>${titleText}</strong></span>
+            </div>
+            <a href="${telUri}" class="la-support-call-btn" role="button" aria-label="${actionText}">
+              <i class="fa-solid fa-phone" aria-hidden="true"></i>
+              <span>${actionText}</span>
+            </a>
           </div>
         `;
       }

@@ -3,6 +3,20 @@ if (typeof window !== 'undefined' && window.location.hostname === 'crowdcity.co.
   window.location.replace('https://www.crowdcity.co.in' + window.location.pathname + window.location.search + window.location.hash);
 }
 
+// Centralized CrowdCity Global Configuration
+window.CROWDCITY_CONFIG = window.CROWDCITY_CONFIG || {};
+if (!window.CROWDCITY_CONFIG.SUPPORT) {
+  window.CROWDCITY_CONFIG.SUPPORT = {
+    label: 'CrowdCity Support',
+    title: 'CrowdCity 24/7 Support',
+    phone: '+91 9025132196',
+    get tel() {
+      return `tel:${this.phone.replace(/[^0-9+]/g, '')}`;
+    },
+    actionText: 'Call CrowdCity Support'
+  };
+}
+
 // Global helper to format category names nicely for display
 window.formatCategoryName = function(category) {
   if (!category) return '';

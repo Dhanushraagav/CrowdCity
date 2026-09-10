@@ -6,7 +6,23 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Pre-fill user profile info if logged in
   prefillUserInfo();
+
+  // Sync Support Call button from centralized configuration
+  initSupportCallButton();
 });
+
+function initSupportCallButton() {
+  const supportBtn = document.getElementById('contact-call-support-btn');
+  if (supportBtn) {
+    const config = (typeof window !== 'undefined' && window.CROWDCITY_CONFIG?.SUPPORT) 
+      ? window.CROWDCITY_CONFIG.SUPPORT 
+      : { tel: 'tel:+919025132196', actionText: 'Call CrowdCity Support' };
+    supportBtn.href = config.tel || 'tel:+919025132196';
+    if (config.actionText) {
+      supportBtn.setAttribute('aria-label', config.actionText);
+    }
+  }
+}
 
 /**
  * Pre-fills the user's name and email if authenticated

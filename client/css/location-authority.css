@@ -388,28 +388,71 @@
   margin-bottom: 0.4rem;
 }
 
-/* CrowdCity 24/7 Helpline Banner */
+/* CrowdCity 24/7 Support Banner & Call Button */
 .la-support-line {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.75rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
   background: #f0fdfa;
   border: 1px solid #ccfbf1;
   border-radius: 8px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #0f766e;
-  margin-top: 0.65rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.la-support-line a {
-  color: #0d9488;
-  font-weight: 800;
-  text-decoration: none;
+.la-support-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
 }
 
-.la-support-line a:hover {
-  text-decoration: underline;
+.la-support-info i {
+  font-size: 0.95rem;
+  color: var(--primary, #0d9488);
+  flex-shrink: 0;
+}
+
+.la-support-title {
+  color: #0f766e;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.la-support-call-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  background: var(--primary, #0d9488);
+  color: #ffffff !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 6px;
+  text-decoration: none !important;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.25);
+  min-height: 36px;
+  box-sizing: border-box;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.la-support-call-btn:hover {
+  background: #0f766e;
+  transform: translateY(-1px);
+}
+
+.la-support-call-btn:active {
+  transform: translateY(0);
+}
+
+.la-support-call-btn i {
+  font-size: 0.75rem;
 }
 
 /* Loading skeleton */

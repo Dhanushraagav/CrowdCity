@@ -90,14 +90,17 @@ router.post('/resolve', async (req, res) => {
  */
 router.get('/support-contact', (req, res) => {
   try {
-    const phone = process.env.CROWDCITY_SUPPORT_PHONE || null;
+    const phone = process.env.CROWDCITY_SUPPORT_PHONE || '+91 9025132196';
+    const tel = `tel:${phone.replace(/[^0-9+]/g, '')}`;
     return res.status(200).json({
       success: true,
       data: {
         label: 'CrowdCity Support',
+        title: 'CrowdCity 24/7 Support',
         phone: phone,
-        displayPhone: phone || '24/7 CrowdCity Support — Contact number coming soon',
-        isConfigured: !!phone
+        tel: tel,
+        displayPhone: phone,
+        isConfigured: true
       }
     });
   } catch (err) {

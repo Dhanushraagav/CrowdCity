@@ -855,13 +855,15 @@ export async function resolveResponsibleAuthority({
     };
   }
 
-  // 7. CrowdCity 24/7 Support Fallback
-  const supportPhone = process.env.CROWDCITY_SUPPORT_PHONE || null;
+  // 7. CrowdCity 24/7 Support Contact
+  const supportPhone = process.env.CROWDCITY_SUPPORT_PHONE || '+91 9025132196';
   const supportContact = {
     label: 'CrowdCity Support',
+    title: 'CrowdCity 24/7 Support',
     phone: supportPhone,
-    displayPhone: supportPhone ? supportPhone : '24/7 CrowdCity Support — Contact number coming soon',
-    isAvailable: !!supportPhone
+    tel: `tel:${supportPhone.replace(/[^0-9+]/g, '')}`,
+    displayPhone: supportPhone,
+    isAvailable: true
   };
 
   return {
