@@ -465,7 +465,8 @@
         const lbs = localBodiesCache[cacheKey] || [];
         let html = '<option value="" selected>Select Local Body (உள்ளாட்சி அமைப்பு)...</option>';
         lbs.forEach(lb => {
-          html += `<option value="${lb.id}">${lb.name} (${lb.localBodyTypeFormatted || 'Local Body'})</option>`;
+          const taLabel = lb.nameTa ? ` (${lb.nameTa})` : '';
+          html += `<option value="${lb.id}">${lb.name}${taLabel}</option>`;
         });
         select.innerHTML = html;
         select.disabled = false;

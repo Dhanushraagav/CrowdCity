@@ -1,6 +1,7 @@
 import { TN_DISTRICTS, getDistrictById } from '../config/districtsConfig.js';
 import logger from '../config/logger.js';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
+import { VILLAGES_BY_SUBDIVISION } from './villageDirectoryService.js';
 
 // Official Verified Tamil Nadu Administrative Hierarchy & Contact Registry
 // Sourced from official portals: tn.gov.in, tnega.tn.gov.in, and district portals (*.nic.in)
@@ -3852,6 +3853,38 @@ export function getSubdivisionsForDistrict(districtId) {
   return [];
 }
 
+// Recognized Municipal Corporations in Tamil Nadu
+const TN_CORPORATIONS = new Set([
+  'chennai', 'coimbatore', 'madurai', 'tiruchirappalli', 'trichy', 'salem', 'tirunelveli',
+  'tiruppur', 'erode', 'vellore', 'thoothukudi', 'dindigul', 'thanjavur', 'nagercoil',
+  'hosur', 'cuddalore', 'kancheepuram', 'tambaram', 'karur', 'kumbakonam', 'sivakasi',
+  'namakkal', 'tiruvannamalai', 'karaikudi', 'pudukkottai', 'avadi'
+]);
+
+// Recognized Municipalities in Tamil Nadu
+const TN_MUNICIPALITIES = new Set([
+  'tiruchengode', 'rasipuram', 'kumarapalayam', 'komarapalayam',
+  'mettur', 'attur', 'edappadi', 'narasingapuram',
+  'pollachi', 'mettupalayam', 'valparai',
+  'udumalaipettai', 'dharapuram', 'kangeyam', 'vellakoil',
+  'ooty', 'udhagamandalam', 'coonoor', 'gudalur', 'nelliyalam',
+  'bhavani', 'gobichettipalayam', 'sathyamangalam', 'punjaipuliampatti',
+  'mayiladuthurai', 'sirkazhi', 'nagapattinam', 'vedaranyam',
+  'rajapalayam', 'srivilliputhur', 'aruppukottai', 'virudhunagar', 'sattur',
+  'kovilpatti', 'kayalpattinam',
+  'ambur', 'vaniyambadi', 'gudiyattam', 'pernambut',
+  'ranipet', 'arakkonam', 'arcot', 'walajah', 'walajapet',
+  'tindivanam', 'villupuram', 'neyveli', 'chidambaram', 'virudhachalam', 'panruti', 'tittakudi',
+  'paramakudi', 'ramanathapuram', 'keelakarai', 'rameshwaram',
+  'tenkasi', 'sankarankovil', 'kadayanallur', 'puliyankudi', 'sengottai',
+  'ambasamudram', 'vikramasingapuram',
+  'bodinayakanur', 'periyakulam', 'cumbum', 'chinnamanur', 'theni_allinagaram', 'theni',
+  'pattukkottai', 'mannargudi', 'thiruvarur', 'thiruthuraipoondi', 'koothanallur',
+  'dharmapuri', 'krishnagiri',
+  'chengalpattu', 'maraimalai_nagar', 'madurantakam',
+  'thiruvallur', 'ponneri', 'poonamallee', 'thiruverkadu', 'tiruttani'
+]);
+
 export function getLocalBodiesForSubdivision(districtId, subdivisionId) {
   if (!districtId) return [];
   const cleanDist = normalizeDistrictId(districtId);
@@ -3863,25 +3896,57 @@ export function getLocalBodiesForSubdivision(districtId, subdivisionId) {
     if (subFiltered.length > 0) list = subFiltered;
   }
 
-  // If no predefined local bodies found in directory, generate valid local bodies for the district & subdivision
+  // If no predefined local bodies found in directory, accurately generate valid local bodies for the district & subdivision
   if (list.length === 0) {
     const dist = TN_DISTRICTS.find(d => d.id === cleanDist) || { id: cleanDist, name: cleanDist, code: 'tn' };
     const subObj = SUBDIVISIONS_DIRECTORY.find(s => s.id === cleanSub) || SUBDIVISIONS_DIRECTORY.find(s => s.districtId === cleanDist);
     const subName = subObj ? subObj.name : dist.name;
     const subNameTa = subObj ? subObj.nameTa : (dist.nameTa || subName);
     const subKey = cleanSub || `${cleanDist}_default`;
+    const subCore = cleanSub.replace(/^[a-z]{2,4}_/, '').toLowerCase();
+    const subNameClean = subName.toLowerCase().trim();
 
-    list = [
-      {
+    const isCorp = TN_CORPORATIONS.has(subCore) || TN_CORPORATIONS.has(subNameClean);
+    const isMpty = TN_MUNICIPALITIES.has(subCore) || TN_MUNICIPALITIES.has(subNameClean);
+
+    let urbanLb = null;
+    if (isCorp) {
+      urbanLb = {
+        id: `lb_${cleanDist}_${subKey}_corp`,
+        districtId: cleanDist,
+        subdivisionId: cleanSub || (subObj ? subObj.id : ''),
+        name: `${subName} City Municipal Corporation`,
+        nameTa: `${subNameTa} மாநகராட்சி`,
+        localBodyType: 'municipal_corporation',
+        localBodyTypeFormatted: 'Municipal Corporation (மாநகராட்சி)',
+        tier: 'urban'
+      };
+    } else if (isMpty) {
+      urbanLb = {
         id: `lb_${cleanDist}_${subKey}_mpty`,
         districtId: cleanDist,
         subdivisionId: cleanSub || (subObj ? subObj.id : ''),
-        name: `${subName} Municipality / Town Panchayat`,
-        nameTa: `${subNameTa} நகராட்சி / பேரூராட்சி`,
+        name: `${subName} Municipality`,
+        nameTa: `${subNameTa} நகராட்சி`,
         localBodyType: 'municipality',
-        localBodyTypeFormatted: 'Municipality / Town Panchayat (நகராட்சி)',
+        localBodyTypeFormatted: 'Municipality (நகராட்சி)',
         tier: 'urban'
-      },
+      };
+    } else {
+      urbanLb = {
+        id: `lb_${cleanDist}_${subKey}_tp`,
+        districtId: cleanDist,
+        subdivisionId: cleanSub || (subObj ? subObj.id : ''),
+        name: `${subName} Town Panchayat`,
+        nameTa: `${subNameTa} பேரூராட்சி`,
+        localBodyType: 'town_panchayat',
+        localBodyTypeFormatted: 'Town Panchayat (பேரூராட்சி)',
+        tier: 'urban'
+      };
+    }
+
+    list = [
+      urbanLb,
       {
         id: `lb_${cleanDist}_${subKey}_block`,
         districtId: cleanDist,
@@ -3903,6 +3968,23 @@ export function getLocalBodiesForSubdivision(districtId, subdivisionId) {
         tier: 'rural'
       }
     ];
+
+    // Also include any recognized town panchayats under this taluk from VILLAGES_BY_SUBDIVISION
+    const talukVillages = (VILLAGES_BY_SUBDIVISION && VILLAGES_BY_SUBDIVISION[cleanSub]) || [];
+    const towns = talukVillages.filter(v => v.type === 'town' && v.name.toLowerCase() !== subName.toLowerCase());
+    towns.forEach(t => {
+      const tKey = t.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      list.push({
+        id: `lb_${cleanDist}_${subKey}_tp_${tKey}`,
+        districtId: cleanDist,
+        subdivisionId: cleanSub || (subObj ? subObj.id : ''),
+        name: `${t.name} Town Panchayat`,
+        nameTa: t.nameTa ? `${t.nameTa} பேரூராட்சி` : `${t.name} பேரூராட்சி`,
+        localBodyType: 'town_panchayat',
+        localBodyTypeFormatted: 'Town Panchayat (பேரூராட்சி)',
+        tier: 'urban'
+      });
+    });
   }
 
   return list.map(lb => ({
