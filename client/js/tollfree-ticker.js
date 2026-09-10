@@ -177,10 +177,25 @@
   }
 
   /**
-   * Ensure Header Widget is attached without any box
+   * Helper to verify current page is strictly the Citizen Dashboard
+   */
+  function isCitizenDashboardPage() {
+    const p = (window.location.pathname || '').toLowerCase();
+    return p.includes('citizen-dashboard') || !!document.querySelector('.stitch-hero') || !!document.getElementById('civic-intelligence-feed-text');
+  }
+
+  /**
+   * Ensure Header Widget is attached without any box (STRICT: Citizen Dashboard Only)
    */
   function ensureHeaderWidget() {
     removeLegacyFloatingWidget();
+
+    // STRICT: Only show header widget on citizen dashboard
+    if (!isCitizenDashboardPage()) {
+      const existing = document.getElementById('header-tollfree-widget');
+      if (existing) existing.remove();
+      return;
+    }
 
     // Check if already present
     if (document.getElementById('header-tollfree-widget')) {
@@ -242,6 +257,11 @@
    */
   function init() {
     removeLegacyFloatingWidget();
+    if (!isCitizenDashboardPage()) {
+      const existing = document.getElementById('header-tollfree-widget');
+      if (existing) existing.remove();
+      return;
+    }
     ensureHeaderWidget();
     // In case auth.js updates the header asynchronously, re-check once
     setTimeout(ensureHeaderWidget, 350);

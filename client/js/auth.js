@@ -2056,8 +2056,8 @@ function updateAuthUI() {
     const tNoNotifications = window.i18n ? window.i18n.t('no_notifications') : 'No new notifications';
     const tProfile = window.i18n ? window.i18n.t('nav_profile') : 'Profile';
     const tSettings = window.i18n ? window.i18n.t('nav_settings') : 'Settings';
-    const currentPath = window.location.pathname;
-    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || currentPath.endsWith('/') || currentPath.endsWith('/index.html') || currentPath.endsWith('/index');
+    const currentPath = (window.location.pathname || '').toLowerCase();
+    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || !!document.querySelector('.stitch-hero') || !!document.getElementById('civic-intelligence-feed-text');
     const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';
     const tnUpdatesBtnHtml = isCitizenDashboardOnly
       ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn" title="Tamil Nadu Government & Civic Updates">
@@ -2067,7 +2067,7 @@ function updateAuthUI() {
       : '';
 
     const tollFreeNum = window.CROWDCITY_TOLL_FREE || localStorage.getItem('crowdcity_toll_free') || '1800-425-1100';
-    const tollFreeHeaderBtnHtml = `
+    const tollFreeHeaderBtnHtml = isCitizenDashboardOnly ? `
       <div class="header-tollfree-pill" id="header-tollfree-widget" title="24/7 Citizen Toll-Free Helpline: ${tollFreeNum}">
         <a href="tel:${tollFreeNum.replace(/[^0-9+]/g, '')}" class="header-tf-link">
           <span class="header-tf-icon-wrap">
@@ -2082,7 +2082,7 @@ function updateAuthUI() {
           <i class="fa-regular fa-copy"></i>
         </button>
       </div>
-    `;
+    ` : '';
 
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
@@ -2153,8 +2153,8 @@ function updateAuthUI() {
       </div>
     `;
   } else {
-    const currentPath = window.location.pathname;
-    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || currentPath.endsWith('/') || currentPath.endsWith('/index.html') || currentPath.endsWith('/index');
+    const currentPath = (window.location.pathname || '').toLowerCase();
+    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || !!document.querySelector('.stitch-hero') || !!document.getElementById('civic-intelligence-feed-text');
     const tnUpdatesBtnHtml = isCitizenDashboardOnly
       ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn" title="Tamil Nadu Government & Civic Updates">
           <i class="fa-solid fa-newspaper"></i>
@@ -2163,7 +2163,7 @@ function updateAuthUI() {
       : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
     const tollFreeNum = window.CROWDCITY_TOLL_FREE || localStorage.getItem('crowdcity_toll_free') || '1800-425-1100';
-    const tollFreeHeaderBtnHtml = `
+    const tollFreeHeaderBtnHtml = isCitizenDashboardOnly ? `
       <div class="header-tollfree-pill" id="header-tollfree-widget" title="24/7 Citizen Toll-Free Helpline: ${tollFreeNum}">
         <a href="tel:${tollFreeNum.replace(/[^0-9+]/g, '')}" class="header-tf-link">
           <span class="header-tf-icon-wrap">
@@ -2178,7 +2178,7 @@ function updateAuthUI() {
           <i class="fa-regular fa-copy"></i>
         </button>
       </div>
-    `;
+    ` : '';
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
         ${tollFreeHeaderBtnHtml}
