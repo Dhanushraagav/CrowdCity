@@ -61,9 +61,9 @@
     { id: 'tenkasi', name: 'Tenkasi', nameTa: 'தென்காசி' },
     { id: 'thanjavur', name: 'Thanjavur', nameTa: 'தஞ்சாவூர்' },
     { id: 'theni', name: 'Theni', nameTa: 'தேனி' },
-    { id: 'thiruvallur', name: 'Thiruvallur', nameTa: 'திருவள்ளூர்' },
-    { id: 'thiruvarur', name: 'Thiruvarur', nameTa: 'திருவாரூர்' },
-    { id: 'thoothukkudi', name: 'Thoothukkudi', nameTa: 'தூத்துக்குடி' },
+    { id: 'tiruvallur', name: 'Tiruvallur', nameTa: 'திருவள்ளூர்' },
+    { id: 'tiruvarur', name: 'Tiruvarur', nameTa: 'திருவாரூர்' },
+    { id: 'thoothukudi', name: 'Thoothukudi', nameTa: 'தூத்துக்குடி' },
     { id: 'tiruchirappalli', name: 'Tiruchirappalli', nameTa: 'திருச்சிராப்பள்ளி' },
     { id: 'tirunelveli', name: 'Tirunelveli', nameTa: 'திருநெல்வேலி' },
     { id: 'tirupathur', name: 'Tirupathur', nameTa: 'திருப்பத்தூர்' },
@@ -159,6 +159,7 @@
           this.state.localBodyId = '';
           this.state.villageOrTown = '';
           if (villageInput) villageInput.value = '';
+          this.updateLocationHeaderLabel();
           await this.populateSubdivisions(distId);
           await this.populateLocalBodies(distId, '');
           this.triggerResolution();
@@ -170,6 +171,7 @@
           const subId = e.target.value;
           this.state.subdivisionId = subId;
           this.state.localBodyId = '';
+          this.updateLocationHeaderLabel();
           await this.populateLocalBodies(this.state.districtId, subId);
           this.triggerResolution();
         });
@@ -178,6 +180,7 @@
       if (localBodySelect) {
         localBodySelect.addEventListener('change', (e) => {
           this.state.localBodyId = e.target.value;
+          this.updateLocationHeaderLabel();
           this.triggerResolution();
         });
       }
@@ -185,6 +188,7 @@
       if (villageInput) {
         villageInput.addEventListener('input', (e) => {
           this.state.villageOrTown = e.target.value.trim();
+          this.updateLocationHeaderLabel();
           clearTimeout(villageDebounceTimer);
           villageDebounceTimer = setTimeout(() => {
             this.triggerResolution();
@@ -226,6 +230,7 @@
           await this.populateSubdivisions(defaultDist);
           await this.populateLocalBodies(defaultDist, '');
         }
+        this.updateLocationHeaderLabel();
         this.triggerResolution();
       } else {
         if (autoBox) autoBox.classList.remove('hidden');
@@ -238,6 +243,7 @@
         this.state.subdivisionId = '';
         this.state.localBodyId = '';
         this.state.villageOrTown = '';
+        this.updateLocationHeaderLabel();
         this.triggerResolution();
       }
     },
@@ -439,8 +445,101 @@
       this.state.lng = lng;
       this.state.address = address;
 
+      if (nominatimData && nominatimData.address) {
+        const addr = nominatimData.address;
+        const loc = addr.village || addr.town || addr.city || addr.suburb || addr.neighbourhood || addr.subdistrict || '';
+        const dist = addr.county || addr.district || addr.state_district || '';
+        if (loc && dist && loc.toLowerCase() !== dist.toLowerCase()) {
+          this.updateLocationHeaderLabel(`${loc}, ${dist}`);
+        } else if (loc || dist) {
+          this.updateLocationHeaderLabel(loc || dist);
+        } else {
+          this.updateLocationHeaderLabel();
+        }
+      } else {
+        this.updateLocationHeaderLabel();
+      }
+
       if (!isManualOverride) {
         this.triggerResolution();
+      }
+    },
+
+    /**
+     * Update the Location status text next to the pin icon in the Mode Toggle Bar.
+     * Shows current location: village, town, city, or district.
+     */
+    updateLocationHeaderLabel: function(customText) {
+      const labelEl = document.getElementById('la-current-mode-label');
+      if (!labelEl) return;
+
+      if (customText && typeof customText === 'string') {
+        labelEl.textContent = customText;
+        labelEl.title = customText;
+        return;
+      }
+
+      if (isManualOverride) {
+        // Build from manual selection
+        const village = (this.state.villageOrTown || '').trim();
+        const distSelect = document.getElementById('la-district-select');
+        const subdivSelect = document.getElementById('la-subdivision-select');
+        
+        let distName = '';
+        if (distSelect && distSelect.selectedIndex > 0) {
+          distName = distSelect.options[distSelect.selectedIndex].text.split('(')[0].trim();
+        } else if (this.state.districtId) {
+          const d = districtsCache.find(x => x.id === this.state.districtId);
+          distName = d ? d.name : this.state.districtId;
+        }
+
+        let talukName = '';
+        if (subdivSelect && subdivSelect.selectedIndex > 0 && subdivSelect.value) {
+          talukName = subdivSelect.options[subdivSelect.selectedIndex].text.split('[')[0].split('(')[0].trim();
+        }
+
+        const parts = [];
+        if (village) parts.push(village);
+        if (talukName && talukName !== village && (!distName || !talukName.toLowerCase().includes(distName.toLowerCase()))) {
+          parts.push(talukName);
+        }
+        if (distName) parts.push(distName);
+
+        const text = parts.length > 0 ? parts.join(', ') : 'Select Location Manually';
+        labelEl.textContent = text;
+        labelEl.title = text;
+      } else {
+        // Auto mode: build from current resolution or address
+        if (currentResolution && currentResolution.jurisdiction) {
+          const j = currentResolution.jurisdiction;
+          const village = (j.villageOrTown || '').trim();
+          const taluk = (j.taluk || '').trim();
+          const district = (j.district || '').trim();
+
+          const parts = [];
+          if (village && district && village.toLowerCase() !== district.toLowerCase()) {
+            parts.push(village);
+          } else if (taluk && district && taluk.toLowerCase() !== district.toLowerCase()) {
+            parts.push(taluk);
+          }
+          if (district) parts.push(district);
+
+          const text = parts.length > 0 ? parts.join(', ') : (j.district || 'Tamil Nadu');
+          labelEl.textContent = text;
+          labelEl.title = text;
+        } else if (this.state.address) {
+          const addrTokens = this.state.address.split(',').map(s => s.trim()).filter(Boolean);
+          if (addrTokens.length >= 2) {
+            const text = `${addrTokens[0]}, ${addrTokens[1]}`;
+            labelEl.textContent = text;
+            labelEl.title = this.state.address;
+          } else {
+            labelEl.textContent = addrTokens[0] || 'Tamil Nadu';
+            labelEl.title = this.state.address;
+          }
+        } else {
+          labelEl.textContent = 'Detecting location...';
+        }
       }
     },
 
@@ -470,6 +569,7 @@
       const cardContainer = document.getElementById('la-authority-card-container');
       if (!cardContainer) return;
       cardContainer.classList.remove('hidden');
+      this.updateLocationHeaderLabel();
 
       const j = res.jurisdiction || {};
       const a = res.administrativeAuthority || {};

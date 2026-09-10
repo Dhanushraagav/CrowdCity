@@ -20,10 +20,19 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  min-width: 0;
+}
+
+#la-current-mode-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
 }
 
 .la-mode-status i {
   color: var(--primary, #0d9488);
+  flex-shrink: 0;
 }
 
 .la-toggle-btn {

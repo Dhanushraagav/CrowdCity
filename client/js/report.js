@@ -974,6 +974,9 @@ function setupSearchButton() {
           });
         }
         isAddressManuallyEntered = false;
+        if (window.LocationAuthority && typeof window.LocationAuthority.onGeocodeResolved === 'function') {
+          window.LocationAuthority.onGeocodeResolved(resolvedLat, resolvedLng, addressInput.value, result.nominatimData || null);
+        }
         window.showToast('Location resolved successfully.', 'success');
       } else {
         const errorMsg = result.errorMsg || 'Could not resolve the address. Please pin it on the map manually.';
@@ -1001,6 +1004,9 @@ async function reverseGeocode(lat, lng) {
   if (!addressInput) return;
 
   addressInput.value = "Resolving address...";
+  if (window.LocationAuthority && typeof window.LocationAuthority.updateLocationHeaderLabel === 'function') {
+    window.LocationAuthority.updateLocationHeaderLabel('Resolving location...');
+  }
   
   try {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`, {
