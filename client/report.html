@@ -22,7 +22,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
   <link rel="stylesheet" href="css/components.css?v=3.1.0">
-  <link rel="stylesheet" href="css/location-authority.css?v=1.1.0">
+  <link rel="stylesheet" href="css/location-authority.css?v=1.2.0">
 
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -386,14 +386,38 @@
 
     @media (max-width: 480px) {
       .topnav {
-        padding: 0 1rem;
+        padding: 0 0.75rem;
       }
       .topnav-logo {
         margin-right: 0;
       }
+      .page-inner {
+        padding: 1rem 0.5rem 2.5rem 0.5rem !important;
+      }
+      .report-form-card {
+        padding: 1.1rem 0.75rem !important;
+        border-radius: 12px;
+        gap: 1.25rem;
+      }
       .coords-row {
         grid-template-columns: 1fr !important;
         gap: 0.5rem !important;
+      }
+      .address-field-wrapper {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+      }
+      .address-input-wrapper {
+        width: 100% !important;
+      }
+      #btn-search-address {
+        width: 100% !important;
+        justify-content: center !important;
+        min-height: 42px !important;
+        height: auto !important;
+      }
+      #wizard-step-3 {
+        padding: 1.25rem 0.75rem !important;
       }
     }
   </style>

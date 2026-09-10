@@ -581,10 +581,28 @@
       const badgesEl = document.getElementById('la-card-hierarchy-badges');
       if (badgesEl) {
         badgesEl.innerHTML = `
-          <span class="la-badge la-badge-district" title="District Collectorate"><i class="fa-solid fa-map-location-dot"></i> District: <strong>${j.district || 'Coimbatore'}</strong></span>
-          <span class="la-badge la-badge-taluk" title="Taluk / Subdivision"><i class="fa-solid fa-building-columns"></i> Taluk: <strong>${j.taluk || 'Sulur'}</strong></span>
-          ${j.villageOrTown ? `<span class="la-badge la-badge-village"><i class="fa-solid fa-location-arrow"></i> Village/Town: <strong>${j.villageOrTown}</strong></span>` : ''}
-          <span class="la-badge la-badge-localbody" title="${j.localBodyType || 'Local Body'}"><i class="fa-solid fa-landmark-dome"></i> <strong>${j.localBody || 'Local Body'}</strong> (${j.localBodyType || 'Village Panchayat'} &bull; ${j.tier || 'Rural'})</span>
+          <span class="la-badge la-badge-district" title="District Collectorate">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span class="la-badge-label">District:</span>
+            <strong class="la-badge-value">${j.district || 'Coimbatore'}</strong>
+          </span>
+          <span class="la-badge la-badge-taluk" title="Taluk / Subdivision">
+            <i class="fa-solid fa-building-columns"></i>
+            <span class="la-badge-label">Taluk:</span>
+            <strong class="la-badge-value">${j.taluk || 'Sulur'}</strong>
+          </span>
+          ${j.villageOrTown ? `
+          <span class="la-badge la-badge-village" title="Village / Locality">
+            <i class="fa-solid fa-location-arrow"></i>
+            <span class="la-badge-label">Village/Town:</span>
+            <strong class="la-badge-value">${j.villageOrTown}</strong>
+          </span>` : ''}
+          <span class="la-badge la-badge-localbody" title="${j.localBodyType || 'Local Body'}">
+            <i class="fa-solid fa-landmark-dome"></i>
+            <span class="la-badge-label">Local Body:</span>
+            <strong class="la-badge-value">${j.localBody || 'Local Body'}</strong>
+            <span class="la-badge-sub">(${j.localBodyType || 'Village Panchayat'} &bull; ${j.tier || 'Rural'})</span>
+          </span>
         `;
       }
 
@@ -662,8 +680,8 @@
               <div class="la-rep-office">${el.office}</div>
               <div class="la-rep-desig">${el.designation}</div>
               <div class="la-contact-row">
-                ${el.phone ? `<a href="tel:${el.phone.replace(/[^0-9+]/g, '')}" class="la-contact-btn phone"><i class="fa-solid fa-phone"></i> ${el.phone}</a>` : '<span class="la-contact-na"><i class="fa-solid fa-phone-slash"></i> Phone unavailable</span>'}
-                ${el.email ? `<a href="mailto:${el.email}" class="la-contact-btn email"><i class="fa-solid fa-envelope"></i> ${el.email}</a>` : ''}
+                ${el.phone ? `<a href="tel:${el.phone.replace(/[^0-9+]/g, '')}" class="la-contact-btn phone"><i class="fa-solid fa-phone"></i> <span>${el.phone}</span></a>` : '<span class="la-contact-na"><i class="fa-solid fa-phone-slash"></i> <span>Phone unavailable</span></span>'}
+                ${el.email ? `<a href="mailto:${el.email}" class="la-contact-btn email"><i class="fa-solid fa-envelope"></i> <span>${el.email}</span></a>` : ''}
               </div>
             </div>
           `;
@@ -684,8 +702,8 @@
             <div class="la-esc-office">${esc.office}</div>
             <div class="la-esc-desig">${esc.designation}</div>
             <div class="la-contact-row">
-              <a href="tel:${esc.phone.replace(/[^0-9+]/g, '')}" class="la-contact-btn phone"><i class="fa-solid fa-phone"></i> ${esc.phone}</a>
-              <a href="mailto:${esc.email}" class="la-contact-btn email"><i class="fa-solid fa-envelope"></i> ${esc.email}</a>
+              <a href="tel:${esc.phone.replace(/[^0-9+]/g, '')}" class="la-contact-btn phone"><i class="fa-solid fa-phone"></i> <span>${esc.phone}</span></a>
+              <a href="mailto:${esc.email}" class="la-contact-btn email"><i class="fa-solid fa-envelope"></i> <span>${esc.email}</span></a>
             </div>
           </div>
         `;
