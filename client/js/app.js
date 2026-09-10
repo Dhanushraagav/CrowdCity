@@ -1102,7 +1102,8 @@ function updateCivicIntelligenceFeed(issues) {
     .slice(0, 3);
 
   recentPending.forEach(r => {
-    const loc = r.address ? ` (${r.address})` : '';
+    const locName = r.village_or_town || (r.address ? r.address.split(',')[0].trim() : '') || r.district || '';
+    const loc = locName ? ` (${locName})` : '';
     msgs.push(`குடிமக்கள் பதிவுசெய்த புகார்: "${r.title}"${loc} — நகராட்சி துரித நடவடிக்கை குழுவிற்கு அனுப்பப்பட்டுள்ளது.`);
   });
 
@@ -1112,7 +1113,8 @@ function updateCivicIntelligenceFeed(issues) {
     .slice(0, 3);
 
   recentResolved.forEach(r => {
-    const loc = r.address ? ` (${r.address})` : '';
+    const locName = r.village_or_town || (r.address ? r.address.split(',')[0].trim() : '') || r.district || '';
+    const loc = locName ? ` (${locName})` : '';
     msgs.push(`சமீபத்தில் தீர்க்கப்பட்ட புகார்: "${r.title}"${loc} • சரிபார்க்கப்பட்டு முழுமையாக தீர்க்கப்பட்டது.`);
   });
 
