@@ -5956,12 +5956,10 @@ a,
   display: inline-flex;
   align-items: center;
   font-family: var(--font-body, 'Inter', sans-serif);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #0f172a;
   white-space: nowrap;
-  max-width: 170px;
-  overflow: hidden;
 }
 
 .header-tf-news-text {

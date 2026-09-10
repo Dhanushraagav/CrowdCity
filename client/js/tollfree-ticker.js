@@ -17,12 +17,12 @@
                             localStorage.getItem('crowdcity_toll_free') || 
                             '1800-425-1100';
 
-  // Header News Ticker Messages (compact, crisp, highly legible)
+  // Header News Ticker Messages (clean, short, reduced letters, zero cut-off)
   const TICKER_MESSAGES = [
-    `${PRIMARY_TOLL_FREE} (24/7 Support)`,
-    `CM Helpline: 1100 (Toll-Free)`,
-    `Municipal: 1913 (Toll-Free)`,
-    `Emergency: 112 (Toll-Free)`,
+    `${PRIMARY_TOLL_FREE} (24/7)`,
+    `CM Helpline: 1100`,
+    `Municipal: 1913`,
+    `Emergency: 112`,
     `Toll-Free: ${PRIMARY_TOLL_FREE}`
   ];
 
