@@ -2060,10 +2060,8 @@ function updateAuthUI() {
             <i class="fa-solid fa-phone-volume"></i>
             <span class="header-tf-live-dot"></span>
           </span>
-          <span class="header-tf-badge">Toll-Free</span>
           <span class="header-tf-text-wrap">
-            <span id="header-tf-text" class="header-tf-news-text">${tollFreeNum}</span>
-            <span class="header-tf-cursor">|</span>
+            <span id="header-tf-text" class="header-tf-news-text">Toll-Free: ${tollFreeNum}</span>
           </span>
         </a>
         <button type="button" class="header-tf-copy-btn" onclick="if(window.CrowdCityTollFree) window.CrowdCityTollFree.copyNumber(event)" title="Copy Toll-Free Number">
@@ -2158,10 +2156,8 @@ function updateAuthUI() {
             <i class="fa-solid fa-phone-volume"></i>
             <span class="header-tf-live-dot"></span>
           </span>
-          <span class="header-tf-badge">Toll-Free</span>
           <span class="header-tf-text-wrap">
-            <span id="header-tf-text" class="header-tf-news-text">${tollFreeNum}</span>
-            <span class="header-tf-cursor">|</span>
+            <span id="header-tf-text" class="header-tf-news-text">Toll-Free: ${tollFreeNum}</span>
           </span>
         </a>
         <button type="button" class="header-tf-copy-btn" onclick="if(window.CrowdCityTollFree) window.CrowdCityTollFree.copyNumber(event)" title="Copy Toll-Free Number">

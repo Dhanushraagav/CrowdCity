@@ -3,10 +3,11 @@
  * 
  * Features:
  * 1. Placed near "TN Updates" in the top navigation header in crisp White Theme.
- * 2. Authentic news-typing typewriter animation cycling through official toll-free lines.
- * 3. 1-tap call (tel:18004251100) & 1-click clipboard copy with feedback toast.
- * 4. Placed as the 1st item in Quick Actions on mobile view.
- * 5. Completely removes old bottom-left dark floating bubble.
+ * 2. Smooth, flicker-free slide-fade news ticker cycling through official lines.
+ * 3. Removed box around "Toll-Free" as requested.
+ * 4. 1-tap call (tel:18004251100) & 1-click clipboard copy with feedback toast.
+ * 5. Placed as the 1st item in Quick Actions on mobile view.
+ * 6. Completely removes old bottom-left dark floating bubble.
  */
 
 (function(window, document) {
@@ -17,13 +18,13 @@
                             localStorage.getItem('crowdcity_toll_free') || 
                             '1800-425-1100';
 
-  // Header News Ticker Messages (clean, short, reduced letters, zero cut-off)
+  // Header News Ticker Messages (clean, short, unboxed, flicker-free)
   const TICKER_MESSAGES = [
-    `${PRIMARY_TOLL_FREE} (24/7)`,
+    `Toll-Free: ${PRIMARY_TOLL_FREE}`,
     `CM Helpline: 1100`,
     `Municipal: 1913`,
     `Emergency: 112`,
-    `Toll-Free: ${PRIMARY_TOLL_FREE}`
+    `24/7 Helpline: ${PRIMARY_TOLL_FREE}`
   ];
 
   // Remove any legacy bottom-left floating dark container
@@ -34,71 +35,64 @@
 
   // Animation State
   let currentMsgIdx = 0;
-  let currentCharIdx = 0;
-  let isDeleting = false;
-  let typingTimer = null;
+  let isTransitioning = false;
+  let tickerTimer = null;
 
   /**
-   * Typewriter news animation engine for header widget
+   * Smooth, flicker-free news-ticker slide/fade transition engine
    */
-  function runTypewriter() {
-    const textEl = document.getElementById('header-tf-text');
-    if (!textEl || TICKER_MESSAGES.length === 0) return;
-
-    const currentMsg = TICKER_MESSAGES[currentMsgIdx % TICKER_MESSAGES.length];
-    
-    // Grapheme-safe splitting for Tamil and Unicode characters
-    let chars;
-    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-      const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
-      chars = Array.from(segmenter.segment(currentMsg), s => s.segment);
-    } else {
-      chars = Array.from(currentMsg);
+  function scheduleNextMessage() {
+    if (tickerTimer) {
+      clearTimeout(tickerTimer);
+      tickerTimer = null;
     }
 
-    if (!isDeleting) {
-      // Forward typing
-      currentCharIdx++;
-      textEl.textContent = chars.slice(0, currentCharIdx).join('');
+    tickerTimer = setTimeout(() => {
+      const textEl = document.getElementById('header-tf-text');
+      if (!textEl || TICKER_MESSAGES.length === 0) return;
+      if (isTransitioning) return;
 
-      if (currentCharIdx >= chars.length) {
-        // Hold for reading
-        isDeleting = true;
-        typingTimer = setTimeout(runTypewriter, 3800);
-        return;
-      }
+      isTransitioning = true;
 
-      const variance = Math.floor(Math.random() * 16);
-      typingTimer = setTimeout(runTypewriter, 36 + variance);
-    } else {
-      // Backward erasing
-      currentCharIdx -= 2;
-      if (currentCharIdx < 0) currentCharIdx = 0;
-      textEl.textContent = chars.slice(0, currentCharIdx).join('');
+      // 1. Smoothly fade out and slide up
+      textEl.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+      textEl.style.opacity = '0';
+      textEl.style.transform = 'translateY(-6px)';
 
-      if (currentCharIdx <= 0) {
-        // Transition to next message
-        isDeleting = false;
+      setTimeout(() => {
+        // 2. Change text while invisible
         currentMsgIdx = (currentMsgIdx + 1) % TICKER_MESSAGES.length;
-        typingTimer = setTimeout(runTypewriter, 300);
-        return;
-      }
+        textEl.textContent = TICKER_MESSAGES[currentMsgIdx];
 
-      typingTimer = setTimeout(runTypewriter, 18);
-    }
+        // 3. Position below before animating in
+        textEl.style.transition = 'none';
+        textEl.style.transform = 'translateY(6px)';
+
+        // 4. Force browser layout repaint
+        void textEl.offsetWidth;
+
+        // 5. Smoothly slide up into view and fade in
+        textEl.style.transition = 'opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)';
+        textEl.style.opacity = '1';
+        textEl.style.transform = 'translateY(0)';
+
+        isTransitioning = false;
+
+        // 6. Schedule next rotation after 4.2 seconds
+        scheduleNextMessage();
+      }, 280);
+    }, 4200);
   }
 
   /**
-   * Start / restart news-typing animation
+   * Start / restart news ticker animation safely
    */
   function startHeaderAnimation() {
-    if (typingTimer) {
-      clearTimeout(typingTimer);
-      typingTimer = null;
+    const textEl = document.getElementById('header-tf-text');
+    if (textEl && !textEl.textContent.trim()) {
+      textEl.textContent = TICKER_MESSAGES[currentMsgIdx];
     }
-    currentCharIdx = 0;
-    isDeleting = false;
-    runTypewriter();
+    scheduleNextMessage();
   }
 
   /**
@@ -183,7 +177,7 @@
   }
 
   /**
-   * Ensure Header Widget is attached if auth.js ran before or without it
+   * Ensure Header Widget is attached without any box
    */
   function ensureHeaderWidget() {
     removeLegacyFloatingWidget();
@@ -209,10 +203,8 @@
             <i class="fa-solid fa-phone-volume"></i>
             <span class="header-tf-live-dot"></span>
           </span>
-          <span class="header-tf-badge">Toll-Free</span>
           <span class="header-tf-text-wrap">
-            <span id="header-tf-text" class="header-tf-news-text">${PRIMARY_TOLL_FREE}</span>
-            <span class="header-tf-cursor">|</span>
+            <span id="header-tf-text" class="header-tf-news-text">Toll-Free: ${PRIMARY_TOLL_FREE}</span>
           </span>
         </a>
         <button type="button" class="header-tf-copy-btn" title="Copy Toll-Free Number">
@@ -251,9 +243,8 @@
   function init() {
     removeLegacyFloatingWidget();
     ensureHeaderWidget();
-    // In case auth.js updates the header asynchronously, re-check
-    setTimeout(ensureHeaderWidget, 400);
-    setTimeout(ensureHeaderWidget, 1200);
+    // In case auth.js updates the header asynchronously, re-check once
+    setTimeout(ensureHeaderWidget, 350);
   }
 
   if (document.readyState === 'loading') {
