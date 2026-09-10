@@ -5,6 +5,7 @@ import {
   getLocalBodiesForSubdivision,
   resolveResponsibleAuthority
 } from '../services/authorityDirectoryService.js';
+import { getVillagesForSubdivision } from '../services/villageDirectoryService.js';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 import logger from '../config/logger.js';
 
@@ -39,6 +40,24 @@ router.get('/subdivisions', (req, res) => {
   } catch (err) {
     logger.error('Error in /api/authorities/subdivisions: %O', err);
     return res.status(500).json({ error: 'Failed to fetch subdivisions.' });
+  }
+});
+
+/**
+ * 3. GET /api/authorities/villages?district=...&subdivision=...
+ * Returns authentic revenue villages / towns for the selected district and taluk/subdivision
+ */
+router.get('/villages', (req, res) => {
+  try {
+    const { district, subdivision } = req.query;
+    if (!district) {
+      return res.status(400).json({ error: 'district query parameter is required.' });
+    }
+    const villages = getVillagesForSubdivision(district, subdivision);
+    return res.status(200).json({ success: true, district, subdivision: subdivision || null, count: villages.length, data: villages, villages });
+  } catch (err) {
+    logger.error('Error in /api/authorities/villages: %O', err);
+    return res.status(500).json({ error: 'Failed to fetch villages.' });
   }
 });
 

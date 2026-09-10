@@ -78,6 +78,7 @@
   // Cache for hierarchy data (initialized with all 38 districts)
   let districtsCache = DEFAULT_TN_DISTRICTS;
   let subdivisionsCache = {};
+  let villagesCache = {};
   let localBodiesCache = {};
 
   // Current resolution state
@@ -133,7 +134,8 @@
       const toggleAutoBtn = document.getElementById('btn-toggle-auto-location');
       const districtSelect = document.getElementById('la-district-select');
       const subdivSelect = document.getElementById('la-subdivision-select');
-      const villageInput = document.getElementById('la-village-input');
+      const villageSelect = document.getElementById('la-village-select');
+      const villageCustomInput = document.getElementById('la-village-custom-input');
       const localBodySelect = document.getElementById('la-localbody-select');
       const categorySelect = document.getElementById('report-category');
 
@@ -158,9 +160,13 @@
           this.state.subdivisionId = '';
           this.state.localBodyId = '';
           this.state.villageOrTown = '';
-          if (villageInput) villageInput.value = '';
+          if (villageCustomInput) {
+            villageCustomInput.value = '';
+            villageCustomInput.classList.add('hidden');
+          }
           this.updateLocationHeaderLabel();
           await this.populateSubdivisions(distId);
+          await this.populateVillages(distId, '');
           await this.populateLocalBodies(distId, '');
           this.triggerResolution();
         });
@@ -170,10 +176,49 @@
         subdivSelect.addEventListener('change', async (e) => {
           const subId = e.target.value;
           this.state.subdivisionId = subId;
+          this.state.villageOrTown = '';
           this.state.localBodyId = '';
+          if (villageCustomInput) {
+            villageCustomInput.value = '';
+            villageCustomInput.classList.add('hidden');
+          }
           this.updateLocationHeaderLabel();
+          await this.populateVillages(this.state.districtId, subId);
           await this.populateLocalBodies(this.state.districtId, subId);
           this.triggerResolution();
+        });
+      }
+
+      if (villageSelect) {
+        villageSelect.addEventListener('change', (e) => {
+          const val = e.target.value;
+          if (val === '__custom__') {
+            if (villageCustomInput) {
+              villageCustomInput.classList.remove('hidden');
+              villageCustomInput.focus();
+            }
+            this.state.villageOrTown = (villageCustomInput?.value || '').trim();
+            this.updateLocationHeaderLabel();
+          } else {
+            if (villageCustomInput) {
+              villageCustomInput.classList.add('hidden');
+            }
+            this.state.villageOrTown = (val || '').trim();
+            this.updateLocationHeaderLabel();
+            this.syncLocalBodyWithVillage(val);
+            this.triggerResolution();
+          }
+        });
+      }
+
+      if (villageCustomInput) {
+        villageCustomInput.addEventListener('input', (e) => {
+          this.state.villageOrTown = e.target.value.trim();
+          this.updateLocationHeaderLabel();
+          clearTimeout(villageDebounceTimer);
+          villageDebounceTimer = setTimeout(() => {
+            this.triggerResolution();
+          }, 500);
         });
       }
 
@@ -182,17 +227,6 @@
           this.state.localBodyId = e.target.value;
           this.updateLocationHeaderLabel();
           this.triggerResolution();
-        });
-      }
-
-      if (villageInput) {
-        villageInput.addEventListener('input', (e) => {
-          this.state.villageOrTown = e.target.value.trim();
-          this.updateLocationHeaderLabel();
-          clearTimeout(villageDebounceTimer);
-          villageDebounceTimer = setTimeout(() => {
-            this.triggerResolution();
-          }, 600);
         });
       }
 
@@ -213,6 +247,8 @@
       const toggleManualBtn = document.getElementById('btn-toggle-manual-location');
       const toggleAutoBtn = document.getElementById('btn-toggle-auto-location');
       const districtSelect = document.getElementById('la-district-select');
+      const villageSelect = document.getElementById('la-village-select');
+      const villageCustomInput = document.getElementById('la-village-custom-input');
 
       if (isManual) {
         if (autoBox) autoBox.classList.add('hidden');
@@ -228,6 +264,7 @@
           districtSelect.value = defaultDist;
           this.state.districtId = defaultDist;
           await this.populateSubdivisions(defaultDist);
+          await this.populateVillages(defaultDist, '');
           await this.populateLocalBodies(defaultDist, '');
         }
         this.updateLocationHeaderLabel();
@@ -243,6 +280,14 @@
         this.state.subdivisionId = '';
         this.state.localBodyId = '';
         this.state.villageOrTown = '';
+        if (villageSelect) {
+          villageSelect.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
+          villageSelect.disabled = true;
+        }
+        if (villageCustomInput) {
+          villageCustomInput.value = '';
+          villageCustomInput.classList.add('hidden');
+        }
         this.updateLocationHeaderLabel();
         this.triggerResolution();
       }
@@ -319,6 +364,71 @@
       } catch (err) {
         console.error('[LocationAuthority] Error fetching subdivisions:', err);
         select.innerHTML = '<option value="">Failed to load taluks</option>';
+      }
+    },
+
+    /**
+     * Populate Village / Town dropdown based on selected District & Taluk.
+     */
+    populateVillages: async function(districtId, subdivisionId) {
+      const select = document.getElementById('la-village-select');
+      const customInput = document.getElementById('la-village-custom-input');
+      if (!select) return;
+
+      if (customInput) customInput.classList.add('hidden');
+
+      if (!districtId || !subdivisionId) {
+        select.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
+        select.disabled = true;
+        return;
+      }
+
+      select.disabled = true;
+      select.innerHTML = '<option value="">Loading Villages / Towns...</option>';
+
+      try {
+        const cacheKey = `${districtId}_${subdivisionId}`;
+        if (!villagesCache[cacheKey]) {
+          const res = await fetch(`${API_BASE}/villages?district=${encodeURIComponent(districtId)}&subdivision=${encodeURIComponent(subdivisionId)}`);
+          if (res.ok) {
+            const data = await res.json();
+            villagesCache[cacheKey] = data.villages || data.data || [];
+          }
+        }
+
+        const vils = villagesCache[cacheKey] || [];
+        let html = '<option value="" disabled selected>Select Village / Town (கிராமம் / நகரம்)...</option>';
+        vils.forEach(v => {
+          const taPart = v.nameTa ? ` (${v.nameTa})` : '';
+          const typeBadge = v.type === 'town' ? ' [Town]' : '';
+          html += `<option value="${v.name}">${v.name}${typeBadge}${taPart}</option>`;
+        });
+        html += '<option value="__custom__">+ Other (Enter Village/Town Manually)...</option>';
+
+        select.innerHTML = html;
+        select.disabled = false;
+      } catch (err) {
+        console.error('[LocationAuthority] Error fetching villages:', err);
+        select.innerHTML = '<option value="">Failed to load villages</option>';
+      }
+    },
+
+    /**
+     * Smart sync: if user picks a village that corresponds to a local body, pre-select it
+     */
+    syncLocalBodyWithVillage: function(villageName) {
+      if (!villageName) return;
+      const select = document.getElementById('la-localbody-select');
+      if (!select || select.disabled) return;
+
+      const normV = villageName.toLowerCase().trim();
+      for (let i = 0; i < select.options.length; i++) {
+        const opt = select.options[i];
+        if (opt.value && opt.text.toLowerCase().includes(normV)) {
+          select.selectedIndex = i;
+          this.state.localBodyId = opt.value;
+          break;
+        }
       }
     },
 
@@ -481,7 +591,19 @@
 
       if (isManualOverride) {
         // Build from manual selection
-        const village = (this.state.villageOrTown || '').trim();
+        const villageSelect = document.getElementById('la-village-select');
+        const villageCustomInput = document.getElementById('la-village-custom-input');
+        let village = (this.state.villageOrTown || '').trim();
+        if (!village) {
+          if (villageSelect && villageSelect.value && villageSelect.value !== '__custom__') {
+            village = villageSelect.value.trim();
+          } else if (villageCustomInput && villageCustomInput.value) {
+            village = villageCustomInput.value.trim();
+          }
+        } else if (villageSelect && villageSelect.value === '__custom__' && villageCustomInput) {
+          village = villageCustomInput.value.trim();
+        }
+
         const distSelect = document.getElementById('la-district-select');
         const subdivSelect = document.getElementById('la-subdivision-select');
         

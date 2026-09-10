@@ -22,6 +22,11 @@ import {
   resolveResponsibleAuthority,
   parseLocationHierarchy
 } from '../services/authorityDirectoryService.js';
+import {
+  VILLAGES_BY_SUBDIVISION,
+  getVillagesForSubdivision,
+  getAllVillagesForDistrict
+} from '../services/villageDirectoryService.js';
 
 let passed = 0;
 let failed = 0;
@@ -318,6 +323,55 @@ await itAsync('20. CrowdCity 24/7 Helpline Support contact is present in all res
   assert(res.supportFallback.label === 'CrowdCity Support');
 });
 
+it('21. Village Directory returns Sendamangalam authentic revenue villages in Namakkal', () => {
+  const villages = getVillagesForSubdivision('namakkal', 'nmk_sendamangalam');
+  assert(villages.length >= 10, `Sendamangalam should have >= 10 villages, got ${villages.length}`);
+  const names = villages.map(v => v.name);
+  assert(names.includes('Sendamangalam'), 'Must include Sendamangalam');
+  assert(names.includes('Kalappanaickenpatti'), 'Must include Kalappanaickenpatti');
+  assert(names.includes('Belukurichi'), 'Must include Belukurichi');
+  assert(names.includes('Pachudaiyampatti'), 'Must include Pachudaiyampatti');
+  const kalap = villages.find(v => v.name === 'Kalappanaickenpatti');
+  assert.strictEqual(kalap.nameTa, 'காளப்பநாயக்கன்பட்டி');
+  assert.strictEqual(kalap.type, 'town');
+});
+
+it('22. Village Directory returns Sulur authentic revenue villages in Coimbatore', () => {
+  const villages = getVillagesForSubdivision('coimbatore', 'cbe_sulur');
+  assert(villages.length >= 10, `Sulur should have >= 10 villages, got ${villages.length}`);
+  const names = villages.map(v => v.name);
+  assert(names.includes('Sulur'), 'Must include Sulur');
+  assert(names.includes('Kannampalayam'), 'Must include Kannampalayam');
+  assert(names.includes('Irugur'), 'Must include Irugur');
+  assert(names.includes('Kalangal'), 'Must include Kalangal');
+  const kp = villages.find(v => v.name === 'Kannampalayam');
+  assert.strictEqual(kp.nameTa, 'கண்ணம்பாளையம்');
+  assert.strictEqual(kp.type, 'town');
+});
+
+it('23. Village Directory covers all 38 districts with authentic subdivisions and villages', () => {
+  const allDistricts = getAllDistrictsList();
+  assert.strictEqual(allDistricts.length, 38, 'Must verify all 38 districts');
+
+  let coveredCount = 0;
+  for (const d of allDistricts) {
+    const subs = getSubdivisionsForDistrict(d.id);
+    assert(subs.length > 0, `District ${d.name} (${d.id}) must have subdivisions`);
+    const firstSub = subs[0];
+    const vils = getVillagesForSubdivision(d.id, firstSub.id);
+    assert(vils.length > 0, `District ${d.name} sub ${firstSub.name} (${firstSub.id}) must return villages`);
+    coveredCount++;
+  }
+  assert.strictEqual(coveredCount, 38, 'All 38 districts must have authentic villages mapped');
+});
+
+it('24. Suffix and normalized matching resolves both exact ID and clean taluk name', () => {
+  const byExactId = getVillagesForSubdivision('namakkal', 'nmk_sendamangalam');
+  const bySuffix = getVillagesForSubdivision('namakkal', 'sendamangalam');
+  assert.strictEqual(byExactId.length, bySuffix.length, 'Exact ID and clean suffix should return same villages');
+  assert(bySuffix.map(v => v.name).includes('Sendamangalam'));
+});
+
 console.log(`\n========================================`);
 console.log(`Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);
 console.log(`========================================\n`);
@@ -325,5 +379,5 @@ console.log(`========================================\n`);
 if (failed > 0) {
   process.exit(1);
 } else {
-  console.log('All 20 Location-Aware Authority & Civic Contact tests passed successfully!');
+  console.log(`All ${passed} Location-Aware Authority & Civic Contact tests passed successfully!`);
 }
