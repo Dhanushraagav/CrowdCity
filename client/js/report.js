@@ -240,7 +240,7 @@ async function runStep3AiTriagePreview(category, description) {
   }
 
   // 2. Priority & Severity Scoring
-  const isEmergency = document.getElementById('report-emergency-checkbox')?.checked;
+  const isEmergency = document.getElementById('report-emergency')?.checked || document.getElementById('report-emergency-checkbox')?.checked;
   const isHighPriorityCat = ['safety_hazard', 'traffic_signal', 'road_block', 'waterlogging', 'drainage'].includes(catLower);
 
   let priorityLabel = 'MEDIUM (Severity: 6.2/10)';
@@ -1020,14 +1020,14 @@ async function reverseGeocode(lat, lng) {
     if (data && data.address) {
       const addr = data.address;
       
-      const road = addr.road || addr.pedestrian || addr.highway || addr.street || '';
+      const road = addr.road || addr.pedestrian || addr.highway || addr.street || addr.footway || '';
       const area = addr.suburb || addr.neighbourhood || addr.residential || addr.village || addr.hamlet || addr.subdistrict || '';
-      const city = addr.city || addr.town || addr.village || addr.municipality || '';
-      const district = addr.county || addr.district || '';
-      const state = addr.state || addr.province || addr.state_district || '';
+      const city = addr.city || addr.town || addr.municipality || '';
+      const district = addr.county || addr.district || addr.state_district || '';
+      const state = addr.state || addr.province || '';
       const country = addr.country || '';
 
-      const parts = [road, area, city, district, state, country].filter(p => p.trim() !== '');
+      const parts = [road, area, city, district, state, country].filter((p, idx, arr) => p && p.trim() !== '' && arr.indexOf(p) === idx);
       let addressStr = parts.join(', ');
 
       if (!addressStr) {

@@ -141,6 +141,8 @@
           this.state.districtId = distId;
           this.state.subdivisionId = '';
           this.state.localBodyId = '';
+          this.state.villageOrTown = '';
+          if (villageInput) villageInput.value = '';
           await this.populateSubdivisions(distId);
           await this.populateLocalBodies(distId, '');
           this.triggerResolution();

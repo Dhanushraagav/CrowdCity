@@ -954,7 +954,9 @@ export function getAllDistrictsList() {
     name: d.name,
     nameTa: d.nameTa,
     lat: d.lat,
-    lng: d.lng
+    lng: d.lng,
+    headquarters: d.headquarters,
+    collectorate: d.collectorate
   }));
 }
 

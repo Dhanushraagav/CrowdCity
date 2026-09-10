@@ -258,6 +258,57 @@ async function loadIssueDetails() {
     }
   }
 
+  // Populate Citizen-facing Administrative Jurisdiction & Authority Card
+  const authRes = issue.authority_resolution;
+  const jur = authRes ? authRes.jurisdiction : null;
+  const adminAuth = authRes ? authRes.administrativeAuthority : null;
+
+  const dist = issue.district || (jur ? jur.district : 'Tamil Nadu');
+  const taluk = issue.taluk || (jur ? jur.taluk : '-');
+  const village = issue.village_or_town || (jur ? jur.villageOrTown : '-');
+  const localBody = issue.local_body || (jur ? jur.localBody : '-');
+  const localBodyType = issue.local_body_type || (jur ? jur.localBodyType : 'Local Body');
+  const authOffice = issue.responsible_authority_name || (adminAuth ? adminAuth.office : 'Local Administrative Authority');
+  const authPhone = issue.authority_phone || (adminAuth ? adminAuth.phone : null);
+  const authEmail = issue.authority_email || (adminAuth ? adminAuth.email : null);
+
+  const distEl = document.getElementById('citizen-detail-district');
+  if (distEl) distEl.textContent = dist;
+  const talukEl = document.getElementById('citizen-detail-taluk');
+  if (talukEl) talukEl.textContent = taluk;
+  const vilEl = document.getElementById('citizen-detail-village-town');
+  if (vilEl) vilEl.textContent = village;
+  const lbEl = document.getElementById('citizen-detail-local-body');
+  if (lbEl) lbEl.textContent = localBody;
+  const lbBadge = document.getElementById('citizen-detail-localbody-type-badge');
+  if (lbBadge) lbBadge.textContent = localBodyType;
+  const authNameEl = document.getElementById('citizen-detail-authority-name');
+  if (authNameEl) authNameEl.textContent = authOffice;
+
+  const phoneEl = document.getElementById('citizen-detail-authority-phone');
+  const phoneWrap = document.getElementById('citizen-detail-authority-phone-wrap');
+  if (phoneEl && phoneWrap) {
+    if (authPhone && authPhone !== 'Contact information unavailable') {
+      phoneEl.textContent = authPhone;
+      phoneEl.href = `tel:${authPhone.replace(/[^0-9+]/g, '')}`;
+      phoneWrap.style.display = 'inline-flex';
+    } else {
+      phoneWrap.style.display = 'none';
+    }
+  }
+
+  const emailEl = document.getElementById('citizen-detail-authority-email');
+  const emailWrap = document.getElementById('citizen-detail-authority-email-wrap');
+  if (emailEl && emailWrap) {
+    if (authEmail && authEmail !== 'Contact information unavailable') {
+      emailEl.textContent = authEmail;
+      emailEl.href = `mailto:${authEmail}`;
+      emailWrap.style.display = 'inline-flex';
+    } else {
+      emailWrap.style.display = 'none';
+    }
+  }
+
   // Hide loader, show content
   if (loader) loader.classList.add('hidden');
   if (content) content.classList.remove('hidden');
