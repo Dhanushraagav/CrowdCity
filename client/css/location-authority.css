@@ -636,11 +636,18 @@
     line-height: 1.35;
   }
 
+  .la-mode-toggle-bar > div:last-child {
+    width: 100%;
+  }
+
   .la-toggle-btn {
     width: 100%;
     justify-content: center;
     min-height: 38px;
     padding: 0.4rem 0.75rem;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
   }
 
   /* Badges stack in 1 clean column on mobile for perfect readability */

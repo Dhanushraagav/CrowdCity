@@ -4612,85 +4612,187 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     flex-shrink: 0 !important;
   }
 
-  /* Location Section Mobile Layout: Map 100% full width, Lat/Lng 2-column row */
+  /* Location Section Mobile Layout: Clean full-width vertical stack */
   .location-group {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-
-  .location-group .location-header,
-  .location-group .address-field-wrapper {
-    display: contents !important;
-  }
-
-  .location-group label {
-    grid-column: 1 / span 2 !important;
-    margin-bottom: 0 !important;
-    font-size: 0.68rem !important;
-  }
-
-  .location-group .address-input-wrapper {
-    grid-column: 1 / span 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: 100% !important;
+    max-width: 100% !important;
+    gap: 0.75rem !important;
     box-sizing: border-box !important;
   }
 
-  .location-group #btn-use-gps {
-    grid-column: 1 !important;
-    grid-row: 3 !important;
-    width: 100% !important;
-    height: 42px !important;
+  .location-group .location-header {
     display: flex !important;
     align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    gap: 0.5rem !important;
+  }
+
+  .location-group label {
+    margin-bottom: 0 !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+  }
+
+  .location-group #btn-use-gps {
+    width: auto !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    display: inline-flex !important;
+    align-items: center !important;
     justify-content: center !important;
+    gap: 0.35rem !important;
     margin: 0 !important;
-    padding: 0 10px !important;
-    border-radius: var(--radius-md) !important;
+    padding: 0 0.75rem !important;
+    border-radius: var(--radius-sm) !important;
     background-color: var(--bg-surface-hover) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
-    font-size: 13px !important;
+    font-size: 0.76rem !important;
     font-weight: 600 !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+
+  .location-group .la-mode-toggle-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    padding: 0.55rem 0.75rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .location-group .la-mode-toggle-bar .la-mode-status {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 0.78rem !important;
+  }
+
+  .location-group .la-mode-toggle-bar #la-current-mode-label {
+    max-width: 100% !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.35 !important;
+  }
+
+  .location-group .la-mode-toggle-bar > div:last-child {
+    width: 100% !important;
+  }
+
+  .location-group .la-mode-toggle-bar .la-toggle-btn {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 38px !important;
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.76rem !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+
+  .location-group #la-manual-mode-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .location-group #la-auto-mode-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.55rem !important;
+  }
+
+  .location-group .address-field-wrapper {
+    display: flex !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  @media (max-width: 380px) {
+    .location-group .address-field-wrapper {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.45rem !important;
+    }
+    .location-group #btn-search-address {
+      width: 100% !important;
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+  }
+
+  .location-group .address-input-wrapper {
+    flex: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
   }
 
   .location-group #btn-search-address {
-    grid-column: 2 !important;
-    grid-row: 3 !important;
-    width: 100% !important;
-    height: 42px !important;
-    display: flex !important;
+    flex-shrink: 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 0.35rem !important;
     margin: 0 !important;
-    padding: 0 10px !important;
+    padding: 0 0.85rem !important;
     border-radius: var(--radius-md) !important;
-    font-size: 13px !important;
+    font-size: 0.82rem !important;
     font-weight: 600 !important;
     box-sizing: border-box !important;
   }
 
   .location-group .map-container {
-    grid-column: 1 / span 2 !important;
     width: 100% !important;
-    height: 200px !important;
-    min-height: 200px !important;
-    margin: 0.5rem 0 !important;
+    max-width: 100% !important;
+    height: 210px !important;
+    min-height: 210px !important;
+    margin: 0.15rem 0 !important;
+    border-radius: var(--radius-md) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
   }
 
   .location-group #map-selector {
     width: 100% !important;
     height: 100% !important;
-    min-height: 200px !important;
+    min-height: 210px !important;
   }
 
   .location-group .coords-row {
-    grid-column: 1 / span 2 !important;
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 0.5rem !important;
-    margin-top: 0.25rem !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .location-group #la-authority-card-container,
+  .location-group .la-authority-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   /* Mobile Stepper Header & Card Refinements */
