@@ -645,3 +645,13 @@ const API = {
 
 // Expose API globally
 window.API = API;
+
+// Ensure Customer Toll-Free Floating Ticker is loaded
+(function() {
+  if (typeof window !== 'undefined' && !window.CrowdCityTollFree && !document.querySelector('script[src*="tollfree-ticker"]')) {
+    const s = document.createElement('script');
+    s.src = 'js/tollfree-ticker.js?v=1.0.0';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+})();

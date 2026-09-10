@@ -303,10 +303,24 @@
     }
   }
 
+  // Ensure Toll-Free news-typing widget is loaded globally
+  function ensureTollFreeTicker() {
+    if (!window.CrowdCityTollFree && !document.querySelector('script[src*="tollfree-ticker"]')) {
+      const s = document.createElement('script');
+      s.src = 'js/tollfree-ticker.js?v=1.0.0';
+      s.defer = true;
+      document.head.appendChild(s);
+    }
+  }
+
   // Load PWA UI elements on DOM ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPwaHelper);
+    document.addEventListener('DOMContentLoaded', () => {
+      initPwaHelper();
+      ensureTollFreeTicker();
+    });
   } else {
     initPwaHelper();
+    ensureTollFreeTicker();
   }
 })();
