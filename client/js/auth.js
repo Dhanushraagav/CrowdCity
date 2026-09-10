@@ -2052,8 +2052,29 @@ function updateAuthUI() {
         </a>`
       : '';
 
+    const tollFreeNum = window.CROWDCITY_TOLL_FREE || localStorage.getItem('crowdcity_toll_free') || '1800-425-1100';
+    const tollFreeHeaderBtnHtml = `
+      <div class="header-tollfree-pill" id="header-tollfree-widget" title="24/7 Citizen Toll-Free Helpline: ${tollFreeNum}">
+        <a href="tel:${tollFreeNum.replace(/[^0-9+]/g, '')}" class="header-tf-link">
+          <span class="header-tf-icon-wrap">
+            <i class="fa-solid fa-phone-volume"></i>
+            <span class="header-tf-live-dot"></span>
+          </span>
+          <span class="header-tf-badge">Toll-Free</span>
+          <span class="header-tf-text-wrap">
+            <span id="header-tf-text" class="header-tf-news-text">${tollFreeNum}</span>
+            <span class="header-tf-cursor">|</span>
+          </span>
+        </a>
+        <button type="button" class="header-tf-copy-btn" onclick="if(window.CrowdCityTollFree) window.CrowdCityTollFree.copyNumber(event)" title="Copy Toll-Free Number">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+      </div>
+    `;
+
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
+        ${tollFreeHeaderBtnHtml}
         ${tnUpdatesBtnHtml}
 
         <!-- Notification Bell Container -->
@@ -2129,8 +2150,28 @@ function updateAuthUI() {
         </a>`
       : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
+    const tollFreeNum = window.CROWDCITY_TOLL_FREE || localStorage.getItem('crowdcity_toll_free') || '1800-425-1100';
+    const tollFreeHeaderBtnHtml = `
+      <div class="header-tollfree-pill" id="header-tollfree-widget" title="24/7 Citizen Toll-Free Helpline: ${tollFreeNum}">
+        <a href="tel:${tollFreeNum.replace(/[^0-9+]/g, '')}" class="header-tf-link">
+          <span class="header-tf-icon-wrap">
+            <i class="fa-solid fa-phone-volume"></i>
+            <span class="header-tf-live-dot"></span>
+          </span>
+          <span class="header-tf-badge">Toll-Free</span>
+          <span class="header-tf-text-wrap">
+            <span id="header-tf-text" class="header-tf-news-text">${tollFreeNum}</span>
+            <span class="header-tf-cursor">|</span>
+          </span>
+        </a>
+        <button type="button" class="header-tf-copy-btn" onclick="if(window.CrowdCityTollFree) window.CrowdCityTollFree.copyNumber(event)" title="Copy Toll-Free Number">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+      </div>
+    `;
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
+        ${tollFreeHeaderBtnHtml}
         ${tnUpdatesBtnHtml}
         <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
       </div>
@@ -2140,6 +2181,11 @@ function updateAuthUI() {
   // Populate dynamic notifications dropdown elements if window.renderNotifications is loaded
   if (typeof window.renderNotifications === 'function') {
     window.renderNotifications();
+  }
+
+  // Trigger Header Toll-Free news-typing animation
+  if (window.CrowdCityTollFree && typeof window.CrowdCityTollFree.startHeaderAnimation === 'function') {
+    window.CrowdCityTollFree.startHeaderAnimation();
   }
   
   // Dispatch custom auth change event ONLY if:
