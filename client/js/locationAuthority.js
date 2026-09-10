@@ -403,7 +403,7 @@
           const typeBadge = v.type === 'town' ? ' [Town]' : '';
           html += `<option value="${v.name}">${v.name}${typeBadge}${taPart}</option>`;
         });
-        html += '<option value="__custom__">+ Other (Enter Village/Town Manually)...</option>';
+        html += '<option value="__custom__">Can\'t find your village? Enter manually...</option>';
 
         select.innerHTML = html;
         select.disabled = false;
@@ -703,24 +703,20 @@
       const badgesEl = document.getElementById('la-card-hierarchy-badges');
       if (badgesEl) {
         badgesEl.innerHTML = `
-          <span class="la-badge la-badge-district" title="District Collectorate">
-            <i class="fa-solid fa-map-location-dot"></i>
+          <span class="la-badge" title="District">
             <span class="la-badge-label">District:</span>
             <strong class="la-badge-value">${j.district || 'Coimbatore'}</strong>
           </span>
-          <span class="la-badge la-badge-taluk" title="Taluk / Subdivision">
-            <i class="fa-solid fa-building-columns"></i>
+          <span class="la-badge" title="Taluk / Subdivision">
             <span class="la-badge-label">Taluk:</span>
             <strong class="la-badge-value">${j.taluk || 'Sulur'}</strong>
           </span>
           ${j.villageOrTown ? `
-          <span class="la-badge la-badge-village" title="Village / Locality">
-            <i class="fa-solid fa-location-arrow"></i>
+          <span class="la-badge" title="Village / Town">
             <span class="la-badge-label">Village/Town:</span>
             <strong class="la-badge-value">${j.villageOrTown}</strong>
           </span>` : ''}
-          <span class="la-badge la-badge-localbody" title="${j.localBodyType || 'Local Body'}">
-            <i class="fa-solid fa-landmark-dome"></i>
+          <span class="la-badge" title="${j.localBodyType || 'Local Body'}">
             <span class="la-badge-label">Local Body:</span>
             <strong class="la-badge-value">${j.localBody || 'Local Body'}</strong>
             <span class="la-badge-sub">(${j.localBodyType || 'Village Panchayat'} &bull; ${j.tier || 'Rural'})</span>
@@ -734,9 +730,9 @@
         if (a.isFallback) {
           fallbackBanner.classList.remove('hidden');
           fallbackBanner.innerHTML = `
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <i class="fa-solid fa-circle-info"></i>
             <div>
-              <strong>Higher-Level Authority Resolved:</strong> ${a.fallbackMessage || 'Direct local contact unavailable. Showing verified higher-level authority.'}
+              <strong>Administrative Routing:</strong> ${a.fallbackMessage || 'Direct local contact unavailable. Showing verified higher-level authority.'}
             </div>
           `;
         } else {
@@ -817,7 +813,7 @@
       if (escBox && esc) {
         escBox.innerHTML = `
           <div class="la-section-label">
-            <i class="fa-solid fa-stairs"></i> ${esc.level || 'Level 1 Escalation Authority'}
+            ${esc.level || 'Level 1 Escalation Authority'}
             <span class="la-sub-label">(Triggered automatically if complaint exceeds SLA)</span>
           </div>
           <div class="la-escalation-info">
