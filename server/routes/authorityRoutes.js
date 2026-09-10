@@ -17,7 +17,7 @@ const router = express.Router();
 router.get('/districts', (req, res) => {
   try {
     const districts = getAllDistrictsList();
-    return res.status(200).json({ success: true, count: districts.length, data: districts });
+    return res.status(200).json({ success: true, count: districts.length, data: districts, districts });
   } catch (err) {
     logger.error('Error in /api/authorities/districts: %O', err);
     return res.status(500).json({ error: 'Failed to fetch districts.' });
@@ -35,7 +35,7 @@ router.get('/subdivisions', (req, res) => {
       return res.status(400).json({ error: 'district query parameter is required.' });
     }
     const subdivisions = getSubdivisionsForDistrict(district);
-    return res.status(200).json({ success: true, district, count: subdivisions.length, data: subdivisions });
+    return res.status(200).json({ success: true, district, count: subdivisions.length, data: subdivisions, subdivisions });
   } catch (err) {
     logger.error('Error in /api/authorities/subdivisions: %O', err);
     return res.status(500).json({ error: 'Failed to fetch subdivisions.' });
@@ -53,7 +53,7 @@ router.get('/local-bodies', (req, res) => {
       return res.status(400).json({ error: 'district query parameter is required.' });
     }
     const localBodies = getLocalBodiesForSubdivision(district, subdivision);
-    return res.status(200).json({ success: true, count: localBodies.length, data: localBodies });
+    return res.status(200).json({ success: true, count: localBodies.length, data: localBodies, localBodies });
   } catch (err) {
     logger.error('Error in /api/authorities/local-bodies: %O', err);
     return res.status(500).json({ error: 'Failed to fetch local bodies.' });
@@ -77,7 +77,7 @@ router.post('/resolve', async (req, res) => {
       manualSelection
     });
 
-    return res.status(200).json({ success: true, data: result });
+    return res.status(200).json({ success: true, data: result, resolution: result });
   } catch (err) {
     logger.error('Error in /api/authorities/resolve: %O', err);
     return res.status(500).json({ error: 'Failed to resolve responsible authority.' });

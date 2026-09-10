@@ -16,9 +16,51 @@
   'use strict';
 
   const API_BASE = '/api/authorities';
+
+  // 38 Verified Tamil Nadu Districts (Instant Fallback / Zero Latency)
+  const DEFAULT_TN_DISTRICTS = [
+    { id: 'ariyalur', name: 'Ariyalur', nameTa: 'அரியலூர்' },
+    { id: 'chengalpattu', name: 'Chengalpattu', nameTa: 'செங்கல்பட்டு' },
+    { id: 'chennai', name: 'Chennai', nameTa: 'சென்னை' },
+    { id: 'coimbatore', name: 'Coimbatore', nameTa: 'கோயம்புத்தூர்' },
+    { id: 'cuddalore', name: 'Cuddalore', nameTa: 'கடலூர்' },
+    { id: 'dharmapuri', name: 'Dharmapuri', nameTa: 'தருமபுரி' },
+    { id: 'dindigul', name: 'Dindigul', nameTa: 'திண்டுக்கல்' },
+    { id: 'erode', name: 'Erode', nameTa: 'ஈரோடு' },
+    { id: 'kallakurichi', name: 'Kallakurichi', nameTa: 'கள்ளக்குறிச்சி' },
+    { id: 'kancheepuram', name: 'Kanchipuram', nameTa: 'காஞ்சிபுரம்' },
+    { id: 'karur', name: 'Karur', nameTa: 'கரூர்' },
+    { id: 'krishnagiri', name: 'Krishnagiri', nameTa: 'கிருஷ்ணகிரி' },
+    { id: 'madurai', name: 'Madurai', nameTa: 'மதுரை' },
+    { id: 'mayiladuthurai', name: 'Mayiladuthurai', nameTa: 'மயிலாடுதுறை' },
+    { id: 'nagapattinam', name: 'Nagapattinam', nameTa: 'நாகப்பட்டினம்' },
+    { id: 'kanniyakumari', name: 'Kanniyakumari', nameTa: 'கன்னியாகுமரி' },
+    { id: 'namakkal', name: 'Namakkal', nameTa: 'நாமக்கல்' },
+    { id: 'perambalur', name: 'Perambalur', nameTa: 'பெரம்பலூர்' },
+    { id: 'pudukkottai', name: 'Pudukkottai', nameTa: 'புதுக்கோட்டை' },
+    { id: 'ramanathapuram', name: 'Ramanathapuram', nameTa: 'ராமநாதபுரம்' },
+    { id: 'ranipet', name: 'Ranipet', nameTa: 'ராணிப்பேட்டை' },
+    { id: 'salem', name: 'Salem', nameTa: 'சேலம்' },
+    { id: 'sivaganga', name: 'Sivaganga', nameTa: 'சிவகங்கை' },
+    { id: 'tenkasi', name: 'Tenkasi', nameTa: 'தென்காசி' },
+    { id: 'thanjavur', name: 'Thanjavur', nameTa: 'தஞ்சாவூர்' },
+    { id: 'theni', name: 'Theni', nameTa: 'தேனி' },
+    { id: 'thiruvallur', name: 'Thiruvallur', nameTa: 'திருவள்ளூர்' },
+    { id: 'thiruvarur', name: 'Thiruvarur', nameTa: 'திருவாரூர்' },
+    { id: 'thoothukkudi', name: 'Thoothukkudi', nameTa: 'தூத்துக்குடி' },
+    { id: 'tiruchirappalli', name: 'Tiruchirappalli', nameTa: 'திருச்சிராப்பள்ளி' },
+    { id: 'tirunelveli', name: 'Tirunelveli', nameTa: 'திருநெல்வேலி' },
+    { id: 'tirupathur', name: 'Tirupathur', nameTa: 'திருப்பத்தூர்' },
+    { id: 'tiruppur', name: 'Tiruppur', nameTa: 'திருப்பூர்' },
+    { id: 'tiruvannamalai', name: 'Tiruvannamalai', nameTa: 'திருவண்ணாமலை' },
+    { id: 'nilgiris', name: 'The Nilgiris', nameTa: 'நீலகிரி' },
+    { id: 'vellore', name: 'Vellore', nameTa: 'வேலூர்' },
+    { id: 'viluppuram', name: 'Viluppuram', nameTa: 'விழுப்புரம்' },
+    { id: 'virudhunagar', name: 'Virudhunagar', nameTa: 'விருதுநகர்' }
+  ];
   
-  // Cache for hierarchy data
-  let districtsCache = null;
+  // Cache for hierarchy data (initialized with all 38 districts)
+  let districtsCache = DEFAULT_TN_DISTRICTS;
   let subdivisionsCache = {};
   let localBodiesCache = {};
 
@@ -47,8 +89,24 @@
      */
     init: function() {
       console.log('[LocationAuthority] Initializing Location-Aware Civic Authority module...');
+      this.populateDistricts();
       this.bindUIEvents();
       this.preloadDistricts();
+
+      // If coordinates or address already exist on page load, resolve immediately
+      setTimeout(() => {
+        const latInput = document.getElementById('report-latitude');
+        const lngInput = document.getElementById('report-longitude');
+        if (latInput && latInput.value && lngInput && lngInput.value) {
+          this.state.lat = parseFloat(latInput.value);
+          this.state.lng = parseFloat(lngInput.value);
+          this.state.address = document.getElementById('report-address')?.value || '';
+          this.triggerResolution();
+        } else {
+          // Default initial resolution for Tamil Nadu
+          this.triggerResolution();
+        }
+      }, 400);
     },
 
     /**
@@ -72,7 +130,6 @@
       if (toggleAutoBtn) {
         toggleAutoBtn.addEventListener('click', () => {
           this.setManualMode(false);
-          // Trigger GPS/current location if available
           const gpsBtn = document.getElementById('btn-use-gps');
           if (gpsBtn) gpsBtn.click();
         });
@@ -119,9 +176,7 @@
 
       if (categorySelect) {
         categorySelect.addEventListener('change', () => {
-          if (this.state.lat || this.state.districtId) {
-            this.triggerResolution();
-          }
+          this.triggerResolution();
         });
       }
     },
@@ -129,24 +184,37 @@
     /**
      * Switch between Auto-Detected (GPS/Map pin) and Manual Override (Cascading Selectors) mode.
      */
-    setManualMode: function(isManual) {
+    setManualMode: async function(isManual) {
       isManualOverride = isManual;
       const autoBox = document.getElementById('la-auto-mode-container');
       const manualBox = document.getElementById('la-manual-mode-container');
       const toggleManualBtn = document.getElementById('btn-toggle-manual-location');
       const toggleAutoBtn = document.getElementById('btn-toggle-auto-location');
+      const districtSelect = document.getElementById('la-district-select');
 
       if (isManual) {
         if (autoBox) autoBox.classList.add('hidden');
         if (manualBox) manualBox.classList.remove('hidden');
         if (toggleManualBtn) toggleManualBtn.classList.add('hidden');
         if (toggleAutoBtn) toggleAutoBtn.classList.remove('hidden');
+
         this.populateDistricts();
+
+        // If no district is selected yet, pre-select Coimbatore or detected district
+        const defaultDist = this.state.districtId || 'coimbatore';
+        if (districtSelect && (!districtSelect.value || districtSelect.value === '')) {
+          districtSelect.value = defaultDist;
+          this.state.districtId = defaultDist;
+          await this.populateSubdivisions(defaultDist);
+          await this.populateLocalBodies(defaultDist, '');
+        }
+        this.triggerResolution();
       } else {
         if (autoBox) autoBox.classList.remove('hidden');
         if (manualBox) manualBox.classList.add('hidden');
         if (toggleManualBtn) toggleManualBtn.classList.remove('hidden');
         if (toggleAutoBtn) toggleAutoBtn.classList.add('hidden');
+
         // Reset manual state
         this.state.districtId = '';
         this.state.subdivisionId = '';
@@ -157,34 +225,36 @@
     },
 
     /**
-     * Preload districts list in background.
+     * Preload districts list in background from API.
      */
     preloadDistricts: async function() {
       try {
-        if (!districtsCache) {
-          const res = await fetch(`${API_BASE}/districts`);
-          if (res.ok) {
-            const data = await res.json();
-            districtsCache = data.districts || [];
+        const res = await fetch(`${API_BASE}/districts`);
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.districts || data.data || (Array.isArray(data) ? data : []);
+          if (list && list.length > 0) {
+            districtsCache = list;
             this.populateDistricts();
           }
         }
       } catch (err) {
-        console.warn('[LocationAuthority] Failed to preload districts:', err);
+        console.warn('[LocationAuthority] Network preload notice (using embedded 38 districts):', err);
       }
     },
 
     /**
-     * Populate District dropdown.
+     * Populate District dropdown with all 38 Tamil Nadu districts.
      */
     populateDistricts: function() {
       const select = document.getElementById('la-district-select');
-      if (!select || !districtsCache) return;
+      if (!select || !districtsCache || districtsCache.length === 0) return;
 
-      const currentVal = select.value;
+      const currentVal = select.value || this.state.districtId;
       let html = '<option value="" disabled selected>Select District (மாவட்டம்)...</option>';
       districtsCache.forEach(d => {
-        html += `<option value="${d.id}" ${currentVal === d.id ? 'selected' : ''}>${d.name} (${d.nameTa || ''})</option>`;
+        const isSel = (currentVal === d.id || currentVal === d.name.toLowerCase()) ? 'selected' : '';
+        html += `<option value="${d.id}" ${isSel}>${d.name} (${d.nameTa || ''})</option>`;
       });
       select.innerHTML = html;
     },
@@ -210,7 +280,7 @@
           const res = await fetch(`${API_BASE}/subdivisions?district=${encodeURIComponent(districtId)}`);
           if (res.ok) {
             const data = await res.json();
-            subdivisionsCache[districtId] = data.subdivisions || [];
+            subdivisionsCache[districtId] = data.subdivisions || data.data || [];
           }
         }
 
@@ -254,14 +324,14 @@
           const res = await fetch(url);
           if (res.ok) {
             const data = await res.json();
-            localBodiesCache[cacheKey] = data.localBodies || [];
+            localBodiesCache[cacheKey] = data.localBodies || data.data || [];
           }
         }
 
         const lbs = localBodiesCache[cacheKey] || [];
         let html = '<option value="" selected>Select Local Body (உள்ளாட்சி அமைப்பு)...</option>';
         lbs.forEach(lb => {
-          html += `<option value="${lb.id}">${lb.name} (${lb.localBodyTypeFormatted})</option>`;
+          html += `<option value="${lb.id}">${lb.name} (${lb.localBodyTypeFormatted || 'Local Body'})</option>`;
         });
         select.innerHTML = html;
         select.disabled = false;
@@ -280,9 +350,9 @@
       const addrInput = document.getElementById('report-address');
       const catSelect = document.getElementById('report-category');
 
-      const lat = parseFloat(latInput?.value) || this.state.lat;
-      const lng = parseFloat(lngInput?.value) || this.state.lng;
-      const address = addrInput?.value || this.state.address;
+      const lat = parseFloat(latInput?.value) || this.state.lat || 11.0168;
+      const lng = parseFloat(lngInput?.value) || this.state.lng || 76.9558;
+      const address = addrInput?.value || this.state.address || 'Coimbatore, Tamil Nadu';
       const category = catSelect?.value || 'roads';
       const mode = window.currentReportMode || 'civic';
 
@@ -324,15 +394,16 @@
         });
 
         if (!res.ok) {
-          throw new Error(`Resolution failed: ${res.status}`);
+          throw new Error(`Resolution request failed with status: ${res.status}`);
         }
 
         const data = await res.json();
-        if (data && data.success && data.resolution) {
-          currentResolution = data.resolution;
-          this.renderAuthorityCard(data.resolution);
-          this.updateStep3Preview(data.resolution);
-          this.updateMapJurisdictionCircle(data.resolution, payload.latitude, payload.longitude);
+        const resObj = (data && data.resolution) ? data.resolution : ((data && data.data) ? data.data : data);
+        if (resObj && (resObj.jurisdiction || resObj.administrativeAuthority)) {
+          currentResolution = resObj;
+          this.renderAuthorityCard(resObj);
+          this.updateStep3Preview(resObj);
+          this.updateMapJurisdictionCircle(resObj, payload.latitude, payload.longitude);
         }
       } catch (err) {
         console.warn('[LocationAuthority] Error resolving authority:', err);
@@ -361,6 +432,8 @@
     showCardLoading: function(isLoading) {
       const loader = document.getElementById('la-authority-card-loader');
       const content = document.getElementById('la-authority-card-content');
+      const card = document.getElementById('la-authority-card-container');
+      if (card) card.classList.remove('hidden');
       if (loader && content) {
         if (isLoading) {
           loader.classList.remove('hidden');
@@ -524,7 +597,6 @@
         deptEl.textContent = `${j.localBody || 'Municipal Administration'} (${a.serviceDepartment || 'Civic Services'})`;
       }
 
-      // If there's an authority element in Step 3, populate it
       const authEl = document.getElementById('step3-ai-authority');
       if (authEl) {
         authEl.textContent = a.office || 'Local Municipal Authority';
