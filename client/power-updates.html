@@ -174,11 +174,11 @@
     }
 
     .power-tab-btn.active {
-      background: #f59e0b;
-      border-color: #d97706;
+      background: #0f172a;
+      border-color: #0f172a;
       color: #ffffff;
-      font-weight: 700;
-      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.12);
     }
 
     .power-filter-inputs {
@@ -263,28 +263,27 @@
 
     .power-card {
       background: var(--bg-surface, #ffffff);
-      border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 14px;
-      padding: 1.3rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .power-card:hover {
-      transform: translateY(-2px);
       border-color: #cbd5e1;
-      box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
     }
 
     .power-card-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 0.65rem;
-      margin-bottom: 0.75rem;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
     }
 
     .power-badges-wrap {
@@ -292,44 +291,71 @@
       align-items: center;
       gap: 0.4rem;
       flex-wrap: wrap;
+      min-width: 0;
     }
 
     .power-district-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      padding: 0.2rem 0.55rem;
-      background: rgba(13, 148, 136, 0.08);
-      color: #0d9488;
-      border: 1px solid rgba(13, 148, 136, 0.2);
+      padding: 0.22rem 0.6rem;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
       border-radius: 6px;
       font-size: 0.72rem;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .power-division-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.22rem 0.55rem;
+      background: #f8fafc;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
     }
 
     .power-status-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      padding: 0.2rem 0.6rem;
+      padding: 0.22rem 0.6rem;
       border-radius: 6px;
       font-size: 0.72rem;
-      font-weight: 800;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.03em;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .status-scheduled {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .status-dot-scheduled {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #64748b;
+      display: inline-block;
     }
 
     .status-ongoing {
       background: #fffbeb;
-      color: #b45309;
+      color: #78350f;
       border: 1px solid #fde68a;
     }
 
@@ -342,87 +368,107 @@
     }
 
     .status-restored {
-      background: #ecfdf5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status-dot-restored {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #16a34a;
+      display: inline-block;
     }
 
     .status-cancelled {
       background: #fef2f2;
-      color: #b91c1c;
+      color: #991b1b;
       border: 1px solid #fecaca;
     }
 
+    .status-dot-cancelled {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #dc2626;
+      display: inline-block;
+    }
+
     .power-substation-title {
-      font-size: 1.02rem;
+      font-size: 0.98rem;
       font-weight: 700;
-      color: var(--text-main, #0f172a);
-      margin: 0 0 0.45rem 0;
+      color: #0f172a;
+      margin: 0 0 0.55rem 0;
+      line-height: 1.4;
       font-family: var(--font-heading, system-ui);
     }
 
     .power-time-window {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.45rem 0.7rem;
-      background: var(--bg-app, #f8fafc);
-      border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 7px;
+      gap: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
       font-size: 0.8rem;
-      color: var(--text-main);
-      font-weight: 600;
-      margin-bottom: 0.8rem;
+      color: #334155;
+      font-weight: 500;
+      margin-bottom: 0.85rem;
     }
 
     .power-time-window i {
-      color: var(--primary, #0d9488);
+      color: #64748b;
       font-size: 0.82rem;
     }
 
     .power-areas-section {
-      margin-bottom: 0.9rem;
+      margin-bottom: 0.85rem;
     }
 
     .power-areas-label {
-      font-size: 0.72rem;
-      font-weight: 700;
+      font-size: 0.7rem;
+      font-weight: 600;
       text-transform: uppercase;
-      color: var(--text-muted, #64748b);
-      margin-bottom: 0.35rem;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 0.4rem;
     }
 
     .power-areas-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.3rem;
+      gap: 0.35rem;
     }
 
     .power-area-tag {
       display: inline-block;
-      padding: 0.18rem 0.48rem;
-      background: var(--bg-app, #f1f5f9);
+      padding: 0.2rem 0.5rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 5px;
-      font-size: 0.75rem;
-      color: var(--text-main, #334155);
+      font-size: 0.74rem;
+      color: #334155;
+      line-height: 1.35;
     }
 
     .power-card-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-top: 1px solid var(--border-color, #f1f5f9);
+      border-top: 1px solid #f1f5f9;
       padding-top: 0.8rem;
       font-size: 0.75rem;
-      color: var(--text-muted, #64748b);
+      color: #64748b;
     }
 
     .power-source-tag {
-      font-weight: 600;
-      color: var(--text-muted);
+      font-weight: 500;
+      color: #64748b;
       display: inline-flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.35rem;
     }
 
     .power-btn-share {
@@ -586,14 +632,10 @@
         <!-- Hero Header Card -->
         <div class="power-hero-banner">
           <div class="power-hero-title-group">
-            <h1><i class="fa-solid fa-plug" style="color: var(--primary);"></i> <span data-i18n="power_updates_title">Power Updates</span></h1>
+            <h1><span data-i18n="power_updates_title">Power Updates</span></h1>
             <p data-i18n="power_updates_subtitle">Planned electricity shutdown schedules across Tamil Nadu.</p>
           </div>
           <div class="power-hero-actions">
-            <div class="power-source-badge">
-              <span class="power-source-dot"></span>
-              <span data-i18n="power_source_label">Source: TNPDCL</span>
-            </div>
             <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn-official-source" title="View Official TNPDCL Shutdown Portal">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
               <span data-i18n="power_view_official">Official TNPDCL Portal</span>

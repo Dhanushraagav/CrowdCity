@@ -245,14 +245,14 @@
     } else if (status === 'RESTORED') {
       statusBadgeHtml = `
         <span class="power-status-badge status-restored">
-          <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
+          <span class="status-dot-restored"></span>
           RESTORED
         </span>
       `;
     } else if (status === 'CANCELLED') {
       statusBadgeHtml = `
         <span class="power-status-badge status-cancelled">
-          <i class="fa-solid fa-xmark" style="font-size: 0.65rem;"></i>
+          <span class="status-dot-cancelled"></span>
           CANCELLED
         </span>
       `;
@@ -260,6 +260,7 @@
       // Default: SCHEDULED
       statusBadgeHtml = `
         <span class="power-status-badge status-scheduled">
+          <span class="status-dot-scheduled"></span>
           SCHEDULED
         </span>
       `;
@@ -286,16 +287,15 @@
           <div class="power-card-header">
             <div class="power-badges-wrap">
               <span class="power-district-badge">
-                <i class="fa-solid fa-location-dot"></i>
+                <i class="fa-solid fa-location-dot" style="font-size: 0.68rem; color: #64748b;"></i>
                 ${escapeHtml(item.district || 'Tamil Nadu')}
               </span>
-              ${item.division ? `<span class="power-district-badge" style="background: rgba(99, 102, 241, 0.08); color: #4f46e5; border-color: rgba(99, 102, 241, 0.2);">${escapeHtml(item.division)}</span>` : ''}
+              ${item.division ? `<span class="power-division-badge">${escapeHtml(item.division)}</span>` : ''}
             </div>
             ${statusBadgeHtml}
           </div>
 
           <h2 class="power-substation-title">
-            <i class="fa-solid fa-tower-broadcast" style="color: var(--primary, #0d9488); font-size: 0.92rem;"></i>
             ${escapeHtml(item.area || 'Substation Feed')}
           </h2>
 
@@ -315,7 +315,7 @@
 
         <div class="power-card-footer">
           <span class="power-source-tag">
-            <i class="fa-solid fa-building-flag" style="font-size: 0.72rem;"></i>
+            <i class="fa-solid fa-building-columns" style="font-size: 0.72rem; color: #94a3b8;"></i>
             Source: TNPDCL
           </span>
           <button class="power-btn-share" onclick="shareOutage('${escapeHtml(item.area || '')}', '${escapeHtml(item.district || '')}', '${dateFormatted}', '${timeWindow}')" title="Copy outage details">

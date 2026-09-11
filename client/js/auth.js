@@ -1366,7 +1366,7 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false) {
               aria-haspopup="true" 
               aria-expanded="false" 
               title="${tPublicPulse} - Live Public Services & Alerts">
-        <i class="fa-solid fa-tower-broadcast"></i>
+        <i class="fa-solid fa-satellite-dish"></i>
         <span class="public-pulse-btn-text" data-i18n="nav_public_pulse">${tPublicPulse}</span>
         <i class="fa-solid fa-chevron-down public-pulse-chevron"></i>
       </button>
@@ -1374,7 +1374,7 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false) {
       <div id="public-pulse-dropdown" class="public-pulse-dropdown hidden" role="menu" aria-label="${tPublicPulse}">
         <div class="public-pulse-dropdown-header">
           <div class="public-pulse-header-title">
-            <i class="fa-solid fa-tower-broadcast"></i>
+            <i class="fa-solid fa-satellite-dish"></i>
             <span data-i18n="nav_public_pulse">${tPublicPulse}</span>
           </div>
           <span class="public-pulse-header-subtitle">Tamil Nadu</span>
