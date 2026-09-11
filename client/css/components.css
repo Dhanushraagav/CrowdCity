@@ -4089,6 +4089,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     flex-direction: column;
     gap: 0.85rem;
     margin-bottom: 2rem;
+    touch-action: manipulation;
   }
   .quick-actions-title {
     font-size: 1.1rem;
@@ -4104,6 +4105,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     margin: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    touch-action: manipulation !important;
   }
   .quick-action-card {
     background-color: var(--bg-surface) !important;
@@ -4116,12 +4118,21 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     justify-content: center !important;
     text-align: center !important;
     text-decoration: none !important;
-    transition: background-color var(--transition-fast) !important;
     box-sizing: border-box !important;
     width: 100% !important;
     aspect-ratio: 1.15 / 1 !important;
     min-height: 104px !important;
     gap: 10px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    cursor: pointer !important;
+    transform: translateZ(0) scale(1) !important;
+    transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.08s ease, border-color 0.08s ease, box-shadow 0.08s ease !important;
+    will-change: transform !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
   }
   button.quick-action-card {
     font: inherit !important;
@@ -4130,8 +4141,28 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     margin: 0 !important;
     outline: none !important;
   }
-  .quick-action-card:active {
-    background-color: var(--bg-surface-hover) !important;
+  .quick-action-card:active,
+  .quick-action-card.touch-pressed {
+    transform: translateZ(0) scale(0.93) !important;
+    background-color: var(--bg-surface-hover, rgba(0, 0, 0, 0.05)) !important;
+    border-color: var(--primary, #0d9488) !important;
+    box-shadow: 0 0 0 2px var(--primary-light-alpha, rgba(13, 148, 136, 0.18)) !important;
+  }
+  /* Odd last-child spanning both columns for a balanced layout */
+  .quick-actions-grid .quick-action-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+    flex-direction: row !important;
+    aspect-ratio: auto !important;
+    min-height: 64px !important;
+    padding: 12px 20px !important;
+    gap: 14px !important;
+    justify-content: center !important;
+  }
+  .quick-actions-grid .quick-action-card:last-child:nth-child(odd) .quick-action-icon {
+    margin: 0 !important;
+  }
+  .quick-actions-grid .quick-action-card:last-child:nth-child(odd) .quick-action-label {
+    text-align: left !important;
   }
   .quick-action-icon {
     width: 44px !important;
@@ -4143,6 +4174,11 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     font-size: 1.2rem !important;
     flex-shrink: 0 !important;
     margin: 0 auto !important;
+    transition: transform 0.08s ease !important;
+  }
+  .quick-action-card:active .quick-action-icon,
+  .quick-action-card.touch-pressed .quick-action-icon {
+    transform: scale(0.94) !important;
   }
   .quick-action-label {
     font-size: 0.82rem !important;

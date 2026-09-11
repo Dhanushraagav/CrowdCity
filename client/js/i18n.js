@@ -17,7 +17,15 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
     nav_logout: "Logout",
     sign_out: "Sign Out",
     sign_in: "Sign In",
-    sign_up: "Sign Up"
+    sign_up: "Sign Up",
+    quick_actions: "Quick Actions",
+    report_issue: "Report Issue",
+    pulse_power_updates: "Power Updates",
+    pulse_weather_alerts: "Weather Forecast",
+    emergency_center: "Emergency Center",
+    view_map: "View Map",
+    nav_tn_updates: "TN Updates",
+    document_wallet: "Document Wallet"
   },
   ta: {
     nav_dashboard: "டாஷ்போர்ட்",
@@ -37,7 +45,15 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
     nav_logout: "வெளியேறு",
     sign_out: "வெளியேறு",
     sign_in: "உள்நுழை",
-    sign_up: "பதிவு செய்"
+    sign_up: "பதிவு செய்",
+    quick_actions: "விரைவான செயல்கள்",
+    report_issue: "புகார் அளி",
+    pulse_power_updates: "Power Updates",
+    pulse_weather_alerts: "வானிலை முன்னறிவிப்பு",
+    emergency_center: "அவசர உதவி மையம்",
+    view_map: "வரைபடத்தைப் பார்",
+    nav_tn_updates: "தமிழ்நாடு அப்டேட்ஸ்",
+    document_wallet: "ஆவண வாலட்"
   }
 };
 

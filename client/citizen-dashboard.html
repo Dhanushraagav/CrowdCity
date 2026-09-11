@@ -15,7 +15,7 @@
   <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=3.1.0"></script>
-  <script src="js/i18n.js"></script>
+  <script src="js/i18n.js?v=4.2.0"></script>
   <script src="js/app-launcher.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +24,7 @@
   
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
-  <link rel="stylesheet" href="css/components.css?v=8.4.0">
+  <link rel="stylesheet" href="css/components.css?v=8.5.0">
   <link rel="stylesheet" href="css/global-search.css?v=6.0.0">
   
   <!-- FontAwesome Icons -->
@@ -237,6 +237,10 @@
         <div class="quick-actions-section mobile-only">
           <h2 class="quick-actions-title" data-i18n="quick_actions">Quick Actions</h2>
           <div class="quick-actions-grid">
+            <a href="report.html" class="quick-action-card">
+              <div class="quick-action-icon bg-primary-alpha"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <span class="quick-action-label" data-i18n="report_issue">Report Issue</span>
+            </a>
             <a href="power-updates.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(13, 148, 136, 0.12); color: var(--primary);"><i class="fa-solid fa-plug"></i></div>
               <span class="quick-action-label" data-i18n="pulse_power_updates">Power Updates</span>
@@ -245,29 +249,21 @@
               <div class="quick-action-icon" style="background: rgba(14, 165, 233, 0.12); color: #0284c7;"><i class="fa-solid fa-cloud-sun"></i></div>
               <span class="quick-action-label" data-i18n="pulse_weather_alerts">Weather Forecast</span>
             </a>
+            <a href="emergency-services.html" class="quick-action-card">
+              <div class="quick-action-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i class="fa-solid fa-truck-medical"></i></div>
+              <span class="quick-action-label" data-i18n="emergency_center">Emergency Center</span>
+            </a>
+            <a href="map.html" class="quick-action-card">
+              <div class="quick-action-icon bg-success-alpha"><i class="fa-solid fa-map-location-dot"></i></div>
+              <span class="quick-action-label" data-i18n="view_map">View Map</span>
+            </a>
             <a href="tamilnadu-updates.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(13, 148, 136, 0.15); color: var(--primary);"><i class="fa-solid fa-newspaper"></i></div>
               <span class="quick-action-label" data-i18n="nav_tn_updates">TN Updates</span>
             </a>
             <a href="services.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(13, 148, 136, 0.15); color: var(--primary);"><i class="fa-solid fa-building-columns"></i></div>
-              <span class="quick-action-label" data-i18n="nav_services">Govt Services</span>
-            </a>
-            <a href="report.html" class="quick-action-card">
-              <div class="quick-action-icon bg-primary-alpha"><i class="fa-solid fa-triangle-exclamation"></i></div>
-              <span class="quick-action-label" data-i18n="report_issue">Report Issue</span>
-            </a>
-            <a href="my-complaints.html" class="quick-action-card">
-              <div class="quick-action-icon bg-secondary-alpha"><i class="fa-solid fa-clipboard-list"></i></div>
-              <span class="quick-action-label" data-i18n="my_complaints">My Complaints</span>
-            </a>
-            <a href="map.html" class="quick-action-card">
-              <div class="quick-action-icon bg-success-alpha"><i class="fa-solid fa-map-location-dot"></i></div>
-              <span class="quick-action-label" data-i18n="view_map">View Map</span>
-            </a>
-            <a href="emergency-services.html" class="quick-action-card">
-              <div class="quick-action-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i class="fa-solid fa-truck-medical"></i></div>
-              <span class="quick-action-label">Emergency Center</span>
+              <span class="quick-action-label" data-i18n="nav_services">Government Services</span>
             </a>
             <a href="helplines.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(14, 116, 144, 0.1); color: #0e7490;"><i class="fa-solid fa-phone-volume"></i></div>
@@ -396,7 +392,7 @@
   <script src="js/app.js?v=2.0.0"></script>
   <script src="js/chat-widget.js"></script>
 
-  <script src="js/citizen-dashboard.js"></script>
+  <script src="js/citizen-dashboard.js?v=2.2.0"></script>
 
   <!-- Weather Widget Logic -->
   <script>

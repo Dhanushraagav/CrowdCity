@@ -258,9 +258,93 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDynamicDashboard);
-  } else {
+  // ----------------------------------------------------
+  // Section 6: Instant Quick Actions Interactions & Prefetching
+  // ----------------------------------------------------
+  function initQuickActionsInteractions() {
+    const quickCards = document.querySelectorAll('.quick-action-card');
+    if (!quickCards.length) return;
+
+    // Top progress indicator for zero perceived latency
+    function showTopNavLoader() {
+      let loader = document.getElementById('cc-top-nav-loader');
+      if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'cc-top-nav-loader';
+        loader.style.cssText = 'position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,#0d9488,#14b8a6,#38bdf8);z-index:99999;box-shadow:0 0 8px rgba(13,148,136,0.6);transition:width 0.25s cubic-bezier(0.16,1,0.3,1);pointer-events:none;';
+        document.body.appendChild(loader);
+      }
+      loader.style.width = '0%';
+      loader.style.opacity = '1';
+      requestAnimationFrame(() => {
+        loader.style.width = '80%';
+      });
+    }
+
+    quickCards.forEach(card => {
+      // 0ms tactile depress on touch down
+      card.addEventListener('touchstart', function () {
+        this.classList.add('touch-pressed');
+        if (navigator.vibrate) {
+          try { navigator.vibrate(8); } catch (_) {}
+        }
+      }, { passive: true });
+
+      // Immediate release on touch finish/cancel
+      card.addEventListener('touchend', function () {
+        this.classList.remove('touch-pressed');
+      }, { passive: true });
+
+      card.addEventListener('touchcancel', function () {
+        this.classList.remove('touch-pressed');
+      }, { passive: true });
+
+      // Immediate progress loader on selection
+      card.addEventListener('click', function () {
+        showTopNavLoader();
+      });
+    });
+
+    // Destination pages to prefetch in background
+    const prefetchUrls = [
+      'report.html',
+      'power-updates.html',
+      'weather-alerts.html',
+      'emergency-services.html',
+      'map.html',
+      'tamilnadu-updates.html',
+      'services.html',
+      'helplines.html',
+      'my-documents.html'
+    ];
+
+    function prefetchDestinations() {
+      prefetchUrls.forEach(url => {
+        try {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.href = url;
+          link.as = 'document';
+          document.head.appendChild(link);
+        } catch (_) {}
+      });
+    }
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(prefetchDestinations, { timeout: 1500 });
+    } else {
+      setTimeout(prefetchDestinations, 600);
+    }
+  }
+
+  function startDashboard() {
     initDynamicDashboard();
+    initQuickActionsInteractions();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startDashboard);
+  } else {
+    startDashboard();
   }
 })();
