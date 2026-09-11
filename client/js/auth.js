@@ -1738,16 +1738,7 @@ function updateAuthUI() {
     const existingNav = sidebar.querySelector('.app-sidebar-nav');
     if (existingNav) {
       existingNav.querySelectorAll('a[href*="analytics.html"], a[href*="analytics"]').forEach(el => el.remove());
-
-      // Ensure Civic Intelligence link is present in sidebar on all pages
-      if (!existingNav.querySelector('a[href*="civic-intelligence.html"]')) {
-        const intelLink = document.createElement('a');
-        intelLink.href = 'civic-intelligence.html';
-        intelLink.className = `app-sidebar-link ${isCivicIntelligence ? 'active' : ''}`;
-        intelLink.title = 'Tamil Nadu Civic Intelligence';
-        intelLink.innerHTML = '<i class="fa-solid fa-chart-column"></i> <span>Civic Intelligence</span>';
-        existingNav.appendChild(intelLink);
-      }
+      existingNav.querySelectorAll('a[href*="civic-intelligence.html"], a[href*="civic-intelligence"]').forEach(el => el.remove());
 
       // Upgrade any legacy icons to the new professional icons
       const iconMap = {
@@ -1834,9 +1825,6 @@ function updateAuthUI() {
         </a>
         <a href="helplines.html" class="app-sidebar-link ${isHelplines ? 'active' : ''}" title="District Helplines">
           <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
-        </a>
-        <a href="civic-intelligence.html" class="app-sidebar-link ${isCivicIntelligence ? 'active' : ''}" title="Tamil Nadu Civic Intelligence">
-          <i class="fa-solid fa-chart-column"></i> <span>Civic Intelligence</span>
         </a>
       </nav>
     `;
@@ -2015,6 +2003,9 @@ function updateAuthUI() {
               <a href="${role === 'admin' ? 'admin.html' : 'authority-profile.html'}" class="nav-dropdown-item">
                 <i class="fa-regular fa-user" style="width: 16px; color: var(--text-muted);"></i> ${tProfile}
               </a>
+              <a href="authority-civic-intelligence.html" class="nav-dropdown-item">
+                <i class="fa-solid fa-chart-column" style="width: 16px; color: var(--text-muted);"></i> Civic Intelligence
+              </a>
               <a href="${role === 'admin' ? 'admin.html' : 'authority-settings.html'}" class="nav-dropdown-item">
                 <i class="fa-solid fa-gear" style="width: 16px; color: var(--text-muted);"></i> ${tSettings}
               </a>
@@ -2108,6 +2099,9 @@ function updateAuthUI() {
             </div>
             <a href="profile.html" class="nav-dropdown-item">
               <i class="fa-regular fa-user" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_profile">${window.i18n ? window.i18n.t('nav_profile') : 'My Profile'}</span>
+            </a>
+            <a href="civic-intelligence.html" class="nav-dropdown-item">
+              <i class="fa-solid fa-chart-column" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_civic_intelligence">${window.i18n ? window.i18n.t('nav_civic_intelligence') : 'Civic Intelligence'}</span>
             </a>
             <a href="notifications.html" class="nav-dropdown-item">
               <i class="fa-regular fa-bell" style="width: 16px; color: var(--text-muted);"></i> <span data-i18n="nav_notifications">${window.i18n ? window.i18n.t('nav_notifications') : 'Notifications'}</span>
