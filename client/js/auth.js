@@ -1342,7 +1342,7 @@ window.showToast = function(message, type = 'info') {
 };
 
 // Build Public Pulse Dropdown HTML
-function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false) {
+function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAlertsActive = false) {
   const tPublicPulse = window.i18n ? window.i18n.t('nav_public_pulse') : 'Public Pulse';
   const tPowerUpdates = window.i18n ? window.i18n.t('pulse_power_updates') : 'Power Updates';
   const tPowerUpdatesDesc = window.i18n ? window.i18n.t('pulse_power_updates_desc') : 'Planned electricity shutdown schedules (TNPDCL)';
@@ -1351,7 +1351,7 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false) {
   const tEmergencyAlerts = window.i18n ? window.i18n.t('pulse_emergency_alerts') : 'Emergency Alerts';
   const tEmergencyAlertsDesc = window.i18n ? window.i18n.t('pulse_emergency_alerts_desc') : 'Disaster management & public safety warnings';
   const tWeatherAlerts = window.i18n ? window.i18n.t('pulse_weather_alerts') : 'Weather Alerts';
-  const tWeatherAlertsDesc = window.i18n ? window.i18n.t('pulse_weather_alerts_desc') : 'IMD forecasts & regional rain advisories';
+  const tWeatherAlertsDesc = window.i18n ? window.i18n.t('pulse_weather_alerts_desc') : 'Official IMD warnings & regional advisories';
   const tTransportUpdates = window.i18n ? window.i18n.t('pulse_transport_updates') : 'Public Transport Updates';
   const tTransportUpdatesDesc = window.i18n ? window.i18n.t('pulse_transport_updates_desc') : 'TNSTC, MTC & metro transit notices';
   const tActive = window.i18n ? window.i18n.t('pulse_active') : 'ACTIVE';
@@ -1360,7 +1360,7 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false) {
   return `
     <div class="public-pulse-wrapper" id="public-pulse-wrapper">
       <button type="button" 
-              class="header-public-pulse-btn ${isPowerUpdatesActive ? 'active' : ''}" 
+              class="header-public-pulse-btn ${isPowerUpdatesActive || isWeatherAlertsActive ? 'active' : ''}" 
               id="header-public-pulse-btn" 
               onclick="togglePublicPulseDropdown(event)" 
               aria-haspopup="true" 
@@ -1423,19 +1423,19 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false) {
             </div>
           </div>
 
-          <!-- 4. Weather Alerts -->
-          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tWeatherAlerts} - ${tPlanned}">
-            <div class="pulse-item-icon-wrap disabled-icon">
-              <i class="fa-solid fa-cloud-rain"></i>
+          <!-- 4. Weather Alerts (ACTIVE) -->
+          <a href="weather-alerts.html" class="public-pulse-item active-feature ${isWeatherAlertsActive ? 'current-page' : ''}" role="menuitem">
+            <div class="pulse-item-icon-wrap active-icon">
+              <i class="fa-solid fa-cloud-bolt"></i>
             </div>
             <div class="pulse-item-content">
               <div class="pulse-item-title-row">
                 <span class="pulse-item-name" data-i18n="pulse_weather_alerts">${tWeatherAlerts}</span>
-                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
+                <span class="pulse-badge pulse-badge-active" data-i18n="pulse_active">${tActive}</span>
               </div>
               <p class="pulse-item-desc" data-i18n="pulse_weather_alerts_desc">${tWeatherAlertsDesc}</p>
             </div>
-          </div>
+          </a>
 
           <!-- 5. Public Transport Updates -->
           <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tTransportUpdates} - ${tPlanned}">
@@ -2170,10 +2170,12 @@ function updateAuthUI() {
     const currentPath = (window.location.pathname || '').toLowerCase();
     const isCitizenView = currentPath.includes('citizen-dashboard') || 
       currentPath.includes('power-updates') || 
+      currentPath.includes('weather-alerts') || 
       currentPath.includes('tamilnadu-updates') || 
       !!document.querySelector('.stitch-hero') || 
       !!document.getElementById('civic-intelligence-feed-text');
     const isPowerUpdatesActive = currentPath.includes('power-updates');
+    const isWeatherAlertsActive = currentPath.includes('weather-alerts');
     const isTnUpdatesActive = currentPath.includes('tamilnadu-updates');
 
     const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';
@@ -2184,7 +2186,7 @@ function updateAuthUI() {
         </a>`
       : '';
     const publicPulseDropdownHtml = isCitizenView
-      ? buildPublicPulseDropdownHtml(isPowerUpdatesActive)
+      ? buildPublicPulseDropdownHtml(isPowerUpdatesActive, isWeatherAlertsActive)
       : '';
 
     finalContainer.innerHTML = `
@@ -2262,10 +2264,12 @@ function updateAuthUI() {
     const currentPath = (window.location.pathname || '').toLowerCase();
     const isCitizenView = currentPath.includes('citizen-dashboard') || 
       currentPath.includes('power-updates') || 
+      currentPath.includes('weather-alerts') || 
       currentPath.includes('tamilnadu-updates') || 
       !!document.querySelector('.stitch-hero') || 
       !!document.getElementById('civic-intelligence-feed-text');
     const isPowerUpdatesActive = currentPath.includes('power-updates');
+    const isWeatherAlertsActive = currentPath.includes('weather-alerts');
     const isTnUpdatesActive = currentPath.includes('tamilnadu-updates');
 
     const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';
@@ -2276,7 +2280,7 @@ function updateAuthUI() {
         </a>`
       : '';
     const publicPulseDropdownHtml = isCitizenView
-      ? buildPublicPulseDropdownHtml(isPowerUpdatesActive)
+      ? buildPublicPulseDropdownHtml(isPowerUpdatesActive, isWeatherAlertsActive)
       : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
     finalContainer.innerHTML = `

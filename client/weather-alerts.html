@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=8.0.0"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Official district-level meteorological warnings and severe weather alerts across Tamil Nadu from the India Meteorological Department (IMD).">
+  <title>Weather Alerts - Public Pulse - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css?v=8.2.0">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .weather-hero-banner {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .weather-hero-title-group h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 0.35rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .weather-hero-title-group p {
+      font-size: 0.88rem;
+      color: var(--text-muted, #64748b);
+      margin: 0;
+      line-height: 1.5;
+      max-width: 620px;
+    }
+
+    .weather-hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .weather-stale-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .btn-official-source {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.95rem;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #cbd5e1);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main, #0f172a);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-official-source:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    .btn-refresh-weather {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.95rem;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #cbd5e1);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main, #0f172a);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-refresh-weather:hover {
+      background: var(--bg-hover);
+      border-color: #94a3b8;
+    }
+
+    /* Filter Card */
+    .weather-filter-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 1.15rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .weather-filter-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .weather-time-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .weather-tab-btn {
+      padding: 0.4rem 0.8rem;
+      background: var(--bg-app, #f8fafc);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted, #64748b);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .weather-tab-btn:hover {
+      background: var(--bg-hover, #f1f5f9);
+      color: var(--text-main, #0f172a);
+    }
+
+    .weather-tab-btn.active {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.12);
+    }
+
+    .weather-filter-inputs {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .weather-search-wrap {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+
+    .weather-search-wrap input {
+      width: 100%;
+      padding: 0.6rem 0.95rem 0.6rem 2.25rem;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      background: var(--bg-app);
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .weather-search-wrap input:focus {
+      border-color: #0f172a;
+      background: var(--bg-surface);
+    }
+
+    .weather-search-wrap i {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .weather-select-filter {
+      padding: 0.6rem 0.9rem;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background: var(--bg-app);
+      cursor: pointer;
+      outline: none;
+      min-width: 160px;
+    }
+
+    .weather-select-filter:focus {
+      border-color: #0f172a;
+    }
+
+    .weather-date-input {
+      padding: 0.55rem 0.85rem;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 8px;
+      font-size: 0.84rem;
+      color: var(--text-main);
+      background: var(--bg-app);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .weather-date-input:focus {
+      border-color: #0f172a;
+    }
+
+    /* Weather Alert Grid */
+    .weather-alerts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .weather-alert-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .weather-alert-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    .weather-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .weather-badges-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .weather-district-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.22rem 0.6rem;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .weather-day-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.22rem 0.55rem;
+      background: #f8fafc;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .weather-severity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.22rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .severity-warning {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .severity-dot-warning {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #dc2626;
+      display: inline-block;
+    }
+
+    .severity-alert {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+    }
+
+    .severity-dot-alert {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ea580c;
+      display: inline-block;
+    }
+
+    .severity-watch {
+      background: #fefce8;
+      color: #854d0e;
+      border: 1px solid #fef08a;
+    }
+
+    .severity-dot-watch {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ca8a04;
+      display: inline-block;
+    }
+
+    .severity-nowarning {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .severity-dot-nowarning {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #16a34a;
+      display: inline-block;
+    }
+
+    .weather-warning-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 0.65rem 0;
+      line-height: 1.4;
+      font-family: var(--font-heading, system-ui);
+    }
+
+    .weather-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+
+    .weather-meta-row i {
+      font-size: 0.82rem;
+      width: 14px;
+      text-align: center;
+    }
+
+    .weather-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 0.8rem;
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .weather-source-tag {
+      font-weight: 500;
+      color: #64748b;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .weather-btn-share {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.76rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+
+    .weather-btn-share:hover {
+      background: var(--bg-hover);
+      color: #0f172a;
+    }
+
+    /* State Boxes */
+    .weather-state-box {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 2.75rem 2rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      margin-bottom: 2rem;
+    }
+
+    .weather-state-box h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .weather-state-box p {
+      font-size: 0.88rem;
+      color: var(--text-muted, #64748b);
+      max-width: 520px;
+      margin: 0 auto 1.35rem auto;
+      line-height: 1.55;
+    }
+
+    .weather-disclaimer-footnote {
+      text-align: center;
+      font-size: 0.76rem;
+      color: var(--text-muted, #94a3b8);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color, #e2e8f0);
+    }
+
+    @media (max-width: 640px) {
+      .weather-hero-banner {
+        padding: 1.25rem;
+      }
+      .weather-hero-title-group h1 {
+        font-size: 1.25rem;
+      }
+      .weather-alerts-grid {
+        grid-template-columns: 1fr;
+      }
+      .weather-filter-inputs {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .weather-select-filter, .weather-date-input {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+      // Language bootstrap: ensure Tamil or stored language is applied before paint
+      const storedLang = localStorage.getItem('cc_lang') || 'en';
+      document.documentElement.lang = storedLang;
+
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.app-sidebar a[href*="civic-intelligence"], aside a[href*="civic-intelligence"]').forEach(function(el) {
+          el.remove();
+        });
+      });
+    })();
+  </script>
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" decoding="async">
+            <div class="brand-divider"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Tamil Nadu" class="brand-emblem" decoding="async">
+          </div>
+          <span class="brand-text">CROWDCITY<small>CITIZEN PORTAL</small></span>
+        </a>
+      </div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-table-columns"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Issue">
+          <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="nav_report_issue">Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-list-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link" title="Transportation">
+          <i class="fa-solid fa-bus"></i> <span data-i18n="nav_transportation">Transportation</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-flag"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
+          <i class="fa-solid fa-shield-halved"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <a href="citizen-dashboard.html" class="app-header-logo-mobile" style="display: flex; align-items: center; text-decoration: none;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" decoding="async">
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.1rem;"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" decoding="async">
+          </div>
+        </a>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
+          <div id="auth-nav-container"></div>
+        </div>
+      </header>
+
+      <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%; box-sizing: border-box;">
+
+        <!-- Hero Header Card -->
+        <div class="weather-hero-banner">
+          <div class="weather-hero-title-group">
+            <h1><span data-i18n="weather_alerts_title">Weather Alerts</span></h1>
+            <p data-i18n="weather_alerts_subtitle">Official weather warnings from the India Meteorological Department.</p>
+          </div>
+          <div class="weather-hero-actions">
+            <div id="weather-stale-badge" class="weather-stale-pill hidden">
+              <i class="fa-regular fa-clock"></i>
+              <span data-i18n="weather_stale_notice">Cached Data</span>
+            </div>
+            <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" class="btn-official-source" title="View Official IMD Portal">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span data-i18n="weather_official_portal">Official IMD Portal</span>
+            </a>
+            <button class="btn-refresh-weather" id="btn-refresh-weather">
+              <i class="fa-solid fa-arrows-rotate" id="refresh-weather-icon"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Card -->
+        <div class="weather-filter-card">
+          <div class="weather-filter-top-row">
+            <div class="weather-time-tabs" id="weather-time-tabs">
+              <button class="weather-tab-btn active" data-tab="all" onclick="setWeatherTimeframeTab('all')">
+                <span data-i18n="weather_tab_all">All Days</span>
+              </button>
+              <button class="weather-tab-btn" data-tab="today" onclick="setWeatherTimeframeTab('today')">
+                <span data-i18n="weather_tab_today">Today</span>
+              </button>
+              <button class="weather-tab-btn" data-tab="tomorrow" onclick="setWeatherTimeframeTab('tomorrow')">
+                <span data-i18n="weather_tab_tomorrow">Tomorrow</span>
+              </button>
+              <button class="weather-tab-btn" data-tab="day3" onclick="setWeatherTimeframeTab('day3')">
+                <span data-i18n="weather_tab_day3">Day 3</span>
+              </button>
+              <button class="weather-tab-btn" data-tab="day4" onclick="setWeatherTimeframeTab('day4')">
+                <span data-i18n="weather_tab_day4">Day 4</span>
+              </button>
+              <button class="weather-tab-btn" data-tab="day5" onclick="setWeatherTimeframeTab('day5')">
+                <span data-i18n="weather_tab_day5">Day 5</span>
+              </button>
+            </div>
+
+            <div style="font-size: 0.78rem; color: var(--text-muted);">
+              <span data-i18n="weather_last_updated">Last Updated:</span>
+              <span id="weather-last-updated-text" style="font-weight: 600;">--</span>
+            </div>
+          </div>
+
+          <div class="weather-filter-inputs">
+            <div class="weather-search-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="weather-search-input" placeholder="Search by district or warning..." data-i18n-placeholder="search_placeholder">
+            </div>
+
+            <select class="weather-select-filter" id="weather-district-filter">
+              <option value="all" data-i18n="weather_filter_district_all">All Districts (38)</option>
+            </select>
+
+            <select class="weather-select-filter" id="weather-severity-filter">
+              <option value="all" data-i18n="weather_filter_severity_all">All Severities</option>
+              <option value="Warning">Warning (Red)</option>
+              <option value="Alert">Alert (Orange)</option>
+              <option value="Watch">Watch (Yellow)</option>
+              <option value="No Warning">No Warning (Green)</option>
+            </select>
+
+            <input type="date" id="weather-date-input" class="weather-date-input" title="Filter by specific date">
+          </div>
+        </div>
+
+        <!-- Alert Cards Grid -->
+        <div class="weather-alerts-grid" id="weather-alerts-container">
+          <!-- Dynamic cards or skeletons injected via JS -->
+        </div>
+
+        <!-- No Warning State for Specific District -->
+        <div id="weather-no-warning-box" class="weather-state-box hidden">
+          <i class="fa-regular fa-circle-check" style="font-size: 2.2rem; color: #16a34a; margin-bottom: 0.75rem;"></i>
+          <h3 id="no-warning-district-name">District</h3>
+          <p data-i18n="weather_no_warning_district">No weather warning for this district.</p>
+          <button class="btn btn-secondary" onclick="resetWeatherFilters()" style="padding: 0.5rem 1.1rem; font-size: 0.82rem; font-weight: 600;">Reset Filters</button>
+        </div>
+
+        <!-- Filter Empty State -->
+        <div id="weather-empty-state" class="weather-state-box hidden">
+          <i class="fa-solid fa-cloud-sun" style="font-size: 2.2rem; color: #64748b; margin-bottom: 0.75rem;"></i>
+          <h3 data-i18n="weather_no_alerts_found">No Weather Warnings Reported</h3>
+          <p data-i18n="weather_no_alerts_desc">No active meteorological warnings match the selected filters across Tamil Nadu.</p>
+          <button class="btn btn-secondary" onclick="resetWeatherFilters()" style="padding: 0.5rem 1.1rem; font-size: 0.82rem; font-weight: 600;">Reset Filters</button>
+        </div>
+
+        <!-- Source Unavailable State (Live IMD requires whitelisting / credentials) -->
+        <div id="weather-source-unavailable-box" class="weather-state-box hidden">
+          <i class="fa-solid fa-satellite-dish" style="font-size: 2.2rem; color: #475569; margin-bottom: 0.75rem;"></i>
+          <h3 data-i18n="weather_source_unavailable_title">Weather alert data is temporarily unavailable.</h3>
+          <p data-i18n="weather_source_unavailable_desc">Official IMD data access is not currently available or requires authorized IP access. Please check the official IMD portal directly.</p>
+          <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+            <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span data-i18n="weather_official_portal">Official IMD Portal</span>
+            </a>
+            <button class="btn btn-secondary" onclick="fetchWeatherAlerts(true)" style="padding: 0.55rem 1.1rem; font-size: 0.85rem; font-weight: 600;">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Check Feed</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="weather-error-state" class="weather-state-box hidden">
+          <i class="fa-solid fa-circle-exclamation" style="font-size: 2.2rem; color: #ef4444; margin-bottom: 0.75rem;"></i>
+          <h3>Unable to Connect to Weather Alert Service</h3>
+          <p id="weather-error-message">Please try refreshing the page or check the official IMD portal.</p>
+          <div style="display: flex; gap: 0.75rem; justify-content: center;">
+            <button class="btn btn-primary" onclick="fetchWeatherAlerts(true)" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
+            <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Official Portal</a>
+          </div>
+        </div>
+
+        <!-- Footnote Disclaimer & Official Attribution -->
+        <div class="weather-disclaimer-footnote">
+          <span>Source: India Meteorological Department, Ministry of Earth Sciences, Government of India. Official portal: <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">mausam.imd.gov.in</a></span>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js?v=8.3.0"></script>
+  <script src="js/weather-alerts.js?v=1.0.0"></script>
+
+</body>
+</html>
