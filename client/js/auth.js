@@ -2061,10 +2061,18 @@ function updateAuthUI() {
           <span class="tn-updates-btn-text" data-i18n="nav_tn_updates">${tTnUpdates}</span>
         </a>`
       : '';
+    const tPowerUpdates = window.i18n ? window.i18n.t('nav_power_updates') : 'Power Updates';
+    const powerUpdatesBtnHtml = isCitizenDashboardOnly
+      ? `<a href="power-updates.html" class="header-power-updates-btn" title="Tamil Nadu Power Shutdown Updates (TNPDCL / TANGEDCO)">
+          <i class="fa-solid fa-bolt"></i>
+          <span class="power-updates-btn-text" data-i18n="nav_power_updates">${tPowerUpdates}</span>
+        </a>`
+      : '';
 
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
         ${tnUpdatesBtnHtml}
+        ${powerUpdatesBtnHtml}
 
         <!-- Notification Bell Container -->
         <div class="notification-bell-wrapper" id="bell-wrapper">
@@ -2141,10 +2149,17 @@ function updateAuthUI() {
           <span class="tn-updates-btn-text">TN Updates</span>
         </a>`
       : '';
+    const powerUpdatesBtnHtml = isCitizenDashboardOnly
+      ? `<a href="power-updates.html" class="header-power-updates-btn" title="Tamil Nadu Power Shutdown Updates (TNPDCL / TANGEDCO)">
+          <i class="fa-solid fa-bolt"></i>
+          <span class="power-updates-btn-text">Power Updates</span>
+        </a>`
+      : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
         ${tnUpdatesBtnHtml}
+        ${powerUpdatesBtnHtml}
         <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
       </div>
     `;

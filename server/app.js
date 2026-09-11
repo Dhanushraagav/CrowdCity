@@ -20,6 +20,7 @@ import tnInfoRoutes from './routes/tnInfoRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import authorityRoutes from './routes/authorityRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
+import powerShutdownRoutes from './routes/powerShutdownRoutes.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
 // ES Module dirname workaround
@@ -120,6 +121,7 @@ app.use('/api/authority/civic-intelligence', (req, res, next) => {
 });
 app.use('/api/authorities', authorityRoutes);
 app.use('/api/locations', locationRoutes);
+app.use('/api/power-updates', powerShutdownRoutes);
 
 // Static client file server with caching and html extension resolution
 app.use(express.static(path.join(__dirname, '../client'), {
