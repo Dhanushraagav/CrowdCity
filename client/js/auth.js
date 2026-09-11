@@ -2071,24 +2071,6 @@ function updateAuthUI() {
         </a>`
       : '';
 
-    const tollFreeNum = window.CROWDCITY_TOLL_FREE || localStorage.getItem('crowdcity_toll_free') || '1800-425-1100';
-    const tollFreeHeaderBtnHtml = isCitizenDashboardOnly ? `
-      <div class="header-tollfree-pill" id="header-tollfree-widget" title="24/7 Citizen Toll-Free Helpline: ${tollFreeNum}">
-        <a href="tel:${tollFreeNum.replace(/[^0-9+]/g, '')}" class="header-tf-link">
-          <span class="header-tf-icon-wrap">
-            <i class="fa-solid fa-phone-volume"></i>
-            <span class="header-tf-live-dot"></span>
-          </span>
-          <span class="header-tf-text-wrap">
-            <span id="header-tf-text" class="header-tf-news-text">Toll-Free: ${tollFreeNum}</span>
-          </span>
-        </a>
-        <button type="button" class="header-tf-copy-btn" onclick="if(window.CrowdCityTollFree) window.CrowdCityTollFree.copyNumber(event)" title="Copy Toll-Free Number">
-          <i class="fa-regular fa-copy"></i>
-        </button>
-      </div>
-    ` : '';
-
     const whatsAppHeaderBtnHtml = isCitizenDashboardOnly ? `
       <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." 
          target="_blank" 
@@ -2111,7 +2093,6 @@ function updateAuthUI() {
 
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
-        ${tollFreeHeaderBtnHtml}
         ${whatsAppHeaderBtnHtml}
         ${tnUpdatesBtnHtml}
 
@@ -2188,22 +2169,6 @@ function updateAuthUI() {
         </a>`
       : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
-    const tollFreeNum = window.CROWDCITY_TOLL_FREE || localStorage.getItem('crowdcity_toll_free') || '1800-425-1100';
-    const tollFreeHeaderBtnHtml = isCitizenDashboardOnly ? `
-      <div class="header-tollfree-pill" id="header-tollfree-widget" title="24/7 Citizen Toll-Free Helpline: ${tollFreeNum}">
-        <a href="tel:${tollFreeNum.replace(/[^0-9+]/g, '')}" class="header-tf-link">
-          <span class="header-tf-icon-wrap">
-            <i class="fa-solid fa-phone-volume"></i>
-            <span class="header-tf-live-dot"></span>
-          </span>
-          <span class="header-tf-text-wrap">
-            <span id="header-tf-text" class="header-tf-news-text">Toll-Free: ${tollFreeNum}</span>
-          </span>
-        </a>
-        <button type="button" class="header-tf-copy-btn" onclick="if(window.CrowdCityTollFree) window.CrowdCityTollFree.copyNumber(event)" title="Copy Toll-Free Number">
-          <i class="fa-regular fa-copy"></i>
-        </button>
-      </div>
     const whatsAppHeaderBtnHtml = isCitizenDashboardOnly ? `
       <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." 
          target="_blank" 
@@ -2225,7 +2190,6 @@ function updateAuthUI() {
     ` : '';
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
-        ${tollFreeHeaderBtnHtml}
         ${whatsAppHeaderBtnHtml}
         ${tnUpdatesBtnHtml}
         <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
@@ -2236,11 +2200,6 @@ function updateAuthUI() {
   // Populate dynamic notifications dropdown elements if window.renderNotifications is loaded
   if (typeof window.renderNotifications === 'function') {
     window.renderNotifications();
-  }
-
-  // Trigger Header Toll-Free news-typing animation
-  if (window.CrowdCityTollFree && typeof window.CrowdCityTollFree.startHeaderAnimation === 'function') {
-    window.CrowdCityTollFree.startHeaderAnimation();
   }
   
   // Dispatch custom auth change event ONLY if:
