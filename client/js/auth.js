@@ -1341,6 +1341,121 @@ window.showToast = function(message, type = 'info') {
   }, 4000);
 };
 
+// Build Public Pulse Dropdown HTML
+function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false) {
+  const tPublicPulse = window.i18n ? window.i18n.t('nav_public_pulse') : 'Public Pulse';
+  const tPowerUpdates = window.i18n ? window.i18n.t('pulse_power_updates') : 'Power Updates';
+  const tPowerUpdatesDesc = window.i18n ? window.i18n.t('pulse_power_updates_desc') : 'Planned electricity shutdown schedules (TNPDCL)';
+  const tFloodAlerts = window.i18n ? window.i18n.t('pulse_flood_alerts') : 'Flood & Water-Level Alerts';
+  const tFloodAlertsDesc = window.i18n ? window.i18n.t('pulse_flood_alerts_desc') : 'River basins, reservoirs & inundation levels';
+  const tEmergencyAlerts = window.i18n ? window.i18n.t('pulse_emergency_alerts') : 'Emergency Alerts';
+  const tEmergencyAlertsDesc = window.i18n ? window.i18n.t('pulse_emergency_alerts_desc') : 'Disaster management & public safety warnings';
+  const tWeatherAlerts = window.i18n ? window.i18n.t('pulse_weather_alerts') : 'Weather Alerts';
+  const tWeatherAlertsDesc = window.i18n ? window.i18n.t('pulse_weather_alerts_desc') : 'IMD forecasts & regional rain advisories';
+  const tTransportUpdates = window.i18n ? window.i18n.t('pulse_transport_updates') : 'Public Transport Updates';
+  const tTransportUpdatesDesc = window.i18n ? window.i18n.t('pulse_transport_updates_desc') : 'TNSTC, MTC & metro transit notices';
+  const tActive = window.i18n ? window.i18n.t('pulse_active') : 'ACTIVE';
+  const tPlanned = window.i18n ? window.i18n.t('pulse_coming_soon') : 'Planned';
+
+  return `
+    <div class="public-pulse-wrapper" id="public-pulse-wrapper">
+      <button type="button" 
+              class="header-public-pulse-btn ${isPowerUpdatesActive ? 'active' : ''}" 
+              id="header-public-pulse-btn" 
+              onclick="togglePublicPulseDropdown(event)" 
+              aria-haspopup="true" 
+              aria-expanded="false" 
+              title="${tPublicPulse} - Live Public Services & Alerts">
+        <i class="fa-solid fa-tower-broadcast"></i>
+        <span class="public-pulse-btn-text" data-i18n="nav_public_pulse">${tPublicPulse}</span>
+        <i class="fa-solid fa-chevron-down public-pulse-chevron"></i>
+      </button>
+
+      <div id="public-pulse-dropdown" class="public-pulse-dropdown hidden" role="menu" aria-label="${tPublicPulse}">
+        <div class="public-pulse-dropdown-header">
+          <div class="public-pulse-header-title">
+            <i class="fa-solid fa-tower-broadcast"></i>
+            <span data-i18n="nav_public_pulse">${tPublicPulse}</span>
+          </div>
+          <span class="public-pulse-header-subtitle">Tamil Nadu</span>
+        </div>
+        
+        <div class="public-pulse-items-list">
+          <!-- 1. Power Updates (ACTIVE) -->
+          <a href="power-updates.html" class="public-pulse-item active-feature ${isPowerUpdatesActive ? 'current-page' : ''}" role="menuitem">
+            <div class="pulse-item-icon-wrap active-icon">
+              <i class="fa-solid fa-plug"></i>
+            </div>
+            <div class="pulse-item-content">
+              <div class="pulse-item-title-row">
+                <span class="pulse-item-name" data-i18n="pulse_power_updates">${tPowerUpdates}</span>
+                <span class="pulse-badge pulse-badge-active" data-i18n="pulse_active">${tActive}</span>
+              </div>
+              <p class="pulse-item-desc" data-i18n="pulse_power_updates_desc">${tPowerUpdatesDesc}</p>
+            </div>
+          </a>
+
+          <!-- 2. Flood & Water-Level Alerts -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tFloodAlerts} - ${tPlanned}">
+            <div class="pulse-item-icon-wrap disabled-icon">
+              <i class="fa-solid fa-water"></i>
+            </div>
+            <div class="pulse-item-content">
+              <div class="pulse-item-title-row">
+                <span class="pulse-item-name" data-i18n="pulse_flood_alerts">${tFloodAlerts}</span>
+                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
+              </div>
+              <p class="pulse-item-desc" data-i18n="pulse_flood_alerts_desc">${tFloodAlertsDesc}</p>
+            </div>
+          </div>
+
+          <!-- 3. Emergency Alerts -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tEmergencyAlerts} - ${tPlanned}">
+            <div class="pulse-item-icon-wrap disabled-icon">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="pulse-item-content">
+              <div class="pulse-item-title-row">
+                <span class="pulse-item-name" data-i18n="pulse_emergency_alerts">${tEmergencyAlerts}</span>
+                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
+              </div>
+              <p class="pulse-item-desc" data-i18n="pulse_emergency_alerts_desc">${tEmergencyAlertsDesc}</p>
+            </div>
+          </div>
+
+          <!-- 4. Weather Alerts -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tWeatherAlerts} - ${tPlanned}">
+            <div class="pulse-item-icon-wrap disabled-icon">
+              <i class="fa-solid fa-cloud-rain"></i>
+            </div>
+            <div class="pulse-item-content">
+              <div class="pulse-item-title-row">
+                <span class="pulse-item-name" data-i18n="pulse_weather_alerts">${tWeatherAlerts}</span>
+                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
+              </div>
+              <p class="pulse-item-desc" data-i18n="pulse_weather_alerts_desc">${tWeatherAlertsDesc}</p>
+            </div>
+          </div>
+
+          <!-- 5. Public Transport Updates -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tTransportUpdates} - ${tPlanned}">
+            <div class="pulse-item-icon-wrap disabled-icon">
+              <i class="fa-solid fa-bus"></i>
+            </div>
+            <div class="pulse-item-content">
+              <div class="pulse-item-title-row">
+                <span class="pulse-item-name" data-i18n="pulse_transport_updates">${tTransportUpdates}</span>
+                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
+              </div>
+              <p class="pulse-item-desc" data-i18n="pulse_transport_updates_desc">${tTransportUpdatesDesc}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // Update Header Navigation UI depending on active state
 function updateAuthUI() {
   const user = getCurrentUser();
@@ -2053,26 +2168,29 @@ function updateAuthUI() {
     const tProfile = window.i18n ? window.i18n.t('nav_profile') : 'Profile';
     const tSettings = window.i18n ? window.i18n.t('nav_settings') : 'Settings';
     const currentPath = (window.location.pathname || '').toLowerCase();
-    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || !!document.querySelector('.stitch-hero') || !!document.getElementById('civic-intelligence-feed-text');
+    const isCitizenView = currentPath.includes('citizen-dashboard') || 
+      currentPath.includes('power-updates') || 
+      currentPath.includes('tamilnadu-updates') || 
+      !!document.querySelector('.stitch-hero') || 
+      !!document.getElementById('civic-intelligence-feed-text');
+    const isPowerUpdatesActive = currentPath.includes('power-updates');
+    const isTnUpdatesActive = currentPath.includes('tamilnadu-updates');
+
     const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';
-    const tnUpdatesBtnHtml = isCitizenDashboardOnly
-      ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn" title="Tamil Nadu Government & Civic Updates">
+    const tnUpdatesBtnHtml = isCitizenView
+      ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn ${isTnUpdatesActive ? 'active' : ''}" title="Tamil Nadu Government & Civic Updates">
           <i class="fa-solid fa-newspaper"></i>
           <span class="tn-updates-btn-text" data-i18n="nav_tn_updates">${tTnUpdates}</span>
         </a>`
       : '';
-    const tPowerUpdates = window.i18n ? window.i18n.t('nav_power_updates') : 'Power Updates';
-    const powerUpdatesBtnHtml = isCitizenDashboardOnly
-      ? `<a href="power-updates.html" class="header-power-updates-btn" title="Tamil Nadu Power Shutdown Updates (TNPDCL / TANGEDCO)">
-          <i class="fa-solid fa-plug"></i>
-          <span class="power-updates-btn-text" data-i18n="nav_power_updates">${tPowerUpdates}</span>
-        </a>`
+    const publicPulseDropdownHtml = isCitizenView
+      ? buildPublicPulseDropdownHtml(isPowerUpdatesActive)
       : '';
 
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
         ${tnUpdatesBtnHtml}
-        ${powerUpdatesBtnHtml}
+        ${publicPulseDropdownHtml}
 
         <!-- Notification Bell Container -->
         <div class="notification-bell-wrapper" id="bell-wrapper">
@@ -2142,24 +2260,29 @@ function updateAuthUI() {
     `;
   } else {
     const currentPath = (window.location.pathname || '').toLowerCase();
-    const isCitizenDashboardOnly = currentPath.includes('citizen-dashboard') || !!document.querySelector('.stitch-hero') || !!document.getElementById('civic-intelligence-feed-text');
-    const tnUpdatesBtnHtml = isCitizenDashboardOnly
-      ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn" title="Tamil Nadu Government & Civic Updates">
+    const isCitizenView = currentPath.includes('citizen-dashboard') || 
+      currentPath.includes('power-updates') || 
+      currentPath.includes('tamilnadu-updates') || 
+      !!document.querySelector('.stitch-hero') || 
+      !!document.getElementById('civic-intelligence-feed-text');
+    const isPowerUpdatesActive = currentPath.includes('power-updates');
+    const isTnUpdatesActive = currentPath.includes('tamilnadu-updates');
+
+    const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';
+    const tnUpdatesBtnHtml = isCitizenView
+      ? `<a href="tamilnadu-updates.html" class="header-tn-updates-btn ${isTnUpdatesActive ? 'active' : ''}" title="Tamil Nadu Government & Civic Updates">
           <i class="fa-solid fa-newspaper"></i>
-          <span class="tn-updates-btn-text">TN Updates</span>
+          <span class="tn-updates-btn-text" data-i18n="nav_tn_updates">${tTnUpdates}</span>
         </a>`
       : '';
-    const powerUpdatesBtnHtml = isCitizenDashboardOnly
-      ? `<a href="power-updates.html" class="header-power-updates-btn" title="Tamil Nadu Power Shutdown Updates (TNPDCL / TANGEDCO)">
-          <i class="fa-solid fa-plug"></i>
-          <span class="power-updates-btn-text">Power Updates</span>
-        </a>`
+    const publicPulseDropdownHtml = isCitizenView
+      ? buildPublicPulseDropdownHtml(isPowerUpdatesActive)
       : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
         ${tnUpdatesBtnHtml}
-        ${powerUpdatesBtnHtml}
+        ${publicPulseDropdownHtml}
         <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
       </div>
     `;
@@ -2274,6 +2397,37 @@ window.closeDocWalletBanner = function() {
   }
 };
 
+// Toggle Public Pulse Dropdown
+window.togglePublicPulseDropdown = function(e) {
+  if (e) {
+    e.stopPropagation();
+  }
+  const dropdown = document.getElementById('public-pulse-dropdown');
+  const btn = document.getElementById('header-public-pulse-btn');
+  if (dropdown) {
+    const isOpening = dropdown.classList.contains('hidden');
+    dropdown.classList.toggle('hidden');
+    if (btn) {
+      if (isOpening) {
+        btn.classList.add('dropdown-open');
+        btn.setAttribute('aria-expanded', 'true');
+      } else {
+        btn.classList.remove('dropdown-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  }
+  // Close user dropdown and notification dropdown if opening public pulse
+  const userDropdown = document.getElementById('user-dropdown');
+  if (userDropdown && dropdown && !dropdown.classList.contains('hidden')) {
+    userDropdown.classList.add('hidden');
+  }
+  const notifDropdown = document.getElementById('notification-dropdown');
+  if (notifDropdown && dropdown && !dropdown.classList.contains('hidden')) {
+    notifDropdown.classList.add('hidden');
+  }
+};
+
 // Toggle Dropdown Display
 function toggleUserDropdown() {
   const dropdown = document.getElementById('user-dropdown');
@@ -2284,6 +2438,16 @@ function toggleUserDropdown() {
   const notifDropdown = document.getElementById('notification-dropdown');
   if (notifDropdown && dropdown && !dropdown.classList.contains('hidden')) {
     notifDropdown.classList.add('hidden');
+  }
+  // Close public pulse dropdown if user dropdown is opened
+  const pulseDropdown = document.getElementById('public-pulse-dropdown');
+  const pulseBtn = document.getElementById('header-public-pulse-btn');
+  if (pulseDropdown && dropdown && !dropdown.classList.contains('hidden')) {
+    pulseDropdown.classList.add('hidden');
+    if (pulseBtn) {
+      pulseBtn.classList.remove('dropdown-open');
+      pulseBtn.setAttribute('aria-expanded', 'false');
+    }
   }
 }
 
@@ -2301,6 +2465,37 @@ window.addEventListener('click', (e) => {
   const notifDropdown = document.getElementById('notification-dropdown');
   if (bellBtn && notifDropdown && !bellBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
     notifDropdown.classList.add('hidden');
+  }
+
+  // Public Pulse dropdown
+  const pulseWrapper = document.getElementById('public-pulse-wrapper');
+  const pulseDropdown = document.getElementById('public-pulse-dropdown');
+  const pulseBtn = document.getElementById('header-public-pulse-btn');
+  if (pulseWrapper && pulseDropdown && !pulseWrapper.contains(e.target)) {
+    pulseDropdown.classList.add('hidden');
+    if (pulseBtn) {
+      pulseBtn.classList.remove('dropdown-open');
+      pulseBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+});
+
+// Close dropdowns on ESC key
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const pulseDropdown = document.getElementById('public-pulse-dropdown');
+    const pulseBtn = document.getElementById('header-public-pulse-btn');
+    if (pulseDropdown && !pulseDropdown.classList.contains('hidden')) {
+      pulseDropdown.classList.add('hidden');
+      if (pulseBtn) {
+        pulseBtn.classList.remove('dropdown-open');
+        pulseBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+    const userDropdown = document.getElementById('user-dropdown');
+    if (userDropdown) userDropdown.classList.add('hidden');
+    const notifDropdown = document.getElementById('notification-dropdown');
+    if (notifDropdown) notifDropdown.classList.add('hidden');
   }
 });
 
