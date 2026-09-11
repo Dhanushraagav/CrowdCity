@@ -1381,7 +1381,7 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
         </div>
         
         <div class="public-pulse-items-list">
-          <!-- 1. Power Updates (ACTIVE) -->
+          <!-- 1. Power Updates -->
           <a href="power-updates.html" class="public-pulse-item active-feature ${isPowerUpdatesActive ? 'current-page' : ''}" role="menuitem">
             <div class="pulse-item-icon-wrap active-icon">
               <i class="fa-solid fa-plug"></i>
@@ -1389,13 +1389,12 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
             <div class="pulse-item-content">
               <div class="pulse-item-title-row">
                 <span class="pulse-item-name" data-i18n="pulse_power_updates">${tPowerUpdates}</span>
-                <span class="pulse-badge pulse-badge-active" data-i18n="pulse_active">${tActive}</span>
               </div>
               <p class="pulse-item-desc" data-i18n="pulse_power_updates_desc">${tPowerUpdatesDesc}</p>
             </div>
           </a>
 
-          <!-- 2. Weather Alerts (ACTIVE) -->
+          <!-- 2. Weather Alerts -->
           <a href="weather-alerts.html" class="public-pulse-item active-feature ${isWeatherAlertsActive ? 'current-page' : ''}" role="menuitem">
             <div class="pulse-item-icon-wrap active-icon">
               <i class="fa-solid fa-cloud-bolt"></i>
@@ -1403,49 +1402,47 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
             <div class="pulse-item-content">
               <div class="pulse-item-title-row">
                 <span class="pulse-item-name" data-i18n="pulse_weather_alerts">${tWeatherAlerts}</span>
-                <span class="pulse-badge pulse-badge-active" data-i18n="pulse_active">${tActive}</span>
               </div>
               <p class="pulse-item-desc" data-i18n="pulse_weather_alerts_desc">${tWeatherAlertsDesc}</p>
             </div>
           </a>
 
-          <!-- 3. Flood & Water-Level Alerts (PLANNED) -->
-          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tFloodAlerts} - ${tPlanned}">
+          <div class="public-pulse-divider"></div>
+
+          <!-- 3. Flood & Water-Level Alerts -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tFloodAlerts}">
             <div class="pulse-item-icon-wrap disabled-icon">
               <i class="fa-solid fa-water"></i>
             </div>
             <div class="pulse-item-content">
               <div class="pulse-item-title-row">
                 <span class="pulse-item-name" data-i18n="pulse_flood_alerts">${tFloodAlerts}</span>
-                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
               </div>
               <p class="pulse-item-desc" data-i18n="pulse_flood_alerts_desc">${tFloodAlertsDesc}</p>
             </div>
           </div>
 
-          <!-- 4. Emergency Alerts (PLANNED) -->
-          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tEmergencyAlerts} - ${tPlanned}">
+          <!-- 4. Emergency Alerts -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tEmergencyAlerts}">
             <div class="pulse-item-icon-wrap disabled-icon">
               <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div class="pulse-item-content">
               <div class="pulse-item-title-row">
                 <span class="pulse-item-name" data-i18n="pulse_emergency_alerts">${tEmergencyAlerts}</span>
-                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
               </div>
               <p class="pulse-item-desc" data-i18n="pulse_emergency_alerts_desc">${tEmergencyAlertsDesc}</p>
             </div>
           </div>
 
-          <!-- 5. Public Transport Updates (PLANNED) -->
-          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tTransportUpdates} - ${tPlanned}">
+          <!-- 5. Public Transport Updates -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tTransportUpdates}">
             <div class="pulse-item-icon-wrap disabled-icon">
               <i class="fa-solid fa-bus"></i>
             </div>
             <div class="pulse-item-content">
               <div class="pulse-item-title-row">
                 <span class="pulse-item-name" data-i18n="pulse_transport_updates">${tTransportUpdates}</span>
-                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
               </div>
               <p class="pulse-item-desc" data-i18n="pulse_transport_updates_desc">${tTransportUpdatesDesc}</p>
             </div>

@@ -6187,6 +6187,12 @@ a,
   line-height: 1.28;
 }
 
+.public-pulse-divider {
+  height: 1px;
+  background: var(--border-color, #f1f5f9);
+  margin: 0.3rem 0.5rem;
+}
+
 .pulse-badge {
   font-size: 0.52rem;
   font-weight: 700;
