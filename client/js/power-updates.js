@@ -295,7 +295,7 @@
           </div>
 
           <h2 class="power-substation-title">
-            <i class="fa-solid fa-bolt" style="color: #f59e0b; font-size: 0.95rem;"></i>
+            <i class="fa-solid fa-tower-broadcast" style="color: var(--primary, #0d9488); font-size: 0.92rem;"></i>
             ${escapeHtml(item.area || 'Substation Feed')}
           </h2>
 

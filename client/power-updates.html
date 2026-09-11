@@ -208,7 +208,7 @@
     }
 
     .power-search-wrap input:focus {
-      border-color: #f59e0b;
+      border-color: var(--primary, #0d9488);
       background: var(--bg-surface);
     }
 
@@ -235,7 +235,7 @@
     }
 
     .power-select-filter:focus {
-      border-color: #f59e0b;
+      border-color: var(--primary, #0d9488);
     }
 
     .power-date-input {
@@ -250,7 +250,7 @@
     }
 
     .power-date-input:focus {
-      border-color: #f59e0b;
+      border-color: var(--primary, #0d9488);
     }
 
     /* Outage Grid */
@@ -376,7 +376,7 @@
     }
 
     .power-time-window i {
-      color: #f59e0b;
+      color: var(--primary, #0d9488);
       font-size: 0.82rem;
     }
 
@@ -586,7 +586,7 @@
         <!-- Hero Header Card -->
         <div class="power-hero-banner">
           <div class="power-hero-title-group">
-            <h1><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> <span data-i18n="power_updates_title">Power Updates</span></h1>
+            <h1><i class="fa-solid fa-plug" style="color: var(--primary);"></i> <span data-i18n="power_updates_title">Power Updates</span></h1>
             <p data-i18n="power_updates_subtitle">Planned electricity shutdown schedules across Tamil Nadu.</p>
           </div>
           <div class="power-hero-actions">
@@ -699,7 +699,7 @@
 
         <!-- Official Portal Information State (When no scheduled records exist in database) -->
         <div id="power-official-info-box" class="power-state-box hidden">
-          <i class="fa-solid fa-bolt" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.75rem;"></i>
+          <i class="fa-solid fa-tower-broadcast" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.75rem;"></i>
           <h3>Official TNPDCL Shutdown Notices</h3>
           <p data-i18n="power_source_unavailable">Official power shutdown schedules are published directly by TNPDCL / TANGEDCO. You can view all active outage notices on the official portal.</p>
           <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
@@ -736,8 +736,8 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/auth.js?v=8.0.0"></script>
-  <script src="js/power-updates.js?v=8.0.0"></script>
+  <script src="js/auth.js?v=8.1.0"></script>
+  <script src="js/power-updates.js?v=8.1.0"></script>
 
 </body>
 </html>

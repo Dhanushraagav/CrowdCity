@@ -2064,7 +2064,7 @@ function updateAuthUI() {
     const tPowerUpdates = window.i18n ? window.i18n.t('nav_power_updates') : 'Power Updates';
     const powerUpdatesBtnHtml = isCitizenDashboardOnly
       ? `<a href="power-updates.html" class="header-power-updates-btn" title="Tamil Nadu Power Shutdown Updates (TNPDCL / TANGEDCO)">
-          <i class="fa-solid fa-bolt"></i>
+          <i class="fa-solid fa-plug"></i>
           <span class="power-updates-btn-text" data-i18n="nav_power_updates">${tPowerUpdates}</span>
         </a>`
       : '';
@@ -2151,7 +2151,7 @@ function updateAuthUI() {
       : '';
     const powerUpdatesBtnHtml = isCitizenDashboardOnly
       ? `<a href="power-updates.html" class="header-power-updates-btn" title="Tamil Nadu Power Shutdown Updates (TNPDCL / TANGEDCO)">
-          <i class="fa-solid fa-bolt"></i>
+          <i class="fa-solid fa-plug"></i>
           <span class="power-updates-btn-text">Power Updates</span>
         </a>`
       : '';
