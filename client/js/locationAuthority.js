@@ -184,24 +184,49 @@
         });
       }
 
-      const villageSearchInput = document.getElementById('la-village-search-input');
-      const clearVillageSearchBtn = document.getElementById('btn-clear-village-search');
+      // Type-to-search support across all dropdowns (typing while focused jumps to matching option like other dropdowns)
+      const attachTypeAhead = (selectElem) => {
+        if (!selectElem) return;
+        let buffer = '';
+        let timer = null;
 
-      if (villageSearchInput) {
-        villageSearchInput.addEventListener('input', (e) => {
-          this.filterVillages(e.target.value);
-        });
-      }
+        selectElem.addEventListener('keydown', (e) => {
+          if (e.altKey || e.ctrlKey || e.metaKey) return;
+          if (['Tab', 'Enter', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
 
-      if (clearVillageSearchBtn) {
-        clearVillageSearchBtn.addEventListener('click', () => {
-          if (villageSearchInput) {
-            villageSearchInput.value = '';
-            villageSearchInput.focus();
+          if (e.key === 'Backspace') {
+            buffer = buffer.slice(0, -1);
+            e.preventDefault();
+          } else if (e.key.length === 1) {
+            buffer += e.key.toLowerCase();
+          } else {
+            return;
           }
-          this.filterVillages('');
+
+          clearTimeout(timer);
+          timer = setTimeout(() => { buffer = ''; }, 1200);
+
+          if (!buffer) return;
+
+          const options = Array.from(selectElem.options);
+          // Try prefix match first
+          let matchIdx = options.findIndex(opt => opt.value && !opt.disabled && opt.text.toLowerCase().trim().startsWith(buffer));
+          // If no prefix match, try substring match
+          if (matchIdx === -1) {
+            matchIdx = options.findIndex(opt => opt.value && !opt.disabled && opt.text.toLowerCase().includes(buffer));
+          }
+
+          if (matchIdx !== -1 && matchIdx !== selectElem.selectedIndex) {
+            selectElem.selectedIndex = matchIdx;
+            selectElem.dispatchEvent(new Event('change'));
+          }
         });
-      }
+      };
+
+      attachTypeAhead(districtSelect);
+      attachTypeAhead(subdivSelect);
+      attachTypeAhead(villageSelect);
+      attachTypeAhead(localBodySelect);
 
       if (villageSelect) {
         villageSelect.addEventListener('change', (e) => {
@@ -301,19 +326,10 @@
      */
     resetVillagesAndLocalBodies: function() {
       const villageSelect = document.getElementById('la-village-select');
-      const villageSearchInput = document.getElementById('la-village-search-input');
-      const clearSearchBtn = document.getElementById('btn-clear-village-search');
-      const countBadge = document.getElementById('la-village-count-badge');
       const localBodySelect = document.getElementById('la-localbody-select');
       const customInput = document.getElementById('la-village-custom-input');
 
       currentTalukLocations = [];
-      if (villageSearchInput) {
-        villageSearchInput.value = '';
-        villageSearchInput.disabled = true;
-      }
-      if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
-      if (countBadge) countBadge.textContent = '';
       if (villageSelect) {
         villageSelect.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
         villageSelect.disabled = true;
@@ -434,29 +450,19 @@
     populateVillages: async function(districtId, subdivisionId) {
       const select = document.getElementById('la-village-select');
       const customInput = document.getElementById('la-village-custom-input');
-      const searchInput = document.getElementById('la-village-search-input');
-      const clearBtn = document.getElementById('btn-clear-village-search');
-      const countBadge = document.getElementById('la-village-count-badge');
       if (!select) return;
 
       if (customInput) customInput.classList.add('hidden');
-      if (searchInput) {
-        searchInput.value = '';
-        searchInput.disabled = !subdivisionId;
-      }
-      if (clearBtn) clearBtn.classList.add('hidden');
 
       if (!districtId || !subdivisionId) {
         select.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
         select.disabled = true;
         currentTalukLocations = [];
-        if (countBadge) countBadge.textContent = '';
         return;
       }
 
       select.disabled = true;
       select.innerHTML = '<option value="">Loading Villages / Towns...</option>';
-      if (countBadge) countBadge.textContent = 'Loading...';
 
       try {
         const cacheKey = `${districtId}_${subdivisionId}`;
@@ -474,34 +480,18 @@
         currentTalukLocations = villagesCache[cacheKey] || [];
         this.renderVillageOptions(currentTalukLocations);
         select.disabled = false;
-        if (searchInput) {
-          searchInput.disabled = false;
-        }
       } catch (err) {
         console.error('[LocationAuthority] Error fetching villages:', err);
         select.innerHTML = '<option value="">Failed to load villages</option>';
-        if (countBadge) countBadge.textContent = '';
       }
     },
 
     /**
      * Render village options with bilingual display and administrative type badge
      */
-    renderVillageOptions: function(list, filterQuery = '') {
+    renderVillageOptions: function(list) {
       const select = document.getElementById('la-village-select');
-      const countBadge = document.getElementById('la-village-count-badge');
       if (!select) return;
-
-      const totalCount = currentTalukLocations.length;
-      const count = list.length;
-
-      if (countBadge) {
-        if (filterQuery) {
-          countBadge.textContent = `Showing ${count} of ${totalCount}`;
-        } else {
-          countBadge.textContent = `${totalCount} locations`;
-        }
-      }
 
       let html = '<option value="" disabled selected>Select Village / Town (கிராமம் / நகரம்)...</option>';
       list.forEach(v => {
@@ -512,31 +502,6 @@
       html += '<option value="__custom__">Can\'t find your village? Enter manually...</option>';
 
       select.innerHTML = html;
-    },
-
-    /**
-     * Filter village options in real-time within the selected Taluk
-     */
-    filterVillages: function(query) {
-      const q = String(query).trim().toLowerCase();
-      const clearBtn = document.getElementById('btn-clear-village-search');
-      if (clearBtn) {
-        if (q) clearBtn.classList.remove('hidden');
-        else clearBtn.classList.add('hidden');
-      }
-
-      if (!q) {
-        this.renderVillageOptions(currentTalukLocations);
-        return;
-      }
-
-      const filtered = currentTalukLocations.filter(v => {
-        const nameEn = (v.name || '').toLowerCase();
-        const nameTa = (v.tamil_name || v.nameTa || '').toLowerCase();
-        return nameEn.includes(q) || nameTa.includes(q);
-      });
-
-      this.renderVillageOptions(filtered, q);
     },
 
     /**
