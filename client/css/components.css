@@ -6029,8 +6029,17 @@ a,
   margin-left: 0.1rem;
 }
 
-.header-public-pulse-btn.dropdown-open .public-pulse-chevron {
+.header-public-pulse-btn.dropdown-open .public-pulse-chevron,
+.public-pulse-wrapper.dropdown-open .public-pulse-chevron,
+.public-pulse-wrapper.is-open .public-pulse-chevron {
   transform: rotate(180deg);
+}
+
+/* Public Pulse Wrapper & Dropdown */
+.public-pulse-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .public-pulse-dropdown {
@@ -6044,19 +6053,171 @@ a,
   width: 320px;
   max-width: 90vw;
   z-index: 99999 !important;
-  overflow: hidden;
   padding: 0.4rem 0;
-  animation: pulseDropdownFadeIn 0.16s ease-out;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 200ms ease-out, transform 200ms ease-out, visibility 200ms ease-out;
 }
 
-@keyframes pulseDropdownFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
+/* Invisible Bridge: Eliminates hover dead-zone between button and dropdown */
+.public-pulse-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* User Menu / Profile Dropdown */
+.user-menu {
+  position: relative;
+  user-select: none;
+}
+
+.user-menu i.fa-chevron-down {
+  transition: transform 200ms ease-out;
+}
+
+.user-menu.dropdown-open i.fa-chevron-down,
+.user-menu.is-open i.fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+.user-dropdown,
+#user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #ffffff !important;
+  border: 1px solid var(--border-color, #cbd5e1) !important;
+  border-radius: var(--radius-md, 12px);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.15) !important;
+  width: 190px;
+  padding: 0.5rem;
+  display: flex !important;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 99999 !important;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 200ms ease-out, transform 200ms ease-out, visibility 200ms ease-out;
+}
+
+/* Invisible Bridge: Eliminates hover dead-zone between user menu and dropdown */
+.user-dropdown::before,
+#user-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* Open States (Applied via JS or CSS) */
+.public-pulse-dropdown.dropdown-open,
+.public-pulse-dropdown.is-open,
+.public-pulse-wrapper.dropdown-open .public-pulse-dropdown,
+.public-pulse-wrapper.is-open .public-pulse-dropdown,
+.user-dropdown.dropdown-open,
+.user-dropdown.is-open,
+#user-dropdown.dropdown-open,
+#user-dropdown.is-open,
+.user-menu.dropdown-open .user-dropdown,
+.user-menu.dropdown-open #user-dropdown,
+.user-menu.is-open .user-dropdown,
+.user-menu.is-open #user-dropdown {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Desktop Hover & Keyboard Focus Interactions */
+@media (hover: hover) and (pointer: fine) {
+  .public-pulse-dropdown.hidden,
+  .user-dropdown.hidden,
+  #user-dropdown.hidden {
+    display: block !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .user-dropdown.hidden,
+  #user-dropdown.hidden {
+    display: flex !important;
+  }
+
+  .public-pulse-wrapper:hover .public-pulse-dropdown,
+  .public-pulse-wrapper:focus-within .public-pulse-dropdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  .public-pulse-wrapper:hover .header-public-pulse-btn .public-pulse-chevron,
+  .public-pulse-wrapper:focus-within .header-public-pulse-btn .public-pulse-chevron {
+    transform: rotate(180deg);
+  }
+
+  .user-menu:hover .user-dropdown,
+  .user-menu:hover #user-dropdown,
+  .user-menu:focus-within .user-dropdown,
+  .user-menu:focus-within #user-dropdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  .user-menu:hover i.fa-chevron-down,
+  .user-menu:focus-within i.fa-chevron-down {
+    transform: rotate(180deg);
+  }
+}
+
+/* Mobile & Touch Screen Handling (Strictly Click/Tap Only) */
+@media (hover: none) or (pointer: coarse), (max-width: 768px) {
+  .public-pulse-dropdown:not(.dropdown-open):not(.is-open),
+  .user-dropdown:not(.dropdown-open):not(.is-open),
+  #user-dropdown:not(.dropdown-open):not(.is-open) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .public-pulse-dropdown.dropdown-open,
+  .public-pulse-dropdown.is-open,
+  .public-pulse-wrapper.dropdown-open .public-pulse-dropdown,
+  .public-pulse-wrapper.is-open .public-pulse-dropdown {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  .user-dropdown.dropdown-open,
+  .user-dropdown.is-open,
+  #user-dropdown.dropdown-open,
+  #user-dropdown.is-open,
+  .user-menu.dropdown-open .user-dropdown,
+  .user-menu.dropdown-open #user-dropdown,
+  .user-menu.is-open .user-dropdown,
+  .user-menu.is-open #user-dropdown {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
   }
 }
 

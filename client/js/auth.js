@@ -2099,15 +2099,15 @@ function updateAuthUI() {
       finalContainer.innerHTML = `
         <div class="auth-nav-wrapper">
           <!-- User profile menu -->
-          <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown()" style="position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+          <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown(event)" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" style="position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
             <div class="user-avatar" style="width: 28px; height: 28px; border-radius: 50%; background-color: var(--primary-light-alpha); color: var(--primary); font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0;">${avatarInnerHtml}</div>
             <span style="font-size: 0.9rem; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               ${tRoleLabel}: <strong style="color: var(--text-main); font-weight: 700;">${fullName}</strong>
             </span>
-            <i class="fa-solid fa-chevron-down" style="font-size: 0.72rem; color: var(--text-muted); transition: transform 0.15s ease;"></i>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.72rem; color: var(--text-muted); transition: transform 0.2s ease;"></i>
             
             <!-- Dropdown Menu -->
-            <div id="user-dropdown" class="hidden" style="position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); width: 180px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 1100;" onclick="event.stopPropagation()">
+            <div id="user-dropdown" class="user-dropdown hidden" onclick="event.stopPropagation()">
               <div style="font-size: 0.72rem; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
                 ${roleSelectorHtml}
               </div>
@@ -2211,13 +2211,13 @@ function updateAuthUI() {
         </div>
 
         <!-- User profile menu -->
-        <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown()" style="position: relative; cursor: pointer;">
+        <div class="user-menu" id="user-menu-btn" onclick="toggleUserDropdown(event)" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" style="position: relative; cursor: pointer;">
           <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; padding: 0; display: flex; align-items: center; justify-content: center;">${avatarInnerHtml}</div>
           <span style="font-size: 0.9rem; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fullName}</span>
-          <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
+          <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s ease;"></i>
           
           <!-- Dropdown Menu -->
-          <div id="user-dropdown" class="hidden" style="position: absolute; top: calc(100% + 8px); right: 0; background: #ffffff !important; border: 1px solid var(--border-color, #cbd5e1) !important; border-radius: var(--radius-md, 12px); box-shadow: 0 12px 30px rgba(0,0,0,0.18) !important; width: 190px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 99999 !important;">
+          <div id="user-dropdown" class="user-dropdown hidden">
             <div style="font-size: 0.75rem; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
               ${roleDisplayHtml}
             </div>
@@ -2330,6 +2330,11 @@ function updateAuthUI() {
   if (user && getUserRole() === 'citizen') {
     setTimeout(injectDocumentWalletBanner, 600);
   }
+
+  // Initialize desktop hover dropdowns & keyboard interactions
+  if (typeof window.initHeaderHoverDropdowns === 'function') {
+    window.initHeaderHoverDropdowns();
+  }
 }
 
 // Prominent Document Wallet Banner displayed on top right under user profile name once per session
@@ -2397,67 +2402,185 @@ window.closeDocWalletBanner = function() {
   }
 };
 
-// Toggle Public Pulse Dropdown
+// ==============================================================================
+// HEADER HOVER DROPDOWN INTERACTION (PUBLIC PULSE & PROFILE)
+// ==============================================================================
+
+// Open Public Pulse Dropdown
+window.openPublicPulseDropdown = function() {
+  const dropdown = document.getElementById('public-pulse-dropdown');
+  const btn = document.getElementById('header-public-pulse-btn');
+  const wrapper = document.getElementById('public-pulse-wrapper');
+  if (!dropdown) return;
+
+  // Close user profile dropdown and notification dropdown
+  window.closeUserDropdown?.();
+  const notifDropdown = document.getElementById('notification-dropdown');
+  if (notifDropdown) notifDropdown.classList.add('hidden');
+
+  dropdown.classList.remove('hidden');
+  dropdown.classList.add('dropdown-open', 'is-open');
+  wrapper?.classList.add('dropdown-open', 'is-open');
+  if (btn) {
+    btn.classList.add('dropdown-open');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+};
+
+// Close Public Pulse Dropdown
+window.closePublicPulseDropdown = function() {
+  const dropdown = document.getElementById('public-pulse-dropdown');
+  const btn = document.getElementById('header-public-pulse-btn');
+  const wrapper = document.getElementById('public-pulse-wrapper');
+  if (!dropdown) return;
+
+  dropdown.classList.remove('dropdown-open', 'is-open');
+  wrapper?.classList.remove('dropdown-open', 'is-open');
+  if (btn) {
+    btn.classList.remove('dropdown-open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+};
+
+// Toggle Public Pulse Dropdown (Click / Touch)
 window.togglePublicPulseDropdown = function(e) {
   if (e) {
     e.stopPropagation();
   }
   const dropdown = document.getElementById('public-pulse-dropdown');
-  const btn = document.getElementById('header-public-pulse-btn');
-  if (dropdown) {
-    const isOpening = dropdown.classList.contains('hidden');
-    dropdown.classList.toggle('hidden');
-    if (btn) {
-      if (isOpening) {
-        btn.classList.add('dropdown-open');
-        btn.setAttribute('aria-expanded', 'true');
-      } else {
-        btn.classList.remove('dropdown-open');
-        btn.setAttribute('aria-expanded', 'false');
-      }
-    }
-  }
-  // Close user dropdown and notification dropdown if opening public pulse
-  const userDropdown = document.getElementById('user-dropdown');
-  if (userDropdown && dropdown && !dropdown.classList.contains('hidden')) {
-    userDropdown.classList.add('hidden');
-  }
-  const notifDropdown = document.getElementById('notification-dropdown');
-  if (notifDropdown && dropdown && !dropdown.classList.contains('hidden')) {
-    notifDropdown.classList.add('hidden');
+  const wrapper = document.getElementById('public-pulse-wrapper');
+  if (!dropdown) return;
+  const isOpen = dropdown.classList.contains('dropdown-open') || wrapper?.classList.contains('dropdown-open');
+  if (isOpen) {
+    window.closePublicPulseDropdown();
+  } else {
+    window.openPublicPulseDropdown();
   }
 };
 
-// Toggle Dropdown Display
-function toggleUserDropdown() {
+// Open User Profile Dropdown
+window.openUserDropdown = function() {
   const dropdown = document.getElementById('user-dropdown');
-  if (dropdown) {
-    dropdown.classList.toggle('hidden');
-  }
-  // Close notification dropdown if user dropdown is opened
+  const userMenu = document.getElementById('user-menu-btn');
+  if (!dropdown) return;
+
+  // Close public pulse dropdown and notification dropdown
+  window.closePublicPulseDropdown?.();
   const notifDropdown = document.getElementById('notification-dropdown');
-  if (notifDropdown && dropdown && !dropdown.classList.contains('hidden')) {
-    notifDropdown.classList.add('hidden');
+  if (notifDropdown) notifDropdown.classList.add('hidden');
+
+  dropdown.classList.remove('hidden');
+  dropdown.classList.add('dropdown-open', 'is-open');
+  userMenu?.classList.add('dropdown-open', 'is-open');
+  userMenu?.setAttribute('aria-expanded', 'true');
+};
+
+// Close User Profile Dropdown
+window.closeUserDropdown = function() {
+  const dropdown = document.getElementById('user-dropdown');
+  const userMenu = document.getElementById('user-menu-btn');
+  if (!dropdown) return;
+
+  dropdown.classList.remove('dropdown-open', 'is-open');
+  userMenu?.classList.remove('dropdown-open', 'is-open');
+  userMenu?.setAttribute('aria-expanded', 'false');
+};
+
+// Toggle User Profile Dropdown (Click / Touch)
+window.toggleUserDropdown = function(e) {
+  if (e) {
+    e.stopPropagation();
   }
-  // Close public pulse dropdown if user dropdown is opened
-  const pulseDropdown = document.getElementById('public-pulse-dropdown');
-  const pulseBtn = document.getElementById('header-public-pulse-btn');
-  if (pulseDropdown && dropdown && !dropdown.classList.contains('hidden')) {
-    pulseDropdown.classList.add('hidden');
-    if (pulseBtn) {
-      pulseBtn.classList.remove('dropdown-open');
-      pulseBtn.setAttribute('aria-expanded', 'false');
+  const dropdown = document.getElementById('user-dropdown');
+  const userMenu = document.getElementById('user-menu-btn');
+  if (!dropdown) return;
+  const isOpen = dropdown.classList.contains('dropdown-open') || userMenu?.classList.contains('dropdown-open');
+  if (isOpen) {
+    window.closeUserDropdown();
+  } else {
+    window.openUserDropdown();
+  }
+};
+
+// Bind Desktop Hover & Keyboard Accessibility
+window.initHeaderHoverDropdowns = function() {
+  const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  // 1. Public Pulse Hover Setup
+  const pulseWrapper = document.getElementById('public-pulse-wrapper');
+  if (pulseWrapper && !pulseWrapper.dataset.hoverAttached) {
+    pulseWrapper.dataset.hoverAttached = 'true';
+    let pulseLeaveTimer = null;
+
+    if (isDesktop) {
+      pulseWrapper.addEventListener('mouseenter', () => {
+        clearTimeout(pulseLeaveTimer);
+        window.openPublicPulseDropdown();
+      });
+
+      pulseWrapper.addEventListener('mouseleave', () => {
+        clearTimeout(pulseLeaveTimer);
+        pulseLeaveTimer = setTimeout(() => {
+          window.closePublicPulseDropdown();
+        }, 160);
+      });
+    }
+
+    // Keyboard accessibility for Public Pulse
+    const pulseBtn = document.getElementById('header-public-pulse-btn');
+    if (pulseBtn && !pulseBtn.dataset.keyAttached) {
+      pulseBtn.dataset.keyAttached = 'true';
+      pulseBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          window.openPublicPulseDropdown();
+          const firstItem = pulseWrapper.querySelector('.public-pulse-item.active-feature');
+          firstItem?.focus();
+        }
+      });
     }
   }
-}
 
-// Close dropdowns if clicking outside
+  // 2. User Profile Menu Hover Setup
+  const userMenu = document.getElementById('user-menu-btn');
+  if (userMenu && !userMenu.dataset.hoverAttached) {
+    userMenu.dataset.hoverAttached = 'true';
+    let userLeaveTimer = null;
+
+    if (isDesktop) {
+      userMenu.addEventListener('mouseenter', () => {
+        clearTimeout(userLeaveTimer);
+        window.openUserDropdown();
+      });
+
+      userMenu.addEventListener('mouseleave', () => {
+        clearTimeout(userLeaveTimer);
+        userLeaveTimer = setTimeout(() => {
+          window.closeUserDropdown();
+        }, 160);
+      });
+    }
+
+    // Keyboard accessibility for User Profile Menu
+    userMenu.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        window.toggleUserDropdown(e);
+        if (e.key === 'ArrowDown') {
+          const firstLink = userMenu.querySelector('#user-dropdown a');
+          firstLink?.focus();
+        }
+      }
+    });
+  }
+};
+
+// Global click handler to close dropdowns if clicking outside
 window.addEventListener('click', (e) => {
-  // User dropdown
+  // User profile dropdown
   const menuBtn = document.getElementById('user-menu-btn');
-  const dropdown = document.getElementById('user-dropdown');
-  if (menuBtn && dropdown && !menuBtn.contains(e.target)) {
-    dropdown.classList.add('hidden');
+  if (menuBtn && !menuBtn.contains(e.target)) {
+    window.closeUserDropdown();
   }
 
   // Notification dropdown
@@ -2469,33 +2592,33 @@ window.addEventListener('click', (e) => {
 
   // Public Pulse dropdown
   const pulseWrapper = document.getElementById('public-pulse-wrapper');
-  const pulseDropdown = document.getElementById('public-pulse-dropdown');
-  const pulseBtn = document.getElementById('header-public-pulse-btn');
-  if (pulseWrapper && pulseDropdown && !pulseWrapper.contains(e.target)) {
-    pulseDropdown.classList.add('hidden');
-    if (pulseBtn) {
-      pulseBtn.classList.remove('dropdown-open');
-      pulseBtn.setAttribute('aria-expanded', 'false');
-    }
+  if (pulseWrapper && !pulseWrapper.contains(e.target)) {
+    window.closePublicPulseDropdown();
   }
 });
 
-// Close dropdowns on ESC key
+// Close dropdowns on ESC key & return focus
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    const pulseDropdown = document.getElementById('public-pulse-dropdown');
-    const pulseBtn = document.getElementById('header-public-pulse-btn');
-    if (pulseDropdown && !pulseDropdown.classList.contains('hidden')) {
-      pulseDropdown.classList.add('hidden');
-      if (pulseBtn) {
-        pulseBtn.classList.remove('dropdown-open');
-        pulseBtn.setAttribute('aria-expanded', 'false');
-      }
+    const pulseWrapper = document.getElementById('public-pulse-wrapper');
+    const isPulseOpen = pulseWrapper?.classList.contains('dropdown-open');
+    if (isPulseOpen) {
+      window.closePublicPulseDropdown();
+      document.getElementById('header-public-pulse-btn')?.focus();
     }
-    const userDropdown = document.getElementById('user-dropdown');
-    if (userDropdown) userDropdown.classList.add('hidden');
+
+    const userMenu = document.getElementById('user-menu-btn');
+    const isUserOpen = userMenu?.classList.contains('dropdown-open');
+    if (isUserOpen) {
+      window.closeUserDropdown();
+      userMenu?.focus();
+    }
+
     const notifDropdown = document.getElementById('notification-dropdown');
-    if (notifDropdown) notifDropdown.classList.add('hidden');
+    if (notifDropdown && !notifDropdown.classList.contains('hidden')) {
+      notifDropdown.classList.add('hidden');
+      document.getElementById('bell-btn')?.focus();
+    }
   }
 });
 
