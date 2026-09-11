@@ -9897,211 +9897,211 @@ export const VILLAGES_BY_SUBDIVISION = {
   ],
   "cbe_north": [
     {
-      "id": "vil_cbe_north_coimbatore_north_town",
-      "name": "Coimbatore North Town",
-      "nameTa": "கோயம்புத்தூர் வடக்கு நகரம்",
+      "id": "vil_cbe_coimbatore_north_ganapathy",
+      "name": "Ganapathy",
+      "nameTa": "கணபதி",
+      "type": "locality"
+    },
+    {
+      "id": "vil_cbe_coimbatore_north_kavundampalayam",
+      "name": "Kavundampalayam",
+      "nameTa": "கவுண்டம்பாளையம்",
       "type": "town"
     },
     {
-      "id": "vil_cbe_north_coimbatore_north_east",
-      "name": "Coimbatore North East",
-      "nameTa": "கோயம்புத்தூர் வடக்கு கிழக்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_thudiyalur",
+      "name": "Thudiyalur",
+      "nameTa": "துடியலூர்",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_coimbatore_north_west",
-      "name": "Coimbatore North West",
-      "nameTa": "கோயம்புத்தூர் வடக்கு மேற்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_saravanampatti",
+      "name": "Saravanampatti",
+      "nameTa": "சரவணம்பட்டி",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_coimbatore_north_north",
-      "name": "Coimbatore North North",
-      "nameTa": "கோயம்புத்தூர் வடக்கு வடக்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_vadavalli",
+      "name": "Vadavalli",
+      "nameTa": "வடவள்ளி",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_coimbatore_north_south",
-      "name": "Coimbatore North South",
-      "nameTa": "கோயம்புத்தூர் வடக்கு தெற்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_veerakeralam",
+      "name": "Veerakeralam",
+      "nameTa": "வீரகேரளம்",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_coimbatore_north_pudur",
-      "name": "Coimbatore North Pudur",
-      "nameTa": "கோயம்புத்தூர் வடக்கு புதூர்",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_chinnavedampatti",
+      "name": "Chinnavedampatti",
+      "nameTa": "சின்னவேடம்பட்டி",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_coimbatore_north_agraharam",
-      "name": "Coimbatore North Agraharam",
-      "nameTa": "கோயம்புத்தூர் வடக்கு அக்ரஹாரம்",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_vellakinar",
+      "name": "Vellakinar",
+      "nameTa": "வெள்ளக்கிணறு",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_papparapatti_coimbatore_north",
-      "name": "Papparapatti (Coimbatore North)",
-      "nameTa": "பாப்பாரப்பட்டி",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_kalapatti",
+      "name": "Kalapatti",
+      "nameTa": "காளப்பட்டி",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_alagapuram_coimbatore_north",
-      "name": "Alagapuram (Coimbatore North)",
-      "nameTa": "அழகபுரம்",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_vilankurichi",
+      "name": "Vilankurichi",
+      "nameTa": "விளங்குறிச்சி",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_periyapatti_coimbatore_north",
-      "name": "Periyapatti (Coimbatore North)",
-      "nameTa": "பெரியபட்டி",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_idigarai",
+      "name": "Idigarai",
+      "nameTa": "இடிகரை",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_kallakurichi_coimbatore_north",
-      "name": "Kallakurichi (Coimbatore North)",
-      "nameTa": "கள்ளக்குறிச்சி",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_north_gudalur_north",
+      "name": "Gudalur (North)",
+      "nameTa": "கூடலூர்",
+      "type": "town"
     },
     {
-      "id": "vil_cbe_north_vellalapatti_coimbatore_north",
-      "name": "Vellalapatti (Coimbatore North)",
-      "nameTa": "வெள்ளாளப்பட்டி",
-      "type": "village"
-    },
-    {
-      "id": "vil_cbe_north_north_pudur",
+      "id": "vil_cbe_coimbatore_north_north_pudur",
       "name": "North Pudur",
       "nameTa": "North புதூர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_mel_north",
+      "id": "vil_cbe_coimbatore_north_mel_north",
       "name": "Mel North",
       "nameTa": "மேல் North",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_melpudur",
+      "id": "vil_cbe_coimbatore_north_melpudur",
       "name": "MelPudur",
       "nameTa": "மேல்புதூர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_north_palayam",
+      "id": "vil_cbe_coimbatore_north_north_palayam",
       "name": "North Palayam",
       "nameTa": "North பாளையம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_therku_north",
+      "id": "vil_cbe_coimbatore_north_therku_north",
       "name": "Therku North",
       "nameTa": "தெற்கு North",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_therkupalayam",
+      "id": "vil_cbe_coimbatore_north_therkupalayam",
       "name": "TherkuPalayam",
       "nameTa": "தெற்குபாளையம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_north_patti",
+      "id": "vil_cbe_coimbatore_north_north_patti",
       "name": "North Patti",
       "nameTa": "North பட்டி",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_periya_north",
+      "id": "vil_cbe_coimbatore_north_periya_north",
       "name": "Periya North",
       "nameTa": "பெரிய North",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_periyapatti",
+      "id": "vil_cbe_coimbatore_north_periyapatti",
       "name": "PeriyaPatti",
       "nameTa": "பெரியபட்டி",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_north_kuppam",
+      "id": "vil_cbe_coimbatore_north_north_kuppam",
       "name": "North Kuppam",
       "nameTa": "North குப்பம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_pazhaya_north",
+      "id": "vil_cbe_coimbatore_north_pazhaya_north",
       "name": "Pazhaya North",
       "nameTa": "பழைய North",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_pazhayakuppam",
+      "id": "vil_cbe_coimbatore_north_pazhayakuppam",
       "name": "PazhayaKuppam",
       "nameTa": "பழையகுப்பம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_north_kottai",
+      "id": "vil_cbe_coimbatore_north_north_kottai",
       "name": "North Kottai",
       "nameTa": "North கோட்டை",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_vayal_north",
+      "id": "vil_cbe_coimbatore_north_vayal_north",
       "name": "Vayal North",
       "nameTa": "வயல் North",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_vayalkottai",
+      "id": "vil_cbe_coimbatore_north_vayalkottai",
       "name": "VayalKottai",
       "nameTa": "வயல்கோட்டை",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_north_nagar",
+      "id": "vil_cbe_coimbatore_north_north_nagar",
       "name": "North Nagar",
       "nameTa": "North நகர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_aaru_north",
+      "id": "vil_cbe_coimbatore_north_aaru_north",
       "name": "Aaru North",
       "nameTa": "ஆறு North",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_aarunagar",
+      "id": "vil_cbe_coimbatore_north_aarunagar",
       "name": "AaruNagar",
       "nameTa": "ஆறுநகர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_north_puram",
+      "id": "vil_cbe_coimbatore_north_north_puram",
       "name": "North Puram",
       "nameTa": "North புரம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_vada_north",
+      "id": "vil_cbe_coimbatore_north_vada_north",
       "name": "Vada North",
       "nameTa": "வட North",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_vadapuram",
+      "id": "vil_cbe_coimbatore_north_vadapuram",
       "name": "VadaPuram",
       "nameTa": "வடபுரம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_north_cheri",
+      "id": "vil_cbe_coimbatore_north_north_cheri",
       "name": "North Cheri",
       "nameTa": "North சேரி",
       "type": "village"
     },
     {
-      "id": "vil_cbe_north_keezh_north",
+      "id": "vil_cbe_coimbatore_north_keezh_north",
       "name": "Keezh North",
       "nameTa": "கீழ் North",
       "type": "village"
@@ -10109,211 +10109,211 @@ export const VILLAGES_BY_SUBDIVISION = {
   ],
   "cbe_south": [
     {
-      "id": "vil_cbe_south_coimbatore_south_town",
-      "name": "Coimbatore South Town",
-      "nameTa": "கோயம்புத்தூர் தெற்கு நகரம்",
-      "type": "town"
+      "id": "vil_cbe_coimbatore_south_peelamedu",
+      "name": "Peelamedu",
+      "nameTa": "பீளமேடு",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_coimbatore_south_east",
-      "name": "Coimbatore South East",
-      "nameTa": "கோயம்புத்தூர் தெற்கு கிழக்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_singanallur",
+      "name": "Singanallur",
+      "nameTa": "சிங்காநல்லூர்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_coimbatore_south_west",
-      "name": "Coimbatore South West",
-      "nameTa": "கோயம்புத்தூர் தெற்கு மேற்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_ramanathapuram_cbe",
+      "name": "Ramanathapuram (Cbe)",
+      "nameTa": "இராமநாதபுரம்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_coimbatore_south_north",
-      "name": "Coimbatore South North",
-      "nameTa": "கோயம்புத்தூர் தெற்கு வடக்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_sundarapuram",
+      "name": "Sundarapuram",
+      "nameTa": "சுந்தராபுரம்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_coimbatore_south_south",
-      "name": "Coimbatore South South",
-      "nameTa": "கோயம்புத்தூர் தெற்கு தெற்கு",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_kurichi",
+      "name": "Kurichi",
+      "nameTa": "குறிச்சி",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_coimbatore_south_pudur",
-      "name": "Coimbatore South Pudur",
-      "nameTa": "கோயம்புத்தூர் தெற்கு புதூர்",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_kuniyamuthur",
+      "name": "Kuniyamuthur",
+      "nameTa": "குனியமுத்தூர்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_coimbatore_south_agraharam",
-      "name": "Coimbatore South Agraharam",
-      "nameTa": "கோயம்புத்தூர் தெற்கு அக்ரஹாரம்",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_ukkadam",
+      "name": "Ukkadam",
+      "nameTa": "உக்கடம்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_papparapatti_coimbatore_south",
-      "name": "Papparapatti (Coimbatore South)",
-      "nameTa": "பாப்பாரப்பட்டி",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_town_hall",
+      "name": "Town Hall",
+      "nameTa": "டவுன் ஹால்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_alagapuram_coimbatore_south",
-      "name": "Alagapuram (Coimbatore South)",
-      "nameTa": "அழகபுரம்",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_gandhipuram",
+      "name": "Gandhipuram",
+      "nameTa": "காந்திபுரம்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_periyapatti_coimbatore_south",
-      "name": "Periyapatti (Coimbatore South)",
-      "nameTa": "பெரியபட்டி",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_rs_puram",
+      "name": "RS Puram",
+      "nameTa": "ஆர்.எஸ்.புரம்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_kallakurichi_coimbatore_south",
-      "name": "Kallakurichi (Coimbatore South)",
-      "nameTa": "கள்ளக்குறிச்சி",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_saibaba_colony",
+      "name": "Saibaba Colony",
+      "nameTa": "சாய்பாபா காலனி",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_vellalapatti_coimbatore_south",
-      "name": "Vellalapatti (Coimbatore South)",
-      "nameTa": "வெள்ளாளப்பட்டி",
-      "type": "village"
+      "id": "vil_cbe_coimbatore_south_race_course",
+      "name": "Race Course",
+      "nameTa": "ரேஸ் கோர்ஸ்",
+      "type": "locality"
     },
     {
-      "id": "vil_cbe_south_south_pudur",
+      "id": "vil_cbe_coimbatore_south_south_pudur",
       "name": "South Pudur",
       "nameTa": "South புதூர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_mel_south",
+      "id": "vil_cbe_coimbatore_south_mel_south",
       "name": "Mel South",
       "nameTa": "மேல் South",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_melpudur",
+      "id": "vil_cbe_coimbatore_south_melpudur",
       "name": "MelPudur",
       "nameTa": "மேல்புதூர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_south_palayam",
+      "id": "vil_cbe_coimbatore_south_south_palayam",
       "name": "South Palayam",
       "nameTa": "South பாளையம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_therku_south",
+      "id": "vil_cbe_coimbatore_south_therku_south",
       "name": "Therku South",
       "nameTa": "தெற்கு South",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_therkupalayam",
+      "id": "vil_cbe_coimbatore_south_therkupalayam",
       "name": "TherkuPalayam",
       "nameTa": "தெற்குபாளையம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_south_patti",
+      "id": "vil_cbe_coimbatore_south_south_patti",
       "name": "South Patti",
       "nameTa": "South பட்டி",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_periya_south",
+      "id": "vil_cbe_coimbatore_south_periya_south",
       "name": "Periya South",
       "nameTa": "பெரிய South",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_periyapatti",
+      "id": "vil_cbe_coimbatore_south_periyapatti",
       "name": "PeriyaPatti",
       "nameTa": "பெரியபட்டி",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_south_kuppam",
+      "id": "vil_cbe_coimbatore_south_south_kuppam",
       "name": "South Kuppam",
       "nameTa": "South குப்பம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_pazhaya_south",
+      "id": "vil_cbe_coimbatore_south_pazhaya_south",
       "name": "Pazhaya South",
       "nameTa": "பழைய South",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_pazhayakuppam",
+      "id": "vil_cbe_coimbatore_south_pazhayakuppam",
       "name": "PazhayaKuppam",
       "nameTa": "பழையகுப்பம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_south_kottai",
+      "id": "vil_cbe_coimbatore_south_south_kottai",
       "name": "South Kottai",
       "nameTa": "South கோட்டை",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_vayal_south",
+      "id": "vil_cbe_coimbatore_south_vayal_south",
       "name": "Vayal South",
       "nameTa": "வயல் South",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_vayalkottai",
+      "id": "vil_cbe_coimbatore_south_vayalkottai",
       "name": "VayalKottai",
       "nameTa": "வயல்கோட்டை",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_south_nagar",
+      "id": "vil_cbe_coimbatore_south_south_nagar",
       "name": "South Nagar",
       "nameTa": "South நகர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_aaru_south",
+      "id": "vil_cbe_coimbatore_south_aaru_south",
       "name": "Aaru South",
       "nameTa": "ஆறு South",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_aarunagar",
+      "id": "vil_cbe_coimbatore_south_aarunagar",
       "name": "AaruNagar",
       "nameTa": "ஆறுநகர்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_south_puram",
+      "id": "vil_cbe_coimbatore_south_south_puram",
       "name": "South Puram",
       "nameTa": "South புரம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_vada_south",
+      "id": "vil_cbe_coimbatore_south_vada_south",
       "name": "Vada South",
       "nameTa": "வட South",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_vadapuram",
+      "id": "vil_cbe_coimbatore_south_vadapuram",
       "name": "VadaPuram",
       "nameTa": "வடபுரம்",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_south_cheri",
+      "id": "vil_cbe_coimbatore_south_south_cheri",
       "name": "South Cheri",
       "nameTa": "South சேரி",
       "type": "village"
     },
     {
-      "id": "vil_cbe_south_keezh_south",
+      "id": "vil_cbe_coimbatore_south_keezh_south",
       "name": "Keezh South",
       "nameTa": "கீழ் South",
       "type": "village"
@@ -61198,33 +61198,298 @@ export const VILLAGES_BY_SUBDIVISION = {
       "nameTa": "கீழ்சேரி",
       "type": "village"
     }
+  ],
+  "cpt_tirukalukundram": [
+    {
+      "id": "vil_cpt_tirukalukundram_hq",
+      "name": "Tirukalukundram",
+      "nameTa": "திருக்கழுக்குன்றம்",
+      "type": "town"
+    }
+  ],
+  "chn_ambattur": [
+    {
+      "id": "vil_chn_ambattur_hq",
+      "name": "Ambattur",
+      "nameTa": "அம்பத்தூர்",
+      "type": "town"
+    }
+  ],
+  "chn_aminjikarai": [
+    {
+      "id": "vil_chn_aminjikarai_hq",
+      "name": "Aminjikarai",
+      "nameTa": "அமிஞ்சிக்கரை",
+      "type": "town"
+    }
+  ],
+  "chn_ayanavaram": [
+    {
+      "id": "vil_chn_ayanavaram_hq",
+      "name": "Ayanavaram",
+      "nameTa": "அயனாவரம்",
+      "type": "town"
+    }
+  ],
+  "chn_madhavaram": [
+    {
+      "id": "vil_chn_madhavaram_hq",
+      "name": "Madhavaram",
+      "nameTa": "மாதவரம்",
+      "type": "town"
+    }
+  ],
+  "chn_maduravoyal": [
+    {
+      "id": "vil_chn_maduravoyal_hq",
+      "name": "Maduravoyal",
+      "nameTa": "மதுரவாயல்",
+      "type": "town"
+    }
+  ],
+  "chn_purasawalkam": [
+    {
+      "id": "vil_chn_purasawalkam_hq",
+      "name": "Purasawalkam",
+      "nameTa": "புரசைவாக்கம்",
+      "type": "town"
+    }
+  ],
+  "chn_thiruvottiyur": [
+    {
+      "id": "vil_chn_thiruvottiyur_hq",
+      "name": "Thiruvottiyur",
+      "nameTa": "திருவொற்றியூர்",
+      "type": "town"
+    }
+  ],
+  "cud_kattumannarkoil": [
+    {
+      "id": "vil_cud_kattumannarkoil_hq",
+      "name": "Kattumannarkoil",
+      "nameTa": "காட்டுமன்னார்கோயில்",
+      "type": "town"
+    }
+  ],
+  "cud_veppur": [
+    {
+      "id": "vil_cud_veppur_hq",
+      "name": "Veppur",
+      "nameTa": "வேப்பூர்",
+      "type": "town"
+    }
+  ],
+  "dgl_oddanchatram": [
+    {
+      "id": "vil_dgl_oddanchatram_hq",
+      "name": "Oddanchatram",
+      "nameTa": "ஒட்டன்சத்திரம்",
+      "type": "town"
+    }
+  ],
+  "erd_nambiyur": [
+    {
+      "id": "vil_erd_nambiyur_hq",
+      "name": "Nambiyur",
+      "nameTa": "நம்பியூர்",
+      "type": "town"
+    }
+  ],
+  "kki_vanapuram": [
+    {
+      "id": "vil_kki_vanapuram_hq",
+      "name": "Vanapuram",
+      "nameTa": "வானாபுரம்",
+      "type": "town"
+    }
+  ],
+  "mdu_kallikudi": [
+    {
+      "id": "vil_mdu_kallikudi_hq",
+      "name": "Kallikudi",
+      "nameTa": "கள்ளிக்குடி",
+      "type": "town"
+    }
+  ],
+  "mdu_madurai_east": [
+    {
+      "id": "vil_mdu_madurai_east_hq",
+      "name": "Madurai East",
+      "nameTa": "மதுரை கிழக்கு",
+      "type": "town"
+    }
+  ],
+  "mdu_madurai_west": [
+    {
+      "id": "vil_mdu_madurai_west_hq",
+      "name": "Madurai West",
+      "nameTa": "மதுரை மேற்கு",
+      "type": "town"
+    }
+  ],
+  "pdk_ponnamaravathi": [
+    {
+      "id": "vil_pdk_ponnamaravathi_hq",
+      "name": "Ponnamaravathi",
+      "nameTa": "பொன்னமராவதி",
+      "type": "town"
+    }
+  ],
+  "pdk_thirumayam": [
+    {
+      "id": "vil_pdk_thirumayam_hq",
+      "name": "Thirumayam",
+      "nameTa": "திருமயம்",
+      "type": "town"
+    }
+  ],
+  "slm_salem_south": [
+    {
+      "id": "vil_slm_salem_south_hq",
+      "name": "Salem South",
+      "nameTa": "சேலம் தெற்கு",
+      "type": "town"
+    }
+  ],
+  "slm_salem_west": [
+    {
+      "id": "vil_slm_salem_west_hq",
+      "name": "Salem West",
+      "nameTa": "சேலம் மேற்கு",
+      "type": "town"
+    }
+  ],
+  "slm_thalaivasal": [
+    {
+      "id": "vil_slm_thalaivasal_hq",
+      "name": "Thalaivasal",
+      "nameTa": "தலைவாசல்",
+      "type": "town"
+    }
+  ],
+  "svg_thiruppuvanam": [
+    {
+      "id": "vil_svg_thiruppuvanam_hq",
+      "name": "Thiruppuvanam",
+      "nameTa": "திருப்புவனம்",
+      "type": "town"
+    }
+  ],
+  "tcy_alwarthirunagari": [
+    {
+      "id": "vil_tcy_alwarthirunagari_hq",
+      "name": "Alwarthirunagari",
+      "nameTa": "ஆழ்வார்திருநகரி",
+      "type": "town"
+    }
+  ],
+  "tcy_kayathar": [
+    {
+      "id": "vil_tcy_kayathar_hq",
+      "name": "Kayathar",
+      "nameTa": "கயத்தாறு",
+      "type": "town"
+    }
+  ],
+  "try_manachanallur": [
+    {
+      "id": "vil_try_manachanallur_hq",
+      "name": "Manachanallur",
+      "nameTa": "மண்ணச்சநல்லூர்",
+      "type": "town"
+    }
+  ],
+  "try_thottiyam": [
+    {
+      "id": "vil_try_thottiyam_hq",
+      "name": "Thottiyam",
+      "nameTa": "தொட்டியம்",
+      "type": "town"
+    }
+  ],
+  "tnv_manur": [
+    {
+      "id": "vil_tnv_manur_hq",
+      "name": "Manur",
+      "nameTa": "மானூர்",
+      "type": "town"
+    }
+  ],
+  "tlr_rk_pet": [
+    {
+      "id": "vil_tlr_rk_pet_hq",
+      "name": "RK Pet",
+      "nameTa": "ஆர்.கே.பேட்டை",
+      "type": "town"
+    }
+  ],
+  "tvm_chetpet": [
+    {
+      "id": "vil_tvm_chetpet_hq",
+      "name": "Chetpet",
+      "nameTa": "சேத்துப்பட்டு",
+      "type": "town"
+    }
+  ],
+  "tvm_kilpennathur": [
+    {
+      "id": "vil_tvm_kilpennathur_hq",
+      "name": "Kilpennathur",
+      "nameTa": "கீழ்பென்னாத்தூர்",
+      "type": "town"
+    }
+  ],
+  "tvm_vembakkam": [
+    {
+      "id": "vil_tvm_vembakkam_hq",
+      "name": "Vembakkam",
+      "nameTa": "வெம்பாக்கம்",
+      "type": "town"
+    }
+  ],
+  "vpm_melmalayanur": [
+    {
+      "id": "vil_vpm_melmalayanur_hq",
+      "name": "Melmalayanur",
+      "nameTa": "மேல்மலையனூர்",
+      "type": "town"
+    }
+  ],
+  "vpm_thiruvennainallur": [
+    {
+      "id": "vil_vpm_thiruvennainallur_hq",
+      "name": "Thiruvennainallur",
+      "nameTa": "திருவெண்ணைநல்லூர்",
+      "type": "town"
+    }
+  ],
+  "vnr_watrap": [
+    {
+      "id": "vil_vnr_watrap_hq",
+      "name": "Watrap",
+      "nameTa": "வத்திராயிருப்பு",
+      "type": "town"
+    }
   ]
 };
 
-/**
- * Normalize district string or ID to standard lowercase format
- */
-function normalizeDistrictId(districtId) {
+export function normalizeDistrictId(districtId) {
   if (!districtId) return '';
-  const clean = String(districtId).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-  if (clean.includes('chengalpattu') || clean.includes('chengalpet')) return 'chengalpattu';
-  if (clean.includes('coimbatore') || clean.includes('kovai')) return 'coimbatore';
-  if (clean.includes('kanyakumari') || clean.includes('kanniyakumari')) return 'kanniyakumari';
-  if (clean.includes('kanchipuram') || clean.includes('kancheepuram')) return 'kancheepuram';
-  if (clean.includes('namakkal')) return 'namakkal';
-  if (clean.includes('thiruvallur') || clean.includes('tiruvallur')) return 'tiruvallur';
-  if (clean.includes('tiruchirappalli') || clean.includes('trichy') || clean.includes('tiruchirapalli')) return 'tiruchirappalli';
-  if (clean.includes('tirunelveli') || clean.includes('nellai')) return 'tirunelveli';
-  if (clean.includes('thoothukudi') || clean.includes('tuticorin')) return 'thoothukudi';
-  if (clean.includes('madurai')) return 'madurai';
-  if (clean.includes('salem')) return 'salem';
-  return clean;
+  const raw = String(districtId).toLowerCase().trim();
+  const aliasMap = {
+    'thiruvallur': 'tiruvallur',
+    'thoothukkudi': 'thoothukudi',
+    'thiruvarur': 'tiruvarur',
+    'the nilgiris': 'nilgiris',
+    'ooty': 'nilgiris',
+    'trichy': 'tiruchirappalli',
+    'kovai': 'coimbatore',
+    'madras': 'chennai'
+  };
+  if (aliasMap[raw]) return aliasMap[raw];
+  return raw;
 }
 
-/**
- * Retrieve villages for a given district and subdivision (taluk).
- * Handles direct ID match, substring match, and fallback.
- */
 export function getVillagesForSubdivision(districtId, subdivisionId) {
   if (!districtId && !subdivisionId) return [];
   const cleanDist = normalizeDistrictId(districtId);

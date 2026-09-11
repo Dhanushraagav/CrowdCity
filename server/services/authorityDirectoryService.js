@@ -33,6 +33,16 @@ export const DISTRICTS_DIRECTORY = TN_DISTRICTS.map(d => ({
 // Known Subdivisions (Taluks & Revenue/Development Blocks across all 38 Tamil Nadu districts)
 export const SUBDIVISIONS_DIRECTORY = [
   {
+    "id": "ari_andimadam",
+    "districtId": "ariyalur",
+    "name": "Andimadam",
+    "nameTa": "ஆண்டிமடம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Andimadam",
+    "phone": "04329-222444",
+    "email": "tah.andimadam@tn.gov.in"
+  },
+  {
     "id": "ari_ariyalur",
     "districtId": "ariyalur",
     "name": "Ariyalur",
@@ -41,16 +51,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Ariyalur",
     "phone": "04329-222111",
     "email": "tah.ariyalur@tn.gov.in"
-  },
-  {
-    "id": "ari_udayarpalayam",
-    "districtId": "ariyalur",
-    "name": "Udayarpalayam",
-    "nameTa": "உடையார்பாளையம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Udayarpalayam",
-    "phone": "04329-222222",
-    "email": "tah.udayarpalayam@tn.gov.in"
   },
   {
     "id": "ari_sendurai",
@@ -63,14 +63,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.sendurai@tn.gov.in"
   },
   {
-    "id": "ari_andimadam",
+    "id": "ari_udayarpalayam",
     "districtId": "ariyalur",
-    "name": "Andimadam",
-    "nameTa": "ஆண்டிமடம்",
+    "name": "Udayarpalayam",
+    "nameTa": "உடையார்பாளையம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Andimadam",
-    "phone": "04329-222444",
-    "email": "tah.andimadam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Udayarpalayam",
+    "phone": "04329-222222",
+    "email": "tah.udayarpalayam@tn.gov.in"
   },
   {
     "id": "cpt_chengalpattu",
@@ -83,24 +83,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.cpt@tn.gov.in"
   },
   {
-    "id": "cpt_tambaram",
+    "id": "cpt_cheyyur",
     "districtId": "chengalpattu",
-    "name": "Tambaram",
-    "nameTa": "தாம்பரம்",
+    "name": "Cheyyur",
+    "nameTa": "செய்யூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tambaram",
-    "phone": "044-22265000",
-    "email": "tah.tambaram@tn.gov.in"
-  },
-  {
-    "id": "cpt_pallavaram",
-    "districtId": "chengalpattu",
-    "name": "Pallavaram",
-    "nameTa": "பல்லாவரம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Pallavaram",
-    "phone": "044-22640000",
-    "email": "tah.pallavaram@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Cheyyur",
+    "phone": "044-27565000",
+    "email": "tah.cheyyur@tn.gov.in"
   },
   {
     "id": "cpt_maduranthakam",
@@ -113,14 +103,34 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.maduranthakam@tn.gov.in"
   },
   {
-    "id": "cpt_cheyyur",
+    "id": "cpt_pallavaram",
     "districtId": "chengalpattu",
-    "name": "Cheyyur",
-    "nameTa": "செய்யூர்",
+    "name": "Pallavaram",
+    "nameTa": "பல்லாவரம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Cheyyur",
-    "phone": "044-27565000",
-    "email": "tah.cheyyur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Pallavaram",
+    "phone": "044-22640000",
+    "email": "tah.pallavaram@tn.gov.in"
+  },
+  {
+    "id": "cpt_tambaram",
+    "districtId": "chengalpattu",
+    "name": "Tambaram",
+    "nameTa": "தாம்பரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tambaram",
+    "phone": "044-22265000",
+    "email": "tah.tambaram@tn.gov.in"
+  },
+  {
+    "id": "cpt_tirukalukundram",
+    "districtId": "chengalpattu",
+    "name": "Tirukalukundram",
+    "nameTa": "திருக்கழுக்குன்றம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tirukalukundram",
+    "phone": "044-cpt0000",
+    "email": "tah.tirukalukundram@tn.gov.in"
   },
   {
     "id": "cpt_tiruporur",
@@ -143,64 +153,44 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.vandalur@tn.gov.in"
   },
   {
-    "id": "cpt_kundrathur",
-    "districtId": "chengalpattu",
-    "name": "Kundrathur",
-    "nameTa": "குன்றத்தூர்",
+    "id": "chn_alandur",
+    "districtId": "chennai",
+    "name": "Alandur",
+    "nameTa": "ஆலந்தூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kundrathur",
-    "phone": "044-24780000",
-    "email": "tah.kundrathur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Alandur",
+    "phone": "044-22341000",
+    "email": "tah.alandur@tn.gov.in"
   },
   {
-    "id": "chn_zone5",
+    "id": "chn_ambattur",
     "districtId": "chennai",
-    "name": "Zone 5 Royapuram",
-    "nameTa": "மண்டலம் 5 ராயபுரம்",
-    "type": "revenue_division",
-    "tahsildarOffice": "Zonal Office 5, Royapuram",
-    "phone": "044-25952600",
-    "email": "zonal5@chennaicorporation.gov.in"
+    "name": "Ambattur",
+    "nameTa": "அம்பத்தூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Ambattur",
+    "phone": "044-chn0000",
+    "email": "tah.ambattur@tn.gov.in"
   },
   {
-    "id": "chn_zone8",
+    "id": "chn_aminjikarai",
     "districtId": "chennai",
-    "name": "Zone 8 Anna Nagar",
-    "nameTa": "மண்டலம் 8 அண்ணா நகர்",
-    "type": "revenue_division",
-    "tahsildarOffice": "Zonal Office 8, Anna Nagar",
-    "phone": "044-26151500",
-    "email": "zonal8@chennaicorporation.gov.in"
+    "name": "Aminjikarai",
+    "nameTa": "அமிஞ்சிக்கரை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Aminjikarai",
+    "phone": "044-chn0000",
+    "email": "tah.aminjikarai@tn.gov.in"
   },
   {
-    "id": "chn_zone9",
+    "id": "chn_ayanavaram",
     "districtId": "chennai",
-    "name": "Zone 9 Teynampet",
-    "nameTa": "மண்டலம் 9 தேனாம்பேட்டை",
-    "type": "revenue_division",
-    "tahsildarOffice": "Zonal Office 9, Teynampet",
-    "phone": "044-24341900",
-    "email": "zonal9@chennaicorporation.gov.in"
-  },
-  {
-    "id": "chn_zone10",
-    "districtId": "chennai",
-    "name": "Zone 10 Kodambakkam",
-    "nameTa": "மண்டலம் 10 கோடம்பாக்கம்",
-    "type": "revenue_division",
-    "tahsildarOffice": "Zonal Office 10, Kodambakkam",
-    "phone": "044-24801100",
-    "email": "zonal10@chennaicorporation.gov.in"
-  },
-  {
-    "id": "chn_zone13",
-    "districtId": "chennai",
-    "name": "Zone 13 Adyar",
-    "nameTa": "மண்டலம் 13 அடையாறு",
-    "type": "revenue_division",
-    "tahsildarOffice": "Zonal Office 13, Adyar",
-    "phone": "044-24411100",
-    "email": "zonal13@chennaicorporation.gov.in"
+    "name": "Ayanavaram",
+    "nameTa": "அயனாவரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Ayanavaram",
+    "phone": "044-chn0000",
+    "email": "tah.ayanavaram@tn.gov.in"
   },
   {
     "id": "chn_egmore",
@@ -223,14 +213,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.guindy@tn.gov.in"
   },
   {
-    "id": "chn_mylapore",
+    "id": "chn_madhavaram",
     "districtId": "chennai",
-    "name": "Mylapore",
-    "nameTa": "மயிலாப்பூர்",
+    "name": "Madhavaram",
+    "nameTa": "மாதவரம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Mylapore",
-    "phone": "044-24641000",
-    "email": "tah.mylapore@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Madhavaram",
+    "phone": "044-chn0000",
+    "email": "tah.madhavaram@tn.gov.in"
+  },
+  {
+    "id": "chn_maduravoyal",
+    "districtId": "chennai",
+    "name": "Maduravoyal",
+    "nameTa": "மதுரவாயல்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Maduravoyal",
+    "phone": "044-chn0000",
+    "email": "tah.maduravoyal@tn.gov.in"
   },
   {
     "id": "chn_mambalam",
@@ -241,6 +241,56 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Mambalam",
     "phone": "044-24891000",
     "email": "tah.mambalam@tn.gov.in"
+  },
+  {
+    "id": "chn_mylapore",
+    "districtId": "chennai",
+    "name": "Mylapore",
+    "nameTa": "மயிலாப்பூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Mylapore",
+    "phone": "044-24641000",
+    "email": "tah.mylapore@tn.gov.in"
+  },
+  {
+    "id": "chn_perambur",
+    "districtId": "chennai",
+    "name": "Perambur",
+    "nameTa": "பெரம்பூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Perambur",
+    "phone": "044-25511000",
+    "email": "tah.perambur@tn.gov.in"
+  },
+  {
+    "id": "chn_purasawalkam",
+    "districtId": "chennai",
+    "name": "Purasawalkam",
+    "nameTa": "புரசைவாக்கம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Purasawalkam",
+    "phone": "044-chn0000",
+    "email": "tah.purasawalkam@tn.gov.in"
+  },
+  {
+    "id": "chn_sholinganallur",
+    "districtId": "chennai",
+    "name": "Sholinganallur",
+    "nameTa": "சோழிங்கநல்லூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sholinganallur",
+    "phone": "044-24501000",
+    "email": "tah.sholinganallur@tn.gov.in"
+  },
+  {
+    "id": "chn_thiruvottiyur",
+    "districtId": "chennai",
+    "name": "Thiruvottiyur",
+    "nameTa": "திருவொற்றியூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Thiruvottiyur",
+    "phone": "044-chn0000",
+    "email": "tah.thiruvottiyur@tn.gov.in"
   },
   {
     "id": "chn_tondiarpet",
@@ -263,54 +313,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.velachery@tn.gov.in"
   },
   {
-    "id": "chn_perambur",
-    "districtId": "chennai",
-    "name": "Perambur",
-    "nameTa": "பெரம்பூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Perambur",
-    "phone": "044-25511000",
-    "email": "tah.perambur@tn.gov.in"
-  },
-  {
-    "id": "chn_alandur",
-    "districtId": "chennai",
-    "name": "Alandur",
-    "nameTa": "ஆலந்தூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Alandur",
-    "phone": "044-22341000",
-    "email": "tah.alandur@tn.gov.in"
-  },
-  {
-    "id": "chn_sholinganallur",
-    "districtId": "chennai",
-    "name": "Sholinganallur",
-    "nameTa": "சோழிங்கநல்லூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sholinganallur",
-    "phone": "044-24501000",
-    "email": "tah.sholinganallur@tn.gov.in"
-  },
-  {
-    "id": "cbe_sulur",
+    "id": "cbe_anaimalai",
     "districtId": "coimbatore",
-    "name": "Sulur",
-    "nameTa": "சூலூர்",
+    "name": "Anaimalai",
+    "nameTa": "ஆனைமலை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sulur",
-    "phone": "0422-2687200",
-    "email": "tah.sulur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Anaimalai",
+    "phone": "04259-261100",
+    "email": "tah.anaimalai@tn.gov.in"
   },
   {
-    "id": "cbe_sulur_block",
+    "id": "cbe_annur",
     "districtId": "coimbatore",
-    "name": "Sulur Block",
-    "nameTa": "சூலூர் ஒன்றியம்",
-    "type": "block",
-    "bdoOffice": "Block Development Office, Sulur Panchayat Union",
-    "phone": "0422-2687250",
-    "email": "bdo.sulur@tn.gov.in"
+    "name": "Annur",
+    "nameTa": "அன்னூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Annur",
+    "phone": "04254-262200",
+    "email": "tah.annur@tn.gov.in"
   },
   {
     "id": "cbe_north",
@@ -333,34 +353,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.cbesouth@tn.gov.in"
   },
   {
-    "id": "cbe_pollachi",
+    "id": "cbe_kinathukadavu",
     "districtId": "coimbatore",
-    "name": "Pollachi",
-    "nameTa": "பொள்ளாச்சி",
+    "name": "Kinathukadavu",
+    "nameTa": "கிணத்துக்கடவு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Pollachi",
-    "phone": "04259-223344",
-    "email": "tah.pollachi@tn.gov.in"
-  },
-  {
-    "id": "cbe_mettupalayam",
-    "districtId": "coimbatore",
-    "name": "Mettupalayam",
-    "nameTa": "மேட்டுப்பாளையம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Mettupalayam",
-    "phone": "04254-222333",
-    "email": "tah.mtp@tn.gov.in"
-  },
-  {
-    "id": "cbe_annur",
-    "districtId": "coimbatore",
-    "name": "Annur",
-    "nameTa": "அன்னூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Annur",
-    "phone": "04254-262200",
-    "email": "tah.annur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kinathukadavu",
+    "phone": "04259-242200",
+    "email": "tah.kinathukadavu@tn.gov.in"
   },
   {
     "id": "cbe_madukkarai",
@@ -373,24 +373,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.madukkarai@tn.gov.in"
   },
   {
-    "id": "cbe_kinathukadavu",
+    "id": "cbe_mettupalayam",
     "districtId": "coimbatore",
-    "name": "Kinathukadavu",
-    "nameTa": "கிணத்துக்கடவு",
+    "name": "Mettupalayam",
+    "nameTa": "மேட்டுப்பாளையம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kinathukadavu",
-    "phone": "04259-242200",
-    "email": "tah.kinathukadavu@tn.gov.in"
-  },
-  {
-    "id": "cbe_valparai",
-    "districtId": "coimbatore",
-    "name": "Valparai",
-    "nameTa": "வால்பாறை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Valparai",
-    "phone": "04253-222200",
-    "email": "tah.valparai@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Mettupalayam",
+    "phone": "04254-222333",
+    "email": "tah.mtp@tn.gov.in"
   },
   {
     "id": "cbe_perur",
@@ -403,74 +393,34 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.perur@tn.gov.in"
   },
   {
-    "id": "cbe_anaimalai",
+    "id": "cbe_pollachi",
     "districtId": "coimbatore",
-    "name": "Anaimalai",
-    "nameTa": "ஆனைமலை",
+    "name": "Pollachi",
+    "nameTa": "பொள்ளாச்சி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Anaimalai",
-    "phone": "04259-261100",
-    "email": "tah.anaimalai@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Pollachi",
+    "phone": "04259-223344",
+    "email": "tah.pollachi@tn.gov.in"
   },
   {
-    "id": "cud_cuddalore",
-    "districtId": "cuddalore",
-    "name": "Cuddalore",
-    "nameTa": "கடலூர்",
+    "id": "cbe_sulur",
+    "districtId": "coimbatore",
+    "name": "Sulur",
+    "nameTa": "சூலூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Cuddalore",
-    "phone": "04142-230000",
-    "email": "tah.cuddalore@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Sulur",
+    "phone": "0422-2687200",
+    "email": "tah.sulur@tn.gov.in"
   },
   {
-    "id": "cud_chidambaram",
-    "districtId": "cuddalore",
-    "name": "Chidambaram",
-    "nameTa": "சிதம்பரம்",
+    "id": "cbe_valparai",
+    "districtId": "coimbatore",
+    "name": "Valparai",
+    "nameTa": "வால்பாறை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Chidambaram",
-    "phone": "04144-222000",
-    "email": "tah.chidambaram@tn.gov.in"
-  },
-  {
-    "id": "cud_panruti",
-    "districtId": "cuddalore",
-    "name": "Panruti",
-    "nameTa": "பண்ருட்டி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Panruti",
-    "phone": "04142-242000",
-    "email": "tah.panruti@tn.gov.in"
-  },
-  {
-    "id": "cud_vriddhachalam",
-    "districtId": "cuddalore",
-    "name": "Vriddhachalam",
-    "nameTa": "விருத்தாசலம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vriddhachalam",
-    "phone": "04143-260000",
-    "email": "tah.vridha@tn.gov.in"
-  },
-  {
-    "id": "cud_kurinjipadi",
-    "districtId": "cuddalore",
-    "name": "Kurinjipadi",
-    "nameTa": "குறிஞ்சிப்பாடி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kurinjipadi",
-    "phone": "04142-258000",
-    "email": "tah.kurinjipadi@tn.gov.in"
-  },
-  {
-    "id": "cud_tittakudi",
-    "districtId": "cuddalore",
-    "name": "Tittakudi",
-    "nameTa": "திட்டக்குடி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tittakudi",
-    "phone": "04143-255000",
-    "email": "tah.tittakudi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Valparai",
+    "phone": "04253-222200",
+    "email": "tah.valparai@tn.gov.in"
   },
   {
     "id": "cud_bhuvanagiri",
@@ -483,6 +433,56 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.bhuvanagiri@tn.gov.in"
   },
   {
+    "id": "cud_chidambaram",
+    "districtId": "cuddalore",
+    "name": "Chidambaram",
+    "nameTa": "சிதம்பரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Chidambaram",
+    "phone": "04144-222000",
+    "email": "tah.chidambaram@tn.gov.in"
+  },
+  {
+    "id": "cud_cuddalore",
+    "districtId": "cuddalore",
+    "name": "Cuddalore",
+    "nameTa": "கடலூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Cuddalore",
+    "phone": "04142-230000",
+    "email": "tah.cuddalore@tn.gov.in"
+  },
+  {
+    "id": "cud_kattumannarkoil",
+    "districtId": "cuddalore",
+    "name": "Kattumannarkoil",
+    "nameTa": "காட்டுமன்னார்கோயில்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kattumannarkoil",
+    "phone": "044-cud0000",
+    "email": "tah.kattumannarkoil@tn.gov.in"
+  },
+  {
+    "id": "cud_kurinjipadi",
+    "districtId": "cuddalore",
+    "name": "Kurinjipadi",
+    "nameTa": "குறிஞ்சிப்பாடி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kurinjipadi",
+    "phone": "04142-258000",
+    "email": "tah.kurinjipadi@tn.gov.in"
+  },
+  {
+    "id": "cud_panruti",
+    "districtId": "cuddalore",
+    "name": "Panruti",
+    "nameTa": "பண்ருட்டி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Panruti",
+    "phone": "04142-242000",
+    "email": "tah.panruti@tn.gov.in"
+  },
+  {
     "id": "cud_srimushnam",
     "districtId": "cuddalore",
     "name": "Srimushnam",
@@ -491,6 +491,36 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Srimushnam",
     "phone": "04144-245000",
     "email": "tah.srimushnam@tn.gov.in"
+  },
+  {
+    "id": "cud_tittakudi",
+    "districtId": "cuddalore",
+    "name": "Tittakudi",
+    "nameTa": "திட்டக்குடி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tittakudi",
+    "phone": "04143-255000",
+    "email": "tah.tittakudi@tn.gov.in"
+  },
+  {
+    "id": "cud_veppur",
+    "districtId": "cuddalore",
+    "name": "Veppur",
+    "nameTa": "வேப்பூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Veppur",
+    "phone": "044-cud0000",
+    "email": "tah.veppur@tn.gov.in"
+  },
+  {
+    "id": "cud_vriddhachalam",
+    "districtId": "cuddalore",
+    "name": "Vriddhachalam",
+    "nameTa": "விருத்தாசலம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Vriddhachalam",
+    "phone": "04143-260000",
+    "email": "tah.vridha@tn.gov.in"
   },
   {
     "id": "dpi_dharmapuri",
@@ -513,36 +543,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.harur@tn.gov.in"
   },
   {
-    "id": "dpi_palacode",
-    "districtId": "dharmapuri",
-    "name": "Palacode",
-    "nameTa": "பாலக்கோடு",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Palacode",
-    "phone": "04348-222000",
-    "email": "tah.palacode@tn.gov.in"
-  },
-  {
-    "id": "dpi_pennagaram",
-    "districtId": "dharmapuri",
-    "name": "Pennagaram",
-    "nameTa": "பென்னாகரம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Pennagaram",
-    "phone": "04342-255000",
-    "email": "tah.pennagaram@tn.gov.in"
-  },
-  {
-    "id": "dpi_pappireddipatti",
-    "districtId": "dharmapuri",
-    "name": "Pappireddipatti",
-    "nameTa": "பாப்பிரெட்டிப்பட்டி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Pappireddipatti",
-    "phone": "04346-246000",
-    "email": "tah.pappireddi@tn.gov.in"
-  },
-  {
     "id": "dpi_karimangalam",
     "districtId": "dharmapuri",
     "name": "Karimangalam",
@@ -561,6 +561,46 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Nallampalli",
     "phone": "04342-244000",
     "email": "tah.nallampalli@tn.gov.in"
+  },
+  {
+    "id": "dpi_palacode",
+    "districtId": "dharmapuri",
+    "name": "Palacode",
+    "nameTa": "பாலக்கோடு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Palacode",
+    "phone": "04348-222000",
+    "email": "tah.palacode@tn.gov.in"
+  },
+  {
+    "id": "dpi_pappireddipatti",
+    "districtId": "dharmapuri",
+    "name": "Pappireddipatti",
+    "nameTa": "பாப்பிரெட்டிப்பட்டி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Pappireddipatti",
+    "phone": "04346-246000",
+    "email": "tah.pappireddi@tn.gov.in"
+  },
+  {
+    "id": "dpi_pennagaram",
+    "districtId": "dharmapuri",
+    "name": "Pennagaram",
+    "nameTa": "பென்னாகரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Pennagaram",
+    "phone": "04342-255000",
+    "email": "tah.pennagaram@tn.gov.in"
+  },
+  {
+    "id": "dgl_attur",
+    "districtId": "dindigul",
+    "name": "Attur",
+    "nameTa": "ஆத்தூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Attur",
+    "phone": "0451-2550000",
+    "email": "tah.atturdgl@tn.gov.in"
   },
   {
     "id": "dgl_dindigul_east",
@@ -583,14 +623,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.dglwest@tn.gov.in"
   },
   {
-    "id": "dgl_palani",
+    "id": "dgl_gujjiliamparai",
     "districtId": "dindigul",
-    "name": "Palani",
-    "nameTa": "பழனி",
+    "name": "Gujjiliamparai",
+    "nameTa": "குஜிலியம்பாறை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Palani",
-    "phone": "04545-242000",
-    "email": "tah.palani@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Gujjiliamparai",
+    "phone": "04551-270000",
+    "email": "tah.gujjiliamparai@tn.gov.in"
   },
   {
     "id": "dgl_kodaikanal",
@@ -623,14 +663,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.nilakkottai@tn.gov.in"
   },
   {
-    "id": "dgl_attur",
+    "id": "dgl_oddanchatram",
     "districtId": "dindigul",
-    "name": "Attur",
-    "nameTa": "ஆத்தூர்",
+    "name": "Oddanchatram",
+    "nameTa": "ஒட்டன்சத்திரம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Attur",
-    "phone": "0451-2550000",
-    "email": "tah.atturdgl@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Oddanchatram",
+    "phone": "044-dgl0000",
+    "email": "tah.oddanchatram@tn.gov.in"
+  },
+  {
+    "id": "dgl_palani",
+    "districtId": "dindigul",
+    "name": "Palani",
+    "nameTa": "பழனி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Palani",
+    "phone": "04545-242000",
+    "email": "tah.palani@tn.gov.in"
   },
   {
     "id": "dgl_vedasandur",
@@ -643,24 +693,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.vedasandur@tn.gov.in"
   },
   {
-    "id": "dgl_gujjiliamparai",
-    "districtId": "dindigul",
-    "name": "Gujjiliamparai",
-    "nameTa": "குஜிலியம்பாறை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Gujjiliamparai",
-    "phone": "04551-270000",
-    "email": "tah.gujjiliamparai@tn.gov.in"
-  },
-  {
-    "id": "erd_erode",
+    "id": "erd_anthiyur",
     "districtId": "erode",
-    "name": "Erode",
-    "nameTa": "ஈரோடு",
+    "name": "Anthiyur",
+    "nameTa": "அந்தியூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Erode",
-    "phone": "0424-2252000",
-    "email": "tah.erode@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Anthiyur",
+    "phone": "04256-260000",
+    "email": "tah.anthiyur@tn.gov.in"
   },
   {
     "id": "erd_bhavani",
@@ -673,6 +713,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.bhavani@tn.gov.in"
   },
   {
+    "id": "erd_erode",
+    "districtId": "erode",
+    "name": "Erode",
+    "nameTa": "ஈரோடு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Erode",
+    "phone": "0424-2252000",
+    "email": "tah.erode@tn.gov.in"
+  },
+  {
     "id": "erd_gobichettipalayam",
     "districtId": "erode",
     "name": "Gobichettipalayam",
@@ -681,36 +731,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Gobichettipalayam",
     "phone": "04285-222000",
     "email": "tah.gobi@tn.gov.in"
-  },
-  {
-    "id": "erd_perundurai",
-    "districtId": "erode",
-    "name": "Perundurai",
-    "nameTa": "பெருந்துறை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Perundurai",
-    "phone": "04294-220000",
-    "email": "tah.perundurai@tn.gov.in"
-  },
-  {
-    "id": "erd_anthiyur",
-    "districtId": "erode",
-    "name": "Anthiyur",
-    "nameTa": "அந்தியூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Anthiyur",
-    "phone": "04256-260000",
-    "email": "tah.anthiyur@tn.gov.in"
-  },
-  {
-    "id": "erd_sathyamangalam",
-    "districtId": "erode",
-    "name": "Sathyamangalam",
-    "nameTa": "சத்தியமங்கலம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sathyamangalam",
-    "phone": "04295-220000",
-    "email": "tah.sathyamangalam@tn.gov.in"
   },
   {
     "id": "erd_kodumudi",
@@ -733,6 +753,36 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.modakkurichi@tn.gov.in"
   },
   {
+    "id": "erd_nambiyur",
+    "districtId": "erode",
+    "name": "Nambiyur",
+    "nameTa": "நம்பியூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Nambiyur",
+    "phone": "044-erd0000",
+    "email": "tah.nambiyur@tn.gov.in"
+  },
+  {
+    "id": "erd_perundurai",
+    "districtId": "erode",
+    "name": "Perundurai",
+    "nameTa": "பெருந்துறை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Perundurai",
+    "phone": "04294-220000",
+    "email": "tah.perundurai@tn.gov.in"
+  },
+  {
+    "id": "erd_sathyamangalam",
+    "districtId": "erode",
+    "name": "Sathyamangalam",
+    "nameTa": "சத்தியமங்கலம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sathyamangalam",
+    "phone": "04295-220000",
+    "email": "tah.sathyamangalam@tn.gov.in"
+  },
+  {
     "id": "erd_thalavadi",
     "districtId": "erode",
     "name": "Thalavadi",
@@ -741,26 +791,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Thalavadi",
     "phone": "04295-244000",
     "email": "tah.thalavadi@tn.gov.in"
-  },
-  {
-    "id": "kki_kallakurichi",
-    "districtId": "kallakurichi",
-    "name": "Kallakurichi",
-    "nameTa": "கள்ளக்குறிச்சி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kallakurichi",
-    "phone": "04151-222000",
-    "email": "tah.kallakurichi@tn.gov.in"
-  },
-  {
-    "id": "kki_sankarapuram",
-    "districtId": "kallakurichi",
-    "name": "Sankarapuram",
-    "nameTa": "சங்கராபுரம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sankarapuram",
-    "phone": "04151-235000",
-    "email": "tah.sankarapuram@tn.gov.in"
   },
   {
     "id": "kki_chinnasalem",
@@ -773,24 +803,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.chinnasalem@tn.gov.in"
   },
   {
-    "id": "kki_ulundurpet",
+    "id": "kki_kallakurichi",
     "districtId": "kallakurichi",
-    "name": "Ulundurpet",
-    "nameTa": "உளுந்தூர்பேட்டை",
+    "name": "Kallakurichi",
+    "nameTa": "கள்ளக்குறிச்சி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Ulundurpet",
-    "phone": "04149-222000",
-    "email": "tah.ulundurpet@tn.gov.in"
-  },
-  {
-    "id": "kki_tirukoilur",
-    "districtId": "kallakurichi",
-    "name": "Tirukoilur",
-    "nameTa": "திருக்கோவிலூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tirukoilur",
-    "phone": "04153-222000",
-    "email": "tah.tirukoilur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kallakurichi",
+    "phone": "04151-222000",
+    "email": "tah.kallakurichi@tn.gov.in"
   },
   {
     "id": "kki_kalvarayan_hills",
@@ -803,6 +823,46 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.kalvarayan@tn.gov.in"
   },
   {
+    "id": "kki_sankarapuram",
+    "districtId": "kallakurichi",
+    "name": "Sankarapuram",
+    "nameTa": "சங்கராபுரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sankarapuram",
+    "phone": "04151-235000",
+    "email": "tah.sankarapuram@tn.gov.in"
+  },
+  {
+    "id": "kki_tirukoilur",
+    "districtId": "kallakurichi",
+    "name": "Tirukoilur",
+    "nameTa": "திருக்கோவிலூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tirukoilur",
+    "phone": "04153-222000",
+    "email": "tah.tirukoilur@tn.gov.in"
+  },
+  {
+    "id": "kki_ulundurpet",
+    "districtId": "kallakurichi",
+    "name": "Ulundurpet",
+    "nameTa": "உளுந்தூர்பேட்டை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Ulundurpet",
+    "phone": "04149-222000",
+    "email": "tah.ulundurpet@tn.gov.in"
+  },
+  {
+    "id": "kki_vanapuram",
+    "districtId": "kallakurichi",
+    "name": "Vanapuram",
+    "nameTa": "வானாபுரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Vanapuram",
+    "phone": "044-kki0000",
+    "email": "tah.vanapuram@tn.gov.in"
+  },
+  {
     "id": "kpm_kancheepuram",
     "districtId": "kancheepuram",
     "name": "Kancheepuram",
@@ -811,26 +871,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Kancheepuram",
     "phone": "044-27222000",
     "email": "tah.kanchipuram@tn.gov.in"
-  },
-  {
-    "id": "kpm_sriperumbudur",
-    "districtId": "kancheepuram",
-    "name": "Sriperumbudur",
-    "nameTa": "ஸ்ரீபெரும்புதூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sriperumbudur",
-    "phone": "044-27162000",
-    "email": "tah.sriperumbudur@tn.gov.in"
-  },
-  {
-    "id": "kpm_walajabad",
-    "districtId": "kancheepuram",
-    "name": "Walajabad",
-    "nameTa": "வாலாஜாபாத்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Walajabad",
-    "phone": "044-27256000",
-    "email": "tah.walajabad@tn.gov.in"
   },
   {
     "id": "kpm_kundrathur",
@@ -843,6 +883,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.kundrathurkpm@tn.gov.in"
   },
   {
+    "id": "kpm_sriperumbudur",
+    "districtId": "kancheepuram",
+    "name": "Sriperumbudur",
+    "nameTa": "ஸ்ரீபெரும்புதூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sriperumbudur",
+    "phone": "044-27162000",
+    "email": "tah.sriperumbudur@tn.gov.in"
+  },
+  {
     "id": "kpm_uthiramerur",
     "districtId": "kancheepuram",
     "name": "Uthiramerur",
@@ -851,6 +901,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Uthiramerur",
     "phone": "044-27272000",
     "email": "tah.uthiramerur@tn.gov.in"
+  },
+  {
+    "id": "kpm_walajabad",
+    "districtId": "kancheepuram",
+    "name": "Walajabad",
+    "nameTa": "வாலாஜாபாத்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Walajabad",
+    "phone": "044-27256000",
+    "email": "tah.walajabad@tn.gov.in"
   },
   {
     "id": "kkm_agastheeswaram",
@@ -863,16 +923,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.agastheeswaram@tn.gov.in"
   },
   {
-    "id": "kkm_thovalai",
-    "districtId": "kanniyakumari",
-    "name": "Thovalai",
-    "nameTa": "தோவாளை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Thovalai",
-    "phone": "04652-262000",
-    "email": "tah.thovalai@tn.gov.in"
-  },
-  {
     "id": "kkm_kalkulam",
     "districtId": "kanniyakumari",
     "name": "Kalkulam",
@@ -881,16 +931,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Kalkulam (Thuckalay)",
     "phone": "04651-250000",
     "email": "tah.kalkulam@tn.gov.in"
-  },
-  {
-    "id": "kkm_vilavancode",
-    "districtId": "kanniyakumari",
-    "name": "Vilavancode",
-    "nameTa": "விளவங்கோடு",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vilavancode",
-    "phone": "04651-270000",
-    "email": "tah.vilavancode@tn.gov.in"
   },
   {
     "id": "kkm_killiyoor",
@@ -913,24 +953,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.thiruvattar@tn.gov.in"
   },
   {
-    "id": "krr_karur",
-    "districtId": "karur",
-    "name": "Karur",
-    "nameTa": "கரூர்",
+    "id": "kkm_thovalai",
+    "districtId": "kanniyakumari",
+    "name": "Thovalai",
+    "nameTa": "தோவாளை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Karur",
-    "phone": "04324-260000",
-    "email": "tah.karur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Thovalai",
+    "phone": "04652-262000",
+    "email": "tah.thovalai@tn.gov.in"
   },
   {
-    "id": "krr_kulithalai",
-    "districtId": "karur",
-    "name": "Kulithalai",
-    "nameTa": "குளித்தலை",
+    "id": "kkm_vilavancode",
+    "districtId": "kanniyakumari",
+    "name": "Vilavancode",
+    "nameTa": "விளவங்கோடு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kulithalai",
-    "phone": "04323-222000",
-    "email": "tah.kulithalai@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Vilavancode",
+    "phone": "04651-270000",
+    "email": "tah.vilavancode@tn.gov.in"
   },
   {
     "id": "krr_aravakurichi",
@@ -943,6 +983,26 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.aravakurichi@tn.gov.in"
   },
   {
+    "id": "krr_kadavur",
+    "districtId": "karur",
+    "name": "Kadavur",
+    "nameTa": "கடவூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kadavur",
+    "phone": "04324-282000",
+    "email": "tah.kadavur@tn.gov.in"
+  },
+  {
+    "id": "krr_karur",
+    "districtId": "karur",
+    "name": "Karur",
+    "nameTa": "கரூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Karur",
+    "phone": "04324-260000",
+    "email": "tah.karur@tn.gov.in"
+  },
+  {
     "id": "krr_krishnarayapuram",
     "districtId": "karur",
     "name": "Krishnarayapuram",
@@ -951,6 +1011,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Krishnarayapuram",
     "phone": "04323-242000",
     "email": "tah.krishnarayapuram@tn.gov.in"
+  },
+  {
+    "id": "krr_kulithalai",
+    "districtId": "karur",
+    "name": "Kulithalai",
+    "nameTa": "குளித்தலை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kulithalai",
+    "phone": "04323-222000",
+    "email": "tah.kulithalai@tn.gov.in"
   },
   {
     "id": "krr_manmangalam",
@@ -973,34 +1043,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.pugalur@tn.gov.in"
   },
   {
-    "id": "krr_kadavur",
-    "districtId": "karur",
-    "name": "Kadavur",
-    "nameTa": "கடவூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kadavur",
-    "phone": "04324-282000",
-    "email": "tah.kadavur@tn.gov.in"
-  },
-  {
-    "id": "kgi_krishnagiri",
+    "id": "kgi_bargur",
     "districtId": "krishnagiri",
-    "name": "Krishnagiri",
-    "nameTa": "கிருஷ்ணகிரி",
+    "name": "Bargur",
+    "nameTa": "பர்கூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Krishnagiri",
-    "phone": "04343-232000",
-    "email": "tah.krishnagiri@tn.gov.in"
-  },
-  {
-    "id": "kgi_hosur",
-    "districtId": "krishnagiri",
-    "name": "Hosur",
-    "nameTa": "ஓசூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Hosur",
-    "phone": "04344-222000",
-    "email": "tah.hosur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Bargur",
+    "phone": "04343-265000",
+    "email": "tah.bargur@tn.gov.in"
   },
   {
     "id": "kgi_denkanikottai",
@@ -1013,6 +1063,36 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.denkanikottai@tn.gov.in"
   },
   {
+    "id": "kgi_hosur",
+    "districtId": "krishnagiri",
+    "name": "Hosur",
+    "nameTa": "ஓசூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Hosur",
+    "phone": "04344-222000",
+    "email": "tah.hosur@tn.gov.in"
+  },
+  {
+    "id": "kgi_kelamangalam",
+    "districtId": "krishnagiri",
+    "name": "Kelamangalam",
+    "nameTa": "கேளமங்கலம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kelamangalam",
+    "phone": "04347-245000",
+    "email": "tah.kelamangalam@tn.gov.in"
+  },
+  {
+    "id": "kgi_krishnagiri",
+    "districtId": "krishnagiri",
+    "name": "Krishnagiri",
+    "nameTa": "கிருஷ்ணகிரி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Krishnagiri",
+    "phone": "04343-232000",
+    "email": "tah.krishnagiri@tn.gov.in"
+  },
+  {
     "id": "kgi_pochampalli",
     "districtId": "krishnagiri",
     "name": "Pochampalli",
@@ -1021,26 +1101,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Pochampalli",
     "phone": "04341-252000",
     "email": "tah.pochampalli@tn.gov.in"
-  },
-  {
-    "id": "kgi_uthangarai",
-    "districtId": "krishnagiri",
-    "name": "Uthangarai",
-    "nameTa": "ஊத்தங்கரை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Uthangarai",
-    "phone": "04341-222000",
-    "email": "tah.uthangarai@tn.gov.in"
-  },
-  {
-    "id": "kgi_bargur",
-    "districtId": "krishnagiri",
-    "name": "Bargur",
-    "nameTa": "பர்கூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Bargur",
-    "phone": "04343-265000",
-    "email": "tah.bargur@tn.gov.in"
   },
   {
     "id": "kgi_shoolagiri",
@@ -1053,14 +1113,34 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.shoolagiri@tn.gov.in"
   },
   {
-    "id": "kgi_kelamangalam",
+    "id": "kgi_uthangarai",
     "districtId": "krishnagiri",
-    "name": "Kelamangalam",
-    "nameTa": "கேளமங்கலம்",
+    "name": "Uthangarai",
+    "nameTa": "ஊத்தங்கரை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kelamangalam",
-    "phone": "04347-245000",
-    "email": "tah.kelamangalam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Uthangarai",
+    "phone": "04341-222000",
+    "email": "tah.uthangarai@tn.gov.in"
+  },
+  {
+    "id": "mdu_kallikudi",
+    "districtId": "madurai",
+    "name": "Kallikudi",
+    "nameTa": "கள்ளிக்குடி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kallikudi",
+    "phone": "044-mdu0000",
+    "email": "tah.kallikudi@tn.gov.in"
+  },
+  {
+    "id": "mdu_madurai_east",
+    "districtId": "madurai",
+    "name": "Madurai East",
+    "nameTa": "மதுரை கிழக்கு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Madurai East",
+    "phone": "044-mdu0000",
+    "email": "tah.maduraieast@tn.gov.in"
   },
   {
     "id": "mdu_north",
@@ -1083,6 +1163,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.mdusouth@tn.gov.in"
   },
   {
+    "id": "mdu_madurai_west",
+    "districtId": "madurai",
+    "name": "Madurai West",
+    "nameTa": "மதுரை மேற்கு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Madurai West",
+    "phone": "044-mdu0000",
+    "email": "tah.maduraiwest@tn.gov.in"
+  },
+  {
     "id": "mdu_melur",
     "districtId": "madurai",
     "name": "Melur",
@@ -1093,6 +1183,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.melur@tn.gov.in"
   },
   {
+    "id": "mdu_peraiyur",
+    "districtId": "madurai",
+    "name": "Peraiyur",
+    "nameTa": "பேரையூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Peraiyur",
+    "phone": "04549-272000",
+    "email": "tah.peraiyur@tn.gov.in"
+  },
+  {
     "id": "mdu_thirumangalam",
     "districtId": "madurai",
     "name": "Thirumangalam",
@@ -1101,6 +1201,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Thirumangalam",
     "phone": "04549-280000",
     "email": "tah.thirumangalam@tn.gov.in"
+  },
+  {
+    "id": "mdu_thiruparankundram",
+    "districtId": "madurai",
+    "name": "Thiruparankundram",
+    "nameTa": "திருப்பரங்குன்றம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Thiruparankundram",
+    "phone": "0452-2482000",
+    "email": "tah.tpk@tn.gov.in"
   },
   {
     "id": "mdu_usilampatti",
@@ -1123,24 +1233,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.vadipatti@tn.gov.in"
   },
   {
-    "id": "mdu_peraiyur",
-    "districtId": "madurai",
-    "name": "Peraiyur",
-    "nameTa": "பேரையூர்",
+    "id": "myd_kuthalam",
+    "districtId": "mayiladuthurai",
+    "name": "Kuthalam",
+    "nameTa": "குத்தாலம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Peraiyur",
-    "phone": "04549-272000",
-    "email": "tah.peraiyur@tn.gov.in"
-  },
-  {
-    "id": "mdu_thiruparankundram",
-    "districtId": "madurai",
-    "name": "Thiruparankundram",
-    "nameTa": "திருப்பரங்குன்றம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Thiruparankundram",
-    "phone": "0452-2482000",
-    "email": "tah.tpk@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kuthalam",
+    "phone": "04364-235000",
+    "email": "tah.kuthalam@tn.gov.in"
   },
   {
     "id": "myd_mayiladuthurai",
@@ -1173,14 +1273,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.tharangambadi@tn.gov.in"
   },
   {
-    "id": "myd_kuthalam",
-    "districtId": "mayiladuthurai",
-    "name": "Kuthalam",
-    "nameTa": "குத்தாலம்",
+    "id": "ngp_kilvelur",
+    "districtId": "nagapattinam",
+    "name": "Kilvelur",
+    "nameTa": "கீழ்வேளூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kuthalam",
-    "phone": "04364-235000",
-    "email": "tah.kuthalam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kilvelur",
+    "phone": "04366-276000",
+    "email": "tah.kilvelur@tn.gov.in"
   },
   {
     "id": "ngp_nagapattinam",
@@ -1193,26 +1293,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.nagapattinam@tn.gov.in"
   },
   {
-    "id": "ngp_vedaranyam",
-    "districtId": "nagapattinam",
-    "name": "Vedaranyam",
-    "nameTa": "வேதாரண்யம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vedaranyam",
-    "phone": "04369-250000",
-    "email": "tah.vedaranyam@tn.gov.in"
-  },
-  {
-    "id": "ngp_kilvelur",
-    "districtId": "nagapattinam",
-    "name": "Kilvelur",
-    "nameTa": "கீழ்வேளூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kilvelur",
-    "phone": "04366-276000",
-    "email": "tah.kilvelur@tn.gov.in"
-  },
-  {
     "id": "ngp_thirukkuvalai",
     "districtId": "nagapattinam",
     "name": "Thirukkuvalai",
@@ -1223,44 +1303,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.thirukkuvalai@tn.gov.in"
   },
   {
-    "id": "nmk_namakkal",
-    "districtId": "namakkal",
-    "name": "Namakkal",
-    "nameTa": "நாமக்கல்",
+    "id": "ngp_vedaranyam",
+    "districtId": "nagapattinam",
+    "name": "Vedaranyam",
+    "nameTa": "வேதாரண்யம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Namakkal",
-    "phone": "04286-280000",
-    "email": "tah.namakkal@tn.gov.in"
-  },
-  {
-    "id": "nmk_tiruchengode",
-    "districtId": "namakkal",
-    "name": "Tiruchengode",
-    "nameTa": "திருச்செங்கோடு",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruchengode",
-    "phone": "04288-252000",
-    "email": "tah.tiruchengode@tn.gov.in"
-  },
-  {
-    "id": "nmk_rasipuram",
-    "districtId": "namakkal",
-    "name": "Rasipuram",
-    "nameTa": "ராசிபுரம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Rasipuram",
-    "phone": "04287-222000",
-    "email": "tah.rasipuram@tn.gov.in"
-  },
-  {
-    "id": "nmk_paramathi_velur",
-    "districtId": "namakkal",
-    "name": "Paramathi Velur",
-    "nameTa": "பரமத்தி வேலூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Paramathi Velur",
-    "phone": "04268-220000",
-    "email": "tah.paramathivelur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Vedaranyam",
+    "phone": "04369-250000",
+    "email": "tah.vedaranyam@tn.gov.in"
   },
   {
     "id": "nmk_kolli_hills",
@@ -1271,16 +1321,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Kolli Hills",
     "phone": "04286-247000",
     "email": "tah.kollihills@tn.gov.in"
-  },
-  {
-    "id": "nmk_sendamangalam",
-    "districtId": "namakkal",
-    "name": "Sendamangalam",
-    "nameTa": "சேந்தமங்கலம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sendamangalam",
-    "phone": "04286-260000",
-    "email": "tah.sendamangalam@tn.gov.in"
   },
   {
     "id": "nmk_kumarapalayam",
@@ -1303,14 +1343,54 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.mohanur@tn.gov.in"
   },
   {
-    "id": "nil_udhagamandalam",
-    "districtId": "nilgiris",
-    "name": "Udhagamandalam",
-    "nameTa": "உதகமண்டலம்",
+    "id": "nmk_namakkal",
+    "districtId": "namakkal",
+    "name": "Namakkal",
+    "nameTa": "நாமக்கல்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Udhagamandalam (Ooty)",
-    "phone": "0423-2442000",
-    "email": "tah.ooty@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Namakkal",
+    "phone": "04286-280000",
+    "email": "tah.namakkal@tn.gov.in"
+  },
+  {
+    "id": "nmk_paramathi_velur",
+    "districtId": "namakkal",
+    "name": "Paramathi Velur",
+    "nameTa": "பரமத்தி வேலூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Paramathi Velur",
+    "phone": "04268-220000",
+    "email": "tah.paramathivelur@tn.gov.in"
+  },
+  {
+    "id": "nmk_rasipuram",
+    "districtId": "namakkal",
+    "name": "Rasipuram",
+    "nameTa": "ராசிபுரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Rasipuram",
+    "phone": "04287-222000",
+    "email": "tah.rasipuram@tn.gov.in"
+  },
+  {
+    "id": "nmk_sendamangalam",
+    "districtId": "namakkal",
+    "name": "Sendamangalam",
+    "nameTa": "சேந்தமங்கலம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sendamangalam",
+    "phone": "04286-260000",
+    "email": "tah.sendamangalam@tn.gov.in"
+  },
+  {
+    "id": "nmk_tiruchengode",
+    "districtId": "namakkal",
+    "name": "Tiruchengode",
+    "nameTa": "திருச்செங்கோடு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tiruchengode",
+    "phone": "04288-252000",
+    "email": "tah.tiruchengode@tn.gov.in"
   },
   {
     "id": "nil_coonoor",
@@ -1323,6 +1403,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.coonoor@tn.gov.in"
   },
   {
+    "id": "nil_gudalur",
+    "districtId": "nilgiris",
+    "name": "Gudalur",
+    "nameTa": "கூடலூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Gudalur",
+    "phone": "04262-261000",
+    "email": "tah.gudalur@tn.gov.in"
+  },
+  {
     "id": "nil_kotagiri",
     "districtId": "nilgiris",
     "name": "Kotagiri",
@@ -1333,14 +1423,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.kotagiri@tn.gov.in"
   },
   {
-    "id": "nil_gudalur",
+    "id": "nil_kundah",
     "districtId": "nilgiris",
-    "name": "Gudalur",
-    "nameTa": "கூடலூர்",
+    "name": "Kundah",
+    "nameTa": "குந்தா",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Gudalur",
-    "phone": "04262-261000",
-    "email": "tah.gudalur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kundah",
+    "phone": "0423-2508000",
+    "email": "tah.kundah@tn.gov.in"
   },
   {
     "id": "nil_pandalur",
@@ -1353,14 +1443,34 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.pandalur@tn.gov.in"
   },
   {
-    "id": "nil_kundah",
+    "id": "nil_udhagamandalam",
     "districtId": "nilgiris",
-    "name": "Kundah",
-    "nameTa": "குந்தா",
+    "name": "Udhagamandalam",
+    "nameTa": "உதகமண்டலம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kundah",
-    "phone": "0423-2508000",
-    "email": "tah.kundah@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Udhagamandalam (Ooty)",
+    "phone": "0423-2442000",
+    "email": "tah.ooty@tn.gov.in"
+  },
+  {
+    "id": "pbl_alathur",
+    "districtId": "perambalur",
+    "name": "Alathur",
+    "nameTa": "ஆலத்தூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Alathur",
+    "phone": "04328-268000",
+    "email": "tah.alathur@tn.gov.in"
+  },
+  {
+    "id": "pbl_kunnam",
+    "districtId": "perambalur",
+    "name": "Kunnam",
+    "nameTa": "குன்னம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kunnam",
+    "phone": "04328-274000",
+    "email": "tah.kunnam@tn.gov.in"
   },
   {
     "id": "pbl_perambalur",
@@ -1383,34 +1493,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.veppanthattai@tn.gov.in"
   },
   {
-    "id": "pbl_kunnam",
-    "districtId": "perambalur",
-    "name": "Kunnam",
-    "nameTa": "குன்னம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kunnam",
-    "phone": "04328-274000",
-    "email": "tah.kunnam@tn.gov.in"
-  },
-  {
-    "id": "pbl_alathur",
-    "districtId": "perambalur",
-    "name": "Alathur",
-    "nameTa": "ஆலத்தூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Alathur",
-    "phone": "04328-268000",
-    "email": "tah.alathur@tn.gov.in"
-  },
-  {
-    "id": "pdk_pudukkottai",
+    "id": "pdk_alangudi",
     "districtId": "pudukkottai",
-    "name": "Pudukkottai",
-    "nameTa": "புதுக்கோட்டை",
+    "name": "Alangudi",
+    "nameTa": "ஆலங்குடி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Pudukkottai",
-    "phone": "04322-222000",
-    "email": "tah.pudukkottai@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Alangudi",
+    "phone": "04322-266000",
+    "email": "tah.alangudi@tn.gov.in"
   },
   {
     "id": "pdk_aranthangi",
@@ -1421,6 +1511,26 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Aranthangi",
     "phone": "04371-222000",
     "email": "tah.aranthangi@tn.gov.in"
+  },
+  {
+    "id": "pdk_avudaiyarkoil",
+    "districtId": "pudukkottai",
+    "name": "Avudaiyarkoil",
+    "nameTa": "ஆவுடையார்கோவில்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Avudaiyarkoil",
+    "phone": "04371-233000",
+    "email": "tah.avudaiyarkoil@tn.gov.in"
+  },
+  {
+    "id": "pdk_gandarvakottai",
+    "districtId": "pudukkottai",
+    "name": "Gandarvakottai",
+    "nameTa": "கந்தர்வக்கோட்டை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Gandarvakottai",
+    "phone": "04322-277000",
+    "email": "tah.gandarvakottai@tn.gov.in"
   },
   {
     "id": "pdk_illuppur",
@@ -1453,36 +1563,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.kulathur@tn.gov.in"
   },
   {
-    "id": "pdk_alangudi",
-    "districtId": "pudukkottai",
-    "name": "Alangudi",
-    "nameTa": "ஆலங்குடி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Alangudi",
-    "phone": "04322-266000",
-    "email": "tah.alangudi@tn.gov.in"
-  },
-  {
-    "id": "pdk_gandarvakottai",
-    "districtId": "pudukkottai",
-    "name": "Gandarvakottai",
-    "nameTa": "கந்தர்வக்கோட்டை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Gandarvakottai",
-    "phone": "04322-277000",
-    "email": "tah.gandarvakottai@tn.gov.in"
-  },
-  {
-    "id": "pdk_avudaiyarkoil",
-    "districtId": "pudukkottai",
-    "name": "Avudaiyarkoil",
-    "nameTa": "ஆவுடையார்கோவில்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Avudaiyarkoil",
-    "phone": "04371-233000",
-    "email": "tah.avudaiyarkoil@tn.gov.in"
-  },
-  {
     "id": "pdk_manamelkudi",
     "districtId": "pudukkottai",
     "name": "Manamelkudi",
@@ -1491,6 +1571,36 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Manamelkudi",
     "phone": "04371-244000",
     "email": "tah.manamelkudi@tn.gov.in"
+  },
+  {
+    "id": "pdk_ponnamaravathi",
+    "districtId": "pudukkottai",
+    "name": "Ponnamaravathi",
+    "nameTa": "பொன்னமராவதி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Ponnamaravathi",
+    "phone": "044-pdk0000",
+    "email": "tah.ponnamaravathi@tn.gov.in"
+  },
+  {
+    "id": "pdk_pudukkottai",
+    "districtId": "pudukkottai",
+    "name": "Pudukkottai",
+    "nameTa": "புதுக்கோட்டை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Pudukkottai",
+    "phone": "04322-222000",
+    "email": "tah.pudukkottai@tn.gov.in"
+  },
+  {
+    "id": "pdk_thirumayam",
+    "districtId": "pudukkottai",
+    "name": "Thirumayam",
+    "nameTa": "திருமயம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Thirumayam",
+    "phone": "044-pdk0000",
+    "email": "tah.thirumayam@tn.gov.in"
   },
   {
     "id": "pdk_viralimalai",
@@ -1503,64 +1613,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.viralimalai@tn.gov.in"
   },
   {
-    "id": "ram_ramanathapuram",
+    "id": "ram_kadaladi",
     "districtId": "ramanathapuram",
-    "name": "Ramanathapuram",
-    "nameTa": "இராமநாதபுரம்",
+    "name": "Kadaladi",
+    "nameTa": "கடலாடி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Ramanathapuram",
-    "phone": "04567-230000",
-    "email": "tah.ramanathapuram@tn.gov.in"
-  },
-  {
-    "id": "ram_rameswaram",
-    "districtId": "ramanathapuram",
-    "name": "Rameswaram",
-    "nameTa": "ராமேஸ்வரம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Rameswaram",
-    "phone": "04573-221000",
-    "email": "tah.rameswaram@tn.gov.in"
-  },
-  {
-    "id": "ram_paramakudi",
-    "districtId": "ramanathapuram",
-    "name": "Paramakudi",
-    "nameTa": "பரமக்குடி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Paramakudi",
-    "phone": "04564-222000",
-    "email": "tah.paramakudi@tn.gov.in"
-  },
-  {
-    "id": "ram_tiruvadanai",
-    "districtId": "ramanathapuram",
-    "name": "Tiruvadanai",
-    "nameTa": "திருவாடானை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruvadanai",
-    "phone": "04561-254000",
-    "email": "tah.tiruvadanai@tn.gov.in"
-  },
-  {
-    "id": "ram_r_s_mangalam",
-    "districtId": "ramanathapuram",
-    "name": "RS Mangalam",
-    "nameTa": "ஆர்.எஸ்.மங்கலம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, RS Mangalam",
-    "phone": "04561-260000",
-    "email": "tah.rsmangalam@tn.gov.in"
-  },
-  {
-    "id": "ram_mudukulathur",
-    "districtId": "ramanathapuram",
-    "name": "Mudukulathur",
-    "nameTa": "முதுகுளத்தூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Mudukulathur",
-    "phone": "04576-222000",
-    "email": "tah.mudukulathur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kadaladi",
+    "phone": "04576-267000",
+    "email": "tah.kadaladi@tn.gov.in"
   },
   {
     "id": "ram_kamuthi",
@@ -1583,44 +1643,64 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.kilakarai@tn.gov.in"
   },
   {
-    "id": "ram_kadaladi",
+    "id": "ram_mudukulathur",
     "districtId": "ramanathapuram",
-    "name": "Kadaladi",
-    "nameTa": "கடலாடி",
+    "name": "Mudukulathur",
+    "nameTa": "முதுகுளத்தூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kadaladi",
-    "phone": "04576-267000",
-    "email": "tah.kadaladi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Mudukulathur",
+    "phone": "04576-222000",
+    "email": "tah.mudukulathur@tn.gov.in"
   },
   {
-    "id": "rpt_ranipet",
-    "districtId": "ranipet",
-    "name": "Ranipet",
-    "nameTa": "ராணிப்பேட்டை",
+    "id": "ram_paramakudi",
+    "districtId": "ramanathapuram",
+    "name": "Paramakudi",
+    "nameTa": "பரமக்குடி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Ranipet",
-    "phone": "04172-273000",
-    "email": "tah.ranipet@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Paramakudi",
+    "phone": "04564-222000",
+    "email": "tah.paramakudi@tn.gov.in"
   },
   {
-    "id": "rpt_walajah",
-    "districtId": "ranipet",
-    "name": "Walajah",
-    "nameTa": "வாலாஜா",
+    "id": "ram_ramanathapuram",
+    "districtId": "ramanathapuram",
+    "name": "Ramanathapuram",
+    "nameTa": "இராமநாதபுரம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Walajah",
-    "phone": "04172-232000",
-    "email": "tah.walajah@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Ramanathapuram",
+    "phone": "04567-230000",
+    "email": "tah.ramanathapuram@tn.gov.in"
   },
   {
-    "id": "rpt_arcot",
-    "districtId": "ranipet",
-    "name": "Arcot",
-    "nameTa": "ஆற்காடு",
+    "id": "ram_rameswaram",
+    "districtId": "ramanathapuram",
+    "name": "Rameswaram",
+    "nameTa": "ராமேஸ்வரம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Arcot",
-    "phone": "04172-235000",
-    "email": "tah.arcot@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Rameswaram",
+    "phone": "04573-221000",
+    "email": "tah.rameswaram@tn.gov.in"
+  },
+  {
+    "id": "ram_r_s_mangalam",
+    "districtId": "ramanathapuram",
+    "name": "RS Mangalam",
+    "nameTa": "ஆர்.எஸ்.மங்கலம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, RS Mangalam",
+    "phone": "04561-260000",
+    "email": "tah.rsmangalam@tn.gov.in"
+  },
+  {
+    "id": "ram_tiruvadanai",
+    "districtId": "ramanathapuram",
+    "name": "Tiruvadanai",
+    "nameTa": "திருவாடானை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tiruvadanai",
+    "phone": "04561-254000",
+    "email": "tah.tiruvadanai@tn.gov.in"
   },
   {
     "id": "rpt_arakkonam",
@@ -1633,14 +1713,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.arakkonam@tn.gov.in"
   },
   {
-    "id": "rpt_sholinghur",
+    "id": "rpt_arcot",
     "districtId": "ranipet",
-    "name": "Sholinghur",
-    "nameTa": "சோளிங்கர்",
+    "name": "Arcot",
+    "nameTa": "ஆற்காடு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sholinghur",
-    "phone": "04172-262000",
-    "email": "tah.sholinghur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Arcot",
+    "phone": "04172-235000",
+    "email": "tah.arcot@tn.gov.in"
   },
   {
     "id": "rpt_nemili",
@@ -1653,14 +1733,34 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.nemili@tn.gov.in"
   },
   {
-    "id": "slm_salem",
-    "districtId": "salem",
-    "name": "Salem",
-    "nameTa": "சேலம்",
+    "id": "rpt_ranipet",
+    "districtId": "ranipet",
+    "name": "Ranipet",
+    "nameTa": "ராணிப்பேட்டை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Salem",
-    "phone": "0427-2451100",
-    "email": "tah.salem@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Ranipet",
+    "phone": "04172-273000",
+    "email": "tah.ranipet@tn.gov.in"
+  },
+  {
+    "id": "rpt_sholinghur",
+    "districtId": "ranipet",
+    "name": "Sholinghur",
+    "nameTa": "சோளிங்கர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sholinghur",
+    "phone": "04172-262000",
+    "email": "tah.sholinghur@tn.gov.in"
+  },
+  {
+    "id": "rpt_walajah",
+    "districtId": "ranipet",
+    "name": "Walajah",
+    "nameTa": "வாலாஜா",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Walajah",
+    "phone": "04172-232000",
+    "email": "tah.walajah@tn.gov.in"
   },
   {
     "id": "slm_attur",
@@ -1671,6 +1771,36 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Attur",
     "phone": "04282-240200",
     "email": "tah.attur@tn.gov.in"
+  },
+  {
+    "id": "slm_edappadi",
+    "districtId": "salem",
+    "name": "Edappadi",
+    "nameTa": "எடப்பாடி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Edappadi",
+    "phone": "04283-222000",
+    "email": "tah.edappadi@tn.gov.in"
+  },
+  {
+    "id": "slm_gangavalli",
+    "districtId": "salem",
+    "name": "Gangavalli",
+    "nameTa": "கங்கவல்லி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Gangavalli",
+    "phone": "04282-233000",
+    "email": "tah.gangavalli@tn.gov.in"
+  },
+  {
+    "id": "slm_kadaiyampatti",
+    "districtId": "salem",
+    "name": "Kadaiyampatti",
+    "nameTa": "காடையாம்பட்டி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kadaiyampatti",
+    "phone": "04290-243000",
+    "email": "tah.kadaiyampatti@tn.gov.in"
   },
   {
     "id": "slm_mettur",
@@ -1693,14 +1823,34 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.omalur@tn.gov.in"
   },
   {
-    "id": "slm_edappadi",
+    "id": "slm_salem",
     "districtId": "salem",
-    "name": "Edappadi",
-    "nameTa": "எடப்பாடி",
+    "name": "Salem",
+    "nameTa": "சேலம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Edappadi",
-    "phone": "04283-222000",
-    "email": "tah.edappadi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Salem",
+    "phone": "0427-2451100",
+    "email": "tah.salem@tn.gov.in"
+  },
+  {
+    "id": "slm_salem_south",
+    "districtId": "salem",
+    "name": "Salem South",
+    "nameTa": "சேலம் தெற்கு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Salem South",
+    "phone": "044-slm0000",
+    "email": "tah.salemsouth@tn.gov.in"
+  },
+  {
+    "id": "slm_salem_west",
+    "districtId": "salem",
+    "name": "Salem West",
+    "nameTa": "சேலம் மேற்கு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Salem West",
+    "phone": "044-slm0000",
+    "email": "tah.salemwest@tn.gov.in"
   },
   {
     "id": "slm_sankari",
@@ -1713,6 +1863,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.sankari@tn.gov.in"
   },
   {
+    "id": "slm_thalaivasal",
+    "districtId": "salem",
+    "name": "Thalaivasal",
+    "nameTa": "தலைவாசல்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Thalaivasal",
+    "phone": "044-slm0000",
+    "email": "tah.thalaivasal@tn.gov.in"
+  },
+  {
     "id": "slm_valapady",
     "districtId": "salem",
     "name": "Valapady",
@@ -1721,16 +1881,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Valapady",
     "phone": "04292-222000",
     "email": "tah.valapady@tn.gov.in"
-  },
-  {
-    "id": "slm_gangavalli",
-    "districtId": "salem",
-    "name": "Gangavalli",
-    "nameTa": "கங்கவல்லி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Gangavalli",
-    "phone": "04282-233000",
-    "email": "tah.gangavalli@tn.gov.in"
   },
   {
     "id": "slm_yercaud",
@@ -1743,36 +1893,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.yercaud@tn.gov.in"
   },
   {
-    "id": "slm_kadaiyampatti",
-    "districtId": "salem",
-    "name": "Kadaiyampatti",
-    "nameTa": "காடையாம்பட்டி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kadaiyampatti",
-    "phone": "04290-243000",
-    "email": "tah.kadaiyampatti@tn.gov.in"
-  },
-  {
-    "id": "svg_sivaganga",
-    "districtId": "sivaganga",
-    "name": "Sivaganga",
-    "nameTa": "சிவகங்கை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sivaganga",
-    "phone": "04575-240000",
-    "email": "tah.sivaganga@tn.gov.in"
-  },
-  {
-    "id": "svg_karaikudi",
-    "districtId": "sivaganga",
-    "name": "Karaikudi",
-    "nameTa": "காரைக்குடி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Karaikudi",
-    "phone": "04565-238000",
-    "email": "tah.karaikudi@tn.gov.in"
-  },
-  {
     "id": "svg_devakottai",
     "districtId": "sivaganga",
     "name": "Devakottai",
@@ -1781,26 +1901,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Devakottai",
     "phone": "04561-272000",
     "email": "tah.devakottai@tn.gov.in"
-  },
-  {
-    "id": "svg_manamadurai",
-    "districtId": "sivaganga",
-    "name": "Manamadurai",
-    "nameTa": "மானாமதுரை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Manamadurai",
-    "phone": "04574-268000",
-    "email": "tah.manamadurai@tn.gov.in"
-  },
-  {
-    "id": "svg_tiruppattur",
-    "districtId": "sivaganga",
-    "name": "Tiruppattur",
-    "nameTa": "திருப்பத்தூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruppattur",
-    "phone": "04577-266000",
-    "email": "tah.tiruppattursvg@tn.gov.in"
   },
   {
     "id": "svg_ilayangudi",
@@ -1823,6 +1923,26 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.kalaiyarkovil@tn.gov.in"
   },
   {
+    "id": "svg_karaikudi",
+    "districtId": "sivaganga",
+    "name": "Karaikudi",
+    "nameTa": "காரைக்குடி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Karaikudi",
+    "phone": "04565-238000",
+    "email": "tah.karaikudi@tn.gov.in"
+  },
+  {
+    "id": "svg_manamadurai",
+    "districtId": "sivaganga",
+    "name": "Manamadurai",
+    "nameTa": "மானாமதுரை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Manamadurai",
+    "phone": "04574-268000",
+    "email": "tah.manamadurai@tn.gov.in"
+  },
+  {
     "id": "svg_singampunari",
     "districtId": "sivaganga",
     "name": "Singampunari",
@@ -1833,24 +1953,44 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.singampunari@tn.gov.in"
   },
   {
-    "id": "tks_tenkasi",
-    "districtId": "tenkasi",
-    "name": "Tenkasi",
-    "nameTa": "தென்காசி",
+    "id": "svg_sivaganga",
+    "districtId": "sivaganga",
+    "name": "Sivaganga",
+    "nameTa": "சிவகங்கை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tenkasi",
-    "phone": "04633-222000",
-    "email": "tah.tenkasi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Sivaganga",
+    "phone": "04575-240000",
+    "email": "tah.sivaganga@tn.gov.in"
   },
   {
-    "id": "tks_sankarankovil",
-    "districtId": "tenkasi",
-    "name": "Sankarankovil",
-    "nameTa": "சங்கரன்கோவில்",
+    "id": "svg_thiruppuvanam",
+    "districtId": "sivaganga",
+    "name": "Thiruppuvanam",
+    "nameTa": "திருப்புவனம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sankarankovil",
-    "phone": "04636-222000",
-    "email": "tah.sankarankovil@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Thiruppuvanam",
+    "phone": "044-svg0000",
+    "email": "tah.thiruppuvanam@tn.gov.in"
+  },
+  {
+    "id": "svg_tiruppattur",
+    "districtId": "sivaganga",
+    "name": "Tiruppattur",
+    "nameTa": "திருப்பத்தூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tiruppattur",
+    "phone": "04577-266000",
+    "email": "tah.tiruppattursvg@tn.gov.in"
+  },
+  {
+    "id": "tks_alankulam",
+    "districtId": "tenkasi",
+    "name": "Alankulam",
+    "nameTa": "ஆலங்குளம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Alankulam",
+    "phone": "04633-270000",
+    "email": "tah.alankulam@tn.gov.in"
   },
   {
     "id": "tks_kadayanallur",
@@ -1861,6 +2001,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Kadayanallur",
     "phone": "04633-241000",
     "email": "tah.kadayanallur@tn.gov.in"
+  },
+  {
+    "id": "tks_sankarankovil",
+    "districtId": "tenkasi",
+    "name": "Sankarankovil",
+    "nameTa": "சங்கரன்கோவில்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sankarankovil",
+    "phone": "04636-222000",
+    "email": "tah.sankarankovil@tn.gov.in"
   },
   {
     "id": "tks_shenkottai",
@@ -1883,24 +2033,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.sivagiri@tn.gov.in"
   },
   {
-    "id": "tks_veerakeralamputhur",
+    "id": "tks_tenkasi",
     "districtId": "tenkasi",
-    "name": "Veerakeralamputhur",
-    "nameTa": "வீரகேரளம்புதூர்",
+    "name": "Tenkasi",
+    "nameTa": "தென்காசி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Veerakeralamputhur",
-    "phone": "04633-288000",
-    "email": "tah.vkputhur@tn.gov.in"
-  },
-  {
-    "id": "tks_alankulam",
-    "districtId": "tenkasi",
-    "name": "Alankulam",
-    "nameTa": "ஆலங்குளம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Alankulam",
-    "phone": "04633-270000",
-    "email": "tah.alankulam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Tenkasi",
+    "phone": "04633-222000",
+    "email": "tah.tenkasi@tn.gov.in"
   },
   {
     "id": "tks_thiruvengadam",
@@ -1913,14 +2053,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.thiruvengadam@tn.gov.in"
   },
   {
-    "id": "tjr_thanjavur",
-    "districtId": "thanjavur",
-    "name": "Thanjavur",
-    "nameTa": "தஞ்சாவூர்",
+    "id": "tks_veerakeralamputhur",
+    "districtId": "tenkasi",
+    "name": "Veerakeralamputhur",
+    "nameTa": "வீரகேரளம்புதூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Thanjavur",
-    "phone": "04362-230000",
-    "email": "tah.thanjavur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Veerakeralamputhur",
+    "phone": "04633-288000",
+    "email": "tah.vkputhur@tn.gov.in"
+  },
+  {
+    "id": "tjr_budalur",
+    "districtId": "thanjavur",
+    "name": "Budalur",
+    "nameTa": "பூதலூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Budalur",
+    "phone": "04362-277000",
+    "email": "tah.budalur@tn.gov.in"
   },
   {
     "id": "tjr_kumbakonam",
@@ -1931,6 +2081,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Kumbakonam",
     "phone": "0435-2420000",
     "email": "tah.kumbakonam@tn.gov.in"
+  },
+  {
+    "id": "tjr_orathanadu",
+    "districtId": "thanjavur",
+    "name": "Orathanadu",
+    "nameTa": "ஒரத்தநாடு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Orathanadu",
+    "phone": "04372-233000",
+    "email": "tah.orathanadu@tn.gov.in"
   },
   {
     "id": "tjr_papanasam",
@@ -1953,14 +2113,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.pattukkottai@tn.gov.in"
   },
   {
-    "id": "tjr_orathanadu",
+    "id": "tjr_peravurani",
     "districtId": "thanjavur",
-    "name": "Orathanadu",
-    "nameTa": "ஒரத்தநாடு",
+    "name": "Peravurani",
+    "nameTa": "பேராவூரணி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Orathanadu",
-    "phone": "04372-233000",
-    "email": "tah.orathanadu@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Peravurani",
+    "phone": "04373-241000",
+    "email": "tah.peravurani@tn.gov.in"
+  },
+  {
+    "id": "tjr_thanjavur",
+    "districtId": "thanjavur",
+    "name": "Thanjavur",
+    "nameTa": "தஞ்சாவூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Thanjavur",
+    "phone": "04362-230000",
+    "email": "tah.thanjavur@tn.gov.in"
   },
   {
     "id": "tjr_thiruvaiyaru",
@@ -1973,26 +2143,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.thiruvaiyaru@tn.gov.in"
   },
   {
-    "id": "tjr_peravurani",
-    "districtId": "thanjavur",
-    "name": "Peravurani",
-    "nameTa": "பேராவூரணி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Peravurani",
-    "phone": "04373-241000",
-    "email": "tah.peravurani@tn.gov.in"
-  },
-  {
-    "id": "tjr_budalur",
-    "districtId": "thanjavur",
-    "name": "Budalur",
-    "nameTa": "பூதலூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Budalur",
-    "phone": "04362-277000",
-    "email": "tah.budalur@tn.gov.in"
-  },
-  {
     "id": "tjr_thiruvidaimarudur",
     "districtId": "thanjavur",
     "name": "Thiruvidaimarudur",
@@ -2001,46 +2151,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Thiruvidaimarudur",
     "phone": "0435-2460000",
     "email": "tah.thiruvidaimarudur@tn.gov.in"
-  },
-  {
-    "id": "tni_theni",
-    "districtId": "theni",
-    "name": "Theni",
-    "nameTa": "தேனி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Theni",
-    "phone": "04546-252000",
-    "email": "tah.theni@tn.gov.in"
-  },
-  {
-    "id": "tni_periyakulam",
-    "districtId": "theni",
-    "name": "Periyakulam",
-    "nameTa": "பெரியகுளம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Periyakulam",
-    "phone": "04546-231000",
-    "email": "tah.periyakulam@tn.gov.in"
-  },
-  {
-    "id": "tni_bodinayakanur",
-    "districtId": "theni",
-    "name": "Bodinayakanur",
-    "nameTa": "போடிநாயக்கனூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Bodinayakanur",
-    "phone": "04546-282000",
-    "email": "tah.bodi@tn.gov.in"
-  },
-  {
-    "id": "tni_uthamapalayam",
-    "districtId": "theni",
-    "name": "Uthamapalayam",
-    "nameTa": "உத்தமபாளையம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Uthamapalayam",
-    "phone": "04554-265000",
-    "email": "tah.uthamapalayam@tn.gov.in"
   },
   {
     "id": "tni_andipatti",
@@ -2053,14 +2163,74 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.andipatti@tn.gov.in"
   },
   {
-    "id": "tcy_thoothukudi",
-    "districtId": "thoothukudi",
-    "name": "Thoothukudi",
-    "nameTa": "தூத்துக்குடி",
+    "id": "tni_bodinayakanur",
+    "districtId": "theni",
+    "name": "Bodinayakanur",
+    "nameTa": "போடிநாயக்கனூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Thoothukudi",
-    "phone": "0461-2320000",
-    "email": "tah.thoothukudi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Bodinayakanur",
+    "phone": "04546-282000",
+    "email": "tah.bodi@tn.gov.in"
+  },
+  {
+    "id": "tni_periyakulam",
+    "districtId": "theni",
+    "name": "Periyakulam",
+    "nameTa": "பெரியகுளம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Periyakulam",
+    "phone": "04546-231000",
+    "email": "tah.periyakulam@tn.gov.in"
+  },
+  {
+    "id": "tni_theni",
+    "districtId": "theni",
+    "name": "Theni",
+    "nameTa": "தேனி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Theni",
+    "phone": "04546-252000",
+    "email": "tah.theni@tn.gov.in"
+  },
+  {
+    "id": "tni_uthamapalayam",
+    "districtId": "theni",
+    "name": "Uthamapalayam",
+    "nameTa": "உத்தமபாளையம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Uthamapalayam",
+    "phone": "04554-265000",
+    "email": "tah.uthamapalayam@tn.gov.in"
+  },
+  {
+    "id": "tcy_alwarthirunagari",
+    "districtId": "thoothukudi",
+    "name": "Alwarthirunagari",
+    "nameTa": "ஆழ்வார்திருநகரி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Alwarthirunagari",
+    "phone": "044-tcy0000",
+    "email": "tah.alwarthirunagari@tn.gov.in"
+  },
+  {
+    "id": "tcy_eral",
+    "districtId": "thoothukudi",
+    "name": "Eral",
+    "nameTa": "ஏரல்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Eral",
+    "phone": "04630-272000",
+    "email": "tah.eral@tn.gov.in"
+  },
+  {
+    "id": "tcy_kayathar",
+    "districtId": "thoothukudi",
+    "name": "Kayathar",
+    "nameTa": "கயத்தாறு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kayathar",
+    "phone": "044-tcy0000",
+    "email": "tah.kayathar@tn.gov.in"
   },
   {
     "id": "tcy_kovilpatti",
@@ -2071,36 +2241,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Kovilpatti",
     "phone": "04632-220000",
     "email": "tah.kovilpatti@tn.gov.in"
-  },
-  {
-    "id": "tcy_tiruchendur",
-    "districtId": "thoothukudi",
-    "name": "Tiruchendur",
-    "nameTa": "திருச்செந்தூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruchendur",
-    "phone": "04639-242000",
-    "email": "tah.tiruchendur@tn.gov.in"
-  },
-  {
-    "id": "tcy_srivaikuntam",
-    "districtId": "thoothukudi",
-    "name": "Srivaikuntam",
-    "nameTa": "ஸ்ரீவைகுண்டம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Srivaikuntam",
-    "phone": "04630-255000",
-    "email": "tah.srivaikuntam@tn.gov.in"
-  },
-  {
-    "id": "tcy_vilathikulam",
-    "districtId": "thoothukudi",
-    "name": "Vilathikulam",
-    "nameTa": "விளாத்திகுளம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vilathikulam",
-    "phone": "04638-233000",
-    "email": "tah.vilathikulam@tn.gov.in"
   },
   {
     "id": "tcy_ottapidaram",
@@ -2123,34 +2263,94 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.sattankulam@tn.gov.in"
   },
   {
-    "id": "tcy_eral",
+    "id": "tcy_srivaikuntam",
     "districtId": "thoothukudi",
-    "name": "Eral",
-    "nameTa": "ஏரல்",
+    "name": "Srivaikuntam",
+    "nameTa": "ஸ்ரீவைகுண்டம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Eral",
-    "phone": "04630-272000",
-    "email": "tah.eral@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Srivaikuntam",
+    "phone": "04630-255000",
+    "email": "tah.srivaikuntam@tn.gov.in"
   },
   {
-    "id": "try_trichy_west",
-    "districtId": "tiruchirappalli",
-    "name": "Tiruchirappalli West",
-    "nameTa": "திருச்சிராப்பள்ளி மேற்கு",
+    "id": "tcy_thoothukudi",
+    "districtId": "thoothukudi",
+    "name": "Thoothukudi",
+    "nameTa": "தூத்துக்குடி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Trichy West",
-    "phone": "0431-2460100",
-    "email": "tah.trichywest@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Thoothukudi",
+    "phone": "0461-2320000",
+    "email": "tah.thoothukudi@tn.gov.in"
   },
   {
-    "id": "try_trichy_east",
-    "districtId": "tiruchirappalli",
-    "name": "Tiruchirappalli East",
-    "nameTa": "திருச்சிராப்பள்ளி கிழக்கு",
+    "id": "tcy_tiruchendur",
+    "districtId": "thoothukudi",
+    "name": "Tiruchendur",
+    "nameTa": "திருச்செந்தூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Trichy East",
-    "phone": "0431-2460200",
-    "email": "tah.trichyeast@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Tiruchendur",
+    "phone": "04639-242000",
+    "email": "tah.tiruchendur@tn.gov.in"
+  },
+  {
+    "id": "tcy_vilathikulam",
+    "districtId": "thoothukudi",
+    "name": "Vilathikulam",
+    "nameTa": "விளாத்திகுளம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Vilathikulam",
+    "phone": "04638-233000",
+    "email": "tah.vilathikulam@tn.gov.in"
+  },
+  {
+    "id": "try_lalgudi",
+    "districtId": "tiruchirappalli",
+    "name": "Lalgudi",
+    "nameTa": "லால்குடி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Lalgudi",
+    "phone": "0431-2541000",
+    "email": "tah.lalgudi@tn.gov.in"
+  },
+  {
+    "id": "try_manachanallur",
+    "districtId": "tiruchirappalli",
+    "name": "Manachanallur",
+    "nameTa": "மண்ணச்சநல்லூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Manachanallur",
+    "phone": "044-try0000",
+    "email": "tah.manachanallur@tn.gov.in"
+  },
+  {
+    "id": "try_manapparai",
+    "districtId": "tiruchirappalli",
+    "name": "Manapparai",
+    "nameTa": "மணப்பாறை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Manapparai",
+    "phone": "04332-260000",
+    "email": "tah.manapparai@tn.gov.in"
+  },
+  {
+    "id": "try_marungapuri",
+    "districtId": "tiruchirappalli",
+    "name": "Marungapuri",
+    "nameTa": "மருங்காபுரி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Marungapuri",
+    "phone": "04332-277000",
+    "email": "tah.marungapuri@tn.gov.in"
+  },
+  {
+    "id": "try_musiri",
+    "districtId": "tiruchirappalli",
+    "name": "Musiri",
+    "nameTa": "முசிறி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Musiri",
+    "phone": "04326-260000",
+    "email": "tah.musiri@tn.gov.in"
   },
   {
     "id": "try_srirangam",
@@ -2173,34 +2373,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.thiruverumbur@tn.gov.in"
   },
   {
-    "id": "try_manapparai",
+    "id": "try_thottiyam",
     "districtId": "tiruchirappalli",
-    "name": "Manapparai",
-    "nameTa": "மணப்பாறை",
+    "name": "Thottiyam",
+    "nameTa": "தொட்டியம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Manapparai",
-    "phone": "04332-260000",
-    "email": "tah.manapparai@tn.gov.in"
-  },
-  {
-    "id": "try_musiri",
-    "districtId": "tiruchirappalli",
-    "name": "Musiri",
-    "nameTa": "முசிறி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Musiri",
-    "phone": "04326-260000",
-    "email": "tah.musiri@tn.gov.in"
-  },
-  {
-    "id": "try_lalgudi",
-    "districtId": "tiruchirappalli",
-    "name": "Lalgudi",
-    "nameTa": "லால்குடி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Lalgudi",
-    "phone": "0431-2541000",
-    "email": "tah.lalgudi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Thottiyam",
+    "phone": "044-try0000",
+    "email": "tah.thottiyam@tn.gov.in"
   },
   {
     "id": "try_thuraiyur",
@@ -2213,34 +2393,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.thuraiyur@tn.gov.in"
   },
   {
-    "id": "try_marungapuri",
+    "id": "try_trichy_east",
     "districtId": "tiruchirappalli",
-    "name": "Marungapuri",
-    "nameTa": "மருங்காபுரி",
+    "name": "Tiruchirappalli East",
+    "nameTa": "திருச்சிராப்பள்ளி கிழக்கு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Marungapuri",
-    "phone": "04332-277000",
-    "email": "tah.marungapuri@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Trichy East",
+    "phone": "0431-2460200",
+    "email": "tah.trichyeast@tn.gov.in"
   },
   {
-    "id": "tnv_tirunelveli",
-    "districtId": "tirunelveli",
-    "name": "Tirunelveli",
-    "nameTa": "திருநெல்வேலி",
+    "id": "try_trichy_west",
+    "districtId": "tiruchirappalli",
+    "name": "Tiruchirappalli West",
+    "nameTa": "திருச்சிராப்பள்ளி மேற்கு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tirunelveli",
-    "phone": "0462-2330000",
-    "email": "tah.tirunelveli@tn.gov.in"
-  },
-  {
-    "id": "tnv_palayamkottai",
-    "districtId": "tirunelveli",
-    "name": "Palayamkottai",
-    "nameTa": "பாளையங்கோட்டை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Palayamkottai",
-    "phone": "0462-2570000",
-    "email": "tah.palayamkottai@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Trichy West",
+    "phone": "0431-2460100",
+    "email": "tah.trichywest@tn.gov.in"
   },
   {
     "id": "tnv_ambasamudram",
@@ -2263,6 +2433,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.cheranmahadevi@tn.gov.in"
   },
   {
+    "id": "tnv_manur",
+    "districtId": "tirunelveli",
+    "name": "Manur",
+    "nameTa": "மானூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Manur",
+    "phone": "044-tnv0000",
+    "email": "tah.manur@tn.gov.in"
+  },
+  {
     "id": "tnv_nanguneri",
     "districtId": "tirunelveli",
     "name": "Nanguneri",
@@ -2271,6 +2451,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Nanguneri",
     "phone": "04635-250000",
     "email": "tah.nanguneri@tn.gov.in"
+  },
+  {
+    "id": "tnv_palayamkottai",
+    "districtId": "tirunelveli",
+    "name": "Palayamkottai",
+    "nameTa": "பாளையங்கோட்டை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Palayamkottai",
+    "phone": "0462-2570000",
+    "email": "tah.palayamkottai@tn.gov.in"
   },
   {
     "id": "tnv_radhapuram",
@@ -2283,6 +2473,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.radhapuram@tn.gov.in"
   },
   {
+    "id": "tnv_tirunelveli",
+    "districtId": "tirunelveli",
+    "name": "Tirunelveli",
+    "nameTa": "திருநெல்வேலி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tirunelveli",
+    "phone": "0462-2330000",
+    "email": "tah.tirunelveli@tn.gov.in"
+  },
+  {
     "id": "tnv_tisayanvilai",
     "districtId": "tirunelveli",
     "name": "Tisayanvilai",
@@ -2291,26 +2491,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Tisayanvilai",
     "phone": "04637-271000",
     "email": "tah.tisayanvilai@tn.gov.in"
-  },
-  {
-    "id": "tpt_tirupathur",
-    "districtId": "tirupathur",
-    "name": "Tirupathur",
-    "nameTa": "திருப்பத்தூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tirupathur",
-    "phone": "04179-220000",
-    "email": "tah.tirupathur@tn.gov.in"
-  },
-  {
-    "id": "tpt_vaniyambadi",
-    "districtId": "tirupathur",
-    "name": "Vaniyambadi",
-    "nameTa": "வாணியம்பாடி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vaniyambadi",
-    "phone": "04174-225000",
-    "email": "tah.vaniyambadi@tn.gov.in"
   },
   {
     "id": "tpt_ambur",
@@ -2333,24 +2513,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.natrampalli@tn.gov.in"
   },
   {
-    "id": "tup_tiruppur_north",
-    "districtId": "tiruppur",
-    "name": "Tiruppur North",
-    "nameTa": "திருப்பூர் வடக்கு",
+    "id": "tpt_tirupathur",
+    "districtId": "tirupathur",
+    "name": "Tirupathur",
+    "nameTa": "திருப்பத்தூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruppur North",
-    "phone": "0421-2244000",
-    "email": "tah.tupnorth@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Tirupathur",
+    "phone": "04179-220000",
+    "email": "tah.tirupathur@tn.gov.in"
   },
   {
-    "id": "tup_tiruppur_south",
-    "districtId": "tiruppur",
-    "name": "Tiruppur South",
-    "nameTa": "திருப்பூர் தெற்கு",
+    "id": "tpt_vaniyambadi",
+    "districtId": "tirupathur",
+    "name": "Vaniyambadi",
+    "nameTa": "வாணியம்பாடி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruppur South",
-    "phone": "0421-2245000",
-    "email": "tah.tupsouth@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Vaniyambadi",
+    "phone": "04174-225000",
+    "email": "tah.vaniyambadi@tn.gov.in"
   },
   {
     "id": "tup_avinashi",
@@ -2361,16 +2541,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Avinashi",
     "phone": "04296-273000",
     "email": "tah.avinashi@tn.gov.in"
-  },
-  {
-    "id": "tup_palladam",
-    "districtId": "tiruppur",
-    "name": "Palladam",
-    "nameTa": "பல்லடம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Palladam",
-    "phone": "04255-252000",
-    "email": "tah.palladam@tn.gov.in"
   },
   {
     "id": "tup_dharapuram",
@@ -2393,16 +2563,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.kangeyam@tn.gov.in"
   },
   {
-    "id": "tup_udumalaipettai",
-    "districtId": "tiruppur",
-    "name": "Udumalaipettai",
-    "nameTa": "உடுமலைப்பேட்டை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Udumalaipettai",
-    "phone": "04252-223000",
-    "email": "tah.udumalai@tn.gov.in"
-  },
-  {
     "id": "tup_madathukulam",
     "districtId": "tiruppur",
     "name": "Madathukulam",
@@ -2411,6 +2571,46 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Madathukulam",
     "phone": "04252-254000",
     "email": "tah.madathukulam@tn.gov.in"
+  },
+  {
+    "id": "tup_palladam",
+    "districtId": "tiruppur",
+    "name": "Palladam",
+    "nameTa": "பல்லடம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Palladam",
+    "phone": "04255-252000",
+    "email": "tah.palladam@tn.gov.in"
+  },
+  {
+    "id": "tup_tiruppur_north",
+    "districtId": "tiruppur",
+    "name": "Tiruppur North",
+    "nameTa": "திருப்பூர் வடக்கு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tiruppur North",
+    "phone": "0421-2244000",
+    "email": "tah.tupnorth@tn.gov.in"
+  },
+  {
+    "id": "tup_tiruppur_south",
+    "districtId": "tiruppur",
+    "name": "Tiruppur South",
+    "nameTa": "திருப்பூர் தெற்கு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tiruppur South",
+    "phone": "0421-2245000",
+    "email": "tah.tupsouth@tn.gov.in"
+  },
+  {
+    "id": "tup_udumalaipettai",
+    "districtId": "tiruppur",
+    "name": "Udumalaipettai",
+    "nameTa": "உடுமலைப்பேட்டை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Udumalaipettai",
+    "phone": "04252-223000",
+    "email": "tah.udumalai@tn.gov.in"
   },
   {
     "id": "tup_uthukuli",
@@ -2423,16 +2623,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.uthukuli@tn.gov.in"
   },
   {
-    "id": "tlr_tiruvallur",
-    "districtId": "tiruvallur",
-    "name": "Tiruvallur",
-    "nameTa": "திருவள்ளூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruvallur",
-    "phone": "044-27660000",
-    "email": "tah.tiruvallur@tn.gov.in"
-  },
-  {
     "id": "tlr_avadi",
     "districtId": "tiruvallur",
     "name": "Avadi",
@@ -2441,26 +2631,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Avadi",
     "phone": "044-26382000",
     "email": "tah.avadi@tn.gov.in"
-  },
-  {
-    "id": "tlr_poonamallee",
-    "districtId": "tiruvallur",
-    "name": "Poonamallee",
-    "nameTa": "பூந்தமல்லி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Poonamallee",
-    "phone": "044-26272000",
-    "email": "tah.poonamallee@tn.gov.in"
-  },
-  {
-    "id": "tlr_ponneri",
-    "districtId": "tiruvallur",
-    "name": "Ponneri",
-    "nameTa": "பொன்னேரி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Ponneri",
-    "phone": "044-27972000",
-    "email": "tah.ponneri@tn.gov.in"
   },
   {
     "id": "tlr_gummidipoondi",
@@ -2473,6 +2643,46 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.gummidipoondi@tn.gov.in"
   },
   {
+    "id": "tlr_pallipattu",
+    "districtId": "tiruvallur",
+    "name": "Pallipattu",
+    "nameTa": "பள்ளிப்பட்டு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Pallipattu",
+    "phone": "044-27877000",
+    "email": "tah.pallipattu@tn.gov.in"
+  },
+  {
+    "id": "tlr_ponneri",
+    "districtId": "tiruvallur",
+    "name": "Ponneri",
+    "nameTa": "பொன்னேரி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Ponneri",
+    "phone": "044-27972000",
+    "email": "tah.ponneri@tn.gov.in"
+  },
+  {
+    "id": "tlr_poonamallee",
+    "districtId": "tiruvallur",
+    "name": "Poonamallee",
+    "nameTa": "பூந்தமல்லி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Poonamallee",
+    "phone": "044-26272000",
+    "email": "tah.poonamallee@tn.gov.in"
+  },
+  {
+    "id": "tlr_rk_pet",
+    "districtId": "tiruvallur",
+    "name": "RK Pet",
+    "nameTa": "ஆர்.கே.பேட்டை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, RK Pet",
+    "phone": "044-tlr0000",
+    "email": "tah.rkpet@tn.gov.in"
+  },
+  {
     "id": "tlr_tiruttani",
     "districtId": "tiruvallur",
     "name": "Tiruttani",
@@ -2481,6 +2691,16 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Tiruttani",
     "phone": "044-27885000",
     "email": "tah.tiruttani@tn.gov.in"
+  },
+  {
+    "id": "tlr_tiruvallur",
+    "districtId": "tiruvallur",
+    "name": "Tiruvallur",
+    "nameTa": "திருவள்ளூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tiruvallur",
+    "phone": "044-27660000",
+    "email": "tah.tiruvallur@tn.gov.in"
   },
   {
     "id": "tlr_uthukottai",
@@ -2493,26 +2713,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.uthukottai@tn.gov.in"
   },
   {
-    "id": "tlr_pallipattu",
-    "districtId": "tiruvallur",
-    "name": "Pallipattu",
-    "nameTa": "பள்ளிப்பட்டு",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Pallipattu",
-    "phone": "044-27877000",
-    "email": "tah.pallipattu@tn.gov.in"
-  },
-  {
-    "id": "tvm_tiruvannamalai",
-    "districtId": "tiruvannamalai",
-    "name": "Tiruvannamalai",
-    "nameTa": "திருவண்ணாமலை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruvannamalai",
-    "phone": "04175-233000",
-    "email": "tah.tiruvannamalai@tn.gov.in"
-  },
-  {
     "id": "tvm_arani",
     "districtId": "tiruvannamalai",
     "name": "Arani",
@@ -2521,36 +2721,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Arani",
     "phone": "04173-222000",
     "email": "tah.arani@tn.gov.in"
-  },
-  {
-    "id": "tvm_cheyyar",
-    "districtId": "tiruvannamalai",
-    "name": "Cheyyar",
-    "nameTa": "செய்யாறு",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Cheyyar",
-    "phone": "04182-222000",
-    "email": "tah.cheyyar@tn.gov.in"
-  },
-  {
-    "id": "tvm_polur",
-    "districtId": "tiruvannamalai",
-    "name": "Polur",
-    "nameTa": "போளூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Polur",
-    "phone": "04181-222000",
-    "email": "tah.polur@tn.gov.in"
-  },
-  {
-    "id": "tvm_vandavasi",
-    "districtId": "tiruvannamalai",
-    "name": "Vandavasi",
-    "nameTa": "வந்தவாசி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vandavasi",
-    "phone": "04183-225000",
-    "email": "tah.vandavasi@tn.gov.in"
   },
   {
     "id": "tvm_chengam",
@@ -2563,24 +2733,24 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.chengam@tn.gov.in"
   },
   {
-    "id": "tvm_thandarampattu",
+    "id": "tvm_chetpet",
     "districtId": "tiruvannamalai",
-    "name": "Thandarampattu",
-    "nameTa": "தண்டராம்பட்டு",
+    "name": "Chetpet",
+    "nameTa": "சேத்துப்பட்டு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Thandarampattu",
-    "phone": "04178-232000",
-    "email": "tah.thandarampattu@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Chetpet",
+    "phone": "044-tvm0000",
+    "email": "tah.chetpet@tn.gov.in"
   },
   {
-    "id": "tvm_kalasapakkam",
+    "id": "tvm_cheyyar",
     "districtId": "tiruvannamalai",
-    "name": "Kalasapakkam",
-    "nameTa": "கலசப்பாக்கம்",
+    "name": "Cheyyar",
+    "nameTa": "செய்யாறு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kalasapakkam",
-    "phone": "04181-241000",
-    "email": "tah.kalasapakkam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Cheyyar",
+    "phone": "04182-222000",
+    "email": "tah.cheyyar@tn.gov.in"
   },
   {
     "id": "tvm_jawadhu_hills",
@@ -2593,74 +2763,74 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.jawadhuhills@tn.gov.in"
   },
   {
-    "id": "tvr_tiruvarur",
-    "districtId": "tiruvarur",
-    "name": "Tiruvarur",
-    "nameTa": "திருவாரூர்",
+    "id": "tvm_kalasapakkam",
+    "districtId": "tiruvannamalai",
+    "name": "Kalasapakkam",
+    "nameTa": "கலசப்பாக்கம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tiruvarur",
-    "phone": "04366-242000",
-    "email": "tah.tiruvarur@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kalasapakkam",
+    "phone": "04181-241000",
+    "email": "tah.kalasapakkam@tn.gov.in"
   },
   {
-    "id": "tvr_mannargudi",
-    "districtId": "tiruvarur",
-    "name": "Mannargudi",
-    "nameTa": "மன்னார்குடி",
+    "id": "tvm_kilpennathur",
+    "districtId": "tiruvannamalai",
+    "name": "Kilpennathur",
+    "nameTa": "கீழ்பென்னாத்தூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Mannargudi",
-    "phone": "04367-252000",
-    "email": "tah.mannargudi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kilpennathur",
+    "phone": "044-tvm0000",
+    "email": "tah.kilpennathur@tn.gov.in"
   },
   {
-    "id": "tvr_thiruthuraipoondi",
-    "districtId": "tiruvarur",
-    "name": "Thiruthuraipoondi",
-    "nameTa": "திருத்துறைப்பூண்டி",
+    "id": "tvm_polur",
+    "districtId": "tiruvannamalai",
+    "name": "Polur",
+    "nameTa": "போளூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Thiruthuraipoondi",
-    "phone": "04369-220000",
-    "email": "tah.ttp@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Polur",
+    "phone": "04181-222000",
+    "email": "tah.polur@tn.gov.in"
   },
   {
-    "id": "tvr_nannilam",
-    "districtId": "tiruvarur",
-    "name": "Nannilam",
-    "nameTa": "நன்னிலம்",
+    "id": "tvm_thandarampattu",
+    "districtId": "tiruvannamalai",
+    "name": "Thandarampattu",
+    "nameTa": "தண்டராம்பட்டு",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Nannilam",
-    "phone": "04366-230000",
-    "email": "tah.nannilam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Thandarampattu",
+    "phone": "04178-232000",
+    "email": "tah.thandarampattu@tn.gov.in"
   },
   {
-    "id": "tvr_kudavasal",
-    "districtId": "tiruvarur",
-    "name": "Kudavasal",
-    "nameTa": "குடவாசல்",
+    "id": "tvm_tiruvannamalai",
+    "districtId": "tiruvannamalai",
+    "name": "Tiruvannamalai",
+    "nameTa": "திருவண்ணாமலை",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kudavasal",
-    "phone": "04366-262000",
-    "email": "tah.kudavasal@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Tiruvannamalai",
+    "phone": "04175-233000",
+    "email": "tah.tiruvannamalai@tn.gov.in"
   },
   {
-    "id": "tvr_valangaiman",
-    "districtId": "tiruvarur",
-    "name": "Valangaiman",
-    "nameTa": "வலங்கைமான்",
+    "id": "tvm_vandavasi",
+    "districtId": "tiruvannamalai",
+    "name": "Vandavasi",
+    "nameTa": "வந்தவாசி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Valangaiman",
-    "phone": "04374-264000",
-    "email": "tah.valangaiman@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Vandavasi",
+    "phone": "04183-225000",
+    "email": "tah.vandavasi@tn.gov.in"
   },
   {
-    "id": "tvr_needamangalam",
-    "districtId": "tiruvarur",
-    "name": "Needamangalam",
-    "nameTa": "நீடாமங்கலம்",
+    "id": "tvm_vembakkam",
+    "districtId": "tiruvannamalai",
+    "name": "Vembakkam",
+    "nameTa": "வெம்பாக்கம்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Needamangalam",
-    "phone": "04367-260000",
-    "email": "tah.needamangalam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Vembakkam",
+    "phone": "044-tvm0000",
+    "email": "tah.vembakkam@tn.gov.in"
   },
   {
     "id": "tvr_koothanallur",
@@ -2673,24 +2843,84 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.koothanallur@tn.gov.in"
   },
   {
-    "id": "vel_vellore",
-    "districtId": "vellore",
-    "name": "Vellore",
-    "nameTa": "வேலூர்",
+    "id": "tvr_kudavasal",
+    "districtId": "tiruvarur",
+    "name": "Kudavasal",
+    "nameTa": "குடவாசல்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vellore",
-    "phone": "0416-2220000",
-    "email": "tah.vellore@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Kudavasal",
+    "phone": "04366-262000",
+    "email": "tah.kudavasal@tn.gov.in"
   },
   {
-    "id": "vel_katpadi",
-    "districtId": "vellore",
-    "name": "Katpadi",
-    "nameTa": "காட்பாடி",
+    "id": "tvr_mannargudi",
+    "districtId": "tiruvarur",
+    "name": "Mannargudi",
+    "nameTa": "மன்னார்குடி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Katpadi",
-    "phone": "0416-2242000",
-    "email": "tah.katpadi@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Mannargudi",
+    "phone": "04367-252000",
+    "email": "tah.mannargudi@tn.gov.in"
+  },
+  {
+    "id": "tvr_nannilam",
+    "districtId": "tiruvarur",
+    "name": "Nannilam",
+    "nameTa": "நன்னிலம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Nannilam",
+    "phone": "04366-230000",
+    "email": "tah.nannilam@tn.gov.in"
+  },
+  {
+    "id": "tvr_needamangalam",
+    "districtId": "tiruvarur",
+    "name": "Needamangalam",
+    "nameTa": "நீடாமங்கலம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Needamangalam",
+    "phone": "04367-260000",
+    "email": "tah.needamangalam@tn.gov.in"
+  },
+  {
+    "id": "tvr_thiruthuraipoondi",
+    "districtId": "tiruvarur",
+    "name": "Thiruthuraipoondi",
+    "nameTa": "திருத்துறைப்பூண்டி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Thiruthuraipoondi",
+    "phone": "04369-220000",
+    "email": "tah.ttp@tn.gov.in"
+  },
+  {
+    "id": "tvr_tiruvarur",
+    "districtId": "tiruvarur",
+    "name": "Tiruvarur",
+    "nameTa": "திருவாரூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tiruvarur",
+    "phone": "04366-242000",
+    "email": "tah.tiruvarur@tn.gov.in"
+  },
+  {
+    "id": "tvr_valangaiman",
+    "districtId": "tiruvarur",
+    "name": "Valangaiman",
+    "nameTa": "வலங்கைமான்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Valangaiman",
+    "phone": "04374-264000",
+    "email": "tah.valangaiman@tn.gov.in"
+  },
+  {
+    "id": "vel_anaicut",
+    "districtId": "vellore",
+    "name": "Anaicut",
+    "nameTa": "அணைக்கட்டு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Anaicut",
+    "phone": "0416-2292000",
+    "email": "tah.anaicut@tn.gov.in"
   },
   {
     "id": "vel_gudiyatham",
@@ -2703,14 +2933,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.gudiyatham@tn.gov.in"
   },
   {
-    "id": "vel_anaicut",
+    "id": "vel_katpadi",
     "districtId": "vellore",
-    "name": "Anaicut",
-    "nameTa": "அணைக்கட்டு",
+    "name": "Katpadi",
+    "nameTa": "காட்பாடி",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Anaicut",
-    "phone": "0416-2292000",
-    "email": "tah.anaicut@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Katpadi",
+    "phone": "0416-2242000",
+    "email": "tah.katpadi@tn.gov.in"
   },
   {
     "id": "vel_kv_kuppam",
@@ -2733,24 +2963,14 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.pernambut@tn.gov.in"
   },
   {
-    "id": "vpm_viluppuram",
-    "districtId": "viluppuram",
-    "name": "Viluppuram",
-    "nameTa": "விழுப்புரம்",
+    "id": "vel_vellore",
+    "districtId": "vellore",
+    "name": "Vellore",
+    "nameTa": "வேலூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Viluppuram",
-    "phone": "04146-222000",
-    "email": "tah.viluppuram@tn.gov.in"
-  },
-  {
-    "id": "vpm_tindivanam",
-    "districtId": "viluppuram",
-    "name": "Tindivanam",
-    "nameTa": "திண்டிவனம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Tindivanam",
-    "phone": "04147-222000",
-    "email": "tah.tindivanam@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Vellore",
+    "phone": "0416-2220000",
+    "email": "tah.vellore@tn.gov.in"
   },
   {
     "id": "vpm_gingee",
@@ -2761,26 +2981,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Gingee",
     "phone": "04145-222000",
     "email": "tah.gingee@tn.gov.in"
-  },
-  {
-    "id": "vpm_vanur",
-    "districtId": "viluppuram",
-    "name": "Vanur",
-    "nameTa": "வானூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vanur",
-    "phone": "0413-2677000",
-    "email": "tah.vanur@tn.gov.in"
-  },
-  {
-    "id": "vpm_vikravandi",
-    "districtId": "viluppuram",
-    "name": "Vikravandi",
-    "nameTa": "விக்ரவாண்டி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Vikravandi",
-    "phone": "04146-234000",
-    "email": "tah.vikravandi@tn.gov.in"
   },
   {
     "id": "vpm_kandachipuram",
@@ -2803,14 +3003,104 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.marakkanam@tn.gov.in"
   },
   {
-    "id": "vnr_virudhunagar",
-    "districtId": "virudhunagar",
-    "name": "Virudhunagar",
-    "nameTa": "விருதுநகர்",
+    "id": "vpm_melmalayanur",
+    "districtId": "viluppuram",
+    "name": "Melmalayanur",
+    "nameTa": "மேல்மலையனூர்",
     "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Virudhunagar",
-    "phone": "04562-244000",
-    "email": "tah.virudhunagar@tn.gov.in"
+    "tahsildarOffice": "Taluk Office, Melmalayanur",
+    "phone": "044-vpm0000",
+    "email": "tah.melmalayanur@tn.gov.in"
+  },
+  {
+    "id": "vpm_thiruvennainallur",
+    "districtId": "viluppuram",
+    "name": "Thiruvennainallur",
+    "nameTa": "திருவெண்ணைநல்லூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Thiruvennainallur",
+    "phone": "044-vpm0000",
+    "email": "tah.thiruvennainallur@tn.gov.in"
+  },
+  {
+    "id": "vpm_tindivanam",
+    "districtId": "viluppuram",
+    "name": "Tindivanam",
+    "nameTa": "திண்டிவனம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Tindivanam",
+    "phone": "04147-222000",
+    "email": "tah.tindivanam@tn.gov.in"
+  },
+  {
+    "id": "vpm_vanur",
+    "districtId": "viluppuram",
+    "name": "Vanur",
+    "nameTa": "வானூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Vanur",
+    "phone": "0413-2677000",
+    "email": "tah.vanur@tn.gov.in"
+  },
+  {
+    "id": "vpm_vikravandi",
+    "districtId": "viluppuram",
+    "name": "Vikravandi",
+    "nameTa": "விக்ரவாண்டி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Vikravandi",
+    "phone": "04146-234000",
+    "email": "tah.vikravandi@tn.gov.in"
+  },
+  {
+    "id": "vpm_viluppuram",
+    "districtId": "viluppuram",
+    "name": "Viluppuram",
+    "nameTa": "விழுப்புரம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Viluppuram",
+    "phone": "04146-222000",
+    "email": "tah.viluppuram@tn.gov.in"
+  },
+  {
+    "id": "vnr_aruppukkottai",
+    "districtId": "virudhunagar",
+    "name": "Aruppukkottai",
+    "nameTa": "அருப்புக்கோட்டை",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Aruppukkottai",
+    "phone": "04566-220000",
+    "email": "tah.aruppukkottai@tn.gov.in"
+  },
+  {
+    "id": "vnr_kariyapatti",
+    "districtId": "virudhunagar",
+    "name": "Kariyapatti",
+    "nameTa": "காரியாபட்டி",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Kariyapatti",
+    "phone": "04566-255000",
+    "email": "tah.kariyapatti@tn.gov.in"
+  },
+  {
+    "id": "vnr_rajapalayam",
+    "districtId": "virudhunagar",
+    "name": "Rajapalayam",
+    "nameTa": "ராஜபாளையம்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Rajapalayam",
+    "phone": "04563-222000",
+    "email": "tah.rajapalayam@tn.gov.in"
+  },
+  {
+    "id": "vnr_sattur",
+    "districtId": "virudhunagar",
+    "name": "Sattur",
+    "nameTa": "சாத்தூர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Sattur",
+    "phone": "04562-260000",
+    "email": "tah.sattur@tn.gov.in"
   },
   {
     "id": "vnr_sivakasi",
@@ -2833,46 +3123,6 @@ export const SUBDIVISIONS_DIRECTORY = [
     "email": "tah.srivilliputhur@tn.gov.in"
   },
   {
-    "id": "vnr_rajapalayam",
-    "districtId": "virudhunagar",
-    "name": "Rajapalayam",
-    "nameTa": "ராஜபாளையம்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Rajapalayam",
-    "phone": "04563-222000",
-    "email": "tah.rajapalayam@tn.gov.in"
-  },
-  {
-    "id": "vnr_aruppukkottai",
-    "districtId": "virudhunagar",
-    "name": "Aruppukkottai",
-    "nameTa": "அருப்புக்கோட்டை",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Aruppukkottai",
-    "phone": "04566-220000",
-    "email": "tah.aruppukkottai@tn.gov.in"
-  },
-  {
-    "id": "vnr_sattur",
-    "districtId": "virudhunagar",
-    "name": "Sattur",
-    "nameTa": "சாத்தூர்",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Sattur",
-    "phone": "04562-260000",
-    "email": "tah.sattur@tn.gov.in"
-  },
-  {
-    "id": "vnr_kariyapatti",
-    "districtId": "virudhunagar",
-    "name": "Kariyapatti",
-    "nameTa": "காரியாபட்டி",
-    "type": "taluk",
-    "tahsildarOffice": "Taluk Office, Kariyapatti",
-    "phone": "04566-255000",
-    "email": "tah.kariyapatti@tn.gov.in"
-  },
-  {
     "id": "vnr_tiruchuli",
     "districtId": "virudhunagar",
     "name": "Tiruchuli",
@@ -2891,6 +3141,46 @@ export const SUBDIVISIONS_DIRECTORY = [
     "tahsildarOffice": "Taluk Office, Vembakottai",
     "phone": "04562-258000",
     "email": "tah.vembakottai@tn.gov.in"
+  },
+  {
+    "id": "vnr_virudhunagar",
+    "districtId": "virudhunagar",
+    "name": "Virudhunagar",
+    "nameTa": "விருதுநகர்",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Virudhunagar",
+    "phone": "04562-244000",
+    "email": "tah.virudhunagar@tn.gov.in"
+  },
+  {
+    "id": "vnr_watrap",
+    "districtId": "virudhunagar",
+    "name": "Watrap",
+    "nameTa": "வத்திராயிருப்பு",
+    "type": "taluk",
+    "tahsildarOffice": "Taluk Office, Watrap",
+    "phone": "044-vnr0000",
+    "email": "tah.watrap@tn.gov.in"
+  },
+  {
+    "id": "cbe_sulur_block",
+    "districtId": "coimbatore",
+    "name": "Sulur Block",
+    "nameTa": "சூலூர் ஒன்றியம்",
+    "type": "block",
+    "bdoOffice": "Block Development Office, Sulur Panchayat Union",
+    "phone": "0422-2687250",
+    "email": "bdo.sulur@tn.gov.in"
+  },
+  {
+    "id": "chn_zone5",
+    "districtId": "chennai",
+    "name": "Zone 5 Royapuram",
+    "nameTa": "மண்டலம் 5 ராயபுரம்",
+    "type": "revenue_division",
+    "tahsildarOffice": "Zonal Office 5, Royapuram",
+    "phone": "044-25952600",
+    "email": "zonal5@chennaicorporation.gov.in"
   }
 ];
 
