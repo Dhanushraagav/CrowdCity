@@ -2438,6 +2438,23 @@ body:not(.admin-portal-body) .app-sidebar {
   margin: 0.25rem 0 0.85rem 0;
 }
 
+.sidebar-section-divider {
+  height: 1px;
+  background: var(--border-color, #e2e8f0);
+  margin: 0.65rem 0.25rem 0.5rem 0.25rem;
+  opacity: 0.8;
+}
+
+.sidebar-nav-heading {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  letter-spacing: 0.06em;
+  padding: 0.35rem 1rem 0.25rem 1rem;
+  text-transform: uppercase;
+  user-select: none;
+}
+
 .app-sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -4081,6 +4098,131 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     cursor: pointer;
     margin-bottom: 1.5rem;
     padding: 0.5rem 0;
+  }
+
+  /* Mobile Public Pulse Section (Dashboard Only) */
+  .mobile-pulse-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mobile-pulse-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-pulse-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main, #0f172a);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    font-family: var(--font-heading);
+  }
+
+  .mobile-pulse-title i {
+    color: var(--primary, #0d9488);
+    font-size: 0.95rem;
+  }
+
+  .mobile-pulse-live-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .mobile-pulse-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mobile-pulse-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: var(--bg-surface, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-lg, 12px);
+    padding: 0.85rem 1rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-sizing: border-box;
+    width: 100%;
+    user-select: none;
+  }
+
+  .mobile-pulse-card:active {
+    background: var(--bg-surface-hover, #f8fafc);
+    transform: scale(0.99);
+  }
+
+  .mobile-pulse-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .mobile-pulse-icon.pulse-icon-power {
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--primary, #0d9488);
+    border: 1px solid rgba(13, 148, 136, 0.2);
+  }
+
+  .mobile-pulse-icon.pulse-icon-weather {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0284c7;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+  }
+
+  .mobile-pulse-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-pulse-name {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main, #0f172a);
+    margin-bottom: 0.15rem;
+  }
+
+  .mobile-pulse-desc {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--text-muted, #64748b);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-pulse-chevron {
+    font-size: 0.78rem;
+    color: var(--text-muted, #94a3b8);
+    flex-shrink: 0;
   }
 
   /* Quick Actions Grid */
