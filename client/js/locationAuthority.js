@@ -922,35 +922,10 @@
         `;
       }
 
-      // 6. CrowdCity 24/7 Support Card
+      // 6. CrowdCity 24/7 Support Card (Omitted here; dedicated Need Assistance card is displayed in the page panel)
       const supBox = document.getElementById('la-card-support-box');
-      if (supBox && sup) {
-        const supportConfig = (typeof window !== 'undefined' && window.CROWDCITY_CONFIG?.SUPPORT) || CROWDCITY_SUPPORT_CONFIG;
-        const telUri = sup.tel || (sup.phone ? `tel:${sup.phone.replace(/[^0-9+]/g, '')}` : supportConfig.tel);
-        const titleText = sup.title || supportConfig.title || 'CrowdCity 24/7 Support';
-        const actionText = supportConfig.actionText || 'Call CrowdCity Support';
-
-        const waUrl = supportConfig.whatsappUrl || 'https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue.';
-        const waActionText = supportConfig.whatsappActionText || 'Chat with Support';
-
-        supBox.innerHTML = `
-          <div class="la-support-line">
-            <div class="la-support-info">
-              <i class="fa-solid fa-headset" aria-hidden="true"></i>
-              <span class="la-support-title"><strong>${titleText}</strong></span>
-            </div>
-            <div style="display: inline-flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
-              <a href="${telUri}" class="la-support-call-btn" role="button" aria-label="${actionText}">
-                <i class="fa-solid fa-phone" aria-hidden="true"></i>
-                <span>${actionText}</span>
-              </a>
-              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="la-support-whatsapp-btn" role="button" aria-label="WhatsApp: ${waActionText}">
-                <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
-                <span>${waActionText}</span>
-              </a>
-            </div>
-          </div>
-        `;
+      if (supBox) {
+        supBox.innerHTML = '';
       }
     },
 

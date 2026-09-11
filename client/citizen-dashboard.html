@@ -417,6 +417,13 @@
 
       if (code >= 95 || code === 96 || code === 99) {
         widget.classList.add('weather-thunder');
+      } else if (temp >= 30) {
+        // High heat (>= 30°C): hot sunny/cloudy weather; strictly NO rain animations on hot days
+        if (code === 0 || code === 1 || temp >= 32) {
+          widget.classList.add('weather-sun');
+        } else {
+          widget.classList.add('weather-clouds');
+        }
       } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
         widget.classList.add('weather-rain');
         injectRainParticles();
@@ -443,7 +450,11 @@
     }
 
     // WMO weather code to icon mapping
-    function getWeatherIcon(code) {
+    function getWeatherIcon(code, temp) {
+      if (typeof temp === 'number' && temp >= 30 && code < 95) {
+        if (code === 0 || code === 1 || temp >= 32) return 'fa-sun';
+        return 'fa-cloud-sun';
+      }
       if (code === 0) return 'fa-sun';
       if (code <= 3) return 'fa-cloud-sun';
       if (code <= 48) return 'fa-smog';
@@ -455,7 +466,10 @@
       return 'fa-cloud';
     }
 
-    function getWeatherColor(code) {
+    function getWeatherColor(code, temp) {
+      if (typeof temp === 'number' && temp >= 30 && code < 95) {
+        return (code === 0 || code === 1 || temp >= 32) ? '#d97706' : '#f59e0b';
+      }
       if (code === 0) return '#d97706';      // sunny amber
       if (code <= 3) return '#f59e0b';        // partly cloudy
       if (code <= 48) return '#64748b';       // fog/mist grey
@@ -486,8 +500,8 @@
         const code = current.weathercode;
         cityEl.textContent = cleanDistrict;
         tempEl.textContent = `${temp}\u00B0C`;
-        iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code)}"></i>`;
-        iconEl.style.color = getWeatherColor(code);
+        iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code, temp)}"></i>`;
+        iconEl.style.color = getWeatherColor(code, temp);
         applyWeatherTheme(code, temp);
         widget.classList.remove('loading');
         widget.title = `${cleanDistrict} — ${temp}\u00B0C (Click to re-detect location)`;
@@ -545,8 +559,8 @@
         if (c.lang === currentLang && Date.now() - c.ts < 10 * 60 * 1000) {
           cityEl.textContent = c.district;
           tempEl.textContent = `${c.temp}\u00B0C`;
-          iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code)}"></i>`;
-          iconEl.style.color = getWeatherColor(c.code);
+          iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code, c.temp)}"></i>`;
+          iconEl.style.color = getWeatherColor(c.code, c.temp);
           applyWeatherTheme(c.code, c.temp);
           widget.classList.remove('loading');
           widget.title = `${c.district} — ${c.temp}\u00B0C (Click to re-detect location)`;
