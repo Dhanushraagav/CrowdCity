@@ -16,6 +16,9 @@
   'use strict';
 
   const API_BASE = '/api/authorities';
+  const API_LOCATIONS = '/api/locations';
+
+  let currentTalukLocations = [];
 
   // Centralized CrowdCity 24/7 Support Configuration
   const CROWDCITY_SUPPORT_CONFIG = (typeof window !== 'undefined' && window.CROWDCITY_CONFIG?.SUPPORT) || {
@@ -160,14 +163,9 @@
           this.state.subdivisionId = '';
           this.state.localBodyId = '';
           this.state.villageOrTown = '';
-          if (villageCustomInput) {
-            villageCustomInput.value = '';
-            villageCustomInput.classList.add('hidden');
-          }
+          this.resetVillagesAndLocalBodies();
           this.updateLocationHeaderLabel();
           await this.populateSubdivisions(distId);
-          await this.populateVillages(distId, '');
-          await this.populateLocalBodies(distId, '');
           this.triggerResolution();
         });
       }
@@ -178,14 +176,30 @@
           this.state.subdivisionId = subId;
           this.state.villageOrTown = '';
           this.state.localBodyId = '';
-          if (villageCustomInput) {
-            villageCustomInput.value = '';
-            villageCustomInput.classList.add('hidden');
-          }
+          this.resetVillagesAndLocalBodies();
           this.updateLocationHeaderLabel();
           await this.populateVillages(this.state.districtId, subId);
           await this.populateLocalBodies(this.state.districtId, subId);
           this.triggerResolution();
+        });
+      }
+
+      const villageSearchInput = document.getElementById('la-village-search-input');
+      const clearVillageSearchBtn = document.getElementById('btn-clear-village-search');
+
+      if (villageSearchInput) {
+        villageSearchInput.addEventListener('input', (e) => {
+          this.filterVillages(e.target.value);
+        });
+      }
+
+      if (clearVillageSearchBtn) {
+        clearVillageSearchBtn.addEventListener('click', () => {
+          if (villageSearchInput) {
+            villageSearchInput.value = '';
+            villageSearchInput.focus();
+          }
+          this.filterVillages('');
         });
       }
 
@@ -247,8 +261,6 @@
       const toggleManualBtn = document.getElementById('btn-toggle-manual-location');
       const toggleAutoBtn = document.getElementById('btn-toggle-auto-location');
       const districtSelect = document.getElementById('la-district-select');
-      const villageSelect = document.getElementById('la-village-select');
-      const villageCustomInput = document.getElementById('la-village-custom-input');
 
       if (isManual) {
         if (autoBox) autoBox.classList.add('hidden');
@@ -258,14 +270,12 @@
 
         this.populateDistricts();
 
-        // If no district is selected yet, pre-select Coimbatore or detected district
         const defaultDist = this.state.districtId || 'coimbatore';
         if (districtSelect && (!districtSelect.value || districtSelect.value === '')) {
           districtSelect.value = defaultDist;
           this.state.districtId = defaultDist;
           await this.populateSubdivisions(defaultDist);
-          await this.populateVillages(defaultDist, '');
-          await this.populateLocalBodies(defaultDist, '');
+          this.resetVillagesAndLocalBodies();
         }
         this.updateLocationHeaderLabel();
         this.triggerResolution();
@@ -280,16 +290,41 @@
         this.state.subdivisionId = '';
         this.state.localBodyId = '';
         this.state.villageOrTown = '';
-        if (villageSelect) {
-          villageSelect.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
-          villageSelect.disabled = true;
-        }
-        if (villageCustomInput) {
-          villageCustomInput.value = '';
-          villageCustomInput.classList.add('hidden');
-        }
+        this.resetVillagesAndLocalBodies();
         this.updateLocationHeaderLabel();
         this.triggerResolution();
+      }
+    },
+
+    /**
+     * Reset village search, village select, and local body select when parent changes
+     */
+    resetVillagesAndLocalBodies: function() {
+      const villageSelect = document.getElementById('la-village-select');
+      const villageSearchInput = document.getElementById('la-village-search-input');
+      const clearSearchBtn = document.getElementById('btn-clear-village-search');
+      const countBadge = document.getElementById('la-village-count-badge');
+      const localBodySelect = document.getElementById('la-localbody-select');
+      const customInput = document.getElementById('la-village-custom-input');
+
+      currentTalukLocations = [];
+      if (villageSearchInput) {
+        villageSearchInput.value = '';
+        villageSearchInput.disabled = true;
+      }
+      if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
+      if (countBadge) countBadge.textContent = '';
+      if (villageSelect) {
+        villageSelect.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
+        villageSelect.disabled = true;
+      }
+      if (localBodySelect) {
+        localBodySelect.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
+        localBodySelect.disabled = true;
+      }
+      if (customInput) {
+        customInput.value = '';
+        customInput.classList.add('hidden');
       }
     },
 
@@ -298,12 +333,19 @@
      */
     preloadDistricts: async function() {
       try {
-        const res = await fetch(`${API_BASE}/districts`);
+        let res = await fetch(`${API_LOCATIONS}/districts`);
+        if (!res.ok) {
+          res = await fetch(`${API_BASE}/districts`);
+        }
         if (res.ok) {
           const data = await res.json();
           const list = data.districts || data.data || (Array.isArray(data) ? data : []);
           if (list && list.length > 0) {
-            districtsCache = list;
+            districtsCache = list.map(d => ({
+              id: d.id,
+              name: d.name,
+              nameTa: d.tamil_name || d.nameTa || ''
+            }));
             this.populateDistricts();
           }
         }
@@ -323,7 +365,8 @@
       let html = '<option value="" disabled selected>Select District (மாவட்டம்)...</option>';
       districtsCache.forEach(d => {
         const isSel = (currentVal === d.id || currentVal === d.name.toLowerCase()) ? 'selected' : '';
-        html += `<option value="${d.id}" ${isSel}>${d.name} (${d.nameTa || ''})</option>`;
+        const taPart = d.nameTa ? ` (${d.nameTa})` : '';
+        html += `<option value="${d.id}" ${isSel}>${d.name}${taPart}</option>`;
       });
       select.innerHTML = html;
     },
@@ -346,18 +389,22 @@
 
       try {
         if (!subdivisionsCache[districtId]) {
-          const res = await fetch(`${API_BASE}/subdivisions?district=${encodeURIComponent(districtId)}`);
+          let res = await fetch(`${API_LOCATIONS}/districts/${encodeURIComponent(districtId)}/taluks`);
+          if (!res.ok) {
+            res = await fetch(`${API_BASE}/subdivisions?district=${encodeURIComponent(districtId)}`);
+          }
           if (res.ok) {
             const data = await res.json();
-            subdivisionsCache[districtId] = data.subdivisions || data.data || [];
+            subdivisionsCache[districtId] = data.taluks || data.subdivisions || data.data || [];
           }
         }
 
         const subs = subdivisionsCache[districtId] || [];
         let html = '<option value="" selected>Select Taluk / Block (வட்டம் / ஒன்றியம்)...</option>';
         subs.forEach(s => {
-          const typeLabel = s.type === 'block' ? 'Block / PU' : (s.type === 'revenue_division' ? 'Zone' : 'Taluk');
-          html += `<option value="${s.id}">${s.name} [${typeLabel}] (${s.nameTa || ''})</option>`;
+          const taLabel = s.tamil_name || s.nameTa ? ` (${s.tamil_name || s.nameTa})` : '';
+          const typeLabel = s.type === 'block' ? 'Block' : (s.type === 'zone' ? 'Zone' : 'Taluk');
+          html += `<option value="${s.id}">${s.name} [${typeLabel}]${taLabel}</option>`;
         });
         select.innerHTML = html;
         select.disabled = false;
@@ -368,49 +415,128 @@
     },
 
     /**
+     * Helper to format administrative location types
+     */
+    formatLocationTypeBadge: function(type) {
+      switch (type) {
+        case 'town_panchayat': return 'Town Panchayat';
+        case 'municipality': return 'Municipality';
+        case 'corporation': return 'Corporation';
+        case 'village_panchayat': return 'Village Panchayat';
+        case 'town': return 'Town';
+        default: return 'Revenue Village';
+      }
+    },
+
+    /**
      * Populate Village / Town dropdown based on selected District & Taluk.
      */
     populateVillages: async function(districtId, subdivisionId) {
       const select = document.getElementById('la-village-select');
       const customInput = document.getElementById('la-village-custom-input');
+      const searchInput = document.getElementById('la-village-search-input');
+      const clearBtn = document.getElementById('btn-clear-village-search');
+      const countBadge = document.getElementById('la-village-count-badge');
       if (!select) return;
 
       if (customInput) customInput.classList.add('hidden');
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.disabled = !subdivisionId;
+      }
+      if (clearBtn) clearBtn.classList.add('hidden');
 
       if (!districtId || !subdivisionId) {
         select.innerHTML = '<option value="" disabled selected>Select Taluk / Block first...</option>';
         select.disabled = true;
+        currentTalukLocations = [];
+        if (countBadge) countBadge.textContent = '';
         return;
       }
 
       select.disabled = true;
       select.innerHTML = '<option value="">Loading Villages / Towns...</option>';
+      if (countBadge) countBadge.textContent = 'Loading...';
 
       try {
         const cacheKey = `${districtId}_${subdivisionId}`;
         if (!villagesCache[cacheKey]) {
-          const res = await fetch(`${API_BASE}/villages?district=${encodeURIComponent(districtId)}&subdivision=${encodeURIComponent(subdivisionId)}`);
+          let res = await fetch(`${API_LOCATIONS}/taluks/${encodeURIComponent(subdivisionId)}/locations`);
+          if (!res.ok) {
+            res = await fetch(`${API_BASE}/villages?district=${encodeURIComponent(districtId)}&subdivision=${encodeURIComponent(subdivisionId)}`);
+          }
           if (res.ok) {
             const data = await res.json();
-            villagesCache[cacheKey] = data.villages || data.data || [];
+            villagesCache[cacheKey] = data.locations || data.villages || data.data || [];
           }
         }
 
-        const vils = villagesCache[cacheKey] || [];
-        let html = '<option value="" disabled selected>Select Village / Town (கிராமம் / நகரம்)...</option>';
-        vils.forEach(v => {
-          const taPart = v.nameTa ? ` (${v.nameTa})` : '';
-          const typeBadge = v.type === 'town' ? ' [Town]' : '';
-          html += `<option value="${v.name}">${v.name}${typeBadge}${taPart}</option>`;
-        });
-        html += '<option value="__custom__">Can\'t find your village? Enter manually...</option>';
-
-        select.innerHTML = html;
+        currentTalukLocations = villagesCache[cacheKey] || [];
+        this.renderVillageOptions(currentTalukLocations);
         select.disabled = false;
+        if (searchInput) {
+          searchInput.disabled = false;
+        }
       } catch (err) {
         console.error('[LocationAuthority] Error fetching villages:', err);
         select.innerHTML = '<option value="">Failed to load villages</option>';
+        if (countBadge) countBadge.textContent = '';
       }
+    },
+
+    /**
+     * Render village options with bilingual display and administrative type badge
+     */
+    renderVillageOptions: function(list, filterQuery = '') {
+      const select = document.getElementById('la-village-select');
+      const countBadge = document.getElementById('la-village-count-badge');
+      if (!select) return;
+
+      const totalCount = currentTalukLocations.length;
+      const count = list.length;
+
+      if (countBadge) {
+        if (filterQuery) {
+          countBadge.textContent = `Showing ${count} of ${totalCount}`;
+        } else {
+          countBadge.textContent = `${totalCount} locations`;
+        }
+      }
+
+      let html = '<option value="" disabled selected>Select Village / Town (கிராமம் / நகரம்)...</option>';
+      list.forEach(v => {
+        const taPart = (v.tamil_name || v.nameTa) ? ` (${v.tamil_name || v.nameTa})` : '';
+        const typeBadge = ` [${this.formatLocationTypeBadge(v.location_type || v.type)}]`;
+        html += `<option value="${v.name}">${v.name}${taPart}${typeBadge}</option>`;
+      });
+      html += '<option value="__custom__">Can\'t find your village? Enter manually...</option>';
+
+      select.innerHTML = html;
+    },
+
+    /**
+     * Filter village options in real-time within the selected Taluk
+     */
+    filterVillages: function(query) {
+      const q = String(query).trim().toLowerCase();
+      const clearBtn = document.getElementById('btn-clear-village-search');
+      if (clearBtn) {
+        if (q) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      if (!q) {
+        this.renderVillageOptions(currentTalukLocations);
+        return;
+      }
+
+      const filtered = currentTalukLocations.filter(v => {
+        const nameEn = (v.name || '').toLowerCase();
+        const nameTa = (v.tamil_name || v.nameTa || '').toLowerCase();
+        return nameEn.includes(q) || nameTa.includes(q);
+      });
+
+      this.renderVillageOptions(filtered, q);
     },
 
     /**
@@ -435,7 +561,7 @@
     /**
      * Populate Local Bodies dropdown based on selected District & Subdivision.
      */
-    populateLocalBodies: async function(districtId, subdivisionId) {
+    populateLocalBodies: async function(districtId, subdivisionId, villageName) {
       const select = document.getElementById('la-localbody-select');
       if (!select) return;
 
@@ -449,27 +575,25 @@
       select.innerHTML = '<option value="">Loading Local Bodies...</option>';
 
       try {
-        const cacheKey = `${districtId}_${subdivisionId || 'all'}`;
-        if (!localBodiesCache[cacheKey]) {
-          let url = `${API_BASE}/local-bodies?district=${encodeURIComponent(districtId)}`;
-          if (subdivisionId) {
-            url += `&subdivision=${encodeURIComponent(subdivisionId)}`;
-          }
-          const res = await fetch(url);
-          if (res.ok) {
-            const data = await res.json();
-            localBodiesCache[cacheKey] = data.localBodies || data.data || [];
-          }
-        }
+        let url = `${API_LOCATIONS}/local-bodies?district=${encodeURIComponent(districtId)}`;
+        if (subdivisionId) url += `&taluk=${encodeURIComponent(subdivisionId)}`;
+        if (villageName) url += `&village=${encodeURIComponent(villageName)}`;
 
-        const lbs = localBodiesCache[cacheKey] || [];
-        let html = '<option value="" selected>Select Local Body (உள்ளாட்சி அமைப்பு)...</option>';
-        lbs.forEach(lb => {
-          const taLabel = lb.nameTa ? ` (${lb.nameTa})` : '';
-          html += `<option value="${lb.id}">${lb.name}${taLabel}</option>`;
-        });
-        select.innerHTML = html;
-        select.disabled = false;
+        let res = await fetch(url);
+        if (!res.ok) {
+          res = await fetch(`${API_BASE}/local-bodies?district=${encodeURIComponent(districtId)}${subdivisionId ? `&subdivision=${encodeURIComponent(subdivisionId)}` : ''}`);
+        }
+        if (res.ok) {
+          const data = await res.json();
+          const lbs = data.localBodies || data.data || [];
+          let html = '<option value="" selected>Select Local Body (உள்ளாட்சி அமைப்பு)...</option>';
+          lbs.forEach(lb => {
+            const taLabel = (lb.tamil_name || lb.nameTa) ? ` (${lb.tamil_name || lb.nameTa})` : '';
+            html += `<option value="${lb.id}">${lb.name}${taLabel}</option>`;
+          });
+          select.innerHTML = html;
+          select.disabled = false;
+        }
       } catch (err) {
         console.error('[LocationAuthority] Error fetching local bodies:', err);
         select.innerHTML = '<option value="">Failed to load local bodies</option>';

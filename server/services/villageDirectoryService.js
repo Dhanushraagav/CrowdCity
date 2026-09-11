@@ -8331,6 +8331,84 @@ export const VILLAGES_BY_SUBDIVISION = {
       "name": "Moolapallipatti",
       "nameTa": "மூலப்பள்ளிப்பட்டி",
       "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_bommasamudram",
+      "name": "Bommasamudram",
+      "nameTa": "பொம்மசமுத்திரம்",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_chithamparapatty",
+      "name": "Chithamparapatty",
+      "nameTa": "சிதம்பரபட்டி",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_ichchampatti",
+      "name": "Ichchampatti",
+      "nameTa": "இச்சம்பட்டி",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_kalkurichi",
+      "name": "Kalkurichi",
+      "nameTa": "கல்குறிச்சி",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_kondamanaickenpatti",
+      "name": "Kondamanaickenpatti",
+      "nameTa": "கொண்டமநாயக்கன்பட்டி",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_pallamparai",
+      "name": "Pallamparai",
+      "nameTa": "பள்ளம்பாறை",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_pudukombai",
+      "name": "Pudukombai",
+      "nameTa": "புதுக்கொம்பை",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_thirumalaigiri",
+      "name": "Thirumalaigiri",
+      "nameTa": "திருமலைகிரி",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_thirumalaipatti",
+      "name": "Thirumalaipatti",
+      "nameTa": "திருமலைப்பட்டி",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_thuthikulam",
+      "name": "Thuthikulam",
+      "nameTa": "தூதிக்குளம்",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_uthirakidikaval",
+      "name": "Uthirakidikaval",
+      "nameTa": "உத்திரகிடிகாவல்",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_valavanthicombai",
+      "name": "Valavanthicombai",
+      "nameTa": "வளவந்திகொம்பை",
+      "type": "village"
+    },
+    {
+      "id": "vil_nmk_sendamangalam_valayapatty",
+      "name": "Valayapatty",
+      "nameTa": "வலையபட்டி",
+      "type": "village"
     }
   ],
   "nmk_namakkal": [
