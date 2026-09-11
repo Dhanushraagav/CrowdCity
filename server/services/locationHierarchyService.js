@@ -1,5 +1,5 @@
 import { supabaseAdmin, supabase } from '../config/supabase.js';
-import { DISTRICTS_DATA, TALUKS_DATA, LOCATIONS_DATA, LOCAL_BODIES_DATA } from '../data/locationHierarchyData.js';
+import { DISTRICTS_DATA, TALUKS_DATA, BLOCKS_DATA, LOCATIONS_DATA, LOCAL_BODIES_DATA } from '../data/locationHierarchyData.js';
 import logger from '../config/logger.js';
 
 // In-memory indexing for ultra-fast response
@@ -7,21 +7,49 @@ const districtsMap = new Map();
 DISTRICTS_DATA.forEach(d => districtsMap.set(d.id.toLowerCase(), d));
 
 const taluksByDistrictMap = new Map();
+const talukByIdMap = new Map();
 TALUKS_DATA.forEach(t => {
   const dId = t.district_id.toLowerCase();
   if (!taluksByDistrictMap.has(dId)) {
     taluksByDistrictMap.set(dId, []);
   }
   taluksByDistrictMap.get(dId).push(t);
+  talukByIdMap.set(t.id.toLowerCase(), t);
 });
 
+const blocksByDistrictMap = new Map();
+const blockByIdMap = new Map();
+if (Array.isArray(BLOCKS_DATA)) {
+  BLOCKS_DATA.forEach(b => {
+    const dId = b.district_id.toLowerCase();
+    if (!blocksByDistrictMap.has(dId)) {
+      blocksByDistrictMap.set(dId, []);
+    }
+    blocksByDistrictMap.get(dId).push(b);
+    blockByIdMap.set(b.id.toLowerCase(), b);
+  });
+}
+
+// Active locations map (non-quarantined) by Taluk
 const locationsByTalukMap = new Map();
+// All locations (including historical quarantined)
+const allLocationsByTalukMap = new Map();
+
 LOCATIONS_DATA.forEach(loc => {
-  const tId = loc.taluk_id.toLowerCase();
-  if (!locationsByTalukMap.has(tId)) {
-    locationsByTalukMap.set(tId, []);
+  if (loc.taluk_id) {
+    const tId = loc.taluk_id.toLowerCase();
+    if (!allLocationsByTalukMap.has(tId)) {
+      allLocationsByTalukMap.set(tId, []);
+    }
+    allLocationsByTalukMap.get(tId).push(loc);
+
+    if (!loc.is_quarantined) {
+      if (!locationsByTalukMap.has(tId)) {
+        locationsByTalukMap.set(tId, []);
+      }
+      locationsByTalukMap.get(tId).push(loc);
+    }
   }
-  locationsByTalukMap.get(tId).push(loc);
 });
 
 const localBodiesByTalukMap = new Map();
@@ -63,6 +91,23 @@ function normalizeDistrictKey(distInput) {
 function normalizeTalukKey(talukInput) {
   if (!talukInput) return '';
   return String(talukInput).trim().toLowerCase();
+}
+
+/**
+ * Formats human-readable administrative type badge
+ */
+function formatLocationTypeLabel(type) {
+  switch (type) {
+    case 'village_panchayat': return 'Village Panchayat';
+    case 'revenue_village': return 'Revenue Village';
+    case 'town_panchayat': return 'Town Panchayat';
+    case 'municipality': return 'Municipality';
+    case 'corporation':
+    case 'municipal_corporation': return 'Corporation';
+    case 'corporation_zone': return 'Corporation Zone';
+    case 'locality': return 'Locality / Area';
+    default: return 'Settlement';
+  }
 }
 
 /**
@@ -122,46 +167,48 @@ export async function getTaluksForDistrict(districtId) {
 }
 
 /**
- * 3. Get all valid Villages / Towns associated with the selected Taluk
- * Supports real-time search query filtering
+ * 3. Get Rural Blocks belonging to the selected District
  */
-export async function getLocationsForTaluk(talukId, searchQuery = '') {
-  if (!talukId) return [];
-  const cleanTaluk = normalizeTalukKey(talukId);
-  const q = String(searchQuery).trim().toLowerCase();
+export async function getBlocksForDistrict(districtId) {
+  if (!districtId) return [];
+  const cleanDist = normalizeDistrictKey(districtId);
 
-  let locations = [];
+  if (blocksByDistrictMap.has(cleanDist)) {
+    return blocksByDistrictMap.get(cleanDist);
+  }
 
-  // Try DB if query has no search or basic
-  const client = supabaseAdmin || supabase;
-  if (client && !q) {
-    try {
-      const { data, error } = await client
-        .from('locations')
-        .select('*')
-        .eq('taluk_id', cleanTaluk)
-        .order('name');
-      if (!error && data && data.length > 0) {
-        locations = data;
-      }
-    } catch (e) {
-      // Fallback
+  for (const [dId, blocks] of blocksByDistrictMap.entries()) {
+    if (dId.startsWith(cleanDist) || cleanDist.startsWith(dId)) {
+      return blocks;
     }
   }
 
-  if (locations.length === 0) {
-    // 1. Direct key match
-    if (locationsByTalukMap.has(cleanTaluk)) {
-      locations = locationsByTalukMap.get(cleanTaluk);
-    } else {
-      // 2. Suffix match: e.g. 'sendamangalam' matching 'nmk_sendamangalam'
-      for (const [tId, list] of locationsByTalukMap.entries()) {
-        const parts = tId.split('_');
-        const suffix = parts.slice(1).join('_');
-        if (tId === cleanTaluk || suffix === cleanTaluk || cleanTaluk.endsWith(suffix) || suffix.endsWith(cleanTaluk)) {
-          locations = list;
-          break;
-        }
+  return [];
+}
+
+/**
+ * 4. Get all valid Villages / Towns associated with the selected Taluk
+ * Excludes quarantined synthetic records by default to protect citizen experience
+ */
+export async function getLocationsForTaluk(talukId, searchQuery = '', options = {}) {
+  if (!talukId) return [];
+  const cleanTaluk = normalizeTalukKey(talukId);
+  const q = String(searchQuery).trim().toLowerCase();
+  const includeQuarantined = !!options.includeQuarantined;
+
+  let locations = [];
+
+  const sourceMap = includeQuarantined ? allLocationsByTalukMap : locationsByTalukMap;
+
+  if (sourceMap.has(cleanTaluk)) {
+    locations = sourceMap.get(cleanTaluk);
+  } else {
+    for (const [tId, list] of sourceMap.entries()) {
+      const parts = tId.split('_');
+      const suffix = parts.slice(1).join('_');
+      if (tId === cleanTaluk || suffix === cleanTaluk || cleanTaluk.endsWith(suffix) || suffix.endsWith(cleanTaluk)) {
+        locations = list;
+        break;
       }
     }
   }
@@ -179,7 +226,99 @@ export async function getLocationsForTaluk(talukId, searchQuery = '') {
 }
 
 /**
- * 4. Get applicable Local Bodies for a given location / taluk / district
+ * 5. High-performance Search-First Typeahead Index
+ * Debounced lookup matching English and Tamil names with rich parent context
+ */
+export async function searchLocations({ query = '', districtId = '', adminType = '', limit = 25, includeQuarantined = false }) {
+  const q = String(query).trim().toLowerCase();
+  if (!q && !districtId) return [];
+
+  const cleanDist = districtId ? normalizeDistrictKey(districtId) : '';
+  const cleanType = adminType ? adminType.trim().toLowerCase() : '';
+  const maxResults = Math.min(Math.max(parseInt(limit, 10) || 25, 1), 100);
+
+  const exactPrefixMatches = [];
+  const containsMatches = [];
+
+  for (const loc of LOCATIONS_DATA) {
+    if (!includeQuarantined && loc.is_quarantined) {
+      continue;
+    }
+
+    if (cleanDist && loc.district_id.toLowerCase() !== cleanDist) {
+      continue;
+    }
+
+    if (cleanType && cleanType !== 'all') {
+      const lType = (loc.location_type || '').toLowerCase();
+      if (cleanType === 'village' || cleanType === 'village_panchayat') {
+        if (lType !== 'village_panchayat' && lType !== 'revenue_village') continue;
+      } else if (cleanType === 'urban' || cleanType === 'town_panchayat' || cleanType === 'municipality') {
+        if (lType !== 'town_panchayat' && lType !== 'municipality' && lType !== 'corporation') continue;
+      } else if (lType !== cleanType) {
+        continue;
+      }
+    }
+
+    if (!q) {
+      // Return top locations if no query specified
+      containsMatches.push(loc);
+      if (containsMatches.length >= maxResults) break;
+      continue;
+    }
+
+    const enName = (loc.name || '').toLowerCase();
+    const taName = (loc.tamil_name || '').toLowerCase();
+
+    if (enName.startsWith(q) || taName.startsWith(q)) {
+      exactPrefixMatches.push(loc);
+      if (exactPrefixMatches.length >= maxResults) break;
+    } else if (enName.includes(q) || taName.includes(q)) {
+      containsMatches.push(loc);
+    }
+  }
+
+  const combined = [...exactPrefixMatches, ...containsMatches].slice(0, maxResults);
+
+  return combined.map(loc => {
+    const dist = districtsMap.get(loc.district_id.toLowerCase());
+    const taluk = loc.taluk_id ? talukByIdMap.get(loc.taluk_id.toLowerCase()) : null;
+    const block = loc.block_id ? blockByIdMap.get(loc.block_id.toLowerCase()) : null;
+
+    let parentContext = '';
+    if (block && block.name) {
+      parentContext = `${block.name} Block, ${dist ? dist.name : loc.district_id}`;
+    } else if (taluk && taluk.name) {
+      parentContext = `${taluk.name} Taluk, ${dist ? dist.name : loc.district_id}`;
+    } else if (dist) {
+      parentContext = dist.name;
+    }
+
+    return {
+      id: loc.id,
+      name: loc.name,
+      tamil_name: loc.tamil_name || loc.name,
+      location_type: loc.location_type,
+      type_label: formatLocationTypeLabel(loc.location_type),
+      lgd_code: loc.lgd_code || null,
+      district_id: loc.district_id,
+      district_name: dist ? dist.name : loc.district_id,
+      district_name_ta: dist ? dist.tamil_name : '',
+      taluk_id: loc.taluk_id || null,
+      taluk_name: taluk ? taluk.name : '',
+      taluk_name_ta: taluk ? taluk.tamil_name : '',
+      block_id: loc.block_id || null,
+      block_name: block ? block.name : '',
+      block_name_ta: block ? block.tamil_name : '',
+      parent_context: parentContext,
+      is_verified: !!loc.is_verified,
+      source_name: loc.source_name || 'tnrd'
+    };
+  });
+}
+
+/**
+ * 6. Get applicable Local Bodies for a given location / taluk / district
  */
 export async function getLocalBodiesForLocation({ districtId, talukId, villageName, locationId }) {
   const cleanDist = normalizeDistrictKey(districtId);

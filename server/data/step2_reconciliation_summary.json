@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-09-11T15:44:10.363Z",
+  "initial_locations_count": 10136,
+  "synthetic_matched_and_promoted": 150,
+  "synthetic_quarantined": 5166,
+  "genuine_enriched_with_lgd": 248,
+  "genuine_retained_verified": 4572,
+  "newly_ingested_tnrd_vps": 12254,
+  "total_blocks_count": 388,
+  "total_districts_count": 38,
+  "total_taluks_count": 313,
+  "total_locations_count": 22390,
+  "active_ui_locations_count": 17228,
+  "quarantined_locations_count": 5162
+}

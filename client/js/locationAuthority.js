@@ -116,6 +116,7 @@
       console.log('[LocationAuthority] Initializing Location-Aware Civic Authority module...');
       this.populateDistricts();
       this.bindUIEvents();
+      this.initTypeaheadSearch();
       this.preloadDistricts();
 
       // If coordinates or address already exist on page load, resolve immediately
@@ -282,6 +283,222 @@
     },
 
     /**
+     * Search-First Typeahead Controller
+     * Instant debounced lookup with administrative type filters and parent context
+     */
+    initTypeaheadSearch: function() {
+      const input = document.getElementById('la-search-typeahead-input');
+      const clearBtn = document.getElementById('la-search-clear-btn');
+      const dropdown = document.getElementById('la-typeahead-dropdown');
+      const filterChips = document.querySelectorAll('.la-filter-chip');
+
+      if (!input || !dropdown) return;
+
+      let activeTypeFilter = 'all';
+      let searchDebounce = null;
+      let currentResults = [];
+      let focusedIndex = -1;
+
+      // Filter chips click handler
+      filterChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          filterChips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          activeTypeFilter = chip.getAttribute('data-type') || 'all';
+          if (input.value.trim()) {
+            triggerSearch(input.value.trim());
+          }
+        });
+      });
+
+      const triggerSearch = async (query) => {
+        const q = (query || '').trim();
+        if (!q) {
+          dropdown.innerHTML = '';
+          dropdown.classList.add('hidden');
+          if (clearBtn) clearBtn.classList.add('hidden');
+          return;
+        }
+
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        try {
+          const dist = LocationAuthority.state.districtId || '';
+          let url = `${API_LOCATIONS}/search?q=${encodeURIComponent(q)}&type=${encodeURIComponent(activeTypeFilter)}&limit=25`;
+          if (dist) url += `&district=${encodeURIComponent(dist)}`;
+
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error('Search failed');
+          }
+          const data = await res.json();
+          currentResults = data.data || [];
+          renderDropdown(currentResults, q);
+        } catch (err) {
+          console.warn('[LocationAuthority] Search fetch error:', err);
+          // Fallback: search in memory / client cache
+          const cached = (currentTalukLocations || []).filter(l => !l.is_quarantined && (l.name.toLowerCase().includes(q.toLowerCase()) || (l.tamil_name && l.tamil_name.includes(q))));
+          renderDropdown(cached, q);
+        }
+      };
+
+      const renderDropdown = (results, query) => {
+        focusedIndex = -1;
+        if (!results || results.length === 0) {
+          dropdown.innerHTML = `<div class="la-typeahead-no-results">No locations found matching "${query}". You can select via the dropdowns below.</div>`;
+          dropdown.classList.remove('hidden');
+          return;
+        }
+
+        let html = '';
+        results.forEach((item, idx) => {
+          const taPart = item.tamil_name && item.tamil_name !== item.name ? ` (${item.tamil_name})` : '';
+          const badgeClass = item.location_type === 'village_panchayat' ? 'badge-panchayat' :
+                             (item.location_type === 'town_panchayat' ? 'badge-town' :
+                             (item.location_type === 'municipality' || item.location_type === 'corporation' ? 'badge-urban' : 'badge-revenue'));
+          const typeLabel = item.type_label || LocationAuthority.formatLocationTypeBadge(item.location_type);
+          const context = item.parent_context || (item.district_name ? `${item.district_name}` : '');
+
+          html += `
+            <div class="la-typeahead-item" data-idx="${idx}">
+              <div class="la-item-main">
+                <div class="la-item-title">${item.name}${taPart}</div>
+                <div class="la-item-context"><i class="fa-solid fa-location-dot" style="font-size: 0.65rem;"></i> ${context}</div>
+              </div>
+              <span class="la-item-badge ${badgeClass}">${typeLabel}</span>
+            </div>
+          `;
+        });
+
+        dropdown.innerHTML = html;
+        dropdown.classList.remove('hidden');
+
+        dropdown.querySelectorAll('.la-typeahead-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const idx = parseInt(el.getAttribute('data-idx'), 10);
+            const selected = currentResults[idx];
+            if (selected) {
+              selectLocation(selected);
+            }
+          });
+        });
+      };
+
+      const selectLocation = async (item) => {
+        input.value = `${item.name}${item.tamil_name && item.tamil_name !== item.name ? ` (${item.tamil_name})` : ''}`;
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        // 1. Sync District
+        if (item.district_id) {
+          LocationAuthority.state.districtId = item.district_id;
+          const distSelect = document.getElementById('la-district-select');
+          if (distSelect) {
+            distSelect.value = item.district_id;
+          }
+          await LocationAuthority.populateSubdivisions(item.district_id);
+        }
+
+        // 2. Sync Subdivision (Taluk / Block)
+        if (item.taluk_id || item.block_id) {
+          const targetSubId = item.taluk_id || item.block_id;
+          LocationAuthority.state.subdivisionId = targetSubId;
+          const subdivSelect = document.getElementById('la-subdivision-select');
+          if (subdivSelect) {
+            subdivSelect.value = targetSubId;
+            if (!subdivSelect.value) {
+              for (let i = 0; i < subdivSelect.options.length; i++) {
+                if (subdivSelect.options[i].value === targetSubId || subdivSelect.options[i].text.toLowerCase().includes((item.taluk_name || item.block_name || '').toLowerCase())) {
+                  subdivSelect.selectedIndex = i;
+                  LocationAuthority.state.subdivisionId = subdivSelect.value;
+                  break;
+                }
+              }
+            }
+          }
+          await LocationAuthority.populateVillages(item.district_id, LocationAuthority.state.subdivisionId);
+          await LocationAuthority.populateLocalBodies(item.district_id, LocationAuthority.state.subdivisionId, item.name);
+        }
+
+        // 3. Sync Village
+        LocationAuthority.state.villageOrTown = item.name;
+        const villageSelect = document.getElementById('la-village-select');
+        if (villageSelect) {
+          villageSelect.value = item.name;
+          if (!villageSelect.value) {
+            for (let i = 0; i < villageSelect.options.length; i++) {
+              if (villageSelect.options[i].text.toLowerCase().includes(item.name.toLowerCase())) {
+                villageSelect.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        }
+
+        LocationAuthority.updateLocationHeaderLabel();
+        LocationAuthority.syncLocalBodyWithVillage(item.name);
+        LocationAuthority.triggerResolution();
+      };
+
+      input.addEventListener('input', (e) => {
+        clearTimeout(searchDebounce);
+        const val = e.target.value;
+        if (!val.trim()) {
+          dropdown.classList.add('hidden');
+          dropdown.innerHTML = '';
+          if (clearBtn) clearBtn.classList.add('hidden');
+          return;
+        }
+        searchDebounce = setTimeout(() => {
+          triggerSearch(val);
+        }, 250);
+      });
+
+      input.addEventListener('keydown', (e) => {
+        const items = dropdown.querySelectorAll('.la-typeahead-item');
+        if (items.length === 0 || dropdown.classList.contains('hidden')) return;
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          focusedIndex = Math.min(focusedIndex + 1, items.length - 1);
+          items.forEach((it, i) => it.classList.toggle('focused', i === focusedIndex));
+          if (items[focusedIndex]) items[focusedIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          focusedIndex = Math.max(focusedIndex - 1, 0);
+          items.forEach((it, i) => it.classList.toggle('focused', i === focusedIndex));
+          if (items[focusedIndex]) items[focusedIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (focusedIndex >= 0 && currentResults[focusedIndex]) {
+            selectLocation(currentResults[focusedIndex]);
+          }
+        } else if (e.key === 'Escape') {
+          dropdown.classList.add('hidden');
+        }
+      });
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          input.value = '';
+          clearBtn.classList.add('hidden');
+          dropdown.classList.add('hidden');
+          dropdown.innerHTML = '';
+          input.focus();
+        });
+      }
+
+      // Close dropdown on outside click
+      document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+    },
+
+    /**
      * Switch between Auto-Detected (GPS/Map pin) and Manual Override (Cascading Selectors) mode.
      */
     setManualMode: async function(isManual) {
@@ -309,6 +526,12 @@
         }
         this.updateLocationHeaderLabel();
         this.triggerResolution();
+
+        // Focus typeahead input for rapid search
+        setTimeout(() => {
+          const searchInput = document.getElementById('la-search-typeahead-input');
+          if (searchInput) searchInput.focus();
+        }, 120);
       } else {
         if (autoBox) autoBox.classList.remove('hidden');
         if (manualBox) manualBox.classList.add('hidden');
@@ -442,8 +665,12 @@
       switch (type) {
         case 'town_panchayat': return 'Town Panchayat';
         case 'municipality': return 'Municipality';
-        case 'corporation': return 'Corporation';
+        case 'corporation':
+        case 'municipal_corporation': return 'Corporation';
+        case 'corporation_zone': return 'Corporation Zone';
         case 'village_panchayat': return 'Village Panchayat';
+        case 'revenue_village': return 'Revenue Village';
+        case 'locality': return 'Locality / Area';
         case 'town': return 'Town';
         default: return 'Revenue Village';
       }
@@ -493,13 +720,16 @@
 
     /**
      * Render village options with bilingual display and administrative type badge
+     * Excludes quarantined synthetic placeholders
      */
     renderVillageOptions: function(list) {
       const select = document.getElementById('la-village-select');
       if (!select) return;
 
+      const activeList = (list || []).filter(v => !v.is_quarantined);
+
       let html = '<option value="" disabled selected>Select Village / Town (கிராமம் / நகரம்)...</option>';
-      list.forEach(v => {
+      activeList.forEach(v => {
         const taPart = (v.tamil_name || v.nameTa) ? ` (${v.tamil_name || v.nameTa})` : '';
         const typeBadge = ` [${this.formatLocationTypeBadge(v.location_type || v.type)}]`;
         html += `<option value="${v.name}">${v.name}${taPart}${typeBadge}</option>`;

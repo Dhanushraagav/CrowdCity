@@ -934,3 +934,242 @@
     font-size: 0.86rem;
   }
 }
+
+/* ==============================================================================
+ * Step 2 Search-First Typeahead & Administrative Hierarchy Filter Styles
+ * ============================================================================== */
+.la-typeahead-section {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.la-typeahead-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.la-typeahead-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.la-typeahead-label i {
+  color: var(--primary, #0d9488);
+}
+
+.la-type-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.la-filter-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background: #ffffff;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.3;
+}
+
+.la-filter-chip:hover {
+  border-color: var(--primary, #0d9488);
+  color: var(--primary, #0d9488);
+}
+
+.la-filter-chip.active {
+  background: var(--primary, #0d9488);
+  border-color: var(--primary, #0d9488);
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.25);
+}
+
+.la-typeahead-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.la-typeahead-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted, #64748b);
+  font-size: 0.82rem;
+  pointer-events: none;
+}
+
+.la-typeahead-input {
+  width: 100%;
+  padding: 0.65rem 2.2rem 0.65rem 2.2rem;
+  font-size: 0.84rem;
+  font-family: inherit;
+  color: var(--text-main, #0f172a);
+  background: var(--bg-surface, #f8fafc);
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.la-typeahead-input:focus {
+  background: #ffffff;
+  border-color: var(--primary, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.la-typeahead-clear-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+
+.la-typeahead-clear-btn:hover {
+  color: var(--text-main, #0f172a);
+}
+
+.la-typeahead-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 999;
+  padding: 0.35rem 0;
+}
+
+.la-typeahead-item {
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+}
+
+.la-typeahead-item:last-child {
+  border-bottom: none;
+}
+
+.la-typeahead-item:hover,
+.la-typeahead-item.focused {
+  background: #f0fdfa;
+}
+
+.la-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.la-item-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main, #0f172a);
+}
+
+.la-item-context {
+  font-size: 0.72rem;
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.la-item-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.la-item-badge.badge-panchayat {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.la-item-badge.badge-town {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.la-item-badge.badge-urban {
+  background: #faf5ff;
+  color: #6b21a8;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.la-item-badge.badge-revenue {
+  background: #fefce8;
+  color: #854d0e;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.la-typeahead-no-results {
+  padding: 0.85rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted, #64748b);
+}
+
+.la-cascade-divider {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.25rem 0;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.la-cascade-divider::before,
+.la-cascade-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-color, #e2e8f0);
+}

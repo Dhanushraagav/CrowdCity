@@ -22,7 +22,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
   <link rel="stylesheet" href="css/components.css?v=3.1.0">
-  <link rel="stylesheet" href="css/location-authority.css?v=1.2.0">
+  <link rel="stylesheet" href="css/location-authority.css?v=8.7.0">
 
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -728,8 +728,42 @@
                 </div>
               </div>
 
-              <!-- Manual 4-Tier Cascade Hierarchy Dropdowns -->
+              <!-- Manual 4-Tier Cascade Hierarchy & Instant Search -->
               <div id="la-manual-mode-container" class="la-manual-grid hidden">
+                <!-- Search-First Typeahead Section -->
+                <div class="la-typeahead-section">
+                  <div class="la-typeahead-header">
+                    <label for="la-search-typeahead-input" class="la-typeahead-label">
+                      <i class="fa-solid fa-magnifying-glass"></i> <span>Instant Location Search (விரைவு தேடல்)</span>
+                    </label>
+                    <div class="la-type-filter-chips">
+                      <button type="button" class="la-filter-chip active" data-type="all">All</button>
+                      <button type="button" class="la-filter-chip" data-type="village_panchayat">Panchayat</button>
+                      <button type="button" class="la-filter-chip" data-type="revenue_village">Revenue Village</button>
+                      <button type="button" class="la-filter-chip" data-type="town_panchayat">Town Panchayat</button>
+                      <button type="button" class="la-filter-chip" data-type="municipality">Municipality / Corp</button>
+                    </div>
+                  </div>
+                  <div class="la-typeahead-wrapper">
+                    <i class="fa-solid fa-magnifying-glass la-typeahead-search-icon"></i>
+                    <input
+                      type="text"
+                      id="la-search-typeahead-input"
+                      class="la-typeahead-input"
+                      placeholder="Type village, panchayat, town, or taluk name in English or தமிழ்..."
+                      autocomplete="off"
+                    >
+                    <button type="button" id="la-search-clear-btn" class="la-typeahead-clear-btn hidden" title="Clear search">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <div id="la-typeahead-dropdown" class="la-typeahead-dropdown hidden"></div>
+                  </div>
+                </div>
+
+                <div class="la-cascade-divider">
+                  <span>Or Select Hierarchy Step-by-Step</span>
+                </div>
+
                 <div class="la-form-group">
                   <label for="la-district-select">1. District (மாவட்டம்) *</label>
                   <select id="la-district-select" class="la-select">
@@ -1083,7 +1117,7 @@
   <script src="js/auth.js?v=6.5.0"></script>
   <script src="js/api.js?v=4.0.1"></script>
   <script src="js/notifications.js?v=4.0.1"></script>
-  <script src="js/locationAuthority.js?v=1.1.0"></script>
+  <script src="js/locationAuthority.js?v=8.7.0"></script>
   <script src="js/report.js?v=4.0.1"></script>
   <script src="js/chat-widget.js?v=4.0.1"></script>
 
