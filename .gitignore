@@ -29,3 +29,11 @@ Thumbs.db
 # Temp scratch directory
 scratch/
 
+# Presentations and Documents (Do not push PPT, PDF to git)
+*.ppt
+*.pptx
+*.pdf
+*.doc
+*.docx
+*.key
+*.odp
