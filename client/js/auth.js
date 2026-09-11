@@ -1737,8 +1737,7 @@ function updateAuthUI() {
     // If sidebar is already rendered (e.g. pre-rendered in HTML), just update active link classes without wiping DOM
     const existingNav = sidebar.querySelector('.app-sidebar-nav');
     if (existingNav) {
-      existingNav.querySelectorAll('a[href*="analytics.html"], a[href*="analytics"]').forEach(el => el.remove());
-      existingNav.querySelectorAll('a[href*="civic-intelligence.html"], a[href*="civic-intelligence"]').forEach(el => el.remove());
+      existingNav.querySelectorAll('a[href*="analytics"], a[href*="civic-intelligence"]').forEach(el => el.remove());
 
       // Upgrade any legacy icons to the new professional icons
       const iconMap = {
@@ -1772,7 +1771,6 @@ function updateAuthUI() {
         else if (href.includes('services.html') && isServices) active = true;
         else if (href.includes('emergency-services.html') && isEmergency) active = true;
         else if (href.includes('helplines.html') && isHelplines) active = true;
-        else if (href.includes('civic-intelligence.html') && isCivicIntelligence) active = true;
         
         link.classList.toggle('active', active);
       });
@@ -1828,6 +1826,8 @@ function updateAuthUI() {
         </a>
       </nav>
     `;
+
+    sidebar.querySelectorAll('a[href*="civic-intelligence"], a[href*="analytics"]').forEach(el => el.remove());
 
     if (window.i18n && typeof window.i18n.translatePage === 'function') {
       window.i18n.translatePage();
@@ -2164,6 +2164,9 @@ function updateAuthUI() {
       </div>
     `;
   }
+
+  // Guarantee that Civic Intelligence is never in any sidebar
+  document.querySelectorAll('.app-sidebar a[href*="civic-intelligence"], aside a[href*="civic-intelligence"]').forEach(el => el.remove());
 
   // Populate dynamic notifications dropdown elements if window.renderNotifications is loaded
   if (typeof window.renderNotifications === 'function') {

@@ -435,7 +435,7 @@
   };
 
   window.shareOutage = function (area, district, date, time) {
-    const text = `⚠️ [TNPDCL Power Shutdown Alert]\nArea: ${area}\nDistrict: ${district}\nDate: ${date}\nWindow: ${time}\nSource: TNPDCL / CrowdCity`;
+    const text = `[TNPDCL Power Shutdown Alert]\nArea: ${area}\nDistrict: ${district}\nDate: ${date}\nWindow: ${time}\nSource: TNPDCL / CrowdCity`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {
         showToast('Outage details copied to clipboard!');

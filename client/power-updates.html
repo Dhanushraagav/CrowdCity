@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="CrowdCity">
   <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
-  <script src="js/auth-router.js?v=3.1.0"></script>
+  <script src="js/auth-router.js?v=8.0.0"></script>
   <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,83 +20,82 @@
   
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
-  <link rel="stylesheet" href="css/components.css?v=3.1.0">
+  <link rel="stylesheet" href="css/components.css?v=8.0.0">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     .power-hero-banner {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      border-radius: 20px;
-      padding: 1.75rem 2rem;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 16px;
+      padding: 1.5rem 1.75rem;
       margin-bottom: 1.25rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 1.25rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
     .power-hero-title-group h1 {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 800;
-      color: var(--text-main);
+      color: var(--text-main, #0f172a);
       margin: 0 0 0.35rem 0;
       font-family: var(--font-heading, system-ui);
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.6rem;
     }
 
     .power-hero-title-group p {
       font-size: 0.88rem;
-      color: var(--text-muted);
+      color: var(--text-muted, #64748b);
       margin: 0;
       line-height: 1.5;
-      max-width: 650px;
+      max-width: 600px;
     }
 
     .power-hero-actions {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
       flex-wrap: wrap;
     }
 
     .power-source-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.4rem 0.85rem;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
       border-radius: 9999px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: #b45309;
     }
 
     .power-source-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #f59e0b;
-      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
     }
 
     .btn-official-source {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.45rem 0.95rem;
+      gap: 0.4rem;
+      padding: 0.42rem 0.9rem;
       background: var(--bg-surface, #ffffff);
       border: 1px solid var(--border-color, #cbd5e1);
-      border-radius: 10px;
-      font-size: 0.84rem;
-      font-weight: 700;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
       color: var(--text-main, #0f172a);
       text-decoration: none;
       transition: all 0.2s ease;
@@ -111,13 +110,13 @@
     .btn-refresh-power {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.45rem 0.95rem;
+      gap: 0.4rem;
+      padding: 0.42rem 0.9rem;
       background: var(--bg-surface, #ffffff);
       border: 1px solid var(--border-color, #cbd5e1);
-      border-radius: 10px;
-      font-size: 0.84rem;
-      font-weight: 700;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
       color: var(--text-main, #0f172a);
       cursor: pointer;
       transition: all 0.2s ease;
@@ -129,70 +128,17 @@
       color: var(--primary);
     }
 
-    /* Disclaimer Callout */
-    .power-disclaimer-callout {
-      background: var(--bg-surface, #ffffff);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      border-left: 4px solid #f59e0b;
-      border-radius: 12px;
-      padding: 0.85rem 1.25rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      font-size: 0.84rem;
-      color: var(--text-muted, #475569);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    }
-
-    .power-disclaimer-callout i {
-      font-size: 1.1rem;
-      color: #f59e0b;
-      flex-shrink: 0;
-    }
-
-    /* User Selected Location Banner */
-    .power-location-highlight {
-      background: rgba(13, 148, 136, 0.08);
-      border: 1px solid rgba(13, 148, 136, 0.22);
-      border-radius: 12px;
-      padding: 0.75rem 1.25rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      font-size: 0.85rem;
-      color: #0f766e;
-    }
-
-    .power-location-highlight strong {
-      color: #0d9488;
-    }
-
-    .power-clear-location-btn {
-      background: none;
-      border: none;
-      color: #0d9488;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: underline;
-      padding: 0;
-    }
-
     /* Controls & Filter Bar */
     .power-filter-card {
       background: var(--bg-surface, #ffffff);
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 16px;
-      padding: 1.25rem;
-      margin-bottom: 1.75rem;
+      border-radius: 14px;
+      padding: 1.15rem;
+      margin-bottom: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+      gap: 0.9rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
     .power-filter-top-row {
@@ -200,22 +146,22 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .power-time-tabs {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       flex-wrap: wrap;
     }
 
     .power-tab-btn {
-      padding: 0.45rem 0.85rem;
+      padding: 0.4rem 0.8rem;
       background: var(--bg-app, #f8fafc);
       border: 1px solid var(--border-color, #e2e8f0);
       border-radius: 8px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-muted, #64748b);
       cursor: pointer;
@@ -232,7 +178,7 @@
       border-color: #d97706;
       color: #ffffff;
       font-weight: 700;
-      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.28);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
     }
 
     .power-filter-inputs {
@@ -244,16 +190,16 @@
 
     .power-search-wrap {
       flex: 1;
-      min-width: 250px;
+      min-width: 240px;
       position: relative;
     }
 
     .power-search-wrap input {
       width: 100%;
-      padding: 0.62rem 1rem 0.62rem 2.3rem;
+      padding: 0.6rem 0.95rem 0.6rem 2.25rem;
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 10px;
-      font-size: 0.86rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
       color: var(--text-main);
       background: var(--bg-app);
       box-sizing: border-box;
@@ -268,24 +214,24 @@
 
     .power-search-wrap i {
       position: absolute;
-      left: 0.85rem;
+      left: 0.8rem;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
     }
 
     .power-select-filter {
-      padding: 0.62rem 0.95rem;
+      padding: 0.6rem 0.9rem;
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-main);
       background: var(--bg-app);
       cursor: pointer;
       outline: none;
-      min-width: 175px;
+      min-width: 170px;
     }
 
     .power-select-filter:focus {
@@ -293,10 +239,10 @@
     }
 
     .power-date-input {
-      padding: 0.58rem 0.85rem;
+      padding: 0.55rem 0.85rem;
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 10px;
-      font-size: 0.85rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
       color: var(--text-main);
       background: var(--bg-app);
       outline: none;
@@ -310,42 +256,41 @@
     /* Outage Grid */
     .power-outages-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 1.25rem;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
 
     .power-card {
       background: var(--bg-surface, #ffffff);
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 16px;
-      padding: 1.35rem;
+      border-radius: 14px;
+      padding: 1.3rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-      position: relative;
     }
 
     .power-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(245, 158, 11, 0.4);
-      box-shadow: 0 10px 25px -4px rgba(245, 158, 11, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+      box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
     }
 
     .power-card-header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 0.75rem;
-      margin-bottom: 0.85rem;
+      gap: 0.65rem;
+      margin-bottom: 0.75rem;
     }
 
     .power-badges-wrap {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
       flex-wrap: wrap;
     }
 
@@ -353,7 +298,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      padding: 0.22rem 0.6rem;
+      padding: 0.2rem 0.55rem;
       background: rgba(13, 148, 136, 0.08);
       color: #0d9488;
       border: 1px solid rgba(13, 148, 136, 0.2);
@@ -368,7 +313,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      padding: 0.22rem 0.65rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 6px;
       font-size: 0.72rem;
       font-weight: 800;
@@ -394,13 +339,6 @@
       border-radius: 50%;
       background: #f59e0b;
       display: inline-block;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.3); }
-      100% { opacity: 1; transform: scale(1); }
     }
 
     .status-restored {
@@ -416,37 +354,34 @@
     }
 
     .power-substation-title {
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 700;
       color: var(--text-main, #0f172a);
       margin: 0 0 0.45rem 0;
       font-family: var(--font-heading, system-ui);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
     }
 
     .power-time-window {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.75rem;
+      gap: 0.45rem;
+      padding: 0.45rem 0.7rem;
       background: var(--bg-app, #f8fafc);
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 8px;
-      font-size: 0.82rem;
+      border-radius: 7px;
+      font-size: 0.8rem;
       color: var(--text-main);
       font-weight: 600;
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.8rem;
     }
 
     .power-time-window i {
       color: #f59e0b;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
 
     .power-areas-section {
-      margin-bottom: 1rem;
+      margin-bottom: 0.9rem;
     }
 
     .power-areas-label {
@@ -454,22 +389,21 @@
       font-weight: 700;
       text-transform: uppercase;
       color: var(--text-muted, #64748b);
-      letter-spacing: 0.03em;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
     }
 
     .power-areas-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.35rem;
+      gap: 0.3rem;
     }
 
     .power-area-tag {
       display: inline-block;
-      padding: 0.2rem 0.5rem;
+      padding: 0.18rem 0.48rem;
       background: var(--bg-app, #f1f5f9);
       border-radius: 5px;
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       color: var(--text-main, #334155);
     }
 
@@ -478,7 +412,7 @@
       align-items: center;
       justify-content: space-between;
       border-top: 1px solid var(--border-color, #f1f5f9);
-      padding-top: 0.85rem;
+      padding-top: 0.8rem;
       font-size: 0.75rem;
       color: var(--text-muted, #64748b);
     }
@@ -496,65 +430,53 @@
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 6px;
+      padding: 0.2rem 0.45rem;
+      border-radius: 5px;
       transition: all 0.2s;
     }
 
     .power-btn-share:hover {
       background: var(--bg-hover);
-      color: #f59e0b;
+      color: #0f172a;
     }
 
-    /* Information / Source Info State */
-    .power-info-box {
+    /* Clean Center State Box */
+    .power-state-box {
       background: var(--bg-surface, #ffffff);
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 3rem 2rem;
       text-align: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
       margin-bottom: 2rem;
     }
 
-    .power-info-icon-wrap {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: rgba(245, 158, 11, 0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.25rem auto;
-      color: #d97706;
-      font-size: 1.75rem;
+    .power-state-box h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 0.5rem 0;
     }
 
-    .power-info-box h3 {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin: 0 0 0.6rem 0;
-    }
-
-    .power-info-box p {
+    .power-state-box p {
       font-size: 0.88rem;
-      color: var(--text-muted);
-      max-width: 580px;
-      margin: 0 auto 1.5rem auto;
-      line-height: 1.6;
+      color: var(--text-muted, #64748b);
+      max-width: 520px;
+      margin: 0 auto 1.35rem auto;
+      line-height: 1.55;
     }
 
-    .power-info-actions {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.85rem;
-      flex-wrap: wrap;
+    .power-disclaimer-footnote {
+      text-align: center;
+      font-size: 0.76rem;
+      color: var(--text-muted, #94a3b8);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color, #e2e8f0);
     }
 
     @media (max-width: 640px) {
@@ -582,13 +504,19 @@
     (function() {
       document.documentElement.classList.add('light-theme');
       document.documentElement.classList.remove('dark-theme');
+      // Enforce removal of Civic Intelligence from sidebar immediately
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.app-sidebar a[href*="civic-intelligence"], aside a[href*="civic-intelligence"]').forEach(function(el) {
+          el.remove();
+        });
+      });
     })();
   </script>
 </head>
 <body class="protected-page">
 
   <div class="app-layout">
-    <!-- Sidebar (Strictly no Power Updates in sidebar) -->
+    <!-- Sidebar (Strictly no Power Updates or Civic Intelligence in sidebar) -->
     <aside class="app-sidebar">
       <div class="sidebar-header">
         <a href="citizen-dashboard.html" class="app-sidebar-logo">
@@ -659,7 +587,7 @@
         <div class="power-hero-banner">
           <div class="power-hero-title-group">
             <h1><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> <span data-i18n="power_updates_title">Power Updates</span></h1>
-            <p data-i18n="power_updates_subtitle">Planned electricity shutdown information across Tamil Nadu.</p>
+            <p data-i18n="power_updates_subtitle">Planned electricity shutdown schedules across Tamil Nadu.</p>
           </div>
           <div class="power-hero-actions">
             <div class="power-source-badge">
@@ -668,33 +596,13 @@
             </div>
             <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn-official-source" title="View Official TNPDCL Shutdown Portal">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span data-i18n="power_view_official">View Official Source</span>
+              <span data-i18n="power_view_official">Official TNPDCL Portal</span>
             </a>
             <button class="btn-refresh-power" id="btn-refresh-power" onclick="refreshPowerUpdates()">
               <i class="fa-solid fa-arrows-rotate" id="refresh-power-icon"></i>
               <span>Refresh</span>
             </button>
           </div>
-        </div>
-
-        <!-- Civic Disclaimer Callout -->
-        <div class="power-disclaimer-callout">
-          <i class="fa-solid fa-shield-halved"></i>
-          <div>
-            <strong>Notice:</strong>
-            <span data-i18n="power_updates_disclaimer">CrowdCity is an independent civic-tech platform. Power outage data is referenced from official TNPDCL / TANGEDCO publications.</span>
-            <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" style="color: #d97706; text-decoration: underline; margin-left: 0.5rem; font-weight: 600;">Open TNPDCL Official Portal</a>
-          </div>
-        </div>
-
-        <!-- User Selected Location Highlight Banner (Dynamic) -->
-        <div id="power-location-highlight" class="power-location-highlight hidden">
-          <div>
-            <i class="fa-solid fa-location-dot" style="margin-right: 0.4rem;"></i>
-            <span data-i18n="power_selected_location">Shutdowns for your selected district:</span>
-            <strong id="power-user-district-text">--</strong>
-          </div>
-          <button class="power-clear-location-btn" onclick="clearDistrictFilter()">Show All Districts</button>
         </div>
 
         <!-- Search, Filter & Timeframe Tabs -->
@@ -782,26 +690,24 @@
         </div>
 
         <!-- Filter Empty State -->
-        <div id="power-empty-state" class="hidden" style="text-align: center; padding: 4rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; margin-bottom: 2rem;">
-          <i class="fa-solid fa-plug-circle-check" style="font-size: 2.5rem; color: #10b981; margin-bottom: 1rem;"></i>
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;" data-i18n="power_no_outages">No planned power shutdowns found for this selection.</h3>
-          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;">No planned maintenance is registered for this district and time window.</p>
-          <button class="btn btn-secondary" onclick="resetPowerFilters()" style="padding: 0.55rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Reset Filters</button>
+        <div id="power-empty-state" class="power-state-box hidden">
+          <i class="fa-solid fa-plug-circle-check" style="font-size: 2.2rem; color: #10b981; margin-bottom: 0.75rem;"></i>
+          <h3 data-i18n="power_no_outages">No planned power shutdowns found for this selection.</h3>
+          <p>No maintenance schedules match the selected district or time window.</p>
+          <button class="btn btn-secondary" onclick="resetPowerFilters()" style="padding: 0.5rem 1.1rem; font-size: 0.82rem; font-weight: 600;">Reset Filters</button>
         </div>
 
-        <!-- Official Source Direct Access State (When no scheduled records are in database) -->
-        <div id="power-official-info-box" class="power-info-box hidden">
-          <div class="power-info-icon-wrap">
-            <i class="fa-solid fa-bolt"></i>
-          </div>
-          <h3 data-i18n="power_updates_title">Power Updates</h3>
-          <p data-i18n="power_source_unavailable">Power shutdown information is temporarily unavailable from the automated official feed. Please verify directly on the official TNPDCL portal.</p>
-          <div class="power-info-actions">
-            <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.65rem 1.4rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <!-- Official Portal Information State (When no scheduled records exist in database) -->
+        <div id="power-official-info-box" class="power-state-box hidden">
+          <i class="fa-solid fa-bolt" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.75rem;"></i>
+          <h3>Official TNPDCL Shutdown Notices</h3>
+          <p data-i18n="power_source_unavailable">Official power shutdown schedules are published directly by TNPDCL / TANGEDCO. You can view all active outage notices on the official portal.</p>
+          <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+            <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem;">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span data-i18n="power_view_official">View Official Source</span>
+              <span data-i18n="power_view_official">Official TNPDCL Portal</span>
             </a>
-            <button class="btn btn-secondary" onclick="refreshPowerUpdates()" style="padding: 0.65rem 1.2rem; font-weight: 600;">
+            <button class="btn btn-secondary" onclick="refreshPowerUpdates()" style="padding: 0.55rem 1.1rem; font-size: 0.85rem; font-weight: 600;">
               <i class="fa-solid fa-arrows-rotate"></i>
               <span>Check Feed</span>
             </button>
@@ -809,14 +715,19 @@
         </div>
 
         <!-- Error State -->
-        <div id="power-error-state" class="hidden" style="text-align: center; padding: 3.5rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; margin-bottom: 2rem;">
-          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; color: #ef4444; margin-bottom: 1rem;"></i>
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Unable to Connect to Power Updates Service</h3>
-          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;" id="power-error-message">Please try refreshing the page or check the official TNPDCL portal.</p>
+        <div id="power-error-state" class="power-state-box hidden">
+          <i class="fa-solid fa-circle-exclamation" style="font-size: 2.2rem; color: #ef4444; margin-bottom: 0.75rem;"></i>
+          <h3>Unable to Connect to Power Updates Service</h3>
+          <p id="power-error-message">Please try refreshing the page or check the official TNPDCL portal.</p>
           <div style="display: flex; gap: 0.75rem; justify-content: center;">
-            <button class="btn btn-primary" onclick="refreshPowerUpdates()" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
-            <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Official Portal</a>
+            <button class="btn btn-primary" onclick="refreshPowerUpdates()" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
+            <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Official Portal</a>
           </div>
+        </div>
+
+        <!-- Footnote Disclaimer -->
+        <div class="power-disclaimer-footnote">
+          <span data-i18n="power_updates_disclaimer">CrowdCity is an independent civic-tech platform. Power outage data is referenced from official TNPDCL / TANGEDCO publications.</span>
         </div>
 
       </div>
@@ -825,8 +736,8 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/auth.js?v=3.1.0"></script>
-  <script src="js/power-updates.js"></script>
+  <script src="js/auth.js?v=8.0.0"></script>
+  <script src="js/power-updates.js?v=8.0.0"></script>
 
 </body>
 </html>
