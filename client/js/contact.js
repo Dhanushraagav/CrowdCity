@@ -12,14 +12,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initSupportCallButton() {
+  const config = (typeof window !== 'undefined' && window.CROWDCITY_CONFIG?.SUPPORT) 
+    ? window.CROWDCITY_CONFIG.SUPPORT 
+    : { 
+        tel: 'tel:+919025132196', 
+        actionText: 'Call CrowdCity Support',
+        whatsappUrl: 'https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue.',
+        whatsappActionText: 'Chat with Support'
+      };
+
   const supportBtn = document.getElementById('contact-call-support-btn');
   if (supportBtn) {
-    const config = (typeof window !== 'undefined' && window.CROWDCITY_CONFIG?.SUPPORT) 
-      ? window.CROWDCITY_CONFIG.SUPPORT 
-      : { tel: 'tel:+919025132196', actionText: 'Call CrowdCity Support' };
     supportBtn.href = config.tel || 'tel:+919025132196';
     if (config.actionText) {
       supportBtn.setAttribute('aria-label', config.actionText);
+    }
+  }
+
+  const waBtn = document.getElementById('contact-whatsapp-support-btn');
+  if (waBtn && config.whatsappUrl) {
+    waBtn.href = config.whatsappUrl;
+    if (config.whatsappActionText) {
+      waBtn.setAttribute('aria-label', `WhatsApp: ${config.whatsappActionText}`);
     }
   }
 }

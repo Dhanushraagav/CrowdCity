@@ -194,11 +194,36 @@
     if (!isCitizenDashboardPage()) {
       const existing = document.getElementById('header-tollfree-widget');
       if (existing) existing.remove();
+      const existingWa = document.getElementById('header-whatsapp-widget');
+      if (existingWa) existingWa.remove();
       return;
     }
 
     // Check if already present
-    if (document.getElementById('header-tollfree-widget')) {
+    const existingTf = document.getElementById('header-tollfree-widget');
+    if (existingTf) {
+      if (!document.getElementById('header-whatsapp-widget') && existingTf.parentNode) {
+        const waPill = document.createElement('a');
+        waPill.href = 'https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue.';
+        waPill.target = '_blank';
+        waPill.rel = 'noopener noreferrer';
+        waPill.className = 'header-whatsapp-pill';
+        waPill.id = 'header-whatsapp-widget';
+        waPill.title = 'WhatsApp: Chat with Support (+91 90251 32196)';
+        waPill.setAttribute('aria-label', 'Chat with Support on WhatsApp');
+        waPill.innerHTML = `
+          <span class="header-wa-icon-wrap">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span class="header-wa-live-dot"></span>
+          </span>
+          <span class="header-wa-text-wrap">
+            <span class="header-wa-title">WhatsApp</span>
+            <span class="header-wa-sep">·</span>
+            <span class="header-wa-desc">Chat with Support</span>
+          </span>
+        `;
+        existingTf.parentNode.insertBefore(waPill, existingTf.nextSibling);
+      }
       startHeaderAnimation();
       return;
     }
@@ -236,6 +261,30 @@
         tnBtn.parentNode.insertBefore(widget, tnBtn);
       } else if (authWrapper) {
         authWrapper.insertBefore(widget, authWrapper.firstChild);
+      }
+
+      // Also ensure WhatsApp Pill is inserted right beside the Toll-Free pill
+      if (!document.getElementById('header-whatsapp-widget') && widget.parentNode) {
+        const waPill = document.createElement('a');
+        waPill.href = 'https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue.';
+        waPill.target = '_blank';
+        waPill.rel = 'noopener noreferrer';
+        waPill.className = 'header-whatsapp-pill';
+        waPill.id = 'header-whatsapp-widget';
+        waPill.title = 'WhatsApp: Chat with Support (+91 90251 32196)';
+        waPill.setAttribute('aria-label', 'Chat with Support on WhatsApp');
+        waPill.innerHTML = `
+          <span class="header-wa-icon-wrap">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span class="header-wa-live-dot"></span>
+          </span>
+          <span class="header-wa-text-wrap">
+            <span class="header-wa-title">WhatsApp</span>
+            <span class="header-wa-sep">·</span>
+            <span class="header-wa-desc">Chat with Support</span>
+          </span>
+        `;
+        widget.parentNode.insertBefore(waPill, widget.nextSibling);
       }
 
       startHeaderAnimation();

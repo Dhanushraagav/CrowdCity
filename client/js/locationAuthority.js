@@ -25,10 +25,15 @@
     label: 'CrowdCity Support',
     title: 'CrowdCity 24/7 Support',
     phone: '+91 9025132196',
+    tollFree: '1800-425-1100',
+    whatsappPhone: '+91 90251 32196',
+    whatsappUrl: 'https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue.',
+    whatsappMessage: 'Hi CrowdCity Support, I need assistance regarding a civic issue.',
     get tel() {
       return `tel:${this.phone.replace(/[^0-9+]/g, '')}`;
     },
-    actionText: 'Call CrowdCity Support'
+    actionText: 'Call CrowdCity Support',
+    whatsappActionText: 'Chat with Support'
   };
 
   if (typeof window !== 'undefined') {
@@ -925,16 +930,25 @@
         const titleText = sup.title || supportConfig.title || 'CrowdCity 24/7 Support';
         const actionText = supportConfig.actionText || 'Call CrowdCity Support';
 
+        const waUrl = supportConfig.whatsappUrl || 'https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue.';
+        const waActionText = supportConfig.whatsappActionText || 'Chat with Support';
+
         supBox.innerHTML = `
           <div class="la-support-line">
             <div class="la-support-info">
               <i class="fa-solid fa-headset" aria-hidden="true"></i>
               <span class="la-support-title"><strong>${titleText}</strong></span>
             </div>
-            <a href="${telUri}" class="la-support-call-btn" role="button" aria-label="${actionText}">
-              <i class="fa-solid fa-phone" aria-hidden="true"></i>
-              <span>${actionText}</span>
-            </a>
+            <div style="display: inline-flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+              <a href="${telUri}" class="la-support-call-btn" role="button" aria-label="${actionText}">
+                <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                <span>${actionText}</span>
+              </a>
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="la-support-whatsapp-btn" role="button" aria-label="WhatsApp: ${waActionText}">
+                <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                <span>${waActionText}</span>
+              </a>
+            </div>
           </div>
         `;
       }

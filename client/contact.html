@@ -401,6 +401,34 @@
       transform: translateY(0);
     }
 
+    .contact-support-whatsapp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.95rem;
+      background: #15803d;
+      color: #ffffff !important;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none !important;
+      transition: background-color 0.2s ease, transform 0.15s ease;
+      box-shadow: 0 2px 6px rgba(21, 128, 61, 0.25);
+      cursor: pointer;
+      min-height: 36px;
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
+
+    .contact-support-whatsapp-btn:hover {
+      background: #166534;
+      transform: translateY(-1px);
+    }
+
+    .contact-support-whatsapp-btn:active {
+      transform: translateY(0);
+    }
+
     .faq-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -710,9 +738,12 @@
                   </div>
                   <div>
                     <div class="contact-info-label">CrowdCity 24/7 Support</div>
-                    <div class="contact-info-value" style="margin-top: 0.35rem;">
+                    <div class="contact-info-value" style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                       <a href="tel:+919025132196" class="contact-support-call-btn" id="contact-call-support-btn" role="button" aria-label="Call CrowdCity Support">
                         <i class="fa-solid fa-phone" aria-hidden="true"></i> <span>Call CrowdCity Support</span>
+                      </a>
+                      <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." target="_blank" rel="noopener noreferrer" class="contact-support-whatsapp-btn" id="contact-whatsapp-support-btn" role="button" aria-label="WhatsApp: Chat with Support">
+                        <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> <span>Chat with Support</span>
                       </a>
                     </div>
                   </div>
