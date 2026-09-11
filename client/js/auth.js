@@ -2071,29 +2071,8 @@ function updateAuthUI() {
         </a>`
       : '';
 
-    const whatsAppHeaderBtnHtml = isCitizenDashboardOnly ? `
-      <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." 
-         target="_blank" 
-         rel="noopener noreferrer" 
-         class="header-whatsapp-pill" 
-         id="header-whatsapp-widget" 
-         title="WhatsApp: Chat with Support (+91 90251 32196)"
-         aria-label="Chat with Support on WhatsApp">
-        <span class="header-wa-icon-wrap">
-          <i class="fa-brands fa-whatsapp"></i>
-          <span class="header-wa-live-dot"></span>
-        </span>
-        <span class="header-wa-text-wrap">
-          <span class="header-wa-title">WhatsApp</span>
-          <span class="header-wa-sep">·</span>
-          <span class="header-wa-desc">Chat with Support</span>
-        </span>
-      </a>
-    ` : '';
-
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
-        ${whatsAppHeaderBtnHtml}
         ${tnUpdatesBtnHtml}
 
         <!-- Notification Bell Container -->
@@ -2169,28 +2148,8 @@ function updateAuthUI() {
         </a>`
       : '';
     const tSignIn = window.i18n ? window.i18n.t('sign_in') : 'Sign In';
-    const whatsAppHeaderBtnHtml = isCitizenDashboardOnly ? `
-      <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." 
-         target="_blank" 
-         rel="noopener noreferrer" 
-         class="header-whatsapp-pill" 
-         id="header-whatsapp-widget" 
-         title="WhatsApp: Chat with Support (+91 90251 32196)"
-         aria-label="Chat with Support on WhatsApp">
-        <span class="header-wa-icon-wrap">
-          <i class="fa-brands fa-whatsapp"></i>
-          <span class="header-wa-live-dot"></span>
-        </span>
-        <span class="header-wa-text-wrap">
-          <span class="header-wa-title">WhatsApp</span>
-          <span class="header-wa-sep">·</span>
-          <span class="header-wa-desc">Chat with Support</span>
-        </span>
-      </a>
-    ` : '';
     finalContainer.innerHTML = `
       <div class="auth-nav-wrapper">
-        ${whatsAppHeaderBtnHtml}
         ${tnUpdatesBtnHtml}
         <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
       </div>
