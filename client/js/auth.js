@@ -1844,47 +1844,11 @@ function updateAuthUI() {
     const isCivicIntelligence = path.includes('civic-intelligence');
     const isAnalytics = path.includes('analytics');
     const isAbout = path.includes('about');
-    const isPowerUpdates = path.includes('power-updates');
-    const isWeatherAlerts = path.includes('weather-alerts') || path.includes('weather-forecast');
-    const isTnUpdates = path.includes('tamilnadu-updates');
-
-    const tPowerUpdates = window.i18n ? window.i18n.t('pulse_power_updates') : 'Power Updates';
-    const tWeatherAlerts = window.i18n ? window.i18n.t('pulse_weather_alerts') : 'Weather Forecast';
-    const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';
 
     // If sidebar is already rendered (e.g. pre-rendered in HTML), just update active link classes without wiping DOM
     const existingNav = sidebar.querySelector('.app-sidebar-nav');
     if (existingNav) {
-      existingNav.querySelectorAll('a[href*="analytics"], a[href*="civic-intelligence"]').forEach(el => el.remove());
-
-      // Ensure Public Pulse section is present in pre-rendered sidebars
-      if (!existingNav.querySelector('a[href*="power-updates"]')) {
-        const pulseFrag = document.createElement('div');
-        pulseFrag.innerHTML = `
-          <div class="sidebar-section-divider"></div>
-          <div class="sidebar-nav-heading">PUBLIC PULSE</div>
-          <a href="power-updates.html" class="app-sidebar-link ${isPowerUpdates ? 'active' : ''}" title="Power Updates">
-            <i class="fa-solid fa-plug"></i> <span data-i18n="pulse_power_updates">${tPowerUpdates}</span>
-          </a>
-          <a href="weather-alerts.html" class="app-sidebar-link ${isWeatherAlerts ? 'active' : ''}" title="Weather Forecast">
-            <i class="fa-solid fa-cloud-sun"></i> <span data-i18n="pulse_weather_alerts">${tWeatherAlerts}</span>
-          </a>
-          <a href="tamilnadu-updates.html" class="app-sidebar-link ${isTnUpdates ? 'active' : ''}" title="TN Updates">
-            <i class="fa-solid fa-newspaper"></i> <span data-i18n="nav_tn_updates">${tTnUpdates}</span>
-          </a>
-          <div class="sidebar-section-divider"></div>
-        `;
-        const insertTarget = existingNav.querySelector('a[href*="emergency-services"], .emergency-sidebar-link');
-        if (insertTarget) {
-          while (pulseFrag.firstChild) {
-            existingNav.insertBefore(pulseFrag.firstChild, insertTarget);
-          }
-        } else {
-          while (pulseFrag.firstChild) {
-            existingNav.appendChild(pulseFrag.firstChild);
-          }
-        }
-      }
+      existingNav.querySelectorAll('a[href*="analytics"], a[href*="civic-intelligence"], a[href*="power-updates"], a[href*="weather-alerts"], a[href*="weather-forecast"], a[href*="tamilnadu-updates"], .sidebar-nav-heading, .sidebar-section-divider').forEach(el => el.remove());
 
       // Upgrade any legacy icons to the new professional icons
       const iconMap = {
@@ -1916,9 +1880,6 @@ function updateAuthUI() {
         else if (href.includes('map.html') && isMap) active = true;
         else if (href.includes('transportation.html') && isTransportation) active = true;
         else if (href.includes('services.html') && isServices) active = true;
-        else if (href.includes('power-updates') && isPowerUpdates) active = true;
-        else if ((href.includes('weather-alerts') || href.includes('weather-forecast')) && isWeatherAlerts) active = true;
-        else if (href.includes('tamilnadu-updates') && isTnUpdates) active = true;
         else if (href.includes('emergency-services.html') && isEmergency) active = true;
         else if (href.includes('helplines.html') && isHelplines) active = true;
         
@@ -1968,22 +1929,6 @@ function updateAuthUI() {
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
           <i class="fa-solid fa-building-flag"></i> <span data-i18n="nav_services">Government Services</span>
         </a>
-
-        <div class="sidebar-section-divider"></div>
-        <div class="sidebar-nav-heading">PUBLIC PULSE</div>
-
-        <a href="power-updates.html" class="app-sidebar-link ${isPowerUpdates ? 'active' : ''}" title="Power Updates">
-          <i class="fa-solid fa-plug"></i> <span data-i18n="pulse_power_updates">${tPowerUpdates}</span>
-        </a>
-        <a href="weather-alerts.html" class="app-sidebar-link ${isWeatherAlerts ? 'active' : ''}" title="Weather Forecast">
-          <i class="fa-solid fa-cloud-sun"></i> <span data-i18n="pulse_weather_alerts">${tWeatherAlerts}</span>
-        </a>
-        <a href="tamilnadu-updates.html" class="app-sidebar-link ${isTnUpdates ? 'active' : ''}" title="TN Updates">
-          <i class="fa-solid fa-newspaper"></i> <span data-i18n="nav_tn_updates">${tTnUpdates}</span>
-        </a>
-
-        <div class="sidebar-section-divider"></div>
-
         <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link ${isEmergency ? 'active' : ''}" title="Emergency Help Center">
           <i class="fa-solid fa-shield-halved"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
         </a>

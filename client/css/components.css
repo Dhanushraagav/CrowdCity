@@ -2438,23 +2438,6 @@ body:not(.admin-portal-body) .app-sidebar {
   margin: 0.25rem 0 0.85rem 0;
 }
 
-.sidebar-section-divider {
-  height: 1px;
-  background: var(--border-color, #e2e8f0);
-  margin: 0.65rem 0.25rem 0.5rem 0.25rem;
-  opacity: 0.8;
-}
-
-.sidebar-nav-heading {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-muted, #64748b);
-  letter-spacing: 0.06em;
-  padding: 0.35rem 1rem 0.25rem 1rem;
-  text-transform: uppercase;
-  user-select: none;
-}
-
 .app-sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -5572,28 +5555,25 @@ body.dark-theme .universal-mobile-back-btn svg {
     flex-shrink: 0 !important;
   }
 
-  /* Hide center actions on mobile dashboard header so edges are pure */
+  /* Header actions (TN Updates & Public Pulse) visible on top across mobile */
   .dashboard-header .app-header-actions {
-    display: none !important;
+    display: flex !important;
+    order: 2 !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    margin-left: auto !important;
   }
 
-  /* Hide logos on subpages */
-  .app-header-logo-mobile {
-    display: none !important;
+  .dashboard-header .auth-nav-wrapper {
+    gap: 0.35rem !important;
   }
 
-  /* CrowdCity & Tamil Nadu Emblem: STRICT FAR RIGHT EDGE */
+  /* Hide logos on mobile header so top actions have full space */
+  .app-header-logo-mobile,
   .dashboard-header .app-header-logo-mobile,
   body.dashboard-page .app-header-logo-mobile,
   .citizen-dashboard .app-header-logo-mobile {
-    display: inline-flex !important;
-    order: 3 !important;
-    margin: 0 !important;
-    margin-left: auto !important;
-    align-items: center !important;
-    gap: 0.45rem !important;
-    text-decoration: none !important;
-    flex-shrink: 0 !important;
+    display: none !important;
   }
 
   .universal-mobile-back-btn {
