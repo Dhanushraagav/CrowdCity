@@ -1350,8 +1350,8 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
   const tFloodAlertsDesc = window.i18n ? window.i18n.t('pulse_flood_alerts_desc') : 'River basins, reservoirs & inundation levels';
   const tEmergencyAlerts = window.i18n ? window.i18n.t('pulse_emergency_alerts') : 'Emergency Alerts';
   const tEmergencyAlertsDesc = window.i18n ? window.i18n.t('pulse_emergency_alerts_desc') : 'Disaster management & public safety warnings';
-  const tWeatherAlerts = window.i18n ? window.i18n.t('pulse_weather_alerts') : 'Weather Alerts';
-  const tWeatherAlertsDesc = window.i18n ? window.i18n.t('pulse_weather_alerts_desc') : 'Official IMD warnings & regional advisories';
+  const tWeatherAlerts = window.i18n ? window.i18n.t('pulse_weather_alerts') : 'Weather Forecast';
+  const tWeatherAlertsDesc = window.i18n ? window.i18n.t('pulse_weather_alerts_desc') : '5-day regional weather forecasts & conditions';
   const tTransportUpdates = window.i18n ? window.i18n.t('pulse_transport_updates') : 'Public Transport Updates';
   const tTransportUpdatesDesc = window.i18n ? window.i18n.t('pulse_transport_updates_desc') : 'TNSTC, MTC & metro transit notices';
   const tActive = window.i18n ? window.i18n.t('pulse_active') : 'ACTIVE';
@@ -1394,10 +1394,10 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
             </div>
           </a>
 
-          <!-- 2. Weather Alerts -->
+          <!-- 2. Weather Forecast -->
           <a href="weather-alerts.html" class="public-pulse-item active-feature ${isWeatherAlertsActive ? 'current-page' : ''}" role="menuitem">
             <div class="pulse-item-icon-wrap active-icon">
-              <i class="fa-solid fa-cloud-bolt"></i>
+              <i class="fa-solid fa-cloud-sun"></i>
             </div>
             <div class="pulse-item-content">
               <div class="pulse-item-title-row">
@@ -2172,7 +2172,7 @@ function updateAuthUI() {
       !!document.querySelector('.stitch-hero') || 
       !!document.getElementById('civic-intelligence-feed-text');
     const isPowerUpdatesActive = currentPath.includes('power-updates');
-    const isWeatherAlertsActive = currentPath.includes('weather-alerts');
+    const isWeatherAlertsActive = currentPath.includes('weather-alerts') || currentPath.includes('weather-forecast');
     const isTnUpdatesActive = currentPath.includes('tamilnadu-updates');
 
     const tTnUpdates = window.i18n ? window.i18n.t('nav_tn_updates') : 'TN Updates';

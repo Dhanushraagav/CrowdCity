@@ -124,7 +124,13 @@ app.use('/api/authorities', authorityRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/power-updates', powerShutdownRoutes);
 app.use('/api/public-pulse/weather-alerts', publicPulseWeatherRoutes);
+app.use('/api/public-pulse/weather', publicPulseWeatherRoutes);
 app.use('/api/public-pulse', publicPulseWeatherRoutes);
+
+// Weather Forecast route alias resolving to weather-alerts.html
+app.get('/weather-forecast', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/weather-alerts.html'));
+});
 
 // Static client file server with caching and html extension resolution
 app.use(express.static(path.join(__dirname, '../client'), {

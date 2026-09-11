@@ -15,8 +15,8 @@
   <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Official district-level meteorological warnings and severe weather alerts across Tamil Nadu from the India Meteorological Department (IMD).">
-  <title>Weather Alerts - Public Pulse - CrowdCity AI</title>
+  <meta name="description" content="5-day meteorological weather forecasts and current weather conditions across all 38 districts of Tamil Nadu, powered by Open-Meteo.">
+  <title>Weather Forecast - Public Pulse - CrowdCity AI</title>
   
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
@@ -220,37 +220,130 @@
       background: var(--bg-app);
       cursor: pointer;
       outline: none;
-      min-width: 160px;
+      min-width: 180px;
     }
 
     .weather-select-filter:focus {
       border-color: #0f172a;
     }
 
-    .weather-date-input {
-      padding: 0.55rem 0.85rem;
+    /* Current Weather Card */
+    .current-weather-hero {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .current-weather-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color, #f1f5f9);
+    }
+
+    .current-district-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .current-temp-block {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .current-temp-large {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      line-height: 1;
+    }
+
+    .current-condition-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.75rem;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .current-feels-like {
+      font-size: 0.85rem;
+      color: var(--text-muted, #64748b);
+      font-weight: 500;
+    }
+
+    .current-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .current-metric-item {
+      background: var(--bg-app, #f8fafc);
       border: 1px solid var(--border-color, #e2e8f0);
       border-radius: 8px;
-      font-size: 0.84rem;
-      color: var(--text-main);
-      background: var(--bg-app);
-      outline: none;
-      cursor: pointer;
+      padding: 0.75rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
     }
 
-    .weather-date-input:focus {
-      border-color: #0f172a;
+    .current-metric-label {
+      font-size: 0.72rem;
+      color: var(--text-muted, #64748b);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
-    /* Weather Alert Grid */
-    .weather-alerts-grid {
+    .current-metric-value {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main, #0f172a);
+    }
+
+    /* Section Subheading */
+    .weather-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main, #0f172a);
+      margin: 1.5rem 0 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Forecast Grid */
+    .weather-forecast-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.25rem;
       margin-bottom: 2rem;
     }
 
-    .weather-alert-card {
+    .forecast-card {
       background: var(--bg-surface, #ffffff);
       border: 1px solid #e2e8f0;
       border-radius: 12px;
@@ -258,172 +351,120 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
     }
 
-    .weather-alert-card:hover {
+    .forecast-card:hover {
       border-color: #cbd5e1;
       box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
     }
 
-    .weather-card-header {
+    .forecast-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.75rem;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .forecast-day-tag {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .forecast-date-tag {
+      font-size: 0.76rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .forecast-condition-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
       margin-bottom: 0.85rem;
     }
 
-    .weather-badges-wrap {
+    .forecast-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #f1f5f9;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      min-width: 0;
-    }
-
-    .weather-district-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.22rem 0.6rem;
-      background: #f1f5f9;
-      color: #334155;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      white-space: nowrap;
-    }
-
-    .weather-day-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.22rem 0.55rem;
-      background: #f8fafc;
-      color: #475569;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-    }
-
-    .weather-severity-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.22rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      white-space: nowrap;
+      justify-content: center;
+      color: #0f172a;
+      font-size: 1.1rem;
       flex-shrink: 0;
     }
 
-    .severity-warning {
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-
-    .severity-dot-warning {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #dc2626;
-      display: inline-block;
-    }
-
-    .severity-alert {
-      background: #fff7ed;
-      color: #9a3412;
-      border: 1px solid #fed7aa;
-    }
-
-    .severity-dot-alert {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #ea580c;
-      display: inline-block;
-    }
-
-    .severity-watch {
-      background: #fefce8;
-      color: #854d0e;
-      border: 1px solid #fef08a;
-    }
-
-    .severity-dot-watch {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #ca8a04;
-      display: inline-block;
-    }
-
-    .severity-nowarning {
-      background: #f0fdf4;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
-
-    .severity-dot-nowarning {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #16a34a;
-      display: inline-block;
-    }
-
-    .weather-warning-title {
-      font-size: 1.05rem;
+    .forecast-condition-text {
+      font-size: 0.92rem;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 0.65rem 0;
-      line-height: 1.4;
-      font-family: var(--font-heading, system-ui);
+      line-height: 1.3;
     }
 
-    .weather-meta-row {
+    .forecast-temps-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .forecast-temp-max {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .forecast-temp-min {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .forecast-details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: #334155;
+      margin-bottom: 0.75rem;
+    }
+
+    .forecast-detail-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 0.5rem;
-      font-size: 0.8rem;
-      color: #334155;
-      margin-bottom: 0.4rem;
     }
 
-    .weather-meta-row i {
-      font-size: 0.82rem;
-      width: 14px;
-      text-align: center;
+    .forecast-detail-label {
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
-    .weather-card-footer {
+    .forecast-detail-val {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .forecast-card-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-top: 1px solid #f1f5f9;
-      padding-top: 0.8rem;
-      margin-top: 0.75rem;
-      font-size: 0.75rem;
+      padding-top: 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 0.74rem;
       color: #64748b;
-    }
-
-    .weather-source-tag {
-      font-weight: 500;
-      color: #64748b;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
     }
 
     .weather-btn-share {
@@ -443,6 +484,62 @@
     .weather-btn-share:hover {
       background: var(--bg-hover);
       color: #0f172a;
+    }
+
+    /* All Districts Grid */
+    .district-overview-card {
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .district-overview-card:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      transform: translateY(-1px);
+    }
+
+    .district-overview-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .district-overview-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .district-overview-condition {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 0.15rem;
+    }
+
+    .district-overview-temp {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
+    .district-overview-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: #64748b;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 0.5rem;
     }
 
     /* State Boxes */
@@ -487,16 +584,19 @@
       .weather-hero-title-group h1 {
         font-size: 1.25rem;
       }
-      .weather-alerts-grid {
+      .weather-forecast-grid {
         grid-template-columns: 1fr;
       }
       .weather-filter-inputs {
         flex-direction: column;
         align-items: stretch;
       }
-      .weather-select-filter, .weather-date-input {
+      .weather-select-filter {
         width: 100%;
         min-width: unset;
+      }
+      .current-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -586,19 +686,19 @@
         <!-- Hero Header Card -->
         <div class="weather-hero-banner">
           <div class="weather-hero-title-group">
-            <h1><span data-i18n="weather_alerts_title">Weather Alerts</span></h1>
-            <p data-i18n="weather_alerts_subtitle">Official weather warnings from the India Meteorological Department.</p>
+            <h1 data-i18n="weather_alerts_title">Weather Forecast</h1>
+            <p data-i18n="weather_alerts_subtitle">Weather forecast information for Tamil Nadu districts</p>
           </div>
           <div class="weather-hero-actions">
             <div id="weather-stale-badge" class="weather-stale-pill hidden">
               <i class="fa-regular fa-clock"></i>
               <span data-i18n="weather_stale_notice">Cached Data</span>
             </div>
-            <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" class="btn-official-source" title="View Official IMD Portal">
+            <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="btn-official-source" title="View Open-Meteo Documentation">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span data-i18n="weather_official_portal">Official IMD Portal</span>
+              <span data-i18n="weather_official_portal">Open-Meteo</span>
             </a>
-            <button class="btn-refresh-weather" id="btn-refresh-weather">
+            <button class="btn-refresh-weather" id="btn-refresh-weather" title="Refresh live forecast">
               <i class="fa-solid fa-arrows-rotate" id="refresh-weather-icon"></i>
               <span>Refresh</span>
             </button>
@@ -638,59 +738,63 @@
           <div class="weather-filter-inputs">
             <div class="weather-search-wrap">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="weather-search-input" placeholder="Search by district or warning..." data-i18n-placeholder="search_placeholder">
+              <input type="text" id="weather-search-input" placeholder="Search by district name..." data-i18n-placeholder="search_placeholder">
             </div>
 
             <select class="weather-select-filter" id="weather-district-filter">
               <option value="all" data-i18n="weather_filter_district_all">All Districts (38)</option>
             </select>
-
-            <select class="weather-select-filter" id="weather-severity-filter">
-              <option value="all" data-i18n="weather_filter_severity_all">All Severities</option>
-              <option value="Warning">Warning (Red)</option>
-              <option value="Alert">Alert (Orange)</option>
-              <option value="Watch">Watch (Yellow)</option>
-              <option value="No Warning">No Warning (Green)</option>
-            </select>
-
-            <input type="date" id="weather-date-input" class="weather-date-input" title="Filter by specific date">
           </div>
         </div>
 
-        <!-- Alert Cards Grid -->
-        <div class="weather-alerts-grid" id="weather-alerts-container">
-          <!-- Dynamic cards or skeletons injected via JS -->
+        <!-- Current Weather Hero Container -->
+        <div id="current-weather-container">
+          <!-- Injected via weather-alerts.js -->
         </div>
 
-        <!-- No Warning State for Specific District -->
-        <div id="weather-no-warning-box" class="weather-state-box hidden">
-          <i class="fa-regular fa-circle-check" style="font-size: 2.2rem; color: #16a34a; margin-bottom: 0.75rem;"></i>
-          <h3 id="no-warning-district-name">District</h3>
-          <p data-i18n="weather_no_warning_district">No weather warning for this district.</p>
-          <button class="btn btn-secondary" onclick="resetWeatherFilters()" style="padding: 0.5rem 1.1rem; font-size: 0.82rem; font-weight: 600;">Reset Filters</button>
+        <!-- 5-Day Forecast Grid Section -->
+        <div id="forecast-section-wrap">
+          <h2 class="weather-section-title" id="forecast-section-heading">
+            <i class="fa-regular fa-calendar-days" style="color: var(--primary);"></i>
+            <span>5-Day Forecast</span>
+          </h2>
+          <div class="weather-forecast-grid" id="weather-forecast-container">
+            <!-- Dynamic forecast cards injected via JS -->
+          </div>
+        </div>
+
+        <!-- All Districts Overview Container (Shown when All Districts is selected) -->
+        <div id="all-districts-section-wrap" class="hidden">
+          <h2 class="weather-section-title">
+            <i class="fa-solid fa-map-location-dot" style="color: var(--primary);"></i>
+            <span>Tamil Nadu Districts Weather (38)</span>
+          </h2>
+          <div class="weather-forecast-grid" id="all-districts-grid-container">
+            <!-- Dynamic 38-district overview cards injected via JS -->
+          </div>
         </div>
 
         <!-- Filter Empty State -->
         <div id="weather-empty-state" class="weather-state-box hidden">
           <i class="fa-solid fa-cloud-sun" style="font-size: 2.2rem; color: #64748b; margin-bottom: 0.75rem;"></i>
-          <h3 data-i18n="weather_no_alerts_found">No Weather Warnings Reported</h3>
-          <p data-i18n="weather_no_alerts_desc">No active meteorological warnings match the selected filters across Tamil Nadu.</p>
+          <h3 data-i18n="weather_no_alerts_found">No Districts Found</h3>
+          <p data-i18n="weather_no_alerts_desc">No Tamil Nadu district matches your search query.</p>
           <button class="btn btn-secondary" onclick="resetWeatherFilters()" style="padding: 0.5rem 1.1rem; font-size: 0.82rem; font-weight: 600;">Reset Filters</button>
         </div>
 
-        <!-- Source Unavailable State (Live IMD requires whitelisting / credentials) -->
+        <!-- Source Unavailable State -->
         <div id="weather-source-unavailable-box" class="weather-state-box hidden">
           <i class="fa-solid fa-satellite-dish" style="font-size: 2.2rem; color: #475569; margin-bottom: 0.75rem;"></i>
-          <h3 data-i18n="weather_source_unavailable_title">Weather alert data is temporarily unavailable.</h3>
-          <p data-i18n="weather_source_unavailable_desc">Official IMD data access is not currently available or requires authorized IP access. Please check the official IMD portal directly.</p>
+          <h3 data-i18n="weather_source_unavailable_title">Weather forecast data is temporarily unavailable.</h3>
+          <p data-i18n="weather_source_unavailable_desc">Open-Meteo forecast service could not be reached. Please check back shortly.</p>
           <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
-            <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem;">
+            <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem;">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span data-i18n="weather_official_portal">Official IMD Portal</span>
+              <span data-i18n="weather_official_portal">Open-Meteo</span>
             </a>
-            <button class="btn btn-secondary" onclick="fetchWeatherAlerts(true)" style="padding: 0.55rem 1.1rem; font-size: 0.85rem; font-weight: 600;">
+            <button class="btn btn-secondary" onclick="fetchWeatherForecast(true)" style="padding: 0.55rem 1.1rem; font-size: 0.85rem; font-weight: 600;">
               <i class="fa-solid fa-arrows-rotate"></i>
-              <span>Check Feed</span>
+              <span>Retry</span>
             </button>
           </div>
         </div>
@@ -698,17 +802,17 @@
         <!-- Error State -->
         <div id="weather-error-state" class="weather-state-box hidden">
           <i class="fa-solid fa-circle-exclamation" style="font-size: 2.2rem; color: #ef4444; margin-bottom: 0.75rem;"></i>
-          <h3>Unable to Connect to Weather Alert Service</h3>
-          <p id="weather-error-message">Please try refreshing the page or check the official IMD portal.</p>
+          <h3>Unable to Connect to Weather Forecast Service</h3>
+          <p id="weather-error-message">Please try refreshing the page or check Open-Meteo.</p>
           <div style="display: flex; gap: 0.75rem; justify-content: center;">
-            <button class="btn btn-primary" onclick="fetchWeatherAlerts(true)" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
-            <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Official Portal</a>
+            <button class="btn btn-primary" onclick="fetchWeatherForecast(true)" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
+            <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Open-Meteo</a>
           </div>
         </div>
 
-        <!-- Footnote Disclaimer & Official Attribution -->
+        <!-- Footnote Disclaimer & Open-Meteo Attribution -->
         <div class="weather-disclaimer-footnote">
-          <span>Source: India Meteorological Department, Ministry of Earth Sciences, Government of India. Official portal: <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">mausam.imd.gov.in</a></span>
+          <span>Source: Open-Meteo. Weather data provided by Open-Meteo. Official portal: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">open-meteo.com</a></span>
         </div>
 
       </div>
@@ -717,8 +821,8 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/auth.js?v=8.3.0"></script>
-  <script src="js/weather-alerts.js?v=1.0.0"></script>
+  <script src="js/auth.js?v=8.4.0"></script>
+  <script src="js/weather-alerts.js?v=2.0.0"></script>
 
 </body>
 </html>
