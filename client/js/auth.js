@@ -1377,7 +1377,6 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
             <i class="fa-solid fa-satellite-dish"></i>
             <span data-i18n="nav_public_pulse">${tPublicPulse}</span>
           </div>
-          <span class="public-pulse-header-subtitle">Tamil Nadu</span>
         </div>
         
         <div class="public-pulse-items-list">
