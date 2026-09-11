@@ -6188,13 +6188,14 @@ a,
 }
 
 .pulse-badge {
-  font-size: 0.62rem;
-  font-weight: 800;
-  padding: 0.12rem 0.42rem;
-  border-radius: 4px;
+  font-size: 0.52rem;
+  font-weight: 700;
+  padding: 0.06rem 0.32rem;
+  border-radius: 3px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   flex-shrink: 0;
+  line-height: 1.15;
 }
 
 .pulse-badge-active {

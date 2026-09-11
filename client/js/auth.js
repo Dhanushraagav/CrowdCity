@@ -1395,35 +1395,7 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
             </div>
           </a>
 
-          <!-- 2. Flood & Water-Level Alerts -->
-          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tFloodAlerts} - ${tPlanned}">
-            <div class="pulse-item-icon-wrap disabled-icon">
-              <i class="fa-solid fa-water"></i>
-            </div>
-            <div class="pulse-item-content">
-              <div class="pulse-item-title-row">
-                <span class="pulse-item-name" data-i18n="pulse_flood_alerts">${tFloodAlerts}</span>
-                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
-              </div>
-              <p class="pulse-item-desc" data-i18n="pulse_flood_alerts_desc">${tFloodAlertsDesc}</p>
-            </div>
-          </div>
-
-          <!-- 3. Emergency Alerts -->
-          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tEmergencyAlerts} - ${tPlanned}">
-            <div class="pulse-item-icon-wrap disabled-icon">
-              <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="pulse-item-content">
-              <div class="pulse-item-title-row">
-                <span class="pulse-item-name" data-i18n="pulse_emergency_alerts">${tEmergencyAlerts}</span>
-                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
-              </div>
-              <p class="pulse-item-desc" data-i18n="pulse_emergency_alerts_desc">${tEmergencyAlertsDesc}</p>
-            </div>
-          </div>
-
-          <!-- 4. Weather Alerts (ACTIVE) -->
+          <!-- 2. Weather Alerts (ACTIVE) -->
           <a href="weather-alerts.html" class="public-pulse-item active-feature ${isWeatherAlertsActive ? 'current-page' : ''}" role="menuitem">
             <div class="pulse-item-icon-wrap active-icon">
               <i class="fa-solid fa-cloud-bolt"></i>
@@ -1437,7 +1409,35 @@ function buildPublicPulseDropdownHtml(isPowerUpdatesActive = false, isWeatherAle
             </div>
           </a>
 
-          <!-- 5. Public Transport Updates -->
+          <!-- 3. Flood & Water-Level Alerts (PLANNED) -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tFloodAlerts} - ${tPlanned}">
+            <div class="pulse-item-icon-wrap disabled-icon">
+              <i class="fa-solid fa-water"></i>
+            </div>
+            <div class="pulse-item-content">
+              <div class="pulse-item-title-row">
+                <span class="pulse-item-name" data-i18n="pulse_flood_alerts">${tFloodAlerts}</span>
+                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
+              </div>
+              <p class="pulse-item-desc" data-i18n="pulse_flood_alerts_desc">${tFloodAlertsDesc}</p>
+            </div>
+          </div>
+
+          <!-- 4. Emergency Alerts (PLANNED) -->
+          <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tEmergencyAlerts} - ${tPlanned}">
+            <div class="pulse-item-icon-wrap disabled-icon">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="pulse-item-content">
+              <div class="pulse-item-title-row">
+                <span class="pulse-item-name" data-i18n="pulse_emergency_alerts">${tEmergencyAlerts}</span>
+                <span class="pulse-badge pulse-badge-soon" data-i18n="pulse_coming_soon">${tPlanned}</span>
+              </div>
+              <p class="pulse-item-desc" data-i18n="pulse_emergency_alerts_desc">${tEmergencyAlertsDesc}</p>
+            </div>
+          </div>
+
+          <!-- 5. Public Transport Updates (PLANNED) -->
           <div class="public-pulse-item disabled-feature" role="menuitem" aria-disabled="true" title="${tTransportUpdates} - ${tPlanned}">
             <div class="pulse-item-icon-wrap disabled-icon">
               <i class="fa-solid fa-bus"></i>
