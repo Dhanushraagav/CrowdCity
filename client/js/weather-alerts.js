@@ -4,13 +4,13 @@
  * Open-Meteo Weather Forecast Client Controller.
  * Powers the Public Pulse > Weather Forecast page.
  * 
- * Strict Integrity & Standards:
+ * Strict Standards:
  * - Real forecast data from Open-Meteo via CrowdCity backend (/api/public-pulse/weather)
+ * - Clean, professional government-grade UI
  * - NO emojis anywhere
- * - NO dummy data
- * - WMO weather code mapping
+ * - Functional icons only
  * - 38 Tamil Nadu districts
- * - Desktop, tablet & mobile responsive
+ * - Desktop (4 col), tablet (2 col), mobile (1 col) responsive
  */
 
 (function() {
@@ -48,7 +48,7 @@
   }
 
   /**
-   * Populate districts dropdown dynamically using CrowdCity's master location API.
+   * Populate districts dropdown dynamically using CrowdCity master location data.
    */
   async function populateDistrictsDropdown() {
     const select = document.getElementById('weather-district-filter');
@@ -64,7 +64,7 @@
         }
       }
     } catch (e) {
-      console.warn('[WeatherForecast] Using fallback 38-districts master list:', e.message);
+      console.warn('[WeatherForecast] Using fallback 38-districts list:', e.message);
     }
 
     districts = Array.from(new Set(districts)).sort();
@@ -167,9 +167,7 @@
       state.lastUpdatedIST = data.last_updated_ist || null;
       state.districtsForecast = data.districts_forecast || [];
 
-      // Determine active district
       updateSelectedDistrictView();
-
       updateHeaderStatus();
       renderView();
     } catch (err) {
@@ -195,7 +193,6 @@
       );
       state.currentDistrict = found || state.districtsForecast[0];
     } else {
-      // Default to Chennai or first available
       const chennai = state.districtsForecast.find(d => d.district.id.toLowerCase() === 'chennai');
       state.currentDistrict = chennai || state.districtsForecast[0];
     }
@@ -206,7 +203,8 @@
     const staleNoticeEl = document.getElementById('weather-stale-badge');
 
     if (updatedEl) {
-      updatedEl.textContent = state.lastUpdatedIST || 'Unavailable';
+      const prefix = window.i18n ? window.i18n.t('weather_last_updated') : 'Updated';
+      updatedEl.textContent = state.lastUpdatedIST ? `${prefix} ${state.lastUpdatedIST}` : '--';
     }
 
     if (staleNoticeEl) {
@@ -244,7 +242,7 @@
 
     if (sourceUnavailableBox) sourceUnavailableBox.classList.add('hidden');
 
-    // Handle search query filtering
+    // Handle search filtering
     let matchingDistricts = [...state.districtsForecast];
     if (state.searchQuery) {
       matchingDistricts = matchingDistricts.filter(d => 
@@ -263,7 +261,7 @@
 
     if (emptyState) emptyState.classList.add('hidden');
 
-    // Render Current Weather Card
+    // Target district for Current Weather and 5-Day Forecast
     const targetDistrict = (state.searchQuery && matchingDistricts.length === 1)
       ? matchingDistricts[0]
       : state.currentDistrict;
@@ -272,7 +270,7 @@
       heroContainer.innerHTML = createCurrentWeatherHeroHtml(targetDistrict);
     }
 
-    // Render 5-Day Forecast Grid for target district
+    // 5-Day Forecast Grid for target district
     if (forecastContainer && targetDistrict && targetDistrict.daily) {
       let filteredDaily = [...targetDistrict.daily];
 
@@ -294,14 +292,11 @@
 
       if (forecastSectionHeading) {
         const timeframeLabel = state.dateTab === 'all' ? '5-Day Forecast' : `${filteredDaily[0]?.day_label || 'Day'} Forecast`;
-        forecastSectionHeading.innerHTML = `
-          <i class="fa-regular fa-calendar-days" style="color: var(--primary);"></i>
-          <span>${escapeHtml(targetDistrict.district.name)} &bull; ${escapeHtml(timeframeLabel)}</span>
-        `;
+        forecastSectionHeading.textContent = `${targetDistrict.district.name} · ${timeframeLabel}`;
       }
     }
 
-    // If "All Districts" is selected, also render the 38-District Overview Grid
+    // 38-District Overview Grid
     if (allDistrictsSection && allDistrictsGrid) {
       if (state.district === 'all') {
         allDistrictsSection.classList.remove('hidden');
@@ -313,7 +308,7 @@
   }
 
   /**
-   * HTML Template: Current Weather Hero Card.
+   * HTML Template: Refined Current Weather Panel (Clean 2-level layout).
    */
   function createCurrentWeatherHeroHtml(item) {
     const dist = item.district;
@@ -326,58 +321,57 @@
     const windDisplay = `${curr.wind_speed_kmh} km/h`;
     const gustsDisplay = `${curr.wind_gusts_kmh} km/h`;
 
-    return `
-      <section class="current-weather-hero">
-        <div class="current-weather-header">
-          <div>
-            <h2 class="current-district-title">
-              <i class="fa-solid fa-location-dot" style="color: var(--primary); font-size: 1.1rem;"></i>
-              <span>${escapeHtml(dist.name)}</span>
-              <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.5rem; background: #e0f2fe; color: #0369a1; border-radius: 4px; text-transform: uppercase;">Current Conditions</span>
-            </h2>
-            <div class="current-temp-block">
-              <span class="current-temp-large">${escapeHtml(tempDisplay)}</span>
-              <span class="current-condition-badge">
-                <i class="fa-solid ${escapeHtml(curr.icon_class)}" style="color: var(--primary);"></i>
-                <span>${escapeHtml(curr.condition)}</span>
-              </span>
-              <span class="current-feels-like">Feels like <strong>${escapeHtml(feelsLikeDisplay)}</strong></span>
-            </div>
-          </div>
+    const feelsLikeLabel = window.i18n ? window.i18n.t('weather_feels_like') : 'Feels like';
+    const rainLabel = window.i18n ? window.i18n.t('weather_rainfall') : 'Rain';
+    const humidityLabel = window.i18n ? window.i18n.t('weather_humidity') : 'Humidity';
+    const windLabel = window.i18n ? window.i18n.t('weather_wind') : 'Wind';
+    const gustsLabel = window.i18n ? window.i18n.t('weather_wind_gusts') : 'Wind gusts';
 
-          <div style="text-align: right; font-size: 0.76rem; color: var(--text-muted);">
-            <div>Observed at ${escapeHtml(curr.time_ist)}</div>
-            <div style="font-weight: 600; color: var(--text-main); margin-top: 0.15rem;">Open-Meteo Live Feed</div>
+    return `
+      <section class="current-weather-panel">
+        <div class="current-weather-top">
+          <div>
+            <h2 class="current-district-name">${escapeHtml(dist.name)}</h2>
+            <div class="current-temp-summary">
+              <span class="current-temperature">${escapeHtml(tempDisplay)}</span>
+              <div class="current-condition-wrap">
+                <span class="current-condition-text">
+                  <i class="fa-solid ${escapeHtml(curr.icon_class)}"></i>
+                  <span>${escapeHtml(curr.condition)}</span>
+                </span>
+                <span class="current-feels-like">${escapeHtml(feelsLikeLabel)} ${escapeHtml(feelsLikeDisplay)}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="current-metrics-grid">
-          <div class="current-metric-item">
-            <span class="current-metric-label">
-              <i class="fa-solid fa-cloud-rain" style="color: #0284c7;"></i> Rain
+        <div class="current-metrics-row">
+          <div class="metric-block">
+            <span class="metric-label">
+              <i class="fa-solid fa-droplet"></i> ${escapeHtml(rainLabel)}
             </span>
-            <span class="current-metric-value">${escapeHtml(rainDisplay)}</span>
+            <span class="metric-value">${escapeHtml(rainDisplay)}</span>
           </div>
 
-          <div class="current-metric-item">
-            <span class="current-metric-label">
-              <i class="fa-solid fa-droplet" style="color: #0d9488;"></i> Humidity
+          <div class="metric-block">
+            <span class="metric-label">
+              <i class="fa-solid fa-water"></i> ${escapeHtml(humidityLabel)}
             </span>
-            <span class="current-metric-value">${escapeHtml(humidityDisplay)}</span>
+            <span class="metric-value">${escapeHtml(humidityDisplay)}</span>
           </div>
 
-          <div class="current-metric-item">
-            <span class="current-metric-label">
-              <i class="fa-solid fa-wind" style="color: #64748b;"></i> Wind
+          <div class="metric-block">
+            <span class="metric-label">
+              <i class="fa-solid fa-wind"></i> ${escapeHtml(windLabel)}
             </span>
-            <span class="current-metric-value">${escapeHtml(windDisplay)}</span>
+            <span class="metric-value">${escapeHtml(windDisplay)}</span>
           </div>
 
-          <div class="current-metric-item">
-            <span class="current-metric-label">
-              <i class="fa-solid fa-gauge-high" style="color: #d97706;"></i> Wind Gusts
+          <div class="metric-block">
+            <span class="metric-label">
+              <i class="fa-solid fa-gauge-high"></i> ${escapeHtml(gustsLabel)}
             </span>
-            <span class="current-metric-value">${escapeHtml(gustsDisplay)}</span>
+            <span class="metric-value">${escapeHtml(gustsDisplay)}</span>
           </div>
         </div>
       </section>
@@ -385,7 +379,7 @@
   }
 
   /**
-   * HTML Template: 5-Day Forecast Card.
+   * HTML Template: Refined 5-Day Forecast Card.
    */
   function createForecastCardHtml(districtName, item) {
     const tempMax = item.temperature_max_c !== null ? `${item.temperature_max_c}°C` : '--';
@@ -393,7 +387,12 @@
     const precipProb = `${item.precipitation_probability_pct}%`;
     const rainSum = `${item.precipitation_sum_mm} mm`;
     const windMax = `${item.wind_speed_max_kmh} km/h`;
-    const gustsMax = `${item.wind_gusts_max_kmh} km/h`;
+
+    const rainChanceLabel = window.i18n ? window.i18n.t('weather_precip_prob') : 'Rain chance';
+    const rainfallLabel = window.i18n ? window.i18n.t('weather_rainfall') : 'Rainfall';
+    const maxWindLabel = 'Max wind';
+    const sunriseLabel = window.i18n ? window.i18n.t('weather_sunrise') : 'Sunrise';
+    const sunsetLabel = window.i18n ? window.i18n.t('weather_sunset') : 'Sunset';
 
     return `
       <article class="forecast-card">
@@ -404,10 +403,8 @@
           </div>
 
           <div class="forecast-condition-row">
-            <div class="forecast-icon-wrap">
-              <i class="fa-solid ${escapeHtml(item.icon_class)}"></i>
-            </div>
-            <div class="forecast-condition-text">${escapeHtml(item.condition)}</div>
+            <i class="fa-solid ${escapeHtml(item.icon_class)}"></i>
+            <span class="forecast-condition-text">${escapeHtml(item.condition)}</span>
           </div>
 
           <div class="forecast-temps-row">
@@ -418,36 +415,43 @@
           <div class="forecast-details-list">
             <div class="forecast-detail-row">
               <span class="forecast-detail-label">
-                <i class="fa-solid fa-umbrella" style="color: #0284c7; width: 14px;"></i> Rain Chance
+                <i class="fa-solid fa-droplet"></i> ${escapeHtml(rainChanceLabel)}
               </span>
               <span class="forecast-detail-val">${escapeHtml(precipProb)}</span>
             </div>
 
             <div class="forecast-detail-row">
               <span class="forecast-detail-label">
-                <i class="fa-solid fa-cloud-showers-heavy" style="color: #0d9488; width: 14px;"></i> Rainfall
+                <i class="fa-solid fa-cloud-rain"></i> ${escapeHtml(rainfallLabel)}
               </span>
               <span class="forecast-detail-val">${escapeHtml(rainSum)}</span>
             </div>
 
             <div class="forecast-detail-row">
               <span class="forecast-detail-label">
-                <i class="fa-solid fa-wind" style="color: #64748b; width: 14px;"></i> Max Wind
+                <i class="fa-solid fa-wind"></i> ${escapeHtml(maxWindLabel)}
               </span>
               <span class="forecast-detail-val">${escapeHtml(windMax)}</span>
             </div>
 
             <div class="forecast-detail-row">
               <span class="forecast-detail-label">
-                <i class="fa-solid fa-sun" style="color: #f59e0b; width: 14px;"></i> Sun Times
+                <i class="fa-regular fa-sun"></i> ${escapeHtml(sunriseLabel)}
               </span>
-              <span class="forecast-detail-val">${escapeHtml(item.sunrise)} &bull; ${escapeHtml(item.sunset)}</span>
+              <span class="forecast-detail-val">${escapeHtml(item.sunrise)}</span>
+            </div>
+
+            <div class="forecast-detail-row">
+              <span class="forecast-detail-label">
+                <i class="fa-regular fa-moon"></i> ${escapeHtml(sunsetLabel)}
+              </span>
+              <span class="forecast-detail-val">${escapeHtml(item.sunset)}</span>
             </div>
           </div>
         </div>
 
         <div class="forecast-card-footer">
-          <span style="font-size: 0.72rem; color: #94a3b8;">Source: Open-Meteo</span>
+          <span>Source: Open-Meteo</span>
           <button class="weather-btn-share" onclick="shareForecast('${escapeHtml(districtName)}', '${escapeHtml(item.day_label)}', '${escapeHtml(item.date_formatted)}', '${escapeHtml(item.condition)}', '${escapeHtml(tempMax)}', '${escapeHtml(tempMin)}', '${escapeHtml(precipProb)}', '${escapeHtml(rainSum)}')" title="Copy forecast details">
             <i class="fa-regular fa-copy"></i>
             <span>Share</span>
@@ -458,7 +462,7 @@
   }
 
   /**
-   * HTML Template: Compact Overview Card for 38-Districts Grid.
+   * HTML Template: Refined 38-District Overview Card.
    */
   function createDistrictOverviewCardHtml(item) {
     const dist = item.district;
@@ -469,21 +473,21 @@
     const rainProb = todayDaily.precipitation_probability_pct !== undefined ? `${todayDaily.precipitation_probability_pct}%` : '--';
 
     return `
-      <div class="district-overview-card" onclick="selectDistrict('${escapeHtml(dist.id)}')">
-        <div class="district-overview-top">
+      <div class="district-card" onclick="selectDistrict('${escapeHtml(dist.id)}')">
+        <div class="district-card-top">
           <div>
-            <div class="district-overview-name">${escapeHtml(dist.name)}</div>
-            <div class="district-overview-condition">
-              <i class="fa-solid ${escapeHtml(curr.icon_class)}" style="color: var(--primary); margin-right: 0.25rem;"></i>
-              ${escapeHtml(curr.condition)}
+            <div class="district-card-name">${escapeHtml(dist.name)}</div>
+            <div class="district-card-condition">
+              <i class="fa-solid ${escapeHtml(curr.icon_class)}" style="color: #64748b;"></i>
+              <span>${escapeHtml(curr.condition)}</span>
             </div>
           </div>
-          <div class="district-overview-temp">${escapeHtml(tempDisplay)}</div>
+          <div class="district-card-temp">${escapeHtml(tempDisplay)}</div>
         </div>
 
-        <div class="district-overview-bottom">
-          <span>Rain Chance: <strong>${escapeHtml(rainProb)}</strong></span>
-          <span>Wind: <strong>${escapeHtml(curr.wind_speed_kmh)} km/h</strong></span>
+        <div class="district-card-bottom">
+          <span>Rain chance ${escapeHtml(rainProb)}</span>
+          <span>Wind ${escapeHtml(curr.wind_speed_kmh)} km/h</span>
         </div>
       </div>
     `;
@@ -497,7 +501,6 @@
     updateSelectedDistrictView();
     renderView();
 
-    // Smooth scroll to top of current weather
     const hero = document.getElementById('current-weather-container');
     if (hero) {
       hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -505,7 +508,7 @@
   };
 
   window.shareForecast = function(district, dayLabel, date, condition, high, low, rainChance, rainSum) {
-    const text = `CrowdCity Weather Forecast\nDistrict: ${district}\nForecast: ${dayLabel} (${date})\nCondition: ${condition}\nTemperature: High ${high} / Low ${low}\nRain Chance: ${rainChance} (${rainSum})\nSource: Open-Meteo\nhttps://open-meteo.com/`;
+    const text = `CrowdCity Weather Forecast\nDistrict: ${district}\nForecast: ${dayLabel} (${date})\nCondition: ${condition}\nTemperature: High ${high} / Low ${low}\nRain chance: ${rainChance} (${rainSum})\nSource: Open-Meteo\nhttps://open-meteo.com/`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {
         alert('Weather forecast details copied to clipboard.');
@@ -520,20 +523,20 @@
   function showErrorState(msg) {
     const errorState = document.getElementById('weather-error-state');
     const msgEl = document.getElementById('weather-error-message');
-    if (msgEl) msgEl.textContent = msg || 'Weather forecast data is temporarily unavailable.';
+    if (msgEl) msgEl.textContent = msg || 'Weather data unavailable.';
     if (errorState) errorState.classList.remove('hidden');
   }
 
   function getHeroSkeletonHtml() {
     return `
-      <div class="current-weather-hero" style="opacity: 0.6; pointer-events: none;">
-        <div style="height: 24px; background: #e2e8f0; border-radius: 6px; width: 35%; margin-bottom: 1rem;"></div>
-        <div style="height: 40px; background: #e2e8f0; border-radius: 6px; width: 50%; margin-bottom: 1.5rem;"></div>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem;">
-          <div style="height: 50px; background: #f1f5f9; border-radius: 6px;"></div>
-          <div style="height: 50px; background: #f1f5f9; border-radius: 6px;"></div>
-          <div style="height: 50px; background: #f1f5f9; border-radius: 6px;"></div>
-          <div style="height: 50px; background: #f1f5f9; border-radius: 6px;"></div>
+      <div class="current-weather-panel" style="opacity: 0.6; pointer-events: none;">
+        <div style="height: 24px; background: #e2e8f0; border-radius: 6px; width: 30%; margin-bottom: 0.75rem;"></div>
+        <div style="height: 44px; background: #e2e8f0; border-radius: 6px; width: 45%; margin-bottom: 1.25rem;"></div>
+        <div class="current-metrics-row">
+          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
+          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
+          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
+          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
         </div>
       </div>
     `;
@@ -542,10 +545,10 @@
   function getForecastSkeletonHtml() {
     return Array(5).fill(0).map(() => `
       <div class="forecast-card" style="opacity: 0.6; pointer-events: none;">
-        <div style="height: 20px; background: #e2e8f0; border-radius: 6px; width: 45%; margin-bottom: 1rem;"></div>
-        <div style="height: 32px; background: #e2e8f0; border-radius: 6px; width: 70%; margin-bottom: 1rem;"></div>
-        <div style="height: 40px; background: #f1f5f9; border-radius: 6px; width: 100%; margin-bottom: 1rem;"></div>
-        <div style="height: 20px; background: #f1f5f9; border-radius: 4px; width: 50%;"></div>
+        <div style="height: 18px; background: #e2e8f0; border-radius: 6px; width: 45%; margin-bottom: 0.85rem;"></div>
+        <div style="height: 24px; background: #e2e8f0; border-radius: 6px; width: 65%; margin-bottom: 0.85rem;"></div>
+        <div style="height: 32px; background: #f1f5f9; border-radius: 6px; width: 100%; margin-bottom: 0.85rem;"></div>
+        <div style="height: 16px; background: #f1f5f9; border-radius: 4px; width: 40%;"></div>
       </div>
     `).join('');
   }
