@@ -17,7 +17,7 @@ function initSupportCallButton() {
     : { 
         tel: 'tel:+919025132196', 
         actionText: 'Call CrowdCity Support',
-        whatsappUrl: 'https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue.',
+        whatsappPhone: '+91 90251 32196',
         whatsappActionText: 'Chat with Support'
       };
 
@@ -30,8 +30,10 @@ function initSupportCallButton() {
   }
 
   const waBtn = document.getElementById('contact-whatsapp-support-btn');
-  if (waBtn && config.whatsappUrl) {
-    waBtn.href = config.whatsappUrl;
+  if (waBtn) {
+    const contactEnquiryMsg = "Hello CrowdCity Support, I would like to get in touch with your support team regarding an enquiry. Please assist me with the appropriate information.";
+    const waPhone = (config.whatsappPhone || '+91 90251 32196').replace(/[^0-9]/g, '');
+    waBtn.href = `https://wa.me/${waPhone}?text=${encodeURIComponent(contactEnquiryMsg)}`;
     if (config.whatsappActionText) {
       waBtn.setAttribute('aria-label', `WhatsApp: ${config.whatsappActionText}`);
     }
