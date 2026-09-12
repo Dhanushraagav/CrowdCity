@@ -15,303 +15,312 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Base Styles -->
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/components.css">
+
+  <!-- i18n Early Initialization -->
+  <script src="js/i18n.js"></script>
 
   <style>
     /* ==========================================================================
-       URGENT / IMMEDIATE ACTION — LOCATION-FIRST EMERGENCY ASSISTANCE STYLES
-       Mobile-first, high contrast, accessible, zero emojis, clean civic design
+       URGENT / IMMEDIATE ACTION — COMPACT LOCATION-FIRST EMERGENCY INTERFACE
+       Mobile-first, fast interaction, high contrast, zero emojis, clean civic design
        ========================================================================== */
     
-    /* Clean Standalone Emergency Layout (Zero sidebars, zero search bars) */
+    /* Strict isolation: suppress any global sidebar, search or dashboard overlays */
     .app-sidebar,
     .global-search-container,
     .app-header-main,
     .dashboard-header,
     header.app-header,
     .menu-toggle,
-    #i18n-container,
     .sidebar-overlay,
     .app-header-actions {
       display: none !important;
     }
 
-    body {
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
       margin: 0;
       padding: 0;
-      background: var(--bg-app, #f8fafc);
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       min-height: 100vh;
       width: 100%;
       overflow-x: hidden;
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Government Official Top Banner */
+    /* 1. Top Government Official Bar */
     .emergency-top-strip {
       background: #7f1d1d;
       color: #fef2f2;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
-      letter-spacing: 0.03em;
-      padding: 0.45rem 1rem;
+      letter-spacing: 0.02em;
+      padding: 0.35rem 1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 0.35rem;
       border-bottom: 1px solid #991b1b;
+      line-height: 1.3;
     }
 
-    /* Clean Navigation Bar */
+    .emergency-top-strip i {
+      margin-right: 0.35rem;
+    }
+
+    /* 2. Compact Header Navigation Bar */
     .urgent-nav-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.85rem 1.75rem;
+      padding: 0.45rem 1rem;
       background: #ffffff;
-      border-bottom: 1px solid var(--border-color, #e2e8f0);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      min-height: 48px;
+    }
+
+    .urgent-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .urgent-back-button {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.55rem 1.15rem;
-      background: #f8fafc;
+      gap: 0.4rem;
+      padding: 0.4rem 0.75rem;
+      background: #f1f5f9;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      border-radius: 6px;
       color: #0f172a;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       font-weight: 700;
       text-decoration: none;
-      transition: all 0.15s ease;
+      transition: background 0.15s ease;
       cursor: pointer;
+      min-height: 36px;
     }
 
     .urgent-back-button:hover {
-      background: #f1f5f9;
-      border-color: #94a3b8;
-      color: #0f172a;
+      background: #e2e8f0;
     }
 
-    .urgent-back-button:active {
-      transform: scale(0.96);
-    }
-
-    .urgent-nav-branding {
+    .urgent-nav-center {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.5rem;
     }
 
     .urgent-nav-logo {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-    }
-
-    .urgent-nav-title {
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: #7f1d1d;
-      letter-spacing: 0.02em;
-    }
-
-    /* Page Container */
-    .urgent-page-wrap {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 1.25rem 1.5rem 4rem 1.5rem;
-    }
-
-    /* Header Hero Banner */
-    .urgent-hero-banner {
-      background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
-      color: #ffffff;
-      border-radius: 14px;
-      padding: 1.5rem 1.5rem 1.25rem 1.5rem;
-      margin-bottom: 1.25rem;
-      box-shadow: 0 4px 16px rgba(185, 28, 28, 0.15);
-    }
-
-    .urgent-hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.2);
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 0.65rem;
-    }
-
-    .urgent-hero-title {
-      font-size: 1.6rem;
-      font-weight: 800;
-      margin: 0 0 0.35rem 0;
-      letter-spacing: -0.01em;
-      line-height: 1.2;
-    }
-
-    .urgent-hero-subtitle {
-      font-size: 0.92rem;
-      color: #fee2e2;
-      margin: 0 0 1rem 0;
-      font-weight: 500;
-      line-height: 1.45;
-    }
-
-    .urgent-disclaimer-box {
-      background: rgba(0, 0, 0, 0.22);
-      border-left: 3px solid #fca5a5;
-      border-radius: 6px;
-      padding: 0.75rem 1rem;
-      font-size: 0.8rem;
-      line-height: 1.5;
-      color: #fef2f2;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-    }
-
-    .urgent-disclaimer-box i {
-      color: #fca5a5;
-      margin-top: 2px;
-      font-size: 0.95rem;
+      width: 32px !important;
+      height: 32px !important;
+      max-width: 32px !important;
+      max-height: 32px !important;
+      object-fit: contain !important;
+      display: block;
       flex-shrink: 0;
     }
 
-    /* Location Bar & Status Card */
-    .urgent-location-card {
+    .urgent-nav-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #7f1d1d;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .urgent-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* 3. Main Page Container */
+    .urgent-page-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0.85rem 1rem 3rem 1rem;
+    }
+
+    /* 4. Compact Page Header & Notice */
+    .urgent-header-compact {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.25rem;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .urgent-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.25rem;
+    }
+
+    .urgent-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .urgent-page-title {
+      font-size: 1.22rem;
+      font-weight: 800;
+      color: #7f1d1d;
+      margin: 0;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .urgent-page-sub {
+      font-size: 0.82rem;
+      color: #475569;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.35;
+    }
+
+    .urgent-alert-notice {
+      background: #f8fafc;
+      border-left: 3px solid #dc2626;
+      border-radius: 4px;
+      padding: 0.4rem 0.65rem;
+      font-size: 0.76rem;
+      color: #334155;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+    }
+
+    .urgent-alert-notice i {
+      color: #dc2626;
+      margin-top: 1px;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    /* 5. Live GPS Location Bar */
+    .urgent-location-bar {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 0.85rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      gap: 0.65rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
-    .urgent-location-info {
+    .loc-status-block {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.65rem;
       flex: 1;
-      min-width: 260px;
+      min-width: 220px;
     }
 
-    .urgent-loc-icon-bubble {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      background: #f1f5f9;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.15rem;
-      flex-shrink: 0;
-      transition: all 0.2s ease;
-    }
-
-    .urgent-loc-icon-bubble.active-gps {
-      background: rgba(16, 185, 129, 0.15);
-      color: #059669;
-    }
-
-    .urgent-loc-icon-bubble.error-gps {
-      background: rgba(239, 68, 68, 0.12);
-      color: #dc2626;
-    }
-
-    .urgent-loc-title {
-      font-size: 0.82rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #475569;
-      margin-bottom: 0.15rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .urgent-loc-coords {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: #0f172a;
-      line-height: 1.35;
-    }
-
-    .urgent-loc-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .btn-copy-coords {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 0.85rem;
-      border-radius: 8px;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      color: #334155;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-copy-coords:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-      border-color: #94a3b8;
-    }
-
-    .btn-retry-gps {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .loc-icon-indicator {
       width: 36px;
       height: 36px;
       border-radius: 8px;
+      background: #f1f5f9;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .loc-icon-indicator.active-gps {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .loc-icon-indicator.error-gps {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .loc-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 0.1rem;
+    }
+
+    .loc-val {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .loc-actions-block {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-loc-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.42rem 0.75rem;
+      border-radius: 6px;
       background: #f8fafc;
       border: 1px solid #cbd5e1;
       color: #334155;
+      font-size: 0.78rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: background 0.15s ease;
+      min-height: 36px;
     }
 
-    .btn-retry-gps:hover {
+    .btn-loc-action:hover {
       background: #f1f5f9;
-      color: #0f172a;
       border-color: #94a3b8;
     }
 
-    .urgent-district-select-wrap select {
-      padding: 0.5rem 0.85rem;
-      border-radius: 8px;
+    .select-district-fallback {
+      padding: 0.42rem 0.65rem;
+      border-radius: 6px;
       border: 1px solid #cbd5e1;
       background: #ffffff;
       color: #0f172a;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 600;
       outline: none;
       cursor: pointer;
+      min-height: 36px;
     }
 
     /* Location Permission Warning Bar */
@@ -320,9 +329,9 @@
       background: #fffbeb;
       border: 1px solid #fef3c7;
       border-left: 4px solid #f59e0b;
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.25rem;
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 0.75rem;
       color: #92400e;
     }
 
@@ -335,164 +344,209 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
     .location-warning-text {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
-      font-size: 0.88rem;
+      gap: 0.5rem;
+      font-size: 0.82rem;
       font-weight: 600;
     }
 
-    .location-warning-actions {
+    .location-warning-btns {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
-    .btn-allow-loc {
+    .btn-warn-allow {
       background: #b45309;
       color: #ffffff;
       border: none;
-      border-radius: 6px;
-      padding: 0.45rem 0.85rem;
-      font-size: 0.82rem;
+      border-radius: 5px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
     }
 
-    .btn-allow-loc:hover {
-      background: #92400e;
-    }
-
-    .btn-manual-loc {
+    .btn-warn-manual {
       background: #ffffff;
       color: #78350f;
       border: 1px solid #d97706;
-      border-radius: 6px;
-      padding: 0.45rem 0.85rem;
-      font-size: 0.82rem;
+      border-radius: 5px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
     }
 
-    /* Emergency Situation Filter Pills */
-    .situation-selector-wrap {
-      margin-bottom: 1.5rem;
+    /* 6. Emergency Situation Choices Section */
+    .emergency-situations-section {
+      margin-bottom: 1.25rem;
     }
 
-    .situation-selector-header {
-      font-size: 0.8rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      margin-bottom: 0.65rem;
+    .situations-header {
       display: flex;
-      align-items: center;
+      align-items: baseline;
       justify-content: space-between;
+      margin-bottom: 0.45rem;
     }
 
-    .situation-pills-row {
-      display: flex;
+    .situations-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .situations-sub {
+      font-size: 0.72rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* 2-column grid on mobile, 4-column balanced on desktop */
+    .situations-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 0.5rem;
-      overflow-x: auto;
-      padding-bottom: 0.4rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
     }
 
-    .situation-pill {
-      display: inline-flex;
+    .situation-card {
+      display: flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 0.95rem;
-      border-radius: 999px;
+      gap: 0.6rem;
+      padding: 0.65rem 0.75rem;
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      color: #334155;
+      border-radius: 8px;
+      color: #0f172a;
+      font-family: inherit;
       font-size: 0.82rem;
       font-weight: 700;
-      white-space: nowrap;
+      text-align: left;
       cursor: pointer;
       transition: all 0.15s ease;
-      flex-shrink: 0;
+      min-height: 52px;
+      user-select: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
     }
 
-    .situation-pill:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-      color: #0f172a;
+    .situation-card:hover {
+      border-color: #7f1d1d;
+      background: #fef2f2;
     }
 
-    .situation-pill.active {
+    .situation-card.active {
       background: #7f1d1d;
       border-color: #7f1d1d;
       color: #ffffff;
       box-shadow: 0 2px 6px rgba(127, 29, 29, 0.25);
     }
 
-    /* Nearby Services Container */
+    .situation-card.active .situation-icon {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    .situation-card-full {
+      grid-column: span 2;
+    }
+
+    .situation-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .icon-accident { color: #dc2626; background: #fee2e2; }
+    .icon-medical { color: #ea580c; background: #ffedd5; }
+    .icon-fire { color: #b91c1c; background: #fee2e2; }
+    .icon-police { color: #2563eb; background: #dbeafe; }
+    .icon-traffic { color: #d97706; background: #fef3c7; }
+    .icon-blockage { color: #0891b2; background: #cffafe; }
+    .icon-danger { color: #7f1d1d; background: #fecaca; }
+
+    .situation-name {
+      line-height: 1.25;
+      font-size: 0.82rem;
+    }
+
+    /* 7. Nearby Emergency Results Sections */
+    #nearby-services-container {
+      margin-bottom: 1.5rem;
+    }
+
     .nearby-section {
-      margin-bottom: 2rem;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
     .nearby-section-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 0.85rem;
-      padding-bottom: 0.35rem;
-      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #f1f5f9;
     }
 
     .nearby-section-title {
-      font-size: 1.15rem;
+      font-size: 0.98rem;
       font-weight: 800;
       color: #0f172a;
       display: flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.45rem;
     }
 
     .nearby-section-badge {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
-      padding: 0.2rem 0.55rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 999px;
-      background: #e2e8f0;
-      color: #475569;
+      background: #ecfdf5;
+      color: #047857;
     }
 
-    /* Cards Grid */
     .nearby-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 0.75rem;
     }
 
-    /* Service Card */
+    /* Service Result Card */
     .service-card {
-      background: #ffffff;
+      background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 1.15rem;
+      border-radius: 8px;
+      padding: 0.85rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+      transition: border-color 0.15s ease;
     }
 
     .service-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
       border-color: #cbd5e1;
     }
 
     .service-card-top {
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.65rem;
     }
 
     .service-header-row {
@@ -500,26 +554,26 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 0.5rem;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.25rem;
     }
 
     .service-name {
-      font-size: 0.98rem;
+      font-size: 0.92rem;
       font-weight: 800;
       color: #0f172a;
-      line-height: 1.35;
       margin: 0;
+      line-height: 1.3;
     }
 
     .service-distance-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
-      padding: 0.2rem 0.55rem;
-      border-radius: 6px;
+      gap: 0.2rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
       background: #ecfdf5;
       color: #047857;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 800;
       white-space: nowrap;
       flex-shrink: 0;
@@ -527,28 +581,29 @@
     }
 
     .service-address {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: #475569;
-      line-height: 1.45;
-      margin: 0 0 0.5rem 0;
+      line-height: 1.35;
+      margin: 0 0 0.35rem 0;
       display: flex;
       align-items: flex-start;
-      gap: 0.35rem;
+      gap: 0.3rem;
     }
 
     .service-address i {
       color: #94a3b8;
       margin-top: 2px;
+      font-size: 0.75rem;
       flex-shrink: 0;
     }
 
     .service-source-tag {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: #64748b;
       display: flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.25rem;
     }
 
     .service-source-tag i {
@@ -557,30 +612,31 @@
 
     /* Actions Row */
     .service-actions-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid #f1f5f9;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 0.45rem;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #e2e8f0;
     }
 
     .btn-service-call {
-      flex: 2;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.45rem;
-      padding: 0.65rem 0.85rem;
-      border-radius: 8px;
+      gap: 0.4rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
       background: #dc2626;
       color: #ffffff;
-      font-size: 0.86rem;
+      font-size: 0.85rem;
       font-weight: 800;
       text-decoration: none;
-      transition: background 0.15s ease;
       min-height: 44px;
-      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+      transition: background 0.15s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .btn-service-call:hover {
@@ -593,151 +649,188 @@
     }
 
     .btn-service-directions {
-      flex: 1;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.4rem;
-      padding: 0.65rem 0.85rem;
-      border-radius: 8px;
+      gap: 0.35rem;
+      padding: 0.6rem 0.65rem;
+      border-radius: 6px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #0f172a;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
       font-weight: 700;
       text-decoration: none;
-      transition: all 0.15s ease;
       min-height: 44px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
     }
 
     .btn-service-directions:hover {
-      background: #f8fafc;
+      background: #f1f5f9;
       border-color: #94a3b8;
     }
 
-    .btn-service-directions:active {
-      transform: scale(0.98);
+    /* Road Block Pivot Notice */
+    .road-block-pivot-card {
+      background: #f0fdfa;
+      border: 1px solid #ccfbf1;
+      border-left: 3px solid #0d9488;
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      margin-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: #115e59;
     }
 
-    /* View More Button */
+    .btn-pivot-transport {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      background: #0d9488;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.76rem;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
     .btn-view-more-wrap {
-      margin-top: 0.85rem;
+      margin-top: 0.65rem;
       text-align: center;
     }
 
     .btn-view-more {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 1.25rem;
-      border-radius: 8px;
+      gap: 0.35rem;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #475569;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.15s ease;
     }
 
-    .btn-view-more:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-      border-color: #94a3b8;
-    }
-
-    /* Fallback / Empty Service Card */
     .service-empty-fallback {
       background: #ffffff;
       border: 1px dashed #cbd5e1;
-      border-radius: 12px;
-      padding: 1.25rem;
+      border-radius: 8px;
+      padding: 1rem;
       text-align: center;
       grid-column: 1 / -1;
     }
 
     .service-empty-title {
-      font-size: 0.92rem;
+      margin: 0 0 0.35rem 0;
+      font-size: 0.88rem;
       font-weight: 700;
-      color: #475569;
-      margin: 0 0 0.5rem 0;
+      color: #334155;
     }
 
-    /* General Emergency Numbers Section (Secondary) */
+    .btn-allow-loc {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.48rem 0.95rem;
+      border-radius: 6px;
+      background: #b45309;
+      color: #ffffff;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.15s ease;
+    }
+
+    .btn-allow-loc:hover {
+      background: #92400e;
+    }
+
+    /* 8. General Emergency Numbers Section (Secondary) */
     .general-emergency-section {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-top: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
     .general-emergency-header {
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.75rem;
     }
 
     .general-emergency-title {
-      font-size: 1.15rem;
+      font-size: 0.98rem;
       font-weight: 800;
       color: #0f172a;
-      margin: 0 0 0.25rem 0;
+      margin: 0 0 0.15rem 0;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
     }
 
     .general-emergency-sub {
-      font-size: 0.85rem;
+      font-size: 0.76rem;
       color: #64748b;
       margin: 0;
     }
 
     .general-numbers-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 0.85rem;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.5rem;
     }
 
     .general-number-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       text-decoration: none;
-      transition: all 0.15s ease;
+      transition: background 0.15s ease;
+      min-height: 48px;
     }
 
     .general-number-card:hover {
       background: #f1f5f9;
       border-color: #cbd5e1;
-      transform: translateY(-1px);
     }
 
     .general-card-info h4 {
-      margin: 0 0 0.15rem 0;
-      font-size: 0.88rem;
+      margin: 0;
+      font-size: 0.82rem;
       font-weight: 800;
       color: #0f172a;
     }
 
     .general-card-info p {
       margin: 0;
-      font-size: 0.74rem;
+      font-size: 0.68rem;
       color: #64748b;
     }
 
     .general-dial-badge {
-      padding: 0.4rem 0.75rem;
-      border-radius: 6px;
+      padding: 0.3rem 0.65rem;
+      border-radius: 5px;
       background: #dc2626;
       color: #ffffff;
       font-weight: 800;
-      font-size: 0.86rem;
+      font-size: 0.82rem;
       letter-spacing: 0.02em;
     }
 
@@ -749,133 +842,114 @@
     .district-helpline-card {
       background: #fef2f2;
       border: 1px solid #fecaca;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-top: 1rem;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 0.85rem;
+      gap: 0.65rem;
     }
 
     .district-helpline-info h4 {
-      margin: 0 0 0.15rem 0;
-      font-size: 0.94rem;
+      margin: 0;
+      font-size: 0.86rem;
       font-weight: 800;
       color: #991b1b;
     }
 
     .district-helpline-info p {
       margin: 0;
-      font-size: 0.8rem;
+      font-size: 0.74rem;
       color: #7f1d1d;
     }
 
-    /* Routine Complaint Notice Banner */
+    /* 9. Routine Notice Banner */
     .routine-notice-banner {
       background: #f8fafc;
       border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 0.85rem;
+      flex-wrap: wrap;
     }
 
     .routine-notice-text h4 {
-      margin: 0 0 0.35rem 0;
-      font-size: 0.96rem;
+      margin: 0 0 0.2rem 0;
+      font-size: 0.88rem;
       font-weight: 800;
       color: #0f172a;
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
     }
 
     .routine-notice-text p {
       margin: 0;
-      font-size: 0.82rem;
+      font-size: 0.76rem;
       color: #475569;
-      line-height: 1.45;
+      line-height: 1.35;
     }
 
     .btn-routine-report {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.65rem 1.15rem;
-      border-radius: 8px;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
       background: #0f172a;
       color: #ffffff;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
       font-weight: 700;
       text-decoration: none;
       white-space: nowrap;
-      transition: background 0.15s ease;
-      flex-shrink: 0;
+      min-height: 40px;
     }
 
-    .btn-routine-report:hover {
-      background: #1e293b;
-      color: #ffffff;
+    /* Responsive Breakpoints */
+    @media (min-width: 768px) {
+      .situations-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .situation-card-full {
+        grid-column: span 2;
+      }
     }
 
-    /* Skeleton Loading State */
-    .skeleton-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 1.15rem;
-      min-height: 140px;
-    }
-
-    .skeleton-line {
-      height: 14px;
-      background: #e2e8f0;
-      border-radius: 4px;
-      margin-bottom: 0.75rem;
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 640px) {
+    @media (max-width: 767px) {
       .urgent-page-wrap {
-        padding: 0.85rem 0.85rem 3rem 0.85rem;
+        padding: 0.65rem 0.65rem 3rem 0.65rem;
       }
-      .urgent-hero-banner {
-        padding: 1.15rem 1rem;
+      .emergency-top-strip {
+        font-size: 0.72rem;
+        padding: 0.3rem 0.65rem;
       }
-      .urgent-hero-title {
-        font-size: 1.35rem;
+      .urgent-nav-bar {
+        padding: 0.35rem 0.65rem;
       }
-      .urgent-location-card {
-        flex-direction: column;
-        align-items: stretch;
+      .urgent-page-title {
+        font-size: 1.15rem;
       }
-      .urgent-loc-actions {
-        width: 100%;
-        justify-content: stretch;
+      .situations-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.45rem;
       }
-      .btn-copy-coords {
-        flex: 1;
-        justify-content: center;
+      .situation-card {
+        padding: 0.55rem 0.6rem;
+        min-height: 48px;
+      }
+      .situation-name {
+        font-size: 0.78rem;
       }
       .nearby-cards-grid {
         grid-template-columns: 1fr;
       }
-      .routine-notice-banner {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .btn-routine-report {
-        justify-content: center;
+      .service-actions-row {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -884,69 +958,74 @@
 
   <!-- Government Official Top Banner -->
   <div class="emergency-top-strip">
-    <span><i class="fa-solid fa-shield-halved"></i> Official Emergency Assistance &bull; Government of Tamil Nadu</span>
-    <span>For life-threatening emergencies, dial 112 or 108 directly</span>
-  </div>
-
-  <!-- Dedicated Clean Navigation (Back Button Only) -->
-  <div class="urgent-nav-bar">
-    <a href="citizen-dashboard.html" class="urgent-back-button" title="Back to Dashboard">
-      <i class="fa-solid fa-arrow-left"></i>
-      <span data-i18n="back_action">Back</span>
-    </a>
-    <div class="urgent-nav-branding">
-      <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="urgent-nav-logo" decoding="async">
-      <span class="urgent-nav-title">CrowdCity Emergency Assistance</span>
+    <div>
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Official Emergency Assistance &bull; Tamil Nadu</span>
+    </div>
+    <div>
+      <span>Life-threatening emergency? Dial <strong>112</strong> or <strong>108</strong></span>
     </div>
   </div>
+
+  <!-- Dedicated Compact Navigation Bar -->
+  <header class="urgent-nav-bar">
+    <div class="urgent-nav-left">
+      <a href="citizen-dashboard.html" class="urgent-back-button" title="Back to Dashboard">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span data-i18n="back_action">Back</span>
+      </a>
+    </div>
+
+    <div class="urgent-nav-center">
+      <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="urgent-nav-logo" width="32" height="32" style="width: 32px; height: 32px; max-width: 32px; max-height: 32px; object-fit: contain;" decoding="async">
+      <span class="urgent-nav-title">CrowdCity Emergency</span>
+    </div>
+
+    <div class="urgent-nav-right header-right" id="header-right">
+      <!-- i18n.js automatically mounts EN | தமிழ் language toggle here -->
+    </div>
+  </header>
 
   <div class="urgent-page-wrap">
 
-    <!-- Header Hero Banner -->
-    <div class="urgent-hero-banner">
-      <div class="urgent-hero-top">
-        <div>
-          <div class="urgent-hero-badge">
-            <i class="fa-solid fa-bolt"></i> Immediate Response &bull; Location-First
-          </div>
-          <h1 class="urgent-hero-title" data-i18n="urgent_action_title">URGENT / IMMEDIATE ACTION</h1>
-          <p class="urgent-hero-subtitle" data-i18n="urgent_action_subtitle">For situations that need immediate attention.</p>
-        </div>
+    <!-- Compact Page Header -->
+    <div class="urgent-header-compact">
+      <div class="urgent-title-row">
+        <span class="urgent-badge"><i class="fa-solid fa-bolt"></i> Immediate Response</span>
+        <h1 class="urgent-page-title" data-i18n="urgent_action_title">URGENT / IMMEDIATE ACTION</h1>
       </div>
-
-      <div class="urgent-disclaimer-box">
+      <p class="urgent-page-sub" data-i18n="urgent_action_subtitle">For situations that need immediate attention.</p>
+      
+      <div class="urgent-alert-notice">
         <i class="fa-solid fa-circle-info"></i>
-        <div>
-          <strong>Official Notice:</strong> CrowdCity discovers verified nearby emergency responders based on your current location and connects you to official government helplines. Urgent actions bypass the routine civic complaint SLA workflow.
-        </div>
+        <span>Location-first emergency discovery connects you directly to nearest responders. Bypasses routine complaint SLAs.</span>
       </div>
     </div>
 
-    <!-- Live GPS & Location Card -->
-    <div class="urgent-location-card">
-      <div class="urgent-location-info">
-        <div class="urgent-loc-icon-bubble" id="urgent-loc-icon">
+    <!-- Live GPS Location Bar -->
+    <div class="urgent-location-bar">
+      <div class="loc-status-block">
+        <div class="loc-icon-indicator" id="urgent-loc-icon">
           <i class="fa-solid fa-location-crosshairs"></i>
         </div>
-        <div>
-          <div class="urgent-loc-title" id="urgent-loc-status-title">Current Location</div>
-          <div class="urgent-loc-coords" id="urgent-loc-display">Finding help near you...</div>
+        <div class="loc-text-wrap">
+          <div class="loc-label" id="urgent-loc-status-title">LIVE LOCATION</div>
+          <div class="loc-val" id="urgent-loc-display">Finding help near you...</div>
         </div>
       </div>
 
-      <div class="urgent-loc-actions">
-        <button type="button" class="btn-copy-coords" id="btn-copy-gps" onclick="copyGpsCoordinates()" title="Copy coordinates to tell emergency dispatchers">
-          <i class="fa-regular fa-copy"></i>
-          <span id="copy-btn-text">Copy Exact GPS Coordinates</span>
-        </button>
-        <button type="button" class="btn-retry-gps" id="btn-refresh-gps" onclick="retryGpsDetection()" title="Refresh live GPS">
+      <div class="loc-actions-block">
+        <button type="button" class="btn-loc-action" id="btn-refresh-gps" onclick="retryGpsDetection()" title="Refresh live GPS">
           <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Refresh</span>
         </button>
-        <div class="urgent-district-select-wrap">
-          <select id="urgent-district-select" class="urgent-district-select" onchange="handleDistrictChange(this.value)" aria-label="District Selector">
-            <option value="">Select District</option>
-          </select>
-        </div>
+        <button type="button" class="btn-loc-action" id="btn-copy-gps" onclick="copyGpsCoordinates()" title="Copy coordinates for emergency dispatchers">
+          <i class="fa-regular fa-copy"></i>
+          <span id="copy-btn-text">Copy Coordinates</span>
+        </button>
+        <select id="urgent-district-select" class="select-district-fallback" onchange="handleDistrictChange(this.value)" aria-label="District Selector">
+          <option value="">Change District...</option>
+        </select>
       </div>
     </div>
 
@@ -957,48 +1036,70 @@
           <i class="fa-solid fa-triangle-exclamation"></i>
           <span>Location access is required to find nearby emergency services.</span>
         </div>
-        <div class="location-warning-actions">
-          <button type="button" class="btn-allow-loc" onclick="retryGpsDetection()">Allow Location Access</button>
-          <button type="button" class="btn-manual-loc" onclick="focusDistrictSelect()">Choose Location Manually</button>
+        <div class="location-warning-btns">
+          <button type="button" class="btn-warn-allow" onclick="retryGpsDetection()">Allow GPS</button>
+          <button type="button" class="btn-warn-manual" onclick="focusDistrictSelect()">Select District</button>
         </div>
       </div>
     </div>
 
-    <!-- Emergency Situation Prioritization Pills -->
-    <div class="situation-selector-wrap">
-      <div class="situation-selector-header">
-        <span>Prioritize Emergency Situation</span>
-        <span style="font-size: 0.76rem; font-weight: 600; color: #94a3b8;">Tap to re-order nearby services</span>
+    <!-- Emergency Situation Choices Section (Most Important - Immediate Interaction) -->
+    <div class="emergency-situations-section">
+      <div class="situations-header">
+        <span class="situations-title">Choose Emergency Situation</span>
+        <span class="situations-sub">Tap to prioritize nearby responders</span>
       </div>
-      <div class="situation-pills-row" id="situation-pills">
-        <button type="button" class="situation-pill active" data-category="all" onclick="selectSituationCategory('all')">
-          <i class="fa-solid fa-layer-group"></i> All Situations
+
+      <div class="situations-grid" id="situations-grid">
+        <button type="button" class="situation-card" data-category="accident" onclick="selectSituationCategory('accident')">
+          <span class="situation-icon icon-accident"><i class="fa-solid fa-car-burst"></i></span>
+          <span class="situation-name">Accident</span>
         </button>
-        <button type="button" class="situation-pill" data-category="accident" onclick="selectSituationCategory('accident')">
-          <i class="fa-solid fa-car-burst"></i> Accident
+
+        <button type="button" class="situation-card" data-category="medical" onclick="selectSituationCategory('medical')">
+          <span class="situation-icon icon-medical"><i class="fa-solid fa-truck-medical"></i></span>
+          <span class="situation-name">Medical Emergency</span>
         </button>
-        <button type="button" class="situation-pill" data-category="medical" onclick="selectSituationCategory('medical')">
-          <i class="fa-solid fa-truck-medical"></i> Medical Emergency
+
+        <button type="button" class="situation-card" data-category="fire" onclick="selectSituationCategory('fire')">
+          <span class="situation-icon icon-fire"><i class="fa-solid fa-fire-flame-curved"></i></span>
+          <span class="situation-name">Fire Emergency</span>
         </button>
-        <button type="button" class="situation-pill" data-category="fire" onclick="selectSituationCategory('fire')">
-          <i class="fa-solid fa-fire-flame-curved"></i> Fire Emergency
+
+        <button type="button" class="situation-card" data-category="police" onclick="selectSituationCategory('police')">
+          <span class="situation-icon icon-police"><i class="fa-solid fa-handcuffs"></i></span>
+          <span class="situation-name">Police Assistance</span>
         </button>
-        <button type="button" class="situation-pill" data-category="police" onclick="selectSituationCategory('police')">
-          <i class="fa-solid fa-handcuffs"></i> Police Assistance
+
+        <button type="button" class="situation-card" data-category="traffic" onclick="selectSituationCategory('traffic')">
+          <span class="situation-icon icon-traffic"><i class="fa-solid fa-traffic-light"></i></span>
+          <span class="situation-name">Traffic Emergency</span>
         </button>
-        <button type="button" class="situation-pill" data-category="traffic" onclick="selectSituationCategory('traffic')">
-          <i class="fa-solid fa-traffic-light"></i> Traffic Emergency
+
+        <button type="button" class="situation-card" data-category="blockage" onclick="selectSituationCategory('blockage')">
+          <span class="situation-icon icon-blockage"><i class="fa-solid fa-road-barrier"></i></span>
+          <span class="situation-name">Dangerous Road Blockage</span>
         </button>
-        <button type="button" class="situation-pill" data-category="blockage" onclick="selectSituationCategory('blockage')">
-          <i class="fa-solid fa-road-barrier"></i> Dangerous Road Blockage
+
+        <button type="button" class="situation-card situation-card-full" data-category="danger" onclick="selectSituationCategory('danger')">
+          <span class="situation-icon icon-danger"><i class="fa-solid fa-triangle-exclamation"></i></span>
+          <span class="situation-name">Other Immediate Danger</span>
         </button>
-        <button type="button" class="situation-pill" data-category="danger" onclick="selectSituationCategory('danger')">
-          <i class="fa-solid fa-triangle-exclamation"></i> Other Immediate Danger
-        </button>
+      </div>
+
+      <!-- Road Block Pivot (conditionally shown or embedded) -->
+      <div class="road-block-pivot-card" id="road-block-pivot" style="display: none;">
+        <div class="pivot-text">
+          <strong>Not an immediate crash danger?</strong> If routine road repair or pothole, file a standard transportation complaint:
+        </div>
+        <a href="transportation-report.html" class="btn-pivot-transport">
+          <span>Standard Report</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
       </div>
     </div>
 
-    <!-- NEARBY SERVICES CONTAINER (PRIMARY CONTENT) -->
+    <!-- NEARBY EMERGENCY SERVICES RESULTS (PRIMARY CONTENT) -->
     <div id="nearby-services-container">
 
       <!-- 1. Nearby Hospitals -->
@@ -1011,11 +1112,10 @@
           <span class="nearby-section-badge" id="badge-hospitals-count">Finding...</span>
         </div>
         <div class="nearby-cards-grid" id="grid-hospitals">
-          <!-- Populated dynamically -->
-          <div class="skeleton-card">
-            <div class="skeleton-line" style="width: 70%;"></div>
-            <div class="skeleton-line" style="width: 90%;"></div>
-            <div class="skeleton-line" style="width: 40%;"></div>
+          <div class="service-card" style="opacity: 0.6;">
+            <div style="height: 14px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 60%;"></div>
+            <div style="height: 12px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 85%;"></div>
+            <div style="height: 38px; background: #e2e8f0; border-radius: 6px; margin-top: 0.5rem;"></div>
           </div>
         </div>
         <div class="btn-view-more-wrap" id="wrap-more-hospitals" style="display: none;">
@@ -1035,10 +1135,10 @@
           <span class="nearby-section-badge" id="badge-ambulances-count">Finding...</span>
         </div>
         <div class="nearby-cards-grid" id="grid-ambulances">
-          <div class="skeleton-card">
-            <div class="skeleton-line" style="width: 70%;"></div>
-            <div class="skeleton-line" style="width: 90%;"></div>
-            <div class="skeleton-line" style="width: 40%;"></div>
+          <div class="service-card" style="opacity: 0.6;">
+            <div style="height: 14px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 60%;"></div>
+            <div style="height: 12px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 85%;"></div>
+            <div style="height: 38px; background: #e2e8f0; border-radius: 6px; margin-top: 0.5rem;"></div>
           </div>
         </div>
         <div class="btn-view-more-wrap" id="wrap-more-ambulances" style="display: none;">
@@ -1058,10 +1158,10 @@
           <span class="nearby-section-badge" id="badge-police-count">Finding...</span>
         </div>
         <div class="nearby-cards-grid" id="grid-police">
-          <div class="skeleton-card">
-            <div class="skeleton-line" style="width: 70%;"></div>
-            <div class="skeleton-line" style="width: 90%;"></div>
-            <div class="skeleton-line" style="width: 40%;"></div>
+          <div class="service-card" style="opacity: 0.6;">
+            <div style="height: 14px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 60%;"></div>
+            <div style="height: 12px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 85%;"></div>
+            <div style="height: 38px; background: #e2e8f0; border-radius: 6px; margin-top: 0.5rem;"></div>
           </div>
         </div>
         <div class="btn-view-more-wrap" id="wrap-more-police" style="display: none;">
@@ -1081,10 +1181,10 @@
           <span class="nearby-section-badge" id="badge-fire-count">Finding...</span>
         </div>
         <div class="nearby-cards-grid" id="grid-fire">
-          <div class="skeleton-card">
-            <div class="skeleton-line" style="width: 70%;"></div>
-            <div class="skeleton-line" style="width: 90%;"></div>
-            <div class="skeleton-line" style="width: 40%;"></div>
+          <div class="service-card" style="opacity: 0.6;">
+            <div style="height: 14px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 60%;"></div>
+            <div style="height: 12px; background: #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; width: 85%;"></div>
+            <div style="height: 38px; background: #e2e8f0; border-radius: 6px; margin-top: 0.5rem;"></div>
           </div>
         </div>
         <div class="btn-view-more-wrap" id="wrap-more-fire" style="display: none;">
@@ -1179,7 +1279,7 @@
           <p id="district-collectorate-sub">Direct official government administrative control room for emergencies.</p>
         </div>
         <div>
-          <a href="tel:04425268323" id="district-collectorate-phone-btn" class="btn-service-call" style="background: #991b1b; padding: 0.5rem 1rem;">
+          <a href="tel:04425268323" id="district-collectorate-phone-btn" class="btn-service-call" style="background: #991b1b; padding: 0.45rem 0.85rem; font-size: 0.82rem; min-height: 38px;">
             <i class="fa-solid fa-phone"></i>
             <span id="district-collectorate-phone-val">044-25268323</span>
           </a>
@@ -1187,7 +1287,7 @@
       </div>
     </div>
 
-    <!-- Non-Emergency / Routine Separation Notice -->
+    <!-- Routine Complaint Notice Banner -->
     <div class="routine-notice-banner">
       <div class="routine-notice-text">
         <h4><i class="fa-solid fa-clipboard-check"></i> Looking for Standard Civic Issue Reporting?</h4>
@@ -1207,7 +1307,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=8.8.0"></script>
   <script src="js/api.js"></script>
-  <script src="js/urgent-action.js?v=2.0.0"></script>
+  <script src="js/urgent-action.js?v=3.0.0"></script>
 
 </body>
 </html>

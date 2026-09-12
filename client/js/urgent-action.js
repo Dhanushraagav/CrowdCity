@@ -111,7 +111,7 @@
       if (locTitle) locTitle.textContent = 'Selected Location';
       if (locDisplay) locDisplay.textContent = `${found.en} (${found.ta}) • Tamil Nadu`;
       if (locIcon) {
-        locIcon.className = 'urgent-loc-icon-bubble';
+        locIcon.className = 'loc-icon-indicator';
         locIcon.innerHTML = '<i class="fa-solid fa-location-pin"></i>';
       }
 
@@ -158,7 +158,7 @@
     if (locDisplay) locDisplay.textContent = 'Finding help near you...';
     if (locTitle) locTitle.textContent = 'Current Location';
     if (locIcon) {
-      locIcon.className = 'urgent-loc-icon-bubble';
+      locIcon.className = 'loc-icon-indicator';
       locIcon.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
     }
     if (warningBar) warningBar.classList.remove('show');
@@ -190,7 +190,7 @@
 
         if (locTitle) locTitle.textContent = 'Using your current location';
         if (locIcon) {
-          locIcon.className = 'urgent-loc-icon-bubble active-gps';
+          locIcon.className = 'loc-icon-indicator active-gps';
           locIcon.innerHTML = '<i class="fa-solid fa-location-dot"></i>';
         }
 
@@ -215,7 +215,7 @@
     if (locTitle) locTitle.textContent = 'Location Required';
     if (locDisplay) locDisplay.textContent = 'Location access is required to find nearby emergency services.';
     if (locIcon) {
-      locIcon.className = 'urgent-loc-icon-bubble error-gps';
+      locIcon.className = 'loc-icon-indicator error-gps';
       locIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
     }
 
@@ -461,8 +461,8 @@
   window.selectSituationCategory = function (category) {
     activeSituationCategory = category;
 
-    // Update active pill styling
-    const pills = document.querySelectorAll('.situation-pill');
+    // Update active card/pill styling
+    const pills = document.querySelectorAll('.situation-pill, .situation-card');
     pills.forEach(p => {
       if (p.getAttribute('data-category') === category) {
         p.classList.add('active');
@@ -470,6 +470,16 @@
         p.classList.remove('active');
       }
     });
+
+    // Toggle road blockage pivot assistance card
+    const roadBlockPivot = document.getElementById('road-block-pivot');
+    if (roadBlockPivot) {
+      if (category === 'blockage' || category === 'traffic') {
+        roadBlockPivot.style.display = 'flex';
+      } else {
+        roadBlockPivot.style.display = 'none';
+      }
+    }
 
     const container = document.getElementById('nearby-services-container');
     const secHosp = document.getElementById('section-hospitals');
