@@ -5932,7 +5932,7 @@ body.dark-theme .universal-desktop-back-btn {
 }
 
 .ticker-text {
-  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-family: var(--font-sans);
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-main, #0f172a);
@@ -5972,7 +5972,7 @@ body.dark-theme .universal-desktop-back-btn {
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-md, 8px);
   color: var(--text-main, #0f172a);
-  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+  font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
@@ -6022,7 +6022,7 @@ body.dark-theme .universal-desktop-back-btn {
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-md, 8px);
   color: var(--text-main, #0f172a);
-  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+  font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
@@ -6438,7 +6438,7 @@ body.dark-theme .universal-desktop-back-btn {
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-md, 8px);
   color: var(--text-main, #0f172a);
-  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+  font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
@@ -6819,7 +6819,7 @@ a,
   transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
               background-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
               backdrop-filter 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

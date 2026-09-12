@@ -89,9 +89,39 @@
   --status-resolved: #16a34a;
   --status-duplicate: #dc2626;
 
-  /* Global Fonts */
-  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Centralized Typography Tokens (Inter + Noto Sans Tamil) */
+  --font-sans: "Inter", "Noto Sans Tamil", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-heading: var(--font-sans);
+  --font-body: var(--font-sans);
+
+  /* Typography Scale Tokens */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+
+  /* Typography Weight Tokens */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Typography Line Height Tokens */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* Typography Tracking Tokens */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-snug: -0.01em;
+  --letter-spacing-normal: 0em;
   
   /* Dimensions & Spacing */
   --header-height: 64px;
@@ -160,7 +190,8 @@ body {
   font-family: var(--font-body);
   background-color: var(--bg-app);
   color: var(--text-main);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -168,10 +199,154 @@ body {
   position: relative;
 }
 
+/* Headings Hierarchy */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-snug);
+}
+
+h4 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-snug);
+}
+
+h5, h6 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Form Controls Typography Inheritance */
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+label {
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-weight: var(--font-weight-normal);
+}
+
+input::placeholder, textarea::placeholder {
+  font-family: inherit;
+  font-weight: var(--font-weight-normal);
+  opacity: 1;
+}
+
+/* Buttons Typography */
+button, .btn, .button, .auth-nav-btn {
+  font-family: inherit;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Navigation Links */
+.nav-link, .app-sidebar-link, .nav-item {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Tables */
+table, th, td {
+  font-family: inherit;
+}
+
+th {
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-snug);
+}
+
+td {
+  font-weight: var(--font-weight-normal);
+}
+
+/* UI Cards, Badges, Modals, Toasts, Tooltips, Dropdowns */
+.badge, .status-badge, .pill, .tag {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-semibold);
+}
+
+.card, .quick-action-card, .service-card, .situation-card {
+  font-family: var(--font-sans);
+}
+
+.modal, .modal-content, .dialog, .cc-modal-backdrop {
+  font-family: var(--font-sans);
+}
+
+.toast-box, .toast, .alert {
+  font-family: var(--font-sans);
+}
+
+.dropdown-menu, .dropdown-item, .user-menu {
+  font-family: var(--font-sans);
+}
+
+/* Tabular Numerals for Numerical Clarity */
+.tabular-nums,
+[data-tabular-nums],
+.stat-card-value,
+.stat-value,
+.metric-value,
+.complaint-id,
+.ticket-id,
+.badge-count,
+.pulse-time,
+.timer-text,
+.sla-deadline,
+.service-distance-badge,
+.weather-temp,
+.forecast-temp {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tamil Typography Line-Height Relaxation for Glyph Diacritics */
+html[lang="ta"],
+body.lang-ta,
+[lang="ta"] {
+  line-height: var(--line-height-relaxed);
+}
+
+html[lang="ta"] h1,
+html[lang="ta"] h2,
+html[lang="ta"] h3,
+html[lang="ta"] h4 {
+  line-height: 1.4;
+  letter-spacing: 0;
 }
 
 a {

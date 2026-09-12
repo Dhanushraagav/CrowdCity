@@ -76,6 +76,9 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
 class I18nService {
   constructor() {
     this.currentLanguage = localStorage.getItem('cc_lang') || 'en';
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.lang = this.currentLanguage;
+    }
     
     // Synchronous inline initializations (0ms startup delay)
     this.fallbackTranslations = { ...INLINE_EMBEDDED_TRANSLATIONS.en };
@@ -244,6 +247,9 @@ class I18nService {
       }
       this.currentLanguage = lang;
       localStorage.setItem('cc_lang', lang);
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.lang = lang;
+      }
       
       this.updateToggleUI();
       this.translatePage();

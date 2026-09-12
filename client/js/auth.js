@@ -121,7 +121,7 @@ function showFatalConfigError(details) {
   overlay.style.alignItems = 'center';
   overlay.style.justifyContent = 'center';
   overlay.style.backdropFilter = 'blur(12px)';
-  overlay.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  overlay.style.fontFamily = 'var(--font-sans, "Inter", "Noto Sans Tamil", system-ui, -apple-system, sans-serif)';
   overlay.style.color = '#f8fafc';
   overlay.style.padding = '2rem';
   overlay.style.boxSizing = 'border-box';

@@ -9,7 +9,7 @@
   flex: 1;
   max-width: 440px;
   margin: 0 1.25rem;
-  font-family: var(--font-main, 'Inter', -apple-system, sans-serif);
+  font-family: var(--font-sans);
   z-index: 1050;
 }
 
