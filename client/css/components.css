@@ -4148,6 +4148,25 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     border-color: var(--primary, #0d9488) !important;
     box-shadow: 0 0 0 2px var(--primary-light-alpha, rgba(13, 148, 136, 0.18)) !important;
   }
+  .quick-action-card.quick-action-urgent {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.02) 100%) !important;
+    border: 1.5px solid rgba(239, 68, 68, 0.35) !important;
+  }
+  .quick-action-card.quick-action-urgent:active,
+  .quick-action-card.quick-action-urgent.touch-pressed {
+    transform: translateZ(0) scale(0.93) !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+  }
+  .quick-action-card.quick-action-urgent .quick-action-icon {
+    background: rgba(239, 68, 68, 0.14) !important;
+    color: #dc2626 !important;
+  }
+  .quick-action-card.quick-action-urgent .quick-action-label {
+    color: #b91c1c !important;
+    font-weight: 800 !important;
+  }
   /* Odd last-child spanning both columns for a balanced layout */
   .quick-actions-grid .quick-action-card:last-child:nth-child(odd) {
     grid-column: 1 / -1 !important;

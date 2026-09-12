@@ -505,9 +505,30 @@
           <div class="page-inner">
 
             <!-- Page Header -->
-            <div class="report-page-header" style="width: 100%; max-width: 100%; margin: 0 0 1.5rem 0;">
+            <div class="report-page-header" style="width: 100%; max-width: 100%; margin: 0 0 1.25rem 0;">
               <h1 id="report-page-title">Report an Issue</h1>
               <p id="report-page-desc">Provide details about the infrastructure or safety concern in your area. Our AI system will route it to the appropriate department.</p>
+            </div>
+
+            <!-- Immediate Emergency Alert Banner (Distinguishes routine SLA reporting from immediate emergency action) -->
+            <div class="urgent-reporting-notice-banner" style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 14px; padding: 1.1rem 1.35rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 2px 6px rgba(225, 29, 72, 0.05);">
+              <div style="display: flex; align-items: flex-start; gap: 0.85rem; max-width: 780px;">
+                <div style="width: 38px; height: 38px; border-radius: 50%; background: #ffe4e6; color: #e11d48; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; margin-top: 2px;">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <div style="font-size: 0.95rem; font-weight: 800; color: #9f1239; margin-bottom: 0.25rem;">
+                    <span data-i18n="urgent_help_banner_title">Need Immediate Help?</span>
+                  </div>
+                  <p style="font-size: 0.84rem; color: #881337; margin: 0; line-height: 1.45;" data-i18n="urgent_help_banner_desc">
+                    For accidents, active fires, medical emergencies, or dangerous road hazards requiring immediate responder assistance, use Urgent Action.
+                  </p>
+                </div>
+              </div>
+              <a href="urgent-action.html" class="btn" style="background: #dc2626; color: #ffffff; font-weight: 700; font-size: 0.85rem; padding: 0.6rem 1.25rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; border: none; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);">
+                <i class="fa-solid fa-phone-volume"></i>
+                <span data-i18n="urgent_help_action_btn">Urgent / Immediate Action</span>
+              </a>
             </div>
 
       <!-- PREMIUM 3-STEP WIZARD CONTAINER -->
@@ -555,8 +576,8 @@
             <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.4rem 0;">
               Choose Issue Type
             </h2>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">
-              Select the type of issue you would like to report.
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+              Select the type of civic concern to initiate structured complaint routing, Complaint ID tracking, and official SLA enforcement.
             </p>
           </div>
 
@@ -578,6 +599,9 @@
                   <li>Sanitation</li>
                 </ul>
               </div>
+              <div style="margin-top: 1.25rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color); font-size: 0.78rem; font-weight: 700; color: #0369a1; display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-clipboard-check"></i> Standard SLA Workflow &bull; Complaint ID
+              </div>
             </div>
 
             <!-- Transportation Issue Card -->
@@ -598,7 +622,23 @@
                   <li>Bus Stop Issues</li>
                 </ul>
               </div>
+              <div style="margin-top: 1.25rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color); font-size: 0.78rem; font-weight: 700; color: #b45309; display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-clipboard-check"></i> Standard SLA Workflow &bull; Complaint ID
+              </div>
             </div>
+          </div>
+
+          <!-- Urgent Action Redirection Footnote inside Step 1 -->
+          <div style="margin-top: 1.75rem; padding: 1rem 1.25rem; background: #fff5f5; border: 1.5px dashed #fca5a5; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.85rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626; font-size: 1.2rem;"></i>
+              <div style="font-size: 0.85rem; color: #7f1d1d;">
+                <strong>Active Emergency or Life Danger?</strong> Do not submit a routine web report. Use immediate emergency action for direct responder helplines.
+              </div>
+            </div>
+            <a href="urgent-action.html" class="btn btn-outline" style="border-color: #dc2626; color: #dc2626; font-weight: 700; font-size: 0.82rem; padding: 0.45rem 1rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+              <i class="fa-solid fa-phone-volume"></i> Urgent Action Screen
+            </a>
           </div>
         </div>
 

@@ -237,38 +237,52 @@
         <div class="quick-actions-section mobile-only">
           <h2 class="quick-actions-title" data-i18n="quick_actions">Quick Actions</h2>
           <div class="quick-actions-grid">
-            <a href="report.html" class="quick-action-card">
-              <div class="quick-action-icon bg-primary-alpha"><i class="fa-solid fa-triangle-exclamation"></i></div>
-              <span class="quick-action-label" data-i18n="report_issue">Report Issue</span>
+            <!-- 1. URGENT / IMMEDIATE ACTION -->
+            <a href="urgent-action.html" class="quick-action-card quick-action-urgent">
+              <div class="quick-action-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <span class="quick-action-label" data-i18n="urgent_action_title">Urgent / Immediate Action</span>
             </a>
+            <!-- 2. REPORT CIVIC ISSUE -->
+            <a href="report.html" class="quick-action-card">
+              <div class="quick-action-icon bg-primary-alpha"><i class="fa-solid fa-bullhorn"></i></div>
+              <span class="quick-action-label" data-i18n="report_civic_issue">Report Civic Issue</span>
+            </a>
+            <!-- 3. REPORT TRANSPORTATION ISSUE -->
+            <a href="transportation-report.html" class="quick-action-card">
+              <div class="quick-action-icon" style="background: rgba(245, 158, 11, 0.15); color: #d97706;"><i class="fa-solid fa-car-burst"></i></div>
+              <span class="quick-action-label" data-i18n="report_transportation_issue">Report Transportation Issue</span>
+            </a>
+            <!-- 4. POWER UPDATES -->
             <a href="power-updates.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(13, 148, 136, 0.12); color: var(--primary);"><i class="fa-solid fa-plug"></i></div>
               <span class="quick-action-label" data-i18n="pulse_power_updates">Power Updates</span>
             </a>
+            <!-- 5. WEATHER FORECAST -->
             <a href="weather-alerts.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(14, 165, 233, 0.12); color: #0284c7;"><i class="fa-solid fa-cloud-sun"></i></div>
               <span class="quick-action-label" data-i18n="pulse_weather_alerts">Weather Forecast</span>
             </a>
-            <a href="emergency-services.html" class="quick-action-card">
-              <div class="quick-action-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i class="fa-solid fa-truck-medical"></i></div>
-              <span class="quick-action-label" data-i18n="emergency_center">Emergency Center</span>
-            </a>
+            <!-- 6. VIEW MAP -->
             <a href="map.html" class="quick-action-card">
               <div class="quick-action-icon bg-success-alpha"><i class="fa-solid fa-map-location-dot"></i></div>
               <span class="quick-action-label" data-i18n="view_map">View Map</span>
             </a>
+            <!-- 7. TN UPDATES -->
             <a href="tamilnadu-updates.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(13, 148, 136, 0.15); color: var(--primary);"><i class="fa-solid fa-newspaper"></i></div>
               <span class="quick-action-label" data-i18n="nav_tn_updates">TN Updates</span>
             </a>
+            <!-- 8. GOVERNMENT SERVICES -->
             <a href="services.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(13, 148, 136, 0.15); color: var(--primary);"><i class="fa-solid fa-building-columns"></i></div>
               <span class="quick-action-label" data-i18n="nav_services">Government Services</span>
             </a>
+            <!-- 9. DISTRICT HELPLINES -->
             <a href="helplines.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(14, 116, 144, 0.1); color: #0e7490;"><i class="fa-solid fa-phone-volume"></i></div>
               <span class="quick-action-label" data-i18n="district_helplines">District Helplines</span>
             </a>
+            <!-- 10. DOCUMENT WALLET -->
             <a href="my-documents.html" class="quick-action-card">
               <div class="quick-action-icon" style="background: rgba(13, 148, 136, 0.15); color: #0d9488;"><i class="fa-solid fa-folder-closed"></i></div>
               <span class="quick-action-label" data-i18n="document_wallet">Document Wallet</span>

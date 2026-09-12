@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#dc2626">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity Urgent">
+  <script src="js/pwa-helper.js" defer></script>
+  <!-- Central Authentication Router -->
+  <script src="js/auth-router.js?v=8.0.0"></script>
+  <script src="js/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="description" content="Urgent and Immediate Action - Direct access to verified official emergency helplines in Tamil Nadu.">
+  <title>Urgent / Immediate Action - CrowdCity AI</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css?v=8.4.0">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --emergency-red: #dc2626;
+      --emergency-red-dark: #b91c1c;
+      --emergency-red-light: #fef2f2;
+      --emergency-red-border: #fecaca;
+    }
+
+    .urgent-page-wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 1rem 1.25rem 3rem 1.25rem;
+    }
+
+    /* Top Emergency Alert Bar */
+    .emergency-top-strip {
+      background: #991b1b;
+      color: #ffffff;
+      padding: 0.5rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .emergency-top-strip span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Header Hero */
+    .urgent-hero-banner {
+      background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+      border: 1.5px solid var(--emergency-red-border);
+      border-radius: 16px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 4px 16px rgba(220, 38, 38, 0.06);
+    }
+
+    .urgent-hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .urgent-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.28rem 0.75rem;
+      background: #fee2e2;
+      color: var(--emergency-red-dark);
+      border: 1px solid #fca5a5;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .urgent-hero-title {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: #7f1d1d;
+      margin: 0 0 0.35rem 0;
+      font-family: var(--font-heading, system-ui);
+      letter-spacing: -0.01em;
+    }
+
+    .urgent-hero-subtitle {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #991b1b;
+      margin: 0;
+    }
+
+    .urgent-disclaimer-box {
+      background: #ffffff;
+      border: 1px solid var(--emergency-red-border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #4b5563;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+
+    .urgent-disclaimer-box i {
+      color: var(--emergency-red);
+      font-size: 1rem;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Live GPS & Location Card */
+    .urgent-location-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 14px;
+      padding: 1.15rem 1.35rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .urgent-location-info {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      min-width: 260px;
+      flex: 1;
+    }
+
+    .urgent-loc-icon-bubble {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(13, 148, 136, 0.12);
+      color: #0f766e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .urgent-loc-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 0.2rem;
+    }
+
+    .urgent-loc-coords {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      font-family: monospace, system-ui;
+    }
+
+    .urgent-loc-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-copy-coords {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.55rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-copy-coords:active {
+      transform: scale(0.96);
+    }
+
+    .btn-retry-gps {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .urgent-district-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .urgent-district-select {
+      padding: 0.5rem 0.85rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Emergency Actions Grid */
+    .urgent-categories-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 1rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .urgent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.15rem;
+      margin-bottom: 2rem;
+    }
+
+    .urgent-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.35rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .urgent-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+    }
+
+    .urgent-card.urgent-highlight {
+      border-color: #fca5a5;
+      background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%);
+    }
+
+    .urgent-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .urgent-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .icon-accident { background: #fee2e2; color: #dc2626; }
+    .icon-medical { background: #fee2e2; color: #b91c1c; }
+    .icon-fire { background: #ffedd5; color: #ea580c; }
+    .icon-police { background: #e0e7ff; color: #4338ca; }
+    .icon-traffic { background: #fef3c7; color: #d97706; }
+    .icon-blockage { background: #fef2f2; color: #dc2626; }
+    .icon-danger { background: #fce7f3; color: #be185d; }
+
+    .urgent-card-content h3 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.3rem 0;
+    }
+
+    .urgent-card-content p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    .urgent-dial-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    .btn-emergency-call {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 0.95rem;
+      min-height: 48px;
+      transition: all 0.12s ease;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    .btn-emergency-call:active {
+      transform: scale(0.97);
+    }
+
+    .btn-call-red {
+      background: #dc2626;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-call-red:hover {
+      background: #b91c1c;
+    }
+
+    .btn-call-secondary {
+      background: #f1f5f9;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-call-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-call-outline-red {
+      background: #fff5f5;
+      color: #dc2626 !important;
+      border: 1.5px solid #fca5a5;
+    }
+
+    .btn-call-outline-red:hover {
+      background: #fee2e2;
+    }
+
+    .btn-call-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-call-number {
+      font-family: monospace, system-ui;
+      font-size: 1.05rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* Dangerous Road Blockage Pivot */
+    .road-block-pivot-box {
+      margin-top: 0.75rem;
+      padding: 0.75rem 0.9rem;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: #475569;
+    }
+
+    .road-block-pivot-box a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #0f766e;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 0.35rem;
+    }
+
+    .road-block-pivot-box a:hover {
+      text-decoration: underline;
+    }
+
+    /* District Collectorate Section */
+    .district-helpline-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .district-helpline-info h4 {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .district-helpline-info p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin: 0;
+    }
+
+    /* Routine Complaint Separation Notice */
+    .routine-notice-banner {
+      background: #f0fdfa;
+      border: 1.5px solid #99f6e4;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.05);
+    }
+
+    .routine-notice-text {
+      max-width: 680px;
+    }
+
+    .routine-notice-text h4 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f766e;
+      margin: 0 0 0.3rem 0;
+    }
+
+    .routine-notice-text p {
+      font-size: 0.82rem;
+      color: #334155;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .btn-routine-report {
+      background: #0d9488;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.84rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+
+    .btn-routine-report:hover {
+      background: #0f766e;
+    }
+
+    @media (max-width: 640px) {
+      .urgent-page-wrap {
+        padding: 0.75rem 0.85rem 3rem 0.85rem;
+      }
+      .urgent-hero-banner {
+        padding: 1.15rem 1rem;
+      }
+      .urgent-hero-title {
+        font-size: 1.35rem;
+      }
+      .urgent-grid {
+        grid-template-columns: 1fr;
+      }
+      .urgent-location-card {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .urgent-loc-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+      .btn-copy-coords {
+        flex: 1;
+        justify-content: center;
+      }
+      .routine-notice-banner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-routine-report {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body class="protected-page">
+
+  <!-- Government Official Top Banner -->
+  <div class="emergency-top-strip">
+    <span><i class="fa-solid fa-shield-halved"></i> Official Emergency Assistance &bull; Government of Tamil Nadu</span>
+    <span>For life-threatening emergencies, dial 112 or 108 directly</span>
+  </div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" decoding="async">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" decoding="async">
+          </div>
+          <div class="brand-text-container">
+            <span class="brand-title">CROWDCITY</span>
+            <span class="brand-subtitle">CITIZEN PORTAL</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-table-columns"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="urgent-action.html" class="app-sidebar-link active" title="Urgent Action" style="color: #dc2626; font-weight: 800;">
+          <i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="urgent_action_title">Urgent Action</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Civic Issue">
+          <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="nav_report">Report Issue</span>
+        </a>
+        <a href="transportation-report.html" class="app-sidebar-link" title="Transportation Issue">
+          <i class="fa-solid fa-car-burst"></i> <span data-i18n="report_transportation_issue">Transportation Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-list-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-columns"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- App Top Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <a href="citizen-dashboard.html" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_action">Back</span>
+          </a>
+        </div>
+        <div class="header-right">
+          <div id="i18n-container"></div>
+        </div>
+      </header>
+
+      <div class="urgent-page-wrap">
+
+        <!-- Header Hero Banner -->
+        <div class="urgent-hero-banner">
+          <div class="urgent-hero-top">
+            <div>
+              <div class="urgent-hero-badge">
+                <i class="fa-solid fa-bolt"></i> Immediate Response
+              </div>
+              <h1 class="urgent-hero-title" data-i18n="urgent_action_title">URGENT / IMMEDIATE ACTION</h1>
+              <p class="urgent-hero-subtitle" data-i18n="urgent_action_subtitle">For situations that need immediate attention.</p>
+            </div>
+          </div>
+
+          <div class="urgent-disclaimer-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <div>
+              <strong>Official Notice:</strong> CrowdCity connects citizens with verified official emergency response pathways. For life-threatening emergencies, dial national emergency responders immediately. Urgent actions bypass the routine civic complaint SLA workflow.
+            </div>
+          </div>
+        </div>
+
+        <!-- Live GPS & Location Card -->
+        <div class="urgent-location-card">
+          <div class="urgent-location-info">
+            <div class="urgent-loc-icon-bubble" id="urgent-loc-icon">
+              <i class="fa-solid fa-location-crosshairs"></i>
+            </div>
+            <div>
+              <div class="urgent-loc-title" id="urgent-loc-status-title">Current Location</div>
+              <div class="urgent-loc-coords" id="urgent-loc-display">Detecting live GPS coordinates...</div>
+            </div>
+          </div>
+
+          <div class="urgent-loc-actions">
+            <button type="button" class="btn-copy-coords" id="btn-copy-gps" onclick="copyGpsCoordinates()" title="Copy coordinates to tell 108 or 100 dispatchers">
+              <i class="fa-regular fa-copy"></i>
+              <span id="copy-btn-text">Copy Exact GPS Coordinates</span>
+            </button>
+            <button type="button" class="btn-retry-gps" id="btn-refresh-gps" onclick="retryGpsDetection()" title="Refresh live GPS">
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+            <div class="urgent-district-select-wrap">
+              <select id="urgent-district-select" class="urgent-district-select" onchange="handleDistrictChange(this.value)" aria-label="District Selector">
+                <option value="">Select District</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Categories Grid -->
+        <div class="urgent-categories-title">
+          <span>Choose Emergency Situation</span>
+          <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Direct Helpline Access</span>
+        </div>
+
+        <div class="urgent-grid">
+
+          <!-- 1. Accident -->
+          <div class="urgent-card urgent-highlight">
+            <div>
+              <div class="urgent-card-header">
+                <div class="urgent-card-icon icon-accident">
+                  <i class="fa-solid fa-car-burst"></i>
+                </div>
+                <div class="urgent-card-content">
+                  <h3>Accident</h3>
+                  <p>Road accident, vehicle collision, or highway casualty requiring urgent medical & police rescue.</p>
+                </div>
+              </div>
+            </div>
+            <div class="urgent-dial-buttons">
+              <a href="tel:108" class="btn-emergency-call btn-call-red">
+                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 108 Ambulance</span>
+                <span class="btn-call-number">108</span>
+              </a>
+              <a href="tel:100" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-shield"></i> Call 100 Police</span>
+                <span class="btn-call-number">100</span>
+              </a>
+              <a href="tel:1073" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-road"></i> National Highway Patrol</span>
+                <span class="btn-call-number">1073</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 2. Medical Emergency -->
+          <div class="urgent-card urgent-highlight">
+            <div>
+              <div class="urgent-card-header">
+                <div class="urgent-card-icon icon-medical">
+                  <i class="fa-solid fa-truck-medical"></i>
+                </div>
+                <div class="urgent-card-content">
+                  <h3>Medical Emergency</h3>
+                  <p>Cardiac arrest, severe injury, respiratory distress, or critical patient needing emergency transit.</p>
+                </div>
+              </div>
+            </div>
+            <div class="urgent-dial-buttons">
+              <a href="tel:108" class="btn-emergency-call btn-call-red">
+                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 108 Free Ambulance</span>
+                <span class="btn-call-number">108</span>
+              </a>
+              <a href="tel:104" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-stethoscope"></i> TN Medical Advice Helpline</span>
+                <span class="btn-call-number">104</span>
+              </a>
+              <a href="tel:112" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-circle-exclamation"></i> All Emergency Support</span>
+                <span class="btn-call-number">112</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 3. Fire Emergency -->
+          <div class="urgent-card">
+            <div>
+              <div class="urgent-card-header">
+                <div class="urgent-card-icon icon-fire">
+                  <i class="fa-solid fa-fire-flame-curved"></i>
+                </div>
+                <div class="urgent-card-content">
+                  <h3>Fire Emergency</h3>
+                  <p>Active fire outbreak, building blaze, gas leakage, or industrial rescue operation.</p>
+                </div>
+              </div>
+            </div>
+            <div class="urgent-dial-buttons">
+              <a href="tel:101" class="btn-emergency-call btn-call-red">
+                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 101 Fire & Rescue</span>
+                <span class="btn-call-number">101</span>
+              </a>
+              <a href="tel:112" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-circle-exclamation"></i> Call 112 National Support</span>
+                <span class="btn-call-number">112</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. Police Assistance -->
+          <div class="urgent-card">
+            <div>
+              <div class="urgent-card-header">
+                <div class="urgent-card-icon icon-police">
+                  <i class="fa-solid fa-handcuffs"></i>
+                </div>
+                <div class="urgent-card-content">
+                  <h3>Police Assistance</h3>
+                  <p>Active crime in progress, physical violence, harassment, theft, or public safety intervention.</p>
+                </div>
+              </div>
+            </div>
+            <div class="urgent-dial-buttons">
+              <a href="tel:100" class="btn-emergency-call btn-call-red">
+                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 100 Police Control</span>
+                <span class="btn-call-number">100</span>
+              </a>
+              <a href="tel:112" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-circle-exclamation"></i> Call 112 Unified Emergency</span>
+                <span class="btn-call-number">112</span>
+              </a>
+              <a href="tel:1091" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-person-dress"></i> Women Safety Helpline</span>
+                <span class="btn-call-number">1091</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 5. Traffic Emergency -->
+          <div class="urgent-card">
+            <div>
+              <div class="urgent-card-header">
+                <div class="urgent-card-icon icon-traffic">
+                  <i class="fa-solid fa-traffic-light"></i>
+                </div>
+                <div class="urgent-card-content">
+                  <h3>Traffic Emergency</h3>
+                  <p>Major junction gridlock, severe accident jam, traffic signal breakdown posing imminent risk.</p>
+                </div>
+              </div>
+            </div>
+            <div class="urgent-dial-buttons">
+              <a href="tel:103" class="btn-emergency-call btn-call-red">
+                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 103 Traffic Helpline</span>
+                <span class="btn-call-number">103</span>
+              </a>
+              <a href="tel:1073" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-road"></i> Call 1073 Highway Patrol</span>
+                <span class="btn-call-number">1073</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 6. Dangerous Road Blockage -->
+          <div class="urgent-card urgent-highlight">
+            <div>
+              <div class="urgent-card-header">
+                <div class="urgent-card-icon icon-blockage">
+                  <i class="fa-solid fa-road-barrier"></i>
+                </div>
+                <div class="urgent-card-content">
+                  <h3>Dangerous Road Blockage</h3>
+                  <p>Fallen tree, electric wire on road, landslip, or massive debris creating immediate crash risk.</p>
+                </div>
+              </div>
+            </div>
+            <div class="urgent-dial-buttons">
+              <a href="tel:103" class="btn-emergency-call btn-call-red">
+                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 103 Traffic Helpline</span>
+                <span class="btn-call-number">103</span>
+              </a>
+              <a href="tel:1073" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-road"></i> Call 1073 Highway Emergency</span>
+                <span class="btn-call-number">1073</span>
+              </a>
+              <a href="tel:100" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-shield"></i> Call 100 Police</span>
+                <span class="btn-call-number">100</span>
+              </a>
+
+              <!-- Special Pivot: Switch to normal transportation complaint if routine -->
+              <div class="road-block-pivot-box">
+                <div><strong>Not an immediate crash danger?</strong> If this is a routine pothole, road repair, or parking nuisance, file a structured complaint for municipal action:</div>
+                <a href="transportation-report.html">
+                  <i class="fa-solid fa-arrow-right"></i> Switch to Standard Transportation Report
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Other Immediate Danger -->
+          <div class="urgent-card">
+            <div>
+              <div class="urgent-card-header">
+                <div class="urgent-card-icon icon-danger">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="urgent-card-content">
+                  <h3>Other Immediate Danger</h3>
+                  <p>Natural disaster, flooding, structural collapse, chemical hazard, or any critical life-safety incident.</p>
+                </div>
+              </div>
+            </div>
+            <div class="urgent-dial-buttons">
+              <a href="tel:112" class="btn-emergency-call btn-call-red">
+                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 112 Unified Emergency</span>
+                <span class="btn-call-number">112</span>
+              </a>
+              <a href="tel:1077" class="btn-emergency-call btn-call-secondary" id="link-1077">
+                <span class="btn-call-label"><i class="fa-solid fa-building-shield"></i> District Disaster Control</span>
+                <span class="btn-call-number">1077</span>
+              </a>
+              <a href="tel:1070" class="btn-emergency-call btn-call-secondary">
+                <span class="btn-call-label"><i class="fa-solid fa-landmark"></i> State Disaster Control Room</span>
+                <span class="btn-call-number">1070</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- District Collectorate Card (Dynamically populated) -->
+        <div class="district-helpline-card" id="district-helpline-card">
+          <div class="district-helpline-info">
+            <h4 id="district-collectorate-title">District Collectorate Control Room</h4>
+            <p id="district-collectorate-sub">Direct official government administrative control room for emergencies.</p>
+          </div>
+          <div>
+            <a href="tel:04425268323" id="district-collectorate-phone-btn" class="btn-emergency-call btn-call-outline-red">
+              <span class="btn-call-label"><i class="fa-solid fa-phone"></i> <span id="district-collectorate-phone-label">Call District Control</span></span>
+              <span class="btn-call-number" id="district-collectorate-phone-val">044-25268323</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Non-Emergency / Routine Separation Notice -->
+        <div class="routine-notice-banner">
+          <div class="routine-notice-text">
+            <h4><i class="fa-solid fa-clipboard-check"></i> Looking for Standard Civic Issue Reporting?</h4>
+            <p data-i18n="normal_civic_reports_desc">
+              For routine civic or road issues (such as waste management, streetlights, potholes, water leaks, or sanitary complaints) that do not pose immediate danger, submit a standard complaint to receive a Complaint ID, department assignment, and SLA tracking.
+            </p>
+          </div>
+          <a href="report.html" class="btn-routine-report">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span data-i18n="report_civic_issue">Report Civic Issue</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/auth.js?v=8.8.0"></script>
+  <script src="js/user-location.js?v=1.0.0"></script>
+  <script src="js/urgent-action.js?v=1.0.0"></script>
+
+</body>
+</html>
