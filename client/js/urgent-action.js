@@ -59,10 +59,10 @@
   let cachedServicesData = null;
   let activeSituationCategory = 'all';
   let categoryLimits = {
-    hospitals: 4,
-    ambulances: 4,
-    police: 4,
-    fire: 4
+    hospitals: 6,
+    ambulances: 6,
+    police: 6,
+    fire: 6
   };
 
   // Initialize on load
@@ -371,7 +371,7 @@
       return;
     }
 
-    // Render cards
+    // Render cards with clear internal hierarchy: Name -> Distance -> Address -> Source -> Actions
     grid.innerHTML = displayedItems.map(item => {
       const cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : null;
       const phoneDisplay = item.phone ? item.phone : 'Local number unavailable';
@@ -380,29 +380,34 @@
       let dialHref = cleanPhone ? `tel:${cleanPhone}` : (serviceType === 'police_station' ? 'tel:100' : (serviceType === 'fire_station' ? 'tel:101' : 'tel:108'));
       let callLabel = cleanPhone ? `Call ${phoneDisplay}` : (serviceType === 'police_station' ? 'Call 100 Police' : (serviceType === 'fire_station' ? 'Call 101 Fire' : 'Call 108 Ambulance'));
 
+      let sourceDisplay = item.source_name ? item.source_name : 'Verified Government Directory';
+      if (!sourceDisplay.toLowerCase().startsWith('verified') && !sourceDisplay.toLowerCase().startsWith('source')) {
+        sourceDisplay = `Verified source: ${sourceDisplay}`;
+      }
+
       return `
         <div class="service-card" data-service-id="${item.id}">
-          <div class="service-card-top">
-            <div class="service-header-row">
-              <h4 class="service-name">${escapeHtml(item.name)}</h4>
+          <div class="service-card-body">
+            <h4 class="service-name">${escapeHtml(item.name)}</h4>
+            <div class="service-distance-wrap">
               <span class="service-distance-badge">
                 <i class="fa-solid fa-location-arrow"></i> ${escapeHtml(item.formattedDistance)}
               </span>
             </div>
             <p class="service-address">
               <i class="fa-solid fa-location-dot"></i>
-              <span>${escapeHtml(item.address)}</span>
+              <span class="service-address-text">${escapeHtml(item.address)}</span>
             </p>
             <div class="service-source-tag">
               <i class="fa-solid fa-circle-check"></i>
-              <span>${escapeHtml(item.source_name || 'Verified Government Directory')}</span>
+              <span class="service-source-text">${escapeHtml(sourceDisplay)}</span>
             </div>
           </div>
 
           <div class="service-actions-row">
             <a href="${dialHref}" class="btn-service-call" title="Call ${escapeHtml(item.name)}">
               <i class="fa-solid fa-phone"></i>
-              <span>${callLabel}</span>
+              <span class="btn-call-text">${escapeHtml(callLabel)}</span>
             </a>
             <a href="${item.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn-service-directions" title="Directions to ${escapeHtml(item.name)}">
               <i class="fa-solid fa-diamond-turn-right"></i>
@@ -415,7 +420,7 @@
 
     // Manage "View More" button
     if (moreWrap && moreText) {
-      if (items.length > 4) {
+      if (items.length > 6) {
         moreWrap.style.display = 'block';
         if (limit >= items.length) {
           moreText.textContent = `Show Fewer ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}`;
@@ -449,7 +454,7 @@
     }
 
     if (categoryLimits[categoryKey] >= items.length) {
-      categoryLimits[categoryKey] = 4; // Collapse back to default
+      categoryLimits[categoryKey] = 6; // Collapse back to default 6 (2 rows of 3)
     } else {
       categoryLimits[categoryKey] = items.length; // Expand all
     }
