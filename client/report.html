@@ -952,17 +952,21 @@
           </div>
 
           <!-- Support & Assistance Card -->
-          <div class="panel-card" style="border-top: 3px solid #16a34a;">
+          <div class="panel-card" style="border-top: 3px solid var(--primary, #0d9488);">
             <p class="panel-card-title" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span><i class="fa-solid fa-headset" style="color: #16a34a; margin-right: 0.4rem;"></i> Need Assistance?</span>
-              <span style="font-size: 0.72rem; color: #16a34a; font-weight: 700; background: rgba(34, 197, 94, 0.1); padding: 0.15rem 0.5rem; border-radius: 999px;">24/7 Support</span>
+              <span><i class="fa-solid fa-headset" style="color: var(--primary, #0d9488); margin-right: 0.4rem;"></i> Need Assistance?</span>
+              <span style="font-size: 0.72rem; color: var(--primary, #0d9488); font-weight: 700; background: var(--primary-light-alpha, rgba(13, 148, 136, 0.1)); padding: 0.15rem 0.5rem; border-radius: 999px;">24/7 Support</span>
             </p>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem; line-height: 1.4;">
-              Need help reporting an issue or verifying your location? Chat directly with CrowdCity Support.
+              Need help reporting an issue or verifying your location? Call or chat directly with CrowdCity Support.
             </p>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1rem; background: #25d366; color: #ffffff !important; border-radius: var(--radius-md, 8px); font-weight: 600; font-size: 0.84rem; text-decoration: none; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25); transition: all 0.2s ease;">
-                <i class="fa-brands fa-whatsapp" style="font-size: 1.1rem;"></i>
+              <a href="tel:+919025132196" id="report-call-support-btn" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1rem; background: var(--primary, #0d9488); color: #ffffff !important; border-radius: var(--radius-md, 8px); font-weight: 700; font-size: 0.84rem; text-decoration: none; box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25); transition: all 0.2s ease;">
+                <i class="fa-solid fa-phone" style="font-size: 0.85rem;"></i>
+                <span>Call Support</span>
+              </a>
+              <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." target="_blank" rel="noopener noreferrer" id="report-whatsapp-support-btn" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.55rem 1rem; background: #25d366; color: #ffffff !important; border-radius: var(--radius-md, 8px); font-weight: 600; font-size: 0.84rem; text-decoration: none; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.2); transition: all 0.2s ease;">
+                <i class="fa-brands fa-whatsapp" style="font-size: 1.05rem;"></i>
                 <span>Chat on WhatsApp</span>
               </a>
             </div>
