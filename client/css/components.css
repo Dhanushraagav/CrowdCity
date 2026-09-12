@@ -4956,13 +4956,14 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 /* ==========================================================================
+   Footer Overrides (Hidden globally)
+   ========================================================================== */
 footer,
 .app-footer,
 .footer,
 .site-footer,
 .main-footer {
   display: none !important;
-}
 }
 
 .page-wrapper {
@@ -6748,6 +6749,298 @@ a,
     box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   CrowdCity Premium Modal System (Apple/Linear Executive Standard)
+   - Deceleration spring curve (cubic-bezier(0.16, 1, 0.3, 1))
+   - Frosted backdrop blur & micro-elevation transform
+   - Fluid exit transitions without abrupt layout shifts
+   ========================================================================== */
+
+.cc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(15, 23, 42, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.cc-modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  background-color: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.cc-modal-backdrop.is-closing {
+  opacity: 0;
+  background-color: rgba(15, 23, 42, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.4, 0, 1, 1),
+              background-color 0.18s cubic-bezier(0.4, 0, 1, 1),
+              backdrop-filter 0.18s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.cc-modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 416px;
+  padding: 1.75rem 1.5rem 1.4rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.85) inset,
+    0 1px 2px 0 rgba(15, 23, 42, 0.04),
+    0 20px 40px -10px rgba(15, 23, 42, 0.16),
+    0 8px 16px -4px rgba(15, 23, 42, 0.06);
+  text-align: center;
+  transform: scale(0.95) translateY(12px);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.cc-modal-backdrop.is-open .cc-modal-dialog {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.cc-modal-backdrop.is-closing .cc-modal-dialog {
+  transform: scale(0.97) translateY(8px);
+  opacity: 0;
+  transition: transform 0.18s cubic-bezier(0.4, 0, 1, 1),
+              opacity 0.18s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Close button (top-right X) */
+.cc-modal-close-btn {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  z-index: 2;
+}
+
+.cc-modal-close-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: scale(1.06);
+}
+
+.cc-modal-close-btn:active {
+  transform: scale(0.94);
+}
+
+.cc-modal-close-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.35);
+}
+
+/* Department Icon Badge */
+.cc-modal-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 118, 110, 0.05) 100%);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  color: #0f766e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin: 0 auto 0.75rem auto;
+  box-shadow: 0 4px 10px rgba(13, 148, 136, 0.08);
+}
+
+/* Official Status Badge */
+.cc-modal-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+  background: #f0fdfa;
+  color: #0f766e;
+  border: 1px solid #ccfbf1;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+/* Micro Live Pulsing Dot */
+.cc-modal-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #0d9488;
+  box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.5);
+  animation: ccModalPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  flex-shrink: 0;
+}
+
+@keyframes ccModalPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.55);
+    transform: scale(0.95);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(13, 148, 136, 0);
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 148, 136, 0);
+    transform: scale(0.95);
+  }
+}
+
+/* Typography */
+.cc-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+
+.cc-modal-subtitle {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Description Callout */
+.cc-modal-callout {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.95rem;
+  text-align: left;
+}
+
+.cc-modal-callout p {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Feature List */
+.cc-modal-features {
+  text-align: left;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cc-modal-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.cc-modal-feature-icon {
+  color: #0f766e;
+  font-size: 0.82rem;
+  margin-top: 0.12rem;
+  flex-shrink: 0;
+}
+
+/* Primary Action Button */
+.cc-modal-primary-btn {
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  outline: none;
+}
+
+.cc-modal-primary-btn:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
+}
+
+.cc-modal-primary-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+}
+
+.cc-modal-primary-btn i {
+  font-size: 0.74rem;
+  transition: transform 0.2s ease;
+  opacity: 0.85;
+}
+
+.cc-modal-primary-btn:hover i {
+  transform: translateX(3px);
+}
+
+.cc-modal-primary-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.4);
+}
+
+/* Responsive adjustment */
+@media (max-width: 480px) {
+  .cc-modal-dialog {
+    padding: 1.5rem 1.25rem 1.25rem;
+    max-width: calc(100vw - 1.5rem);
+    border-radius: 14px;
   }
 }
 

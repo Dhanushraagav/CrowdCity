@@ -425,22 +425,46 @@ function initAiCameraDetection() {
   const modal = document.getElementById('ai-upcoming-feature-modal');
   const closeBtn = document.getElementById('btn-close-upcoming-modal');
   const closeBtnX = document.getElementById('btn-close-upcoming-modal-x');
+  let isUpcomingModalClosing = false;
 
   function openUpcomingModal(e) {
-    if (e) e.preventDefault();
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    if (!modal) return;
+
+    // Reset closing state
+    isUpcomingModalClosing = false;
+    modal.classList.remove('is-closing');
+
+    // Make visible in DOM
+    modal.style.display = 'flex';
+
+    // Force layout reflow so smooth CSS transition triggers reliably
+    void modal.offsetWidth;
+
+    // Add open class to execute spring deceleration animation
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
   }
 
-  function closeUpcomingModal() {
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
-    }
+  function closeUpcomingModal(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    if (!modal || isUpcomingModalClosing || !modal.classList.contains('is-open')) return;
+
+    isUpcomingModalClosing = true;
+    modal.classList.remove('is-open');
+    modal.classList.add('is-closing');
+    modal.setAttribute('aria-hidden', 'true');
+
+    // Allow graceful exit transition (180ms) to complete before removal
+    setTimeout(() => {
+      if (isUpcomingModalClosing) {
+        modal.classList.remove('is-closing');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        isUpcomingModalClosing = false;
+      }
+    }, 200);
   }
 
   if (cameraBtn) cameraBtn.addEventListener('click', openUpcomingModal);
@@ -449,11 +473,12 @@ function initAiCameraDetection() {
   if (closeBtnX) closeBtnX.addEventListener('click', closeUpcomingModal);
   if (modal) {
     modal.addEventListener('click', (e) => {
+      // Close only if citizen clicks directly on the frosted backdrop container
       if (e.target === modal) closeUpcomingModal();
     });
   }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+    if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
       closeUpcomingModal();
     }
   });

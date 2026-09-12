@@ -1254,57 +1254,65 @@
   </div>
 
   <!-- =============================================================
-       UPCOMING FEATURE MODAL: AI VISUAL HAZARD INSPECTION (MINIMAL DESIGN)
+       UPCOMING FEATURE MODAL: AI VISUAL HAZARD INSPECTION (PREMIUM CIVIC DIALOG)
        ============================================================= -->
-  <div id="ai-upcoming-feature-modal" class="hidden" style="position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 10050; display: none; align-items: center; justify-content: center; padding: 1rem; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased;">
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; max-width: 410px; width: 100%; padding: 1.6rem 1.4rem; box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.12); text-align: center; position: relative;">
-      
+  <div id="ai-upcoming-feature-modal" class="cc-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
+    <div class="cc-modal-dialog">
       <!-- Close button (top-right X) -->
-      <button type="button" id="btn-close-upcoming-modal-x" aria-label="Close" style="position: absolute; top: 0.85rem; right: 0.85rem; width: 28px; height: 28px; border-radius: 6px; border: 1px solid #f1f5f9; background: #ffffff; color: #94a3b8; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;">
+      <button type="button" id="btn-close-upcoming-modal-x" class="cc-modal-close-btn" aria-label="Close dialog">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <!-- Department Icon Badge -->
-      <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(15, 118, 110, 0.08); border: 1px solid rgba(15, 118, 110, 0.2); color: #0f766e; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin: 0 auto 0.75rem auto;">
+      <div class="cc-modal-icon-badge">
         <i class="fa-solid fa-camera-retro"></i>
       </div>
 
-      <!-- Official Badge -->
-      <div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; border-radius: 20px; background: #f0fdfa; color: #0f766e; border: 1px solid #ccfbf1; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.7rem;">
-        <i class="fa-solid fa-satellite-dish" style="font-size: 0.65rem;"></i> Civic AI Pilot • Phase 2
+      <!-- Official Status Badge -->
+      <div class="cc-modal-status-pill">
+        <span class="cc-modal-pulse-dot" aria-hidden="true"></span>
+        <span>Civic AI Pilot &bull; Phase 2</span>
       </div>
 
       <!-- Title & Subtitle -->
-      <h3 style="font-size: 1.05rem; font-weight: 600; color: #0f172a; margin: 0 0 0.25rem 0; line-height: 1.35; letter-spacing: -0.01em;">
+      <h3 id="ai-modal-title" class="cc-modal-title">
         AI Visual Hazard Inspection
       </h3>
-      <div style="font-size: 0.76rem; font-weight: 400; color: #64748b; margin-bottom: 1rem; line-height: 1.4;">
-        Automated On-Field Photo Defect Detection & Triage
+      <div class="cc-modal-subtitle">
+        Automated On-Field Photo Defect Detection &amp; Triage
       </div>
 
-      <!-- Description Text -->
-      <p style="font-size: 0.78rem; font-weight: 400; color: #475569; line-height: 1.55; margin: 0 0 0.95rem 0; text-align: left; background: #f8fafc; padding: 0.85rem 0.95rem; border-radius: 8px; border: 1px solid #f1f5f9;">
-        Automated photo defect detection is currently undergoing municipal sandbox testing. In Phase 2, live captures will automatically classify civic defects (potholes, water leaks, streetlights, garbage) and route reports directly to field engineers.
-      </p>
+      <!-- Description Callout -->
+      <div class="cc-modal-callout">
+        <p>
+          Automated photo defect detection is currently undergoing municipal sandbox testing. In Phase 2, live captures will automatically classify civic defects (potholes, water leaks, streetlights, garbage) and route reports directly to field engineers.
+        </p>
+      </div>
 
       <!-- Pilot Rollout Notes -->
-      <div style="text-align: left; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.35rem;">
-        <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.74rem; color: #64748b; font-weight: 400;">
-          <i class="fa-regular fa-clock" style="color: #0f766e; font-size: 0.78rem;"></i>
+      <div class="cc-modal-features">
+        <div class="cc-modal-feature-item">
+          <div class="cc-modal-feature-icon">
+            <i class="fa-regular fa-clock"></i>
+          </div>
           <span>Scheduled for upcoming platform update</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.74rem; color: #64748b; font-weight: 400;">
-          <i class="fa-regular fa-circle-check" style="color: #0f766e; font-size: 0.78rem;"></i>
+        <div class="cc-modal-feature-item">
+          <div class="cc-modal-feature-icon">
+            <i class="fa-regular fa-circle-check"></i>
+          </div>
           <span>Use description, voice report, or standard photo attachment below</span>
         </div>
       </div>
 
       <!-- Action Button -->
-      <button type="button" id="btn-close-upcoming-modal" style="width: 100%; height: 38px; border-radius: 8px; background: #0f172a; color: #ffffff; border: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.01em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; transition: background 0.15s ease;">
-        <span>Understood • Continue Report</span> <i class="fa-solid fa-arrow-right" style="font-size: 0.72rem; opacity: 0.8;"></i>
+      <button type="button" id="btn-close-upcoming-modal" class="cc-modal-primary-btn">
+        <span>Understood &bull; Continue Report</span>
+        <i class="fa-solid fa-arrow-right"></i>
       </button>
     </div>
   </div>
+
 
 </body>
 </html>
