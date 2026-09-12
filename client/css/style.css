@@ -724,6 +724,79 @@ body {
     min-height: 44px !important;
   }
 
+  /* ==========================================================================
+     UNIVERSAL MOBILE SELECT & DROPDOWN ANTI-FLICKER / ANTI-SHUTTER SYSTEM
+     ========================================================================== */
+  /* 1. Eliminate OS viewport auto-zoom shutter on all selects and form controls */
+  select,
+  .form-select,
+  .form-select-custom,
+  .la-select,
+  .global-search-select,
+  .power-select-filter,
+  .weather-select-filter,
+  .tn-select-filter,
+  select.form-control,
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  textarea {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100% !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* 2. Eliminate focus/active transition jitter and GPU layer tearing */
+  select,
+  .form-select,
+  .form-select-custom,
+  .la-select,
+  .global-search-select,
+  .power-select-filter,
+  .weather-select-filter,
+  .tn-select-filter {
+    transition: border-color 0.12s ease, background-color 0.12s ease !important;
+    transform: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+  }
+
+  select:focus,
+  select:active,
+  .form-select:focus,
+  .form-select:active,
+  .form-select-custom:focus,
+  .form-select-custom:active,
+  .la-select:focus,
+  .la-select:active,
+  .global-search-select:focus,
+  .global-search-select:active,
+  .power-select-filter:focus,
+  .power-select-filter:active,
+  .weather-select-filter:focus,
+  .weather-select-filter:active,
+  .tn-select-filter:focus,
+  .tn-select-filter:active {
+    transform: none !important;
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25) !important;
+    outline: none !important;
+  }
+
+  /* 3. Custom dropdown panels: clean instant rendering on touch devices without display/transition flash */
+  .user-dropdown,
+  #user-dropdown,
+  .notification-dropdown,
+  #notification-dropdown,
+  .public-pulse-dropdown {
+    transition: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+  }
+
   /* Scale reset-password container and cards properly */
   .reset-container {
     width: 100% !important;

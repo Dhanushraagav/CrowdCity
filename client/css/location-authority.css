@@ -673,9 +673,20 @@
   .la-select, .la-input {
     min-height: 46px;
     height: 46px;
-    font-size: 0.84rem;
+    font-size: 16px !important;
     padding-left: 0.8rem;
     padding-right: 2.3rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-text-size-adjust: 100%;
+    transition: border-color 0.15s ease, background-color 0.15s ease !important;
+    transform: none !important;
+  }
+
+  .la-select:focus {
+    transform: none !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2.5px rgba(13, 148, 136, 0.2) !important;
   }
 
   .la-authority-card {

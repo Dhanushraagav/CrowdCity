@@ -491,4 +491,10 @@
   .global-search-filter-drawer {
     grid-template-columns: 1fr;
   }
+
+  .global-search-select {
+    font-size: 16px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent !important;
+  }
 }
