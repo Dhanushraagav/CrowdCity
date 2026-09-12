@@ -100,6 +100,11 @@ window.getOrInitSupabaseClient = getOrInitSupabaseClient;
 
 // Fatal configuration error screen displaying a premium glassmorphic overlay
 function showFatalConfigError(details) {
+  // Never block emergency assistance pages with a technical config overlay
+  if (typeof window !== 'undefined' && window.location && (window.location.pathname.includes('urgent-action') || window.location.pathname.includes('emergency'))) {
+    console.warn('[Auth] Suppressing fatal config overlay on emergency assistance screen:', details);
+    return;
+  }
   // Create fatal overlay if not already present
   if (document.getElementById('cc-fatal-config-overlay')) return;
   
@@ -291,6 +296,10 @@ async function initAuth() {
         window.cc_initialized_supabase_key === config.supabaseAnonKey) {
       console.log("[Auth] Supabase client already initialized with matching config. Skipping re-initialization.");
     } else {
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        console.warn("[Auth] Supabase SDK (@supabase/supabase-js) is not available on window. Skipping Supabase client initialization.");
+        return;
+      }
       console.log("[Auth] Connecting to Supabase at URL:", config.supabaseUrl);
       supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, getSafeSupabaseOptions());
       window.supabaseClient = supabaseClient;
@@ -327,6 +336,10 @@ function _tryInitFromCache() {
                              config.supabaseAnonKey.includes('placeholder') || 
                              (!config.supabaseAnonKey.startsWith('eyJ') && !config.supabaseAnonKey.startsWith('sb_publishable_'));
     if (!config.supabaseUrl || config.supabaseUrl.includes('placeholder') || isKeyPlaceholder) return false;
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      console.warn('[Auth] Supabase SDK (@supabase/supabase-js) is not available on window for cached init.');
+      return false;
+    }
     supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, getSafeSupabaseOptions());
     window.supabaseClient = supabaseClient;
     window.cc_initialized_supabase_url = config.supabaseUrl;
