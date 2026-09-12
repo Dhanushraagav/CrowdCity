@@ -4087,15 +4087,15 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   .quick-actions-section {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
-    margin-bottom: 2rem;
+    gap: 1.15rem;
+    margin-bottom: 2.25rem;
     touch-action: manipulation;
   }
   .quick-actions-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--text-main);
-    margin: 0;
+    margin: 0 0 0.45rem 0;
     font-family: var(--font-heading);
   }
   .quick-actions-grid {
