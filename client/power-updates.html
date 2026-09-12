@@ -40,6 +40,131 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
+    /* Auto-Detected Citizen Location Banner */
+    .power-location-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 0.75rem 1.2rem;
+      background: rgba(13, 148, 136, 0.08);
+      border: 1px solid rgba(13, 148, 136, 0.25);
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      color: #0f766e;
+    }
+    .power-location-banner.hidden {
+      display: none !important;
+    }
+    .power-location-banner-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 500;
+    }
+    .power-location-banner-content i {
+      color: var(--primary, #0d9488);
+      font-size: 1rem;
+    }
+    .power-location-banner-content strong {
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .power-location-switch-btn {
+      background: #ffffff;
+      border: 1px solid rgba(13, 148, 136, 0.35);
+      color: #0f766e;
+      border-radius: 8px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .power-location-switch-btn:hover {
+      background: #0f766e;
+      color: #ffffff;
+      border-color: #0f766e;
+    }
+
+    /* Reassuring No-Outages Local Card */
+    .power-district-clear-card {
+      background: #ffffff;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      padding: 1.75rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.06);
+      grid-column: 1 / -1;
+      margin-bottom: 1.5rem;
+    }
+    .power-district-clear-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin: 0 auto 1rem auto;
+    }
+    .power-district-clear-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 0.4rem 0;
+    }
+    .power-district-clear-card p {
+      font-size: 0.85rem;
+      color: #64748b;
+      max-width: 540px;
+      margin: 0 auto 1.25rem auto;
+      line-height: 1.55;
+    }
+    .power-district-clear-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .power-district-clear-actions .btn {
+      padding: 0.45rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      text-decoration: none;
+    }
+
+    .power-card.user-location-highlight {
+      border-color: rgba(13, 148, 136, 0.45);
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.25), 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+    .power-area-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      background: #f0fdfa;
+      color: #0f766e;
+      border: 1px solid #ccfbf1;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
     .power-hero-title-group h1 {
       font-size: 1.45rem;
       font-weight: 800;
@@ -647,6 +772,18 @@
           </div>
         </div>
 
+        <!-- Auto-Detected Citizen Location Banner -->
+        <div id="power-location-highlight" class="power-location-banner hidden">
+          <div class="power-location-banner-content">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Showing planned power shutdowns for your area: <strong id="power-user-district-text">--</strong></span>
+          </div>
+          <button type="button" class="power-location-switch-btn" id="btn-power-all-districts" onclick="clearDistrictFilter()">
+            <span>View All Districts (38)</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
         <!-- Search, Filter & Timeframe Tabs -->
         <div class="power-filter-card">
           <div class="power-filter-top-row">
@@ -779,7 +916,8 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=8.8.0"></script>
-  <script src="js/power-updates.js?v=8.2.0"></script>
+  <script src="js/user-location.js?v=1.0.0"></script>
+  <script src="js/power-updates.js?v=8.3.0"></script>
 
 </body>
 </html>

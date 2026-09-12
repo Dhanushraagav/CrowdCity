@@ -18,6 +18,8 @@
 
   const state = {
     district: 'all',
+    userDetectedDistrict: null,
+    userHasManuallyChangedDistrict: false,
     dateTab: 'all',
     searchQuery: '',
     districtsForecast: [],
@@ -42,10 +44,89 @@
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
+    // 1. Resolve known citizen district synchronously from client storage / coordinates
+    if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
+      const saved = window.CrowdCityLocation.getSavedUserDistrict();
+      if (saved) {
+        state.userDetectedDistrict = saved;
+        state.district = saved.toLowerCase();
+      }
+    }
+
     await populateDistrictsDropdown();
     setupEventListeners();
+    updateLocationBanner();
     await fetchWeatherForecast();
+
+    // 2. If no district was found in local storage, trigger non-blocking GPS detection
+    if (!state.userDetectedDistrict && window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
+      window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 3500 }).then(gpsDistrict => {
+        if (gpsDistrict && !state.userHasManuallyChangedDistrict) {
+          state.userDetectedDistrict = gpsDistrict;
+          state.district = gpsDistrict.toLowerCase();
+          const distSelect = document.getElementById('weather-district-filter');
+          if (distSelect) distSelect.value = state.district;
+          updateLocationBanner();
+          updateSelectedDistrictView();
+          renderView();
+        }
+      });
+    }
+
+    // 3. Listen for global location detection and change events
+    window.addEventListener('crowdcity:location_detected', handleLocationEvent);
+    window.addEventListener('crowdcity:location_changed', handleLocationEvent);
   }
+
+  function handleLocationEvent(e) {
+    if (e.detail && e.detail.district && !state.userHasManuallyChangedDistrict) {
+      state.userDetectedDistrict = e.detail.district;
+      state.district = e.detail.district.toLowerCase();
+      const distSelect = document.getElementById('weather-district-filter');
+      if (distSelect) distSelect.value = state.district;
+      updateLocationBanner();
+      updateSelectedDistrictView();
+      renderView();
+    }
+  }
+
+  /**
+   * Update the auto-detected location notification banner.
+   */
+  function updateLocationBanner() {
+    const banner = document.getElementById('weather-location-banner');
+    const label = document.getElementById('weather-user-district-label');
+    const switchBtn = document.getElementById('btn-weather-all-districts');
+    if (!banner) return;
+
+    if (state.userDetectedDistrict) {
+      banner.classList.remove('hidden');
+      if (label) label.textContent = state.userDetectedDistrict;
+      if (switchBtn) {
+        if (state.district === 'all') {
+          switchBtn.innerHTML = `<span>Back to ${escapeHtml(state.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
+          switchBtn.onclick = () => window.selectUserDetectedDistrict();
+        } else {
+          switchBtn.innerHTML = `<span>View All 38 Districts</span> <i class="fa-solid fa-arrow-right"></i>`;
+          switchBtn.onclick = () => window.resetWeatherFilters();
+        }
+      }
+    } else {
+      banner.classList.add('hidden');
+    }
+  }
+
+  window.selectUserDetectedDistrict = function() {
+    if (state.userDetectedDistrict) {
+      state.district = state.userDetectedDistrict.toLowerCase();
+      state.userHasManuallyChangedDistrict = false;
+      const distSelect = document.getElementById('weather-district-filter');
+      if (distSelect) distSelect.value = state.district;
+      updateLocationBanner();
+      updateSelectedDistrictView();
+      renderView();
+    }
+  };
 
   /**
    * Populate districts dropdown dynamically using CrowdCity master location data.
@@ -69,18 +150,18 @@
 
     districts = Array.from(new Set(districts)).sort();
 
-    const currentVal = select.value;
     select.innerHTML = '<option value="all" data-i18n="weather_filter_district_all">All Districts (38)</option>';
 
     districts.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d.toLowerCase();
-      opt.textContent = d;
+      const isDetected = state.userDetectedDistrict && state.userDetectedDistrict.toLowerCase() === d.toLowerCase();
+      opt.textContent = isDetected ? `${d} (Your Location)` : d;
       select.appendChild(opt);
     });
 
-    if (currentVal && (currentVal === 'all' || districts.map(d => d.toLowerCase()).includes(currentVal.toLowerCase()))) {
-      select.value = currentVal;
+    if (state.district && state.district !== 'all') {
+      select.value = state.district;
     }
   }
 
@@ -96,6 +177,8 @@
     if (distSelect) {
       distSelect.addEventListener('change', (e) => {
         state.district = e.target.value.toLowerCase();
+        state.userHasManuallyChangedDistrict = true;
+        updateLocationBanner();
         updateSelectedDistrictView();
         renderView();
       });
@@ -129,6 +212,7 @@
     state.district = 'all';
     state.dateTab = 'all';
     state.searchQuery = '';
+    state.userHasManuallyChangedDistrict = true;
 
     const distSelect = document.getElementById('weather-district-filter');
     if (distSelect) distSelect.value = 'all';
@@ -137,6 +221,9 @@
     if (searchInput) searchInput.value = '';
 
     window.setWeatherTimeframeTab('all');
+    updateLocationBanner();
+    updateSelectedDistrictView();
+    renderView();
   };
 
   /**
@@ -193,8 +280,18 @@
       );
       state.currentDistrict = found || state.districtsForecast[0];
     } else {
-      const chennai = state.districtsForecast.find(d => d.district.id.toLowerCase() === 'chennai');
-      state.currentDistrict = chennai || state.districtsForecast[0];
+      // Prioritize user's detected location first even in statewide overview!
+      let preferred = null;
+      if (state.userDetectedDistrict) {
+        preferred = state.districtsForecast.find(d => 
+          d.district.id.toLowerCase() === state.userDetectedDistrict.toLowerCase() ||
+          d.district.name.toLowerCase() === state.userDetectedDistrict.toLowerCase()
+        );
+      }
+      if (!preferred) {
+        preferred = state.districtsForecast.find(d => d.district.id.toLowerCase() === 'chennai');
+      }
+      state.currentDistrict = preferred || state.districtsForecast[0];
     }
   }
 
@@ -300,7 +397,18 @@
     if (allDistrictsSection && allDistrictsGrid) {
       if (state.district === 'all') {
         allDistrictsSection.classList.remove('hidden');
-        allDistrictsGrid.innerHTML = matchingDistricts.map(item => createDistrictOverviewCardHtml(item)).join('');
+        let sortedDistricts = [...matchingDistricts];
+        if (state.userDetectedDistrict && !state.searchQuery) {
+          const userIdx = sortedDistricts.findIndex(d => 
+            d.district.name.toLowerCase() === state.userDetectedDistrict.toLowerCase() ||
+            d.district.id.toLowerCase() === state.userDetectedDistrict.toLowerCase()
+          );
+          if (userIdx > -1) {
+            const [userItem] = sortedDistricts.splice(userIdx, 1);
+            sortedDistricts.unshift(userItem);
+          }
+        }
+        allDistrictsGrid.innerHTML = sortedDistricts.map(item => createDistrictOverviewCardHtml(item)).join('');
       } else {
         allDistrictsSection.classList.add('hidden');
       }
@@ -471,12 +579,19 @@
 
     const tempDisplay = curr.temperature_c !== null ? `${curr.temperature_c}°C` : '--';
     const rainProb = todayDaily.precipitation_probability_pct !== undefined ? `${todayDaily.precipitation_probability_pct}%` : '--';
+    const isUserLocation = state.userDetectedDistrict && (
+      dist.name.toLowerCase() === state.userDetectedDistrict.toLowerCase() ||
+      dist.id.toLowerCase() === state.userDetectedDistrict.toLowerCase()
+    );
 
     return `
-      <div class="district-card" onclick="selectDistrict('${escapeHtml(dist.id)}')">
+      <div class="district-card ${isUserLocation ? 'user-location-highlight' : ''}" onclick="selectDistrict('${escapeHtml(dist.id)}')">
         <div class="district-card-top">
           <div>
-            <div class="district-card-name">${escapeHtml(dist.name)}</div>
+            <div class="district-card-name">
+              ${escapeHtml(dist.name)}
+              ${isUserLocation ? '<span class="user-location-pill"><i class="fa-solid fa-location-dot"></i> Your Area</span>' : ''}
+            </div>
             <div class="district-card-condition">
               <i class="fa-solid ${escapeHtml(curr.icon_class)}" style="color: #64748b;"></i>
               <span>${escapeHtml(curr.condition)}</span>

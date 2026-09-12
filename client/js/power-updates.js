@@ -23,7 +23,8 @@
     outages: [],
     lastUpdated: '',
     isLoading: false,
-    userDetectedDistrict: null
+    userDetectedDistrict: null,
+    hasManuallyChangedDistrict: false
   };
 
   document.addEventListener('DOMContentLoaded', initPowerUpdates);
@@ -37,15 +38,29 @@
     window.addEventListener('languageChanged', () => {
       renderOutages();
     });
+
+    // Listen for global location events
+    window.addEventListener('crowdcity:location_detected', handleLocationEvent);
+    window.addEventListener('crowdcity:location_changed', handleLocationEvent);
+  }
+
+  function handleLocationEvent(e) {
+    if (e.detail && e.detail.district && !powerState.hasManuallyChangedDistrict) {
+      applyDetectedDistrict(e.detail.district);
+      fetchPowerShutdowns();
+    }
   }
 
   /**
-   * Detect citizen district from profile or stored preferences.
+   * Detect citizen district from local storage, coordinates, or profile.
    */
   function detectUserLocation() {
     try {
-      let detected = null;
-      if (typeof window.getCurrentUser === 'function') {
+      let detected = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
+        ? window.CrowdCityLocation.getSavedUserDistrict()
+        : null;
+
+      if (!detected && typeof window.getCurrentUser === 'function') {
         const user = window.getCurrentUser();
         if (user && user.district && user.district !== 'Tamil Nadu') {
           detected = user.district;
@@ -57,31 +72,81 @@
       }
 
       if (detected) {
-        powerState.userDetectedDistrict = detected.trim();
-        const highlightBanner = document.getElementById('power-location-highlight');
-        const districtText = document.getElementById('power-user-district-text');
-        const districtSelect = document.getElementById('power-district-filter');
-
-        if (highlightBanner && districtText) {
-          districtText.textContent = powerState.userDetectedDistrict;
-          highlightBanner.classList.remove('hidden');
-        }
-
-        // Pre-select in dropdown if matching option exists
-        if (districtSelect) {
-          const matchOpt = Array.from(districtSelect.options).find(
-            opt => opt.value.toLowerCase() === powerState.userDetectedDistrict.toLowerCase()
-          );
-          if (matchOpt) {
-            districtSelect.value = matchOpt.value;
-            powerState.selectedDistrict = matchOpt.value;
+        applyDetectedDistrict(detected);
+      } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
+        // Non-blocking background GPS detection
+        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 3500 }).then(gpsDistrict => {
+          if (gpsDistrict && (powerState.selectedDistrict === 'all' || !powerState.hasManuallyChangedDistrict)) {
+            applyDetectedDistrict(gpsDistrict);
+            fetchPowerShutdowns();
           }
-        }
+        });
       }
     } catch (e) {
       console.warn('[PowerUpdates] Location detection notice:', e);
     }
   }
+
+  function applyDetectedDistrict(districtName) {
+    if (!districtName) return;
+    powerState.userDetectedDistrict = districtName.trim();
+    powerState.selectedDistrict = powerState.userDetectedDistrict;
+    updateLocationBanner();
+
+    const districtSelect = document.getElementById('power-district-filter');
+    if (districtSelect) {
+      const matchOpt = Array.from(districtSelect.options).find(
+        opt => opt.value.toLowerCase() === powerState.userDetectedDistrict.toLowerCase()
+      );
+      if (matchOpt) {
+        districtSelect.value = matchOpt.value;
+        powerState.selectedDistrict = matchOpt.value;
+        if (!matchOpt.text.includes('(Your Location)')) {
+          matchOpt.text = `${matchOpt.value} (Your Location)`;
+        }
+      }
+    }
+  }
+
+  function updateLocationBanner() {
+    const highlightBanner = document.getElementById('power-location-highlight');
+    const switchBtn = document.getElementById('btn-power-all-districts');
+
+    if (!highlightBanner) return;
+
+    if (powerState.userDetectedDistrict) {
+      highlightBanner.classList.remove('hidden');
+      const bannerContent = highlightBanner.querySelector('.power-location-banner-content');
+      if (bannerContent && switchBtn) {
+        if (powerState.selectedDistrict === 'all') {
+          bannerContent.innerHTML = `
+            <i class="fa-solid fa-globe"></i>
+            <span>Showing all districts across Tamil Nadu. Your detected location: <strong>${escapeHtml(powerState.userDetectedDistrict)}</strong></span>
+          `;
+          switchBtn.innerHTML = `<span>Back to ${escapeHtml(powerState.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
+          switchBtn.onclick = () => window.selectUserDetectedDistrict();
+        } else {
+          bannerContent.innerHTML = `
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Showing planned power shutdowns for your area: <strong>${escapeHtml(powerState.selectedDistrict)}</strong></span>
+          `;
+          switchBtn.innerHTML = `<span>View All Districts (38)</span> <i class="fa-solid fa-arrow-right"></i>`;
+          switchBtn.onclick = () => window.clearDistrictFilter();
+        }
+      }
+    } else {
+      highlightBanner.classList.add('hidden');
+    }
+  }
+
+  window.selectUserDetectedDistrict = function() {
+    if (powerState.userDetectedDistrict) {
+      applyDetectedDistrict(powerState.userDetectedDistrict);
+      powerState.hasManuallyChangedDistrict = false;
+      updateLocationBanner();
+      fetchPowerShutdowns();
+    }
+  };
 
   function setupEventListeners() {
     const searchInput = document.getElementById('power-search-input');
@@ -100,6 +165,8 @@
     if (districtFilter) {
       districtFilter.addEventListener('change', (e) => {
         powerState.selectedDistrict = e.target.value;
+        powerState.hasManuallyChangedDistrict = true;
+        updateLocationBanner();
         fetchPowerShutdowns();
       });
     }
@@ -212,6 +279,13 @@
         Boolean(powerState.selectedDate);
 
       if (hasActiveFilters) {
+        // If the user's filtered/detected district has no shutdowns and no sub-filters are applied:
+        if (powerState.selectedDistrict !== 'all' && !powerState.searchQuery && !powerState.selectedDate && powerState.selectedTab === 'all') {
+          container.innerHTML = createNoOutageLocalHtml(powerState.selectedDistrict);
+          if (emptyState) emptyState.classList.add('hidden');
+          if (officialInfoBox) officialInfoBox.classList.add('hidden');
+          return;
+        }
         if (emptyState) emptyState.classList.remove('hidden');
         if (officialInfoBox) officialInfoBox.classList.add('hidden');
       } else {
@@ -225,7 +299,50 @@
     if (emptyState) emptyState.classList.add('hidden');
     if (officialInfoBox) officialInfoBox.classList.add('hidden');
 
-    container.innerHTML = powerState.outages.map(item => createOutageCardHtml(item)).join('');
+    // When viewing all districts, sort user's detected district outages to the top
+    let sortedOutages = [...powerState.outages];
+    if (powerState.userDetectedDistrict) {
+      const userDist = powerState.userDetectedDistrict.toLowerCase();
+      sortedOutages.sort((a, b) => {
+        const aMatches = (a.district && a.district.toLowerCase() === userDist) ? 1 : 0;
+        const bMatches = (b.district && b.district.toLowerCase() === userDist) ? 1 : 0;
+        return bMatches - aMatches;
+      });
+    }
+
+    container.innerHTML = sortedOutages.map(item => createOutageCardHtml(item)).join('');
+  }
+
+  /**
+   * HTML template for reassurance when user's district has no scheduled outages.
+   */
+  function createNoOutageLocalHtml(districtName) {
+    const isUserLocation = powerState.userDetectedDistrict &&
+      powerState.userDetectedDistrict.toLowerCase() === districtName.toLowerCase();
+    
+    const subtitle = isUserLocation
+      ? `No scheduled power shutdowns found for your district (${escapeHtml(districtName)}). Electricity supply is operating normally under TNPDCL.`
+      : `No scheduled power shutdowns found for ${escapeHtml(districtName)}. Electricity supply is operating normally under TNPDCL.`;
+
+    return `
+      <div class="power-district-clear-card">
+        <div class="power-district-clear-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h3>No Scheduled Shutdowns in ${escapeHtml(districtName)}</h3>
+        <p>${subtitle}</p>
+        <div class="power-district-clear-actions">
+          <button type="button" class="btn btn-secondary" onclick="clearDistrictFilter()">
+            <i class="fa-solid fa-list-ul"></i>
+            <span>View All Districts (38)</span>
+          </button>
+          <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Official TNPDCL Portal</span>
+          </a>
+        </div>
+      </div>
+    `;
   }
 
   /**
@@ -281,8 +398,14 @@
     const moreCount = areasStr.split(/[,;\n]/).map(s => s.trim()).filter(Boolean).length - 10;
     const morePill = moreCount > 0 ? `<span class="power-area-tag">+${moreCount} more</span>` : '';
 
+    const isUserDistrict = Boolean(
+      powerState.userDetectedDistrict &&
+      item.district &&
+      item.district.toLowerCase() === powerState.userDetectedDistrict.toLowerCase()
+    );
+
     return `
-      <article class="power-card" id="outage-card-${item.id || ''}">
+      <article class="power-card ${isUserDistrict ? 'user-location-highlight' : ''}" id="outage-card-${item.id || ''}">
         <div>
           <div class="power-card-header">
             <div class="power-badges-wrap">
@@ -290,6 +413,7 @@
                 <i class="fa-solid fa-location-dot" style="font-size: 0.68rem; color: #64748b;"></i>
                 ${escapeHtml(item.district || 'Tamil Nadu')}
               </span>
+              ${isUserDistrict ? '<span class="power-area-pill"><i class="fa-solid fa-location-crosshairs"></i> Your Area</span>' : ''}
               ${item.division ? `<span class="power-division-badge">${escapeHtml(item.division)}</span>` : ''}
             </div>
             ${statusBadgeHtml}
@@ -383,26 +507,34 @@
     const dateInput = document.getElementById('power-date-filter');
     const searchInput = document.getElementById('power-search-input');
 
-    if (districtSelect) powerState.selectedDistrict = districtSelect.value;
+    if (districtSelect) {
+      powerState.selectedDistrict = districtSelect.value;
+      powerState.hasManuallyChangedDistrict = true;
+    }
     if (dateInput) powerState.selectedDate = dateInput.value;
     if (searchInput) powerState.searchQuery = searchInput.value.trim();
 
+    updateLocationBanner();
     fetchPowerShutdowns();
   };
 
   window.clearDistrictFilter = function () {
     powerState.selectedDistrict = 'all';
+    powerState.hasManuallyChangedDistrict = true;
     const districtSelect = document.getElementById('power-district-filter');
     if (districtSelect) districtSelect.value = 'all';
 
-    const highlightBanner = document.getElementById('power-location-highlight');
-    if (highlightBanner) highlightBanner.classList.add('hidden');
-
+    updateLocationBanner();
     fetchPowerShutdowns();
   };
 
   window.resetPowerFilters = function () {
-    powerState.selectedDistrict = 'all';
+    if (powerState.userDetectedDistrict) {
+      powerState.selectedDistrict = powerState.userDetectedDistrict;
+      powerState.hasManuallyChangedDistrict = false;
+    } else {
+      powerState.selectedDistrict = 'all';
+    }
     powerState.searchQuery = '';
     powerState.selectedDate = '';
     powerState.selectedTab = 'all';
@@ -411,7 +543,7 @@
     const dateInput = document.getElementById('power-date-filter');
     const searchInput = document.getElementById('power-search-input');
 
-    if (districtSelect) districtSelect.value = 'all';
+    if (districtSelect) districtSelect.value = powerState.selectedDistrict;
     if (dateInput) dateInput.value = '';
     if (searchInput) searchInput.value = '';
 
@@ -424,9 +556,7 @@
       }
     });
 
-    const highlightBanner = document.getElementById('power-location-highlight');
-    if (highlightBanner) highlightBanner.classList.add('hidden');
-
+    updateLocationBanner();
     fetchPowerShutdowns();
   };
 

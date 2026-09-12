@@ -40,6 +40,59 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
     }
 
+    /* Auto-Detected Citizen Location Banner */
+    .weather-location-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 0.75rem 1.2rem;
+      background: rgba(13, 148, 136, 0.08);
+      border: 1px solid rgba(13, 148, 136, 0.25);
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      color: #0f766e;
+    }
+    .weather-location-banner.hidden {
+      display: none !important;
+    }
+    .weather-location-banner-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 500;
+    }
+    .weather-location-banner-content i {
+      color: var(--primary, #0d9488);
+      font-size: 1rem;
+    }
+    .weather-location-banner-content strong {
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .weather-location-switch-btn {
+      background: #ffffff;
+      border: 1px solid rgba(13, 148, 136, 0.35);
+      color: #0f766e;
+      border-radius: 8px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .weather-location-switch-btn:hover {
+      background: #0f766e;
+      color: #ffffff;
+      border-color: #0f766e;
+    }
+
     .weather-hero-title-group h1 {
       font-size: 1.4rem;
       font-weight: 800;
@@ -731,6 +784,18 @@
           </div>
         </div>
 
+        <!-- Auto-Detected Citizen Location Banner -->
+        <div id="weather-location-banner" class="weather-location-banner hidden">
+          <div class="weather-location-banner-content">
+            <i class="fa-solid fa-location-crosshairs"></i>
+            <span>Showing weather for your location: <strong id="weather-user-district-label">--</strong></span>
+          </div>
+          <button type="button" class="weather-location-switch-btn" id="btn-weather-all-districts" onclick="resetWeatherFilters()">
+            <span>View All 38 Districts</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
         <!-- Filter Card -->
         <div class="weather-filter-card">
           <div class="weather-filter-top-row">
@@ -829,7 +894,8 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=8.8.0"></script>
-  <script src="js/weather-alerts.js?v=2.1.0"></script>
+  <script src="js/user-location.js?v=1.0.0"></script>
+  <script src="js/weather-alerts.js?v=2.2.0"></script>
 
 </body>
 </html>
