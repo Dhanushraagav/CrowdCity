@@ -53,26 +53,35 @@
   async function initDynamicDashboard() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     
-    // Determine User City / Location Priority (1. Profile, 2. Storage, 3. Default)
-    let userCity = 'Coimbatore';
+    // Determine User City / Location Priority (1. Profile, 2. Storage / Geolocation Service)
+    let userCity = '';
     if (user && (user.city || user.district)) {
       userCity = user.city || user.district;
+    } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
+      userCity = window.CrowdCityLocation.getSavedUserDistrict() || '';
+    } else if (localStorage.getItem('user_district')) {
+      userCity = localStorage.getItem('user_district');
     } else if (localStorage.getItem('cc_user_location')) {
       userCity = localStorage.getItem('cc_user_location');
     }
 
     // Clean City Name
-    userCity = userCity.replace(/ district$/i, '').trim();
+    if (userCity) {
+      userCity = userCity.replace(/ district$/i, '').trim();
+    }
 
     // Update City Indicators across Dashboard Header
-    const headerCityEl = document.querySelector('.header-city-indicator span');
-    if (headerCityEl) {
-      headerCityEl.textContent = `${userCity}, Tamil Nadu`;
+    function updateCityHeaders(city) {
+      const headerCityEl = document.querySelector('.header-city-indicator span');
+      if (headerCityEl) {
+        headerCityEl.textContent = city ? `${city}, Tamil Nadu` : 'Tamil Nadu';
+      }
+      const headerCorpEl = document.getElementById('city-corp-name');
+      if (headerCorpEl) {
+        headerCorpEl.textContent = city ? `${city} City Corp` : 'Tamil Nadu Civic Hub';
+      }
     }
-    const headerCorpEl = document.getElementById('city-corp-name');
-    if (headerCorpEl) {
-      headerCorpEl.textContent = `${userCity} City Corp`;
-    }
+    updateCityHeaders(userCity);
 
     // Fetch All Complaints from API
     let issues = [];
@@ -87,41 +96,60 @@
       console.warn('Failed to load issues from API:', e);
     }
 
-    // ----------------------------------------------------
-    // Section 1: Recent Complaint Activity (City Filtered)
-    // ----------------------------------------------------
-    const recentListEl = document.getElementById('dash-recent-activity-list');
-    if (recentListEl) {
-      const cityIssues = issues.filter(item => {
+    // Function to render city-filtered complaints
+    function renderRecentComplaints(targetCity) {
+      const recentListEl = document.getElementById('dash-recent-activity-list');
+      if (!recentListEl) return;
+
+      const cityIssues = targetCity ? issues.filter(item => {
         if (!item) return false;
         const loc = (item.address || '') + ' ' + (item.city || '') + ' ' + (item.district || '');
-        return loc.toLowerCase().includes(userCity.toLowerCase());
-      });
+        return loc.toLowerCase().includes(targetCity.toLowerCase());
+      }) : issues;
 
       if (cityIssues.length === 0) {
+        const placeName = targetCity || 'your area';
         recentListEl.innerHTML = `
           <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
             <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; color: #cbd5e1;"></i>
-            <p style="margin: 0; font-size: 0.88rem; font-weight: 600;">No recent complaints found for ${userCity}.</p>
+            <p style="margin: 0; font-size: 0.88rem; font-weight: 600;">No recent complaints found for ${escapeHtml(placeName)}.</p>
           </div>
         `;
       } else {
         recentListEl.innerHTML = cityIssues.slice(0, 4).map(item => `
           <div class="activity-item" style="cursor: pointer;" onclick="window.location.href='issue-details.html?id=${item.id}'">
-            <div class="activity-item-details">
-              <h4 class="activity-item-title">${escapeHtml(item.title || 'Reported Issue')}</h4>
-              <div class="activity-item-meta">
-                <span style="font-family: monospace; font-weight: 700; color: var(--primary);">${escapeHtml(item.complaint_id || ('#CMP-' + (item.id || '').substring(0, 8)))}</span> &bull; 
-                <span><i class="fa-solid fa-users"></i> ${item.citizen_count || 1} ${item.citizen_count === 1 ? 'citizen' : 'citizens'}</span> &bull; 
-                <span>${escapeHtml(item.department || item.category || 'Civic Dept')}</span> &bull; 
-                <span>${formatRelativeTime(item.created_at || item.updated_at)}</span>
+            <div class="activity-icon-wrap status-${(item.status || 'open').toLowerCase()}">
+              <i class="fa-solid ${getCategoryIcon(item.category)}"></i>
+            </div>
+            <div class="activity-details">
+              <div class="activity-title">${escapeHtml(item.title || item.category || 'Civic Issue')}</div>
+              <div class="activity-meta">
+                <span class="activity-location"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(item.address || targetCity || 'Tamil Nadu')}</span>
+                <span class="activity-time">&bull; ${formatTimeAgo(item.created_at || item.createdAt)}</span>
               </div>
             </div>
-            ${getStatusBadge(item.status)}
+            <div class="activity-status">
+              <span class="status-pill status-${(item.status || 'open').toLowerCase()}">${escapeHtml(formatStatus(item.status || 'open'))}</span>
+            </div>
           </div>
         `).join('');
       }
     }
+
+    // ----------------------------------------------------
+    // Section 1: Recent Complaint Activity (City Filtered)
+    // ----------------------------------------------------
+    renderRecentComplaints(userCity);
+
+    // Listen for live location detected event to update header and complaints dynamically
+    window.addEventListener('crowdcity:location_detected', (evt) => {
+      if (evt.detail && evt.detail.district) {
+        const detected = evt.detail.district.replace(/ district$/i, '').trim();
+        userCity = detected;
+        updateCityHeaders(detected);
+        renderRecentComplaints(detected);
+      }
+    });
 
     // ----------------------------------------------------
     // Section 2: My Active Complaints

@@ -78,10 +78,14 @@ function initDashboard() {
   // Render initial cached stats instantly with 0ms delay
   try { loadUserStats(); } catch (e) {}
 
-  // Load initial datasets from real database and refresh stats
-  loadAndRenderIssues().then(() => {
-    try { loadUserStats(); } catch (e) {}
-  }).catch(err => console.error("Error in loadAndRenderIssues:", err));
+  // Fetch authoritative user complaints from database
+  if (user || localStorage.getItem('cc_session')) {
+    const uid = user ? (user.id || user.sub) : null;
+    if (uid) fetchAuthoritativeUserStats(uid).catch(e => console.warn(e));
+  }
+
+  // Load initial datasets from real database for the public feed
+  loadAndRenderIssues().catch(err => console.error("Error in loadAndRenderIssues:", err));
 
   if (user || localStorage.getItem('cc_session')) {
     loadRecentNotifications().catch(err => console.error("Error in loadRecentNotifications:", err));
@@ -90,8 +94,11 @@ function initDashboard() {
   initRealtimeDashboard();
 }
 
-// Fetch user profile and compute real database statistics
-function loadUserStats(isLanguageChange = false) {
+// Render user statistics given an array of the user's authentic complaints
+function applyUserStats(userIssues) {
+  if (!Array.isArray(userIssues)) return;
+  lastUserIssues = userIssues;
+
   const totalEl = document.getElementById('stat-total-reports');
   const weeklyEl = document.getElementById('stat-total-reports-change');
   const resolvedEl = document.getElementById('stat-resolved-issues');
@@ -102,6 +109,78 @@ function loadUserStats(isLanguageChange = false) {
   const cityTotalSubEl = document.getElementById('stat-city-total-sub');
   const heroDesc = document.getElementById('hero-desc');
 
+  const total = userIssues.length;
+  const now = Date.now();
+  const weeklyCount = userIssues.filter(i => (now - new Date(i.created_at || i.createdAt).getTime()) <= 7 * 86400000).length;
+  const resolved = userIssues.filter(i => {
+    const s = (i.status || '').toLowerCase();
+    return s === 'resolved' || s === 'verified' || s === 'closed';
+  }).length;
+  const active = userIssues.filter(i => {
+    const s = (i.status || '').toLowerCase();
+    return s === 'pending' || s === 'assigned' || s === 'in_progress' || s === 'in progress';
+  }).length;
+
+  const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
+  const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
+  const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
+  const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
+
+  if (totalEl) totalEl.textContent = total.toString();
+  if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
+  if (resolvedEl) resolvedEl.textContent = resolved.toString();
+  if (inprogressEl) inprogressEl.textContent = active.toString();
+  if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
+  if (cityTotalEl) cityTotalEl.textContent = total.toString();
+  if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
+
+  if (rateEl) {
+    const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+    rateEl.textContent = `${rate}% ${tResolutionRate}`;
+  }
+
+  if (heroDesc) {
+    if (total === 0) {
+      heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.';
+    } else {
+      if (window.i18n) {
+        heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
+      } else {
+        heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
+      }
+    }
+  }
+
+  localStorage.setItem('cc_user_stat_total', total.toString());
+  localStorage.setItem('cc_user_stat_weekly', weeklyCount.toString());
+  localStorage.setItem('cc_user_stat_resolved', resolved.toString());
+  localStorage.setItem('cc_user_stat_active', active.toString());
+  localStorage.setItem('cc_city_stat_total', total.toString());
+
+  try {
+    renderRecentComplaints(userIssues);
+  } catch (e) {}
+}
+
+// Fetch authoritative citizen complaints from API including both direct and co-reported issues
+async function fetchAuthoritativeUserStats(userId) {
+  if (!userId || !window.API || typeof window.API.getIssues !== 'function') return null;
+  try {
+    const res = await window.API.getIssues({ reporter_id: userId });
+    const userIssues = (res && Array.isArray(res.data)) ? res.data : [];
+    if (userIssues.length > 0) {
+      localStorage.setItem('cc_my_complaints_civic', JSON.stringify(userIssues));
+      applyUserStats(userIssues);
+      return userIssues;
+    }
+  } catch (err) {
+    console.warn("[app.js] Failed to fetch authoritative user issues:", err);
+  }
+  return null;
+}
+
+// Fetch user profile and compute real database statistics
+async function loadUserStats(isLanguageChange = false) {
   // Retrieve authenticated user ID
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   let userId = user ? (user.id || user.sub) : null;
@@ -126,154 +205,43 @@ function loadUserStats(isLanguageChange = false) {
 
   // 1. If language changed and we have cached user issues, recalculate text strings
   if (isLanguageChange && lastUserIssues && lastUserIssues.length > 0) {
-    const total = lastUserIssues.length;
-    const now = Date.now();
-    const weeklyCount = lastUserIssues.filter(i => (now - new Date(i.created_at).getTime()) <= 7 * 86400000).length;
-    const resolved = lastUserIssues.filter(i => {
-      const s = (i.status || '').toLowerCase();
-      return s === 'resolved' || s === 'verified' || s === 'closed';
-    }).length;
-    const active = lastUserIssues.filter(i => {
-      const s = (i.status || '').toLowerCase();
-      return s === 'pending' || s === 'assigned' || s === 'in_progress';
-    }).length;
-
-    const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
-    const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
-    const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-    const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
-
-    if (totalEl) totalEl.textContent = total.toString();
-    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
-    if (resolvedEl) resolvedEl.textContent = resolved.toString();
-    if (inprogressEl) inprogressEl.textContent = active.toString();
-    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) cityTotalEl.textContent = total.toString();
-    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
-
-    if (rateEl) {
-      const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      rateEl.textContent = `${rate}% ${tResolutionRate}`;
-    }
-
-    if (heroDesc) {
-      if (total === 0) {
-        heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.';
-      } else {
-        if (window.i18n) {
-          heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
-        } else {
-          heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
-        }
-      }
-    }
-    renderRecentComplaints(lastUserIssues);
+    applyUserStats(lastUserIssues);
     return;
   }
 
-  // 2. If issues are loaded in memory, calculate user statistics directly from real database records
-  if (Array.isArray(currentIssues) && currentIssues.length > 0 && userId) {
-    const userIssues = currentIssues.filter(i => i && (i.reporter_id === userId || i.user_id === userId));
-    lastUserIssues = userIssues;
-    const total = userIssues.length;
-    const now = Date.now();
-    const weeklyCount = userIssues.filter(i => (now - new Date(i.created_at).getTime()) <= 7 * 86400000).length;
-    const resolved = userIssues.filter(i => {
-      const s = (i.status || '').toLowerCase();
-      return s === 'resolved' || s === 'verified' || s === 'closed';
-    }).length;
-    const active = userIssues.filter(i => {
-      const s = (i.status || '').toLowerCase();
-      return s === 'pending' || s === 'assigned' || s === 'in_progress';
-    }).length;
-
-    const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
-    const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
-    const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-    const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
-
-    if (totalEl) totalEl.textContent = total.toString();
-    if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
-    if (resolvedEl) resolvedEl.textContent = resolved.toString();
-    if (inprogressEl) inprogressEl.textContent = active.toString();
-    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-    if (cityTotalEl) cityTotalEl.textContent = total.toString();
-    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
-
-    if (rateEl) {
-      const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      rateEl.textContent = `${rate}% ${tResolutionRate}`;
-    }
-
-    if (heroDesc) {
-      if (total === 0) {
-        heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.';
-      } else {
-        if (window.i18n) {
-          heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
-        } else {
-          heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
-        }
-      }
-    }
-
-    localStorage.setItem('cc_user_stat_total', total.toString());
-    localStorage.setItem('cc_user_stat_weekly', weeklyCount.toString());
-    localStorage.setItem('cc_user_stat_resolved', resolved.toString());
-    localStorage.setItem('cc_user_stat_active', active.toString());
-    localStorage.setItem('cc_city_stat_total', total.toString());
-
-    renderRecentComplaints(userIssues);
+  // 2. If we already have authoritative user issues loaded in memory, render immediately
+  if (Array.isArray(lastUserIssues) && lastUserIssues.length > 0) {
+    applyUserStats(lastUserIssues);
+    if (userId) fetchAuthoritativeUserStats(userId);
     return;
   }
 
-  // 3. Instant 0ms Cache-First Pre-fill from localStorage (cc_my_complaints_civic / cc_user_stat_*)
+  // 3. Instant 0ms Cache-First Pre-fill from localStorage (cc_my_complaints_civic)
   if (userId) {
     try {
       const cachedCivicStr = localStorage.getItem('cc_my_complaints_civic');
       if (cachedCivicStr) {
         const cachedIssues = JSON.parse(cachedCivicStr);
         if (Array.isArray(cachedIssues) && cachedIssues.length > 0) {
-          const total = cachedIssues.length;
-          const now = Date.now();
-          const weeklyCount = cachedIssues.filter(i => (now - new Date(i.created_at).getTime()) <= 7 * 86400000).length;
-          const resolved = cachedIssues.filter(i => {
-            const s = (i.status || '').toLowerCase();
-            return s === 'resolved' || s === 'verified' || s === 'closed';
-          }).length;
-          const active = cachedIssues.filter(i => {
-            const s = (i.status || '').toLowerCase();
-            return s === 'pending' || s === 'assigned' || s === 'in_progress';
-          }).length;
-
-          const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
-          const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
-          const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-          const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
-
-          if (totalEl) totalEl.textContent = total.toString();
-          if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
-          if (resolvedEl) resolvedEl.textContent = resolved.toString();
-          if (inprogressEl) inprogressEl.textContent = active.toString();
-          if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-          if (cityTotalEl) cityTotalEl.textContent = total.toString();
-          if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
-
-          if (rateEl) {
-            const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-            rateEl.textContent = `${rate}% ${tResolutionRate}`;
-          }
-
-          if (heroDesc) {
-            heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
-          }
+          applyUserStats(cachedIssues);
+          fetchAuthoritativeUserStats(userId);
           return;
         }
       }
     } catch (e) {}
   }
 
-  // 4. Otherwise, load last known cached stats
+  // 4. Otherwise, load last known cached numerical stats
+  const totalEl = document.getElementById('stat-total-reports');
+  const weeklyEl = document.getElementById('stat-total-reports-change');
+  const resolvedEl = document.getElementById('stat-resolved-issues');
+  const rateEl = document.getElementById('stat-resolved-rate');
+  const inprogressEl = document.getElementById('stat-inprogress-reports');
+  const inprogressSubEl = document.getElementById('stat-inprogress-sub');
+  const cityTotalEl = document.getElementById('stat-city-total-reports');
+  const cityTotalSubEl = document.getElementById('stat-city-total-sub');
+  const heroDesc = document.getElementById('hero-desc');
+
   const cachedTotal = localStorage.getItem('cc_user_stat_total');
   const cachedWeekly = localStorage.getItem('cc_user_stat_weekly');
   const cachedResolved = localStorage.getItem('cc_user_stat_resolved');
@@ -296,6 +264,11 @@ function loadUserStats(isLanguageChange = false) {
     if (heroDesc && total > 0) {
       heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
     }
+  }
+
+  // 5. Fetch fresh user issues from API if user is logged in
+  if (userId) {
+    await fetchAuthoritativeUserStats(userId);
   }
 }
 
@@ -369,8 +342,6 @@ async function loadAndRenderIssues(forceReload = false) {
 
     currentIssues = issues;
     _lastIssuesFetchAt = Date.now(); // Mark successful fetch time for cooldown guard
-    
-    try { loadUserStats(); } catch (e) {}
 
     // Calculate and render Community Insights dynamically
     updateCommunityInsights(currentIssues);

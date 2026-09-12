@@ -19,6 +19,7 @@
   const state = {
     district: 'all',
     userDetectedDistrict: null,
+    isDetectingLocation: false,
     userHasManuallyChangedDistrict: false,
     dateTab: 'all',
     searchQuery: '',
@@ -51,27 +52,39 @@
         state.userDetectedDistrict = saved;
         state.district = saved.toLowerCase();
       }
+    } else {
+      const saved = localStorage.getItem('user_district');
+      if (saved && saved !== 'all' && saved !== 'Tamil Nadu') {
+        state.userDetectedDistrict = saved;
+        state.district = saved.toLowerCase();
+      }
+    }
+
+    // 2. If no district was found in local storage, trigger immediate GPS detection
+    if (!state.userDetectedDistrict) {
+      state.isDetectingLocation = true;
+      if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
+        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 5000, requestGps: true }).then(gpsDistrict => {
+          state.isDetectingLocation = false;
+          if (gpsDistrict && !state.userHasManuallyChangedDistrict) {
+            state.userDetectedDistrict = gpsDistrict;
+            state.district = gpsDistrict.toLowerCase();
+            const distSelect = document.getElementById('weather-district-filter');
+            if (distSelect) distSelect.value = state.district;
+            updateLocationBanner();
+            updateSelectedDistrictView();
+            renderView();
+          } else {
+            updateLocationBanner();
+          }
+        });
+      }
     }
 
     await populateDistrictsDropdown();
     setupEventListeners();
     updateLocationBanner();
     await fetchWeatherForecast();
-
-    // 2. If no district was found in local storage, trigger non-blocking GPS detection
-    if (!state.userDetectedDistrict && window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
-      window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 3500 }).then(gpsDistrict => {
-        if (gpsDistrict && !state.userHasManuallyChangedDistrict) {
-          state.userDetectedDistrict = gpsDistrict;
-          state.district = gpsDistrict.toLowerCase();
-          const distSelect = document.getElementById('weather-district-filter');
-          if (distSelect) distSelect.value = state.district;
-          updateLocationBanner();
-          updateSelectedDistrictView();
-          renderView();
-        }
-      });
-    }
 
     // 3. Listen for global location detection and change events
     window.addEventListener('crowdcity:location_detected', handleLocationEvent);
@@ -82,6 +95,7 @@
     if (e.detail && e.detail.district && !state.userHasManuallyChangedDistrict) {
       state.userDetectedDistrict = e.detail.district;
       state.district = e.detail.district.toLowerCase();
+      state.isDetectingLocation = false;
       const distSelect = document.getElementById('weather-district-filter');
       if (distSelect) distSelect.value = state.district;
       updateLocationBanner();
@@ -95,14 +109,40 @@
    */
   function updateLocationBanner() {
     const banner = document.getElementById('weather-location-banner');
-    const label = document.getElementById('weather-user-district-label');
     const switchBtn = document.getElementById('btn-weather-all-districts');
     if (!banner) return;
 
+    if (state.isDetectingLocation) {
+      banner.classList.remove('hidden');
+      const contentEl = banner.querySelector('.weather-location-banner-content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <i class="fa-solid fa-location-crosshairs fa-spin"></i>
+          <span>Detecting your live current location...</span>
+        `;
+      }
+      if (switchBtn) switchBtn.style.display = 'none';
+      return;
+    }
+
     if (state.userDetectedDistrict) {
       banner.classList.remove('hidden');
-      if (label) label.textContent = state.userDetectedDistrict;
+      const contentEl = banner.querySelector('.weather-location-banner-content');
+      if (contentEl) {
+        if (state.district === 'all') {
+          contentEl.innerHTML = `
+            <i class="fa-solid fa-globe"></i>
+            <span>Showing all 38 districts across Tamil Nadu. Your detected location: <strong>${escapeHtml(state.userDetectedDistrict)}</strong></span>
+          `;
+        } else {
+          contentEl.innerHTML = `
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Showing live weather forecast for your location: <strong>${escapeHtml(state.userDetectedDistrict)}</strong></span>
+          `;
+        }
+      }
       if (switchBtn) {
+        switchBtn.style.display = 'inline-flex';
         if (state.district === 'all') {
           switchBtn.innerHTML = `<span>Back to ${escapeHtml(state.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
           switchBtn.onclick = () => window.selectUserDetectedDistrict();
@@ -112,7 +152,15 @@
         }
       }
     } else {
-      banner.classList.add('hidden');
+      banner.classList.remove('hidden');
+      const contentEl = banner.querySelector('.weather-location-banner-content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <i class="fa-solid fa-location-pin"></i>
+          <span>Select your district to showcase local weather forecast.</span>
+        `;
+      }
+      if (switchBtn) switchBtn.style.display = 'none';
     }
   }
 
@@ -287,9 +335,6 @@
           d.district.id.toLowerCase() === state.userDetectedDistrict.toLowerCase() ||
           d.district.name.toLowerCase() === state.userDetectedDistrict.toLowerCase()
         );
-      }
-      if (!preferred) {
-        preferred = state.districtsForecast.find(d => d.district.id.toLowerCase() === 'chennai');
       }
       state.currentDistrict = preferred || state.districtsForecast[0];
     }

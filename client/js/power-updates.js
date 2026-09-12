@@ -23,6 +23,7 @@
     outages: [],
     lastUpdated: '',
     isLoading: false,
+    isDetectingLocation: false,
     userDetectedDistrict: null,
     hasManuallyChangedDistrict: false
   };
@@ -30,9 +31,51 @@
   document.addEventListener('DOMContentLoaded', initPowerUpdates);
 
   function initPowerUpdates() {
-    detectUserLocation();
     setupEventListeners();
-    fetchPowerShutdowns();
+
+    // 1. Resolve known citizen district synchronously
+    let detected = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
+      ? window.CrowdCityLocation.getSavedUserDistrict()
+      : null;
+
+    if (!detected && typeof window.getCurrentUser === 'function') {
+      const user = window.getCurrentUser();
+      if (user && user.district && user.district !== 'Tamil Nadu') {
+        detected = user.district;
+      }
+    }
+
+    if (!detected) {
+      detected = localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district');
+      if (detected === 'all' || detected === 'Tamil Nadu') detected = null;
+    }
+
+    if (detected) {
+      applyDetectedDistrict(detected);
+      fetchPowerShutdowns();
+    } else {
+      // 2. Immediate live GPS detection with visual indicator
+      powerState.isDetectingLocation = true;
+      updateLocationBanner();
+      showDetectingLocationState();
+
+      if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
+        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 5000, requestGps: true }).then(gpsDistrict => {
+          powerState.isDetectingLocation = false;
+          if (gpsDistrict && !powerState.hasManuallyChangedDistrict) {
+            applyDetectedDistrict(gpsDistrict);
+            fetchPowerShutdowns();
+          } else {
+            updateLocationBanner();
+            fetchPowerShutdowns();
+          }
+        });
+      } else {
+        powerState.isDetectingLocation = false;
+        updateLocationBanner();
+        fetchPowerShutdowns();
+      }
+    }
 
     // Listen for language change events
     window.addEventListener('languageChanged', () => {
@@ -44,46 +87,23 @@
     window.addEventListener('crowdcity:location_changed', handleLocationEvent);
   }
 
-  function handleLocationEvent(e) {
-    if (e.detail && e.detail.district && !powerState.hasManuallyChangedDistrict) {
-      applyDetectedDistrict(e.detail.district);
-      fetchPowerShutdowns();
-    }
+  function showDetectingLocationState() {
+    const container = document.getElementById('power-outages-container');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="power-loading-card" style="padding: 2.5rem; text-align: center; grid-column: 1 / -1; background: #fff; border: 1px solid var(--border-color); border-radius: 14px;">
+        <i class="fa-solid fa-location-crosshairs fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.75rem;"></i>
+        <h4 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700; color: var(--text-main);">Detecting Current Location...</h4>
+        <p style="margin: 0; font-size: 0.84rem; color: var(--text-muted);">Retrieving official TNPDCL planned electricity shutdown schedules for your area</p>
+      </div>
+    `;
   }
 
-  /**
-   * Detect citizen district from local storage, coordinates, or profile.
-   */
-  function detectUserLocation() {
-    try {
-      let detected = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
-        ? window.CrowdCityLocation.getSavedUserDistrict()
-        : null;
-
-      if (!detected && typeof window.getCurrentUser === 'function') {
-        const user = window.getCurrentUser();
-        if (user && user.district && user.district !== 'Tamil Nadu') {
-          detected = user.district;
-        }
-      }
-
-      if (!detected) {
-        detected = localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district');
-      }
-
-      if (detected) {
-        applyDetectedDistrict(detected);
-      } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
-        // Non-blocking background GPS detection
-        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 3500 }).then(gpsDistrict => {
-          if (gpsDistrict && (powerState.selectedDistrict === 'all' || !powerState.hasManuallyChangedDistrict)) {
-            applyDetectedDistrict(gpsDistrict);
-            fetchPowerShutdowns();
-          }
-        });
-      }
-    } catch (e) {
-      console.warn('[PowerUpdates] Location detection notice:', e);
+  function handleLocationEvent(e) {
+    if (e.detail && e.detail.district && !powerState.hasManuallyChangedDistrict) {
+      powerState.isDetectingLocation = false;
+      applyDetectedDistrict(e.detail.district);
+      fetchPowerShutdowns();
     }
   }
 
@@ -114,10 +134,24 @@
 
     if (!highlightBanner) return;
 
+    const bannerContent = highlightBanner.querySelector('.power-location-banner-content');
+
+    if (powerState.isDetectingLocation) {
+      highlightBanner.classList.remove('hidden');
+      if (bannerContent) {
+        bannerContent.innerHTML = `
+          <i class="fa-solid fa-location-crosshairs fa-spin"></i>
+          <span>Detecting your current location to showcase planned shutdowns for your area...</span>
+        `;
+      }
+      if (switchBtn) switchBtn.style.display = 'none';
+      return;
+    }
+
     if (powerState.userDetectedDistrict) {
       highlightBanner.classList.remove('hidden');
-      const bannerContent = highlightBanner.querySelector('.power-location-banner-content');
-      if (bannerContent && switchBtn) {
+      if (switchBtn) switchBtn.style.display = 'inline-flex';
+      if (bannerContent) {
         if (powerState.selectedDistrict === 'all') {
           bannerContent.innerHTML = `
             <i class="fa-solid fa-globe"></i>
@@ -128,14 +162,21 @@
         } else {
           bannerContent.innerHTML = `
             <i class="fa-solid fa-location-dot"></i>
-            <span>Showing planned power shutdowns for your area: <strong>${escapeHtml(powerState.selectedDistrict)}</strong></span>
+            <span>Showing planned power shutdowns for your current location: <strong>${escapeHtml(powerState.selectedDistrict)}</strong></span>
           `;
           switchBtn.innerHTML = `<span>View All Districts (38)</span> <i class="fa-solid fa-arrow-right"></i>`;
           switchBtn.onclick = () => window.clearDistrictFilter();
         }
       }
     } else {
-      highlightBanner.classList.add('hidden');
+      highlightBanner.classList.remove('hidden');
+      if (bannerContent) {
+        bannerContent.innerHTML = `
+          <i class="fa-solid fa-location-pin"></i>
+          <span>Please select your district to showcase local planned power shutdowns.</span>
+        `;
+      }
+      if (switchBtn) switchBtn.style.display = 'none';
     }
   }
 

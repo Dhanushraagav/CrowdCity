@@ -171,12 +171,12 @@
               </div>
             </div>
             
-            <!-- Floating Coimbatore Weather Widget -->
+            <!-- Floating Live Weather Widget -->
             <a href="weather-alerts.html" class="floating-weather-widget weather-widget loading" id="weather-widget" title="View Weather Forecast" style="text-decoration: none; cursor: pointer;">
               <div class="weather-icon" id="weather-icon" style="font-size: 1.5rem; color: #f59e0b;"><i class="fa-solid fa-cloud-sun"></i></div>
               <div class="weather-info" style="display: flex; flex-direction: column;">
-                <span class="weather-city" id="weather-city" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Coimbatore</span>
-                <span class="weather-temp" id="weather-temp" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Detecting...</span>
+                <span class="weather-city" id="weather-city" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Detecting...</span>
+                <span class="weather-temp" id="weather-temp" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">--°C</span>
               </div>
             </a>
           </div>
@@ -391,7 +391,7 @@
   <script src="js/notifications.js"></script>
   <script src="js/app.js?v=2.0.0"></script>
   <script src="js/chat-widget.js"></script>
-
+  <script src="js/user-location.js?v=1.0.0"></script>
   <script src="js/citizen-dashboard.js?v=2.2.0"></script>
 
   <!-- Weather Widget Logic -->
@@ -508,6 +508,18 @@
         localStorage.setItem(`cc_weather_cache_${currentLang}`, JSON.stringify({
           district: cleanDistrict, temp, code, lang: currentLang, ts: Date.now()
         }));
+
+        // Synchronize detected location with CrowdCity universal location service
+        try {
+          if (window.CrowdCityLocation && typeof window.CrowdCityLocation.setUserDistrict === 'function') {
+            window.CrowdCityLocation.setUserDistrict(cleanDistrict);
+          } else {
+            localStorage.setItem('user_district', cleanDistrict);
+            window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
+              detail: { district: cleanDistrict, lat, lng: lon }
+            }));
+          }
+        } catch (syncErr) {}
       } catch (e) {
         console.warn('Weather fetch failed:', e);
         cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
@@ -529,14 +541,31 @@
             fetchWeather(lat, lon, isForced);
           },
           (err) => {
-            console.warn('Geolocation denied or failed, falling back to default:', err.message);
-            // Default: Chennai / Tamil Nadu
-            fetchWeather(13.0827, 80.2707, isForced);
+            console.warn('Geolocation unavailable or denied:', err.message);
+            // Check if user previously had a valid detected district
+            const savedDistrict = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
+              ? window.CrowdCityLocation.getSavedUserDistrict()
+              : localStorage.getItem('user_district');
+            if (savedDistrict && window.CrowdCityLocation && window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS) {
+              const centroid = window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS.find(c => 
+                c.name.toLowerCase() === savedDistrict.toLowerCase() || c.id.toLowerCase() === savedDistrict.toLowerCase()
+              );
+              if (centroid) {
+                fetchWeather(centroid.lat, centroid.lng, isForced);
+                return;
+              }
+            }
+            cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
+            tempEl.textContent = currentLang === 'ta' ? 'இருப்பிடம் தேவை' : 'Location Required';
+            widget.classList.remove('loading');
+            widget.title = currentLang === 'ta' ? 'நேரலை வானிலைக்கு இருப்பிடத்தை இயக்கவும்' : 'Click to enable location for live weather';
           },
           { enableHighAccuracy: true, timeout: 8000, maximumAge: isForced ? 0 : 300000 }
         );
       } else {
-        fetchWeather(13.0827, 80.2707, isForced);
+        cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
+        tempEl.textContent = '--\u00B0C';
+        widget.classList.remove('loading');
       }
     }
 
