@@ -134,6 +134,13 @@
       this.initTypeaheadSearch();
       this.preloadDistricts();
 
+      // Pre-initialize stream controls for default/initial district so child options are ready immediately
+      const initialDist = this.state.districtId || document.getElementById('la-district-select')?.value || 'coimbatore';
+      this.state.districtId = initialDist;
+      const streamSelect = document.getElementById('la-stream-select');
+      if (streamSelect) streamSelect.disabled = false;
+      this.populateStream(initialDist, this.state.stream || 'rural');
+
       // If coordinates or address already exist on page load, resolve immediately
       setTimeout(() => {
         const latInput = document.getElementById('report-latitude');
@@ -195,8 +202,15 @@
       }
 
       if (districtSelect) {
-        districtSelect.addEventListener('change', async (e) => {
-          const distId = e.target.value;
+        const handleDistrictSelect = async (force = false) => {
+          const distId = districtSelect.value || this.state.districtId || 'coimbatore';
+          const blkSelect = document.getElementById('la-block-select');
+          const isPopulated = blkSelect && !blkSelect.disabled && blkSelect.options.length > 1;
+
+          if (this.state.districtId === distId && isPopulated && !force) {
+            return;
+          }
+
           this.state.districtId = distId;
           this.state.subdivisionId = '';
           this.state.localBodyId = '';
@@ -217,10 +231,20 @@
           await this.populateStream(distId, this.state.stream || 'rural');
           await this.populateSubdivisions(distId);
           this.triggerResolution();
+        };
+
+        districtSelect.addEventListener('change', () => handleDistrictSelect(true));
+        districtSelect.addEventListener('input', () => handleDistrictSelect(true));
+        districtSelect.addEventListener('click', () => {
+          const blkSelect = document.getElementById('la-block-select');
+          if (districtSelect.value && (!blkSelect || blkSelect.disabled || blkSelect.options.length <= 1)) {
+            handleDistrictSelect(true);
+          }
         });
       }
 
       if (streamSelect) {
+        streamSelect.disabled = false;
         streamSelect.addEventListener('change', async (e) => {
           await this.setStream(e.target.value, true);
         });
@@ -696,19 +720,19 @@
         if (toggleManualBtn) toggleManualBtn.classList.add('hidden');
         if (toggleAutoBtn) toggleAutoBtn.classList.remove('hidden');
 
+        const defaultDist = this.state.districtId || (currentResolution && currentResolution.jurisdiction && currentResolution.jurisdiction.districtId) || 'coimbatore';
+        this.state.districtId = defaultDist;
         this.populateDistricts();
 
-        const defaultDist = this.state.districtId || 'coimbatore';
-        if (districtSelect && (!districtSelect.value || districtSelect.value === '')) {
+        if (districtSelect) {
           districtSelect.value = defaultDist;
-          this.state.districtId = defaultDist;
         }
         if (streamSelect) {
           streamSelect.disabled = false;
           if (this.state.stream) streamSelect.value = this.state.stream;
         }
-        await this.populateStream(this.state.districtId || defaultDist, this.state.stream || 'rural');
-        await this.populateSubdivisions(this.state.districtId || defaultDist);
+        await this.populateStream(defaultDist, this.state.stream || 'rural');
+        await this.populateSubdivisions(defaultDist);
         this.updateLocationHeaderLabel();
         this.triggerResolution();
 
@@ -723,8 +747,7 @@
         if (toggleManualBtn) toggleManualBtn.classList.remove('hidden');
         if (toggleAutoBtn) toggleAutoBtn.classList.add('hidden');
 
-        // Reset manual state
-        this.state.districtId = '';
+        // Reset manual stream selections (preserve district for smooth re-entry)
         this.state.subdivisionId = '';
         this.state.localBodyId = '';
         this.state.villageOrTown = '';
@@ -751,8 +774,11 @@
       this.state.stream = stream;
 
       const streamSelect = document.getElementById('la-stream-select');
-      if (streamSelect && streamSelect.value !== stream) {
-        streamSelect.value = stream;
+      if (streamSelect) {
+        streamSelect.disabled = false;
+        if (streamSelect.value !== stream) {
+          streamSelect.value = stream;
+        }
       }
 
       const ruralPanel = document.getElementById('la-stream-rural-panel');
@@ -768,9 +794,9 @@
         this.clearInactiveStreamValues(stream);
       }
 
-      if (this.state.districtId) {
-        await this.populateStream(this.state.districtId, stream);
-      }
+      const activeDist = this.state.districtId || document.getElementById('la-district-select')?.value || 'coimbatore';
+      this.state.districtId = activeDist;
+      await this.populateStream(activeDist, stream);
 
       this.updateLocationHeaderLabel();
       if (shouldTriggerResolution) {
@@ -827,16 +853,18 @@
      * Populate stream controls for active district
      */
     populateStream: async function(districtId, stream) {
-      if (!districtId) return;
+      const dist = districtId || this.state.districtId || document.getElementById('la-district-select')?.value || 'coimbatore';
+      this.state.districtId = dist;
       const streamSelect = document.getElementById('la-stream-select');
       if (streamSelect) streamSelect.disabled = false;
 
-      if (stream === 'rural') {
-        await this.populateRuralBlocks(districtId, this.state.blockId);
-      } else if (stream === 'urban') {
-        await this.populateUrbanBodies(districtId, this.state.urbanTypeFilter || 'all', this.state.urbanBodyId);
-      } else if (stream === 'revenue') {
-        await this.populateRevenueTaluks(districtId, this.state.talukId);
+      const targetStream = stream || this.state.stream || 'rural';
+      if (targetStream === 'rural') {
+        await this.populateRuralBlocks(dist, this.state.blockId);
+      } else if (targetStream === 'urban') {
+        await this.populateUrbanBodies(dist, this.state.urbanTypeFilter || 'all', this.state.urbanBodyId);
+      } else if (targetStream === 'revenue') {
+        await this.populateRevenueTaluks(dist, this.state.talukId);
       }
     },
 
@@ -846,31 +874,28 @@
     populateRuralBlocks: async function(districtId, preselectedBlockId) {
       const select = document.getElementById('la-block-select');
       if (!select) return;
-      if (!districtId) {
-        select.innerHTML = '<option value="" disabled selected>Select District first...</option>';
-        select.disabled = true;
-        return;
-      }
+      const dist = districtId || this.state.districtId || document.getElementById('la-district-select')?.value || 'coimbatore';
+      this.state.districtId = dist;
 
       select.disabled = true;
       select.innerHTML = '<option value="">Loading Blocks...</option>';
 
       try {
-        if (!blocksCache[districtId]) {
-          let res = await fetch(`${API_LOCATIONS}/districts/${encodeURIComponent(districtId)}/blocks`);
+        if (!blocksCache[dist]) {
+          let res = await fetch(`${API_LOCATIONS}/districts/${encodeURIComponent(dist)}/blocks`);
           if (res.ok) {
             const data = await res.json();
-            blocksCache[districtId] = data.blocks || data.data || [];
+            blocksCache[dist] = data.blocks || data.data || [];
           } else {
-            let fallbackRes = await fetch(`${API_LOCATIONS}/districts/${encodeURIComponent(districtId)}/taluks`);
+            let fallbackRes = await fetch(`${API_LOCATIONS}/districts/${encodeURIComponent(dist)}/taluks`);
             if (fallbackRes.ok) {
               const data = await fallbackRes.json();
-              blocksCache[districtId] = data.taluks || data.data || [];
+              blocksCache[dist] = data.taluks || data.data || [];
             }
           }
         }
 
-        const blocks = blocksCache[districtId] || [];
+        const blocks = blocksCache[dist] || [];
         let html = '<option value="" disabled selected>Select Rural Block (ஊராட்சி ஒன்றியம்)...</option>';
         blocks.forEach(b => {
           const taPart = (b.name_ta || b.tamil_name || b.nameTa) ? ` (${b.name_ta || b.tamil_name || b.nameTa})` : '';
@@ -888,6 +913,7 @@
       } catch (err) {
         console.error('[LocationAuthority] Error loading blocks:', err);
         select.innerHTML = '<option value="">Failed to load blocks</option>';
+        select.disabled = false;
       }
     },
 
@@ -938,6 +964,7 @@
       } catch (err) {
         console.error('[LocationAuthority] Error loading village panchayats:', err);
         select.innerHTML = '<option value="">Failed to load village panchayats</option>';
+        select.disabled = false;
       }
     },
 
@@ -947,19 +974,16 @@
     populateUrbanBodies: async function(districtId, filterType = 'all', preselectedBodyId) {
       const select = document.getElementById('la-urban-body-select');
       if (!select) return;
-      if (!districtId) {
-        select.innerHTML = '<option value="" disabled selected>Select District first...</option>';
-        select.disabled = true;
-        return;
-      }
+      const dist = districtId || this.state.districtId || document.getElementById('la-district-select')?.value || 'coimbatore';
+      this.state.districtId = dist;
 
       select.disabled = true;
       select.innerHTML = '<option value="">Loading Urban Local Bodies...</option>';
 
       try {
-        const cacheKey = `${districtId}_${filterType || 'all'}`;
+        const cacheKey = `${dist}_${filterType || 'all'}`;
         if (!urbanBodiesCache[cacheKey]) {
-          const url = `${API_LOCATIONS}/districts/${encodeURIComponent(districtId)}/urban-local-bodies?type=${encodeURIComponent(filterType || 'all')}`;
+          const url = `${API_LOCATIONS}/districts/${encodeURIComponent(dist)}/urban-local-bodies?type=${encodeURIComponent(filterType || 'all')}`;
           const res = await fetch(url);
           if (res.ok) {
             const data = await res.json();
@@ -968,7 +992,7 @@
         }
 
         const bodies = urbanBodiesCache[cacheKey] || [];
-        let html = '<option value="" disabled selected>Select Urban Body (உள்ளாட்சி அமைப்பு)...</option>';
+        let html = '<option value="" disabled selected>Select Urban Local Body (உள்ளாட்சி அமைப்பு)...</option>';
         bodies.forEach(b => {
           const taPart = (b.name_ta || b.tamil_name) ? ` (${b.name_ta || b.tamil_name})` : '';
           const typeBadge = ` [${this.formatLocationTypeBadge(b.administrative_type || b.location_type || b.type)}]`;
@@ -990,6 +1014,7 @@
       } catch (err) {
         console.error('[LocationAuthority] Error loading urban bodies:', err);
         select.innerHTML = '<option value="">Failed to load urban local bodies</option>';
+        select.disabled = false;
       }
     },
 
@@ -999,25 +1024,22 @@
     populateRevenueTaluks: async function(districtId, preselectedTalukId) {
       const select = document.getElementById('la-taluk-select');
       if (!select) return;
-      if (!districtId) {
-        select.innerHTML = '<option value="" disabled selected>Select District first...</option>';
-        select.disabled = true;
-        return;
-      }
+      const dist = districtId || this.state.districtId || document.getElementById('la-district-select')?.value || 'coimbatore';
+      this.state.districtId = dist;
 
       select.disabled = true;
       select.innerHTML = '<option value="">Loading Taluks...</option>';
 
       try {
-        if (!taluksCache[districtId]) {
-          const res = await fetch(`${API_LOCATIONS}/districts/${encodeURIComponent(districtId)}/taluks`);
+        if (!taluksCache[dist]) {
+          const res = await fetch(`${API_LOCATIONS}/districts/${encodeURIComponent(dist)}/taluks`);
           if (res.ok) {
             const data = await res.json();
-            taluksCache[districtId] = data.taluks || data.data || [];
+            taluksCache[dist] = data.taluks || data.data || [];
           }
         }
 
-        const taluks = taluksCache[districtId] || [];
+        const taluks = taluksCache[dist] || [];
         let html = '<option value="" disabled selected>Select Taluk (வருவாய் வட்டம்)...</option>';
         taluks.forEach(t => {
           const taPart = (t.name_ta || t.tamil_name || t.nameTa) ? ` (${t.name_ta || t.tamil_name || t.nameTa})` : '';
@@ -1099,8 +1121,8 @@
       const rvSelect = document.getElementById('la-revenue-village-select');
 
       if (blockSelect) {
-        blockSelect.innerHTML = '<option value="" disabled selected>Select District first...</option>';
-        blockSelect.disabled = true;
+        blockSelect.innerHTML = '<option value="" disabled selected>Select Rural Block (ஊராட்சி ஒன்றியம்)...</option>';
+        blockSelect.disabled = false;
       }
       if (vpSelect) {
         vpSelect.innerHTML = '<option value="" disabled selected>Select Block first...</option>';
@@ -1108,13 +1130,13 @@
       }
       if (habitationInput) habitationInput.value = '';
       if (urbanBodySelect) {
-        urbanBodySelect.innerHTML = '<option value="" disabled selected>Select District first...</option>';
-        urbanBodySelect.disabled = true;
+        urbanBodySelect.innerHTML = '<option value="" disabled selected>Select Urban Local Body (உள்ளாட்சி அமைப்பு)...</option>';
+        urbanBodySelect.disabled = false;
       }
       if (urbanLocalityInput) urbanLocalityInput.value = '';
       if (talukSelect) {
-        talukSelect.innerHTML = '<option value="" disabled selected>Select District first...</option>';
-        talukSelect.disabled = true;
+        talukSelect.innerHTML = '<option value="" disabled selected>Select Taluk (வருவாய் வட்டம்)...</option>';
+        talukSelect.disabled = false;
       }
       if (rvSelect) {
         rvSelect.innerHTML = '<option value="" disabled selected>Select Taluk first...</option>';
@@ -1199,14 +1221,17 @@
       const select = document.getElementById('la-district-select');
       if (!select || !districtsCache || districtsCache.length === 0) return;
 
-      const currentVal = select.value || this.state.districtId;
-      let html = '<option value="" disabled selected>Select District (மாவட்டம்)...</option>';
+      const currentVal = select.value || this.state.districtId || 'coimbatore';
+      let html = '<option value="" disabled>Select District (மாவட்டம்)...</option>';
       districtsCache.forEach(d => {
         const isSel = (currentVal === d.id || currentVal === d.name.toLowerCase()) ? 'selected' : '';
         const taPart = d.nameTa ? ` (${d.nameTa})` : '';
         html += `<option value="${d.id}" ${isSel}>${d.name}${taPart}</option>`;
       });
       select.innerHTML = html;
+      if (!select.value && currentVal) {
+        select.value = currentVal;
+      }
     },
 
     /**
@@ -1466,6 +1491,7 @@
           this.renderAuthorityCard(resObj);
           this.updateStep3Preview(resObj);
           this.updateMapJurisdictionCircle(resObj, payload.latitude, payload.longitude);
+          this.syncJurisdictionToState(resObj);
         }
       } catch (err) {
         console.warn('[LocationAuthority] Error resolving authority:', err);
@@ -1473,6 +1499,57 @@
         this.state.isResolving = false;
         this.showCardLoading(false);
       }
+    },
+
+    /**
+     * Synchronize resolved backend jurisdiction into manual hierarchy selectors
+     */
+    syncJurisdictionToState: function(resObj) {
+      if (!resObj) return;
+      const jur = resObj.jurisdiction || {};
+      const auth = resObj.administrativeAuthority || {};
+
+      // 1. Sync District
+      const distId = (jur.districtId || (jur.district ? jur.district.toLowerCase() : '') || '').trim();
+      if (distId) {
+        this.state.districtId = distId;
+        const distSelect = document.getElementById('la-district-select');
+        if (distSelect && (!distSelect.value || distSelect.value === '' || distSelect.value !== distId)) {
+          distSelect.value = distId;
+        }
+      }
+
+      // 2. Sync Stream based on resolved administrative tier
+      const tier = (auth.tier || '').toLowerCase();
+      const rawType = (auth.rawLocalBodyType || jur.localBodyType || '').toLowerCase();
+      let stream = this.state.stream || 'rural';
+      if (['corporation', 'municipality', 'town_panchayat', 'urban'].includes(tier) ||
+          rawType.includes('corporation') || rawType.includes('municipality') || rawType.includes('town panchayat')) {
+        stream = 'urban';
+      } else if (['taluk', 'revenue_village', 'revenue'].includes(tier)) {
+        stream = 'revenue';
+      } else if (tier === 'rural' || rawType.includes('panchayat union') || rawType.includes('village panchayat') || jur.block) {
+        stream = 'rural';
+      }
+      this.state.stream = stream;
+
+      const streamSelect = document.getElementById('la-stream-select');
+      if (streamSelect) {
+        streamSelect.disabled = false;
+        streamSelect.value = stream;
+      }
+
+      // Ensure active stream panel is displayed
+      const ruralPanel = document.getElementById('la-stream-rural-panel');
+      const urbanPanel = document.getElementById('la-stream-urban-panel');
+      const revenuePanel = document.getElementById('la-stream-revenue-panel');
+      if (ruralPanel) ruralPanel.classList.toggle('hidden', stream !== 'rural');
+      if (urbanPanel) urbanPanel.classList.toggle('hidden', stream !== 'urban');
+      if (revenuePanel) revenuePanel.classList.toggle('hidden', stream !== 'revenue');
+
+      // Preload active stream controls so dropdowns are enabled and populated
+      const activeDist = this.state.districtId || 'coimbatore';
+      this.populateStream(activeDist, stream);
     },
 
     /**
@@ -1493,6 +1570,17 @@
           this.updateLocationHeaderLabel(loc || dist);
         } else {
           this.updateLocationHeaderLabel();
+        }
+
+        // Match district name if available from Nominatim
+        if (dist && !isManualOverride) {
+          const normDist = dist.toLowerCase().replace(/district|dt/gi, '').trim();
+          const matched = districtsCache.find(d => d.id === normDist || d.name.toLowerCase() === normDist || normDist.includes(d.id));
+          if (matched) {
+            this.state.districtId = matched.id;
+            const distSelect = document.getElementById('la-district-select');
+            if (distSelect) distSelect.value = matched.id;
+          }
         }
       } else {
         this.updateLocationHeaderLabel();
