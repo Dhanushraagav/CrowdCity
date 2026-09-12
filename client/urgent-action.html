@@ -1,532 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- PWA Meta and Manifest -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="icon-192.png">
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <meta name="theme-color" content="#dc2626">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="CrowdCity Urgent">
-  <script src="js/pwa-helper.js" defer></script>
-  <!-- Central Authentication Router -->
-  <script src="js/auth-router.js?v=8.0.0"></script>
-  <script src="js/i18n.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <meta name="description" content="Urgent and Immediate Action - Direct access to verified official emergency helplines in Tamil Nadu.">
-  <title>Urgent / Immediate Action - CrowdCity AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title data-i18n="urgent_action_title">Urgent / Immediate Action — Location-First Emergency Assistance | CrowdCity AI</title>
   
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=1.0.5">
-  <link rel="stylesheet" href="css/components.css?v=8.4.0">
+  <meta name="theme-color" content="#dc2626">
+  <meta name="description" content="CrowdCity AI Location-First Emergency Assistance. Discovers nearest verified hospitals, ambulances, police stations, and fire stations across Tamil Nadu using live GPS.">
   
-  <!-- FontAwesome Icons -->
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Base Styles -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/components.css">
 
   <style>
-    :root {
-      --emergency-red: #dc2626;
-      --emergency-red-dark: #b91c1c;
-      --emergency-red-light: #fef2f2;
-      --emergency-red-border: #fecaca;
-    }
-
-    .urgent-page-wrap {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 1rem 1.25rem 3rem 1.25rem;
-    }
-
-    /* Top Emergency Alert Bar */
-    .emergency-top-strip {
-      background: #991b1b;
-      color: #ffffff;
-      padding: 0.5rem 1rem;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .emergency-top-strip span {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    /* Header Hero */
-    .urgent-hero-banner {
-      background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
-      border: 1.5px solid var(--emergency-red-border);
-      border-radius: 16px;
-      padding: 1.5rem 1.75rem;
-      margin-bottom: 1.25rem;
-      box-shadow: 0 4px 16px rgba(220, 38, 38, 0.06);
-    }
-
-    .urgent-hero-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .urgent-hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.28rem 0.75rem;
-      background: #fee2e2;
-      color: var(--emergency-red-dark);
-      border: 1px solid #fca5a5;
-      border-radius: 999px;
-      font-size: 0.74rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .urgent-hero-title {
-      font-size: 1.65rem;
-      font-weight: 900;
-      color: #7f1d1d;
-      margin: 0 0 0.35rem 0;
-      font-family: var(--font-heading, system-ui);
-      letter-spacing: -0.01em;
-    }
-
-    .urgent-hero-subtitle {
-      font-size: 0.98rem;
-      font-weight: 600;
-      color: #991b1b;
-      margin: 0;
-    }
-
-    .urgent-disclaimer-box {
-      background: #ffffff;
-      border: 1px solid var(--emergency-red-border);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      margin-top: 1rem;
-      font-size: 0.82rem;
-      line-height: 1.5;
-      color: #4b5563;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-    }
-
-    .urgent-disclaimer-box i {
-      color: var(--emergency-red);
-      font-size: 1rem;
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
-
-    /* Live GPS & Location Card */
-    .urgent-location-card {
-      background: #ffffff;
-      border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 14px;
-      padding: 1.15rem 1.35rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    }
-
-    .urgent-location-info {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      min-width: 260px;
-      flex: 1;
-    }
-
-    .urgent-loc-icon-bubble {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: rgba(13, 148, 136, 0.12);
-      color: #0f766e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-
-    .urgent-loc-title {
-      font-size: 0.74rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #64748b;
-      margin-bottom: 0.2rem;
-    }
-
-    .urgent-loc-coords {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #0f172a;
-      font-family: monospace, system-ui;
-    }
-
-    .urgent-loc-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      flex-wrap: wrap;
-    }
-
-    .btn-copy-coords {
-      background: #0f172a;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      padding: 0.55rem 1rem;
-      font-size: 0.82rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      transition: all 0.15s ease;
-      touch-action: manipulation;
-    }
-
-    .btn-copy-coords:active {
-      transform: scale(0.96);
-    }
-
-    .btn-retry-gps {
-      background: #f1f5f9;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 0.55rem 0.85rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .urgent-district-select-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .urgent-district-select {
-      padding: 0.5rem 0.85rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 0.84rem;
-      background: #ffffff;
-      color: #0f172a;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-    }
-
-    /* Emergency Actions Grid */
-    .urgent-categories-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0 0 1rem 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .urgent-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.15rem;
-      margin-bottom: 2rem;
-    }
-
-    .urgent-card {
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 1.35rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
-    }
-
-    .urgent-card:hover {
-      border-color: #cbd5e1;
-      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
-    }
-
-    .urgent-card.urgent-highlight {
-      border-color: #fca5a5;
-      background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%);
-    }
-
-    .urgent-card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.85rem;
-      margin-bottom: 1rem;
-    }
-
-    .urgent-card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-
-    .icon-accident { background: #fee2e2; color: #dc2626; }
-    .icon-medical { background: #fee2e2; color: #b91c1c; }
-    .icon-fire { background: #ffedd5; color: #ea580c; }
-    .icon-police { background: #e0e7ff; color: #4338ca; }
-    .icon-traffic { background: #fef3c7; color: #d97706; }
-    .icon-blockage { background: #fef2f2; color: #dc2626; }
-    .icon-danger { background: #fce7f3; color: #be185d; }
-
-    .urgent-card-content h3 {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0 0 0.3rem 0;
-    }
-
-    .urgent-card-content p {
-      font-size: 0.82rem;
-      color: #64748b;
-      margin: 0;
-      line-height: 1.45;
-    }
-
-    .urgent-dial-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      margin-top: 1rem;
-    }
-
-    .btn-emergency-call {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 0.95rem;
-      min-height: 48px;
-      transition: all 0.12s ease;
-      touch-action: manipulation;
-      user-select: none;
-    }
-
-    .btn-emergency-call:active {
-      transform: scale(0.97);
-    }
-
-    .btn-call-red {
-      background: #dc2626;
-      color: #ffffff !important;
-      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
-    }
-
-    .btn-call-red:hover {
-      background: #b91c1c;
-    }
-
-    .btn-call-secondary {
-      background: #f1f5f9;
-      color: #0f172a !important;
-      border: 1px solid #cbd5e1;
-    }
-
-    .btn-call-secondary:hover {
-      background: #e2e8f0;
-    }
-
-    .btn-call-outline-red {
-      background: #fff5f5;
-      color: #dc2626 !important;
-      border: 1.5px solid #fca5a5;
-    }
-
-    .btn-call-outline-red:hover {
-      background: #fee2e2;
-    }
-
-    .btn-call-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-call-number {
-      font-family: monospace, system-ui;
-      font-size: 1.05rem;
-      letter-spacing: 0.03em;
-    }
-
-    /* Dangerous Road Blockage Pivot */
-    .road-block-pivot-box {
-      margin-top: 0.75rem;
-      padding: 0.75rem 0.9rem;
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      color: #475569;
-    }
-
-    .road-block-pivot-box a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      color: #0f766e;
-      font-weight: 700;
-      text-decoration: none;
-      margin-top: 0.35rem;
-    }
-
-    .road-block-pivot-box a:hover {
-      text-decoration: underline;
-    }
-
-    /* District Collectorate Section */
-    .district-helpline-card {
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .district-helpline-info h4 {
-      font-size: 0.98rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0 0 0.25rem 0;
-    }
-
-    .district-helpline-info p {
-      font-size: 0.82rem;
-      color: #64748b;
-      margin: 0;
-    }
-
-    /* Routine Complaint Separation Notice */
-    .routine-notice-banner {
-      background: #f0fdfa;
-      border: 1.5px solid #99f6e4;
-      border-radius: 14px;
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.05);
-    }
-
-    .routine-notice-text {
-      max-width: 680px;
-    }
-
-    .routine-notice-text h4 {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #0f766e;
-      margin: 0 0 0.3rem 0;
-    }
-
-    .routine-notice-text p {
-      font-size: 0.82rem;
-      color: #334155;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    .btn-routine-report {
-      background: #0d9488;
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 0.84rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: 8px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      white-space: nowrap;
-      transition: background 0.15s ease;
-    }
-
-    .btn-routine-report:hover {
-      background: #0f766e;
-    }
-
-    @media (max-width: 640px) {
-      .urgent-page-wrap {
-        padding: 0.75rem 0.85rem 3rem 0.85rem;
-      }
-      .urgent-hero-banner {
-        padding: 1.15rem 1rem;
-      }
-      .urgent-hero-title {
-        font-size: 1.35rem;
-      }
-      .urgent-grid {
-        grid-template-columns: 1fr;
-      }
-      .urgent-location-card {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .urgent-loc-actions {
-        width: 100%;
-        justify-content: stretch;
-      }
-      .btn-copy-coords {
-        flex: 1;
-        justify-content: center;
-      }
-      .routine-notice-banner {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .btn-routine-report {
-        justify-content: center;
-      }
+    /* ==========================================================================
+       URGENT / IMMEDIATE ACTION — LOCATION-FIRST EMERGENCY ASSISTANCE STYLES
+       Mobile-first, high contrast, accessible, zero emojis, clean civic design
+       ========================================================================== */
+    
     /* Clean Standalone Emergency Layout (Zero sidebars, zero search bars) */
     .app-sidebar,
     .global-search-container,
@@ -547,8 +45,27 @@
       min-height: 100vh;
       width: 100%;
       overflow-x: hidden;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      color: #0f172a;
     }
 
+    /* Government Official Top Banner */
+    .emergency-top-strip {
+      background: #7f1d1d;
+      color: #fef2f2;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 0.45rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-bottom: 1px solid #991b1b;
+    }
+
+    /* Clean Navigation Bar */
     .urgent-nav-bar {
       display: flex;
       align-items: center;
@@ -604,12 +121,761 @@
       letter-spacing: 0.02em;
     }
 
+    /* Page Container */
+    .urgent-page-wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem 4rem 1.5rem;
+    }
+
+    /* Header Hero Banner */
+    .urgent-hero-banner {
+      background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+      color: #ffffff;
+      border-radius: 14px;
+      padding: 1.5rem 1.5rem 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 4px 16px rgba(185, 28, 28, 0.15);
+    }
+
+    .urgent-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.65rem;
+    }
+
+    .urgent-hero-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin: 0 0 0.35rem 0;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .urgent-hero-subtitle {
+      font-size: 0.92rem;
+      color: #fee2e2;
+      margin: 0 0 1rem 0;
+      font-weight: 500;
+      line-height: 1.45;
+    }
+
+    .urgent-disclaimer-box {
+      background: rgba(0, 0, 0, 0.22);
+      border-left: 3px solid #fca5a5;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #fef2f2;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+
+    .urgent-disclaimer-box i {
+      color: #fca5a5;
+      margin-top: 2px;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    /* Location Bar & Status Card */
+    .urgent-location-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .urgent-location-info {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .urgent-loc-icon-bubble {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .urgent-loc-icon-bubble.active-gps {
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
+    }
+
+    .urgent-loc-icon-bubble.error-gps {
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+    }
+
+    .urgent-loc-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #475569;
+      margin-bottom: 0.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .urgent-loc-coords {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.35;
+    }
+
+    .urgent-loc-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-copy-coords {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-copy-coords:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+
+    .btn-retry-gps {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-retry-gps:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+
+    .urgent-district-select-wrap select {
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 0.82rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Location Permission Warning Bar */
+    .location-warning-bar {
+      display: none;
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-left: 4px solid #f59e0b;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      color: #92400e;
+    }
+
+    .location-warning-bar.show {
+      display: block;
+    }
+
+    .location-warning-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .location-warning-text {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .location-warning-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-allow-loc {
+      background: #b45309;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-allow-loc:hover {
+      background: #92400e;
+    }
+
+    .btn-manual-loc {
+      background: #ffffff;
+      color: #78350f;
+      border: 1px solid #d97706;
+      border-radius: 6px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Emergency Situation Filter Pills */
+    .situation-selector-wrap {
+      margin-bottom: 1.5rem;
+    }
+
+    .situation-selector-header {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .situation-pills-row {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.4rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .situation-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.95rem;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .situation-pill:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    .situation-pill.active {
+      background: #7f1d1d;
+      border-color: #7f1d1d;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(127, 29, 29, 0.25);
+    }
+
+    /* Nearby Services Container */
+    .nearby-section {
+      margin-bottom: 2rem;
+    }
+
+    .nearby-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .nearby-section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .nearby-section-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    /* Cards Grid */
+    .nearby-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1rem;
+    }
+
+    /* Service Card */
+    .service-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .service-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      border-color: #cbd5e1;
+    }
+
+    .service-card-top {
+      margin-bottom: 0.85rem;
+    }
+
+    .service-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .service-name {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .service-distance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: #ecfdf5;
+      color: #047857;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+      flex-shrink: 0;
+      border: 1px solid #a7f3d0;
+    }
+
+    .service-address {
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.45;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.35rem;
+    }
+
+    .service-address i {
+      color: #94a3b8;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .service-source-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .service-source-tag i {
+      color: #059669;
+    }
+
+    /* Actions Row */
+    .service-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-service-call {
+      flex: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 0.86rem;
+      font-weight: 800;
+      text-decoration: none;
+      transition: background 0.15s ease;
+      min-height: 44px;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-service-call:hover {
+      background: #b91c1c;
+      color: #ffffff;
+    }
+
+    .btn-service-call:active {
+      transform: scale(0.98);
+    }
+
+    .btn-service-directions {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      min-height: 44px;
+    }
+
+    .btn-service-directions:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .btn-service-directions:active {
+      transform: scale(0.98);
+    }
+
+    /* View More Button */
+    .btn-view-more-wrap {
+      margin-top: 0.85rem;
+      text-align: center;
+    }
+
+    .btn-view-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-view-more:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+
+    /* Fallback / Empty Service Card */
+    .service-empty-fallback {
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      grid-column: 1 / -1;
+    }
+
+    .service-empty-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #475569;
+      margin: 0 0 0.5rem 0;
+    }
+
+    /* General Emergency Numbers Section (Secondary) */
+    .general-emergency-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .general-emergency-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .general-emergency-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .general-emergency-sub {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .general-numbers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .general-number-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .general-number-card:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .general-card-info h4 {
+      margin: 0 0 0.15rem 0;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .general-card-info p {
+      margin: 0;
+      font-size: 0.74rem;
+      color: #64748b;
+    }
+
+    .general-dial-badge {
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      background: #dc2626;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.86rem;
+      letter-spacing: 0.02em;
+    }
+
+    .general-dial-badge.secondary-badge {
+      background: #0f172a;
+    }
+
+    /* District Collectorate Card */
+    .district-helpline-card {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .district-helpline-info h4 {
+      margin: 0 0 0.15rem 0;
+      font-size: 0.94rem;
+      font-weight: 800;
+      color: #991b1b;
+    }
+
+    .district-helpline-info p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #7f1d1d;
+    }
+
+    /* Routine Complaint Notice Banner */
+    .routine-notice-banner {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .routine-notice-text h4 {
+      margin: 0 0 0.35rem 0;
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .routine-notice-text p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .btn-routine-report {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1.15rem;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-routine-report:hover {
+      background: #1e293b;
+      color: #ffffff;
+    }
+
+    /* Skeleton Loading State */
+    .skeleton-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.15rem;
+      min-height: 140px;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Mobile Responsive */
     @media (max-width: 640px) {
-      .urgent-nav-bar {
-        padding: 0.75rem 1rem;
+      .urgent-page-wrap {
+        padding: 0.85rem 0.85rem 3rem 0.85rem;
       }
-      .urgent-nav-title {
-        display: none;
+      .urgent-hero-banner {
+        padding: 1.15rem 1rem;
+      }
+      .urgent-hero-title {
+        font-size: 1.35rem;
+      }
+      .urgent-location-card {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .urgent-loc-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+      .btn-copy-coords {
+        flex: 1;
+        justify-content: center;
+      }
+      .nearby-cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .routine-notice-banner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-routine-report {
+        justify-content: center;
       }
     }
   </style>
@@ -636,303 +902,312 @@
 
   <div class="urgent-page-wrap">
 
-        <!-- Header Hero Banner -->
-        <div class="urgent-hero-banner">
-          <div class="urgent-hero-top">
-            <div>
-              <div class="urgent-hero-badge">
-                <i class="fa-solid fa-bolt"></i> Immediate Response
-              </div>
-              <h1 class="urgent-hero-title" data-i18n="urgent_action_title">URGENT / IMMEDIATE ACTION</h1>
-              <p class="urgent-hero-subtitle" data-i18n="urgent_action_subtitle">For situations that need immediate attention.</p>
-            </div>
+    <!-- Header Hero Banner -->
+    <div class="urgent-hero-banner">
+      <div class="urgent-hero-top">
+        <div>
+          <div class="urgent-hero-badge">
+            <i class="fa-solid fa-bolt"></i> Immediate Response &bull; Location-First
           </div>
+          <h1 class="urgent-hero-title" data-i18n="urgent_action_title">URGENT / IMMEDIATE ACTION</h1>
+          <p class="urgent-hero-subtitle" data-i18n="urgent_action_subtitle">For situations that need immediate attention.</p>
+        </div>
+      </div>
 
-          <div class="urgent-disclaimer-box">
-            <i class="fa-solid fa-circle-info"></i>
-            <div>
-              <strong>Official Notice:</strong> CrowdCity connects citizens with verified official emergency response pathways. For life-threatening emergencies, dial national emergency responders immediately. Urgent actions bypass the routine civic complaint SLA workflow.
-            </div>
+      <div class="urgent-disclaimer-box">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>
+          <strong>Official Notice:</strong> CrowdCity discovers verified nearby emergency responders based on your current location and connects you to official government helplines. Urgent actions bypass the routine civic complaint SLA workflow.
+        </div>
+      </div>
+    </div>
+
+    <!-- Live GPS & Location Card -->
+    <div class="urgent-location-card">
+      <div class="urgent-location-info">
+        <div class="urgent-loc-icon-bubble" id="urgent-loc-icon">
+          <i class="fa-solid fa-location-crosshairs"></i>
+        </div>
+        <div>
+          <div class="urgent-loc-title" id="urgent-loc-status-title">Current Location</div>
+          <div class="urgent-loc-coords" id="urgent-loc-display">Finding help near you...</div>
+        </div>
+      </div>
+
+      <div class="urgent-loc-actions">
+        <button type="button" class="btn-copy-coords" id="btn-copy-gps" onclick="copyGpsCoordinates()" title="Copy coordinates to tell emergency dispatchers">
+          <i class="fa-regular fa-copy"></i>
+          <span id="copy-btn-text">Copy Exact GPS Coordinates</span>
+        </button>
+        <button type="button" class="btn-retry-gps" id="btn-refresh-gps" onclick="retryGpsDetection()" title="Refresh live GPS">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+        <div class="urgent-district-select-wrap">
+          <select id="urgent-district-select" class="urgent-district-select" onchange="handleDistrictChange(this.value)" aria-label="District Selector">
+            <option value="">Select District</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Permission Denied / Error Warning Bar -->
+    <div class="location-warning-bar" id="location-warning-bar">
+      <div class="location-warning-content">
+        <div class="location-warning-text">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Location access is required to find nearby emergency services.</span>
+        </div>
+        <div class="location-warning-actions">
+          <button type="button" class="btn-allow-loc" onclick="retryGpsDetection()">Allow Location Access</button>
+          <button type="button" class="btn-manual-loc" onclick="focusDistrictSelect()">Choose Location Manually</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Situation Prioritization Pills -->
+    <div class="situation-selector-wrap">
+      <div class="situation-selector-header">
+        <span>Prioritize Emergency Situation</span>
+        <span style="font-size: 0.76rem; font-weight: 600; color: #94a3b8;">Tap to re-order nearby services</span>
+      </div>
+      <div class="situation-pills-row" id="situation-pills">
+        <button type="button" class="situation-pill active" data-category="all" onclick="selectSituationCategory('all')">
+          <i class="fa-solid fa-layer-group"></i> All Situations
+        </button>
+        <button type="button" class="situation-pill" data-category="accident" onclick="selectSituationCategory('accident')">
+          <i class="fa-solid fa-car-burst"></i> Accident
+        </button>
+        <button type="button" class="situation-pill" data-category="medical" onclick="selectSituationCategory('medical')">
+          <i class="fa-solid fa-truck-medical"></i> Medical Emergency
+        </button>
+        <button type="button" class="situation-pill" data-category="fire" onclick="selectSituationCategory('fire')">
+          <i class="fa-solid fa-fire-flame-curved"></i> Fire Emergency
+        </button>
+        <button type="button" class="situation-pill" data-category="police" onclick="selectSituationCategory('police')">
+          <i class="fa-solid fa-handcuffs"></i> Police Assistance
+        </button>
+        <button type="button" class="situation-pill" data-category="traffic" onclick="selectSituationCategory('traffic')">
+          <i class="fa-solid fa-traffic-light"></i> Traffic Emergency
+        </button>
+        <button type="button" class="situation-pill" data-category="blockage" onclick="selectSituationCategory('blockage')">
+          <i class="fa-solid fa-road-barrier"></i> Dangerous Road Blockage
+        </button>
+        <button type="button" class="situation-pill" data-category="danger" onclick="selectSituationCategory('danger')">
+          <i class="fa-solid fa-triangle-exclamation"></i> Other Immediate Danger
+        </button>
+      </div>
+    </div>
+
+    <!-- NEARBY SERVICES CONTAINER (PRIMARY CONTENT) -->
+    <div id="nearby-services-container">
+
+      <!-- 1. Nearby Hospitals -->
+      <section class="nearby-section" id="section-hospitals" data-section="hospitals">
+        <div class="nearby-section-header">
+          <div class="nearby-section-title">
+            <i class="fa-solid fa-hospital" style="color: #dc2626;"></i>
+            <span>Nearby Hospitals</span>
+          </div>
+          <span class="nearby-section-badge" id="badge-hospitals-count">Finding...</span>
+        </div>
+        <div class="nearby-cards-grid" id="grid-hospitals">
+          <!-- Populated dynamically -->
+          <div class="skeleton-card">
+            <div class="skeleton-line" style="width: 70%;"></div>
+            <div class="skeleton-line" style="width: 90%;"></div>
+            <div class="skeleton-line" style="width: 40%;"></div>
           </div>
         </div>
+        <div class="btn-view-more-wrap" id="wrap-more-hospitals" style="display: none;">
+          <button type="button" class="btn-view-more" onclick="toggleViewMore('hospitals')">
+            <i class="fa-solid fa-chevron-down"></i> <span id="text-more-hospitals">View More Hospitals</span>
+          </button>
+        </div>
+      </section>
 
-        <!-- Live GPS & Location Card -->
-        <div class="urgent-location-card">
-          <div class="urgent-location-info">
-            <div class="urgent-loc-icon-bubble" id="urgent-loc-icon">
-              <i class="fa-solid fa-location-crosshairs"></i>
-            </div>
-            <div>
-              <div class="urgent-loc-title" id="urgent-loc-status-title">Current Location</div>
-              <div class="urgent-loc-coords" id="urgent-loc-display">Detecting live GPS coordinates...</div>
-            </div>
+      <!-- 2. Nearby Ambulance Services -->
+      <section class="nearby-section" id="section-ambulances" data-section="ambulances">
+        <div class="nearby-section-header">
+          <div class="nearby-section-title">
+            <i class="fa-solid fa-truck-medical" style="color: #ea580c;"></i>
+            <span>Nearby Ambulance Services</span>
           </div>
-
-          <div class="urgent-loc-actions">
-            <button type="button" class="btn-copy-coords" id="btn-copy-gps" onclick="copyGpsCoordinates()" title="Copy coordinates to tell 108 or 100 dispatchers">
-              <i class="fa-regular fa-copy"></i>
-              <span id="copy-btn-text">Copy Exact GPS Coordinates</span>
-            </button>
-            <button type="button" class="btn-retry-gps" id="btn-refresh-gps" onclick="retryGpsDetection()" title="Refresh live GPS">
-              <i class="fa-solid fa-arrows-rotate"></i>
-            </button>
-            <div class="urgent-district-select-wrap">
-              <select id="urgent-district-select" class="urgent-district-select" onchange="handleDistrictChange(this.value)" aria-label="District Selector">
-                <option value="">Select District</option>
-              </select>
-            </div>
+          <span class="nearby-section-badge" id="badge-ambulances-count">Finding...</span>
+        </div>
+        <div class="nearby-cards-grid" id="grid-ambulances">
+          <div class="skeleton-card">
+            <div class="skeleton-line" style="width: 70%;"></div>
+            <div class="skeleton-line" style="width: 90%;"></div>
+            <div class="skeleton-line" style="width: 40%;"></div>
           </div>
         </div>
-
-        <!-- Emergency Categories Grid -->
-        <div class="urgent-categories-title">
-          <span>Choose Emergency Situation</span>
-          <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Direct Helpline Access</span>
+        <div class="btn-view-more-wrap" id="wrap-more-ambulances" style="display: none;">
+          <button type="button" class="btn-view-more" onclick="toggleViewMore('ambulances')">
+            <i class="fa-solid fa-chevron-down"></i> <span id="text-more-ambulances">View More Ambulances</span>
+          </button>
         </div>
+      </section>
 
-        <div class="urgent-grid">
-
-          <!-- 1. Accident -->
-          <div class="urgent-card urgent-highlight">
-            <div>
-              <div class="urgent-card-header">
-                <div class="urgent-card-icon icon-accident">
-                  <i class="fa-solid fa-car-burst"></i>
-                </div>
-                <div class="urgent-card-content">
-                  <h3>Accident</h3>
-                  <p>Road accident, vehicle collision, or highway casualty requiring urgent medical & police rescue.</p>
-                </div>
-              </div>
-            </div>
-            <div class="urgent-dial-buttons">
-              <a href="tel:108" class="btn-emergency-call btn-call-red">
-                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 108 Ambulance</span>
-                <span class="btn-call-number">108</span>
-              </a>
-              <a href="tel:100" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-shield"></i> Call 100 Police</span>
-                <span class="btn-call-number">100</span>
-              </a>
-              <a href="tel:1073" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-road"></i> National Highway Patrol</span>
-                <span class="btn-call-number">1073</span>
-              </a>
-            </div>
+      <!-- 3. Nearby Police Stations -->
+      <section class="nearby-section" id="section-police" data-section="police">
+        <div class="nearby-section-header">
+          <div class="nearby-section-title">
+            <i class="fa-solid fa-shield-halved" style="color: #2563eb;"></i>
+            <span>Nearby Police Stations</span>
           </div>
-
-          <!-- 2. Medical Emergency -->
-          <div class="urgent-card urgent-highlight">
-            <div>
-              <div class="urgent-card-header">
-                <div class="urgent-card-icon icon-medical">
-                  <i class="fa-solid fa-truck-medical"></i>
-                </div>
-                <div class="urgent-card-content">
-                  <h3>Medical Emergency</h3>
-                  <p>Cardiac arrest, severe injury, respiratory distress, or critical patient needing emergency transit.</p>
-                </div>
-              </div>
-            </div>
-            <div class="urgent-dial-buttons">
-              <a href="tel:108" class="btn-emergency-call btn-call-red">
-                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 108 Free Ambulance</span>
-                <span class="btn-call-number">108</span>
-              </a>
-              <a href="tel:104" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-stethoscope"></i> TN Medical Advice Helpline</span>
-                <span class="btn-call-number">104</span>
-              </a>
-              <a href="tel:112" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-circle-exclamation"></i> All Emergency Support</span>
-                <span class="btn-call-number">112</span>
-              </a>
-            </div>
-          </div>
-
-          <!-- 3. Fire Emergency -->
-          <div class="urgent-card">
-            <div>
-              <div class="urgent-card-header">
-                <div class="urgent-card-icon icon-fire">
-                  <i class="fa-solid fa-fire-flame-curved"></i>
-                </div>
-                <div class="urgent-card-content">
-                  <h3>Fire Emergency</h3>
-                  <p>Active fire outbreak, building blaze, gas leakage, or industrial rescue operation.</p>
-                </div>
-              </div>
-            </div>
-            <div class="urgent-dial-buttons">
-              <a href="tel:101" class="btn-emergency-call btn-call-red">
-                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 101 Fire & Rescue</span>
-                <span class="btn-call-number">101</span>
-              </a>
-              <a href="tel:112" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-circle-exclamation"></i> Call 112 National Support</span>
-                <span class="btn-call-number">112</span>
-              </a>
-            </div>
-          </div>
-
-          <!-- 4. Police Assistance -->
-          <div class="urgent-card">
-            <div>
-              <div class="urgent-card-header">
-                <div class="urgent-card-icon icon-police">
-                  <i class="fa-solid fa-handcuffs"></i>
-                </div>
-                <div class="urgent-card-content">
-                  <h3>Police Assistance</h3>
-                  <p>Active crime in progress, physical violence, harassment, theft, or public safety intervention.</p>
-                </div>
-              </div>
-            </div>
-            <div class="urgent-dial-buttons">
-              <a href="tel:100" class="btn-emergency-call btn-call-red">
-                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 100 Police Control</span>
-                <span class="btn-call-number">100</span>
-              </a>
-              <a href="tel:112" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-circle-exclamation"></i> Call 112 Unified Emergency</span>
-                <span class="btn-call-number">112</span>
-              </a>
-              <a href="tel:1091" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-person-dress"></i> Women Safety Helpline</span>
-                <span class="btn-call-number">1091</span>
-              </a>
-            </div>
-          </div>
-
-          <!-- 5. Traffic Emergency -->
-          <div class="urgent-card">
-            <div>
-              <div class="urgent-card-header">
-                <div class="urgent-card-icon icon-traffic">
-                  <i class="fa-solid fa-traffic-light"></i>
-                </div>
-                <div class="urgent-card-content">
-                  <h3>Traffic Emergency</h3>
-                  <p>Major junction gridlock, severe accident jam, traffic signal breakdown posing imminent risk.</p>
-                </div>
-              </div>
-            </div>
-            <div class="urgent-dial-buttons">
-              <a href="tel:103" class="btn-emergency-call btn-call-red">
-                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 103 Traffic Helpline</span>
-                <span class="btn-call-number">103</span>
-              </a>
-              <a href="tel:1073" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-road"></i> Call 1073 Highway Patrol</span>
-                <span class="btn-call-number">1073</span>
-              </a>
-            </div>
-          </div>
-
-          <!-- 6. Dangerous Road Blockage -->
-          <div class="urgent-card urgent-highlight">
-            <div>
-              <div class="urgent-card-header">
-                <div class="urgent-card-icon icon-blockage">
-                  <i class="fa-solid fa-road-barrier"></i>
-                </div>
-                <div class="urgent-card-content">
-                  <h3>Dangerous Road Blockage</h3>
-                  <p>Fallen tree, electric wire on road, landslip, or massive debris creating immediate crash risk.</p>
-                </div>
-              </div>
-            </div>
-            <div class="urgent-dial-buttons">
-              <a href="tel:103" class="btn-emergency-call btn-call-red">
-                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 103 Traffic Helpline</span>
-                <span class="btn-call-number">103</span>
-              </a>
-              <a href="tel:1073" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-road"></i> Call 1073 Highway Emergency</span>
-                <span class="btn-call-number">1073</span>
-              </a>
-              <a href="tel:100" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-shield"></i> Call 100 Police</span>
-                <span class="btn-call-number">100</span>
-              </a>
-
-              <!-- Special Pivot: Switch to normal transportation complaint if routine -->
-              <div class="road-block-pivot-box">
-                <div><strong>Not an immediate crash danger?</strong> If this is a routine pothole, road repair, or parking nuisance, file a structured complaint for municipal action:</div>
-                <a href="transportation-report.html">
-                  <i class="fa-solid fa-arrow-right"></i> Switch to Standard Transportation Report
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <!-- 7. Other Immediate Danger -->
-          <div class="urgent-card">
-            <div>
-              <div class="urgent-card-header">
-                <div class="urgent-card-icon icon-danger">
-                  <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div class="urgent-card-content">
-                  <h3>Other Immediate Danger</h3>
-                  <p>Natural disaster, flooding, structural collapse, chemical hazard, or any critical life-safety incident.</p>
-                </div>
-              </div>
-            </div>
-            <div class="urgent-dial-buttons">
-              <a href="tel:112" class="btn-emergency-call btn-call-red">
-                <span class="btn-call-label"><i class="fa-solid fa-phone"></i> Call 112 Unified Emergency</span>
-                <span class="btn-call-number">112</span>
-              </a>
-              <a href="tel:1077" class="btn-emergency-call btn-call-secondary" id="link-1077">
-                <span class="btn-call-label"><i class="fa-solid fa-building-shield"></i> District Disaster Control</span>
-                <span class="btn-call-number">1077</span>
-              </a>
-              <a href="tel:1070" class="btn-emergency-call btn-call-secondary">
-                <span class="btn-call-label"><i class="fa-solid fa-landmark"></i> State Disaster Control Room</span>
-                <span class="btn-call-number">1070</span>
-              </a>
-            </div>
-          </div>
-
+          <span class="nearby-section-badge" id="badge-police-count">Finding...</span>
         </div>
-
-        <!-- District Collectorate Card (Dynamically populated) -->
-        <div class="district-helpline-card" id="district-helpline-card">
-          <div class="district-helpline-info">
-            <h4 id="district-collectorate-title">District Collectorate Control Room</h4>
-            <p id="district-collectorate-sub">Direct official government administrative control room for emergencies.</p>
-          </div>
-          <div>
-            <a href="tel:04425268323" id="district-collectorate-phone-btn" class="btn-emergency-call btn-call-outline-red">
-              <span class="btn-call-label"><i class="fa-solid fa-phone"></i> <span id="district-collectorate-phone-label">Call District Control</span></span>
-              <span class="btn-call-number" id="district-collectorate-phone-val">044-25268323</span>
-            </a>
+        <div class="nearby-cards-grid" id="grid-police">
+          <div class="skeleton-card">
+            <div class="skeleton-line" style="width: 70%;"></div>
+            <div class="skeleton-line" style="width: 90%;"></div>
+            <div class="skeleton-line" style="width: 40%;"></div>
           </div>
         </div>
+        <div class="btn-view-more-wrap" id="wrap-more-police" style="display: none;">
+          <button type="button" class="btn-view-more" onclick="toggleViewMore('police')">
+            <i class="fa-solid fa-chevron-down"></i> <span id="text-more-police">View More Police Stations</span>
+          </button>
+        </div>
+      </section>
 
-        <!-- Non-Emergency / Routine Separation Notice -->
-        <div class="routine-notice-banner">
-          <div class="routine-notice-text">
-            <h4><i class="fa-solid fa-clipboard-check"></i> Looking for Standard Civic Issue Reporting?</h4>
-            <p data-i18n="normal_civic_reports_desc">
-              For routine civic or road issues (such as waste management, streetlights, potholes, water leaks, or sanitary complaints) that do not pose immediate danger, submit a standard complaint to receive a Complaint ID, department assignment, and SLA tracking.
-            </p>
+      <!-- 4. Nearby Fire Stations -->
+      <section class="nearby-section" id="section-fire" data-section="fire">
+        <div class="nearby-section-header">
+          <div class="nearby-section-title">
+            <i class="fa-solid fa-fire-extinguisher" style="color: #b91c1c;"></i>
+            <span>Nearby Fire Stations</span>
           </div>
-          <a href="report.html" class="btn-routine-report">
-            <i class="fa-solid fa-pen-to-square"></i>
-            <span data-i18n="report_civic_issue">Report Civic Issue</span>
+          <span class="nearby-section-badge" id="badge-fire-count">Finding...</span>
+        </div>
+        <div class="nearby-cards-grid" id="grid-fire">
+          <div class="skeleton-card">
+            <div class="skeleton-line" style="width: 70%;"></div>
+            <div class="skeleton-line" style="width: 90%;"></div>
+            <div class="skeleton-line" style="width: 40%;"></div>
+          </div>
+        </div>
+        <div class="btn-view-more-wrap" id="wrap-more-fire" style="display: none;">
+          <button type="button" class="btn-view-more" onclick="toggleViewMore('fire')">
+            <i class="fa-solid fa-chevron-down"></i> <span id="text-more-fire">View More Fire Stations</span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- GENERAL EMERGENCY NUMBERS (SECONDARY SECTION) -->
+    <div class="general-emergency-section">
+      <div class="general-emergency-header">
+        <h3 class="general-emergency-title">
+          <i class="fa-solid fa-phone-volume" style="color: #dc2626;"></i>
+          <span>General Emergency Numbers</span>
+        </h3>
+        <p class="general-emergency-sub">24/7 Verified National & State Helplines &bull; Direct One-Tap Dial</p>
+      </div>
+
+      <div class="general-numbers-grid">
+        <a href="tel:112" class="general-number-card">
+          <div class="general-card-info">
+            <h4>112 National Emergency</h4>
+            <p>Unified Police, Fire & Medical</p>
+          </div>
+          <span class="general-dial-badge">112</span>
+        </a>
+
+        <a href="tel:108" class="general-number-card">
+          <div class="general-card-info">
+            <h4>108 Emergency Ambulance</h4>
+            <p>Free Medical & Trauma Care</p>
+          </div>
+          <span class="general-dial-badge">108</span>
+        </a>
+
+        <a href="tel:100" class="general-number-card">
+          <div class="general-card-info">
+            <h4>100 Police Control Room</h4>
+            <p>Immediate Law & Safety</p>
+          </div>
+          <span class="general-dial-badge secondary-badge">100</span>
+        </a>
+
+        <a href="tel:101" class="general-number-card">
+          <div class="general-card-info">
+            <h4>101 Fire & Rescue</h4>
+            <p>Fire Outbreak & Hazards</p>
+          </div>
+          <span class="general-dial-badge secondary-badge">101</span>
+        </a>
+
+        <a href="tel:103" class="general-number-card">
+          <div class="general-card-info">
+            <h4>103 Traffic Helpline</h4>
+            <p>Traffic Gridlock & Signals</p>
+          </div>
+          <span class="general-dial-badge secondary-badge">103</span>
+        </a>
+
+        <a href="tel:1073" class="general-number-card">
+          <div class="general-card-info">
+            <h4>1073 National Highway</h4>
+            <p>Highway Accidents & Patrol</p>
+          </div>
+          <span class="general-dial-badge secondary-badge">1073</span>
+        </a>
+
+        <a href="tel:1077" class="general-number-card" id="link-1077">
+          <div class="general-card-info">
+            <h4>1077 District Disaster</h4>
+            <p>District Collectorate Control</p>
+          </div>
+          <span class="general-dial-badge secondary-badge">1077</span>
+        </a>
+
+        <a href="tel:1070" class="general-number-card">
+          <div class="general-card-info">
+            <h4>1070 State Disaster</h4>
+            <p>State Emergency Operations</p>
+          </div>
+          <span class="general-dial-badge secondary-badge">1070</span>
+        </a>
+      </div>
+
+      <!-- District Collectorate Card (Dynamically populated based on active district) -->
+      <div class="district-helpline-card" id="district-helpline-card">
+        <div class="district-helpline-info">
+          <h4 id="district-collectorate-title">District Collectorate Control Room</h4>
+          <p id="district-collectorate-sub">Direct official government administrative control room for emergencies.</p>
+        </div>
+        <div>
+          <a href="tel:04425268323" id="district-collectorate-phone-btn" class="btn-service-call" style="background: #991b1b; padding: 0.5rem 1rem;">
+            <i class="fa-solid fa-phone"></i>
+            <span id="district-collectorate-phone-val">044-25268323</span>
           </a>
         </div>
-
       </div>
+    </div>
+
+    <!-- Non-Emergency / Routine Separation Notice -->
+    <div class="routine-notice-banner">
+      <div class="routine-notice-text">
+        <h4><i class="fa-solid fa-clipboard-check"></i> Looking for Standard Civic Issue Reporting?</h4>
+        <p data-i18n="normal_civic_reports_desc">
+          For routine civic or road issues (such as waste management, streetlights, potholes, water leaks, or sanitary complaints) that do not pose immediate danger, submit a standard complaint to receive a Complaint ID, department assignment, and SLA tracking.
+        </p>
+      </div>
+      <a href="report.html" class="btn-routine-report">
+        <i class="fa-solid fa-pen-to-square"></i>
+        <span data-i18n="report_civic_issue">Report Civic Issue</span>
+      </a>
+    </div>
+
+  </div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=8.8.0"></script>
   <script src="js/api.js"></script>
-  <script src="js/user-location.js?v=1.0.0"></script>
-  <script src="js/urgent-action.js?v=1.0.0"></script>
+  <script src="js/urgent-action.js?v=2.0.0"></script>
 
 </body>
 </html>

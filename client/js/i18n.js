@@ -25,7 +25,15 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
     emergency_center: "Emergency Center",
     view_map: "View Map",
     nav_tn_updates: "TN Updates",
-    document_wallet: "Document Wallet"
+    document_wallet: "Document Wallet",
+    urgent_action_title: "URGENT / IMMEDIATE ACTION",
+    urgent_action_subtitle: "For situations that need immediate attention.",
+    nearby_hospitals: "Nearby Hospitals",
+    nearby_ambulances: "Nearby Ambulance Services",
+    nearby_police: "Nearby Police Stations",
+    nearby_fire: "Nearby Fire Stations",
+    action_directions: "Directions",
+    general_emergency_numbers: "General Emergency Numbers"
   },
   ta: {
     nav_dashboard: "டாஷ்போர்ட்",
@@ -53,7 +61,15 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
     emergency_center: "அவசர உதவி மையம்",
     view_map: "வரைபடத்தைப் பார்",
     nav_tn_updates: "தமிழ்நாடு அப்டேட்ஸ்",
-    document_wallet: "ஆவண வாலட்"
+    document_wallet: "ஆவண வாலட்",
+    urgent_action_title: "அவசர / உடனடி நடவடிக்கை",
+    urgent_action_subtitle: "உடனடி கவனம் தேவைப்படும் அவசர சூழல்களுக்கு.",
+    nearby_hospitals: "அருகிலுள்ள மருத்துவமனைகள்",
+    nearby_ambulances: "அருகிலுள்ள ஆம்புலன்ஸ் சேவைகள்",
+    nearby_police: "அருகிலுள்ள காவல் நிலையங்கள்",
+    nearby_fire: "அருகிலுள்ள தீயணைப்பு நிலையங்கள்",
+    action_directions: "வழிசெலுத்து",
+    general_emergency_numbers: "பொது அவசர உதவி எண்கள்"
   }
 };
 

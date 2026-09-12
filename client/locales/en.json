@@ -863,5 +863,13 @@
   "weather_wind": "Wind",
   "weather_wind_gusts": "Wind gusts",
   "weather_sunrise": "Sunrise",
-  "weather_sunset": "Sunset"
+  "weather_sunset": "Sunset",
+  "urgent_action_title": "URGENT / IMMEDIATE ACTION",
+  "urgent_action_subtitle": "For situations that need immediate attention.",
+  "nearby_hospitals": "Nearby Hospitals",
+  "nearby_ambulances": "Nearby Ambulance Services",
+  "nearby_police": "Nearby Police Stations",
+  "nearby_fire": "Nearby Fire Stations",
+  "action_directions": "Directions",
+  "general_emergency_numbers": "General Emergency Numbers"
 }

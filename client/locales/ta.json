@@ -863,5 +863,13 @@
   "weather_wind": "காற்று வேகம்",
   "weather_wind_gusts": "காற்று வீச்சு",
   "weather_sunrise": "சூரிய உதயம்",
-  "weather_sunset": "சூரிய அஸ்தமனம்"
+  "weather_sunset": "சூரிய அஸ்தமனம்",
+  "urgent_action_title": "அவசர / உடனடி நடவடிக்கை",
+  "urgent_action_subtitle": "உடனடி கவனம் தேவைப்படும் அவசர சூழல்களுக்கு.",
+  "nearby_hospitals": "அருகிலுள்ள மருத்துவமனைகள்",
+  "nearby_ambulances": "அருகிலுள்ள ஆம்புலன்ஸ் சேவைகள்",
+  "nearby_police": "அருகிலுள்ள காவல் நிலையங்கள்",
+  "nearby_fire": "அருகிலுள்ள தீயணைப்பு நிலையங்கள்",
+  "action_directions": "வழிசெலுத்து",
+  "general_emergency_numbers": "பொது அவசர உதவி எண்கள்"
 }

@@ -1,8 +1,9 @@
 /**
  * urgent-action.js
  * 
- * CrowdCity AI - Dedicated Urgent / Immediate Action Controller
- * Direct access to verified official emergency helplines and live GPS coordinates across Tamil Nadu.
+ * CrowdCity AI — Location-First Emergency Assistance Controller
+ * Discovers verified nearby hospitals, ambulances, police stations, and fire stations
+ * across Tamil Nadu using live device GPS coordinates.
  * 
  * NO emojis. Strictly clean, government-grade civic engineering.
  */
@@ -52,26 +53,23 @@
     { id: "virudhunagar", en: "Virudhunagar", ta: "விருதுநகர்", code: "vnr", phone: "04562-252525" }
   ];
 
+  let currentCoordinates = null;
   let currentCoordinatesString = '';
   let activeDistrict = null;
+  let cachedServicesData = null;
+  let activeSituationCategory = 'all';
+  let categoryLimits = {
+    hospitals: 4,
+    ambulances: 4,
+    police: 4,
+    fire: 4
+  };
 
-  // Initialize UI on load
+  // Initialize on load
   document.addEventListener('DOMContentLoaded', () => {
-    initMenuToggle();
     populateDistrictSelect();
     detectEmergencyLocation();
   });
-
-  // Setup Mobile Menu Toggle
-  function initMenuToggle() {
-    const toggleBtn = document.getElementById('menuToggle');
-    const sidebar = document.querySelector('.app-sidebar');
-    if (toggleBtn && sidebar) {
-      toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-      });
-    }
-  }
 
   // Populate District Select Dropdown
   function populateDistrictSelect() {
@@ -87,6 +85,15 @@
     });
   }
 
+  // Focus District Selector from warning action
+  window.focusDistrictSelect = function () {
+    const select = document.getElementById('urgent-district-select');
+    if (select) {
+      select.focus();
+      select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   // Handle District Selector Change
   window.handleDistrictChange = function (districtId) {
     if (!districtId) return;
@@ -94,12 +101,25 @@
     if (found) {
       activeDistrict = found;
       updateDistrictCard(found);
+
       const locDisplay = document.getElementById('urgent-loc-display');
       const locTitle = document.getElementById('urgent-loc-status-title');
-      if (locTitle) locTitle.textContent = 'Selected District';
-      if (locDisplay && !currentCoordinatesString) {
-        locDisplay.textContent = `${found.en} (${found.ta}) - Tamil Nadu`;
+      const locIcon = document.getElementById('urgent-loc-icon');
+      const warningBar = document.getElementById('location-warning-bar');
+
+      if (warningBar) warningBar.classList.remove('show');
+      if (locTitle) locTitle.textContent = 'Selected Location';
+      if (locDisplay) locDisplay.textContent = `${found.en} (${found.ta}) • Tamil Nadu`;
+      if (locIcon) {
+        locIcon.className = 'urgent-loc-icon-bubble';
+        locIcon.innerHTML = '<i class="fa-solid fa-location-pin"></i>';
       }
+
+      currentCoordinates = null;
+      currentCoordinatesString = `District: ${found.en}, Tamil Nadu, India`;
+
+      // Fetch nearby services for manual district
+      loadNearbyServices(null, null, found.id);
     }
   };
 
@@ -108,22 +128,18 @@
     const titleEl = document.getElementById('district-collectorate-title');
     const subEl = document.getElementById('district-collectorate-sub');
     const phoneBtn = document.getElementById('district-collectorate-phone-btn');
-    const phoneLabel = document.getElementById('district-collectorate-phone-label');
     const phoneVal = document.getElementById('district-collectorate-phone-val');
 
     if (titleEl) {
-      titleEl.textContent = `${district.en} District Collectorate & Emergency Control`;
+      titleEl.textContent = `${district.en} District Collectorate Control Room`;
     }
     if (subEl) {
-      subEl.textContent = `Official administrative disaster and emergency control room for ${district.en}.`;
+      subEl.textContent = `Direct official government administrative control room for ${district.en}.`;
     }
     if (phoneBtn && phoneVal) {
       const cleanPhone = district.phone.replace(/[^0-9]/g, '');
       phoneBtn.href = `tel:${cleanPhone}`;
       phoneVal.textContent = district.phone;
-    }
-    if (phoneLabel) {
-      phoneLabel.textContent = `Call ${district.en} Control Room`;
     }
 
     const select = document.getElementById('urgent-district-select');
@@ -132,14 +148,20 @@
     }
   }
 
-  // Location Detection Flow
-  async function detectEmergencyLocation() {
+  // Location Detection Flow (Location-First)
+  function detectEmergencyLocation() {
     const locDisplay = document.getElementById('urgent-loc-display');
     const locTitle = document.getElementById('urgent-loc-status-title');
     const locIcon = document.getElementById('urgent-loc-icon');
+    const warningBar = document.getElementById('location-warning-bar');
 
-    if (locDisplay) locDisplay.textContent = 'Acquiring live GPS coordinates...';
-    if (locTitle) locTitle.textContent = 'Emergency Location';
+    if (locDisplay) locDisplay.textContent = 'Finding help near you...';
+    if (locTitle) locTitle.textContent = 'Current Location';
+    if (locIcon) {
+      locIcon.className = 'urgent-loc-icon-bubble';
+      locIcon.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    }
+    if (warningBar) warningBar.classList.remove('show');
 
     if (!('geolocation' in navigator)) {
       handleLocationFallback('Geolocation is not supported by this browser.');
@@ -149,7 +171,7 @@
     const options = {
       enableHighAccuracy: true,
       timeout: 8000,
-      maximumAge: 30000
+      maximumAge: 0
     };
 
     navigator.geolocation.getCurrentPosition(
@@ -158,84 +180,329 @@
         const lng = position.coords.longitude;
         const accuracy = Math.round(position.coords.accuracy || 0);
 
-        // Format Coordinates
+        currentCoordinates = { latitude: lat, longitude: lng };
+
+        // Format Coordinates for reading aloud
         const latRef = lat >= 0 ? 'N' : 'S';
         const lngRef = lng >= 0 ? 'E' : 'W';
         const formattedCoords = `${Math.abs(lat).toFixed(4)}° ${latRef}, ${Math.abs(lng).toFixed(4)}° ${lngRef}`;
+        currentCoordinatesString = `${formattedCoords} (GPS Accuracy: ±${accuracy}m)`;
 
-        // Find nearest district
-        let nearestDistrict = null;
-        if (window.CrowdCityLocation && typeof window.CrowdCityLocation.findNearestDistrictByCoords === 'function') {
-          nearestDistrict = window.CrowdCityLocation.findNearestDistrictByCoords(lat, lng);
-        }
-
-        const districtName = nearestDistrict || 'Tamil Nadu';
-        currentCoordinatesString = `${formattedCoords} (${districtName}, GPS Accuracy: ±${accuracy}m)`;
-
-        if (locTitle) locTitle.textContent = 'Live GPS Coordinates (Active)';
-        if (locDisplay) locDisplay.textContent = `${formattedCoords} • ${districtName}`;
+        if (locTitle) locTitle.textContent = 'Using your current location';
         if (locIcon) {
-          locIcon.style.background = 'rgba(16, 185, 129, 0.15)';
-          locIcon.style.color = '#059669';
+          locIcon.className = 'urgent-loc-icon-bubble active-gps';
           locIcon.innerHTML = '<i class="fa-solid fa-location-dot"></i>';
         }
 
-        // Match district in official list
-        if (nearestDistrict) {
-          const match = OFFICIAL_DISTRICTS.find(d => d.en.toLowerCase() === nearestDistrict.toLowerCase());
-          if (match) {
-            activeDistrict = match;
-            updateDistrictCard(match);
-          }
-        }
+        // Fetch nearby services using coordinates
+        loadNearbyServices(lat, lng, null);
       },
       (error) => {
-        let msg = 'Live location permission unavailable.';
-        if (error.code === 1) msg = 'Location permission denied by user.';
-        else if (error.code === 2) msg = 'Location signal unavailable.';
-        else if (error.code === 3) msg = 'GPS acquisition timed out.';
-        handleLocationFallback(msg);
+        handleLocationFallback(error.message || 'Location permission unavailable.');
       },
       options
     );
   }
 
-  // Location Fallback without Blocking or Hardcoding
+  // Handle Location Failure / Denied
   function handleLocationFallback(reason) {
     const locDisplay = document.getElementById('urgent-loc-display');
     const locTitle = document.getElementById('urgent-loc-status-title');
     const locIcon = document.getElementById('urgent-loc-icon');
+    const warningBar = document.getElementById('location-warning-bar');
 
-    if (locTitle) locTitle.textContent = 'Manual District Location';
+    if (warningBar) warningBar.classList.add('show');
+    if (locTitle) locTitle.textContent = 'Location Required';
+    if (locDisplay) locDisplay.textContent = 'Location access is required to find nearby emergency services.';
     if (locIcon) {
-      locIcon.style.background = 'rgba(239, 68, 68, 0.12)';
-      locIcon.style.color = '#dc2626';
-      locIcon.innerHTML = '<i class="fa-solid fa-location-pin"></i>';
+      locIcon.className = 'urgent-loc-icon-bubble error-gps';
+      locIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
     }
 
-    // Check if user has saved district in storage or profile
-    let savedDistrict = null;
-    if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
-      savedDistrict = window.CrowdCityLocation.getSavedUserDistrict();
-    } else {
-      savedDistrict = localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district');
-    }
-
+    // Check if user has saved district
+    const savedDistrict = localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district');
     if (savedDistrict) {
       const match = OFFICIAL_DISTRICTS.find(d => d.en.toLowerCase() === savedDistrict.toLowerCase() || d.id === savedDistrict.toLowerCase());
       if (match) {
         activeDistrict = match;
         updateDistrictCard(match);
-        if (locDisplay) locDisplay.textContent = `${match.en} (${match.ta}) - Saved District`;
+        if (locDisplay) locDisplay.textContent = `Using saved district: ${match.en} (${match.ta})`;
+        loadNearbyServices(null, null, match.id);
         return;
       }
     }
 
-    // Default to prompt without picking any fake/hardcoded city
-    if (locDisplay) {
-      locDisplay.textContent = 'Please select your district from the dropdown';
+    // Render empty state with clean call-to-action
+    renderLocationRequiredNotice();
+  }
+
+  // Render Location Required state when no coordinates and no district chosen
+  function renderLocationRequiredNotice() {
+    const categories = ['hospitals', 'ambulances', 'police', 'fire'];
+    categories.forEach(cat => {
+      const grid = document.getElementById(`grid-${cat}`);
+      const badge = document.getElementById(`badge-${cat}-count`);
+      if (badge) badge.textContent = 'Location needed';
+      if (grid) {
+        grid.innerHTML = `
+          <div class="service-empty-fallback">
+            <h4 class="service-empty-title">Location access needed to discover nearest ${cat.replace('_', ' ')}</h4>
+            <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.85rem 0;">
+              Allow GPS access or select your district from the dropdown above to view real nearby facilities.
+            </p>
+            <button type="button" class="btn-allow-loc" onclick="retryGpsDetection()">
+              <i class="fa-solid fa-location-crosshairs"></i> Allow Location Access
+            </button>
+          </div>
+        `;
+      }
+    });
+  }
+
+  // Fetch Nearby Services from Backend API
+  async function loadNearbyServices(lat, lng, districtId) {
+    let url = '/api/emergency-services/nearby?';
+    if (lat !== null && lat !== undefined && lng !== null && lng !== undefined) {
+      url += `lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=35&limit=15`;
+    } else if (districtId) {
+      url += `districtId=${encodeURIComponent(districtId)}&radius=35&limit=15`;
+    } else {
+      return;
+    }
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data && data.success) {
+        cachedServicesData = data;
+
+        // Update district title and collectorate card
+        if (data.location && data.location.district) {
+          const matchedDistrict = OFFICIAL_DISTRICTS.find(d =>
+            d.en.toLowerCase() === data.location.district.toLowerCase() ||
+            d.id === (data.location.districtId || '').toLowerCase()
+          );
+
+          if (matchedDistrict) {
+            activeDistrict = matchedDistrict;
+            updateDistrictCard(matchedDistrict);
+            const locDisplay = document.getElementById('urgent-loc-display');
+            if (locDisplay && currentCoordinates) {
+              locDisplay.textContent = `Using your current location (${matchedDistrict.en} District)`;
+            }
+          }
+        }
+
+        renderAllNearbyServices(data);
+      } else {
+        console.error('Failed to load emergency services:', data ? data.error : 'Unknown error');
+      }
+    } catch (err) {
+      console.error('Network error loading emergency services:', err);
     }
   }
+
+  // Render All Categories
+  function renderAllNearbyServices(data) {
+    if (!data || !data.results) return;
+
+    renderServiceCategory('hospitals', data.results.hospitals || [], data.counts.hospitals || 0, 'hospital');
+    renderServiceCategory('ambulances', data.results.ambulances || [], data.counts.ambulances || 0, 'ambulance');
+    renderServiceCategory('police', data.results.police_stations || [], data.counts.police_stations || 0, 'police_station');
+    renderServiceCategory('fire', data.results.fire_stations || [], data.counts.fire_stations || 0, 'fire_station');
+  }
+
+  // Render a Specific Category Grid
+  function renderServiceCategory(categoryKey, items, totalCount, serviceType) {
+    const grid = document.getElementById(`grid-${categoryKey}`);
+    const badge = document.getElementById(`badge-${categoryKey}-count`);
+    const moreWrap = document.getElementById(`wrap-more-${categoryKey}`);
+    const moreText = document.getElementById(`text-more-${categoryKey}`);
+
+    if (!grid) return;
+
+    const limit = categoryLimits[categoryKey] || 4;
+    const displayedItems = items.slice(0, limit);
+
+    // Update count badge
+    if (badge) {
+      if (items.length === 0) {
+        badge.textContent = 'None in range';
+        badge.style.background = '#fef2f2';
+        badge.style.color = '#b91c1c';
+      } else {
+        badge.textContent = `${items.length} nearby`;
+        badge.style.background = '#ecfdf5';
+        badge.style.color = '#047857';
+      }
+    }
+
+    // If no verified services found, render authentic fallback option
+    if (items.length === 0) {
+      let fallbackNumber = '112';
+      let fallbackLabel = 'Call 112 Unified Emergency';
+      let fallbackDesc = 'No verified local station found within search range.';
+
+      if (categoryKey === 'hospitals' || categoryKey === 'ambulances') {
+        fallbackNumber = '108';
+        fallbackLabel = 'Call 108 Free Emergency Ambulance';
+        fallbackDesc = 'No local facility in range. Dispatch free state ambulance immediately.';
+      } else if (categoryKey === 'police') {
+        fallbackNumber = '100';
+        fallbackLabel = 'Call 100 Police Control Room';
+        fallbackDesc = 'Local police station number unavailable. Contact master control room.';
+      } else if (categoryKey === 'fire') {
+        fallbackNumber = '101';
+        fallbackLabel = 'Call 101 Fire & Rescue';
+        fallbackDesc = 'Local fire station number unavailable. Contact fire control room.';
+      }
+
+      grid.innerHTML = `
+        <div class="service-empty-fallback">
+          <h4 class="service-empty-title">${fallbackDesc}</h4>
+          <a href="tel:${fallbackNumber}" class="btn-service-call" style="max-width: 280px; margin: 0.5rem auto 0 auto;">
+            <i class="fa-solid fa-phone"></i> ${fallbackLabel}
+          </a>
+        </div>
+      `;
+
+      if (moreWrap) moreWrap.style.display = 'none';
+      return;
+    }
+
+    // Render cards
+    grid.innerHTML = displayedItems.map(item => {
+      const cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : null;
+      const phoneDisplay = item.phone ? item.phone : 'Local number unavailable';
+      const isCallAvailable = Boolean(cleanPhone);
+
+      let dialHref = cleanPhone ? `tel:${cleanPhone}` : (serviceType === 'police_station' ? 'tel:100' : (serviceType === 'fire_station' ? 'tel:101' : 'tel:108'));
+      let callLabel = cleanPhone ? `Call ${phoneDisplay}` : (serviceType === 'police_station' ? 'Call 100 Police' : (serviceType === 'fire_station' ? 'Call 101 Fire' : 'Call 108 Ambulance'));
+
+      return `
+        <div class="service-card" data-service-id="${item.id}">
+          <div class="service-card-top">
+            <div class="service-header-row">
+              <h4 class="service-name">${escapeHtml(item.name)}</h4>
+              <span class="service-distance-badge">
+                <i class="fa-solid fa-location-arrow"></i> ${escapeHtml(item.formattedDistance)}
+              </span>
+            </div>
+            <p class="service-address">
+              <i class="fa-solid fa-location-dot"></i>
+              <span>${escapeHtml(item.address)}</span>
+            </p>
+            <div class="service-source-tag">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>${escapeHtml(item.source_name || 'Verified Government Directory')}</span>
+            </div>
+          </div>
+
+          <div class="service-actions-row">
+            <a href="${dialHref}" class="btn-service-call" title="Call ${escapeHtml(item.name)}">
+              <i class="fa-solid fa-phone"></i>
+              <span>${callLabel}</span>
+            </a>
+            <a href="${item.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn-service-directions" title="Directions to ${escapeHtml(item.name)}">
+              <i class="fa-solid fa-diamond-turn-right"></i>
+              <span data-i18n="action_directions">Directions</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Manage "View More" button
+    if (moreWrap && moreText) {
+      if (items.length > 4) {
+        moreWrap.style.display = 'block';
+        if (limit >= items.length) {
+          moreText.textContent = `Show Fewer ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}`;
+        } else {
+          moreText.textContent = `View More (${items.length - limit} more available)`;
+        }
+      } else {
+        moreWrap.style.display = 'none';
+      }
+    }
+  }
+
+  // Toggle View More for a category
+  window.toggleViewMore = function (categoryKey) {
+    if (!cachedServicesData || !cachedServicesData.results) return;
+
+    let items = [];
+    let serviceType = 'hospital';
+    if (categoryKey === 'hospitals') {
+      items = cachedServicesData.results.hospitals || [];
+      serviceType = 'hospital';
+    } else if (categoryKey === 'ambulances') {
+      items = cachedServicesData.results.ambulances || [];
+      serviceType = 'ambulance';
+    } else if (categoryKey === 'police') {
+      items = cachedServicesData.results.police_stations || [];
+      serviceType = 'police_station';
+    } else if (categoryKey === 'fire') {
+      items = cachedServicesData.results.fire_stations || [];
+      serviceType = 'fire_station';
+    }
+
+    if (categoryLimits[categoryKey] >= items.length) {
+      categoryLimits[categoryKey] = 4; // Collapse back to default
+    } else {
+      categoryLimits[categoryKey] = items.length; // Expand all
+    }
+
+    renderServiceCategory(categoryKey, items, items.length, serviceType);
+  };
+
+  // Prioritize Emergency Situation Category (Re-orders sections on tap)
+  window.selectSituationCategory = function (category) {
+    activeSituationCategory = category;
+
+    // Update active pill styling
+    const pills = document.querySelectorAll('.situation-pill');
+    pills.forEach(p => {
+      if (p.getAttribute('data-category') === category) {
+        p.classList.add('active');
+      } else {
+        p.classList.remove('active');
+      }
+    });
+
+    const container = document.getElementById('nearby-services-container');
+    const secHosp = document.getElementById('section-hospitals');
+    const secAmb = document.getElementById('section-ambulances');
+    const secPol = document.getElementById('section-police');
+    const secFire = document.getElementById('section-fire');
+
+    if (!container || !secHosp || !secAmb || !secPol || !secFire) return;
+
+    // Define re-order priority based on emergency type
+    let order = [secHosp, secAmb, secPol, secFire]; // Default: Hospitals -> Ambulances -> Police -> Fire
+
+    if (category === 'medical' || category === 'accident') {
+      // Prioritize Ambulance then Hospitals then Police
+      order = [secAmb, secHosp, secPol, secFire];
+    } else if (category === 'fire') {
+      // Prioritize Fire then Ambulance then Police
+      order = [secFire, secAmb, secPol, secHosp];
+    } else if (category === 'police' || category === 'traffic' || category === 'blockage') {
+      // Prioritize Police then Ambulance then Fire
+      order = [secPol, secAmb, secFire, secHosp];
+    } else if (category === 'danger') {
+      order = [secPol, secFire, secAmb, secHosp];
+    }
+
+    // Append in new order
+    order.forEach(section => {
+      container.appendChild(section);
+    });
+
+    // Smooth scroll to top of nearby services
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Retry GPS Detection
   window.retryGpsDetection = function () {
@@ -283,12 +550,25 @@
         const originalText = copyText.textContent;
         copyText.textContent = 'Coordinates Copied!';
         copyBtn.style.background = '#059669';
+        copyBtn.style.color = '#ffffff';
         setTimeout(() => {
           copyText.textContent = originalText;
-          copyBtn.style.background = '#0f172a';
+          copyBtn.style.background = '#f8fafc';
+          copyBtn.style.color = '#334155';
         }, 2500);
       }
     }
   };
+
+  // Escape HTML helper for XSS prevention
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
 })();
