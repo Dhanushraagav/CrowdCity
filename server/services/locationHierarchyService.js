@@ -1,5 +1,5 @@
 import { supabaseAdmin, supabase } from '../config/supabase.js';
-import { DISTRICTS_DATA, TALUKS_DATA, BLOCKS_DATA, LOCATIONS_DATA, LOCAL_BODIES_DATA } from '../data/locationHierarchyData.js';
+import { DISTRICTS_DATA, TALUKS_DATA, BLOCKS_DATA, LOCATIONS_DATA, LOCAL_BODIES_DATA, URBAN_LOCAL_BODIES_DATA } from '../data/locationHierarchyData.js';
 import logger from '../config/logger.js';
 
 // In-memory indexing for ultra-fast response
@@ -35,6 +35,12 @@ const locationsByTalukMap = new Map();
 // All locations (including historical quarantined)
 const allLocationsByTalukMap = new Map();
 
+// 1. Rural Development: Village Panchayats indexed by Block
+const villagePanchayatsByBlockMap = new Map();
+
+// 2. Revenue Administration: Revenue Villages indexed by Taluk
+const revenueVillagesByTalukMap = new Map();
+
 LOCATIONS_DATA.forEach(loc => {
   if (loc.taluk_id) {
     const tId = loc.taluk_id.toLowerCase();
@@ -50,6 +56,38 @@ LOCATIONS_DATA.forEach(loc => {
       locationsByTalukMap.get(tId).push(loc);
     }
   }
+
+  // Index active Village Panchayats strictly under their Rural Block
+  if (!loc.is_quarantined && loc.administrative_type === 'village_panchayat' && loc.block_id) {
+    const bId = loc.block_id.toLowerCase();
+    if (!villagePanchayatsByBlockMap.has(bId)) {
+      villagePanchayatsByBlockMap.set(bId, []);
+    }
+    villagePanchayatsByBlockMap.get(bId).push(loc);
+  }
+
+  // Index active Revenue Villages strictly under their Taluk
+  if (!loc.is_quarantined && loc.administrative_type === 'revenue_village' && loc.taluk_id) {
+    const tId = loc.taluk_id.toLowerCase();
+    if (!revenueVillagesByTalukMap.has(tId)) {
+      revenueVillagesByTalukMap.set(tId, []);
+    }
+    revenueVillagesByTalukMap.get(tId).push(loc);
+  }
+});
+
+// 3. Urban Local Government: Urban Local Bodies (Corporations, Municipalities, Town Panchayats)
+const urbanLocalBodiesByDistrictMap = new Map();
+const urbanLocalBodyByIdMap = new Map();
+const ulbSource = Array.isArray(URBAN_LOCAL_BODIES_DATA) ? URBAN_LOCAL_BODIES_DATA : [];
+
+ulbSource.forEach(ulb => {
+  const dId = ulb.district_id.toLowerCase();
+  if (!urbanLocalBodiesByDistrictMap.has(dId)) {
+    urbanLocalBodiesByDistrictMap.set(dId, []);
+  }
+  urbanLocalBodiesByDistrictMap.get(dId).push(ulb);
+  urbanLocalBodyByIdMap.set(ulb.id.toLowerCase(), ulb);
 });
 
 const localBodiesByTalukMap = new Map();
@@ -226,6 +264,51 @@ export async function getLocationsForTaluk(talukId, searchQuery = '', options = 
 }
 
 /**
+ * 4a. Rural Development Stream: Get Village Panchayats strictly belonging to a Rural Block
+ */
+export async function getVillagePanchayatsForBlock(blockId) {
+  if (!blockId) return [];
+  const cleanBlock = String(blockId).trim().toLowerCase();
+  if (villagePanchayatsByBlockMap.has(cleanBlock)) {
+    return villagePanchayatsByBlockMap.get(cleanBlock);
+  }
+  for (const [bId, vps] of villagePanchayatsByBlockMap.entries()) {
+    if (bId.endsWith(cleanBlock) || cleanBlock.endsWith(bId)) {
+      return vps;
+    }
+  }
+  return [];
+}
+
+/**
+ * 4b. Revenue Administration Stream: Get Revenue Villages strictly belonging to a CRA Taluk
+ */
+export async function getRevenueVillagesForTaluk(talukId) {
+  if (!talukId) return [];
+  const cleanTaluk = normalizeTalukKey(talukId);
+  if (revenueVillagesByTalukMap.has(cleanTaluk)) {
+    return revenueVillagesByTalukMap.get(cleanTaluk);
+  }
+  for (const [tId, rvs] of revenueVillagesByTalukMap.entries()) {
+    if (tId.endsWith(cleanTaluk) || cleanTaluk.endsWith(tId)) {
+      return rvs;
+    }
+  }
+  return [];
+}
+
+/**
+ * 4c. Urban Local Government Stream: Get Urban Local Bodies for a District
+ */
+export async function getUrbanLocalBodiesForDistrict(districtId, ulbType = 'all') {
+  if (!districtId) return [];
+  const cleanDist = normalizeDistrictKey(districtId);
+  const list = urbanLocalBodiesByDistrictMap.get(cleanDist) || [];
+  if (!ulbType || ulbType === 'all') return list;
+  return list.filter(u => u.type === ulbType.toLowerCase());
+}
+
+/**
  * 5. High-performance Search-First Typeahead Index
  * Debounced lookup matching English and Tamil names with rich parent context
  */
@@ -250,11 +333,11 @@ export async function searchLocations({ query = '', districtId = '', adminType =
     }
 
     if (cleanType && cleanType !== 'all') {
-      const lType = (loc.location_type || '').toLowerCase();
+      const lType = (loc.administrative_type || loc.location_type || '').toLowerCase();
       if (cleanType === 'village' || cleanType === 'village_panchayat') {
         if (lType !== 'village_panchayat' && lType !== 'revenue_village') continue;
-      } else if (cleanType === 'urban' || cleanType === 'town_panchayat' || cleanType === 'municipality') {
-        if (lType !== 'town_panchayat' && lType !== 'municipality' && lType !== 'corporation') continue;
+      } else if (cleanType === 'urban' || cleanType === 'town_panchayat' || cleanType === 'municipality' || cleanType === 'corporation') {
+        if (lType !== 'town_panchayat' && lType !== 'municipality' && lType !== 'corporation' && lType !== 'locality') continue;
       } else if (lType !== cleanType) {
         continue;
       }
@@ -284,23 +367,50 @@ export async function searchLocations({ query = '', districtId = '', adminType =
     const dist = districtsMap.get(loc.district_id.toLowerCase());
     const taluk = loc.taluk_id ? talukByIdMap.get(loc.taluk_id.toLowerCase()) : null;
     const block = loc.block_id ? blockByIdMap.get(loc.block_id.toLowerCase()) : null;
+    const adminType = loc.administrative_type || loc.location_type || 'revenue_village';
 
     let parentContext = '';
-    if (block && block.name) {
-      parentContext = `${block.name} Block, ${dist ? dist.name : loc.district_id}`;
-    } else if (taluk && taluk.name) {
-      parentContext = `${taluk.name} Taluk, ${dist ? dist.name : loc.district_id}`;
-    } else if (dist) {
-      parentContext = dist.name;
+    let parentName = '';
+    let parentType = loc.parent_type || 'taluk';
+
+    if (adminType === 'village_panchayat') {
+      parentType = 'block';
+      parentName = block ? block.name : (loc.block_id || '');
+      parentContext = `${parentName || (taluk ? taluk.name : '')} Block, ${dist ? dist.name : loc.district_id}`;
+    } else if (adminType === 'revenue_village') {
+      parentType = 'taluk';
+      parentName = taluk ? taluk.name : (loc.taluk_id || '');
+      parentContext = `${parentName} Taluk, ${dist ? dist.name : loc.district_id}`;
+    } else if (adminType === 'town_panchayat') {
+      parentType = 'district';
+      parentName = dist ? dist.name : loc.district_id;
+      parentContext = `Town Panchayat, ${dist ? dist.name : loc.district_id}`;
+    } else if (adminType === 'municipality') {
+      parentType = 'district';
+      parentName = dist ? dist.name : loc.district_id;
+      parentContext = `Municipality, ${dist ? dist.name : loc.district_id}`;
+    } else if (adminType === 'corporation') {
+      parentType = 'district';
+      parentName = dist ? dist.name : loc.district_id;
+      parentContext = `Municipal Corporation, ${dist ? dist.name : loc.district_id}`;
+    } else {
+      parentType = loc.local_body_id ? 'urban_local_body' : (loc.taluk_id ? 'taluk' : 'district');
+      parentName = taluk ? taluk.name : (dist ? dist.name : '');
+      parentContext = `${taluk ? `${taluk.name} Taluk, ` : ''}${dist ? dist.name : loc.district_id}`;
     }
 
     return {
       id: loc.id,
       name: loc.name,
+      name_en: loc.name,
       tamil_name: loc.tamil_name || loc.name,
-      location_type: loc.location_type,
-      type_label: formatLocationTypeLabel(loc.location_type),
+      name_ta: loc.tamil_name || loc.name,
+      location_type: adminType,
+      administrative_type: adminType,
+      type_label: formatLocationTypeLabel(adminType),
       lgd_code: loc.lgd_code || null,
+      official_code: loc.lgd_code || null,
+      district: dist ? dist.name : loc.district_id,
       district_id: loc.district_id,
       district_name: dist ? dist.name : loc.district_id,
       district_name_ta: dist ? dist.tamil_name : '',
@@ -310,9 +420,13 @@ export async function searchLocations({ query = '', districtId = '', adminType =
       block_id: loc.block_id || null,
       block_name: block ? block.name : '',
       block_name_ta: block ? block.tamil_name : '',
+      parent_name: parentName,
+      parent_type: parentType,
       parent_context: parentContext,
+      verified: !!loc.is_verified,
       is_verified: !!loc.is_verified,
-      source_name: loc.source_name || 'tnrd'
+      source_name: loc.source_name || 'tnrd',
+      source_url: loc.source_url || null
     };
   });
 }

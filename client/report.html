@@ -761,34 +761,91 @@
                 </div>
 
                 <div class="la-cascade-divider">
-                  <span>Or Select Hierarchy Step-by-Step</span>
+                  <span>Or Select by Administrative Stream (நிர்வாகப் பிரிவு)</span>
                 </div>
 
+                <!-- Step 1: District -->
                 <div class="la-form-group">
                   <label for="la-district-select">1. District (மாவட்டம்) *</label>
                   <select id="la-district-select" class="la-select">
                     <option value="" disabled selected>Select District...</option>
                   </select>
                 </div>
+
+                <!-- Step 2: Administrative Stream Selector -->
                 <div class="la-form-group">
-                  <label for="la-subdivision-select">2. Taluk / Block (வட்டம் / ஒன்றியம்)</label>
-                  <select id="la-subdivision-select" class="la-select" disabled>
-                    <option value="" disabled selected>Select District first...</option>
+                  <label for="la-stream-select">2. Administrative Stream (நிர்வாகப் பிரிவு) *</label>
+                  <select id="la-stream-select" class="la-select" disabled>
+                    <option value="rural" selected>Rural Development (ஊரக வளர்ச்சி: Block &rarr; Village Panchayat)</option>
+                    <option value="urban">Urban Local Government (நகர்ப்புற உள்ளாட்சி: Corporation / Municipality / Town Panchayat)</option>
+                    <option value="revenue">Revenue Administration (வருவாய்த் துறை: Taluk &rarr; Revenue Village)</option>
                   </select>
                 </div>
-                <div class="la-form-group">
-                  <label for="la-village-select">3. Village / Town (கிராமம் / நகரம்)</label>
-                  <select id="la-village-select" class="la-select" disabled>
-                    <option value="" disabled selected>Select Taluk / Block first...</option>
-                  </select>
-                  <input type="text" id="la-village-custom-input" class="la-input hidden" placeholder="Enter village or town name..." style="margin-top: 0.35rem;">
+
+                <!-- Stream Branch A: Rural Development (Block -> Village Panchayat -> Habitation) -->
+                <div id="la-stream-rural-panel" class="la-stream-panel">
+                  <div class="la-form-group">
+                    <label for="la-block-select">3. Rural Block / Panchayat Union (ஊராட்சி ஒன்றியம்) *</label>
+                    <select id="la-block-select" class="la-select" disabled>
+                      <option value="" disabled selected>Select District first...</option>
+                    </select>
+                  </div>
+                  <div class="la-form-group">
+                    <label for="la-vp-select">4. Village Panchayat (கிராம ஊராட்சி) *</label>
+                    <select id="la-vp-select" class="la-select" disabled>
+                      <option value="" disabled selected>Select Block first...</option>
+                    </select>
+                  </div>
+                  <div class="la-form-group">
+                    <label for="la-habitation-input">5. Habitation / Locality (குடியிருப்பு / பகுதி - விருப்பத்தேர்வு)</label>
+                    <input type="text" id="la-habitation-input" class="la-input" placeholder="Enter habitation or street name if applicable...">
+                  </div>
                 </div>
-                <div class="la-form-group">
-                  <label for="la-localbody-select">4. Local Body (உள்ளாட்சி அமைப்பு)</label>
-                  <select id="la-localbody-select" class="la-select" disabled>
-                    <option value="" disabled selected>Select Taluk / Block first...</option>
-                  </select>
+
+                <!-- Stream Branch B: Urban Local Government (ULB -> Ward / Locality) -->
+                <div id="la-stream-urban-panel" class="la-stream-panel hidden">
+                  <div class="la-form-group">
+                    <label for="la-urban-type-filter">3. Urban Body Type (நகர்ப்புற உள்ளாட்சி வகை)</label>
+                    <select id="la-urban-type-filter" class="la-select">
+                      <option value="all">All Urban Bodies</option>
+                      <option value="corporation">Municipal Corporation (மாநகராட்சி)</option>
+                      <option value="municipality">Municipality (நகராட்சி)</option>
+                      <option value="town_panchayat">Town Panchayat (பேரூராட்சி)</option>
+                    </select>
+                  </div>
+                  <div class="la-form-group">
+                    <label for="la-urban-body-select">4. Urban Local Body (உள்ளாட்சி அமைப்பு) *</label>
+                    <select id="la-urban-body-select" class="la-select" disabled>
+                      <option value="" disabled selected>Select District first...</option>
+                    </select>
+                  </div>
+                  <div class="la-form-group">
+                    <label for="la-urban-locality-input">5. Ward / Locality / Neighborhood (வார்டு / பகுதி)</label>
+                    <input type="text" id="la-urban-locality-input" class="la-input" placeholder="e.g. Ward 12, Gandhipuram, Anna Nagar...">
+                  </div>
                 </div>
+
+                <!-- Stream Branch C: Revenue Administration (Taluk -> Revenue Village) -->
+                <div id="la-stream-revenue-panel" class="la-stream-panel hidden">
+                  <div class="la-form-group">
+                    <label for="la-taluk-select">3. Taluk (வருவாய் வட்டம்) *</label>
+                    <select id="la-taluk-select" class="la-select" disabled>
+                      <option value="" disabled selected>Select District first...</option>
+                    </select>
+                  </div>
+                  <div class="la-form-group">
+                    <label for="la-revenue-village-select">4. Revenue Village (வருவாய் கிராமம்)</label>
+                    <select id="la-revenue-village-select" class="la-select" disabled>
+                      <option value="" disabled selected>Select Taluk first...</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Hidden inputs for backward compatibility with legacy scripts -->
+                <select id="la-subdivision-select" class="la-select hidden" aria-hidden="true" style="display: none;"></select>
+                <select id="la-village-select" class="la-select hidden" aria-hidden="true" style="display: none;"></select>
+                <select id="la-localbody-select" class="la-select hidden" aria-hidden="true" style="display: none;"></select>
+                <input type="hidden" id="la-village-custom-input">
               </div>
 
               <!-- Auto Mode Map & Pin Container -->

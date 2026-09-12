@@ -4,6 +4,9 @@ import {
   getTaluksForDistrict,
   getBlocksForDistrict,
   getLocationsForTaluk,
+  getVillagePanchayatsForBlock,
+  getRevenueVillagesForTaluk,
+  getUrbanLocalBodiesForDistrict,
   getLocalBodiesForLocation,
   searchLocations
 } from '../services/locationHierarchyService.js';
@@ -187,6 +190,81 @@ router.get('/locations/:locationId/local-bodies', async (req, res) => {
   } catch (err) {
     logger.error('Error in GET /api/locations/locations/:locationId/local-bodies: %O', err);
     return res.status(500).json({ error: 'Failed to fetch local bodies for location.' });
+  }
+});
+
+/**
+ * 8. GET /api/locations/blocks/:blockId/village-panchayats
+ * Rural Development Stream: Returns Village Panchayats strictly belonging to requested Block
+ */
+router.get('/blocks/:blockId/village-panchayats', async (req, res) => {
+  try {
+    const { blockId } = req.params;
+    if (!blockId) {
+      return res.status(400).json({ error: 'blockId parameter is required.' });
+    }
+    const vps = await getVillagePanchayatsForBlock(blockId);
+    return res.status(200).json({
+      success: true,
+      blockId,
+      count: vps.length,
+      data: vps,
+      village_panchayats: vps
+    });
+  } catch (err) {
+    logger.error('Error in GET /api/locations/blocks/:blockId/village-panchayats: %O', err);
+    return res.status(500).json({ error: 'Failed to fetch village panchayats for block.' });
+  }
+});
+
+/**
+ * 9. GET /api/locations/taluks/:talukId/revenue-villages
+ * Revenue Administration Stream: Returns verified Revenue Villages under requested CRA Taluk
+ */
+router.get('/taluks/:talukId/revenue-villages', async (req, res) => {
+  try {
+    const { talukId } = req.params;
+    if (!talukId) {
+      return res.status(400).json({ error: 'talukId parameter is required.' });
+    }
+    const rvs = await getRevenueVillagesForTaluk(talukId);
+    return res.status(200).json({
+      success: true,
+      talukId,
+      count: rvs.length,
+      data: rvs,
+      revenue_villages: rvs
+    });
+  } catch (err) {
+    logger.error('Error in GET /api/locations/taluks/:talukId/revenue-villages: %O', err);
+    return res.status(500).json({ error: 'Failed to fetch revenue villages for taluk.' });
+  }
+});
+
+/**
+ * 10. GET /api/locations/districts/:districtId/urban-local-bodies
+ * Urban Local Government Stream: Returns Urban Local Bodies for requested District
+ * Optional ?type=corporation|municipality|town_panchayat
+ */
+router.get('/districts/:districtId/urban-local-bodies', async (req, res) => {
+  try {
+    const { districtId } = req.params;
+    const { type } = req.query;
+    if (!districtId) {
+      return res.status(400).json({ error: 'districtId parameter is required.' });
+    }
+    const ulbs = await getUrbanLocalBodiesForDistrict(districtId, type || 'all');
+    return res.status(200).json({
+      success: true,
+      districtId,
+      type: type || 'all',
+      count: ulbs.length,
+      data: ulbs,
+      urban_local_bodies: ulbs
+    });
+  } catch (err) {
+    logger.error('Error in GET /api/locations/districts/:districtId/urban-local-bodies: %O', err);
+    return res.status(500).json({ error: 'Failed to fetch urban local bodies for district.' });
   }
 });
 

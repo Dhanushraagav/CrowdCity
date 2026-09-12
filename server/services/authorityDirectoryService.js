@@ -3814,25 +3814,27 @@ export async function resolveResponsibleAuthority({
     const cleanDist = normalizeDistrictId(manualSelection.districtId);
     districtObj = DISTRICTS_DIRECTORY.find(d => d.id === cleanDist || d.code === cleanDist) || DISTRICTS_DIRECTORY[0];
     
-    if (manualSelection.subdivisionId) {
-      subdivObj = SUBDIVISIONS_DIRECTORY.find(s => s.id === manualSelection.subdivisionId);
+    const targetSubdivId = manualSelection.subdivisionId || manualSelection.blockId || manualSelection.talukId;
+    if (targetSubdivId) {
+      subdivObj = SUBDIVISIONS_DIRECTORY.find(s => s.id === targetSubdivId || s.id.includes(targetSubdivId) || targetSubdivId.includes(s.id));
     }
     
-    if (manualSelection.localBodyId) {
-      localBodyObj = LOCAL_BODIES_DIRECTORY.find(lb => lb.id === manualSelection.localBodyId || lb.id.startsWith(manualSelection.localBodyId) || manualSelection.localBodyId.startsWith(lb.id));
+    const targetLocalBodyId = manualSelection.localBodyId || manualSelection.urbanBodyId || manualSelection.villagePanchayatId;
+    if (targetLocalBodyId) {
+      localBodyObj = LOCAL_BODIES_DIRECTORY.find(lb => lb.id === targetLocalBodyId || lb.id.startsWith(targetLocalBodyId) || targetLocalBodyId.startsWith(lb.id));
       if (!localBodyObj) {
-        const generated = getLocalBodiesForSubdivision(districtObj.id, manualSelection.subdivisionId);
-        localBodyObj = generated.find(lb => lb.id === manualSelection.localBodyId) || generated[0];
+        const generated = getLocalBodiesForSubdivision(districtObj.id, targetSubdivId);
+        localBodyObj = generated.find(lb => lb.id === targetLocalBodyId) || generated[0];
       }
     } else if (districtObj) {
       localBodyObj = LOCAL_BODIES_DIRECTORY.find(lb => lb.districtId === districtObj.id);
       if (!localBodyObj) {
-        const generated = getLocalBodiesForSubdivision(districtObj.id, manualSelection.subdivisionId);
+        const generated = getLocalBodiesForSubdivision(districtObj.id, targetSubdivId);
         localBodyObj = generated[0];
       }
     }
 
-    villageOrTown = manualSelection.villageOrTown || (localBodyObj ? localBodyObj.name.split(' ')[0] : districtObj.name);
+    villageOrTown = manualSelection.villageOrTown || manualSelection.urbanLocality || manualSelection.habitation || (localBodyObj ? localBodyObj.name.split(' ')[0] : districtObj.name);
   } else {
     // 2. Resolve via automated location geocoding
     const parsed = parseLocationHierarchy(address, parseFloat(latitude), parseFloat(longitude));
