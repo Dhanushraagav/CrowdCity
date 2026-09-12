@@ -352,3 +352,24 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('language-change', () => {
   renderNotifications();
 });
+
+// Clean up realtime channel and event sources on page navigation/hide
+window.addEventListener('pagehide', () => {
+  if (supabaseRealtimeChannel && typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      supabaseClient.removeChannel(supabaseRealtimeChannel);
+    } catch (e) {
+      console.warn("Error removing realtime channel on pagehide:", e);
+    }
+    supabaseRealtimeChannel = null;
+  }
+  if (sseSource) {
+    try {
+      sseSource.close();
+    } catch (e) {
+      console.warn("Error closing SSE source on pagehide:", e);
+    }
+    sseSource = null;
+  }
+});
+

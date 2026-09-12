@@ -54,24 +54,17 @@
       applyDetectedDistrict(detected);
       fetchPowerShutdowns();
     } else {
-      // 2. Immediate live GPS detection with visual indicator
-      powerState.isDetectingLocation = true;
-      updateLocationBanner();
-      showDetectingLocationState();
-
+      // 2. Fallback to cached location or statewide overview (do not force GPS prompt on page load)
+      powerState.isDetectingLocation = false;
       if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
-        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 5000, requestGps: true }).then(gpsDistrict => {
-          powerState.isDetectingLocation = false;
-          if (gpsDistrict && !powerState.hasManuallyChangedDistrict) {
-            applyDetectedDistrict(gpsDistrict);
-            fetchPowerShutdowns();
-          } else {
-            updateLocationBanner();
-            fetchPowerShutdowns();
+        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 3000, requestGps: false }).then(cachedDistrict => {
+          if (cachedDistrict && !powerState.hasManuallyChangedDistrict) {
+            applyDetectedDistrict(cachedDistrict);
           }
+          updateLocationBanner();
+          fetchPowerShutdowns();
         });
       } else {
-        powerState.isDetectingLocation = false;
         updateLocationBanner();
         fetchPowerShutdowns();
       }

@@ -60,24 +60,17 @@
       }
     }
 
-    // 2. If no district was found in local storage, trigger immediate GPS detection
+    // 2. If no district was found in local storage, check cached location without forcing browser GPS prompt
     if (!state.userDetectedDistrict) {
-      state.isDetectingLocation = true;
       if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
-        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 5000, requestGps: true }).then(gpsDistrict => {
-          state.isDetectingLocation = false;
-          if (gpsDistrict && !state.userHasManuallyChangedDistrict) {
-            state.userDetectedDistrict = gpsDistrict;
-            state.district = gpsDistrict.toLowerCase();
-            const distSelect = document.getElementById('weather-district-filter');
-            if (distSelect) distSelect.value = state.district;
-            updateLocationBanner();
-            updateSelectedDistrictView();
-            renderView();
-          } else {
-            updateLocationBanner();
-          }
-        });
+        const cachedDistrict = await window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 3000, requestGps: false });
+        if (cachedDistrict && !state.userHasManuallyChangedDistrict) {
+          state.userDetectedDistrict = cachedDistrict;
+          state.district = cachedDistrict.toLowerCase();
+          const distSelect = document.getElementById('weather-district-filter');
+          if (distSelect) distSelect.value = state.district;
+          updateSelectedDistrictView();
+        }
       }
     }
 

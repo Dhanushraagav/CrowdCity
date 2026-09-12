@@ -2073,6 +2073,27 @@ function updateAuthUI() {
   const finalContainer = document.getElementById('auth-nav-container');
   if (!finalContainer) return;
 
+  // On non-dashboard pages, header must contain ONLY the back button + page identity.
+  // Suppress action cards, TN updates, public pulse, notification bell, and user profile dropdown in non-dashboard header.
+  if (finalContainer.closest('.app-header-main:not(.dashboard-header)')) {
+    finalContainer.innerHTML = '';
+    
+    // Dispatch custom auth change event so other components receive auth state
+    const loggedIn = !!user;
+    const userId = user ? user.id : null;
+    const isFirstDispatch = window._lastDispatchedLoggedIn === undefined;
+    const loggedInChanged = window._lastDispatchedLoggedIn !== loggedIn;
+    const userChanged = window._lastDispatchedUserId !== userId;
+    if (isFirstDispatch || loggedInChanged || userChanged) {
+      window._lastDispatchedLoggedIn = loggedIn;
+      window._lastDispatchedUserId = userId;
+      window.dispatchEvent(new CustomEvent('auth:change', { 
+        detail: { user, loggedIn, role: getUserRole() } 
+      }));
+    }
+    return;
+  }
+
   if (user) {
     const rawRole = getUserRole();
     const role = (rawRole && rawRole !== 'null' && rawRole !== 'undefined') ? rawRole : 'citizen';
@@ -3032,12 +3053,7 @@ function setupUniversalMobileNavigation() {
     desktopBackBtn.innerHTML = `<i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_action">${tBack}</span>`;
     desktopBackBtn.onclick = window.handleUniversalBack;
 
-    const actionsContainer = headerMain.querySelector('.app-header-actions');
-    if (actionsContainer) {
-      headerMain.insertBefore(desktopBackBtn, actionsContainer);
-    } else {
-      headerMain.appendChild(desktopBackBtn);
-    }
+    headerMain.insertBefore(desktopBackBtn, backBtn ? backBtn.nextSibling : headerMain.firstChild);
   }
 }
 
@@ -3189,14 +3205,14 @@ window.onloadTurnstileCallback = function() {
 };
 
 /**
- * Initialize Global Civic Search across all application pages
+ * Initialize Global Civic Search across application pages
  */
 function initGlobalCivicSearch() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-  // Avoid running on purely static landing pages without header
-  const hasHeader = document.querySelector('.app-header-main, .dashboard-header, header.app-header');
-  if (!hasHeader) return;
+  // Search input is strictly restricted to Dashboard header ONLY per non-dashboard header rule
+  const dashboardHeader = document.querySelector('.dashboard-header');
+  if (!dashboardHeader) return;
 
   // 1. Ensure global-search.css is loaded
   if (!document.getElementById('global-civic-search-css')) {

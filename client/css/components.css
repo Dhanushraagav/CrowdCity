@@ -32,8 +32,6 @@
   background: var(--primary, #0d9488);
   color: #ffffff;
   border-color: var(--primary, #0d9488);
-  transform: translateX(-2px);
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
 }
 
 @media (max-width: 768px) {
@@ -5418,7 +5416,7 @@ footer,
 }
 
 /* ==========================================================================
-   UNIVERSAL SHARED MOBILE BACK BUTTON STYLING
+   UNIVERSAL SHARED MOBILE BACK BUTTON STYLING (ZERO ANIMATION, INSTANT)
    ========================================================================== */
 .universal-mobile-back-btn {
   display: none; /* Hidden on Desktop (>= 1024px) */
@@ -5426,22 +5424,32 @@ footer,
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #f1f5f9 !important;
   border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   cursor: pointer;
-  margin-right: 0.65rem;
+  margin-right: 0.5rem;
   flex-shrink: 0;
-  transition: all 0.2s ease;
   z-index: 100 !important;
+  user-select: none;
+}
+
+.universal-mobile-back-btn:hover {
+  background: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
+}
+
+.universal-mobile-back-btn:active {
+  background: #cbd5e1 !important;
+  border-color: #64748b !important;
 }
 
 .universal-mobile-back-btn i,
 .universal-mobile-back-btn svg {
   color: #0f172a !important;
-  font-size: 0.95rem !important;
+  font-size: 0.92rem !important;
   display: inline-block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -5461,28 +5469,62 @@ body.dark-theme .universal-mobile-back-btn svg {
   color: #ffffff !important;
 }
 
-.universal-mobile-back-btn:active {
-  transform: scale(0.95);
-  background: var(--primary, #0d9488) !important;
-  color: #ffffff !important;
+/* ==========================================================================
+   NON-DASHBOARD HEADER RULE: SINGLE CONTROL (BACK BUTTON ONLY)
+   ========================================================================== */
+.app-header-main:not(.dashboard-header) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+  padding: 0 1rem !important;
+  gap: 0.65rem !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-sizing: border-box !important;
 }
 
-.universal-mobile-back-btn:active i,
-.universal-mobile-back-btn:active svg {
-  color: #ffffff !important;
+/* Strictly suppress action cards, buttons, bells, profile dropdowns and duplicate controls on non-dashboard headers */
+.app-header-main:not(.dashboard-header) .mobile-menu-toggle,
+.app-header-main:not(.dashboard-header) #mobile-menu-btn,
+.app-header-main:not(.dashboard-header) .app-header-actions,
+.app-header-main:not(.dashboard-header) #auth-nav-container,
+.app-header-main:not(.dashboard-header) .header-tn-updates-btn,
+.app-header-main:not(.dashboard-header) #public-pulse-wrapper,
+.app-header-main:not(.dashboard-header) .global-search-container,
+.app-header-main:not(.dashboard-header) #global-civic-search-wrapper,
+.app-header-main:not(.dashboard-header) .quick-actions-section,
+.app-header-main:not(.dashboard-header) .user-menu,
+.app-header-main:not(.dashboard-header) .notification-bell-wrapper {
+  display: none !important;
+}
+
+/* Non-dashboard page identity placement */
+.app-header-main:not(.dashboard-header) .app-header-logo-mobile {
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  margin-right: auto !important;
 }
 
 @media (max-width: 1023px) {
-  .app-header-main {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    height: 58px !important;
+  .app-header-main:not(.dashboard-header) {
+    height: 48px !important;
+    min-height: 48px !important;
     padding: 0 0.85rem !important;
-    gap: 0.5rem !important;
   }
 
-  /* Specific Dashboard Split Header on Mobile */
+  .app-header-main:not(.dashboard-header) .universal-mobile-back-btn {
+    display: inline-flex !important;
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Specific Dashboard Split Header on Mobile — REMAINS UNTOUCHED */
   .dashboard-header,
   .app-header-main.dashboard-header {
     display: flex !important;
@@ -5515,7 +5557,7 @@ body.dark-theme .universal-mobile-back-btn svg {
     flex-shrink: 0 !important;
   }
 
-  /* Header actions (TN Updates & Public Pulse) visible on top across mobile */
+  /* Header actions (TN Updates & Public Pulse) visible on top across mobile dashboard */
   .dashboard-header .app-header-actions {
     display: flex !important;
     order: 2 !important;
@@ -5528,66 +5570,49 @@ body.dark-theme .universal-mobile-back-btn svg {
     gap: 0.35rem !important;
   }
 
-  /* Hide logos on mobile header so top actions have full space */
-  .app-header-logo-mobile,
+  /* Hide logos on mobile dashboard header so top actions have full space */
   .dashboard-header .app-header-logo-mobile,
   body.dashboard-page .app-header-logo-mobile,
   .citizen-dashboard .app-header-logo-mobile {
     display: none !important;
   }
-
-  .universal-mobile-back-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
-    margin: 0 !important;
-    flex-shrink: 0 !important;
-  }
 }
 
 /* ==========================================================================
-   UNIVERSAL SHARED DESKTOP / LAPTOP BACK BUTTON STYLING
+   UNIVERSAL SHARED DESKTOP / LAPTOP BACK BUTTON STYLING (ZERO ANIMATION)
    ========================================================================== */
 .universal-desktop-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.42rem 0.95rem;
-  background: #ffffff;
-  color: var(--text-main, #0f172a);
-  border: 1px solid var(--border-color, #cbd5e1);
-  border-radius: 9px;
-  font-size: 0.84rem;
+  gap: 0.45rem;
+  padding: 0.38rem 0.85rem;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  margin-right: auto;
+  margin-right: 0.75rem;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .universal-desktop-back-btn:hover {
-  background: rgba(13, 148, 136, 0.08);
-  color: var(--primary, #0d9488);
-  border-color: var(--primary, #0d9488);
-  transform: translateX(-3px);
-  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.12);
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .universal-desktop-back-btn:active {
-  transform: scale(0.97);
+  background: #cbd5e1;
+  border-color: #64748b;
 }
 
 .universal-desktop-back-btn i {
-  font-size: 0.85rem;
-  transition: transform 0.2s ease;
-}
-
-.universal-desktop-back-btn:hover i {
-  transform: translateX(-2px);
+  font-size: 0.82rem;
+  color: #0f172a;
 }
 
 [data-theme="dark"] .universal-desktop-back-btn,

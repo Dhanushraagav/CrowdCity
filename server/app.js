@@ -134,10 +134,19 @@ app.get('/weather-forecast', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/weather-alerts.html'));
 });
 
-// Static client file server with caching and html extension resolution
+// Static client file server with optimized caching and html extension resolution
 app.use(express.static(path.join(__dirname, '../client'), {
-  maxAge: isProduction ? '1d' : '0',
-  extensions: ['html', 'htm']
+  maxAge: isProduction ? '7d' : '1h',
+  extensions: ['html', 'htm'],
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html') || filePath.endsWith('.htm')) {
+      // HTML documents must always validate so deployments and dynamic pages are never stale
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    } else {
+      // Static assets (CSS, JS, images, fonts) leverage fast browser cache with background revalidation
+      res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
+    }
+  }
 }));
 
 // Health check endpoint
@@ -145,8 +154,9 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'CrowdCity Server is running smoothly' });
 });
 
-// Serve public config credentials to client
+// Serve public config credentials to client with short-lived cache
 app.get('/api/config', (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
   res.status(200).json({
     supabaseUrl: process.env.SUPABASE_URL || 'https://placeholder.supabase.co',
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY || 'placeholder',

@@ -83,6 +83,18 @@ class I18nService {
       ? { ...INLINE_EMBEDDED_TRANSLATIONS.ta } 
       : { ...INLINE_EMBEDDED_TRANSLATIONS.en };
 
+    // Prime full translations from storage cache synchronously if present (0ms startup delay)
+    try {
+      const cachedEn = localStorage.getItem('cc_i18n_en_v109');
+      if (cachedEn) this.fallbackTranslations = { ...this.fallbackTranslations, ...JSON.parse(cachedEn) };
+      if (this.currentLanguage === 'ta') {
+        const cachedTa = localStorage.getItem('cc_i18n_ta_v109');
+        if (cachedTa) this.translations = { ...this.translations, ...JSON.parse(cachedTa) };
+      } else {
+        this.translations = this.fallbackTranslations;
+      }
+    } catch (e) {}
+
     this.reverseEnglishMap = {};
     this.observer = null;
 
@@ -132,9 +144,24 @@ class I18nService {
   }
 
   async loadLocale(lang) {
+    const cacheKey = `cc_i18n_${lang}_v109`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+
     const res = await fetch(`/locales/${lang}.json?v=1.0.9`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
-    return await res.json();
+    const data = await res.json();
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+    } catch (e) {}
+    return data;
   }
 
   buildReverseMap() {

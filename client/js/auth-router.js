@@ -59,6 +59,15 @@
   cleanLoader();
   window.addEventListener('pageshow', cleanLoader);
   document.addEventListener('DOMContentLoaded', cleanLoader);
+
+  // Speculative prefetching for instant page transitions
+  if (typeof document !== 'undefined' && !document.getElementById('instant-nav-script')) {
+    const navScript = document.createElement('script');
+    navScript.id = 'instant-nav-script';
+    navScript.src = 'js/instant-nav.js';
+    navScript.defer = true;
+    (document.head || document.documentElement).appendChild(navScript);
+  }
 })();
 
 

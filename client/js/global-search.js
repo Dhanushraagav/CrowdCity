@@ -96,8 +96,8 @@
   function mountGlobalSearch() {
     if (document.getElementById('global-civic-search-wrapper')) return;
 
-    // Target header
-    const header = document.querySelector('.app-header-main, .dashboard-header, header.app-header');
+    // Target header - only mount on dashboard header per non-dashboard header rule
+    const header = document.querySelector('.dashboard-header');
     if (!header) return;
 
     const wrapper = document.createElement('div');

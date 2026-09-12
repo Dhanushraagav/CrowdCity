@@ -67,11 +67,36 @@ async function request(endpoint, options = {}) {
     };
   }
 
+  const method = (options.method || 'GET').toUpperCase();
+  const isGet = method === 'GET';
+
+  // Invalidate cache on mutations
+  if (!isGet) {
+    _clearApiCache();
+  }
+
+  // Safe client-side caching for public non-sensitive GET requests
+  const isCacheablePublic = isGet && !options.auth && (
+    endpoint.startsWith('/locations/') ||
+    endpoint.startsWith('/tamilnadu-updates') ||
+    endpoint.startsWith('/gamification/badges') ||
+    endpoint.startsWith('/config') ||
+    Boolean(options.cacheTtlMs)
+  );
+
+  if (isCacheablePublic) {
+    const ttl = options.cacheTtlMs || (endpoint.startsWith('/locations/') ? 300000 : 90000);
+    const cached = _apiCache.get(endpoint);
+    if (cached && (Date.now() - cached.timestamp < ttl)) {
+      return cached.response;
+    }
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 35000);
 
   const config = {
-    method: options.method || 'GET',
+    method: method,
     ...options,
     headers,
     credentials: 'omit',
@@ -108,7 +133,12 @@ async function request(endpoint, options = {}) {
       }
     }
 
-    return { data, error, status };
+    const result = { data, error, status };
+    if (isCacheablePublic && response.ok && data) {
+      _apiCache.set(endpoint, { timestamp: Date.now(), response: result });
+    }
+
+    return result;
   } catch (err) {
     clearTimeout(timeoutId);
     const isTimeout = err.name === 'AbortError';
