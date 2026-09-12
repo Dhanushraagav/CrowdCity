@@ -582,17 +582,17 @@
 
         if (stream === 'rural') {
           const blockId = item.block_id || item.parent_id;
+          LocationAuthority.state.villagePanchayatId = item.official_code || item.id || item.name;
+          LocationAuthority.state.villageOrTown = item.name;
+          LocationAuthority.state.localBodyId = item.official_code || item.id || item.name;
           if (blockId) {
             LocationAuthority.state.blockId = blockId;
             LocationAuthority.state.subdivisionId = blockId;
             await LocationAuthority.populateRuralBlocks(distId, blockId);
             await LocationAuthority.populateVillagePanchayats(blockId, item.official_code || item.name);
           }
-          LocationAuthority.state.villagePanchayatId = item.official_code || item.id || item.name;
-          LocationAuthority.state.villageOrTown = item.name;
-          LocationAuthority.state.localBodyId = item.official_code || item.id || item.name;
         } else if (stream === 'urban') {
-          const bodyId = item.urban_local_body_id || item.id;
+          const bodyId = item.urban_local_body_id || item.local_body_id || item.id;
           LocationAuthority.state.urbanBodyId = bodyId;
           LocationAuthority.state.localBodyId = bodyId;
           LocationAuthority.state.villageOrTown = item.name;
@@ -604,6 +604,8 @@
           }
         } else if (stream === 'revenue') {
           const talukId = item.taluk_id || item.parent_id;
+          LocationAuthority.state.revenueVillageId = item.id || item.name;
+          LocationAuthority.state.villageOrTown = item.name;
           if (talukId) {
             LocationAuthority.state.talukId = talukId;
             LocationAuthority.state.subdivisionId = talukId;
@@ -612,8 +614,6 @@
               await LocationAuthority.populateRevenueVillages(talukId, item.name);
             }
           }
-          LocationAuthority.state.revenueVillageId = item.id || item.name;
-          LocationAuthority.state.villageOrTown = item.name;
         }
 
         // Backward compatibility sync with legacy selectors
@@ -747,6 +747,7 @@
      */
     setStream: async function(streamName, shouldTriggerResolution = true) {
       const stream = streamName || 'rural';
+      const prevStream = this.state.stream;
       this.state.stream = stream;
 
       const streamSelect = document.getElementById('la-stream-select');
@@ -762,6 +763,11 @@
       if (urbanPanel) urbanPanel.classList.toggle('hidden', stream !== 'urban');
       if (revenuePanel) revenuePanel.classList.toggle('hidden', stream !== 'revenue');
 
+      // Purge inactive stream state and reset inactive selectors
+      if (prevStream !== stream || shouldTriggerResolution) {
+        this.clearInactiveStreamValues(stream);
+      }
+
       if (this.state.districtId) {
         await this.populateStream(this.state.districtId, stream);
       }
@@ -770,6 +776,51 @@
       if (shouldTriggerResolution) {
         this.triggerResolution();
       }
+    },
+
+    /**
+     * Clear stale location values and reset selectors of inactive streams
+     */
+    clearInactiveStreamValues: function(activeStream) {
+      if (activeStream !== 'rural') {
+        this.state.blockId = '';
+        this.state.villagePanchayatId = '';
+        this.state.habitation = '';
+        const blockSelect = document.getElementById('la-block-select');
+        const vpSelect = document.getElementById('la-vp-select');
+        const habInput = document.getElementById('la-habitation-input');
+        if (blockSelect) blockSelect.selectedIndex = 0;
+        if (vpSelect) {
+          vpSelect.innerHTML = '<option value="" disabled selected>Select Block first...</option>';
+          vpSelect.disabled = true;
+        }
+        if (habInput) habInput.value = '';
+      }
+      if (activeStream !== 'urban') {
+        this.state.urbanBodyId = '';
+        this.state.urbanLocality = '';
+        const urbanBodySelect = document.getElementById('la-urban-body-select');
+        const urbanLocInput = document.getElementById('la-urban-locality-input');
+        if (urbanBodySelect) urbanBodySelect.selectedIndex = 0;
+        if (urbanLocInput) urbanLocInput.value = '';
+      }
+      if (activeStream !== 'revenue') {
+        this.state.talukId = '';
+        this.state.revenueVillageId = '';
+        const talukSelect = document.getElementById('la-taluk-select');
+        const rvSelect = document.getElementById('la-revenue-village-select');
+        if (talukSelect) talukSelect.selectedIndex = 0;
+        if (rvSelect) {
+          rvSelect.innerHTML = '<option value="" disabled selected>Select Taluk first...</option>';
+          rvSelect.disabled = true;
+        }
+      }
+
+      // Reset common location identifiers
+      this.state.subdivisionId = '';
+      this.state.localBodyId = '';
+      this.state.villageOrTown = '';
+      this.resetVillagesAndLocalBodies();
     },
 
     /**
