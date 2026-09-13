@@ -2,10 +2,15 @@
  * urgent-action.js
  * 
  * CrowdCity AI — Location-First Emergency Assistance Controller
- * Discovers verified nearby hospitals, ambulances, police stations, and fire stations
- * across Tamil Nadu using live device GPS coordinates.
+ * Discovers verified nearby government and private hospitals, clinics,
+ * ambulances, police stations, and fire stations across Tamil Nadu.
  * 
- * NO emojis. Strictly clean, government-grade civic engineering.
+ * Strict Standards:
+ * - NO emojis. Pure government-grade civic engineering.
+ * - Distance-first: closest real-world services displayed first.
+ * - Real private and government coverage with direct call and directions.
+ * - Clear distinction: Clinics never labeled as hospitals.
+ * - Emergency availability explicitly verified or flagged as unverified.
  */
 
 (function () {
@@ -103,150 +108,142 @@
       updateDistrictCard(found);
 
       const locDisplay = document.getElementById('urgent-loc-display');
-      const locTitle = document.getElementById('urgent-loc-status-title');
-      const locIcon = document.getElementById('urgent-loc-icon');
-      const warningBar = document.getElementById('location-warning-bar');
-
-      if (warningBar) warningBar.classList.remove('show');
-      if (locTitle) locTitle.textContent = 'Selected Location';
-      if (locDisplay) locDisplay.textContent = `${found.en} (${found.ta}) • Tamil Nadu`;
-      if (locIcon) {
-        locIcon.className = 'loc-icon-indicator';
-        locIcon.innerHTML = '<i class="fa-solid fa-location-pin"></i>';
+      if (locDisplay) {
+        locDisplay.textContent = `Manual Selection: ${found.en} District`;
       }
+      hideLocationWarning();
 
-      currentCoordinates = null;
-      currentCoordinatesString = `District: ${found.en}, Tamil Nadu, India`;
+      // Reset coordinates string to district name
+      currentCoordinatesString = `District: ${found.en}, Tamil Nadu`;
 
-      // Fetch nearby services for manual district
       loadNearbyServices(null, null, found.id);
     }
   };
 
-  // Update District Collectorate Card in UI
+  // Detect Emergency GPS Location
+  function detectEmergencyLocation() {
+    const locDisplay = document.getElementById('urgent-loc-display');
+    const locIcon = document.getElementById('urgent-loc-icon');
+
+    if (locDisplay) {
+      locDisplay.textContent = 'Detecting current GPS location...';
+    }
+    if (locIcon) {
+      locIcon.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    }
+
+    if (!navigator.geolocation) {
+      handleLocationFailure('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        currentCoordinates = { lat, lng };
+        currentCoordinatesString = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+
+        if (locIcon) {
+          locIcon.innerHTML = '<i class="fa-solid fa-location-dot" style="color: #059669;"></i>';
+        }
+        if (locDisplay) {
+          locDisplay.textContent = `Live GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        }
+
+        hideLocationWarning();
+        loadNearbyServices(lat, lng, null);
+      },
+      (err) => {
+        let msg = 'Unable to retrieve your location.';
+        if (err.code === err.PERMISSION_DENIED) {
+          msg = 'Location access permission was denied.';
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          msg = 'Location position is currently unavailable.';
+        } else if (err.code === err.TIMEOUT) {
+          msg = 'Location request timed out.';
+        }
+        handleLocationFailure(msg);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  }
+
+  // Handle Location Detection Failure
+  function handleLocationFailure(msg) {
+    const locDisplay = document.getElementById('urgent-loc-display');
+    const locIcon = document.getElementById('urgent-loc-icon');
+    const warningBar = document.getElementById('location-warning-bar');
+
+    if (locIcon) {
+      locIcon.innerHTML = '<i class="fa-solid fa-location-crosshairs" style="color: #dc2626;"></i>';
+    }
+    if (locDisplay) {
+      locDisplay.textContent = 'Location unavailable - Please select your district';
+    }
+    if (warningBar) {
+      warningBar.style.display = 'block';
+    }
+
+    // Default to Chennai or prompt district select
+    if (!activeDistrict) {
+      const defaultDistrict = OFFICIAL_DISTRICTS.find(d => d.id === 'chennai');
+      if (defaultDistrict) {
+        updateDistrictCard(defaultDistrict);
+      }
+    }
+
+    renderEmptyLocationState();
+  }
+
+  function hideLocationWarning() {
+    const warningBar = document.getElementById('location-warning-bar');
+    if (warningBar) {
+      warningBar.style.display = 'none';
+    }
+  }
+
+  // Update District Collectorate Card
   function updateDistrictCard(district) {
-    const titleEl = document.getElementById('district-collectorate-title');
-    const subEl = document.getElementById('district-collectorate-sub');
-    const phoneBtn = document.getElementById('district-collectorate-phone-btn');
-    const phoneVal = document.getElementById('district-collectorate-phone-val');
+    const nameEl = document.getElementById('card-district-name');
+    const phoneEl = document.getElementById('card-district-phone');
+    const btnEl = document.getElementById('btn-call-collectorate');
 
-    if (titleEl) {
-      titleEl.textContent = `${district.en} District Collectorate Control Room`;
-    }
-    if (subEl) {
-      subEl.textContent = `Direct official government administrative control room for ${district.en}.`;
-    }
-    if (phoneBtn && phoneVal) {
+    if (nameEl) nameEl.textContent = `District Collectorate Helpline (${district.en})`;
+    if (phoneEl) phoneEl.textContent = district.phone;
+    if (btnEl) {
       const cleanPhone = district.phone.replace(/[^0-9]/g, '');
-      phoneBtn.href = `tel:${cleanPhone}`;
-      phoneVal.textContent = district.phone;
+      btnEl.href = `tel:${cleanPhone}`;
+      const btnText = btnEl.querySelector('.btn-call-text');
+      if (btnText) btnText.textContent = `Call ${district.phone}`;
     }
 
+    // Sync select dropdown
     const select = document.getElementById('urgent-district-select');
-    if (select && select.value !== district.id) {
+    if (select) {
       select.value = district.id;
     }
   }
 
-  // Location Detection Flow (Location-First)
-  function detectEmergencyLocation() {
-    const locDisplay = document.getElementById('urgent-loc-display');
-    const locTitle = document.getElementById('urgent-loc-status-title');
-    const locIcon = document.getElementById('urgent-loc-icon');
-    const warningBar = document.getElementById('location-warning-bar');
-
-    if (locDisplay) locDisplay.textContent = 'Finding help near you...';
-    if (locTitle) locTitle.textContent = 'Current Location';
-    if (locIcon) {
-      locIcon.className = 'loc-icon-indicator';
-      locIcon.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    }
-    if (warningBar) warningBar.classList.remove('show');
-
-    if (!('geolocation' in navigator)) {
-      handleLocationFallback('Geolocation is not supported by this browser.');
-      return;
-    }
-
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 8000,
-      maximumAge: 0
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const accuracy = Math.round(position.coords.accuracy || 0);
-
-        currentCoordinates = { latitude: lat, longitude: lng };
-
-        // Format Coordinates for reading aloud
-        const latRef = lat >= 0 ? 'N' : 'S';
-        const lngRef = lng >= 0 ? 'E' : 'W';
-        const formattedCoords = `${Math.abs(lat).toFixed(4)}° ${latRef}, ${Math.abs(lng).toFixed(4)}° ${lngRef}`;
-        currentCoordinatesString = `${formattedCoords} (GPS Accuracy: ±${accuracy}m)`;
-
-        if (locTitle) locTitle.textContent = 'Using your current location';
-        if (locIcon) {
-          locIcon.className = 'loc-icon-indicator active-gps';
-          locIcon.innerHTML = '<i class="fa-solid fa-location-dot"></i>';
-        }
-
-        // Fetch nearby services using coordinates
-        loadNearbyServices(lat, lng, null);
-      },
-      (error) => {
-        handleLocationFallback(error.message || 'Location permission unavailable.');
-      },
-      options
-    );
-  }
-
-  // Handle Location Failure / Denied
-  function handleLocationFallback(reason) {
-    const locDisplay = document.getElementById('urgent-loc-display');
-    const locTitle = document.getElementById('urgent-loc-status-title');
-    const locIcon = document.getElementById('urgent-loc-icon');
-    const warningBar = document.getElementById('location-warning-bar');
-
-    if (warningBar) warningBar.classList.add('show');
-    if (locTitle) locTitle.textContent = 'Location Required';
-    if (locDisplay) locDisplay.textContent = 'Location access is required to find nearby emergency services.';
-    if (locIcon) {
-      locIcon.className = 'loc-icon-indicator error-gps';
-      locIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-    }
-
-    // Check if user has saved district
-    const savedDistrict = localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district');
-    if (savedDistrict) {
-      const match = OFFICIAL_DISTRICTS.find(d => d.en.toLowerCase() === savedDistrict.toLowerCase() || d.id === savedDistrict.toLowerCase());
-      if (match) {
-        activeDistrict = match;
-        updateDistrictCard(match);
-        if (locDisplay) locDisplay.textContent = `Using saved district: ${match.en} (${match.ta})`;
-        loadNearbyServices(null, null, match.id);
-        return;
-      }
-    }
-
-    // Render empty state with clean call-to-action
-    renderLocationRequiredNotice();
-  }
-
-  // Render Location Required state when no coordinates and no district chosen
-  function renderLocationRequiredNotice() {
+  // Render Empty State when GPS is blocked
+  function renderEmptyLocationState() {
     const categories = ['hospitals', 'ambulances', 'police', 'fire'];
     categories.forEach(cat => {
       const grid = document.getElementById(`grid-${cat}`);
       const badge = document.getElementById(`badge-${cat}-count`);
-      if (badge) badge.textContent = 'Location needed';
+      if (badge) {
+        badge.textContent = 'Location Needed';
+        badge.style.background = '#fef2f2';
+        badge.style.color = '#b91c1c';
+      }
       if (grid) {
         grid.innerHTML = `
           <div class="service-empty-fallback">
-            <h4 class="service-empty-title">Location access needed to discover nearest ${cat.replace('_', ' ')}</h4>
+            <h4 class="service-empty-title">Location Access Required</h4>
             <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.85rem 0;">
               Allow GPS access or select your district from the dropdown above to view real nearby facilities.
             </p>
@@ -263,9 +260,9 @@
   async function loadNearbyServices(lat, lng, districtId) {
     let url = '/api/emergency-services/nearby?';
     if (lat !== null && lat !== undefined && lng !== null && lng !== undefined) {
-      url += `lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=35&limit=15`;
+      url += `lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=35&limit=30`;
     } else if (districtId) {
-      url += `districtId=${encodeURIComponent(districtId)}&radius=35&limit=15`;
+      url += `districtId=${encodeURIComponent(districtId)}&radius=35&limit=30`;
     } else {
       return;
     }
@@ -322,27 +319,57 @@
 
     if (!grid) return;
 
-    const limit = categoryLimits[categoryKey] || 4;
-    const displayedItems = items.slice(0, limit);
+    // Build items list
+    let preparedItems = [...items];
+
+    // For Ambulances category: ensure dedicated 108 Emergency Ambulance is pinned at top
+    if (categoryKey === 'ambulances') {
+      const dedicated108 = {
+        id: 'state_108_priority_ambulance',
+        name: '108 Free Emergency Ambulance Network (TNHSP / EMRI)',
+        service_type: 'ambulance',
+        facility_type: 'State Emergency Ambulance',
+        ownership_type: 'government',
+        emergency_available: true,
+        formattedDistance: 'Statewide Priority Dispatch',
+        distanceKm: 0,
+        address: 'Central 108 Emergency Response Dispatch Network, Tamil Nadu',
+        phone: '108',
+        source_name: 'TNHSP 108 Emergency System',
+        directionsUrl: currentCoordinates
+          ? `https://www.google.com/maps/dir/?api=1&destination=${currentCoordinates.lat},${currentCoordinates.lng}`
+          : 'https://tnhealth.tn.gov.in',
+        isDedicated108: true
+      };
+
+      // Filter out duplicate generic 108 records if any, then prepend premier card
+      preparedItems = [
+        dedicated108,
+        ...preparedItems.filter(i => i.phone !== '108' || (i.name && !i.name.includes('TNHSP / EMRI')))
+      ];
+    }
+
+    const limit = categoryLimits[categoryKey] || 6;
+    const displayedItems = preparedItems.slice(0, limit);
 
     // Update count badge
     if (badge) {
-      if (items.length === 0) {
+      if (preparedItems.length === 0) {
         badge.textContent = 'None in range';
         badge.style.background = '#fef2f2';
         badge.style.color = '#b91c1c';
       } else {
-        badge.textContent = `${items.length} nearby`;
+        badge.textContent = `${preparedItems.length} nearby`;
         badge.style.background = '#ecfdf5';
         badge.style.color = '#047857';
       }
     }
 
-    // If no verified services found, render authentic fallback option
-    if (items.length === 0) {
+    // Fallback if empty
+    if (preparedItems.length === 0) {
       let fallbackNumber = '112';
       let fallbackLabel = 'Call 112 Unified Emergency';
-      let fallbackDesc = 'No verified local station found within search range.';
+      let fallbackDesc = 'No verified local services found within search range.';
 
       if (categoryKey === 'hospitals' || categoryKey === 'ambulances') {
         fallbackNumber = '108';
@@ -371,27 +398,81 @@
       return;
     }
 
-    // Render cards with clear vertical hierarchy: Name -> Distance -> Address -> Source -> Actions
+    // Render cards with complete vertical hierarchy & badges:
+    // Badges Row (Facility Type + Ownership) -> Emergency Status -> Name -> Distance -> Address -> Source -> Actions
     grid.innerHTML = displayedItems.map(item => {
       const cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : null;
       const phoneDisplay = item.phone ? item.phone : 'Local number unavailable';
-      const isCallAvailable = Boolean(cleanPhone);
 
-      let dialHref = cleanPhone ? `tel:${cleanPhone}` : (serviceType === 'police_station' ? 'tel:100' : (serviceType === 'fire_station' ? 'tel:101' : 'tel:108'));
-      let callLabel = cleanPhone ? `Call ${phoneDisplay}` : (serviceType === 'police_station' ? 'Call 100 Police' : (serviceType === 'fire_station' ? 'Call 101 Fire' : 'Call 108 Ambulance'));
+      // Fallback dialing rules (never replace private ambulance with 108!)
+      let dialHref = cleanPhone
+        ? `tel:${cleanPhone}`
+        : (serviceType === 'police_station' ? 'tel:100' : (serviceType === 'fire_station' ? 'tel:101' : 'tel:108'));
+      let callLabel = cleanPhone
+        ? `Call ${phoneDisplay}`
+        : (serviceType === 'police_station' ? 'Call 100 Police' : (serviceType === 'fire_station' ? 'Call 101 Fire' : 'Call 108 Ambulance'));
 
-      let rawSource = item.source_name ? item.source_name.trim() : 'Verified Government Directory';
+      if (item.isDedicated108) {
+        dialHref = 'tel:108';
+        callLabel = 'Call 108 (Toll-Free)';
+      }
+
+      let rawSource = item.source_name ? item.source_name.trim() : 'Verified Directory';
       let cleanSource = rawSource.replace(/^verified\s*source\s*:\s*/i, '').replace(/^source\s*:\s*/i, '').trim();
       let sourceDisplay = `Source: ${cleanSource}`;
 
+      // Facility Type Badge (Clinic explicitly distinguished)
+      const isClinic = item.service_type === 'clinic' || (item.facility_type && item.facility_type.toLowerCase().includes('clinic'));
+      const facilityBadgeHtml = isClinic
+        ? `<span class="badge-facility-type badge-facility-clinic"><i class="fa-solid fa-stethoscope"></i> Clinic / Health Centre</span>`
+        : (item.facility_type
+            ? `<span class="badge-facility-type"><i class="fa-solid fa-building-circle-check"></i> ${escapeHtml(item.facility_type)}</span>`
+            : '');
+
+      // Ownership Badge (Government vs Private vs Trust/NGO)
+      const ownType = (item.ownership_type || 'government').toLowerCase();
+      let ownLabel = 'Government';
+      let ownClass = 'ownership-government';
+      if (ownType === 'private') {
+        ownLabel = 'Private';
+        ownClass = 'ownership-private';
+      } else if (ownType === 'trust' || ownType === 'ngo') {
+        ownLabel = 'Trust / NGO';
+        ownClass = 'ownership-trust';
+      }
+      const ownershipBadgeHtml = `<span class="badge-ownership ${ownClass}">${ownLabel}</span>`;
+
+      // Emergency Capability Badge (only on hospitals/clinics)
+      let emergencyBadgeHtml = '';
+      if (item.service_type === 'hospital' || item.service_type === 'clinic') {
+        if (item.emergency_available) {
+          emergencyBadgeHtml = `<div class="badge-emergency-status status-verified"><i class="fa-solid fa-circle-check"></i> Emergency services available</div>`;
+        } else {
+          emergencyBadgeHtml = `<div class="badge-emergency-status status-unverified"><i class="fa-solid fa-circle-info"></i> Emergency availability not verified</div>`;
+        }
+      }
+
+      const cardDedicatedClass = item.isDedicated108 ? 'service-card-dedicated-108' : '';
+
       return `
-        <div class="service-card" data-service-id="${item.id}">
+        <div class="service-card ${cardDedicatedClass}" data-service-id="${item.id}">
           <div class="service-card-body">
-            <h4 class="service-name">${escapeHtml(item.name)}</h4>
-            <div class="service-distance-wrap">
-              <span class="service-distance-badge">${escapeHtml(item.formattedDistance)}</span>
+            <div class="service-badges-row">
+              ${item.isDedicated108 ? '<span class="badge-dedicated-108"><i class="fa-solid fa-star"></i> Free State Emergency</span>' : ''}
+              ${facilityBadgeHtml}
+              ${ownershipBadgeHtml}
             </div>
+
+            ${emergencyBadgeHtml}
+
+            <h4 class="service-name">${escapeHtml(item.name)}</h4>
+
+            <div class="service-distance-wrap">
+              <span class="service-distance-badge"><i class="fa-solid fa-location-arrow"></i> ${escapeHtml(item.formattedDistance)}</span>
+            </div>
+
             <p class="service-address">${escapeHtml(item.address)}</p>
+
             <div class="service-source-tag">
               <span class="service-source-text">${escapeHtml(sourceDisplay)}</span>
             </div>
@@ -413,12 +494,12 @@
 
     // Manage "View More" button
     if (moreWrap && moreText) {
-      if (items.length > 6) {
+      if (preparedItems.length > 6) {
         moreWrap.style.display = 'block';
-        if (limit >= items.length) {
+        if (limit >= preparedItems.length) {
           moreText.textContent = `Show Fewer ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}`;
         } else {
-          moreText.textContent = `View More (${items.length - limit} more available)`;
+          moreText.textContent = `View More (${preparedItems.length - limit} more available)`;
         }
       } else {
         moreWrap.style.display = 'none';
@@ -447,9 +528,9 @@
     }
 
     if (categoryLimits[categoryKey] >= items.length) {
-      categoryLimits[categoryKey] = 6; // Collapse back to default 6 (2 rows of 3)
+      categoryLimits[categoryKey] = 6; // Collapse back to default 6
     } else {
-      categoryLimits[categoryKey] = items.length; // Expand all
+      categoryLimits[categoryKey] = items.length + 1; // Expand all
     }
 
     renderServiceCategory(categoryKey, items, items.length, serviceType);

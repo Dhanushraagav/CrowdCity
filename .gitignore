@@ -28,6 +28,7 @@ Thumbs.db
 
 # Temp scratch directory
 scratch/
+server/cache/
 
 # Presentations and Documents (Do not push PPT, PDF to git)
 *.ppt

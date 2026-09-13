@@ -55,29 +55,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* 1. Top Government Official Bar */
-    .emergency-top-strip {
-      background: #7f1d1d;
-      color: #fef2f2;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      padding: 0.4rem 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-      border-bottom: 1px solid #991b1b;
-      line-height: 1.35;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .emergency-top-strip i {
-      margin-right: 0.35rem;
-    }
-
     /* 2. Compact Header Navigation Bar */
     .urgent-nav-bar {
       display: flex;
@@ -599,6 +576,121 @@
       margin-bottom: 0.5rem;
     }
 
+    /* Service Card Badges */
+    .nearby-cards-grid .service-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.45rem;
+      align-items: center;
+    }
+
+    .nearby-cards-grid .badge-facility-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      line-height: 1.3;
+    }
+
+    .nearby-cards-grid .badge-facility-clinic {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    .nearby-cards-grid .badge-ownership {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.69rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+    }
+
+    .nearby-cards-grid .ownership-government {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .nearby-cards-grid .ownership-private {
+      background: #f5f3ff;
+      color: #6d28d9;
+      border: 1px solid #ddd6fe;
+    }
+
+    .nearby-cards-grid .ownership-trust,
+    .nearby-cards-grid .ownership-ngo {
+      background: #fdf4ff;
+      color: #86198f;
+      border: 1px solid #f5d0fe;
+    }
+
+    /* Emergency Capability Status Badges */
+    .nearby-cards-grid .badge-emergency-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.73rem;
+      font-weight: 700;
+      padding: 0.18rem 0.5rem;
+      border-radius: 4px;
+      margin: 0 0 0.45rem 0;
+      line-height: 1.3;
+      width: fit-content;
+    }
+
+    .nearby-cards-grid .badge-emergency-status.status-verified {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .nearby-cards-grid .badge-emergency-status.status-verified i {
+      color: #059669;
+    }
+
+    .nearby-cards-grid .badge-emergency-status.status-unverified {
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      font-weight: 600;
+    }
+
+    .nearby-cards-grid .badge-emergency-status.status-unverified i {
+      color: #94a3b8;
+    }
+
+    /* Dedicated 108 Ambulance Card Highlight */
+    .nearby-cards-grid .service-card-dedicated-108 {
+      border: 2px solid #059669 !important;
+      background: linear-gradient(to bottom, #f0fdf4 0%, #ffffff 42%) !important;
+      position: relative;
+    }
+
+    .nearby-cards-grid .badge-dedicated-108 {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 4px;
+      background: #047857;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
     /* 1. SERVICE NAME */
     .nearby-cards-grid .service-name {
       font-size: 1.05rem;
@@ -1003,10 +1095,6 @@
     }
 
     @media (max-width: 767px) {
-      .emergency-top-strip {
-        font-size: 0.72rem;
-        padding: 0.35rem 12px;
-      }
       .urgent-nav-bar {
         padding: 0.4rem 12px;
       }
@@ -1098,17 +1186,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Government Official Top Banner -->
-  <div class="emergency-top-strip">
-    <div>
-      <i class="fa-solid fa-shield-halved"></i>
-      <span>Official Emergency Assistance &bull; Tamil Nadu</span>
-    </div>
-    <div>
-      <span>Life-threatening emergency? Dial <strong>112</strong> or <strong>108</strong></span>
-    </div>
-  </div>
 
   <!-- Dedicated Compact Navigation Bar -->
   <header class="urgent-nav-bar">
