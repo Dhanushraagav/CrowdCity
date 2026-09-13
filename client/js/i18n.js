@@ -908,7 +908,22 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "nearby_police": "Nearby Police Stations",
   "nearby_fire": "Nearby Fire Stations",
   "action_directions": "Directions",
-  "general_emergency_numbers": "General Emergency Numbers"
+  "general_emergency_numbers": "General Emergency Numbers",
+  "stat_all_time": "All time",
+  "no_recent_complaints": "No recent complaints found for {place}.",
+  "no_active_complaints": "No active complaints submitted yet.",
+  "no_nearby_issues": "No nearby community issues reported in {place}.",
+  "assigned_authority": "Assigned Authority",
+  "expected_completion": "Expected completion",
+  "updated_time": "Updated",
+  "citizens_label": "citizens",
+  "km_away": "km away",
+  "loading_updates": "Loading city updates...",
+  "emergency_police_control": "Police Control",
+  "emergency_ambulance": "Ambulance Services",
+  "emergency_fire_dept": "Fire Department",
+  "emergency_municipal_helpline": "Municipal Helpline",
+  "emergency_call": "Call"
 },
   ta: {
   "back_action": "பின்னே",
@@ -1765,7 +1780,23 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "nearby_police": "அருகிலுள்ள காவல் நிலையங்கள்",
   "nearby_fire": "அருகிலுள்ள தீயணைப்பு நிலையங்கள்",
   "action_directions": "வழிசெலுத்து",
-  "general_emergency_numbers": "பொது அவசர உதவி எண்கள்"
+  "general_emergency_numbers": "பொது அவசர உதவி எண்கள்",
+  "stat_all_time": "அனைத்து காலம்",
+  "no_recent_complaints": "{place} பகுதியில் சமீபத்திய புகார்கள் எதுவும் இல்லை.",
+  "no_active_complaints": "செயலில் உள்ள புகார்கள் எதுவும் இதுவரை சமர்ப்பிக்கப்படவில்லை.",
+  "no_nearby_issues": "{place} பகுதியில் அருகிலுள்ள சமூக புகார்கள் எதுவும் பதிவாகவில்லை.",
+  "assigned_authority": "ஒதுக்கப்பட்ட அதிகாரி",
+  "expected_completion": "எதிர்பார்க்கப்படும் முடிவு",
+  "updated_time": "புதுப்பிக்கப்பட்டது",
+  "citizens_label": "குடிமக்கள்",
+  "citizen_label": "குடிமகன்",
+  "km_away": "கி.மீ தொலைவில்",
+  "loading_updates": "நகர புதுப்பிப்புகள் ஏற்றப்படுகின்றன...",
+  "emergency_police_control": "காவல் கட்டுப்பாட்டு அறை",
+  "emergency_ambulance": "ஆம்புலன்ஸ் அவசர சேவை",
+  "emergency_fire_dept": "தீயணைப்பு மற்றும் மீட்புப்பணி",
+  "emergency_municipal_helpline": "மாநகராட்சி உதவி எண்",
+  "emergency_call": "அழைக்கவும்"
 }
 };
 
@@ -2050,7 +2081,7 @@ class I18nService {
 
       targets.forEach(el => {
         if (el.hasAttribute('data-i18n')) return;
-        if (el.id === 'hero-greeting' || el.id === 'hero-desc' || el.id === 'civic-intelligence-feed-text' || el.closest('#hero-greeting') || el.closest('#hero-desc') || el.classList.contains('user-greeting-name') || el.closest('.user-greeting-name')) return;
+        if (el.id === 'hero-greeting' || el.id === 'civic-intelligence-feed-text' || el.closest('#hero-greeting') || el.classList.contains('user-greeting-name') || el.closest('.user-greeting-name')) return;
         
         // Skip auto-stamping container links/buttons with child icon elements
         if (el.children.length > 0 && (el.tagName === 'A' || el.tagName === 'BUTTON' || el.classList.contains('app-sidebar-link') || el.classList.contains('bell-btn'))) {
@@ -2112,6 +2143,11 @@ class I18nService {
       );
       if (isInternalToggle) return;
 
+      // Ensure language toggle remains in the DOM if accidentally removed
+      if (!document.getElementById('lang-toggle-container')) {
+        this.injectLanguageToggle();
+      }
+
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       animationFrameId = requestAnimationFrame(() => {
         this.translatePage();
@@ -2141,6 +2177,7 @@ class I18nService {
         height: 38px;
         box-sizing: border-box;
         user-select: none;
+        flex-shrink: 0;
       }
       .lang-globe-icon {
         font-size: 0.85rem;
@@ -2189,47 +2226,63 @@ class I18nService {
       return;
     }
 
-    if (document.getElementById('lang-toggle-container')) {
-      this.updateToggleUI();
-      return;
+    let container = document.getElementById('lang-toggle-container');
+    const authNav = document.getElementById('auth-nav-container');
+
+    // If container exists but is inside #auth-nav-container, extract it to its parent
+    if (container && authNav && (container.parentElement === authNav || authNav.contains(container))) {
+      if (authNav.parentElement) {
+        authNav.parentElement.insertBefore(container, authNav);
+      }
     }
 
-    const container = document.createElement('div');
-    container.id = 'lang-toggle-container';
-    container.className = 'lang-toggle';
-    container.innerHTML = `
-      <i class="fa-solid fa-globe lang-globe-icon"></i>
-      <span class="lang-option" data-lang="en">EN</span>
-      <span class="lang-separator">|</span>
-      <span class="lang-option" data-lang="ta">தமிழ்</span>
-    `;
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'lang-toggle-container';
+      container.className = 'lang-toggle';
+      container.innerHTML = `
+        <i class="fa-solid fa-globe lang-globe-icon"></i>
+        <span class="lang-option" data-lang="en">EN</span>
+        <span class="lang-separator">|</span>
+        <span class="lang-option" data-lang="ta">தமிழ்</span>
+      `;
 
-    container.querySelectorAll('.lang-option').forEach(span => {
-      span.addEventListener('click', (e) => {
-        const lang = e.target.getAttribute('data-lang');
-        this.setLanguage(lang);
+      container.querySelectorAll('.lang-option').forEach(span => {
+        span.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const lang = e.target.getAttribute('data-lang');
+          if (lang) this.setLanguage(lang);
+        });
       });
-    });
 
-    const targetHeader = 
-      document.querySelector('#auth-nav-container .auth-nav-wrapper') ||
-      document.getElementById('auth-nav-container') ||
-      document.querySelector('.app-header-actions') ||
-      document.querySelector('.header-actions') ||
-      document.querySelector('.topnav-right') ||
-      document.querySelector('.nav-actions') ||
-      document.querySelector('.header-right') ||
-      document.querySelector('.auth-header') ||
-      document.querySelector('.user-menu-wrapper') ||
-      document.querySelector('.user-profile-menu') ||
-      document.querySelector('.header-container');
+      // Placement: Insert into .app-header-actions right BEFORE #auth-nav-container
+      // so auth.js updates to #auth-nav-container NEVER overwrite or wipe the toggle!
+      const appHeaderActions = document.querySelector('.app-header-actions') ||
+                               document.querySelector('.header-actions') ||
+                               document.querySelector('.topnav-right') ||
+                               document.querySelector('.nav-actions') ||
+                               document.querySelector('.header-right');
 
-    if (targetHeader) {
-      targetHeader.insertBefore(container, targetHeader.firstChild);
-      targetHeader.addEventListener('click', (e) => e.stopPropagation());
-    } else if (document.body) {
-      container.classList.add('lang-toggle-fixed');
-      document.body.appendChild(container);
+      if (appHeaderActions && authNav && authNav.parentElement === appHeaderActions) {
+        appHeaderActions.insertBefore(container, authNav);
+      } else if (appHeaderActions) {
+        appHeaderActions.insertBefore(container, appHeaderActions.firstChild);
+      } else {
+        const targetHeader = 
+          document.querySelector('.auth-header') ||
+          document.querySelector('.user-menu-wrapper') ||
+          document.querySelector('.user-profile-menu') ||
+          document.querySelector('.header-container') ||
+          document.querySelector('.app-header-main') ||
+          document.querySelector('header');
+
+        if (targetHeader) {
+          targetHeader.appendChild(container);
+        } else if (document.body) {
+          container.classList.add('lang-toggle-fixed');
+          document.body.appendChild(container);
+        }
+      }
     }
 
     this.updateToggleUI();

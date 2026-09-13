@@ -2065,6 +2065,13 @@ function updateAuthUI() {
         detail: { user, loggedIn, role: getUserRole() } 
       }));
     }
+
+    if (window.i18n && typeof window.i18n.injectLanguageToggle === 'function') {
+      window.i18n.injectLanguageToggle();
+    }
+    if (window.i18n && typeof window.i18n.translatePage === 'function') {
+      window.i18n.translatePage();
+    }
     return;
   }
 
@@ -2145,6 +2152,12 @@ function updateAuthUI() {
           </div>
         </div>
       `;
+      if (window.i18n && typeof window.i18n.injectLanguageToggle === 'function') {
+        window.i18n.injectLanguageToggle();
+      }
+      if (window.i18n && typeof window.i18n.translatePage === 'function') {
+        window.i18n.translatePage();
+      }
       return;
     }
 
@@ -2294,6 +2307,13 @@ function updateAuthUI() {
         <a href="auth.html" class="btn auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> ${tSignIn}</a>
       </div>
     `;
+  }
+  
+  if (window.i18n && typeof window.i18n.injectLanguageToggle === 'function') {
+    window.i18n.injectLanguageToggle();
+  }
+  if (window.i18n && typeof window.i18n.translatePage === 'function') {
+    window.i18n.translatePage();
   }
 
   // Guarantee that Civic Intelligence is never in any sidebar

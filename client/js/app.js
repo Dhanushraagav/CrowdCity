@@ -248,21 +248,38 @@ async function loadUserStats(isLanguageChange = false) {
   const cachedActive = localStorage.getItem('cc_user_stat_active');
   const cachedCityTotal = localStorage.getItem('cc_city_stat_total');
 
+  const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
+  const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
+  const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
+  const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
+
   if (totalEl && cachedTotal !== null) totalEl.textContent = cachedTotal;
-  if (weeklyEl && cachedWeekly !== null) weeklyEl.textContent = `+${parseInt(cachedWeekly, 10) || 0} this week`;
+  if (weeklyEl && cachedWeekly !== null) weeklyEl.textContent = `+${parseInt(cachedWeekly, 10) || 0} ${tThisWeek}`;
   if (resolvedEl && cachedResolved !== null) resolvedEl.textContent = cachedResolved;
   if (inprogressEl && cachedActive !== null) inprogressEl.textContent = cachedActive;
+  if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
   if (cityTotalEl && cachedCityTotal !== null) cityTotalEl.textContent = cachedCityTotal;
+  if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
   if (cachedTotal !== null && cachedResolved !== null) {
     const total = parseInt(cachedTotal, 10) || 0;
     const resolved = parseInt(cachedResolved, 10) || 0;
     if (rateEl) {
       const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      rateEl.textContent = `${rate}% Resolution Rate`;
+      rateEl.textContent = `${rate}% ${tResolutionRate}`;
     }
-    if (heroDesc && total > 0) {
-      heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
+    if (heroDesc) {
+      if (total > 0) {
+        if (window.i18n) {
+          heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
+        } else {
+          heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
+        }
+      } else {
+        if (window.i18n) {
+          heroDesc.textContent = window.i18n.t('hero_desc_default');
+        }
+      }
     }
   }
 
@@ -399,12 +416,16 @@ function renderFeedList(issues) {
   const listContainer = document.getElementById('issues-list');
   if (!listContainer) return;
 
+  const isTa = window.i18n ? window.i18n.getLanguage() === 'ta' : false;
+
   if (issues.length === 0) {
+    const emptyTitle = isTa ? 'செயலில் உள்ள புகார்கள் எதுவும் இல்லை' : 'No active reports found';
+    const emptyDesc = isTa ? 'தேர்ந்தெடுக்கப்பட்ட வடிகட்டலுடன் பொருந்தக்கூடிய நகராட்சிப் புகார்கள் எதுவும் இல்லை.' : 'There are no active municipal issues or cases matching the selected filter criteria.';
     listContainer.innerHTML = `
       <div style="text-align: center; padding: 3.5rem 1.5rem; color: var(--text-muted); border: 1px solid var(--border-color); border-radius: var(--radius-lg); background-color: var(--bg-surface);">
         <i class="fa-solid fa-clipboard-list" style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-muted); opacity: 0.6;"></i>
-        <p style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-bottom: 0.25rem;">No active reports found</p>
-        <p style="font-size: 0.85rem; max-width: 320px; margin: 0 auto; line-height: 1.4;">There are no active municipal issues or cases matching the selected filter criteria.</p>
+        <p style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-bottom: 0.25rem;">${emptyTitle}</p>
+        <p style="font-size: 0.85rem; max-width: 320px; margin: 0 auto; line-height: 1.4;">${emptyDesc}</p>
       </div>
     `;
     return;
@@ -414,11 +435,19 @@ function renderFeedList(issues) {
     const timeAgo = formatTimeAgo(new Date(issue.created_at));
     const upvotedClass = (issue.user_has_upvoted || localStorage.getItem(`voted-${issue.id}`)) ? 'upvoted' : '';
     const categoryIcon = getCategoryIcon(issue.category);
-    const categoryName = window.formatCategoryName(issue.category);
+    const categoryName = window.formatCategoryName ? window.formatCategoryName(issue.category) : issue.category;
     const voteColor = upvotedClass ? 'var(--primary)' : 'var(--text-muted)';
+    const upvoteLabel = isTa ? 'ஆதரவுகள் (Upvotes)' : 'Upvotes';
+    const locationFallback = isTa ? 'கண்டறியப்பட்ட இருப்பிடம்' : 'Location detected';
+    const distanceText = issue.distance !== undefined ? `<span style="font-weight: 700; color: var(--primary);"><i class="fa-solid fa-location-arrow"></i> ${issue.distance.toFixed(1)} ${isTa ? 'கி.மீ தொலைவில்' : 'km away'}</span>` : '';
 
     const isEmergency = issue.is_emergency;
-    const emergencyBadge = isEmergency ? `<span class="stitch-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 800; font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.25rem; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation" style="font-size: 0.7rem;"></i> EMERGENCY</span>` : '';
+    const emergencyBadge = isEmergency ? `<span class="stitch-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 800; font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.25rem; animation: pulse-red 1.5s infinite;"><i class="fa-solid fa-triangle-exclamation" style="font-size: 0.7rem;"></i> ${isTa ? 'அவசரம் (EMERGENCY)' : 'EMERGENCY'}</span>` : '';
+
+    const statusKey = `status_${(issue.status || 'open').toLowerCase().replace(' ', '_')}`;
+    const statusDisplay = (window.i18n && window.i18n.t(statusKey) !== statusKey)
+      ? window.i18n.t(statusKey)
+      : (issue.status || 'open').replace('_', ' ');
 
     return `
       <div class="stitch-item-card ${isEmergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='issue-details.html?id=${issue.id}'">
@@ -432,15 +461,15 @@ function renderFeedList(issues) {
           </div>
           <div style="display: flex; gap: 0.75rem; margin-top: 0.25rem; font-size: 0.75rem; align-items: center; flex-wrap: wrap;">
             <span style="color: ${voteColor}; cursor: pointer; font-weight: 700;" onclick="event.stopPropagation(); toggleUpvote('${issue.id}')" id="vote-btn-${issue.id}">
-              <i class="fa-solid fa-thumbs-up"></i> <span id="vote-count-${issue.id}">${issue.upvotes_count || 0}</span> Upvotes
+              <i class="fa-solid fa-thumbs-up"></i> <span id="vote-count-${issue.id}">${issue.upvotes_count || 0}</span> ${upvoteLabel}
             </span>
-            <span style="color: var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHTML(issue.address || 'Location detected')}</span>
-            ${issue.distance !== undefined ? `<span style="font-weight: 700; color: var(--primary);"><i class="fa-solid fa-location-arrow"></i> ${issue.distance.toFixed(1)} km away</span>` : ''}
+            <span style="color: var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHTML(issue.address || locationFallback)}</span>
+            ${distanceText}
           </div>
         </div>
         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
           ${emergencyBadge}
-          <span class="stitch-badge ${issue.status}">${issue.status.replace('_', ' ')}</span>
+          <span class="stitch-badge ${issue.status}">${escapeHTML(statusDisplay)}</span>
         </div>
       </div>
     `;
@@ -737,7 +766,9 @@ function showGeolocationWarning() {
   const warnContainer = document.createElement('div');
   warnContainer.id = 'gps-warning-alert';
   warnContainer.style = "background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #d97706; padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.8rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; width: 100%; box-sizing: border-box;";
-  warnContainer.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Location permission denied. Sorting from city center (default).`;
+  const isTa = window.i18n ? window.i18n.getLanguage() === 'ta' : false;
+  const warnMsg = isTa ? 'இருப்பிட அனுமதி மறுக்கப்பட்டது. இயல்புநிலை நகர மையத்திலிருந்து வரிசைப்படுத்தப்படுகிறது.' : 'Location permission denied. Sorting from city center (default).';
+  warnContainer.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${warnMsg}`;
   
   listContainer.parentNode.insertBefore(warnContainer, listContainer);
 
@@ -911,10 +942,12 @@ async function loadRecentNotifications() {
 function renderRecentNotificationsHTML(container, notifications) {
   const unread = notifications.filter(n => !n.is_read).slice(0, 3);
   if (unread.length === 0) {
+    const tNoNotif = window.i18n ? window.i18n.t('no_notifications') : 'No recent notifications';
+    const tSystemActive = window.i18n ? (window.i18n.t('system_monitoring_active') || 'System monitoring active') : 'System monitoring active';
     container.innerHTML = `
       <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1.5rem 0; display: flex; flex-direction: column; gap: 0.25rem;">
-        <span style="font-weight: 600; color: var(--text-main);">No recent notifications</span>
-        <span>System monitoring active</span>
+        <span style="font-weight: 600; color: var(--text-main);">${tNoNotif}</span>
+        <span>${tSystemActive}</span>
       </div>
     `;
     return;
@@ -945,23 +978,33 @@ function updateCommunityInsights(issues) {
   const streetlightCount = issues.filter(i => i.category === 'streetlights' && i.status !== 'resolved' && i.status !== 'verified').length;
   
   const resolutionRate = totalCount > 0 ? ((resolvedCount / totalCount) * 100).toFixed(0) : '0';
+  const isTa = window.i18n && window.i18n.getLanguage() === 'ta';
+
+  const tPipeline = isTa ? 'செயலில் உள்ள புகார்கள்' : 'Active Pipeline';
+  const tPipelineDesc = isTa ? `${activeCount} புகார்கள் நகராட்சி செயலாக்கத்தில் உள்ளன.` : `${activeCount} reports currently under municipal processing.`;
+  const tRate = isTa ? 'தீர்வு விகிதம்' : 'Resolution Rate';
+  const tRateDesc = isTa ? `பதிவு செய்யப்பட்ட புகார்களில் ${resolutionRate}% தீர்க்கப்பட்டன.` : `${resolutionRate}% of all logged issues successfully resolved.`;
+  const tRoad = isTa ? 'சாலை புகார்கள்' : 'Road Reports';
+  const tRoadDesc = isTa ? `${roadCount} சாலை புகார்களுக்கு கவனம் தேவை.` : `${roadCount} active road hazard reports require attention.`;
+  const tLights = isTa ? 'தெருவிளக்கு பழுதுகள்' : 'Streetlights Out';
+  const tLightsDesc = isTa ? `${streetlightCount} தெருவிளக்கு பழுது புகார்கள் பதிவாகியுள்ளன.` : `${streetlightCount} active streetlight outage reports logged.`;
 
   container.innerHTML = `
     <div class="glass-card" style="padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid #6366f1; display: flex; flex-direction: column; gap: 0.25rem; justify-content: flex-start; min-height: 85px;">
-      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Active Pipeline</span>
-      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${activeCount} reports currently under municipal processing.</p>
+      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${tPipeline}</span>
+      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${tPipelineDesc}</p>
     </div>
     <div class="glass-card" style="padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid #10b981; display: flex; flex-direction: column; gap: 0.25rem; justify-content: flex-start; min-height: 85px;">
-      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Resolution Rate</span>
-      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${resolutionRate}% of all logged issues successfully resolved.</p>
+      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${tRate}</span>
+      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${tRateDesc}</p>
     </div>
     <div class="glass-card" style="padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid #f59e0b; display: flex; flex-direction: column; gap: 0.25rem; justify-content: flex-start; min-height: 85px;">
-      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Road Reports</span>
-      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${roadCount} active road hazard reports require attention.</p>
+      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${tRoad}</span>
+      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${tRoadDesc}</p>
     </div>
     <div class="glass-card" style="padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid #ef4444; display: flex; flex-direction: column; gap: 0.25rem; justify-content: flex-start; min-height: 85px;">
-      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Streetlights Out</span>
-      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${streetlightCount} active streetlight outage reports logged.</p>
+      <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${tLights}</span>
+      <p style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); line-height: 1.35; margin: 0;">${tLightsDesc}</p>
     </div>
   `;
 }
@@ -1269,10 +1312,20 @@ function updateHeroGreeting() {
     heroGreeting.innerHTML = `${escapeHTML(greeting)}, ${safeName}`;
   }
 
-  // Also set the hero description if it hasn't been populated yet by loadUserStats
+  // Also set the hero description if available
   const heroDesc = document.getElementById('hero-desc');
-  if (heroDesc && !heroDesc.textContent) {
-    heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Your civic reports help build a more responsive city for everyone.';
+  if (heroDesc) {
+    const cachedTotal = parseInt(localStorage.getItem('cc_user_stat_total') || '0', 10);
+    const cachedResolved = parseInt(localStorage.getItem('cc_user_stat_resolved') || '0', 10);
+    if (cachedTotal > 0) {
+      if (window.i18n) {
+        heroDesc.textContent = window.i18n.t('hero_desc_stats', { total: cachedTotal, s: cachedTotal !== 1 ? 's' : '', resolved: cachedResolved });
+      }
+    } else {
+      if (window.i18n) {
+        heroDesc.textContent = window.i18n.t('hero_desc_default');
+      }
+    }
   }
 }
 
@@ -1320,10 +1373,13 @@ function renderCommunityActivity(issues) {
   const container = document.getElementById('community-activity-timeline');
   if (!container) return;
 
+  const isTa = window.i18n ? (window.i18n.getLanguage() === 'ta') : false;
+
   if (!issues || issues.length === 0) {
+    const tEmpty = isTa ? 'சமீபத்திய சமூக செயல்பாடுகள் இல்லை.' : 'No recent community activity.';
     container.innerHTML = `
       <div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0; text-align: center;">
-        No recent community activity.
+        ${tEmpty}
       </div>
     `;
     return;
@@ -1340,13 +1396,13 @@ function renderCommunityActivity(issues) {
     
     if (issue.status === 'resolved' || issue.status === 'verified') {
       dotColor = '#10b981'; // emerald
-      actionText = `Resolved: ${escapeHTML(issue.title)}`;
+      actionText = `${isTa ? 'தீர்வு:' : 'Resolved:'} ${escapeHTML(issue.title)}`;
     } else if (issue.status === 'in_progress' || issue.status === 'assigned') {
       dotColor = '#d97706'; // amber
-      actionText = `In Progress: ${escapeHTML(issue.title)}`;
+      actionText = `${isTa ? 'செயலில்:' : 'In Progress:'} ${escapeHTML(issue.title)}`;
     } else {
       dotColor = 'var(--text-muted)'; // neutral
-      actionText = `Reported: ${escapeHTML(issue.title)}`;
+      actionText = `${isTa ? 'பதிவு செய்யப்பட்டது:' : 'Reported:'} ${escapeHTML(issue.title)}`;
     }
 
     return `

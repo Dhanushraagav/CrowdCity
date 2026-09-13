@@ -15,7 +15,7 @@
   <script src="js/pwa-helper.js" defer></script>
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=3.1.0"></script>
-  <script src="js/i18n.js?v=4.2.0"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/app-launcher.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -156,7 +156,7 @@
           <div class="stitch-hero-container">
             <div class="stitch-hero-details-wrap">
               <h1 id="hero-greeting" class="stitch-hero-title"></h1>
-              <p class="stitch-hero-desc" id="hero-desc">Transforming citizen voices into rapid community action. Report local issues, track live department resolutions, and earn Civic Impact points.</p>
+              <p class="stitch-hero-desc" id="hero-desc" data-i18n="hero_desc_default">Transforming citizen voices into rapid community action. Report local issues, track live department resolutions, and earn Civic Impact points.</p>
               <div class="stitch-hero-actions">
                 <a href="report.html" class="btn btn-primary" style="padding: 0.65rem 1.35rem; font-size: 0.88rem; font-weight: 700; background-color: var(--primary); color: var(--text-inverse); border: none;">
                   <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">Report Issue</span>
@@ -212,7 +212,7 @@
             <div class="kpi-info-col">
               <span class="stitch-stat-label" data-i18n="in_progress_reports">IN PROGRESS</span>
               <span class="stitch-stat-value" id="stat-inprogress-reports">0</span>
-              <span class="kpi-subtext kpi-subtext-purple" id="stat-inprogress-sub">Active reports</span>
+              <span class="kpi-subtext kpi-subtext-purple" id="stat-inprogress-sub" data-i18n="stat_active_reports">Active reports</span>
             </div>
           </div>
 
@@ -372,7 +372,7 @@
             <div class="stitch-guidelines-card">
               <h2 class="stitch-guidelines-title" data-i18n="community_activity">Community Activity</h2>
               <div class="stitch-guidelines-list" id="community-activity-timeline" style="position: relative; display: flex; flex-direction: column; gap: 1.25rem; padding-left: 1.25rem; border-left: 2px solid var(--border-color); margin-left: 6px;">
-                <div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">
+                <div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;" data-i18n="loading_updates">
                   Loading city updates...
                 </div>
               </div>
@@ -637,34 +637,34 @@
         <div class="emergency-contact-item">
           <div class="emergency-icon"><i class="fa-solid fa-building-shield"></i></div>
           <div class="emergency-info">
-            <span class="emergency-name">Police Control</span>
+            <span class="emergency-name" data-i18n="emergency_police_control">Police Control</span>
             <span class="emergency-number">100</span>
           </div>
-          <a href="tel:100" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+          <a href="tel:100" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> <span data-i18n="emergency_call">Call</span></a>
         </div>
         <div class="emergency-contact-item">
           <div class="emergency-icon"><i class="fa-solid fa-truck-medical"></i></div>
           <div class="emergency-info">
-            <span class="emergency-name">Ambulance Services</span>
+            <span class="emergency-name" data-i18n="emergency_ambulance">Ambulance Services</span>
             <span class="emergency-number">108</span>
           </div>
-          <a href="tel:108" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+          <a href="tel:108" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> <span data-i18n="emergency_call">Call</span></a>
         </div>
         <div class="emergency-contact-item">
           <div class="emergency-icon"><i class="fa-solid fa-fire-extinguisher"></i></div>
           <div class="emergency-info">
-            <span class="emergency-name">Fire Department</span>
+            <span class="emergency-name" data-i18n="emergency_fire_dept">Fire Department</span>
             <span class="emergency-number">101</span>
           </div>
-          <a href="tel:101" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+          <a href="tel:101" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> <span data-i18n="emergency_call">Call</span></a>
         </div>
         <div class="emergency-contact-item">
           <div class="emergency-icon"><i class="fa-solid fa-city"></i></div>
           <div class="emergency-info">
-            <span class="emergency-name">Municipal Helpline</span>
+            <span class="emergency-name" data-i18n="emergency_municipal_helpline">Municipal Helpline</span>
             <span class="emergency-number">1913</span>
           </div>
-          <a href="tel:1913" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> Call</a>
+          <a href="tel:1913" class="emergency-call-btn"><i class="fa-solid fa-phone"></i> <span data-i18n="emergency_call">Call</span></a>
         </div>
       </div>
     </div>
