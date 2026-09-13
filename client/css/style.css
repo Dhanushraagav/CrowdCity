@@ -1305,3 +1305,9 @@ body:not(.admin-portal-body) .page-inner {
   }
 }
 
+/* Enforce language toggle visibility exclusively on settings page */
+body:not(.settings-page) #lang-toggle-container,
+body:not(.settings-page) .lang-toggle,
+body:not(.settings-page) .lang-toggle-fixed {
+  display: none !important;
+}

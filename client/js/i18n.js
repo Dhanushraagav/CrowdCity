@@ -923,7 +923,8 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "emergency_ambulance": "Ambulance Services",
   "emergency_fire_dept": "Fire Department",
   "emergency_municipal_helpline": "Municipal Helpline",
-  "emergency_call": "Call"
+  "emergency_call": "Call",
+  "citizen_label": "Citizen"
 },
   ta: {
   "back_action": "பின்னே",
@@ -938,14 +939,14 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "urgent_help_banner_desc": "விபத்துகள், தீ விபத்துகள், மருத்துவ அவசரநிலைகள் அல்லது உடனடி உதவி தேவைப்படும் ஆபத்துகளுக்கு, அவசர நடவடிக்கையைப் பயன்படுத்தவும்.",
   "urgent_help_action_btn": "அவசர / உடனடி உதவி",
   "normal_civic_reports_desc": "Complaint ID, துறை ஒதுக்கீடு மற்றும் SLA கண்காணிப்புடன் கூடிய பொதுப் புகார்களைப் பதிவு செய்யவும்.",
-  "nav_dashboard": "Dashboard",
+  "nav_dashboard": "டாஷ்போர்ட்",
   "nav_report": "புகார் அளி",
   "nav_my_complaints": "எனது புகார்கள்",
   "nav_map": "வரைபடம்",
-  "nav_settings": "Settings",
-  "nav_logout": "Logout",
-  "nav_profile": "Profile",
-  "nav_notifications": "Notifications",
+  "nav_settings": "அமைப்புகள்",
+  "nav_logout": "வெளியேறு",
+  "nav_profile": "சுயவிவரம்",
+  "nav_notifications": "அறிவிப்புகள்",
   "nav_documents": "ஆவண பெட்டகம்",
   "nav_saved_schemes": "சேமிக்கப்பட்ட திட்டங்கள்",
   "nav_civic_intelligence": "குடிமை நுண்ணறிவு",
@@ -1019,10 +1020,10 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "level_city_legend": "நகர புகழ்",
   "level_master_watchdog": "சிறந்த கண்காணிப்பாளர்",
   "level_hero_abbr": "நகர நாயகன் (நிலை {level})",
-  "sign_in": "Sign In",
+  "sign_in": "உள்நுழை",
   "sign_up": "பதிவு செய்",
   "email_address": "Email முகவரி",
-  "password": "Password",
+  "password": "கடவுச்சொல்",
   "use_email_otp": "Email OTP பயன்படுத்தவும்",
   "use_password": "Password பயன்படுத்தவும்",
   "continue_with_google": "Google மூலம் தொடரவும்",
@@ -1137,17 +1138,17 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "time_days_ago": "{days} நாள் முன்",
   "recently_resolved_ticker": "சமீபத்தில் தீர்க்கப்பட்டது: \"<strong>{title}</strong>\" ({category}) {address} இல்.",
   "new_report": "புதிய புகார்",
-  "sign_out": "Sign Out",
+  "sign_out": "வெளியேறு",
   "search_placeholder": "தலைப்பு, வகை அல்லது முகவரி மூலம் Search செய்யவும்...",
   "civic_assistant": "குடிமை உதவியாளர்",
-  "civic_ai_active": "Civic AI • Active",
+  "civic_ai_active": "குடிமை AI • செயலில்",
   "ask_civic_assistant": "குடிமை உதவியாளரிடம் கேளுங்கள்...",
   "please_login_complaints": "உங்கள் புகார்களைக் காண Login செய்யவும்.",
   "failed_load_complaints": "உங்கள் புகார்களை ஏற்ற முடியவில்லை",
   "no_recent_activity": "சமீபத்திய சமூக செயல்பாடுகள் இல்லை.",
   "inspector": "ஆய்வாளர்",
-  "profile": "Profile",
-  "settings": "Settings",
+  "profile": "சுயவிவரம்",
+  "settings": "அமைப்புகள்",
   "map": "வரைபடம்",
   "issue_details": "பிரச்சினை விவரங்கள்",
   "reports": "அறிக்கைகள்",
@@ -1155,7 +1156,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "admin_panel": "நிர்வாகி பேனல்",
   "users": "பயனர்கள்",
   "manage_users": "பயனர்களை நிர்வகி",
-  "authority_dashboard": "Authority Dashboard",
+  "authority_dashboard": "அதிகாரி டாஷ்போர்ட்",
   "all_reports": "அனைத்து அறிக்கைகள்",
   "update_status": "Status புதுப்பி",
   "comments": "கருத்துகள்",
@@ -1163,11 +1164,11 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "total_points": "மொத்த புள்ளிகள்",
   "rank": "தரவரிசை",
   "description": "விளக்கம்",
-  "location": "Location",
+  "location": "இடம்",
   "submitted_by": "சமர்ப்பித்தவர்",
   "save_changes": "மாற்றங்களை சேமி",
   "update": "புதுப்பி",
-  "notification_settings": "Notification Settings",
+  "notification_settings": "அறிவிப்பு அமைப்புகள்",
   "language": "மொழி",
   "theme": "தீம்",
   "appearance_language": "அமைப்பு மற்றும் மொழி",
@@ -1196,12 +1197,12 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "app_version": "பயன்பாட்டு பதிப்பு",
   "phone": "தொலைபேசி",
   "welcome_back": "மீண்டும் வருக",
-  "email_otp": "Email OTP",
+  "email_otp": "மின்னஞ்சல் OTP",
   "verify_otp": "OTP சரிபார்",
   "reset_password": "Password மீட்டமைக்கவும்",
   "update_password": "Password புதுப்பிக்கவும்",
   "or": "அல்லது",
-  "status": "Status",
+  "status": "நிலை",
   "category": "வகை",
   "priority": "முன்னுரிமை",
   "date": "தேதி",
@@ -1216,7 +1217,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "back": "பின்",
   "next": "அடுத்து",
   "previous": "முந்தைய",
-  "search": "Search",
+  "search": "தேடு",
   "total_users": "மொத்த பயனர்கள்",
   "total_issues": "மொத்த பிரச்சினைகள்",
   "resolution_rate": "தீர்வு விகிதம்",
@@ -1224,7 +1225,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "weekly_report": "வாராந்திர அறிக்கை",
   "monthly_report": "மாதாந்திர அறிக்கை",
   "yearly_report": "ஆண்டு அறிக்கை",
-  "authority_login": "Authority Login",
+  "authority_login": "அதிகாரி உள்நுழைவு",
   "sign_in_as_authority": "Authority ஆக Sign In செய்யவும்",
   "manage_reports": "அறிக்கைகளை நிர்வகி",
   "assigned_reports": "ஒதுக்கப்பட்ட அறிக்கைகள்",
@@ -1246,14 +1247,14 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "resolved_count": "தீர்க்கப்பட்டவை",
   "all_issues": "அனைத்து பிரச்சினைகள்",
   "nearby_issues": "அருகிலுள்ள பிரச்சினைகள்",
-  "authority_notifications": "Authority Notifications",
-  "authority_profile": "Authority Profile",
-  "authority_settings": "Authority Settings",
-  "general_settings": "General Settings",
-  "account_settings": "Account Settings",
+  "authority_notifications": "அதிகாரி அறிவிப்புகள்",
+  "authority_profile": "அதிகாரி சுயவிவரம்",
+  "authority_settings": "அதிகாரி அமைப்புகள்",
+  "general_settings": "பொது அமைப்புகள்",
+  "account_settings": "கணக்கு அமைப்புகள்",
   "dark_mode": "இருண்ட பயன்முறை",
-  "email_notifications": "Email Notifications",
-  "push_notifications": "Push Notifications",
+  "email_notifications": "மின்னஞ்சல் அறிவிப்புகள்",
+  "push_notifications": "புஷ் அறிவிப்புகள்",
   "current_password": "தற்போதைய Password",
   "enter_current_password": "தற்போதைய Password உள்ளிடவும்",
   "badges": "பதக்கங்கள்",
@@ -1290,7 +1291,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "last_updated": "கடைசி புதுப்பிப்பு",
   "no_data_available": "தரவு கிடைக்கவில்லை",
   "view_details": "விவரங்களைக் காண்",
-  "back_to_dashboard": "Dashboard-க்குத் திரும்பு",
+  "back_to_dashboard": "டாஷ்போர்டுக்கு திரும்பு",
   "assign_to": "ஒதுக்கு",
   "add_note": "குறிப்பு சேர்",
   "issue_history": "பிரச்சினை வரலாறு",
@@ -1299,7 +1300,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "authority_settings_desc": "உங்கள் உத்தியோகபூர்வ நகராட்சி Credentials, Profile தகவல்கள் மற்றும் Password விருப்பங்களை நிர்வகிக்கவும்.",
   "inspector_credentials": "ஆய்வாளர் சான்றுகள்",
   "inspector_credentials_desc": "நிர்வாகத்தால் வழங்கப்பட்ட உத்தியோகபூர்வ சான்றுகள். சரிபார்ப்பு நோக்கங்களுக்காக மட்டுமே வாசிக்கக்கூடியவை.",
-  "work_email": "Work Email",
+  "work_email": "பணி மின்னஞ்சல்",
   "assigned_role": "ஒதுக்கப்பட்ட பாத்திரம்",
   "verified_officer_status": "சரிபார்க்கப்பட்ட Officer கணக்கு • Active Status",
   "change_portal_password": "Portal Password மாற்றவும்",
@@ -1307,9 +1308,9 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "enter_new_password": "புதிய Password உள்ளிடவும்",
   "confirm_new_password": "புதிய Password உறுதிப்படுத்தவும்",
   "authorized_access": "அங்கீகரிக்கப்பட்ட அணுகல்",
-  "authority_portal_title": "CrowdCity AI Authority Portal",
+  "authority_portal_title": "CrowdCity AI அதிகாரி போர்ட்டல்",
   "enter_official_email": "உங்கள் அதிகாரப்பூர்வ Email முகவரியை உள்ளிடவும்",
-  "access_dashboard": "Dashboard அணுகவும்",
+  "access_dashboard": "டாஷ்போர்டை அணுகவும்",
   "back_to_citizen_portal": "குடிமக்கள் போர்ட்டலுக்குத் திரும்பு",
   "inspector_panel": "ஆய்வாளர் பேனல்",
   "authority_operations_center": "அதிகார செயல்பாட்டு மையம்",
@@ -1329,12 +1330,12 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "upload_completion_proof": "நிறைவு Photo ஆதாரம் Upload செய்க *",
   "click_upload_proof": "Photo ஆதாரம் Upload செய்ய கிளிக் செய்யவும்",
   "clear": "துடைக்கவும்",
-  "admin_panel_title": "CrowdCity AI Administration Center",
+  "admin_panel_title": "CrowdCity AI நிர்வாக மையம்",
   "admin_panel_desc": "நகர அளவீடுகளின் மேலோட்டத்தைப் பார்க்கவும், புகார்களைப் பிரிக்கவும் மற்றும் பாத்திரங்களை நிர்வகிக்கவும்.",
   "analytics_overview": "பகுப்பாய்வு மேலோட்டம்",
   "user_management": "பயனர் மேலாண்மை",
   "complaint_queue": "புகார் வரிசை",
-  "ai_monitor": "AI Monitor",
+  "ai_monitor": "AI கண்காணிப்பாளர்",
   "reports_center": "அறிக்கைகள் மையம்",
   "authorities": "அதிகாரிகள்",
   "complaints_by_category": "வகைகளின்படி புகார்கள்",
@@ -1345,7 +1346,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "registration_date": "பதிவு தேதி",
   "verify_authority": "அதிகாரியை சரிபார்க்கவும்",
   "department_assignment": "துறை ஒதுக்கீடு",
-  "status_suspension": "Status / Suspension",
+  "status_suspension": "நிலை / இடைநீக்கம்",
   "overall_complaints_queue": "ஒட்டுமொத்த புகார்கள் வரிசை",
   "city_departments_manager": "நகரத் துறைகள் மேலாளர்",
   "city_departments_desc": "புகார்களை வழிநடத்துவதற்கான நகராட்சித் துறைகளை உருவாக்கவும், திருத்தவும் மற்றும் நீக்கவும்.",
@@ -1359,7 +1360,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "save_department": "துறையைச் சேமி",
   "code": "குறியீடு",
   "department_name": "துறையின் பெயர்",
-  "ai_decisions_auditor": "AI Decisions Auditor",
+  "ai_decisions_auditor": "AI முடிவுகள் தணிக்கையாளர்",
   "ai_decisions_desc": "CrowdCity AI Models கணிப்புகளைத் தணிக்கை செய்து துறை Overrides செய்யவும்.",
   "override_ai_prediction": "AI Prediction Override செய்க",
   "assigned_department": "ஒதுக்கப்பட்ட துறை",
@@ -1367,9 +1368,9 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "apply_override": "மேலெழுதலைப் பயன்படுத்து",
   "complaint": "புகார்",
   "selected_category": "தேர்ந்தெடுக்கப்பட்ட வகை",
-  "ai_predicted_category": "AI Predicted Category",
-  "ai_assigned_department": "AI Assigned Department",
-  "ai_priority": "AI Priority",
+  "ai_predicted_category": "AI கணித்த வகை",
+  "ai_assigned_department": "AI ஒதுக்கிய துறை",
+  "ai_priority": "AI முன்னுரிமை",
   "audit_match": "தணிக்கை பொருத்தம்",
   "auditing": "தணிக்கை செய்தல்",
   "reports_export_center": "அறிக்கைகள் ஏற்றுமதி மையம்",
@@ -1380,7 +1381,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "excel_format": "Excel விரிதாள் (.CSV)",
   "pdf_format": "அச்சிடக்கூடிய PDF அறிக்கை (.HTML)",
   "generate_export_report": "அறிக்கையை உருவாக்கி ஏற்றுமதி செய்",
-  "admin_footer_text": "© 2026 CrowdCity AI - Administrative Operations Console. All rights reserved.",
+  "admin_footer_text": "© 2026 CrowdCity AI - நிர்வாக செயல்பாட்டு கன்சோல். அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.",
   "advanced_civic_analytics_title": "மேம்பட்ட நகரப் பகுப்பாய்வு",
   "advanced_civic_analytics_desc": "குடிமை புகார்கள், தீர்வு வேகம் மற்றும் ஆபத்து வரைபடங்களின் பகுப்பாய்வு.",
   "filters": "வடிகட்டிகள்",
@@ -1390,7 +1391,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "last_6_months": "கடந்த 6 மாதங்கள்",
   "resolved_cases": "தீர்க்கப்பட்ட வழக்குகள்",
   "hotspot_points": "அதிக பாதிப்பு புள்ளிகள்",
-  "ai_insights_title": "AI-Generated City Insights",
+  "ai_insights_title": "AI உருவாக்கிய நகர நுண்ணறிவுகள்",
   "realtime_diagnostics": "உண்மை நேர கண்டறிதல்",
   "heatmap_title": "புகார் வரைபடம்",
   "heatmap_overlay": "புகார் வரைபடம் மேலடுக்கு",
@@ -1401,10 +1402,10 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "hazards_reported": "புகாரளிக்கப்பட்ட ஆபத்துகள்",
   "no_resolutions_yet": "இதுவரை தீர்வுகள் இல்லை",
   "outside_service_area_error": "தற்போது, CrowdCity AI தமிழ்நாடு எல்லைக்குள் மட்டுமே புகாரளிக்க அனுமதிக்கிறது. விரைவில் மற்ற மாநிலங்களுக்கும் விரிவாக்குகிறோம்.",
-  "dashboard": "Dashboard",
+  "dashboard": "டாஷ்போர்டு",
   "auth_hero_title": "தூய்மையான மற்றும் பாதுகாப்பான சுற்றுப்புறங்களை உருவாக்க குடிமக்களை ஊக்குவித்தல்.",
   "auth_hero_subtitle": "CrowdCity என்பது குடிமக்கள் சாலைப் பள்ளங்கள், குப்பைக் குவியல்கள், குடிநீர் கசிவுகள் மற்றும் தெருவிளக்கு பழுதுகள் போன்ற பொதுப் பிரச்சினைகளைப் புகாரளிக்கவும், அவற்றை நகராட்சித் துறைகளுடன் நேரடியாக இணைத்து தீர்க்கவும் உதவும் ஒரு AI தளம் ஆகும்.",
-  "crowdcity_ai_portal": "CrowdCity AI Portal",
+  "crowdcity_ai_portal": "CrowdCity AI போர்டல்",
   "auth_portal_subtitle": "குடிமை புகாரளிப்பு மற்றும் நகராட்சி சேவை நிர்வாகத்திற்கான பாதுகாப்பான அணுகல்.",
   "forgot_password": "Password மறந்துவிட்டதா?",
   "sign_in_with_email_otp": "Email OTP மூலம் Sign In செய்யவும்",
@@ -1423,14 +1424,14 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "authentication_successful": "அங்கீகாரம் வெற்றிகரமாக முடிந்தது",
   "send_recovery_link": "மீட்பு இணைப்பை அனுப்பு",
   "verify_code": "குறியீட்டைச் சரிபார்",
-  "notifications": "Notifications",
-  "logout": "Logout",
+  "notifications": "அறிவிப்புகள்",
+  "logout": "வெளியேறு",
   "in_progress": "செயல்பாட்டில்",
   "detected_category": "கண்டறியப்பட்ட வகை",
   "assigned": "ஒதுக்கப்பட்டது",
   "resolved": "தீர்க்கப்பட்டது",
   "rejected": "நிராகரிக்கப்பட்டது",
-  "notification_history": "Notification History",
+  "notification_history": "அறிவிப்பு வரலாறு",
   "active_streak": "செயலில் உள்ள தொடர்",
   "my_complaints": "எனது புகார்கள்",
   "view_complaints": "புகார்களைக் காண்க",
@@ -1451,7 +1452,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "cat_other": "மற்றவை",
   "pending": "நிலுவையில்",
   "no_new_notifications": "புதிய Notifications இல்லை",
-  "redirecting_to_dashboard": "Dashboard-க்கு திருப்பி விடப்படுகிறது...",
+  "redirecting_to_dashboard": "டாஷ்போர்டிற்கு திருப்பி விடப்படுகிறது...",
   "verify_resolution": "தீர்வைச் சரிபார்",
   "approve_and_verify": "அங்கீகரித்து சரிபார்",
   "reopen_complaint": "புகாரை மீண்டும் திறக்கவும்",
@@ -1464,19 +1465,19 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "post_comment": "கருத்து இடுகையிடவும்",
   "control_panel": "கட்டுப்பாட்டு குழு",
   "delete_issue": "புகாரை நீக்குக",
-  "ai_analysis_insights": "AI Analysis Insights",
-  "ai_brief_summary": "AI Brief Summary",
-  "ai_category": "AI Category",
-  "location_map": "Location Map",
+  "ai_analysis_insights": "AI பகுப்பாய்வு நுண்ணறிவுகள்",
+  "ai_brief_summary": "AI சுருக்கம்",
+  "ai_category": "AI வகை",
+  "location_map": "இருப்பிட வரைபடம்",
   "latitude": "அட்சரேகை:",
   "longitude": "தீர்க்கரேகை:",
-  "status_history": "Status History",
+  "status_history": "நிலை வரலாறு",
   "timeline_update_keep": "Timeline Update (Status மாற்றாமல் வைத்திருங்கள்)",
   "issue_reported": "புகாரளிக்கப்பட்ட பிரச்சினை",
   "add_comment_placeholder": "பொதுவான கருத்து அல்லது ஆலோசனையைச் சேர்க்கவும்...",
   "explain_resolution_work": "செய்யப்பட்ட தீர்வுப் பணியை விவரிக்கவும்...",
   "map_view": "வரைபடக் காட்சி",
-  "ai_assisted_report": "AI-Assisted Report",
+  "ai_assisted_report": "AI-உதவி அறிக்கை",
   "community_rankings": "சமூக தரவரிசை",
   "community_rankings_description": "சமூகத்தில் சிறப்பாகச் செயல்படும் குடிமக்களை அங்கீகரித்தல்.",
   "citizen_standings": "குடிமக்கள் நிலை",
@@ -1531,7 +1532,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "guideline_emergency": "அவசரகாலப் பிரச்சினை என்றால் உடனடியாக அவசர எண்ணை அழைக்கவும்.",
   "analyzing_civic_report": "குடிமை அறிக்கையை பகுப்பாய்வு செய்கிறது...",
   "analyzing_description": "CrowdCity AI உங்கள் விவரங்களை ஆய்வு செய்து, தானாக வகைப்படுத்தி, துறை மற்றும் தீவிரத்தன்மையை ஒதுக்குகிறது...",
-  "ai_analysis_complete": "AI Analysis Complete!",
+  "ai_analysis_complete": "AI பகுப்பாய்வு நிறைவடைந்தது",
   "generated_summary": "உருவாக்கப்பட்ட சுருக்கம்",
   "priority_level": "முன்னுரிமை நிலை",
   "describe_issue_placeholder": "பிரச்சினையை விவரிக்கவும், அதன் தீவிரம் மற்றும் ஆபத்துக்களைப் பற்றி எழுதவும்...",
@@ -1539,7 +1540,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "account_security": "கணக்கு பாதுகாப்பு",
   "back_to_authority_login": "Authority Login பக்கத்திற்குத் திரும்புக",
   "settings_description": "உங்கள் Citizen Profile விவரங்களை நிர்வகிக்கவும், Points பார்க்கவும் மற்றும் Password புதுப்பிக்கவும்.",
-  "citizen_profile": "Citizen Profile",
+  "citizen_profile": "குடிமகன் சுயவிவரம்",
   "citizen_profile_description": "உங்கள் Profile விவரங்கள் மற்றும் Civic Credentials. சரிபார்ப்பிற்காக முழுப் பெயர் மற்றும் Email முகவரி மாற்ற முடியாது.",
   "change_password_description": "கணக்கைப் பாதுகாக்க தவறாமல் Password புதுப்பிக்கவும். வலுவான alphanumeric Password தேர்ந்தெடுக்கவும்.",
   "confirm_new_password_placeholder": "புதிய Password உறுதிப்படுத்தவும்",
@@ -1604,10 +1605,10 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "slideshow_desc_4_line2": "ஸ்மார்ட் அமைப்புகள் நீர் மற்றும் மின்சார விநியோகத்தை கண்காணிக்கின்றன.",
   "slideshow_desc_5_line1": "நாமக்கல் கோட்டை எங்களது புதிய செயல்பாட்டு மையமாக விளங்குகிறது.",
   "slideshow_desc_5_line2": "AI கழிவு மேலாண்மை மற்றும் சோலார் தெருவிளக்குகள் நகரை இயக்குகின்றன.",
-  "search_districts": "Search districts...",
+  "search_districts": "மாவட்டங்களைத் தேடுக...",
   "helpline_desc": "தமிழ்நாட்டின் 38 மாவட்டங்களின் அதிகாரப்பூர்வ தொடர்புகள்.",
   "call_collector": "மாவட்ட ஆட்சியர் அலுவலகத்தை அழைக்கவும்",
-  "email_collector": "Email Collector",
+  "email_collector": "மின்னஞ்சல் அனுப்பவும்",
   "visit_website": "இணையதளத்தைப் பார்வையிடவும்",
   "central_grievance": "மத்திய குறைதீர்க்கும் பிரிவு (முதல்வரின் முகவரி)",
   "state_level": "மாநில அளவிலான போர்டல்",
@@ -1618,13 +1619,13 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "district_directory": "மாவட்ட அதிகாரப்பூர்வ அடைவு",
   "districts_loaded": "மாவட்டங்கள் உள்ளன",
   "nav_ministers": "அமைச்சரவை",
-  "search_ministers": "Search ministers, responsibilities, or departments...",
+  "search_ministers": "அமைச்சர்கள், பொறுப்புகளைத் தேடுக...",
   "cabinet_leadership": "அமைச்சரவை தலைமை",
   "portfolio": "பொறுப்புகள்",
   "departments": "துறைகள்",
   "ministers_loaded": "அமைச்சர்கள் உள்ளனர்",
   "call_minister": "அலுவலகத்தை அழைக்கவும்",
-  "email_minister": "Email Minister",
+  "email_minister": "மின்னஞ்சல் அனுப்பவும்",
   "constituency_label": "சட்டமன்ற தொகுதி",
   "office_location_label": "அலுவலக அறை",
   "biography_label": "வாழ்க்கைக்குறிப்பு மற்றும் முக்கியப் பணிகள்",
@@ -1632,43 +1633,43 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "services_title": "அரசு சேவைகள் மையம்",
   "services_subtitle": "தமிழ்நாடு மற்றும் இந்திய குடிமக்களுக்கான AI Digital Citizen Services",
   "explore_services": "அரசு சேவைகளை ஆராய்க",
-  "ai_explanation_title": "AI Qualification Explanation",
+  "ai_explanation_title": "AI தகுதி விளக்கம்",
   "ai_why_qualify": "நீங்கள் ஏன் தகுதி பெறுகிறீர்கள்",
   "ai_main_benefits": "முக்கிய நன்மைகள்",
   "ai_required_docs": "தேவையான ஆவணங்கள்",
   "ai_important_notes": "முக்கிய குறிப்புகள்",
-  "citizen_services_dashboard": "Citizen Services Dashboard",
+  "citizen_services_dashboard": "குடிமகன் சேவைகள் டாஷ்போர்டு",
   "citizen_portal": "குடிமகன் போர்டல்",
-  "profile_status": "Profile Status",
+  "profile_status": "சுயவிவர நிலை",
   "scheme_eligibility": "திட்ட தகுதி",
   "check_welfare_qualification": "நலத்திட்ட தகுதியை சரிபார்க்கவும்",
   "files_uploaded": "Files Upload செய்யப்பட்டன",
-  "ai_assistant": "AI Assistant",
+  "ai_assistant": "AI உதவி",
   "ask_scheme_guidance": "திட்ட வழிகாட்டுதலைக் கேட்கவும்",
   "office_locator": "அலுவலக இருப்பிடம்",
   "find_esevai_taluk": "இ-சேவை & தாலுக் அலுவலகங்களை கண்டறியவும்",
-  "proactive_ai_recommendations": "Proactive AI Recommendations",
-  "ask_ai": "Ask AI →",
-  "proactive_ai_match": "Proactive AI Match",
+  "proactive_ai_recommendations": "செயற்கை நுண்ணறிவு பரிந்துரைகள்",
+  "ask_ai": "AI-யிடம் கேட்கவும் →",
+  "proactive_ai_match": "AI தகுதி பொருத்தம்",
   "saved_welfare_schemes": "சேமிக்கப்பட்ட நலத்திட்டங்கள்",
   "view_all": "அனைத்தையும் பார் →",
   "document_wallet_readiness": "ஆவண வாலட் தயார்நிலை",
   "manage_wallet": "வாலட்டை நிர்வகிக்கவும் →",
   "need_application_help": "விண்ணப்பிக்க உதவி தேவையா?",
   "ask_ai_assistant_desc": "எங்கள் AI Government Assistant-இடம் தகுதி விதிகள், ஆவணப் பட்டியல் மற்றும் விண்ணப்பிக்கும் படிகளைக் கேட்கவும்.",
-  "ask_ai_assistant_btn": "Ask AI Assistant",
+  "ask_ai_assistant_btn": "AI உதவியாளரிடம் கேட்கவும்",
   "my_saved_schemes": "எனது சேமிக்கப்பட்ட திட்டங்கள்",
   "my_document_wallet": "எனது ஆவண வாலட்",
   "scheme_eligibility_checker": "திட்ட தகுதி சரிபார்ப்பான்",
-  "ai_document_verification": "AI Document Verification Assistant",
-  "ai_form_filling": "AI Form Filling Assistant",
+  "ai_document_verification": "AI ஆவண சரிபார்ப்பு உதவி",
+  "ai_form_filling": "AI படிவம் பூர்த்தி செய்யும் உதவி",
   "government_office_locator": "அரசு அலுவலக இருப்பிடம்",
   "government_application_tracker": "அரசு விண்ணப்பக் கண்காணிப்பான்",
   "smart_reminder_center": "ஸ்மார்ட் நினைவூட்டல் மையம்",
   "nav_transportation": "போக்குவரத்து",
   "choose_issue_type": "பிரச்சினை வகையைத் தேர்ந்தெடுக்கவும்",
   "report_details": "அறிக்கை விவரங்கள்",
-  "ai_review": "AI Review",
+  "ai_review": "AI மதிப்பாய்வு",
   "civic_issue": "குடிமைப் பிரச்சினை",
   "transportation_issue": "போக்குவரத்துப் பிரச்சினை",
   "examples_label": "எடுத்துக்காட்டுகள்:",
@@ -1680,7 +1681,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "category_health": "சுகாதாரம் மற்றும் காப்பீடு",
   "category_agriculture": "வேளாண்மை மற்றும் விவசாயிகள்",
   "category_skill_dev": "திறன் மேம்பாடு",
-  "about_tag": "CROWDCITY AI PLATFORM",
+  "about_tag": "CROWDCITY AI தளம்",
   "about_hero_title": "சிறந்த தமிழ்நாடு அரசிற்கான குடிமக்கள் அதிகாரம்.",
   "about_hero_sub": "CrowdCity AI உங்கள் அனைத்திற்குமான ஒரே Digital Civic Portal. தெருப் புகார்களைப் பதிவு செய்வது முதல் அரசு நலத்திட்டங்கள் மற்றும் ஆவணங்களை அறிவது வரை — அனைத்துப் சேவைகளையும் வெளிப்படையாகவும் எளிதாகவும் வழங்குகிறோம்.",
   "about_help_label": "CROWDCITY உங்களுக்கு எவ்வாறு உதவுகிறது",
@@ -1688,7 +1689,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "about_help_desc": "அன்றாட குடிமைத் தொடர்புகள், அவசரக்காலப் பாதுகாப்பு மற்றும் அரசு உதவிகளை CrowdCity AI எவ்வாறு எளிதாக்குகிறது என்பதை அறியுங்கள்.",
   "about_help_card1_title": "குடிமைப் புகார் பதிவு",
   "about_help_card1_desc": "சாலைப் பள்ளங்கள், குப்பை, தெருவிளக்குகள் அல்லது நீர் கசிவுகளைப் Photos மற்றும் GPS உடன் புகாரளிக்கவும். நேரலை Status Updates உடன் நகராட்சி அதிகாரிகளுக்கு எங்கள் AI புகாரை அனுப்பும்.",
-  "about_help_card2_title": "AI Welfare Scheme Finder",
+  "about_help_card2_title": "AI நலத்திட்டக் கண்டறிதல்",
   "about_help_card2_desc": "உங்கள் வயது, வருமானம் மற்றும் தகுதிக்கு ஏற்ப தமிழ்நாடு மாநில மற்றும் மத்திய அரசு நலத்திட்டங்களை உடனடியாகக் கண்டறியவும்.",
   "about_help_card3_title": "அவசர உதவி மையம்",
   "about_help_card3_desc": "தமிழ்நாட்டின் அனைத்து மாவட்டங்களுக்கும் காவல்துறை, தீயணைப்பு, ஆம்புலன்ஸ், பேரிடர் மற்றும் பெண்கள் பாதுகாப்பிற்கான 1-டேப் அவசர உதவி எண்கள்.",
@@ -1703,15 +1704,15 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "about_principle_desc": "பொதுப் பொறுப்புக்கூறல் மற்றும் குடிமக்கள் அதிகாரமளித்தல் ஆகியவற்றிற்கான அர்ப்பணிப்பால் CrowdCity AI வழிகாட்டப்படுகிறது.",
   "about_p1_title": "01 — முதல் நிலை வெளிப்படைத்தன்மை",
   "about_p1_desc": "ஒவ்வொரு புகாரும் பொது Complaint ID மற்றும் சமர்ப்பிப்பிலிருந்து சரிபார்ப்பு வரை Realtime Status Updates-ஐப் பெறுகிறது.",
-  "about_p2_title": "02 — AI-Driven Efficiency",
+  "about_p2_title": "02 — AI சார்ந்த வேகம்",
   "about_p2_desc": "தானியங்கி புகார் வகைப்பாடு மற்றும் வழிகாட்டுதல் மூலம் தீர்வு நேரங்கள் குறைக்கப்பட்டு தாமதங்கள் தவிர்க்கப்படுகின்றன.",
   "about_p3_title": "03 — அனைவருக்கும் அணுகல்",
   "about_p3_desc": "தமிழ் மற்றும் ஆங்கிலத்தில் இருமொழி ஆதரவு தமிழ்நாட்டின் அனைத்து குடிமக்களுக்கும் சமமான அணுகலை உறுதி செய்கிறது.",
   "about_team_label": "எங்கள் குழுவைக் சந்திக்கவும்",
-  "about_team_title": "Engineers & Visionaries Behind CrowdCity AI",
+  "about_team_title": "CrowdCity AI இன் பொறியாளர்கள் மற்றும் தொலைநோக்காளர்கள்",
   "about_close_title": "உங்கள் நகரத்திற்கு அதிகாரம் அளிக்கத் தயாரா?",
   "about_close_sub": "ஒவ்வொரு நாளும் தமிழ்நாடு பாதுகாப்பாகவும், தூய்மையாகவும், புத்திசாலித்தனமாகவும் மாற ஆயிரக்கணக்கான குடிமக்களுடன் இணையுங்கள்.",
-  "launch_dashboard": "Launch Dashboard",
+  "launch_dashboard": "டாஷ்போர்டைத் தொடங்கு",
   "services_portal_label": "அரசு போர்டல்",
   "services_hero_title": "அரசு சேவைகள் & நலத்திட்டங்கள்",
   "services_hero_desc": "தமிழ்நாடு அரசு மற்றும் மத்திய அரசின் அதிகாரப்பூர்வ நலத்திட்டங்களை ஆராயுங்கள், தகுதியைச் சரிபார்க்கவும், ஆவணங்களைச் சரிபார்க்கவும், எங்கள் AI Scheme Advisor-இடம் கேளுங்கள்.",
@@ -1748,7 +1749,7 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "services_no_schemes_desc": "வேறு முக்கிய சொல்லைத் தேட முயற்சிக்கவும் அல்லது 'அனைத்து திட்டங்கள்' என்பதைத் தேர்ந்தெடுக்கவும்.",
   "weather_alerts_title": "வானிலை முன்னறிவிப்பு",
   "weather_alerts_subtitle": "தமிழ்நாடு மாவட்ட வானிலை முன்னறிவிப்பு",
-  "weather_search_placeholder": "Search district...",
+  "weather_search_placeholder": "மாவட்டத்தைத் தேடுக...",
   "weather_source_attribution": "மூலம்: Open-Meteo",
   "weather_official_portal": "Open-Meteo",
   "weather_last_updated": "புதுப்பிக்கப்பட்டது",
@@ -2138,14 +2139,10 @@ class I18nService {
     let animationFrameId = null;
 
     this.observer = new MutationObserver((mutations) => {
-      const isInternalToggle = mutations.every(m => 
-        m.target && m.target.closest && m.target.closest('#lang-toggle-container')
-      );
-      if (isInternalToggle) return;
-
-      // Ensure language toggle remains in the DOM if accidentally removed
-      if (!document.getElementById('lang-toggle-container')) {
-        this.injectLanguageToggle();
+      // Clean up any rogue toggle container
+      const existing = document.getElementById('lang-toggle-container');
+      if (existing) {
+        existing.remove();
       }
 
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
@@ -2220,72 +2217,13 @@ class I18nService {
   }
 
   injectLanguageToggle() {
-    if (typeof window === 'undefined' || typeof document === 'undefined') return;
-    const path = window.location.pathname.toLowerCase();
-    if (path.includes('admin') || path.includes('authority') || (document.body && document.body.classList.contains('admin-portal-body'))) {
-      return;
+    // Language selection must exist ONLY inside Settings (settings.html).
+    // Remove any floating or header language toggle containers if present in the DOM.
+    if (typeof document === 'undefined') return;
+    const existing = document.getElementById('lang-toggle-container');
+    if (existing) {
+      existing.remove();
     }
-
-    let container = document.getElementById('lang-toggle-container');
-    const authNav = document.getElementById('auth-nav-container');
-
-    // If container exists but is inside #auth-nav-container, extract it to its parent
-    if (container && authNav && (container.parentElement === authNav || authNav.contains(container))) {
-      if (authNav.parentElement) {
-        authNav.parentElement.insertBefore(container, authNav);
-      }
-    }
-
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'lang-toggle-container';
-      container.className = 'lang-toggle';
-      container.innerHTML = `
-        <i class="fa-solid fa-globe lang-globe-icon"></i>
-        <span class="lang-option" data-lang="en">EN</span>
-        <span class="lang-separator">|</span>
-        <span class="lang-option" data-lang="ta">தமிழ்</span>
-      `;
-
-      container.querySelectorAll('.lang-option').forEach(span => {
-        span.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const lang = e.target.getAttribute('data-lang');
-          if (lang) this.setLanguage(lang);
-        });
-      });
-
-      // Placement: Insert into .app-header-actions right BEFORE #auth-nav-container
-      // so auth.js updates to #auth-nav-container NEVER overwrite or wipe the toggle!
-      const appHeaderActions = document.querySelector('.app-header-actions') ||
-                               document.querySelector('.header-actions') ||
-                               document.querySelector('.topnav-right') ||
-                               document.querySelector('.nav-actions') ||
-                               document.querySelector('.header-right');
-
-      if (appHeaderActions && authNav && authNav.parentElement === appHeaderActions) {
-        appHeaderActions.insertBefore(container, authNav);
-      } else if (appHeaderActions) {
-        appHeaderActions.insertBefore(container, appHeaderActions.firstChild);
-      } else {
-        const targetHeader = 
-          document.querySelector('.auth-header') ||
-          document.querySelector('.user-menu-wrapper') ||
-          document.querySelector('.user-profile-menu') ||
-          document.querySelector('.header-container') ||
-          document.querySelector('.app-header-main') ||
-          document.querySelector('header');
-
-        if (targetHeader) {
-          targetHeader.appendChild(container);
-        } else if (document.body) {
-          container.classList.add('lang-toggle-fixed');
-          document.body.appendChild(container);
-        }
-      }
-    }
-
-    this.updateToggleUI();
   }
 
   updateToggleUI() {

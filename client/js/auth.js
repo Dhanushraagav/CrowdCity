@@ -2066,9 +2066,6 @@ function updateAuthUI() {
       }));
     }
 
-    if (window.i18n && typeof window.i18n.injectLanguageToggle === 'function') {
-      window.i18n.injectLanguageToggle();
-    }
     if (window.i18n && typeof window.i18n.translatePage === 'function') {
       window.i18n.translatePage();
     }
@@ -2152,9 +2149,6 @@ function updateAuthUI() {
           </div>
         </div>
       `;
-      if (window.i18n && typeof window.i18n.injectLanguageToggle === 'function') {
-        window.i18n.injectLanguageToggle();
-      }
       if (window.i18n && typeof window.i18n.translatePage === 'function') {
         window.i18n.translatePage();
       }
@@ -2309,9 +2303,6 @@ function updateAuthUI() {
     `;
   }
   
-  if (window.i18n && typeof window.i18n.injectLanguageToggle === 'function') {
-    window.i18n.injectLanguageToggle();
-  }
   if (window.i18n && typeof window.i18n.translatePage === 'function') {
     window.i18n.translatePage();
   }
