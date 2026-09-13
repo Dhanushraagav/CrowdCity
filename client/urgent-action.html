@@ -296,7 +296,7 @@
       color: #0f172a;
       line-height: 1.3;
       word-break: normal;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     .loc-actions-block {
@@ -508,7 +508,7 @@
       line-height: 1.25;
       font-size: 0.85rem;
       word-break: normal;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     /* 7. Nearby Emergency Results Sections — Full Width */
@@ -567,17 +567,17 @@
       box-sizing: border-box;
     }
 
-    /* Service Result Card — Complete Internal Hierarchy */
+    /* Service Result Card — Complete Vertical Hierarchy */
     .nearby-cards-grid .service-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
-      padding: 1.1rem 1.2rem;
+      padding: 1.15rem 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
-      min-height: 230px;
+      min-height: 240px;
       box-sizing: border-box;
       width: 100%;
       transform: none !important;
@@ -593,20 +593,22 @@
     .nearby-cards-grid .service-card-body {
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
       flex-grow: 1;
       width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 0.5rem;
     }
 
     /* 1. SERVICE NAME */
     .nearby-cards-grid .service-name {
-      font-size: 1rem;
-      font-weight: 800;
+      font-size: 1.05rem;
+      font-weight: 700;
       color: #0f172a;
-      margin: 0;
+      margin: 0 0 0.35rem 0;
       line-height: 1.35;
       word-break: normal;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
+      hyphens: none;
       display: block;
       width: 100%;
     }
@@ -615,77 +617,52 @@
     .nearby-cards-grid .service-distance-wrap {
       display: flex;
       align-items: center;
-      margin: 0.1rem 0 0.2rem 0;
+      margin: 0 0 0.45rem 0;
       width: 100%;
     }
 
     .nearby-cards-grid .service-distance-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.2rem 0.55rem;
+      display: inline-block;
+      padding: 0.18rem 0.55rem;
       border-radius: 4px;
       background: #ecfdf5;
       color: #047857;
       font-size: 0.78rem;
-      font-weight: 800;
-      white-space: nowrap;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
       border: 1px solid #a7f3d0;
-    }
-
-    .nearby-cards-grid .service-distance-badge i {
-      font-size: 0.72rem;
+      line-height: 1.3;
+      white-space: nowrap;
     }
 
     /* 3. ADDRESS */
     .nearby-cards-grid .service-address {
-      font-size: 0.83rem;
+      font-size: 0.85rem;
       color: #334155;
       line-height: 1.45;
-      margin: 0.1rem 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.45rem;
-      width: 100%;
-    }
-
-    .nearby-cards-grid .service-address i {
-      color: #94a3b8;
-      margin-top: 3px;
-      font-size: 0.8rem;
-      flex-shrink: 0;
-    }
-
-    .nearby-cards-grid .service-address-text {
+      margin: 0 0 0.35rem 0;
       word-break: normal;
-      overflow-wrap: anywhere;
-      flex: 1;
+      overflow-wrap: break-word;
+      display: block;
+      width: 100%;
     }
 
     /* 4. VERIFIED SOURCE */
     .nearby-cards-grid .service-source-tag {
-      font-size: 0.73rem;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 500;
       color: #64748b;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.4rem;
-      line-height: 1.35;
-      margin-top: 0.2rem;
+      line-height: 1.4;
+      margin: 0 0 0.25rem 0;
+      word-break: normal;
+      overflow-wrap: break-word;
+      display: block;
       width: 100%;
-    }
-
-    .nearby-cards-grid .service-source-tag i {
-      color: #059669;
-      margin-top: 2px;
-      font-size: 0.76rem;
-      flex-shrink: 0;
     }
 
     .nearby-cards-grid .service-source-text {
       word-break: normal;
-      overflow-wrap: anywhere;
-      flex: 1;
+      overflow-wrap: break-word;
     }
 
     /* 5. ACTION AREA */
@@ -706,12 +683,12 @@
       align-items: center;
       justify-content: center;
       gap: 0.45rem;
-      padding: 0.65rem 0.85rem;
+      padding: 0.6rem 0.85rem;
       border-radius: 6px;
       background: #dc2626;
       color: #ffffff;
       font-size: 0.85rem;
-      font-weight: 800;
+      font-weight: 700;
       text-decoration: none;
       min-height: 44px;
       transition: background 0.15s ease;
@@ -730,8 +707,6 @@
 
     .nearby-cards-grid .btn-call-text {
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .nearby-cards-grid .btn-service-directions {
@@ -740,13 +715,13 @@
       align-items: center;
       justify-content: center;
       gap: 0.35rem;
-      padding: 0.65rem 0.95rem;
+      padding: 0.6rem 0.95rem;
       border-radius: 6px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #0f172a;
       font-size: 0.82rem;
-      font-weight: 700;
+      font-weight: 600;
       text-decoration: none;
       min-height: 44px;
       transition: all 0.15s ease;
@@ -1599,7 +1574,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=8.8.0"></script>
   <script src="js/api.js"></script>
-  <script src="js/urgent-action.js?v=3.0.0"></script>
+  <script src="js/urgent-action.js?v=3.1.0"></script>
 
 </body>
 </html>

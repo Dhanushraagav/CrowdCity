@@ -371,7 +371,7 @@
       return;
     }
 
-    // Render cards with clear internal hierarchy: Name -> Distance -> Address -> Source -> Actions
+    // Render cards with clear vertical hierarchy: Name -> Distance -> Address -> Source -> Actions
     grid.innerHTML = displayedItems.map(item => {
       const cleanPhone = item.phone ? item.phone.replace(/[^0-9]/g, '') : null;
       const phoneDisplay = item.phone ? item.phone : 'Local number unavailable';
@@ -380,26 +380,19 @@
       let dialHref = cleanPhone ? `tel:${cleanPhone}` : (serviceType === 'police_station' ? 'tel:100' : (serviceType === 'fire_station' ? 'tel:101' : 'tel:108'));
       let callLabel = cleanPhone ? `Call ${phoneDisplay}` : (serviceType === 'police_station' ? 'Call 100 Police' : (serviceType === 'fire_station' ? 'Call 101 Fire' : 'Call 108 Ambulance'));
 
-      let sourceDisplay = item.source_name ? item.source_name : 'Verified Government Directory';
-      if (!sourceDisplay.toLowerCase().startsWith('verified') && !sourceDisplay.toLowerCase().startsWith('source')) {
-        sourceDisplay = `Verified source: ${sourceDisplay}`;
-      }
+      let rawSource = item.source_name ? item.source_name.trim() : 'Verified Government Directory';
+      let cleanSource = rawSource.replace(/^verified\s*source\s*:\s*/i, '').replace(/^source\s*:\s*/i, '').trim();
+      let sourceDisplay = `Source: ${cleanSource}`;
 
       return `
         <div class="service-card" data-service-id="${item.id}">
           <div class="service-card-body">
             <h4 class="service-name">${escapeHtml(item.name)}</h4>
             <div class="service-distance-wrap">
-              <span class="service-distance-badge">
-                <i class="fa-solid fa-location-arrow"></i> ${escapeHtml(item.formattedDistance)}
-              </span>
+              <span class="service-distance-badge">${escapeHtml(item.formattedDistance)}</span>
             </div>
-            <p class="service-address">
-              <i class="fa-solid fa-location-dot"></i>
-              <span class="service-address-text">${escapeHtml(item.address)}</span>
-            </p>
+            <p class="service-address">${escapeHtml(item.address)}</p>
             <div class="service-source-tag">
-              <i class="fa-solid fa-circle-check"></i>
               <span class="service-source-text">${escapeHtml(sourceDisplay)}</span>
             </div>
           </div>
