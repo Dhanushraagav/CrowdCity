@@ -1496,35 +1496,9 @@ function updateAuthUI() {
       }
     });
 
-    // 2. Mobile Header Logos
-    const mobileLogos = document.querySelectorAll('.app-header-logo-mobile');
-    mobileLogos.forEach(logo => {
-      if (logo.dataset.tnBranded) return;
-      logo.dataset.tnBranded = "true";
-      
-      logo.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 24px; height: 24px; object-fit: contain;" />
-          <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 0.05rem;"></div>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 28px; height: 28px; object-fit: contain;" />
-        </div>
-      `;
-    });
-
-    // 3. Topnav Logos (e.g. report.html)
-    const topnavLogos = document.querySelectorAll('.topnav-logo');
-    topnavLogos.forEach(logo => {
-      if (logo.dataset.tnBranded) return;
-      logo.dataset.tnBranded = "true";
-      
-      logo.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.55rem;">
-          <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity AI" style="width: 26px; height: 26px; object-fit: contain;" />
-          <div style="width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;"></div>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Govt. of Tamil Nadu" style="width: 30px; height: 30px; object-fit: contain;" />
-        </div>
-      `;
-    });
+    // 2. Remove logos from headers — headers have ONLY back buttons
+    const headerLogos = document.querySelectorAll('.app-header-main .app-header-logo-mobile, .app-header-logo-mobile, .topnav-logo, .urgent-nav-logo');
+    headerLogos.forEach(logo => logo.remove());
     
     // 4. Logo Containers (e.g. admin.html, analytics.html)
     const logoContainers = document.querySelectorAll('.logo-container');
@@ -3010,10 +2984,13 @@ function setupUniversalMobileNavigation() {
   const headerMain = document.querySelector('.app-header-main') || document.querySelector('.admin-header-actions') || document.querySelector('.auth-header') || document.querySelector('header.app-header');
   if (!headerMain) return;
 
-  // Remove all legacy duplicate back buttons inside the header (never touch mobile logo)
+  // Remove all logos from headerMain — strictly NO logos in headers, only back buttons
+  const headerLogos = headerMain.querySelectorAll('.app-header-logo-mobile, .topnav-logo, .urgent-nav-logo, .portal-badge');
+  headerLogos.forEach(logo => logo.remove());
+
+  // Remove all legacy duplicate back buttons inside the header
   const legacyBacks = headerMain.querySelectorAll('.subpage-back-btn, .gov-back-btn, a.btn-secondary, a.btn-back, a.back-btn');
   legacyBacks.forEach(el => {
-    if (el.classList.contains('app-header-logo-mobile') || el.closest('.app-header-logo-mobile')) return;
     if (el.querySelector('.fa-arrow-left') || el.classList.contains('subpage-back-btn') || el.classList.contains('gov-back-btn')) {
       const wrapperDiv = el.parentElement;
       if (wrapperDiv && wrapperDiv.parentElement === headerMain && wrapperDiv.children.length === 1 && !wrapperDiv.classList.contains('app-header-actions')) {
@@ -3034,12 +3011,7 @@ function setupUniversalMobileNavigation() {
     backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
     backBtn.onclick = window.handleUniversalBack;
 
-    const logoMobile = headerMain.querySelector('.app-header-logo-mobile');
-    if (logoMobile) {
-      headerMain.insertBefore(backBtn, logoMobile);
-    } else {
-      headerMain.insertBefore(backBtn, headerMain.firstChild);
-    }
+    headerMain.insertBefore(backBtn, headerMain.firstChild);
   }
 
   // 2. Desktop / Laptop Back Button ([ ← Back ] button with translation)

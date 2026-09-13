@@ -464,17 +464,11 @@
     display: none !important;
   }
 
-  /* 3. Logos: STRICT FAR RIGHT EDGE */
+  /* 3. Header cleanliness: Strictly NO logos in headers, only back buttons */
   .app-header-logo-mobile,
   .dashboard-header .app-header-logo-mobile,
   .app-header-main .app-header-logo-mobile {
-    display: inline-flex !important;
-    order: 3 !important;
-    margin: 0 !important;
-    margin-left: auto !important;
-    flex-shrink: 0 !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
+    display: none !important;
   }
 
   .global-search-dropdown {

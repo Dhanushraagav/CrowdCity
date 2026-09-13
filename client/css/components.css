@@ -3669,38 +3669,10 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   .app-header-logo-mobile {
     display: none !important;
   }
-
   .dashboard-header .app-header-logo-mobile,
   body.dashboard-page .app-header-logo-mobile,
   .citizen-dashboard .app-header-logo-mobile {
-    order: 10 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    text-decoration: none !important;
-    flex-shrink: 0 !important;
-    height: 100% !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  .app-header-logo-mobile div {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    visibility: visible !important;
-  }
-
-  .app-header-logo-mobile img {
-    width: 28px !important;
-    height: 28px !important;
-    margin-right: 0 !important;
-    object-fit: contain !important;
-    display: inline-block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: none !important;
   }
 
   /* Hide header title text on mobile to leave only back button + logos */
@@ -5501,12 +5473,13 @@ body.dark-theme .universal-mobile-back-btn svg {
   display: none !important;
 }
 
-/* Non-dashboard page identity placement */
+/* Header cleanliness: Strictly NO logos in headers, only back buttons */
+.app-header-main .app-header-logo-mobile,
+.app-header-logo-mobile,
+.topnav-logo,
+.urgent-nav-logo,
 .app-header-main:not(.dashboard-header) .app-header-logo-mobile {
-  display: inline-flex !important;
-  align-items: center !important;
-  text-decoration: none !important;
-  margin-right: auto !important;
+  display: none !important;
 }
 
 @media (max-width: 1023px) {
