@@ -690,7 +690,7 @@
       document.documentElement.classList.add('light-theme');
       document.documentElement.classList.remove('dark-theme');
       // Language bootstrap: ensure Tamil or stored language is applied before paint
-      const storedLang = localStorage.getItem('cc_lang') || 'en';
+      const storedLang = localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta';
       document.documentElement.lang = storedLang;
 
       document.addEventListener('DOMContentLoaded', function() {

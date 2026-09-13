@@ -1,5 +1,11 @@
 /* CrowdCity - Core Styling System */
 
+/* Anti-flicker guard for i18n initial paint */
+html[data-lang="ta"].cc-i18n-loading [data-i18n],
+html.lang-ta.cc-i18n-loading [data-i18n] {
+  visibility: hidden !important;
+}
+
 :root {
   /* Design Tokens - Colors (TN Government Inspired Theme) */
   --primary: #0F766E;

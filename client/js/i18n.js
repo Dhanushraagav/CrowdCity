@@ -1,102 +1,1804 @@
+/**
+ * CrowdCity Universal Internationalization & Localization Service (i18n)
+ * 
+ * Production Architecture:
+ * 1. Default language for new users: Tamil ('ta')
+ * 2. Full language persistence across navigation, reload, Ctrl+Shift+R, and back/forward cache
+ * 3. Technical and system terms strictly preserved in English
+ * 4. Zero flash/flicker of English text when Tamil is selected
+ * 5. Full embedded synchronous dictionary (0ms network delay)
+ */
+(function() {
+  var stored = null;
+  try {
+    stored = localStorage.getItem('crowdcity_language') || 
+             localStorage.getItem('cc_lang') || 
+             localStorage.getItem('preferred_language');
+  } catch (e) {}
+
+  var lang = (stored === 'en' || stored === 'ta') ? stored : 'ta';
+
+  // Persist default immediately for first-time visitors
+  if (!stored) {
+    try {
+      localStorage.setItem('crowdcity_language', 'ta');
+      localStorage.setItem('cc_lang', 'ta');
+      localStorage.setItem('preferred_language', 'ta');
+    } catch (e) {}
+  }
+
+  // Set document root attributes synchronously before first paint
+  if (typeof document !== 'undefined' && document.documentElement) {
+    document.documentElement.lang = lang;
+    document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.classList.remove('lang-en', 'lang-ta');
+    document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
+
+    // If Tamil is active, attach anti-flicker loading guard
+    if (lang === 'ta') {
+      document.documentElement.classList.add('cc-i18n-loading');
+    }
+  }
+
+  // Inject anti-flicker CSS guard immediately in <head> if not already present
+  if (typeof document !== 'undefined') {
+    var guard = document.getElementById('cc-anti-flicker-guard');
+    if (!guard && (document.head || document.documentElement)) {
+      guard = document.createElement('style');
+      guard.id = 'cc-anti-flicker-guard';
+      guard.textContent = 'html[data-lang="ta"].cc-i18n-loading [data-i18n], html.lang-ta.cc-i18n-loading [data-i18n] { visibility: hidden !important; }';
+      (document.head || document.documentElement).appendChild(guard);
+    }
+  }
+})();
+
 const INLINE_EMBEDDED_TRANSLATIONS = {
   en: {
-    nav_dashboard: "Dashboard",
-    nav_report: "Report Issue",
-    nav_my_complaints: "My Complaints",
-    nav_map: "Map",
-    nav_transportation: "Transportation",
-    nav_services: "Government Services",
-    district_helplines: "District Helplines",
-    nav_ministers: "Council of Ministers",
-    nav_about: "About CrowdCity AI",
-    nav_admin: "Admin Panel",
-    nav_cases: "Cases",
-    nav_notifications: "Notifications",
-    nav_profile: "Profile",
-    nav_settings: "Settings",
-    nav_logout: "Logout",
-    sign_out: "Sign Out",
-    sign_in: "Sign In",
-    sign_up: "Sign Up",
-    quick_actions: "Quick Actions",
-    report_issue: "Report Issue",
-    pulse_power_updates: "Power Updates",
-    pulse_weather_alerts: "Weather Forecast",
-    emergency_center: "Emergency Center",
-    view_map: "View Map",
-    nav_tn_updates: "TN Updates",
-    document_wallet: "Document Wallet",
-    urgent_action_title: "URGENT / IMMEDIATE ACTION",
-    urgent_action_subtitle: "For situations that need immediate attention.",
-    nearby_hospitals: "Nearby Hospitals",
-    nearby_ambulances: "Nearby Ambulance Services",
-    nearby_police: "Nearby Police Stations",
-    nearby_fire: "Nearby Fire Stations",
-    action_directions: "Directions",
-    general_emergency_numbers: "General Emergency Numbers"
-  },
+  "back_action": "Back",
+  "urgent_action_title": "URGENT / IMMEDIATE ACTION",
+  "urgent_action_subtitle": "For situations that need immediate attention.",
+  "report_issue": "Report Issue",
+  "report_civic_issue": "Report a Civic Issue",
+  "report_transportation_issue": "Report Transportation Issue",
+  "district_helplines": "District Helplines",
+  "document_wallet": "Document Wallet",
+  "urgent_help_banner_title": "Need Immediate Help?",
+  "urgent_help_banner_desc": "For accidents, active fires, medical emergencies, or dangerous road hazards requiring immediate responder assistance, use Urgent Action.",
+  "urgent_help_action_btn": "Urgent / Immediate Action",
+  "normal_civic_reports_desc": "Submit standard infrastructure and public service complaints with complaint ID, authority routing, and SLA tracking.",
+  "nav_dashboard": "Dashboard",
+  "nav_report": "Report Issue",
+  "nav_my_complaints": "My Complaints",
+  "nav_map": "Map",
+  "nav_settings": "Settings",
+  "nav_logout": "Logout",
+  "nav_profile": "My Profile",
+  "nav_notifications": "Notifications",
+  "nav_documents": "Document Wallet",
+  "nav_saved_schemes": "Saved Schemes",
+  "nav_civic_intelligence": "Civic Intelligence",
+  "nav_analytics": "Analytics & Insights",
+  "nav_about": "About Us",
+  "nav_about_us": "About Us",
+  "nav_contact": "Contact Us",
+  "nav_contact_us": "Contact Us",
+  "nav_tn_updates": "TN Updates",
+  "nav_power_updates": "Power Updates",
+  "nav_public_pulse": "Public Pulse",
+  "pulse_power_updates": "Power Updates",
+  "pulse_power_updates_desc": "Planned electricity shutdown schedules (TNPDCL)",
+  "pulse_flood_alerts": "Flood & Water-Level Alerts",
+  "pulse_flood_alerts_desc": "River basins, reservoirs & inundation levels",
+  "pulse_emergency_alerts": "Emergency Alerts",
+  "pulse_emergency_alerts_desc": "Disaster management & public safety warnings",
+  "pulse_weather_alerts": "Weather Forecast",
+  "pulse_weather_alerts_desc": "5-day regional weather forecasts & conditions",
+  "pulse_transport_updates": "Public Transport Updates",
+  "pulse_transport_updates_desc": "TNSTC, MTC & metro transit notices",
+  "pulse_active": "ACTIVE",
+  "pulse_coming_soon": "Planned",
+  "power_updates_title": "Power Updates",
+  "power_updates_subtitle": "Planned electricity shutdown schedules across Tamil Nadu.",
+  "power_updates_disclaimer": "CrowdCity is an independent civic-tech platform. Power outage data is referenced from official TNPDCL / TANGEDCO publications.",
+  "power_view_official": "Official TNPDCL Portal",
+  "power_source_label": "Source: TNPDCL",
+  "filter_district_all": "All Districts",
+  "filter_area_placeholder": "Filter by Taluk, Substation or Area...",
+  "filter_date": "Select Date",
+  "tab_today": "Today",
+  "tab_tomorrow": "Tomorrow",
+  "tab_this_week": "This Week",
+  "tab_this_month": "This Month",
+  "tab_all": "All",
+  "power_no_outages": "No planned power shutdowns found for this selection.",
+  "power_source_unavailable": "Official power shutdown schedules are published directly by TNPDCL / TANGEDCO. You can view all active outage notices on the official portal.",
+  "power_selected_location": "Shutdowns for your selected district:",
+  "power_time_window": "Outage Window",
+  "power_affected_areas": "Affected Areas",
+  "power_last_updated": "Last updated:",
+  "stat_this_week": "this week",
+  "stat_resolution_rate": "Resolution Rate",
+  "stat_active_reports": "Active reports",
+  "nav_admin": "Admin Panel",
+  "nav_cases": "Cases",
+  "status_pending": "Pending",
+  "status_assigned": "Assigned",
+  "status_in_progress": "In Progress",
+  "status_resolved": "Resolved",
+  "status_rejected": "Rejected",
+  "status_verified": "Verified",
+  "status_unlocked": "Unlocked",
+  "status_locked": "Locked",
+  "category_roads": "Roads",
+  "category_streetlights": "Streetlights",
+  "category_water_supply": "Water Supply",
+  "category_drainage": "Drainage",
+  "category_garbage": "Garbage",
+  "category_traffic": "Traffic",
+  "category_public_property": "Public Property",
+  "category_parks": "Parks",
+  "category_sanitation": "Sanitation",
+  "category_safety_hazard": "Safety Hazard",
+  "category_environment": "Environment",
+  "category_other": "Other",
+  "level_civic_novice": "Civic Novice",
+  "level_local_watchdog": "Local Watchdog",
+  "level_civic_leader": "Civic Leader",
+  "level_city_legend": "City Legend",
+  "level_master_watchdog": "Master Watchdog",
+  "level_hero_abbr": "City Hero (Lvl {level})",
+  "sign_in": "Sign In",
+  "sign_up": "Sign Up",
+  "email_address": "Email Address",
+  "password": "Password",
+  "use_email_otp": "Use Email OTP instead",
+  "use_password": "Use Password instead",
+  "continue_with_google": "Continue with Google",
+  "send_otp": "Send OTP",
+  "verify_sign_in": "Verify & Sign In",
+  "resend_otp_in": "Resend OTP in",
+  "resend_code_in": "Resend code in",
+  "seconds_abbr": "s",
+  "otp_sent": "OTP Sent",
+  "invalid_otp": "Invalid verification code",
+  "forgot_password_q": "Forgot Password?",
+  "verification_code": "Verification Code",
+  "otp_description": "Get a one-time verification code sent to your email.",
+  "continue_with_otp_arrow": "Continue with Email OTP →",
+  "forgot_password_desc": "Enter your email address and we'll send you a link to reset your password.",
+  "back_to_sign_in": "Back to Sign In",
+  "reset_link_sent": "Password recovery link sent! Check your inbox.",
+  "new_password": "New Password",
+  "confirm_password": "Confirm New Password",
+  "change_password_btn": "Change Password",
+  "full_name": "Full Name",
+  "create_account": "Create Account",
+  "already_have_account": "Already have an account? Sign In",
+  "need_account": "Don't have an account? Sign Up",
+  "role_citizen": "Citizen",
+  "role_authority": "Authority",
+  "role_admin": "Admin",
+  "hero_greeting_morning": "Good Morning, {name}",
+  "hero_greeting_afternoon": "Good Afternoon, {name}",
+  "hero_greeting_evening": "Good Evening, {name}",
+  "hero_desc_default": "Transforming citizen voices into rapid community action. Report local issues, track live department resolutions, and earn Civic Impact points.",
+  "hero_desc_stats": "You have submitted {total} report{s} with {resolved} resolved. Every report builds a more responsive city for everyone.",
+  "your_progress": "Your Progress",
+  "reports_submitted": "Reports Submitted",
+  "resolved_reports": "Resolved Reports",
+  "resolved_issues": "Resolved Issues",
+  "in_progress_reports": "In Progress",
+  "total_reports": "Total Reports",
+  "city_total_reports": "Community Reports",
+  "city_total_sub": "Across city",
+  "current_points": "Current Points",
+  "community_rank": "Community Rank",
+  "rate_suffix": "Rate",
+  "reports_feed": "Reports Feed",
+  "community_activity": "Community Activity",
+  "loading_city_updates": "Loading city updates...",
+  "no_reports_found": "No Reports Found",
+  "no_members_found": "No active members found.",
+  "no_notifications": "No new notifications",
+  "no_notifications_yet": "No notifications yet",
+  "mark_all_read": "Mark all as read",
+  "view_all_notifications": "View All Notifications",
+  "all_categories": "All Categories",
+  "all_statuses": "All Statuses",
+  "filter_category": "Filter Category",
+  "filter_status": "Filter Status",
+  "feed_tab_recent": "Recent",
+  "feed_tab_trending": "Trending",
+  "feed_tab_nearby": "Nearby",
+  "feed_tab_resolved": "Resolved",
+  "report_issue_btn": "Report Issue",
+  "view_complaints_btn": "View Complaints",
+  "operational_ticker": "All municipal services are operational. Check the feed below for community reports.",
+  "badge_first_report_name": "Pioneer Reporter",
+  "badge_first_report_desc": "Awarded for filing your first civic complaint on CrowdCity.",
+  "badge_report_verified_name": "Civic Defender",
+  "badge_report_verified_desc": "Earned when one of your reports is resolved successfully by public works.",
+  "badge_comment_added_name": "Town Crier",
+  "badge_comment_added_desc": "Earned for sharing local knowledge and commenting on active issues.",
+  "badge_vote_cast_name": "Active Voter",
+  "badge_vote_cast_desc": "Awarded for supporting civic action and upvoting nearby reports.",
+  "member_since": "Member since {date}",
+  "contributions_summary": "{count} contributions in the last {months} months",
+  "no_cases_reported": "No cases reported yet",
+  "no_cases_reported_desc": "You have not reported any civic infrastructure issues. Click the button above to submit your first case.",
+  "verified_solution": "Verified Solution:",
+  "resolved_successfully": "Resolved successfully.",
+  "view_proof_attachment": "View Completion Proof Attachment",
+  "declined_report_notice": "Declined: The report was closed or marked as duplicate/not applicable.",
+  "submitted_time_ago": "Submitted {time}",
+  "timeline_details": "Timeline & Details",
+  "try_again": "Try Again",
+  "loading_dot": "Loading...",
+  "success_dot": "Success",
+  "error_dot": "Error",
+  "notifications_history_summary": "{unread} unread / {total} total",
+  "notification_history_empty_title": "Your notification history is empty.",
+  "mark_as_read": "Mark as read",
+  "day_0": "Sunday",
+  "day_1": "Monday",
+  "day_2": "Tuesday",
+  "day_3": "Wednesday",
+  "day_4": "Thursday",
+  "day_5": "Friday",
+  "day_6": "Saturday",
+  "month_0": "January",
+  "month_1": "February",
+  "month_2": "March",
+  "month_3": "April",
+  "month_4": "May",
+  "month_5": "June",
+  "month_6": "July",
+  "month_7": "August",
+  "month_8": "September",
+  "month_9": "October",
+  "month_10": "November",
+  "month_11": "December",
+  "time_just_now": "Just now",
+  "time_yesterday": "Yesterday",
+  "time_mins_ago": "{mins}m ago",
+  "time_hours_ago": "{hours}h ago",
+  "time_days_ago": "{days}d ago",
+  "recently_resolved_ticker": "Recently resolved: \"<strong>{title}</strong>\" ({category}) at {address}.",
+  "new_report": "New Report",
+  "sign_out": "Sign Out",
+  "search_placeholder": "Search issues by title, category, or address...",
+  "civic_assistant": "Civic Assistant",
+  "civic_ai_active": "Civic AI • Active",
+  "ask_civic_assistant": "Ask the civic assistant...",
+  "please_login_complaints": "Please log in to view your complaints.",
+  "failed_load_complaints": "Failed to load your complaints",
+  "no_recent_activity": "No recent community activity.",
+  "inspector": "Inspector",
+  "profile": "Profile",
+  "settings": "Settings",
+  "map": "Map",
+  "issue_details": "Issue Details",
+  "reports": "Reports",
+  "analytics": "Analytics",
+  "admin_panel": "Admin Panel",
+  "users": "Users",
+  "manage_users": "Manage Users",
+  "authority_dashboard": "Authority Dashboard",
+  "all_reports": "All Reports",
+  "update_status": "Update Status",
+  "comments": "Comments",
+  "add_comment": "Add Comment",
+  "total_points": "Total Points",
+  "rank": "Rank",
+  "description": "Description",
+  "location": "Location",
+  "submitted_by": "Submitted By",
+  "save_changes": "Save Changes",
+  "update": "Update",
+  "notification_settings": "Notification Settings",
+  "language": "Language",
+  "theme": "Theme",
+  "appearance_language": "Appearance & Language",
+  "appearance_language_desc": "Customize application theme and language preference.",
+  "appearance": "Appearance",
+  "light_theme": "Light Theme",
+  "dark_theme": "Dark Theme",
+  "recent_activity": "Recent Activity",
+  "quick_actions": "Quick Actions",
+  "view_map": "View Map",
+  "emergency_center": "Emergency Center",
+  "emergency_contacts": "Emergency Contacts",
+  "enable_notifications": "Enable Notifications",
+  "sound": "Sound",
+  "vibration": "Vibration",
+  "privacy": "Privacy",
+  "location_access": "Location Access",
+  "camera_access": "Camera Access",
+  "display": "Display",
+  "compact_mode": "Compact Mode",
+  "reduce_animations": "Reduce Animations",
+  "account": "Account",
+  "edit_profile": "Edit Profile",
+  "change_password": "Change Password",
+  "about_crowdcity": "About CrowdCity",
+  "app_version": "App Version",
+  "phone": "Phone",
+  "welcome_back": "Welcome back",
+  "email_otp": "Email OTP",
+  "verify_otp": "Verify OTP",
+  "reset_password": "Reset Password",
+  "update_password": "Update Password",
+  "or": "OR",
+  "status": "Status",
+  "category": "Category",
+  "priority": "Priority",
+  "date": "Date",
+  "actions": "Actions",
+  "view": "View",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "submit": "Submit",
+  "back": "Back",
+  "next": "Next",
+  "previous": "Previous",
+  "search": "Search",
+  "total_users": "Total Users",
+  "total_issues": "Total Issues",
+  "resolution_rate": "Resolution Rate",
+  "average_response_time": "Avg Response Time",
+  "weekly_report": "Weekly Report",
+  "monthly_report": "Monthly Report",
+  "yearly_report": "Yearly Report",
+  "authority_login": "Authority Login",
+  "sign_in_as_authority": "Sign in as Authority",
+  "manage_reports": "Manage Reports",
+  "assigned_reports": "Assigned Reports",
+  "pending_review": "Pending Review",
+  "quick_stats": "Quick Stats",
+  "active_issues": "Active Issues",
+  "my_reports": "My Reports",
+  "report_an_issue": "Report an Issue",
+  "select_category": "Select Category",
+  "upload_photo": "Upload Photo",
+  "enter_description": "Enter Description",
+  "enter_location": "Enter Location",
+  "submit_report": "Submit Report",
+  "report_submitted": "Report Submitted",
+  "top_contributors": "Top Contributors",
+  "your_rank": "Your Rank",
+  "points": "Points",
+  "reports_count": "Reports",
+  "resolved_count": "Resolved",
+  "all_issues": "All Issues",
+  "nearby_issues": "Nearby Issues",
+  "authority_notifications": "Authority Notifications",
+  "authority_profile": "Authority Profile",
+  "authority_settings": "Authority Settings",
+  "general_settings": "General Settings",
+  "account_settings": "Account Settings",
+  "dark_mode": "Dark Mode",
+  "email_notifications": "Email Notifications",
+  "push_notifications": "Push Notifications",
+  "current_password": "Current Password",
+  "enter_current_password": "Enter current password",
+  "badges": "Badges",
+  "achievements": "Achievements",
+  "no_badges_yet": "No badges earned yet",
+  "overview": "Overview",
+  "issue_timeline": "Issue Timeline",
+  "created_at": "Created At",
+  "updated_at": "Updated At",
+  "resolution_details": "Resolution Details",
+  "proof_photo": "Proof Photo",
+  "authority_response": "Authority Response",
+  "citizen_feedback": "Citizen Feedback",
+  "upvotes": "Upvotes",
+  "ward": "Ward",
+  "address": "Address",
+  "all_wards": "All Wards",
+  "high": "High",
+  "medium": "Medium",
+  "low": "Low",
+  "urgent": "Urgent",
+  "sign_in_subtitle": "Sign in to your CrowdCity account",
+  "create_account_subtitle": "Join CrowdCity and start reporting",
+  "forgot_password_title": "Forgot Password",
+  "enter_email": "Enter your email address",
+  "enter_password": "Enter your password",
+  "enter_full_name": "Enter your full name",
+  "reports_overview": "Reports Overview",
+  "category_breakdown": "Category Breakdown",
+  "status_distribution": "Status Distribution",
+  "trend_analysis": "Trend Analysis",
+  "export_data": "Export Data",
+  "refresh": "Refresh",
+  "last_updated": "Last Updated",
+  "no_data_available": "No data available",
+  "view_details": "View Details",
+  "back_to_dashboard": "Back to Dashboard",
+  "assign_to": "Assign To",
+  "add_note": "Add Note",
+  "issue_history": "Issue History",
+  "resident_info": "Resident Information",
+  "contact_citizen": "Contact Citizen",
+  "authority_settings_desc": "Manage your official municipal credentials, profile information, and password preferences.",
+  "inspector_credentials": "Inspector Credentials",
+  "inspector_credentials_desc": "Official credentials provided by administration. Values are read-only for verification purposes.",
+  "work_email": "Work Email",
+  "assigned_role": "Assigned Role",
+  "verified_officer_status": "Verified Officer Account • Active status",
+  "change_portal_password": "Change Portal Password",
+  "change_portal_password_desc": "Update your credentials to maintain portal security. Choose a strong alphanumeric password.",
+  "enter_new_password": "Enter new password",
+  "confirm_new_password": "Confirm new password",
+  "authorized_access": "AUTHORIZED ACCESS",
+  "authority_portal_title": "CrowdCity AI Authority Portal",
+  "enter_official_email": "Enter your official email address",
+  "access_dashboard": "Access Dashboard",
+  "back_to_citizen_portal": "Back to Citizen Portal",
+  "inspector_panel": "Inspector Panel",
+  "authority_operations_center": "Authority Operations Center",
+  "authority_operations_desc": "View assigned cases, provide dispatch status updates, and upload completion proofs.",
+  "total_cases": "Total Cases",
+  "assigned_cases_queue": "Assigned Cases Queue",
+  "all_cases": "All Cases",
+  "operations_guide": "Operations Guide",
+  "ops_guide_step1": "Review Cases: Select assigned complaint reports from your feed queue on the left.",
+  "ops_guide_step2": "Inspect Location: Browse coordinates or address notes and deploy to inspect.",
+  "ops_guide_step3": "Update Dispatch: Click the Update Status button to transition status to 'In Progress' to inform citizens.",
+  "ops_guide_step4": "Resolve & Prove: Once repairs are completed, set the status to Resolved, fill in resolution remarks, and upload a completion photo proof.",
+  "update_case_dispatch": "Update Case Dispatch",
+  "update_status_required": "Update Status *",
+  "remarks_notes_required": "Remarks / Dispatch Notes *",
+  "remarks_placeholder": "Provide description updates (e.g. Inspector deployed to site, repairs underway...)",
+  "upload_completion_proof": "Upload Completion Photo Proof *",
+  "click_upload_proof": "Click to upload proof photo",
+  "clear": "Clear",
+  "admin_panel_title": "CrowdCity AI Administration Center",
+  "admin_panel_desc": "View city metrics overview, delegate complaints, and manage system roles.",
+  "analytics_overview": "Analytics Overview",
+  "user_management": "User Management",
+  "complaint_queue": "Complaint Queue",
+  "ai_monitor": "AI Monitor",
+  "reports_center": "Reports Center",
+  "authorities": "Authorities",
+  "complaints_by_category": "Complaints by Category",
+  "complaints_by_status": "Complaints by Status",
+  "inspector_resolution_performance": "Inspector Resolution Performance",
+  "search_users_placeholder": "Search users by name or email...",
+  "all_roles": "All Roles",
+  "registration_date": "Registration Date",
+  "verify_authority": "Verify Authority",
+  "department_assignment": "Department Assignment",
+  "status_suspension": "Status / Suspension",
+  "overall_complaints_queue": "Overall complaints queue",
+  "city_departments_manager": "City Departments Manager",
+  "city_departments_desc": "Create, edit, and delete municipal departments for routing complaints.",
+  "add_new_department": "Add New Department",
+  "create_department": "Create Department",
+  "dept_name_required": "Department Name *",
+  "dept_name_placeholder": "e.g. Roads & Transport Dept",
+  "dept_code_required": "Unique Code (Uppercase) *",
+  "dept_code_placeholder": "e.g. ROAD",
+  "dept_desc_placeholder": "Explain the responsibilities of this department...",
+  "save_department": "Save Department",
+  "code": "Code",
+  "department_name": "Department Name",
+  "ai_decisions_auditor": "AI Decisions Auditor",
+  "ai_decisions_desc": "Audit predictions made by CrowdCity AI models and execute category or department overrides.",
+  "override_ai_prediction": "Override AI Prediction",
+  "assigned_department": "Assigned Department",
+  "priority_severity": "Priority Severity",
+  "apply_override": "Apply Override",
+  "complaint": "Complaint",
+  "selected_category": "Selected Category",
+  "ai_predicted_category": "AI Predicted Category",
+  "ai_assigned_department": "AI Assigned Department",
+  "ai_priority": "AI Priority",
+  "audit_match": "Audit Match",
+  "auditing": "Auditing",
+  "reports_export_center": "System Reports Export Center",
+  "reports_export_desc": "Download municipal operations and citizen involvement reports. Select report timeframe parameters and preferred output layout format.",
+  "report_timeframe_range": "Report Timeframe Range",
+  "daily_report": "Daily Report (Past 24 Hours)",
+  "output_layout_format": "Output Layout Format",
+  "excel_format": "Excel Spreadsheet (.CSV)",
+  "pdf_format": "Printable PDF Report (.HTML)",
+  "generate_export_report": "Generate & Export Report",
+  "admin_footer_text": "© 2026 CrowdCity AI - Administrative Operations Console. All rights reserved.",
+  "advanced_civic_analytics_title": "Advanced Civic Analytics",
+  "advanced_civic_analytics_desc": "Interactive diagnostics of civic complaints, monthly resolution speeds, department efficiency, and geographic hazard heatmaps across the city.",
+  "filters": "Filters",
+  "all_time": "All Time",
+  "last_30_days": "Last 30 Days",
+  "last_90_days": "Last 90 Days",
+  "last_6_months": "Last 6 Months",
+  "resolved_cases": "Resolved Cases",
+  "hotspot_points": "Hotspot Points",
+  "ai_insights_title": "AI-Generated City Insights",
+  "realtime_diagnostics": "Real-Time Diagnostics",
+  "heatmap_title": "Heatmap of Complaint Hotspots",
+  "heatmap_overlay": "Heatmap Overlay",
+  "neighborhood_distribution": "Neighborhood Distribution",
+  "monthly_reporting_trends": "Monthly Reporting Trends",
+  "responsible_dept_performance": "Responsible Department Performance",
+  "dept_efficiency_scorecard": "Department Efficiency Scorecard",
+  "hazards_reported": "Hazards Reported",
+  "no_resolutions_yet": "No Resolutions Yet",
+  "outside_service_area_error": "Currently, CrowdCity AI supports reporting only within Tamil Nadu. We are expanding to other states soon.",
+  "dashboard": "Dashboard",
+  "auth_hero_title": "Empowering citizens to build cleaner, safer, and better neighborhoods.",
+  "auth_hero_subtitle": "CrowdCity is an AI-powered civic issue reporting platform that allows citizens to report public issues like potholes, garbage, water leaks, and streetlights, connecting them directly with local municipal departments.",
+  "crowdcity_ai_portal": "CrowdCity AI Portal",
+  "auth_portal_subtitle": "Secure access to civic reporting and municipal service management.",
+  "forgot_password": "Forgot Password?",
+  "sign_in_with_email_otp": "Sign in with Email OTP",
+  "otp_promo_subtitle": "Get a one-time verification code sent to your email.",
+  "resend_otp": "Resend OTP",
+  "use_password_instead": "← Use Password Instead",
+  "password_strength": "Password Strength:",
+  "reset_password_description": "Enter your email below and we will send you a secure link to reset your password.",
+  "resend_code": "Resend Code",
+  "or_continue_with": "or continue with",
+  "secure_authentication": "Secure Authentication",
+  "role_based_access_control": "Role-Based Access Control",
+  "authority_portal": "Authority Portal",
+  "government_officials_only": "Government Officials Only",
+  "open_portal": "Open Portal",
+  "authentication_successful": "Authentication Successful",
+  "send_recovery_link": "Send Recovery Link",
+  "verify_code": "Verify Code",
+  "notifications": "NOTIFICATIONS",
+  "logout": "Logout",
+  "in_progress": "In Progress",
+  "detected_category": "DETECTED CATEGORY",
+  "assigned": "Assigned",
+  "resolved": "Resolved",
+  "rejected": "Rejected",
+  "notification_history": "Notification History",
+  "active_streak": "Active Streak",
+  "my_complaints": "My Complaints",
+  "view_complaints": "View Complaints",
+  "recent": "Recent",
+  "trending": "Trending",
+  "nearby": "Nearby",
+  "cat_roads": "Roads",
+  "cat_streetlights": "Streetlights",
+  "cat_water_supply": "Water Supply",
+  "cat_drainage": "Drainage",
+  "cat_garbage": "Garbage",
+  "cat_traffic": "Traffic",
+  "cat_public_property": "Public Property",
+  "cat_parks": "Parks",
+  "cat_sanitation": "Sanitation",
+  "cat_safety_hazard": "Safety Hazard",
+  "cat_environment": "Environment",
+  "cat_other": "Other",
+  "pending": "Pending",
+  "no_new_notifications": "No new notifications",
+  "redirecting_to_dashboard": "Redirecting to your dashboard...",
+  "verify_resolution": "Verify Resolution",
+  "approve_and_verify": "Approve & Verify",
+  "reopen_complaint": "Reopen Complaint",
+  "work_resolution_details": "Work Resolution Details",
+  "completion_notes": "Completion Notes",
+  "completion_proof_image": "Completion Proof Image",
+  "reported": "Reported",
+  "verified": "Verified",
+  "discussion": "Discussion",
+  "post_comment": "Post Comment",
+  "control_panel": "Control Panel",
+  "delete_issue": "Delete Issue",
+  "ai_analysis_insights": "AI Analysis Insights",
+  "ai_brief_summary": "AI Brief Summary",
+  "ai_category": "AI Category",
+  "location_map": "Location Map",
+  "latitude": "Latitude:",
+  "longitude": "Longitude:",
+  "status_history": "Status History",
+  "timeline_update_keep": "Timeline Update (Keep status)",
+  "issue_reported": "Issue Reported",
+  "add_comment_placeholder": "Add a public comment or suggestion...",
+  "explain_resolution_work": "Explain the resolution work done...",
+  "map_view": "Map View",
+  "ai_assisted_report": "AI-Assisted Report",
+  "community_rankings": "Community Rankings",
+  "community_rankings_description": "Recognizing the active citizens making our community a better place. Earn points by reporting issues, having reports verified, commenting, and participating in votes.",
+  "citizen_standings": "Citizen Standings",
+  "your_badge_chest": "Your Badge Chest",
+  "nearby_civic_map": "Nearby Civic Map",
+  "nearby_civic_map_description": "Browse and locate civic complaints reported around the city.",
+  "roads": "Roads",
+  "streetlights": "Streetlights",
+  "water_supply": "Water Supply",
+  "drainage": "Drainage",
+  "garbage": "Garbage",
+  "traffic": "Traffic",
+  "public_property": "Public Property",
+  "parks": "Parks",
+  "sanitation": "Sanitation",
+  "safety_hazard": "Safety Hazard",
+  "environment": "Environment",
+  "other": "Other",
+  "map_layer_type": "Map Layer Type",
+  "marker_clusters": "Marker Clusters",
+  "hotspot_heatmap": "Hotspot Heatmap",
+  "no_issue_selected": "No issue selected",
+  "click_map_marker_hint": "Click any map marker to view detailed description and action steps.",
+  "search_by_description_or_address": "Search by description or address...",
+  "my_tracked_cases": "My Tracked Cases",
+  "my_tracked_cases_desc": "Monitor the lifecycles, statuses, and details of all issues you submitted.",
+  "file_another": "File Another",
+  "streak": "Streak",
+  "activity": "Activity",
+  "reports_filed": "Reports Filed",
+  "rank_progression": "Rank Progression",
+  "community_impact_metrics": "Community Impact Metrics",
+  "civic_engagement_calendar": "Civic Engagement Calendar",
+  "learn_how_points_scored": "Learn how points are scored",
+  "less": "Less",
+  "more": "More",
+  "unlocked_medal_chest": "Unlocked Medal Chest",
+  "reporting_activity": "Reporting Activity",
+  "report_civic_issue_desc": "Provide details about the infrastructure or safety concern in your area. Our AI will route it to the appropriate department.",
+  "issue_category": "Issue Category",
+  "detailed_description": "Detailed Description",
+  "auto_categorize_ai": "Auto-Categorize with AI",
+  "use_gps": "Use GPS",
+  "click_to_set_pin": "Click to set pin",
+  "photo_evidence": "Photo Evidence",
+  "drag_drop_images": "Drag & drop images",
+  "supported_formats": "Supported formats: JPG, PNG, max 10MB",
+  "remove": "Remove",
+  "guidelines": "Guidelines",
+  "guideline_photos": "Reports with clear photos are prioritized by our civic triage system.",
+  "guideline_context": "Provide as much context as possible to reduce dispatch time.",
+  "guideline_emergency": "For immediate life-threatening emergencies, please dial emergency services (100).",
+  "analyzing_civic_report": "Analyzing Civic Report",
+  "analyzing_description": "CrowdCity AI is analyzing your description to auto-categorize, select the department, and assign severity...",
+  "ai_analysis_complete": "AI Analysis Complete!",
+  "generated_summary": "Generated Summary",
+  "priority_level": "Priority Level",
+  "describe_issue_placeholder": "Describe the issue, its severity, and any hazards...",
+  "enter_address_placeholder": "Enter address or pinpoint on map",
+  "account_security": "ACCOUNT SECURITY",
+  "back_to_authority_login": "Back To Authority Login",
+  "settings_description": "Manage your citizen profile information, view your points, and update security credentials.",
+  "citizen_profile": "Citizen Profile",
+  "citizen_profile_description": "Your profile details and civic credentials. Full name and email address are locked for verification.",
+  "change_password_description": "Update your credentials regularly to secure your account. Choose a strong alphanumeric password.",
+  "confirm_new_password_placeholder": "Confirm new password",
+  "enter_email_placeholder": "Enter your email address",
+  "enter_password_placeholder": "Enter your password",
+  "enter_full_name_placeholder": "Enter your full name",
+  "create_password_placeholder": "Create a password",
+  "confirm_password_placeholder": "Confirm your password",
+  "email_placeholder": "you@example.com",
+  "otp_placeholder": "000000",
+  "new_password_placeholder": "Enter your new password",
+  "reported_on": "Reported on {date}",
+  "profile_no_comments": "No comments yet. Start the discussion!",
+  "profile_no_activity": "No reporting activity logged. Go report a hazard to start your timeline!",
+  "profile_streak": "{streak}-day streak",
+  "profile_impact_empty": "You haven't filed any complaints yet. Start reporting local issues to earn points and help improve the neighborhood!",
+  "profile_impact_stats": "Your reporting efforts have directly helped resolve {resolved} issues, improving municipal responsiveness by {rate}% for reported cases!",
+  "profile_xp_tip_legend": "You are a City Legend! Keep up the amazing work!",
+  "profile_xp_tip_next": "Earn {points} more points to rank up to {rank}!",
+  "resolution_rate_stats": "{rate}% of your reported issues have been fully resolved.",
+  "badge_report_5_name": "Civic Champion",
+  "badge_report_5_desc": "Reported 5 community complaints.",
+  "badge_comment_5_name": "Voice of the City",
+  "badge_comment_5_desc": "Contributed 5 discussion comments.",
+  "badge_upvote_5_name": "Vocal Citizen",
+  "badge_upvote_5_desc": "Upvoted 5 community complaints.",
+  "badge_resolve_1_name": "Urban Restorer",
+  "badge_resolve_1_desc": "Your reported complaint was successfully fixed.",
+  "badge_status_unlocked": "Unlocked",
+  "badge_status_locked": "Locked",
+  "badge_awarded_date": "Awarded {date}",
+  "by_author": "By {name}",
+  "proximity_alert": "Proximity Alert: There are {count} issues reported within 500m of your position!",
+  "no_resolution_notes": "No resolution notes provided.",
+  "no_summary_generated": "No summary generated.",
+  "complaint_saved_success": "Complaint successfully saved in public database.",
+  "user_you": "You",
+  "get_directions": "Get Directions",
+  "details": "Details",
+  "connecting": "Connecting...",
+  "initializing": "Initializing...",
+  "verifying": "Verifying...",
+  "sending": "Sending...",
+  "slideshow_caption_1": "Kathipara Flyover, Chennai",
+  "slideshow_caption_2": "Gandhipuram Flyover, Coimbatore",
+  "slideshow_caption_3": "Meenakshi Temple & Smart Junction, Madurai",
+  "slideshow_caption_4": "Rockfort & Kaveri Bridge, Trichy",
+  "slideshow_caption_5": "Namakkal Rock Fort",
+  "slideshow_caption_6": "Chennai Metro Water Infrastructure",
+  "slideshow_caption_7": "📍 Namakkal City - Rock Fort Heritage",
+  "slideshow_caption_8": "📍 Namakkal City - Smart Signal System",
+  "active_deployment_city": "Active Deployment",
+  "govt_of_tamilnadu": "Government of Tamil Nadu",
+  "smart_civic_platform": "Smart Civic Services Platform",
+  "slideshow_desc_1_line1": "Kathipara Cloverleaf showcases Chennai's advanced transit systems.",
+  "slideshow_desc_1_line2": "Commutes are made smarter with AI-integrated traffic monitoring.",
+  "slideshow_desc_2_line1": "Gandhipuram Flyover powers Coimbatore's regional mobility.",
+  "slideshow_desc_2_line2": "Dynamic cameras ensure clean, organized, and secure city streets.",
+  "slideshow_desc_3_line1": "Madurai blends ancient heritage with new smart civic grids.",
+  "slideshow_desc_3_line2": "Integrated sensors optimize safety and lighting around junctions.",
+  "slideshow_desc_4_line1": "Historic Kaveri Bridge connects Trichy's legacy with modern design.",
+  "slideshow_desc_4_line2": "Smart utility networks ensure efficient water and power tracking.",
+  "slideshow_desc_5_line1": "Namakkal's historic Rock Fort anchors our latest deployment.",
+  "slideshow_desc_5_line2": "AI-driven waste sorting and solar streetlights power the town.",
+  "search_districts": "Search districts...",
+  "helpline_desc": "Official contacts for all 38 districts of Tamil Nadu.",
+  "call_collector": "Call Collector Office",
+  "email_collector": "Email Collector",
+  "visit_website": "Visit Website",
+  "central_grievance": "Central Grievance Redressal (Mudhalvarin Mugavari)",
+  "state_level": "State Level Portal",
+  "live_support": "24/7 Support",
+  "cm_helpline_label": "CM Helpline",
+  "municipal_helpline_label": "Municipal Corporation Support",
+  "visit_grievance_portal": "Visit Mudhalvarin Mugavari Portal",
+  "district_directory": "District Official Directory",
+  "districts_loaded": "districts available",
+  "nav_ministers": "Council of Ministers",
+  "search_ministers": "Search ministers, responsibilities, or departments...",
+  "cabinet_leadership": "Cabinet Leadership",
+  "portfolio": "Responsibilities",
+  "departments": "Departments",
+  "ministers_loaded": "ministers loaded",
+  "call_minister": "Call Office",
+  "email_minister": "Email Minister",
+  "constituency_label": "Assembly Constituency",
+  "office_location_label": "Office Room",
+  "biography_label": "Biography & Focus Area",
+  "nav_services": "Government Services",
+  "services_title": "Government Services Hub",
+  "services_subtitle": "AI-Powered Digital Citizen Services for Tamil Nadu & India",
+  "explore_services": "Explore Govt Services",
+  "ai_explanation_title": "AI Qualification Explanation",
+  "ai_why_qualify": "Why You Qualify",
+  "ai_main_benefits": "Main Benefits",
+  "ai_required_docs": "Required Documents",
+  "ai_important_notes": "Important Notes",
+  "citizen_services_dashboard": "Citizen Services Dashboard",
+  "citizen_portal": "Citizen Portal",
+  "profile_status": "Profile Status",
+  "scheme_eligibility": "Scheme Eligibility",
+  "check_welfare_qualification": "Check Welfare Qualification",
+  "files_uploaded": "Files Uploaded",
+  "ai_assistant": "AI Assistant",
+  "ask_scheme_guidance": "Ask Scheme Guidance",
+  "office_locator": "Office Locator",
+  "find_esevai_taluk": "Find E-Sevai & Taluk",
+  "proactive_ai_recommendations": "Proactive AI Recommendations",
+  "ask_ai": "Ask AI →",
+  "proactive_ai_match": "Proactive AI Match",
+  "saved_welfare_schemes": "Saved Welfare Schemes",
+  "view_all": "View All →",
+  "document_wallet_readiness": "Document Wallet Readiness",
+  "manage_wallet": "Manage Wallet →",
+  "need_application_help": "Need Application Help?",
+  "ask_ai_assistant_desc": "Ask our AI Government Assistant about eligibility rules, document checklists, or application steps.",
+  "ask_ai_assistant_btn": "Ask AI Assistant",
+  "my_saved_schemes": "My Saved Schemes",
+  "my_document_wallet": "My Document Wallet",
+  "scheme_eligibility_checker": "Scheme Eligibility Checker",
+  "ai_document_verification": "AI Document Verification Assistant",
+  "ai_form_filling": "AI Form Filling Assistant",
+  "government_office_locator": "Government Office Locator",
+  "government_application_tracker": "Government Application Tracker",
+  "smart_reminder_center": "Smart Reminder Center",
+  "nav_transportation": "Transportation",
+  "choose_issue_type": "Choose Issue Type",
+  "report_details": "Report Details",
+  "ai_review": "AI Review",
+  "civic_issue": "Civic Issue",
+  "transportation_issue": "Transportation Issue",
+  "examples_label": "EXAMPLES:",
+  "step_1": "STEP 1",
+  "step_2": "STEP 2",
+  "step_3": "STEP 3",
+  "category_social_welfare": "Social Welfare",
+  "category_education": "Education & Youth",
+  "category_health": "Health & Insurance",
+  "category_agriculture": "Agriculture & Farmers",
+  "category_skill_dev": "Skill Development",
+  "about_tag": "CROWDCITY AI PLATFORM",
+  "about_hero_title": "Empowering Citizens for a Better Tamil Nadu.",
+  "about_hero_sub": "CrowdCity AI is your all-in-one digital civic portal. From reporting street issues to discovering government welfare schemes and securing essential documents — we make public services transparent and accessible to everyone.",
+  "about_help_label": "HOW CROWDCITY HELPS YOU",
+  "about_help_title": "Everything You Need for Your City & Welfare",
+  "about_help_desc": "Explore how CrowdCity AI simplifies everyday civic interaction, emergency safety, and government assistance.",
+  "about_help_card1_title": "Civic Issue Reporting",
+  "about_help_card1_desc": "Report potholes, garbage, streetlights, or water leakage with photos and GPS. Our AI routes your complaint to municipal officers with live status updates.",
+  "about_help_card2_title": "AI Welfare Scheme Finder",
+  "about_help_card2_desc": "Discover Tamil Nadu state and central government welfare schemes tailored to your age, income, and community eligibility.",
+  "about_help_card3_title": "Emergency Help Center",
+  "about_help_card3_desc": "Instant 1-tap emergency helplines for police, fire, ambulance, disaster response, and women safety across all Tamil Nadu districts.",
+  "about_help_card4_title": "Government Services & Documents",
+  "about_help_card4_desc": "Access online application links, required document checklists, and step-by-step guides for birth certificates, community certificates, and ration cards.",
+  "about_help_card5_title": "District Helplines & Offices",
+  "about_help_card5_desc": "Find official contact numbers, email addresses, and office locations for municipal corporations and collectorates.",
+  "about_help_card6_title": "Ministers & Governance",
+  "about_help_card6_desc": "View the current Tamil Nadu Council of Ministers, portfolio distributions, and leadership contact details.",
+  "about_principle_label": "OUR CORE PRINCIPLES",
+  "about_principle_title": "Built on Transparency, Speed & Equity",
+  "about_principle_desc": "CrowdCity AI is guided by a commitment to public accountability and citizen empowerment.",
+  "about_p1_title": "01 — Transparency First",
+  "about_p1_desc": "Every reported issue gets a public tracking ID and real-time status updates from submission to municipal verification.",
+  "about_p2_title": "02 — AI-Driven Efficiency",
+  "about_p2_desc": "Intelligent complaint categorization and automated routing reduce resolution times and eliminate manual bureaucracy.",
+  "about_p3_title": "03 — Inclusive Access",
+  "about_p3_desc": "Bilingual support in Tamil & English ensures equal access to civic services for all citizens across Tamil Nadu.",
+  "about_team_label": "MEET THE TEAM",
+  "about_team_title": "Engineers & Visionaries Behind CrowdCity AI",
+  "about_close_title": "Ready to Empower Your City?",
+  "about_close_sub": "Join thousands of citizens making Tamil Nadu safer, cleaner, and smarter every single day.",
+  "launch_dashboard": "Launch Dashboard",
+  "services_portal_label": "Government Portal",
+  "services_hero_title": "Government Services & Welfare Schemes",
+  "services_hero_desc": "Explore official Tamil Nadu State and Central Government welfare schemes, check eligibility, verify documents, and ask our AI Scheme Advisor.",
+  "services_mod_checker_title": "Scheme Eligibility Checker",
+  "services_mod_checker_desc": "Check your qualification for Tamil Nadu & Central welfare schemes",
+  "services_mod_wallet_title": "Document Wallet",
+  "services_mod_wallet_desc": "Store Ration Card, Aadhaar, Income & Community certificates",
+  "services_mod_verifier_title": "Document Verifier",
+  "services_mod_verifier_desc": "Scan and verify certificates against scheme eligibility rules",
+  "services_mod_tracker_title": "Application Tracker",
+  "services_mod_tracker_desc": "Monitor live status of submitted government applications",
+  "services_mod_locator_title": "Office Locator",
+  "services_mod_locator_desc": "Find nearest E-Sevai centers, Taluk offices, and BDOs",
+  "services_mod_reminders_title": "Scheme Reminders",
+  "services_mod_reminders_desc": "Set alerts for application deadlines and certificate renewals",
+  "services_mod_assistant_title": "Form Assistant",
+  "services_mod_assistant_desc": "Interactive guidance to fill official application forms correctly",
+  "services_mod_saved_title": "Saved Schemes",
+  "services_mod_saved_desc": "View your bookmarked schemes and saved eligibility results",
+  "services_search_placeholder": "Search schemes by name, department, or keyword (e.g. Magalir Urimai, Pudhumai Penn, Health)...",
+  "services_tab_all": "All Schemes",
+  "services_tab_social": "Social Welfare",
+  "services_tab_education": "Education & Youth",
+  "services_tab_health": "Health & Insurance",
+  "services_tab_agriculture": "Agriculture & Farmers",
+  "services_tab_skill": "Skill Development",
+  "services_btn_check_eligibility": "Check Eligibility",
+  "services_btn_save_scheme": "Save Scheme",
+  "services_btn_official_portal": "Official Portal",
+  "services_lbl_key_benefits": "Key Benefits",
+  "services_lbl_eligibility_criteria": "Eligibility Criteria",
+  "services_lbl_required_documents": "Required Documents",
+  "services_no_schemes_found": "No Government Schemes Found",
+  "services_no_schemes_desc": "Try searching for a different keyword or selecting 'All Schemes'.",
+  "weather_alerts_title": "Weather Forecast",
+  "weather_alerts_subtitle": "Tamil Nadu district weather forecast",
+  "weather_search_placeholder": "Search district...",
+  "weather_source_attribution": "Source: Open-Meteo",
+  "weather_official_portal": "Open-Meteo",
+  "weather_last_updated": "Updated",
+  "weather_last_retrieved": "Last successfully retrieved from Open-Meteo",
+  "weather_stale_notice": "Cached Data",
+  "weather_coverage_label": "Coverage: Tamil Nadu (38 Districts)",
+  "weather_filter_district_all": "All Districts (38)",
+  "weather_tab_all": "All Days",
+  "weather_tab_today": "Today",
+  "weather_tab_tomorrow": "Tomorrow",
+  "weather_tab_day3": "Day 3",
+  "weather_tab_day4": "Day 4",
+  "weather_tab_day5": "Day 5",
+  "weather_no_alerts_found": "No Districts Found",
+  "weather_no_alerts_desc": "No Tamil Nadu district matches your search query.",
+  "weather_source_unavailable_title": "Weather data unavailable.",
+  "weather_source_unavailable_desc": "Open-Meteo forecast service could not be reached. Please check back shortly.",
+  "weather_temperature": "Temperature",
+  "weather_feels_like": "Feels like",
+  "weather_rainfall": "Rainfall",
+  "weather_precip_prob": "Rain chance",
+  "weather_humidity": "Humidity",
+  "weather_wind": "Wind",
+  "weather_wind_gusts": "Wind gusts",
+  "weather_sunrise": "Sunrise",
+  "weather_sunset": "Sunset",
+  "nearby_hospitals": "Nearby Hospitals",
+  "nearby_ambulances": "Nearby Ambulance Services",
+  "nearby_police": "Nearby Police Stations",
+  "nearby_fire": "Nearby Fire Stations",
+  "action_directions": "Directions",
+  "general_emergency_numbers": "General Emergency Numbers"
+},
   ta: {
-    nav_dashboard: "டாஷ்போர்ட்",
-    nav_report: "புகார் அளி",
-    nav_my_complaints: "எனது புகார்கள்",
-    nav_map: "வரைபடம்",
-    nav_transportation: "போக்குவரத்து",
-    nav_services: "அரசு சேவைகள்",
-    district_helplines: "மாவட்ட உதவி எண்கள்",
-    nav_ministers: "அமைச்சரவை",
-    nav_about: "CrowdCity AI பற்றி",
-    nav_admin: "நிர்வாகி பேனல்",
-    nav_cases: "வழக்குகள்",
-    nav_notifications: "அறிவிப்புகள்",
-    nav_profile: "சுயவிவரம்",
-    nav_settings: "அமைப்புகள்",
-    nav_logout: "வெளியேறு",
-    sign_out: "வெளியேறு",
-    sign_in: "உள்நுழை",
-    sign_up: "பதிவு செய்",
-    quick_actions: "விரைவான செயல்கள்",
-    report_issue: "புகார் அளி",
-    pulse_power_updates: "Power Updates",
-    pulse_weather_alerts: "வானிலை முன்னறிவிப்பு",
-    emergency_center: "அவசர உதவி மையம்",
-    view_map: "வரைபடத்தைப் பார்",
-    nav_tn_updates: "தமிழ்நாடு அப்டேட்ஸ்",
-    document_wallet: "ஆவண வாலட்",
-    urgent_action_title: "அவசர / உடனடி நடவடிக்கை",
-    urgent_action_subtitle: "உடனடி கவனம் தேவைப்படும் அவசர சூழல்களுக்கு.",
-    nearby_hospitals: "அருகிலுள்ள மருத்துவமனைகள்",
-    nearby_ambulances: "அருகிலுள்ள ஆம்புலன்ஸ் சேவைகள்",
-    nearby_police: "அருகிலுள்ள காவல் நிலையங்கள்",
-    nearby_fire: "அருகிலுள்ள தீயணைப்பு நிலையங்கள்",
-    action_directions: "வழிசெலுத்து",
-    general_emergency_numbers: "பொது அவசர உதவி எண்கள்"
-  }
+  "back_action": "பின்னே",
+  "urgent_action_title": "அவசர / உடனடி நடவடிக்கை",
+  "urgent_action_subtitle": "உடனடி கவனம் தேவைப்படும் அவசர சூழல்களுக்கு.",
+  "report_issue": "புகாரளிக்கவும்",
+  "report_civic_issue": "குடிமைப் பிரச்சினையைப் புகாரளிக்கவும்",
+  "report_transportation_issue": "போக்குவரத்துப் பிரச்சினை பதிவு",
+  "district_helplines": "மாவட்ட உதவி எண்கள்",
+  "document_wallet": "ஆவண வாலட்",
+  "urgent_help_banner_title": "உடனடி அவசர உதவி தேவையா?",
+  "urgent_help_banner_desc": "விபத்துகள், தீ விபத்துகள், மருத்துவ அவசரநிலைகள் அல்லது உடனடி உதவி தேவைப்படும் ஆபத்துகளுக்கு, அவசர நடவடிக்கையைப் பயன்படுத்தவும்.",
+  "urgent_help_action_btn": "அவசர / உடனடி உதவி",
+  "normal_civic_reports_desc": "Complaint ID, துறை ஒதுக்கீடு மற்றும் SLA கண்காணிப்புடன் கூடிய பொதுப் புகார்களைப் பதிவு செய்யவும்.",
+  "nav_dashboard": "Dashboard",
+  "nav_report": "புகார் அளி",
+  "nav_my_complaints": "எனது புகார்கள்",
+  "nav_map": "வரைபடம்",
+  "nav_settings": "Settings",
+  "nav_logout": "Logout",
+  "nav_profile": "Profile",
+  "nav_notifications": "Notifications",
+  "nav_documents": "ஆவண பெட்டகம்",
+  "nav_saved_schemes": "சேமிக்கப்பட்ட திட்டங்கள்",
+  "nav_civic_intelligence": "குடிமை நுண்ணறிவு",
+  "nav_analytics": "பகுப்பாய்வு மற்றும் நுண்ணறிவு",
+  "nav_about": "எங்களை பற்றி",
+  "nav_about_us": "எங்களை பற்றி",
+  "nav_contact": "எங்களைத் தொடர்பு கொள்ள",
+  "nav_contact_us": "எங்களைத் தொடர்பு கொள்ள",
+  "nav_tn_updates": "தமிழ்நாடு அப்டேட்ஸ்",
+  "nav_power_updates": "Power Updates",
+  "nav_public_pulse": "பப்ளிக் பல்ஸ்",
+  "pulse_power_updates": "Power Updates",
+  "pulse_power_updates_desc": "திட்டமிடப்பட்ட மின்சார பணிநிறுத்த அட்டவணை (TNPDCL)",
+  "pulse_flood_alerts": "வெள்ளம் & நீர்மட்ட எச்சரிக்கைகள்",
+  "pulse_flood_alerts_desc": "ஆற்றுப் படுகைகள் மற்றும் நீர்த்தேக்க எச்சரிக்கைகள்",
+  "pulse_emergency_alerts": "அவசரகால எச்சரிக்கைகள்",
+  "pulse_emergency_alerts_desc": "பேரிடர் மேலாண்மை & பொதுப் பாதுகாப்பு எச்சரிக்கைகள்",
+  "pulse_weather_alerts": "வானிலை முன்னறிவிப்பு",
+  "pulse_weather_alerts_desc": "5-நாள் பிராந்திய வானிலை முன்னறிவிப்பு & விவரங்கள்",
+  "pulse_transport_updates": "பொதுப் போக்குவரத்து தகவல்கள்",
+  "pulse_transport_updates_desc": "TNSTC, MTC & Metro Transit அறிவிப்புகள்",
+  "pulse_active": "செயலில்",
+  "pulse_coming_soon": "விரைவில்",
+  "power_updates_title": "Power Updates",
+  "power_updates_subtitle": "தமிழ்நாடு முழுவதும் திட்டமிடப்பட்ட மின்சார பணிநிறுத்த அட்டவணை.",
+  "power_updates_disclaimer": "CrowdCity ஒரு சுயாதீன குடிமை-தொழில்நுட்ப தளம். மின் தடை தரவு அதிகாரப்பூர்வ TNPDCL / TANGEDCO வெளியீடுகளில் இருந்து குறிப்பிடப்படுகிறது.",
+  "power_view_official": "அதிகாரப்பூர்வ TNPDCL Portal",
+  "power_source_label": "Source: TNPDCL",
+  "filter_district_all": "அனைத்து மாவட்டங்கள்",
+  "filter_area_placeholder": "வட்டம், துணை மின்நிலையம் அல்லது பகுதி வாரியாக Search செய்யவும்...",
+  "filter_date": "தேதியைத் தேர்ந்தெடுக்கவும்",
+  "tab_today": "இன்று",
+  "tab_tomorrow": "நாளை",
+  "tab_this_week": "இந்த வாரம்",
+  "tab_this_month": "இந்த மாதம்",
+  "tab_all": "அனைத்தும்",
+  "power_no_outages": "இந்த தேர்வுக்கு திட்டமிடப்பட்ட மின் வெட்டு எதுவும் இல்லை.",
+  "power_source_unavailable": "அதிகாரப்பூர்வ மின் பணிநிறுத்த அட்டவணைகள் TNPDCL / TANGEDCO மூலம் நேரடியாக வெளியிடப்படுகின்றன. தற்போதைய சுற்றறிக்கைகளை அதிகாரப்பூர்வ போர்ட்டலில் காணலாம்.",
+  "power_selected_location": "நீங்கள் தேர்ந்தெடுத்த மாவட்டத்திற்கான பணிநிறுத்தங்கள்:",
+  "power_time_window": "நேர இடைவெளி",
+  "power_affected_areas": "பாதிக்கப்பட்ட பகுதிகள்",
+  "power_last_updated": "கடைசியாக புதுப்பிக்கப்பட்டது:",
+  "stat_this_week": "இந்த வாரம்",
+  "stat_resolution_rate": "தீர்வு விகிதம்",
+  "stat_active_reports": "செயலில் உள்ள புகார்கள்",
+  "nav_admin": "நிர்வாகி பேனல்",
+  "nav_cases": "வழக்குகள்",
+  "status_pending": "நிலுவையில்",
+  "status_assigned": "ஒதுக்கப்பட்டது",
+  "status_in_progress": "செயலில் உள்ளது",
+  "status_resolved": "தீர்க்கப்பட்டது",
+  "status_rejected": "நிராகரிக்கப்பட்டது",
+  "status_verified": "சரிபார்க்கப்பட்டது",
+  "status_unlocked": "திறக்கப்பட்டது",
+  "status_locked": "பூட்டப்பட்டது",
+  "category_roads": "சாலைகள்",
+  "category_streetlights": "தெரு விளக்குகள்",
+  "category_water_supply": "நீர் வழங்கல்",
+  "category_drainage": "வடிகால்",
+  "category_garbage": "குப்பை",
+  "category_traffic": "போக்குவரத்து",
+  "category_public_property": "பொதுச்சொத்து",
+  "category_parks": "பூங்காக்கள்",
+  "category_sanitation": "சுகாதாரம்",
+  "category_safety_hazard": "பாதுகாப்பு ஆபத்து",
+  "category_environment": "சுற்றுச்சூழல்",
+  "category_other": "பிற",
+  "level_civic_novice": "குடிமை புதியவர்",
+  "level_local_watchdog": "உள்ளூர் கண்காணிப்பாளர்",
+  "level_civic_leader": "குடிமை தலைவர்",
+  "level_city_legend": "நகர புகழ்",
+  "level_master_watchdog": "சிறந்த கண்காணிப்பாளர்",
+  "level_hero_abbr": "நகர நாயகன் (நிலை {level})",
+  "sign_in": "Sign In",
+  "sign_up": "பதிவு செய்",
+  "email_address": "Email முகவரி",
+  "password": "Password",
+  "use_email_otp": "Email OTP பயன்படுத்தவும்",
+  "use_password": "Password பயன்படுத்தவும்",
+  "continue_with_google": "Google மூலம் தொடரவும்",
+  "send_otp": "OTP அனுப்பு",
+  "verify_sign_in": "சரிபார்த்து Sign In செய்யவும்",
+  "resend_otp_in": "OTP மீண்டும் அனுப்பு",
+  "resend_code_in": "குறியீட்டை மீண்டும் அனுப்பு",
+  "seconds_abbr": "வி",
+  "otp_sent": "OTP அனுப்பப்பட்டது",
+  "invalid_otp": "தவறான சரிபார்ப்புக் குறியீடு",
+  "forgot_password_q": "Password மறந்துவிட்டதா?",
+  "verification_code": "சரிபார்ப்புக் குறியீடு",
+  "otp_description": "உங்கள் Email முகவரிக்கு ஒருமுறை சரிபார்ப்புக் குறியீடு அனுப்பப்படும்.",
+  "continue_with_otp_arrow": "Email OTP மூலம் தொடரவும் →",
+  "forgot_password_desc": "உங்கள் Email முகவரியை உள்ளிடவும், Password மீட்டமைக்க இணைப்பை அனுப்புவோம்.",
+  "back_to_sign_in": "Sign In பக்கத்திற்குத் திரும்பு",
+  "reset_link_sent": "Password மீட்பு இணைப்பு அனுப்பப்பட்டது! உங்கள் Inbox சரிபாருங்கள்.",
+  "new_password": "புதிய Password",
+  "confirm_password": "புதிய Password உறுதிப்படுத்தவும்",
+  "change_password_btn": "Password மாற்றவும்",
+  "full_name": "முழுப்பெயர்",
+  "create_account": "கணக்கை உருவாக்கு",
+  "already_have_account": "ஏற்கனவே கணக்கு உள்ளதா? Sign In செய்யவும்",
+  "need_account": "கணக்கு இல்லையா? பதிவு செய்யவும்",
+  "role_citizen": "குடிமகன்",
+  "role_authority": "அதிகாரி",
+  "role_admin": "நிர்வாகி",
+  "hero_greeting_morning": "காலை வணக்கம், {name}",
+  "hero_greeting_afternoon": "மதிய வணக்கம், {name}",
+  "hero_greeting_evening": "மாலை வணக்கம், {name}",
+  "hero_desc_default": "உங்கள் பகுதியில் உள்ள குடிமை பிரச்சினைகளைப் புகாரளிக்கத் தொடங்குங்கள். ஒவ்வொரு புகாரும் அனைவருக்கும் சிறந்த நகரத்தை உருவாக்குகிறது.",
+  "hero_desc_stats": "நீங்கள் {total} புகார்களை சமர்ப்பித்துள்ளீர்கள், {resolved} தீர்க்கப்பட்டன. ஒவ்வொரு புகாரும் அனைவருக்கும் சிறந்த நகரத்தை உருவாக்குகிறது.",
+  "your_progress": "உங்கள் முன்னேற்றம்",
+  "reports_submitted": "சமர்ப்பிக்கப்பட்ட புகார்கள்",
+  "resolved_reports": "தீர்க்கப்பட்ட அறிக்கைகள்",
+  "resolved_issues": "தீர்க்கப்பட்ட பிரச்சினைகள்",
+  "in_progress_reports": "செயல்பாட்டில்",
+  "total_reports": "மொத்த அறிக்கைகள்",
+  "city_total_reports": "சமூகப் புகார்கள்",
+  "city_total_sub": "நகரம் முழுவதும்",
+  "current_points": "தற்போதைய புள்ளிகள்",
+  "community_rank": "சமூக தரவரிசை",
+  "rate_suffix": "விகிதம்",
+  "reports_feed": "புகார்கள் ஊட்டம்",
+  "community_activity": "சமூக செயல்பாடு",
+  "loading_city_updates": "நகர புதுப்பிப்புகள் ஏற்றப்படுகின்றன...",
+  "no_reports_found": "புகார்கள் இல்லை",
+  "no_members_found": "செயலில் உள்ள உறுப்பினர்கள் இல்லை.",
+  "no_notifications": "புதிய Notifications இல்லை",
+  "no_notifications_yet": "இதுவரை Notifications இல்லை",
+  "mark_all_read": "அனைத்தையும் படித்ததாகக் குறி",
+  "view_all_notifications": "அனைத்து Notifications-ஐயும் காண்",
+  "all_categories": "அனைத்து வகைகள்",
+  "all_statuses": "அனைத்து நிலைகள்",
+  "filter_category": "வகை வடிகட்டி",
+  "filter_status": "Status வடிகட்டி",
+  "feed_tab_recent": "சமீபத்திய",
+  "feed_tab_trending": "பிரபலமான",
+  "feed_tab_nearby": "அருகில்",
+  "feed_tab_resolved": "தீர்க்கப்பட்டவை",
+  "report_issue_btn": "புகார் அளி",
+  "view_complaints_btn": "புகார்களைக் காண்",
+  "operational_ticker": "அனைத்து நகராட்சி சேவைகளும் செயல்படுகின்றன. சமூக புகார்களுக்கு கீழே உள்ள ஊட்டத்தைப் பாருங்கள்.",
+  "badge_first_report_name": "முன்னோடி செய்தியாளர்",
+  "badge_first_report_desc": "CrowdCity-யில் உங்கள் முதல் குடிமை புகாரை சமர்ப்பித்ததற்கு வழங்கப்பட்டது.",
+  "badge_report_verified_name": "குடிமை பாதுகாவலர்",
+  "badge_report_verified_desc": "உங்கள் புகார்களில் ஒன்று பொதுப்பணி மூலம் வெற்றிகரமாக தீர்க்கப்பட்டதற்கு பெறப்பட்டது.",
+  "badge_comment_added_name": "நகர அறிவிப்பாளர்",
+  "badge_comment_added_desc": "உள்ளூர் அறிவைப் பகிர்ந்து, செயலில் உள்ள பிரச்சினைகளில் கருத்து தெரிவித்ததற்கு பெறப்பட்டது.",
+  "badge_vote_cast_name": "செயலில் வாக்காளர்",
+  "badge_vote_cast_desc": "குடிமை நடவடிக்கையை ஆதரித்து அருகிலுள்ள புகார்களை வாக்களித்ததற்கு வழங்கப்பட்டது.",
+  "member_since": "{date} முதல் உறுப்பினர்",
+  "contributions_summary": "கடந்த {months} மாதங்களில் {count} பங்களிப்புகள்",
+  "no_cases_reported": "இதுவரை வழக்குகள் பதிவாகவில்லை",
+  "no_cases_reported_desc": "நீங்கள் எந்த குடிமை உள்கட்டமைப்பு பிரச்சினைகளையும் புகாரளிக்கவில்லை. உங்கள் முதல் வழக்கை சமர்ப்பிக்க மேலே உள்ள பொத்தானைக் கிளிக் செய்யுங்கள்.",
+  "verified_solution": "சரிபார்க்கப்பட்ட தீர்வு:",
+  "resolved_successfully": "வெற்றிகரமாக தீர்க்கப்பட்டது.",
+  "view_proof_attachment": "முடிவு சான்று இணைப்பைக் காண்",
+  "declined_report_notice": "நிராகரிக்கப்பட்டது: புகார் மூடப்பட்டது அல்லது நகல்/பொருந்தாது எனக் குறிக்கப்பட்டது.",
+  "submitted_time_ago": "{time} முன்பு சமர்ப்பிக்கப்பட்டது",
+  "timeline_details": "காலவரிசை மற்றும் விவரங்கள்",
+  "try_again": "மீண்டும் முயற்சிக்கவும்",
+  "loading_dot": "ஏற்றுகிறது...",
+  "success_dot": "வெற்றி",
+  "error_dot": "பிழை",
+  "notifications_history_summary": "{unread} படிக்காதவை / {total} மொத்தம்",
+  "notification_history_empty_title": "உங்கள் Notifications வரலாறு காலியாக உள்ளது.",
+  "mark_as_read": "படித்ததாகக் குறி",
+  "day_0": "ஞாயிற்றுக்கிழமை",
+  "day_1": "திங்கட்கிழமை",
+  "day_2": "செவ்வாய்க்கிழமை",
+  "day_3": "புதன்கிழமை",
+  "day_4": "வியாழக்கிழமை",
+  "day_5": "வெள்ளிக்கிழமை",
+  "day_6": "சனிக்கிழமை",
+  "month_0": "ஜனவரி",
+  "month_1": "பிப்ரவரி",
+  "month_2": "மார்ச்",
+  "month_3": "ஏப்ரல்",
+  "month_4": "மே",
+  "month_5": "ஜூன்",
+  "month_6": "ஜூலை",
+  "month_7": "ஆகஸ்ட்",
+  "month_8": "செப்டம்பர்",
+  "month_9": "அக்டோபர்",
+  "month_10": "நவம்பர்",
+  "month_11": "டிசம்பர்",
+  "time_just_now": "இப்போது",
+  "time_yesterday": "நேற்று",
+  "time_mins_ago": "{mins} நிமிடம் முன்",
+  "time_hours_ago": "{hours} மணிநேரம் முன்",
+  "time_days_ago": "{days} நாள் முன்",
+  "recently_resolved_ticker": "சமீபத்தில் தீர்க்கப்பட்டது: \"<strong>{title}</strong>\" ({category}) {address} இல்.",
+  "new_report": "புதிய புகார்",
+  "sign_out": "Sign Out",
+  "search_placeholder": "தலைப்பு, வகை அல்லது முகவரி மூலம் Search செய்யவும்...",
+  "civic_assistant": "குடிமை உதவியாளர்",
+  "civic_ai_active": "Civic AI • Active",
+  "ask_civic_assistant": "குடிமை உதவியாளரிடம் கேளுங்கள்...",
+  "please_login_complaints": "உங்கள் புகார்களைக் காண Login செய்யவும்.",
+  "failed_load_complaints": "உங்கள் புகார்களை ஏற்ற முடியவில்லை",
+  "no_recent_activity": "சமீபத்திய சமூக செயல்பாடுகள் இல்லை.",
+  "inspector": "ஆய்வாளர்",
+  "profile": "Profile",
+  "settings": "Settings",
+  "map": "வரைபடம்",
+  "issue_details": "பிரச்சினை விவரங்கள்",
+  "reports": "அறிக்கைகள்",
+  "analytics": "பகுப்பாய்வு",
+  "admin_panel": "நிர்வாகி பேனல்",
+  "users": "பயனர்கள்",
+  "manage_users": "பயனர்களை நிர்வகி",
+  "authority_dashboard": "Authority Dashboard",
+  "all_reports": "அனைத்து அறிக்கைகள்",
+  "update_status": "Status புதுப்பி",
+  "comments": "கருத்துகள்",
+  "add_comment": "கருத்து சேர்",
+  "total_points": "மொத்த புள்ளிகள்",
+  "rank": "தரவரிசை",
+  "description": "விளக்கம்",
+  "location": "Location",
+  "submitted_by": "சமர்ப்பித்தவர்",
+  "save_changes": "மாற்றங்களை சேமி",
+  "update": "புதுப்பி",
+  "notification_settings": "Notification Settings",
+  "language": "மொழி",
+  "theme": "தீம்",
+  "appearance_language": "அமைப்பு மற்றும் மொழி",
+  "appearance_language_desc": "பயன்பாட்டு தீம் மற்றும் மொழி முன்னுரிமையைத் தனிப்பயனாக்குங்கள்.",
+  "appearance": "தோற்றம்",
+  "light_theme": "ஒளிரும் தீம்",
+  "dark_theme": "இருண்ட தீம்",
+  "recent_activity": "சமீபத்திய நடவடிக்கைகள்",
+  "quick_actions": "விரைவான செயல்கள்",
+  "view_map": "வரைபடத்தைக் காண்",
+  "emergency_center": "அவசர உதவி மையம்",
+  "emergency_contacts": "அவசர தொடர்புகள்",
+  "enable_notifications": "Notifications இயக்கவும்",
+  "sound": "ஒலி",
+  "vibration": "அதிர்வு",
+  "privacy": "தனியுரிமை",
+  "location_access": "Location அனுமதி",
+  "camera_access": "கேமரா அனுமதி",
+  "display": "திரை அமைப்பு",
+  "compact_mode": "நெருக்கமான முறை",
+  "reduce_animations": "அசைவூட்டங்களைக் குறை",
+  "account": "கணக்கு",
+  "edit_profile": "Profile திருத்து",
+  "change_password": "Password மாற்று",
+  "about_crowdcity": "கிரவுட்சிட்டி பற்றி",
+  "app_version": "பயன்பாட்டு பதிப்பு",
+  "phone": "தொலைபேசி",
+  "welcome_back": "மீண்டும் வருக",
+  "email_otp": "Email OTP",
+  "verify_otp": "OTP சரிபார்",
+  "reset_password": "Password மீட்டமைக்கவும்",
+  "update_password": "Password புதுப்பிக்கவும்",
+  "or": "அல்லது",
+  "status": "Status",
+  "category": "வகை",
+  "priority": "முன்னுரிமை",
+  "date": "தேதி",
+  "actions": "செயல்கள்",
+  "view": "பார்",
+  "delete": "நீக்கு",
+  "edit": "திருத்து",
+  "close": "மூடு",
+  "cancel": "ரத்துசெய்",
+  "confirm": "உறுதிப்படுத்து",
+  "submit": "சமர்ப்பி",
+  "back": "பின்",
+  "next": "அடுத்து",
+  "previous": "முந்தைய",
+  "search": "Search",
+  "total_users": "மொத்த பயனர்கள்",
+  "total_issues": "மொத்த பிரச்சினைகள்",
+  "resolution_rate": "தீர்வு விகிதம்",
+  "average_response_time": "சராசரி பதில் நேரம்",
+  "weekly_report": "வாராந்திர அறிக்கை",
+  "monthly_report": "மாதாந்திர அறிக்கை",
+  "yearly_report": "ஆண்டு அறிக்கை",
+  "authority_login": "Authority Login",
+  "sign_in_as_authority": "Authority ஆக Sign In செய்யவும்",
+  "manage_reports": "அறிக்கைகளை நிர்வகி",
+  "assigned_reports": "ஒதுக்கப்பட்ட அறிக்கைகள்",
+  "pending_review": "மதிப்பாய்வு நிலுவையில்",
+  "quick_stats": "விரைவு புள்ளிவிவரங்கள்",
+  "active_issues": "செயலில் உள்ள பிரச்சினைகள்",
+  "my_reports": "எனது அறிக்கைகள்",
+  "report_an_issue": "பிரச்சினையை புகாரளிக்கவும்",
+  "select_category": "வகையைத் தேர்ந்தெடுக்கவும்",
+  "upload_photo": "புகைப்படம் Upload செய்யவும்",
+  "enter_description": "விளக்கத்தை உள்ளிடவும்",
+  "enter_location": "Location உள்ளிடவும்",
+  "submit_report": "அறிக்கையை சமர்ப்பிக்கவும்",
+  "report_submitted": "அறிக்கை சமர்ப்பிக்கப்பட்டது",
+  "top_contributors": "முன்னணி பங்களிப்பாளர்கள்",
+  "your_rank": "உங்கள் தரவரிசை",
+  "points": "புள்ளிகள்",
+  "reports_count": "அறிக்கைகள்",
+  "resolved_count": "தீர்க்கப்பட்டவை",
+  "all_issues": "அனைத்து பிரச்சினைகள்",
+  "nearby_issues": "அருகிலுள்ள பிரச்சினைகள்",
+  "authority_notifications": "Authority Notifications",
+  "authority_profile": "Authority Profile",
+  "authority_settings": "Authority Settings",
+  "general_settings": "General Settings",
+  "account_settings": "Account Settings",
+  "dark_mode": "இருண்ட பயன்முறை",
+  "email_notifications": "Email Notifications",
+  "push_notifications": "Push Notifications",
+  "current_password": "தற்போதைய Password",
+  "enter_current_password": "தற்போதைய Password உள்ளிடவும்",
+  "badges": "பதக்கங்கள்",
+  "achievements": "சாதனைகள்",
+  "no_badges_yet": "இதுவரை பதக்கங்கள் பெறவில்லை",
+  "overview": "மேலோட்டம்",
+  "issue_timeline": "பிரச்சினை காலவரிசை",
+  "created_at": "உருவாக்கிய நாள்",
+  "updated_at": "புதுப்பிக்கப்பட்ட நாள்",
+  "resolution_details": "தீர்வு விவரங்கள்",
+  "proof_photo": "ஆதார புகைப்படம்",
+  "authority_response": "அதிகாரி பதில்",
+  "citizen_feedback": "குடிமக்கள் கருத்து",
+  "upvotes": "ஆதரவு வாக்குகள்",
+  "ward": "வார்டு",
+  "address": "முகவரி",
+  "all_wards": "அனைத்து வார்டுகள்",
+  "high": "உயர்",
+  "medium": "நடுத்தர",
+  "low": "குறைவு",
+  "urgent": "அவசரம்",
+  "sign_in_subtitle": "உங்கள் CrowdCity கணக்கில் Sign In செய்யவும்",
+  "create_account_subtitle": "CrowdCity-யில் சேர்ந்து புகார் செய்யத் தொடங்குங்கள்",
+  "forgot_password_title": "Password மறந்துவிட்டது",
+  "enter_email": "உங்கள் Email முகவரியை உள்ளிடவும்",
+  "enter_password": "உங்கள் Password உள்ளிடவும்",
+  "enter_full_name": "உங்கள் முழுப்பெயரை உள்ளிடவும்",
+  "reports_overview": "அறிக்கைகள் மேலோட்டம்",
+  "category_breakdown": "வகை பிரிவு",
+  "status_distribution": "Status பகிர்வு",
+  "trend_analysis": "போக்கு பகுப்பாய்வு",
+  "export_data": "தரவை ஏற்றுமதி செய்",
+  "refresh": "புதுப்பி",
+  "last_updated": "கடைசி புதுப்பிப்பு",
+  "no_data_available": "தரவு கிடைக்கவில்லை",
+  "view_details": "விவரங்களைக் காண்",
+  "back_to_dashboard": "Dashboard-க்குத் திரும்பு",
+  "assign_to": "ஒதுக்கு",
+  "add_note": "குறிப்பு சேர்",
+  "issue_history": "பிரச்சினை வரலாறு",
+  "resident_info": "குடியிருப்பாளர் தகவல்",
+  "contact_citizen": "குடிமகனைத் தொடர்புகொள்",
+  "authority_settings_desc": "உங்கள் உத்தியோகபூர்வ நகராட்சி Credentials, Profile தகவல்கள் மற்றும் Password விருப்பங்களை நிர்வகிக்கவும்.",
+  "inspector_credentials": "ஆய்வாளர் சான்றுகள்",
+  "inspector_credentials_desc": "நிர்வாகத்தால் வழங்கப்பட்ட உத்தியோகபூர்வ சான்றுகள். சரிபார்ப்பு நோக்கங்களுக்காக மட்டுமே வாசிக்கக்கூடியவை.",
+  "work_email": "Work Email",
+  "assigned_role": "ஒதுக்கப்பட்ட பாத்திரம்",
+  "verified_officer_status": "சரிபார்க்கப்பட்ட Officer கணக்கு • Active Status",
+  "change_portal_password": "Portal Password மாற்றவும்",
+  "change_portal_password_desc": "Portal பாதுகாப்பை பராமரிக்க உங்கள் Credentials புதுப்பிக்கவும். வலுவான alphanumeric Password தேர்ந்தெடுக்கவும்.",
+  "enter_new_password": "புதிய Password உள்ளிடவும்",
+  "confirm_new_password": "புதிய Password உறுதிப்படுத்தவும்",
+  "authorized_access": "அங்கீகரிக்கப்பட்ட அணுகல்",
+  "authority_portal_title": "CrowdCity AI Authority Portal",
+  "enter_official_email": "உங்கள் அதிகாரப்பூர்வ Email முகவரியை உள்ளிடவும்",
+  "access_dashboard": "Dashboard அணுகவும்",
+  "back_to_citizen_portal": "குடிமக்கள் போர்ட்டலுக்குத் திரும்பு",
+  "inspector_panel": "ஆய்வாளர் பேனல்",
+  "authority_operations_center": "அதிகார செயல்பாட்டு மையம்",
+  "authority_operations_desc": "ஒதுக்கப்பட்ட வழக்குகளைப் பார்க்கவும், Status இற்றைப்படுத்தவும், நிறைவு Photo ஆதாரங்களை Upload செய்யவும்.",
+  "total_cases": "மொத்த வழக்குகள்",
+  "assigned_cases_queue": "ஒதுக்கப்பட்ட வழக்குகள் வரிசை",
+  "all_cases": "அனைத்து வழக்குகள்",
+  "operations_guide": "செயல்பாட்டு வழிகாட்டி",
+  "ops_guide_step1": "வழக்குகளை மதிப்பாய்வு செய்யவும்: இடதுபுறத்தில் உள்ள உங்கள் வரிசையில் இருந்து ஒதுக்கப்பட்ட புகார் அறிக்கைகளைத் தேர்ந்தெடுக்கவும்.",
+  "ops_guide_step2": "Location ஆய்வு செய்யவும்: Coordinates அல்லது முகவரிக் குறிப்புகளைக் கண்டு ஆய்வு செய்யச் செல்லவும்.",
+  "ops_guide_step3": "Dispatch புதுப்பிக்கவும்: குடிமக்களுக்குத் தெரிவிக்க Status-ஐ In Progress என மாற்ற Update Status பொத்தானைக் கிளிக் செய்யவும்.",
+  "ops_guide_step4": "Resolve & Prove: பழுதுபார்ப்பு முடிந்ததும், Status-ஐ Resolved என அமைத்து, நிறைவு Photo ஆதாரத்தை Upload செய்யவும்.",
+  "update_case_dispatch": "வழக்கு நிலையை இற்றைப்படுத்து",
+  "update_status_required": "Status புதுப்பி *",
+  "remarks_notes_required": "குறிப்புகள் / அனுப்புதல் குறிப்புகள் *",
+  "remarks_placeholder": "விளக்கப் புதுப்பிப்புகளை வழங்கவும் (எ.கா. ஆய்வாளர் தளம் சென்றுள்ளார், பழுதுபார்க்கும் பணி செயலில் உள்ளது...)",
+  "upload_completion_proof": "நிறைவு Photo ஆதாரம் Upload செய்க *",
+  "click_upload_proof": "Photo ஆதாரம் Upload செய்ய கிளிக் செய்யவும்",
+  "clear": "துடைக்கவும்",
+  "admin_panel_title": "CrowdCity AI Administration Center",
+  "admin_panel_desc": "நகர அளவீடுகளின் மேலோட்டத்தைப் பார்க்கவும், புகார்களைப் பிரிக்கவும் மற்றும் பாத்திரங்களை நிர்வகிக்கவும்.",
+  "analytics_overview": "பகுப்பாய்வு மேலோட்டம்",
+  "user_management": "பயனர் மேலாண்மை",
+  "complaint_queue": "புகார் வரிசை",
+  "ai_monitor": "AI Monitor",
+  "reports_center": "அறிக்கைகள் மையம்",
+  "authorities": "அதிகாரிகள்",
+  "complaints_by_category": "வகைகளின்படி புகார்கள்",
+  "complaints_by_status": "Status வாரியாக புகார்கள்",
+  "inspector_resolution_performance": "ஆய்வாளர் தீர்வு செயல்திறன்",
+  "search_users_placeholder": "பயனர்களை பெயர் அல்லது Email மூலம் Search செய்யவும்...",
+  "all_roles": "அனைத்து பாத்திரங்கள்",
+  "registration_date": "பதிவு தேதி",
+  "verify_authority": "அதிகாரியை சரிபார்க்கவும்",
+  "department_assignment": "துறை ஒதுக்கீடு",
+  "status_suspension": "Status / Suspension",
+  "overall_complaints_queue": "ஒட்டுமொத்த புகார்கள் வரிசை",
+  "city_departments_manager": "நகரத் துறைகள் மேலாளர்",
+  "city_departments_desc": "புகார்களை வழிநடத்துவதற்கான நகராட்சித் துறைகளை உருவாக்கவும், திருத்தவும் மற்றும் நீக்கவும்.",
+  "add_new_department": "புதிய துறையைச் சேர்",
+  "create_department": "துறையை உருவாக்கு",
+  "dept_name_required": "துறை பெயர் *",
+  "dept_name_placeholder": "எ.கா. சாலை மற்றும் போக்குவரத்து துறை",
+  "dept_code_required": "தனித்துவமான குறியீடு (பெரிய எழுத்து) *",
+  "dept_code_placeholder": "எ.கா. ROAD",
+  "dept_desc_placeholder": "இந்தத் துறையின் பொறுப்புகளை விளக்கவும்...",
+  "save_department": "துறையைச் சேமி",
+  "code": "குறியீடு",
+  "department_name": "துறையின் பெயர்",
+  "ai_decisions_auditor": "AI Decisions Auditor",
+  "ai_decisions_desc": "CrowdCity AI Models கணிப்புகளைத் தணிக்கை செய்து துறை Overrides செய்யவும்.",
+  "override_ai_prediction": "AI Prediction Override செய்க",
+  "assigned_department": "ஒதுக்கப்பட்ட துறை",
+  "priority_severity": "முன்னுரிமை தீவிரத்தன்மை",
+  "apply_override": "மேலெழுதலைப் பயன்படுத்து",
+  "complaint": "புகார்",
+  "selected_category": "தேர்ந்தெடுக்கப்பட்ட வகை",
+  "ai_predicted_category": "AI Predicted Category",
+  "ai_assigned_department": "AI Assigned Department",
+  "ai_priority": "AI Priority",
+  "audit_match": "தணிக்கை பொருத்தம்",
+  "auditing": "தணிக்கை செய்தல்",
+  "reports_export_center": "அறிக்கைகள் ஏற்றுமதி மையம்",
+  "reports_export_desc": "நகர செயல்பாட்டு அறிக்கைகளை Download செய்யவும். கால அளவு மற்றும் Output Format தேர்ந்தெடுக்கவும்.",
+  "report_timeframe_range": "அறிக்கை கால அளவு",
+  "daily_report": "தினசரி அறிக்கை (கடந்த 24 மணிநேரம்)",
+  "output_layout_format": "வெளியீட்டு வடிவம்",
+  "excel_format": "Excel விரிதாள் (.CSV)",
+  "pdf_format": "அச்சிடக்கூடிய PDF அறிக்கை (.HTML)",
+  "generate_export_report": "அறிக்கையை உருவாக்கி ஏற்றுமதி செய்",
+  "admin_footer_text": "© 2026 CrowdCity AI - Administrative Operations Console. All rights reserved.",
+  "advanced_civic_analytics_title": "மேம்பட்ட நகரப் பகுப்பாய்வு",
+  "advanced_civic_analytics_desc": "குடிமை புகார்கள், தீர்வு வேகம் மற்றும் ஆபத்து வரைபடங்களின் பகுப்பாய்வு.",
+  "filters": "வடிகட்டிகள்",
+  "all_time": "அனைத்து காலம்",
+  "last_30_days": "கடந்த 30 நாட்கள்",
+  "last_90_days": "கடந்த 90 நாட்கள்",
+  "last_6_months": "கடந்த 6 மாதங்கள்",
+  "resolved_cases": "தீர்க்கப்பட்ட வழக்குகள்",
+  "hotspot_points": "அதிக பாதிப்பு புள்ளிகள்",
+  "ai_insights_title": "AI-Generated City Insights",
+  "realtime_diagnostics": "உண்மை நேர கண்டறிதல்",
+  "heatmap_title": "புகார் வரைபடம்",
+  "heatmap_overlay": "புகார் வரைபடம் மேலடுக்கு",
+  "neighborhood_distribution": "பகுதி விநியோகம்",
+  "monthly_reporting_trends": "மாதாந்திர அறிக்கை போக்குகள்",
+  "responsible_dept_performance": "துறை தீர்வு செயல்திறன்",
+  "dept_efficiency_scorecard": "துறை செயல்திறன் மதிப்பெண் அட்டை",
+  "hazards_reported": "புகாரளிக்கப்பட்ட ஆபத்துகள்",
+  "no_resolutions_yet": "இதுவரை தீர்வுகள் இல்லை",
+  "outside_service_area_error": "தற்போது, CrowdCity AI தமிழ்நாடு எல்லைக்குள் மட்டுமே புகாரளிக்க அனுமதிக்கிறது. விரைவில் மற்ற மாநிலங்களுக்கும் விரிவாக்குகிறோம்.",
+  "dashboard": "Dashboard",
+  "auth_hero_title": "தூய்மையான மற்றும் பாதுகாப்பான சுற்றுப்புறங்களை உருவாக்க குடிமக்களை ஊக்குவித்தல்.",
+  "auth_hero_subtitle": "CrowdCity என்பது குடிமக்கள் சாலைப் பள்ளங்கள், குப்பைக் குவியல்கள், குடிநீர் கசிவுகள் மற்றும் தெருவிளக்கு பழுதுகள் போன்ற பொதுப் பிரச்சினைகளைப் புகாரளிக்கவும், அவற்றை நகராட்சித் துறைகளுடன் நேரடியாக இணைத்து தீர்க்கவும் உதவும் ஒரு AI தளம் ஆகும்.",
+  "crowdcity_ai_portal": "CrowdCity AI Portal",
+  "auth_portal_subtitle": "குடிமை புகாரளிப்பு மற்றும் நகராட்சி சேவை நிர்வாகத்திற்கான பாதுகாப்பான அணுகல்.",
+  "forgot_password": "Password மறந்துவிட்டதா?",
+  "sign_in_with_email_otp": "Email OTP மூலம் Sign In செய்யவும்",
+  "otp_promo_subtitle": "உங்கள் Email முகவரிக்கு அனுப்பப்படும் ஒருமுறை சரிபார்ப்புக் குறியீட்டைப் பெறவும்.",
+  "resend_otp": "மீண்டும் OTP அனுப்பு",
+  "use_password_instead": "← Password பயன்படுத்தவும்",
+  "password_strength": "Password வலிமை:",
+  "reset_password_description": "உங்கள் Email முகவரியை உள்ளிட்டு Password மீட்டமைப்பு இணைப்பைப் பெறுக.",
+  "resend_code": "மீண்டும் குறியீட்டை அனுப்பு",
+  "or_continue_with": "அல்லது இதனுடன் தொடரவும்",
+  "secure_authentication": "பாதுகாப்பான அங்கீகாரம்",
+  "role_based_access_control": "பங்கு அடிப்படையிலான அணுகல் கட்டுப்பாடு",
+  "authority_portal": "அதிகாரிகள் போர்டல்",
+  "government_officials_only": "அரசு அதிகாரிகள் மட்டுமே",
+  "open_portal": "போர்டலைத் திறக்கவும்",
+  "authentication_successful": "அங்கீகாரம் வெற்றிகரமாக முடிந்தது",
+  "send_recovery_link": "மீட்பு இணைப்பை அனுப்பு",
+  "verify_code": "குறியீட்டைச் சரிபார்",
+  "notifications": "Notifications",
+  "logout": "Logout",
+  "in_progress": "செயல்பாட்டில்",
+  "detected_category": "கண்டறியப்பட்ட வகை",
+  "assigned": "ஒதுக்கப்பட்டது",
+  "resolved": "தீர்க்கப்பட்டது",
+  "rejected": "நிராகரிக்கப்பட்டது",
+  "notification_history": "Notification History",
+  "active_streak": "செயலில் உள்ள தொடர்",
+  "my_complaints": "எனது புகார்கள்",
+  "view_complaints": "புகார்களைக் காண்க",
+  "recent": "சமீபத்திய",
+  "trending": "பிரபலமான",
+  "nearby": "அருகிலுள்ள",
+  "cat_roads": "சாலைகள்",
+  "cat_streetlights": "தெருவிளக்குகள்",
+  "cat_water_supply": "குடிநீர் வழங்கல்",
+  "cat_drainage": "வடிகால்",
+  "cat_garbage": "குப்பை",
+  "cat_traffic": "போக்குவரத்து",
+  "cat_public_property": "பொது சொத்து",
+  "cat_parks": "பூங்காக்கள்",
+  "cat_sanitation": "சுகாதாரம்",
+  "cat_safety_hazard": "பாதுகாப்பு ஆபத்து",
+  "cat_environment": "சுற்றுச்சூழல்",
+  "cat_other": "மற்றவை",
+  "pending": "நிலுவையில்",
+  "no_new_notifications": "புதிய Notifications இல்லை",
+  "redirecting_to_dashboard": "Dashboard-க்கு திருப்பி விடப்படுகிறது...",
+  "verify_resolution": "தீர்வைச் சரிபார்",
+  "approve_and_verify": "அங்கீகரித்து சரிபார்",
+  "reopen_complaint": "புகாரை மீண்டும் திறக்கவும்",
+  "work_resolution_details": "தீர்வுப் பணி விவரங்கள்",
+  "completion_notes": "முடிவு குறிப்புகள்",
+  "completion_proof_image": "முடிவு ஆதாரப் படம்",
+  "reported": "புகாரளிக்கப்பட்டது",
+  "verified": "சரிபார்க்கப்பட்டது",
+  "discussion": "விவாதம்",
+  "post_comment": "கருத்து இடுகையிடவும்",
+  "control_panel": "கட்டுப்பாட்டு குழு",
+  "delete_issue": "புகாரை நீக்குக",
+  "ai_analysis_insights": "AI Analysis Insights",
+  "ai_brief_summary": "AI Brief Summary",
+  "ai_category": "AI Category",
+  "location_map": "Location Map",
+  "latitude": "அட்சரேகை:",
+  "longitude": "தீர்க்கரேகை:",
+  "status_history": "Status History",
+  "timeline_update_keep": "Timeline Update (Status மாற்றாமல் வைத்திருங்கள்)",
+  "issue_reported": "புகாரளிக்கப்பட்ட பிரச்சினை",
+  "add_comment_placeholder": "பொதுவான கருத்து அல்லது ஆலோசனையைச் சேர்க்கவும்...",
+  "explain_resolution_work": "செய்யப்பட்ட தீர்வுப் பணியை விவரிக்கவும்...",
+  "map_view": "வரைபடக் காட்சி",
+  "ai_assisted_report": "AI-Assisted Report",
+  "community_rankings": "சமூக தரவரிசை",
+  "community_rankings_description": "சமூகத்தில் சிறப்பாகச் செயல்படும் குடிமக்களை அங்கீகரித்தல்.",
+  "citizen_standings": "குடிமக்கள் நிலை",
+  "your_badge_chest": "உங்கள் பேட்ஜ் பெட்டி",
+  "nearby_civic_map": "அருகிலுள்ள குடிமை வரைபடம்",
+  "nearby_civic_map_description": "நகரத்தைச் சுற்றி பதிவாகியுள்ள குடிமை புகார்களைக் கண்டறியவும்.",
+  "roads": "சாலைகள்",
+  "streetlights": "தெருவிளக்குகள்",
+  "water_supply": "குடிநீர் வழங்கல்",
+  "drainage": "வடிகால்",
+  "garbage": "குப்பை",
+  "traffic": "போக்குவரத்து",
+  "public_property": "பொது சொத்து",
+  "parks": "பூங்காக்கள்",
+  "sanitation": "சுகாதாரம்",
+  "safety_hazard": "பாதுகாப்பு ஆபத்து",
+  "environment": "சுற்றுச்சூழல்",
+  "other": "மற்றவை",
+  "map_layer_type": "வரைபட அடுக்கு வகை",
+  "marker_clusters": "மார்க்கர் தொகுப்புகள்",
+  "hotspot_heatmap": "பாதிப்பு பகுதிகள் வரைபடம்",
+  "no_issue_selected": "எந்தப் பிரச்சினையும் தேர்ந்தெடுக்கப்படவில்லை",
+  "click_map_marker_hint": "விவரங்களைக் காண வரைபட மார்க்கரைக் கிளிக் செய்யவும்.",
+  "search_by_description_or_address": "விவரம் அல்லது முகவரி மூலம் Search செய்யவும்...",
+  "my_tracked_cases": "எனது கண்காணிக்கப்படும் வழக்குகள்",
+  "my_tracked_cases_desc": "நீங்கள் சமர்ப்பித்த புகார்களின் தற்போதைய நிலையை இங்கே கண்காணிக்கலாம்.",
+  "file_another": "மற்றொரு புகாரை பதிவு செய்",
+  "streak": "தொடர் நாட்கள்",
+  "activity": "செயல்பாடு",
+  "reports_filed": "சமர்ப்பிக்கப்பட்ட அறிக்கைகள்",
+  "rank_progression": "தரவரிசை முன்னேற்றம்",
+  "community_impact_metrics": "சமூக தாக்க அளவீடுகள்",
+  "civic_engagement_calendar": "குடிமை ஈடுபாடு காலண்டர்",
+  "learn_how_points_scored": "புள்ளிகள் எவ்வாறு பெறப்படுகின்றன என்பதை அறியவும்",
+  "less": "குறைவாக",
+  "more": "அதிகமாக",
+  "unlocked_medal_chest": "திறக்கப்பட்ட பதக்க பெட்டி",
+  "reporting_activity": "புகாரளிப்பு செயல்பாடு",
+  "report_civic_issue_desc": "உங்கள் பகுதியில் உள்ள உள்கட்டமைப்பு அல்லது பாதுகாப்புப் பிரச்சினை பற்றிய விவரங்களை வழங்கவும். எங்கள் AI தானாக உரிய துறைக்கு வழிநடத்தும்.",
+  "issue_category": "பிரச்சினை வகை",
+  "detailed_description": "விரிவான விளக்கம்",
+  "auto_categorize_ai": "AI மூலம் தானாக வகைப்படுத்துக",
+  "use_gps": "GPS பயன்படுத்துக",
+  "click_to_set_pin": "பின் அமைக்க வரைபடத்தில் சொடுக்கவும்",
+  "photo_evidence": "புகைப்பட ஆதாரம்",
+  "drag_drop_images": "படங்களை இழுத்து இங்கே போடவும்",
+  "supported_formats": "ஆதரிக்கப்படும் வடிவங்கள்: JPG, PNG, அதிகபட்சம் 10MB",
+  "remove": "நீக்கு",
+  "guidelines": "வழிகாட்டுதல்கள்",
+  "guideline_photos": "பிரச்சினையின் தெளிவான Photos Upload செய்யவும்.",
+  "guideline_context": "சரியான திணைக்களத்திற்கு அனுப்ப விவரங்களை வழங்கவும்.",
+  "guideline_emergency": "அவசரகாலப் பிரச்சினை என்றால் உடனடியாக அவசர எண்ணை அழைக்கவும்.",
+  "analyzing_civic_report": "குடிமை அறிக்கையை பகுப்பாய்வு செய்கிறது...",
+  "analyzing_description": "CrowdCity AI உங்கள் விவரங்களை ஆய்வு செய்து, தானாக வகைப்படுத்தி, துறை மற்றும் தீவிரத்தன்மையை ஒதுக்குகிறது...",
+  "ai_analysis_complete": "AI Analysis Complete!",
+  "generated_summary": "உருவாக்கப்பட்ட சுருக்கம்",
+  "priority_level": "முன்னுரிமை நிலை",
+  "describe_issue_placeholder": "பிரச்சினையை விவரிக்கவும், அதன் தீவிரம் மற்றும் ஆபத்துக்களைப் பற்றி எழுதவும்...",
+  "enter_address_placeholder": "முகவரியை உள்ளிடவும் அல்லது வரைபடத்தில் பின் செய்யவும்",
+  "account_security": "கணக்கு பாதுகாப்பு",
+  "back_to_authority_login": "Authority Login பக்கத்திற்குத் திரும்புக",
+  "settings_description": "உங்கள் Citizen Profile விவரங்களை நிர்வகிக்கவும், Points பார்க்கவும் மற்றும் Password புதுப்பிக்கவும்.",
+  "citizen_profile": "Citizen Profile",
+  "citizen_profile_description": "உங்கள் Profile விவரங்கள் மற்றும் Civic Credentials. சரிபார்ப்பிற்காக முழுப் பெயர் மற்றும் Email முகவரி மாற்ற முடியாது.",
+  "change_password_description": "கணக்கைப் பாதுகாக்க தவறாமல் Password புதுப்பிக்கவும். வலுவான alphanumeric Password தேர்ந்தெடுக்கவும்.",
+  "confirm_new_password_placeholder": "புதிய Password உறுதிப்படுத்தவும்",
+  "enter_email_placeholder": "உங்கள் Email முகவரியை உள்ளிடவும்",
+  "enter_password_placeholder": "உங்கள் Password உள்ளிடவும்",
+  "enter_full_name_placeholder": "உங்கள் முழுப் பெயரை உள்ளிடவும்",
+  "create_password_placeholder": "Password ஒன்றை உருவாக்கவும்",
+  "confirm_password_placeholder": "உங்கள் Password உறுதிப்படுத்தவும்",
+  "email_placeholder": "you@example.com",
+  "otp_placeholder": "000000",
+  "new_password_placeholder": "புதிய Password உள்ளிடவும்",
+  "reported_on": "{date} அன்று புகார் அளிக்கப்பட்டது",
+  "profile_no_comments": "இதுவரை கருத்துகள் இல்லை. உரையாடலைத் தொடங்குங்கள்!",
+  "profile_no_activity": "புகார் செயல்பாடு எதுவும் பதிவு செய்யப்படவில்லை. உங்கள் காலவரிசையைத் தொடங்க ஒரு புகாரைச் சமர்ப்பிக்கவும்!",
+  "profile_streak": "{streak}-நாள் தொடர்",
+  "profile_impact_empty": "நீங்கள் இன்னும் எந்தப் புகாரையும் சமர்ப்பிக்கவில்லை. புள்ளிகளைப் பெறவும் சுற்றுப்புறத்தை மேம்படுத்தவும் உள்ளூர் சிக்கல்களைப் புகாரளிக்கத் தொடங்குங்கள்!",
+  "profile_impact_stats": "உங்கள் புகாரளிக்கும் முயற்சிகள் நேரடியாக {resolved} சிக்கல்களைத் தீர்க்க உதவியுள்ளன, சமர்ப்பிக்கப்பட்ட வழக்குகளுக்கான நகராட்சி பதிலளிப்பை {rate}% மேம்படுத்துகிறது!",
+  "profile_xp_tip_legend": "நீங்கள் ஒரு நகர இதிகாசம் (சிட்டி லெஜண்ட்)! உங்கள் சிறந்த பணியைத் தொடருங்கள்!",
+  "profile_xp_tip_next": "{rank} நிலைக்கு முன்னேற இன்னும் {points} புள்ளிகளைப் பெறுங்கள்!",
+  "resolution_rate_stats": "நீங்கள் புகாரளித்த சிக்கல்களில் {rate}% முழுமையாகத் தீர்க்கப்பட்டுள்ளன.",
+  "badge_report_5_name": "குடிமை சாம்பியன்",
+  "badge_report_5_desc": "5 சமூக புகார்களைப் புகாரளித்துள்ளார்.",
+  "badge_comment_5_name": "நகரத்தின் குரல்",
+  "badge_comment_5_desc": "5 கலந்துரையாடல் கருத்துகளைப் பங்களித்துள்ளார்.",
+  "badge_upvote_5_name": "குரல் கொடுக்கும் குடிமகன்",
+  "badge_upvote_5_desc": "5 சமூக புகார்களுக்கு வாக்களித்துள்ளார்.",
+  "badge_resolve_1_name": "நகர்ப்புற மீட்பாளர்",
+  "badge_resolve_1_desc": "நீங்கள் புகாரளித்த சிக்கல் வெற்றிகரமாக சரிசெய்யப்பட்டது.",
+  "badge_status_unlocked": "திறக்கப்பட்டது",
+  "badge_status_locked": "பூட்டப்பட்டது",
+  "badge_awarded_date": "{date} அன்று வழங்கப்பட்டது",
+  "by_author": "{name} மூலம்",
+  "proximity_alert": "அருகாமை எச்சரிக்கை: உங்கள் இருப்பிடத்திலிருந்து 500 மீட்டருக்குள் {count} சிக்கல்கள் பதிவாகியுள்ளன!",
+  "no_resolution_notes": "தீர்வு குறிப்புகள் எதுவும் வழங்கப்படவில்லை.",
+  "no_summary_generated": "சுருக்கம் எதுவும் உருவாக்கப்படவில்லை.",
+  "complaint_saved_success": "புகார் பொது Database-ல் வெற்றிகரமாக சேமிக்கப்பட்டது.",
+  "user_you": "நீங்கள்",
+  "get_directions": "வழிமுறைகளைப் பெறுக",
+  "details": "விவரங்கள்",
+  "connecting": "இணைக்கப்படுகிறது...",
+  "initializing": "துவக்குகிறது...",
+  "verifying": "சரிபார்க்கிறது...",
+  "sending": "அனுப்பப்படுகிறது...",
+  "slideshow_caption_1": "கத்திப்பாரா மேம்பாலம், சென்னை",
+  "slideshow_caption_2": "காந்திபுரம் மேம்பாலம், கோயம்புத்தூர்",
+  "slideshow_caption_3": "மீனாட்சி அம்மன் கோவில் & ஸ்மார்ட் சந்திப்பு, மதுரை",
+  "slideshow_caption_4": "மலைக்கோட்டை & காவிரி பாலம், திருச்சி",
+  "slideshow_caption_5": "நாமக்கல் மலைக்கோட்டை",
+  "slideshow_caption_6": "சென்னை மெட்ரோ குடிநீர் உள்கட்டமைப்பு",
+  "slideshow_caption_7": "📍 நாமக்கல் நகரம் - மலைக்கோட்டை பாரம்பரியம்",
+  "slideshow_caption_8": "📍 நாமக்கல் நகரம் - ஸ்மார்ட் சிக்னல் அமைப்பு",
+  "active_deployment_city": "செயலில் உள்ள நகரம்",
+  "govt_of_tamilnadu": "தமிழ்நாடு அரசு",
+  "smart_civic_platform": "ஸ்மார்ட் குடிமக்கள் சேவை தளம்",
+  "slideshow_desc_1_line1": "கத்திப்பாரா சந்திப்பு சென்னையின் மேம்பட்ட போக்குவரத்து அமைப்பை காட்டுகிறது.",
+  "slideshow_desc_1_line2": "AI-ஒருங்கிணைந்த போக்குவரத்து கண்காணிப்பு மூலம் பயணம் எளிதாகிறது.",
+  "slideshow_desc_2_line1": "காந்திபுரம் மேம்பாலம் கோயம்புத்தூரின் பிராந்திய போக்குவரத்தை மேம்படுத்துகிறது.",
+  "slideshow_desc_2_line2": "நவீன கேமராக்கள் சுத்தமான மற்றும் பாதுகாப்பான தெருக்களை உறுதி செய்கின்றன.",
+  "slideshow_desc_3_line1": "மதுரை பழங்கால பாரம்பரியத்தை புதிய ஸ்மார்ட் கட்டமைப்புடன் இணைக்கிறது.",
+  "slideshow_desc_3_line2": "ஒருங்கிணைந்த சென்சார்கள் பாதுகாப்பு மற்றும் விளக்குகளை மேம்படுத்துகின்றன.",
+  "slideshow_desc_4_line1": "வரலாற்று சிறப்புமிக்க காவிரி பாலம் திருச்சியின் பாரம்பரியத்தை காட்டுகிறது.",
+  "slideshow_desc_4_line2": "ஸ்மார்ட் அமைப்புகள் நீர் மற்றும் மின்சார விநியோகத்தை கண்காணிக்கின்றன.",
+  "slideshow_desc_5_line1": "நாமக்கல் கோட்டை எங்களது புதிய செயல்பாட்டு மையமாக விளங்குகிறது.",
+  "slideshow_desc_5_line2": "AI கழிவு மேலாண்மை மற்றும் சோலார் தெருவிளக்குகள் நகரை இயக்குகின்றன.",
+  "search_districts": "Search districts...",
+  "helpline_desc": "தமிழ்நாட்டின் 38 மாவட்டங்களின் அதிகாரப்பூர்வ தொடர்புகள்.",
+  "call_collector": "மாவட்ட ஆட்சியர் அலுவலகத்தை அழைக்கவும்",
+  "email_collector": "Email Collector",
+  "visit_website": "இணையதளத்தைப் பார்வையிடவும்",
+  "central_grievance": "மத்திய குறைதீர்க்கும் பிரிவு (முதல்வரின் முகவரி)",
+  "state_level": "மாநில அளவிலான போர்டல்",
+  "live_support": "24/7 சேவை",
+  "cm_helpline_label": "முதலமைச்சர் உதவி எண்",
+  "municipal_helpline_label": "மாநகராட்சி உதவி எண்",
+  "visit_grievance_portal": "முதல்வரின் முகவரி போர்ட்டலை பார்வையிடவும்",
+  "district_directory": "மாவட்ட அதிகாரப்பூர்வ அடைவு",
+  "districts_loaded": "மாவட்டங்கள் உள்ளன",
+  "nav_ministers": "அமைச்சரவை",
+  "search_ministers": "Search ministers, responsibilities, or departments...",
+  "cabinet_leadership": "அமைச்சரவை தலைமை",
+  "portfolio": "பொறுப்புகள்",
+  "departments": "துறைகள்",
+  "ministers_loaded": "அமைச்சர்கள் உள்ளனர்",
+  "call_minister": "அலுவலகத்தை அழைக்கவும்",
+  "email_minister": "Email Minister",
+  "constituency_label": "சட்டமன்ற தொகுதி",
+  "office_location_label": "அலுவலக அறை",
+  "biography_label": "வாழ்க்கைக்குறிப்பு மற்றும் முக்கியப் பணிகள்",
+  "nav_services": "அரசு சேவைகள்",
+  "services_title": "அரசு சேவைகள் மையம்",
+  "services_subtitle": "தமிழ்நாடு மற்றும் இந்திய குடிமக்களுக்கான AI Digital Citizen Services",
+  "explore_services": "அரசு சேவைகளை ஆராய்க",
+  "ai_explanation_title": "AI Qualification Explanation",
+  "ai_why_qualify": "நீங்கள் ஏன் தகுதி பெறுகிறீர்கள்",
+  "ai_main_benefits": "முக்கிய நன்மைகள்",
+  "ai_required_docs": "தேவையான ஆவணங்கள்",
+  "ai_important_notes": "முக்கிய குறிப்புகள்",
+  "citizen_services_dashboard": "Citizen Services Dashboard",
+  "citizen_portal": "குடிமகன் போர்டல்",
+  "profile_status": "Profile Status",
+  "scheme_eligibility": "திட்ட தகுதி",
+  "check_welfare_qualification": "நலத்திட்ட தகுதியை சரிபார்க்கவும்",
+  "files_uploaded": "Files Upload செய்யப்பட்டன",
+  "ai_assistant": "AI Assistant",
+  "ask_scheme_guidance": "திட்ட வழிகாட்டுதலைக் கேட்கவும்",
+  "office_locator": "அலுவலக இருப்பிடம்",
+  "find_esevai_taluk": "இ-சேவை & தாலுக் அலுவலகங்களை கண்டறியவும்",
+  "proactive_ai_recommendations": "Proactive AI Recommendations",
+  "ask_ai": "Ask AI →",
+  "proactive_ai_match": "Proactive AI Match",
+  "saved_welfare_schemes": "சேமிக்கப்பட்ட நலத்திட்டங்கள்",
+  "view_all": "அனைத்தையும் பார் →",
+  "document_wallet_readiness": "ஆவண வாலட் தயார்நிலை",
+  "manage_wallet": "வாலட்டை நிர்வகிக்கவும் →",
+  "need_application_help": "விண்ணப்பிக்க உதவி தேவையா?",
+  "ask_ai_assistant_desc": "எங்கள் AI Government Assistant-இடம் தகுதி விதிகள், ஆவணப் பட்டியல் மற்றும் விண்ணப்பிக்கும் படிகளைக் கேட்கவும்.",
+  "ask_ai_assistant_btn": "Ask AI Assistant",
+  "my_saved_schemes": "எனது சேமிக்கப்பட்ட திட்டங்கள்",
+  "my_document_wallet": "எனது ஆவண வாலட்",
+  "scheme_eligibility_checker": "திட்ட தகுதி சரிபார்ப்பான்",
+  "ai_document_verification": "AI Document Verification Assistant",
+  "ai_form_filling": "AI Form Filling Assistant",
+  "government_office_locator": "அரசு அலுவலக இருப்பிடம்",
+  "government_application_tracker": "அரசு விண்ணப்பக் கண்காணிப்பான்",
+  "smart_reminder_center": "ஸ்மார்ட் நினைவூட்டல் மையம்",
+  "nav_transportation": "போக்குவரத்து",
+  "choose_issue_type": "பிரச்சினை வகையைத் தேர்ந்தெடுக்கவும்",
+  "report_details": "அறிக்கை விவரங்கள்",
+  "ai_review": "AI Review",
+  "civic_issue": "குடிமைப் பிரச்சினை",
+  "transportation_issue": "போக்குவரத்துப் பிரச்சினை",
+  "examples_label": "எடுத்துக்காட்டுகள்:",
+  "step_1": "படி 1",
+  "step_2": "படி 2",
+  "step_3": "படி 3",
+  "category_social_welfare": "சமூக நலன்",
+  "category_education": "கல்வி மற்றும் இளைஞர்",
+  "category_health": "சுகாதாரம் மற்றும் காப்பீடு",
+  "category_agriculture": "வேளாண்மை மற்றும் விவசாயிகள்",
+  "category_skill_dev": "திறன் மேம்பாடு",
+  "about_tag": "CROWDCITY AI PLATFORM",
+  "about_hero_title": "சிறந்த தமிழ்நாடு அரசிற்கான குடிமக்கள் அதிகாரம்.",
+  "about_hero_sub": "CrowdCity AI உங்கள் அனைத்திற்குமான ஒரே Digital Civic Portal. தெருப் புகார்களைப் பதிவு செய்வது முதல் அரசு நலத்திட்டங்கள் மற்றும் ஆவணங்களை அறிவது வரை — அனைத்துப் சேவைகளையும் வெளிப்படையாகவும் எளிதாகவும் வழங்குகிறோம்.",
+  "about_help_label": "CROWDCITY உங்களுக்கு எவ்வாறு உதவுகிறது",
+  "about_help_title": "உங்கள் நகரம் மற்றும் நலனுக்கான அனைத்தும்",
+  "about_help_desc": "அன்றாட குடிமைத் தொடர்புகள், அவசரக்காலப் பாதுகாப்பு மற்றும் அரசு உதவிகளை CrowdCity AI எவ்வாறு எளிதாக்குகிறது என்பதை அறியுங்கள்.",
+  "about_help_card1_title": "குடிமைப் புகார் பதிவு",
+  "about_help_card1_desc": "சாலைப் பள்ளங்கள், குப்பை, தெருவிளக்குகள் அல்லது நீர் கசிவுகளைப் Photos மற்றும் GPS உடன் புகாரளிக்கவும். நேரலை Status Updates உடன் நகராட்சி அதிகாரிகளுக்கு எங்கள் AI புகாரை அனுப்பும்.",
+  "about_help_card2_title": "AI Welfare Scheme Finder",
+  "about_help_card2_desc": "உங்கள் வயது, வருமானம் மற்றும் தகுதிக்கு ஏற்ப தமிழ்நாடு மாநில மற்றும் மத்திய அரசு நலத்திட்டங்களை உடனடியாகக் கண்டறியவும்.",
+  "about_help_card3_title": "அவசர உதவி மையம்",
+  "about_help_card3_desc": "தமிழ்நாட்டின் அனைத்து மாவட்டங்களுக்கும் காவல்துறை, தீயணைப்பு, ஆம்புலன்ஸ், பேரிடர் மற்றும் பெண்கள் பாதுகாப்பிற்கான 1-டேப் அவசர உதவி எண்கள்.",
+  "about_help_card4_title": "அரசு சேவைகள் & ஆவணங்கள்",
+  "about_help_card4_desc": "பிறப்புச் சான்றிதழ்கள், சாதிச் சான்றிதழ்கள் மற்றும் ரேஷன் கார்டுகளுக்கான ஆன்லைன் விண்ணப்ப இணைப்புகள் மற்றும் வழிகாட்டிகள்.",
+  "about_help_card5_title": "மாவட்ட உதவி எண்கள் & அலுவலகங்கள்",
+  "about_help_card5_desc": "நகராட்சி மாநகராட்சிகள் மற்றும் ஆட்சியர் அலுவலகங்களுக்கான அதிகாரப்பூர்வ தொடர்பு எண்கள், Email முகவரிகள் மற்றும் Office Locations கண்டறியவும்.",
+  "about_help_card6_title": "அமைச்சர்கள் & நிர்வாகம்",
+  "about_help_card6_desc": "தற்போதைய தமிழ்நாடு அமைச்சரவை, துறை ஒதுக்கீடுகள் மற்றும் தலைவர்களின் தொடர்பு விவரங்களைக் காண்க.",
+  "about_principle_label": "எங்கள் முதன்மை தத்துவங்கள்",
+  "about_principle_title": "வெளிப்படைத்தன்மை, வேகம் மற்றும் சமத்துவத்தின் மீது கட்டப்பட்டது",
+  "about_principle_desc": "பொதுப் பொறுப்புக்கூறல் மற்றும் குடிமக்கள் அதிகாரமளித்தல் ஆகியவற்றிற்கான அர்ப்பணிப்பால் CrowdCity AI வழிகாட்டப்படுகிறது.",
+  "about_p1_title": "01 — முதல் நிலை வெளிப்படைத்தன்மை",
+  "about_p1_desc": "ஒவ்வொரு புகாரும் பொது Complaint ID மற்றும் சமர்ப்பிப்பிலிருந்து சரிபார்ப்பு வரை Realtime Status Updates-ஐப் பெறுகிறது.",
+  "about_p2_title": "02 — AI-Driven Efficiency",
+  "about_p2_desc": "தானியங்கி புகார் வகைப்பாடு மற்றும் வழிகாட்டுதல் மூலம் தீர்வு நேரங்கள் குறைக்கப்பட்டு தாமதங்கள் தவிர்க்கப்படுகின்றன.",
+  "about_p3_title": "03 — அனைவருக்கும் அணுகல்",
+  "about_p3_desc": "தமிழ் மற்றும் ஆங்கிலத்தில் இருமொழி ஆதரவு தமிழ்நாட்டின் அனைத்து குடிமக்களுக்கும் சமமான அணுகலை உறுதி செய்கிறது.",
+  "about_team_label": "எங்கள் குழுவைக் சந்திக்கவும்",
+  "about_team_title": "Engineers & Visionaries Behind CrowdCity AI",
+  "about_close_title": "உங்கள் நகரத்திற்கு அதிகாரம் அளிக்கத் தயாரா?",
+  "about_close_sub": "ஒவ்வொரு நாளும் தமிழ்நாடு பாதுகாப்பாகவும், தூய்மையாகவும், புத்திசாலித்தனமாகவும் மாற ஆயிரக்கணக்கான குடிமக்களுடன் இணையுங்கள்.",
+  "launch_dashboard": "Launch Dashboard",
+  "services_portal_label": "அரசு போர்டல்",
+  "services_hero_title": "அரசு சேவைகள் & நலத்திட்டங்கள்",
+  "services_hero_desc": "தமிழ்நாடு அரசு மற்றும் மத்திய அரசின் அதிகாரப்பூர்வ நலத்திட்டங்களை ஆராயுங்கள், தகுதியைச் சரிபார்க்கவும், ஆவணங்களைச் சரிபார்க்கவும், எங்கள் AI Scheme Advisor-இடம் கேளுங்கள்.",
+  "services_mod_checker_title": "திட்ட தகுதி சரிபார்ப்பான்",
+  "services_mod_checker_desc": "தமிழ்நாடு & மத்திய நலத்திட்டங்களுக்கான உங்கள் தகுதியைச் சரிபார்க்கவும்",
+  "services_mod_wallet_title": "ஆவண பணப்பை",
+  "services_mod_wallet_desc": "ரேஷன் அட்டை, ஆதார், வருமானம் மற்றும் சாதிச் சான்றிதழ்களைப் பாதுகாப்பாக சேமிக்கவும்",
+  "services_mod_verifier_title": "ஆவண சரிபார்ப்பான்",
+  "services_mod_verifier_desc": "திட்டத் தகுதி விதிகளுக்கு எதிராக சான்றிதழ்களை ஸ்கேன் செய்து சரிபார்க்கவும்",
+  "services_mod_tracker_title": "விண்ணப்ப கண்காணிப்பாளர்",
+  "services_mod_tracker_desc": "சமர்ப்பிக்கப்பட்ட அரசு விண்ணப்பங்களின் Live Status கண்காணிக்கவும்",
+  "services_mod_locator_title": "அலுவலக இருப்பிடம்",
+  "services_mod_locator_desc": "அருகிலுள்ள இ-சேவை மையங்கள், வட்டாட்சியர் அலுவலகங்கள் மற்றும் BDO அலுவலகங்களைக் கண்டறியவும்",
+  "services_mod_reminders_title": "திட்ட நினைவூட்டல்கள்",
+  "services_mod_reminders_desc": "விண்ணப்ப காலக்கெடு (SLA) மற்றும் சான்றிதழ் புதுப்பித்தல்களுக்கான விழிப்பூட்டல்களை அமைக்கவும்",
+  "services_mod_assistant_title": "படிவ உதவியாளர்",
+  "services_mod_assistant_desc": "அதிகாரப்பூர்வ விண்ணப்பப் படிவங்களை சரியாக நிரப்ப வழிகாட்டுதல்",
+  "services_mod_saved_title": "சேமிக்கப்பட்ட திட்டங்கள்",
+  "services_mod_saved_desc": "உங்கள் சேமித்த திட்டங்கள் மற்றும் சேமிக்கப்பட்ட தகுதி முடிவுகளைக் காண்க",
+  "services_search_placeholder": "திட்டத்தின் பெயர், துறை அல்லது முக்கிய சொல் மூலம் Search செய்யவும் (எ.கா. Magalir Urimai, Pudhumai Penn, Health)...",
+  "services_tab_all": "அனைத்து திட்டங்கள்",
+  "services_tab_social": "சமூக நலன்",
+  "services_tab_education": "கல்வி மற்றும் இளைஞர்",
+  "services_tab_health": "சுகாதாரம் மற்றும் காப்பீடு",
+  "services_tab_agriculture": "வேளாண்மை மற்றும் விவசாயிகள்",
+  "services_tab_skill": "திறன் மேம்பாடு",
+  "services_btn_check_eligibility": "தகுதியைச் சரிபார்க்கவும்",
+  "services_btn_save_scheme": "திட்டத்தைச் சேமி",
+  "services_btn_official_portal": "அதிகாரப்பூர்வ தளம்",
+  "services_lbl_key_benefits": "முக்கிய பலன்கள்",
+  "services_lbl_eligibility_criteria": "தகுதி வரம்பு",
+  "services_lbl_required_documents": "தேவையான ஆவணங்கள்",
+  "services_no_schemes_found": "அரசு நலத்திட்டங்கள் எதுவும் கிடைக்கவில்லை",
+  "services_no_schemes_desc": "வேறு முக்கிய சொல்லைத் தேட முயற்சிக்கவும் அல்லது 'அனைத்து திட்டங்கள்' என்பதைத் தேர்ந்தெடுக்கவும்.",
+  "weather_alerts_title": "வானிலை முன்னறிவிப்பு",
+  "weather_alerts_subtitle": "தமிழ்நாடு மாவட்ட வானிலை முன்னறிவிப்பு",
+  "weather_search_placeholder": "Search district...",
+  "weather_source_attribution": "மூலம்: Open-Meteo",
+  "weather_official_portal": "Open-Meteo",
+  "weather_last_updated": "புதுப்பிக்கப்பட்டது",
+  "weather_last_retrieved": "Open-Meteo இலிருந்து கடைசியாக பெறப்பட்டது",
+  "weather_stale_notice": "சேமிக்கப்பட்ட தகவல்",
+  "weather_coverage_label": "வரம்பு: தமிழ்நாடு (38 மாவட்டங்கள்)",
+  "weather_filter_district_all": "அனைத்து மாவட்டங்கள் (38)",
+  "weather_tab_all": "அனைத்து நாட்கள்",
+  "weather_tab_today": "இன்று",
+  "weather_tab_tomorrow": "நாளை",
+  "weather_tab_day3": "நாள் 3",
+  "weather_tab_day4": "நாள் 4",
+  "weather_tab_day5": "நாள் 5",
+  "weather_no_alerts_found": "மாவட்டங்கள் எதுவும் கிடைக்கவில்லை",
+  "weather_no_alerts_desc": "உங்கள் Search-க்கு ஏற்ற தமிழ்நாடு மாவட்டம் எதுவும் கிடைக்கவில்லை.",
+  "weather_source_unavailable_title": "வானிலை தகவல் கிடைக்கவில்லை.",
+  "weather_source_unavailable_desc": "Open-Meteo வானிலை சேவையை இணைக்க முடியவில்லை. சிறிது நேரம் கழித்து மீண்டும் முயற்சிக்கவும்.",
+  "weather_temperature": "வெப்பநிலை",
+  "weather_feels_like": "உணரப்படும் வெப்பநிலை",
+  "weather_rainfall": "மழையளவு",
+  "weather_precip_prob": "மழை வாய்ப்பு",
+  "weather_humidity": "ஈரப்பதம்",
+  "weather_wind": "காற்று வேகம்",
+  "weather_wind_gusts": "காற்று வீச்சு",
+  "weather_sunrise": "சூரிய உதயம்",
+  "weather_sunset": "சூரிய அஸ்தமனம்",
+  "nearby_hospitals": "அருகிலுள்ள மருத்துவமனைகள்",
+  "nearby_ambulances": "அருகிலுள்ள ஆம்புலன்ஸ் சேவைகள்",
+  "nearby_police": "அருகிலுள்ள காவல் நிலையங்கள்",
+  "nearby_fire": "அருகிலுள்ள தீயணைப்பு நிலையங்கள்",
+  "action_directions": "வழிசெலுத்து",
+  "general_emergency_numbers": "பொது அவசர உதவி எண்கள்"
+}
 };
 
 class I18nService {
   constructor() {
-    this.currentLanguage = localStorage.getItem('cc_lang') || 'en';
+    let stored = null;
+    try {
+      stored = localStorage.getItem('crowdcity_language') || 
+               localStorage.getItem('cc_lang') || 
+               localStorage.getItem('preferred_language');
+    } catch (e) {}
+
+    this.currentLanguage = (stored === 'en' || stored === 'ta') ? stored : 'ta';
+
+    // Synchronize all persistence keys
+    try {
+      localStorage.setItem('crowdcity_language', this.currentLanguage);
+      localStorage.setItem('cc_lang', this.currentLanguage);
+      localStorage.setItem('preferred_language', this.currentLanguage);
+    } catch (e) {}
+
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.lang = this.currentLanguage;
+      document.documentElement.setAttribute('data-lang', this.currentLanguage);
+      document.documentElement.classList.remove('lang-en', 'lang-ta');
+      document.documentElement.classList.add(this.currentLanguage === 'ta' ? 'lang-ta' : 'lang-en');
     }
-    
-    // Synchronous inline initializations (0ms startup delay)
-    this.fallbackTranslations = { ...INLINE_EMBEDDED_TRANSLATIONS.en };
-    this.translations = this.currentLanguage === 'ta' 
-      ? { ...INLINE_EMBEDDED_TRANSLATIONS.ta } 
-      : { ...INLINE_EMBEDDED_TRANSLATIONS.en };
 
-    // Prime full translations from storage cache synchronously if present (0ms startup delay)
-    try {
-      const cachedEn = localStorage.getItem('cc_i18n_en_v109');
-      if (cachedEn) this.fallbackTranslations = { ...this.fallbackTranslations, ...JSON.parse(cachedEn) };
-      if (this.currentLanguage === 'ta') {
-        const cachedTa = localStorage.getItem('cc_i18n_ta_v109');
-        if (cachedTa) this.translations = { ...this.translations, ...JSON.parse(cachedTa) };
-      } else {
-        this.translations = this.fallbackTranslations;
-      }
-    } catch (e) {}
+    // Full translations available synchronously (0ms delay)
+    this.fallbackTranslations = INLINE_EMBEDDED_TRANSLATIONS.en;
+    this.translations = this.currentLanguage === 'ta'
+      ? INLINE_EMBEDDED_TRANSLATIONS.ta
+      : INLINE_EMBEDDED_TRANSLATIONS.en;
 
     this.reverseEnglishMap = {};
     this.observer = null;
@@ -104,67 +1806,95 @@ class I18nService {
     // Build reverse map synchronously on startup
     this.buildReverseMap();
 
-    // Perform immediate synchronous DOM translation if DOM is already populated
-    if (document.body) {
-      this.translatePage();
+    // Listen to browser Back/Forward (bfcache) navigation
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pageshow', (e) => this.onPageShow(e));
+      window.addEventListener('storage', (e) => this.onStorageChange(e));
     }
 
-    this.initPromise = this.init();
+    // Translate DOM immediately if already loaded
+    if (typeof document !== 'undefined') {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => this.onDomReady());
+      } else {
+        this.onDomReady();
+      }
+
+      // If document.body is already present, translate immediately
+      if (document.body) {
+        this.translatePage();
+      }
+    }
+
+    // Safety timeout to remove cc-i18n-loading under any unforeseen conditions
+    setTimeout(() => {
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.classList.remove('cc-i18n-loading');
+      }
+    }, 400);
   }
 
-  async init() {
-    // Inject the custom styles for the toggle dynamically
+  onPageShow(event) {
+    try {
+      const stored = localStorage.getItem('crowdcity_language') || 
+                     localStorage.getItem('cc_lang') || 
+                     localStorage.getItem('preferred_language');
+      const targetLang = (stored === 'en' || stored === 'ta') ? stored : 'ta';
+      if (targetLang !== this.currentLanguage) {
+        this.setLanguage(targetLang);
+      }
+    } catch (err) {}
+  }
+
+  onStorageChange(event) {
+    if (event.key === 'crowdcity_language' || event.key === 'cc_lang' || event.key === 'preferred_language') {
+      if (event.newValue && (event.newValue === 'en' || event.newValue === 'ta') && event.newValue !== this.currentLanguage) {
+        this.setLanguage(event.newValue);
+      }
+    }
+  }
+
+  onDomReady() {
     this.injectStyles();
-
-    // Load full fallback translations asynchronously (English)
-    try {
-      const fullEn = await this.loadLocale('en');
-      this.fallbackTranslations = { ...this.fallbackTranslations, ...fullEn };
-    } catch (e) {
-      console.error('Failed to load fallback translations (en):', e);
+    this.injectLanguageToggle();
+    this.translatePage();
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.classList.remove('cc-i18n-loading');
     }
-
-    // Load full selected language translations asynchronously
-    if (this.currentLanguage !== 'en') {
-      try {
-        const fullLang = await this.loadLocale(this.currentLanguage);
-        this.translations = { ...this.translations, ...fullLang };
-      } catch (e) {
-        console.error(`Failed to load translations for ${this.currentLanguage}, falling back to English.`, e);
-      }
-    } else {
-      this.translations = this.fallbackTranslations;
-    }
-
-    this.buildReverseMap();
-
-    // Listen for DOMContentLoaded to set up initial translations and language toggle
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => this.onDomReady());
-    } else {
-      this.onDomReady();
-    }
+    this.setupMutationObserver();
+    window.dispatchEvent(new CustomEvent('language-change', { detail: { language: this.currentLanguage } }));
   }
 
-  async loadLocale(lang) {
-    const cacheKey = `cc_i18n_${lang}_v109`;
+  getLanguage() {
+    return this.currentLanguage;
+  }
+
+  setLanguage(lang) {
+    if (lang !== 'en' && lang !== 'ta') return;
+    this.currentLanguage = lang;
+
+    // Immediately persist across all keys
     try {
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && typeof parsed === 'object') {
-          return parsed;
-        }
-      }
+      localStorage.setItem('crowdcity_language', lang);
+      localStorage.setItem('cc_lang', lang);
+      localStorage.setItem('preferred_language', lang);
     } catch (e) {}
 
-    const res = await fetch(`/locales/${lang}.json?v=1.0.9`);
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    const data = await res.json();
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(data));
-    } catch (e) {}
-    return data;
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.classList.remove('lang-en', 'lang-ta', 'cc-i18n-loading');
+      document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
+    }
+
+    this.translations = lang === 'ta'
+      ? INLINE_EMBEDDED_TRANSLATIONS.ta
+      : INLINE_EMBEDDED_TRANSLATIONS.en;
+
+    this.updateToggleUI();
+    this.translatePage();
+
+    window.dispatchEvent(new CustomEvent('language-change', { detail: { language: lang } }));
   }
 
   buildReverseMap() {
@@ -184,80 +1914,44 @@ class I18nService {
 
     // Custom phrase mappings for common navigation & UI labels
     const customMappings = {
-      "dashboard": "nav_dashboard",
-      "report issue": "nav_report",
-      "my complaints": "nav_my_complaints",
-      "map": "nav_map",
-      "transportation": "nav_transportation",
-      "government services": "nav_services",
-      "district helplines": "district_helplines",
-      "council of ministers": "nav_ministers",
-      "about crowdcity ai": "nav_about",
-      "admin panel": "nav_admin",
-      "cases": "nav_cases",
-      "notifications": "nav_notifications",
-      "profile": "nav_profile",
-      "settings": "nav_settings",
-      "logout": "nav_logout",
-      "sign out": "sign_out",
-      "sign in": "sign_in",
-      "sign up": "sign_up",
-      "step 1": "step_1",
-      "step 2": "step_2",
-      "step 3": "step_3",
-      "choose issue type": "choose_issue_type",
-      "report details": "report_details",
-      "ai review": "ai_review",
-      "civic issue": "civic_issue",
-      "transportation issue": "transportation_issue",
-      "examples:": "examples_label",
-      "all schemes": "all_categories",
-      "social welfare": "category_social_welfare",
-      "education & youth": "category_education",
-      "health & insurance": "category_health",
-      "agriculture & farmers": "category_agriculture",
-      "skill development": "category_skill_dev"
+      'dashboard': 'nav_dashboard',
+      'report issue': 'nav_report',
+      'my complaints': 'nav_my_complaints',
+      'map': 'nav_map',
+      'transportation': 'nav_transportation',
+      'government services': 'nav_services',
+      'district helplines': 'district_helplines',
+      'council of ministers': 'nav_ministers',
+      'about crowdcity ai': 'nav_about',
+      'admin panel': 'nav_admin',
+      'cases': 'nav_cases',
+      'notifications': 'nav_notifications',
+      'profile': 'nav_profile',
+      'settings': 'nav_settings',
+      'logout': 'nav_logout',
+      'sign out': 'sign_out',
+      'sign in': 'sign_in',
+      'sign up': 'sign_up',
+      'step 1': 'step_1',
+      'step 2': 'step_2',
+      'step 3': 'step_3',
+      'choose issue type': 'choose_issue_type',
+      'report details': 'report_details',
+      'ai review': 'ai_review',
+      'civic issue': 'civic_issue',
+      'transportation issue': 'transportation_issue',
+      'examples:': 'examples_label',
+      'all schemes': 'all_categories',
+      'social welfare': 'category_social_welfare',
+      'education & youth': 'category_education',
+      'health & insurance': 'category_health',
+      'agriculture & farmers': 'category_agriculture',
+      'skill development': 'category_skill_dev'
     };
 
     Object.keys(customMappings).forEach(phrase => {
       this.reverseEnglishMap[phrase.toLowerCase()] = customMappings[phrase];
     });
-  }
-
-  onDomReady() {
-    this.injectLanguageToggle();
-    this.translatePage();
-    this.setupMutationObserver();
-    window.dispatchEvent(new CustomEvent('language-change', { detail: { language: this.currentLanguage } }));
-  }
-
-  getLanguage() {
-    return this.currentLanguage;
-  }
-
-  async setLanguage(lang) {
-    if (lang === this.currentLanguage) return;
-
-    try {
-      if (lang === 'en') {
-        this.translations = this.fallbackTranslations;
-      } else {
-        const fullLang = await this.loadLocale(lang);
-        this.translations = { ...INLINE_EMBEDDED_TRANSLATIONS.ta, ...fullLang };
-      }
-      this.currentLanguage = lang;
-      localStorage.setItem('cc_lang', lang);
-      if (typeof document !== 'undefined' && document.documentElement) {
-        document.documentElement.lang = lang;
-      }
-      
-      this.updateToggleUI();
-      this.translatePage();
-      
-      window.dispatchEvent(new CustomEvent('language-change', { detail: { language: lang } }));
-    } catch (e) {
-      console.error(`Failed to switch language to ${lang}:`, e);
-    }
   }
 
   formatFallbackKey(key) {
@@ -269,13 +1963,15 @@ class I18nService {
   }
 
   t(key, variables = {}) {
-    let text = this.translations[key] || this.fallbackTranslations[key];
+    let text = (this.translations && this.translations[key]) || (this.fallbackTranslations && this.fallbackTranslations[key]);
     if (!text) {
       text = this.formatFallbackKey(key);
     }
-    Object.keys(variables).forEach(varName => {
-      text = text.replace(new RegExp(`{${varName}}`, 'g'), variables[varName]);
-    });
+    if (variables && typeof variables === 'object') {
+      Object.keys(variables).forEach(varName => {
+        text = text.replace(new RegExp(`\\{${varName}\\}`, 'g'), variables[varName]);
+      });
+    }
     return text;
   }
 
@@ -289,7 +1985,8 @@ class I18nService {
     }
 
     // If el has a child <span> that contains text or has data-i18n, update that target span
-    const targetSpan = el.querySelector('span[data-i18n]') || childElements.find(c => c.tagName.toLowerCase() === 'span' && !c.classList.contains('bell-badge') && !c.classList.contains('badge'));
+    const targetSpan = el.querySelector('span[data-i18n]') || 
+      childElements.find(c => c.tagName.toLowerCase() === 'span' && !c.classList.contains('bell-badge') && !c.classList.contains('badge'));
     if (targetSpan) {
       targetSpan.textContent = text;
       return;
@@ -306,12 +2003,14 @@ class I18nService {
   }
 
   translatePage() {
+    if (typeof document === 'undefined') return;
+
     // 1. Scan and translate explicit data-i18n elements
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (key) {
-        const hasTranslation = this.translations[key] || this.fallbackTranslations[key];
+        const hasTranslation = (this.translations && this.translations[key]) || (this.fallbackTranslations && this.fallbackTranslations[key]);
         if (hasTranslation) {
           this.setElementTextPreservingChildren(el, this.t(key));
         } else if (!el.textContent.trim()) {
@@ -325,7 +2024,7 @@ class I18nService {
     placeholders.forEach(el => {
       const key = el.getAttribute('data-i18n-placeholder');
       if (key) {
-        const hasTranslation = this.translations[key] || this.fallbackTranslations[key];
+        const hasTranslation = (this.translations && this.translations[key]) || (this.fallbackTranslations && this.fallbackTranslations[key]);
         if (hasTranslation) {
           el.placeholder = this.t(key);
         }
@@ -337,7 +2036,7 @@ class I18nService {
     titles.forEach(el => {
       const key = el.getAttribute('data-i18n-title');
       if (key) {
-        const hasTranslation = this.translations[key] || this.fallbackTranslations[key];
+        const hasTranslation = (this.translations && this.translations[key]) || (this.fallbackTranslations && this.fallbackTranslations[key]);
         if (hasTranslation) {
           el.title = this.t(key);
         }
@@ -348,6 +2047,7 @@ class I18nService {
     if (this.currentLanguage === 'ta') {
       const selector = 'span, a, button, h1, h2, h3, h4, h5, h6, label, p, small, strong, li, td, th, .nav-link, .app-sidebar-link, .badge, .status-badge, .category-tag';
       const targets = document.querySelectorAll(selector);
+
       targets.forEach(el => {
         if (el.hasAttribute('data-i18n')) return;
         if (el.id === 'hero-greeting' || el.id === 'hero-desc' || el.id === 'civic-intelligence-feed-text' || el.closest('#hero-greeting') || el.closest('#hero-desc') || el.classList.contains('user-greeting-name') || el.closest('.user-greeting-name')) return;
@@ -370,7 +2070,6 @@ class I18nService {
             if (!el.getAttribute('data-orig-en')) {
               el.setAttribute('data-orig-en', directText);
             }
-            // Auto-stamp data-i18n attribute on the element to permanently lock its translation
             el.setAttribute('data-i18n', mappedKey);
             const tamilText = this.translations[mappedKey];
             el.childNodes.forEach(n => {
@@ -396,35 +2095,34 @@ class I18nService {
         }
       });
     }
+
+    // Immediately remove anti-flicker loading class once translation is complete
+    if (document.documentElement && document.documentElement.classList.contains('cc-i18n-loading')) {
+      document.documentElement.classList.remove('cc-i18n-loading');
+    }
   }
 
   setupMutationObserver() {
-    if (this.observer) return;
+    if (this.observer || typeof document === 'undefined' || !document.body) return;
     let animationFrameId = null;
-    let timeoutId = null;
 
     this.observer = new MutationObserver((mutations) => {
-      // Ignore mutations originating from language toggle button itself
       const isInternalToggle = mutations.every(m => 
         m.target && m.target.closest && m.target.closest('#lang-toggle-container')
       );
       if (isInternalToggle) return;
 
-      if (timeoutId) clearTimeout(timeoutId);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
-      timeoutId = setTimeout(() => {
-        animationFrameId = requestAnimationFrame(() => {
-          this.translatePage();
-        });
-      }, 150);
+      animationFrameId = requestAnimationFrame(() => {
+        this.translatePage();
+      });
     });
 
     this.observer.observe(document.body, { childList: true, subtree: true });
   }
 
   injectStyles() {
-    if (document.getElementById('i18n-styles')) return;
+    if (typeof document === 'undefined' || document.getElementById('i18n-styles')) return;
     const style = document.createElement('style');
     style.id = 'i18n-styles';
     style.textContent = `
@@ -485,12 +2183,16 @@ class I18nService {
   }
 
   injectLanguageToggle() {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     const path = window.location.pathname.toLowerCase();
     if (path.includes('admin') || path.includes('authority') || (document.body && document.body.classList.contains('admin-portal-body'))) {
       return;
     }
 
-    if (document.getElementById('lang-toggle-container')) return;
+    if (document.getElementById('lang-toggle-container')) {
+      this.updateToggleUI();
+      return;
+    }
 
     const container = document.createElement('div');
     container.id = 'lang-toggle-container';
@@ -525,7 +2227,7 @@ class I18nService {
     if (targetHeader) {
       targetHeader.insertBefore(container, targetHeader.firstChild);
       targetHeader.addEventListener('click', (e) => e.stopPropagation());
-    } else {
+    } else if (document.body) {
       container.classList.add('lang-toggle-fixed');
       document.body.appendChild(container);
     }
@@ -534,6 +2236,7 @@ class I18nService {
   }
 
   updateToggleUI() {
+    if (typeof document === 'undefined') return;
     const container = document.getElementById('lang-toggle-container');
     if (!container) return;
     const options = container.querySelectorAll('.lang-option');
@@ -547,4 +2250,7 @@ class I18nService {
   }
 }
 
-window.i18n = new I18nService();
+// Instantiate globally
+if (typeof window !== 'undefined') {
+  window.i18n = new I18nService();
+}

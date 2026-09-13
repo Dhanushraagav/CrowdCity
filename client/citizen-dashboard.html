@@ -418,7 +418,7 @@
     if (!cityEl || !tempEl) return;
 
     window.cc_initWeather = initWeather;
-    const currentLang = localStorage.getItem('cc_lang') || 'en';
+    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
 
     // Apply weather theme class & particle animation
     function applyWeatherTheme(code, temp) {

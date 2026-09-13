@@ -191,7 +191,7 @@
     const renewingDocs = [];
     const missingDocsList = [];
 
-    const currentLang = localStorage.getItem('preferred_language') || 'en';
+    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
     const isTamil = (currentLang === 'ta');
 
     // 1. Age check
@@ -515,7 +515,7 @@
   async function calculateResults() {
     const resultsContainer = document.getElementById('checker-results-list');
     if (resultsContainer) {
-      const currentLang = localStorage.getItem('preferred_language') || 'en';
+      const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
       const isTamil = (currentLang === 'ta');
       
       resultsContainer.innerHTML = `
@@ -653,7 +653,7 @@
       return;
     }
 
-    const currentLang = localStorage.getItem('preferred_language') || 'en';
+    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
     const isTamil = (currentLang === 'ta');
 
     resultsContainer.innerHTML = schemes.map(scheme => {

@@ -125,7 +125,7 @@
     const renewingDocs = [];
     const missingDocsList = [];
 
-    const currentLang = localStorage.getItem('preferred_language') || 'en';
+    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
     const isTamil = (currentLang === 'ta');
 
     // 1. Age check
@@ -407,7 +407,8 @@
       return;
     }
 
-    const isTamil = (localStorage.getItem('preferred_language') === 'ta');
+    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
+    const isTamil = (currentLang === 'ta');
 
     container.innerHTML = filtered.map(scheme => {
       const isState = (scheme.state_or_central === 'state');

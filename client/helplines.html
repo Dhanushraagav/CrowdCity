@@ -725,7 +725,7 @@
 
     function renderDistricts(searchQuery = "") {
       const container = document.getElementById('helplines-container');
-      const lang = localStorage.getItem('cc_lang') || 'en';
+      const lang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
       container.innerHTML = '';
 
       const query = searchQuery.toLowerCase().trim();
