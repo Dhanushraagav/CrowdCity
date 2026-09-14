@@ -6025,6 +6025,7 @@ html.dark-theme .universal-desktop-back-btn i {
   font-weight: 700;
 }
 
+.header-public-pulse-btn i.fa-satellite-dish,
 .header-public-pulse-btn i.fa-tower-broadcast {
   font-size: 0.84rem;
   color: var(--primary, #0d9488);
@@ -7240,49 +7241,247 @@ html[data-theme="dark"] #user-dropdown > div {
   color: #a3a3a3 !important;
 }
 
+/* Public Pulse Button & Dropdown Dark Mode Hierarchy */
+[data-theme="dark"] .header-public-pulse-btn,
+html[data-theme="dark"] .header-public-pulse-btn,
+html.dark-theme .header-public-pulse-btn,
+html.theme-dark .header-public-pulse-btn {
+  background: #0a0a0a !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .header-public-pulse-btn:hover,
+[data-theme="dark"] .header-public-pulse-btn:focus,
+[data-theme="dark"] .header-public-pulse-btn:focus-visible,
+[data-theme="dark"] .header-public-pulse-btn.dropdown-open,
+[data-theme="dark"] .public-pulse-wrapper.dropdown-open .header-public-pulse-btn,
+[data-theme="dark"] .public-pulse-wrapper.is-open .header-public-pulse-btn,
+html[data-theme="dark"] .header-public-pulse-btn:hover,
+html[data-theme="dark"] .header-public-pulse-btn:focus,
+html[data-theme="dark"] .header-public-pulse-btn:focus-visible,
+html[data-theme="dark"] .header-public-pulse-btn.dropdown-open,
+html.dark-theme .header-public-pulse-btn:hover,
+html.dark-theme .header-public-pulse-btn:focus,
+html.dark-theme .header-public-pulse-btn:focus-visible,
+html.dark-theme .header-public-pulse-btn.dropdown-open,
+html.theme-dark .header-public-pulse-btn:hover,
+html.theme-dark .header-public-pulse-btn:focus,
+html.theme-dark .header-public-pulse-btn:focus-visible,
+html.theme-dark .header-public-pulse-btn.dropdown-open {
+  background: #141414 !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25) !important;
+}
+
+[data-theme="dark"] .header-public-pulse-btn.active,
+html[data-theme="dark"] .header-public-pulse-btn.active,
+html.dark-theme .header-public-pulse-btn.active,
+html.theme-dark .header-public-pulse-btn.active {
+  background: rgba(13, 148, 136, 0.15) !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .header-public-pulse-btn .public-pulse-chevron,
+html[data-theme="dark"] .header-public-pulse-btn .public-pulse-chevron,
+html.dark-theme .header-public-pulse-btn .public-pulse-chevron,
+html.theme-dark .header-public-pulse-btn .public-pulse-chevron {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .header-public-pulse-btn:hover .public-pulse-chevron,
+[data-theme="dark"] .header-public-pulse-btn.dropdown-open .public-pulse-chevron,
+html[data-theme="dark"] .header-public-pulse-btn:hover .public-pulse-chevron,
+html[data-theme="dark"] .header-public-pulse-btn.dropdown-open .public-pulse-chevron,
+html.dark-theme .header-public-pulse-btn:hover .public-pulse-chevron,
+html.dark-theme .header-public-pulse-btn.dropdown-open .public-pulse-chevron,
+html.theme-dark .header-public-pulse-btn:hover .public-pulse-chevron,
+html.theme-dark .header-public-pulse-btn.dropdown-open .public-pulse-chevron {
+  color: #2dd4bf !important;
+}
+
+/* Header TN Updates button & Power Updates button dark hover */
+[data-theme="dark"] .header-tn-updates-btn,
+html[data-theme="dark"] .header-tn-updates-btn,
+html.dark-theme .header-tn-updates-btn,
+html.theme-dark .header-tn-updates-btn,
+[data-theme="dark"] .header-power-updates-btn,
+html[data-theme="dark"] .header-power-updates-btn,
+html.dark-theme .header-power-updates-btn,
+html.theme-dark .header-power-updates-btn {
+  background: #0a0a0a !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .header-tn-updates-btn:hover,
+html[data-theme="dark"] .header-tn-updates-btn:hover,
+html.dark-theme .header-tn-updates-btn:hover,
+html.theme-dark .header-tn-updates-btn:hover,
+[data-theme="dark"] .header-power-updates-btn:hover,
+html[data-theme="dark"] .header-power-updates-btn:hover,
+html.dark-theme .header-power-updates-btn:hover,
+html.theme-dark .header-power-updates-btn:hover {
+  background: #141414 !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
+}
+
 /* Public Pulse Dropdown Inner Elements */
+[data-theme="dark"] #public-pulse-dropdown,
+[data-theme="dark"] .public-pulse-dropdown,
+html[data-theme="dark"] #public-pulse-dropdown,
+html[data-theme="dark"] .public-pulse-dropdown,
+html.dark-theme #public-pulse-dropdown,
+html.dark-theme .public-pulse-dropdown,
+html.theme-dark #public-pulse-dropdown,
+html.theme-dark .public-pulse-dropdown {
+  background: #0a0a0a !important;
+  background-color: #0a0a0a !important;
+  border: 1px solid #222222 !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.95) !important;
+  color: #ffffff !important;
+}
+
 [data-theme="dark"] .public-pulse-dropdown-header,
-html.dark-theme .public-pulse-dropdown-header {
+html[data-theme="dark"] .public-pulse-dropdown-header,
+html.dark-theme .public-pulse-dropdown-header,
+html.theme-dark .public-pulse-dropdown-header {
   border-bottom: 1px solid #1f1f1f !important;
   background: #080808 !important;
 }
 
 [data-theme="dark"] .public-pulse-header-title,
-html.dark-theme .public-pulse-header-title {
+html[data-theme="dark"] .public-pulse-header-title,
+html.dark-theme .public-pulse-header-title,
+html.theme-dark .public-pulse-header-title {
   color: #ffffff !important;
 }
 
+[data-theme="dark"] .public-pulse-header-title i,
+html[data-theme="dark"] .public-pulse-header-title i,
+html.dark-theme .public-pulse-header-title i,
+html.theme-dark .public-pulse-header-title i {
+  color: #2dd4bf !important;
+}
+
 [data-theme="dark"] .public-pulse-header-subtitle,
-html.dark-theme .public-pulse-header-subtitle {
+html[data-theme="dark"] .public-pulse-header-subtitle,
+html.dark-theme .public-pulse-header-subtitle,
+html.theme-dark .public-pulse-header-subtitle {
   color: #a3a3a3 !important;
 }
 
+[data-theme="dark"] .public-pulse-items-list,
+html[data-theme="dark"] .public-pulse-items-list,
+html.dark-theme .public-pulse-items-list,
+html.theme-dark .public-pulse-items-list {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .public-pulse-item,
+html[data-theme="dark"] .public-pulse-item,
+html.dark-theme .public-pulse-item,
+html.theme-dark .public-pulse-item {
+  color: #e5e5e5 !important;
+  background: transparent !important;
+}
+
 [data-theme="dark"] .public-pulse-item.active-feature:hover,
-html.dark-theme .public-pulse-item.active-feature:hover {
+html[data-theme="dark"] .public-pulse-item.active-feature:hover,
+html.dark-theme .public-pulse-item.active-feature:hover,
+html.theme-dark .public-pulse-item.active-feature:hover {
   background: rgba(13, 148, 136, 0.14) !important;
 }
 
 [data-theme="dark"] .public-pulse-item.active-feature.current-page,
-html.dark-theme .public-pulse-item.active-feature.current-page {
+html[data-theme="dark"] .public-pulse-item.active-feature.current-page,
+html.dark-theme .public-pulse-item.active-feature.current-page,
+html.theme-dark .public-pulse-item.active-feature.current-page {
   background: rgba(13, 148, 136, 0.2) !important;
   border: 1px solid rgba(13, 148, 136, 0.4) !important;
 }
 
+[data-theme="dark"] .public-pulse-item.disabled-feature,
+html[data-theme="dark"] .public-pulse-item.disabled-feature,
+html.dark-theme .public-pulse-item.disabled-feature,
+html.theme-dark .public-pulse-item.disabled-feature {
+  opacity: 0.65 !important;
+}
+
+[data-theme="dark"] .pulse-item-name,
 [data-theme="dark"] .pulse-item-title,
-html.dark-theme .pulse-item-title {
+html[data-theme="dark"] .pulse-item-name,
+html[data-theme="dark"] .pulse-item-title,
+html.dark-theme .pulse-item-name,
+html.dark-theme .pulse-item-title,
+html.theme-dark .pulse-item-name,
+html.theme-dark .pulse-item-title {
   color: #ffffff !important;
 }
 
+[data-theme="dark"] .public-pulse-item.active-feature:hover .pulse-item-name,
+[data-theme="dark"] .public-pulse-item.active-feature:hover .pulse-item-title,
+html[data-theme="dark"] .public-pulse-item.active-feature:hover .pulse-item-name,
+html[data-theme="dark"] .public-pulse-item.active-feature:hover .pulse-item-title,
+html.dark-theme .public-pulse-item.active-feature:hover .pulse-item-name,
+html.dark-theme .public-pulse-item.active-feature:hover .pulse-item-title,
+html.theme-dark .public-pulse-item.active-feature:hover .pulse-item-name,
+html.theme-dark .public-pulse-item.active-feature:hover .pulse-item-title {
+  color: #2dd4bf !important;
+}
+
 [data-theme="dark"] .pulse-item-desc,
-html.dark-theme .pulse-item-desc {
+html[data-theme="dark"] .pulse-item-desc,
+html.dark-theme .pulse-item-desc,
+html.theme-dark .pulse-item-desc {
   color: #a3a3a3 !important;
 }
 
+[data-theme="dark"] .pulse-item-icon-wrap.active-icon,
+html[data-theme="dark"] .pulse-item-icon-wrap.active-icon,
+html.dark-theme .pulse-item-icon-wrap.active-icon,
+html.theme-dark .pulse-item-icon-wrap.active-icon {
+  background: rgba(13, 148, 136, 0.18) !important;
+  color: #2dd4bf !important;
+  border: 1px solid rgba(13, 148, 136, 0.35) !important;
+}
+
 [data-theme="dark"] .pulse-item-icon-wrap.disabled-icon,
-html.dark-theme .pulse-item-icon-wrap.disabled-icon {
+html[data-theme="dark"] .pulse-item-icon-wrap.disabled-icon,
+html.dark-theme .pulse-item-icon-wrap.disabled-icon,
+html.theme-dark .pulse-item-icon-wrap.disabled-icon {
   background: #141414 !important;
   color: #666666 !important;
   border: 1px solid #222222 !important;
+}
+
+[data-theme="dark"] .public-pulse-divider,
+html[data-theme="dark"] .public-pulse-divider,
+html.dark-theme .public-pulse-divider,
+html.theme-dark .public-pulse-divider {
+  background: #1f1f1f !important;
+}
+
+[data-theme="dark"] .pulse-badge-active,
+html[data-theme="dark"] .pulse-badge-active,
+html.dark-theme .pulse-badge-active,
+html.theme-dark .pulse-badge-active {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] .pulse-badge-soon,
+html[data-theme="dark"] .pulse-badge-soon,
+html.dark-theme .pulse-badge-soon,
+html.theme-dark .pulse-badge-soon {
+  background: #171717 !important;
+  color: #a3a3a3 !important;
+  border: 1px solid #262626 !important;
 }
 
 /* Notifications Dropdown Inner Elements */

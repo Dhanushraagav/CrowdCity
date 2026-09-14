@@ -29,6 +29,7 @@ html.lang-ta.cc-i18n-loading [data-i18n] {
   --bg-app: #f8fafc;
   --bg-surface: #ffffff;
   --bg-surface-hover: #f8fafc;
+  --bg-hover: #f8fafc;
   --bg-header: #ffffff;
   --border-color: #e2e8f0;
   --border-color-hover: #cbd5e1;
@@ -153,6 +154,7 @@ html.theme-dark {
   --bg-app: #000000;
   --bg-surface: #0a0a0a;
   --bg-surface-hover: #141414;
+  --bg-hover: #171717;
   --bg-header: #050505;
   --border-color: #1f1f1f;
   --border-color-hover: #333333;
