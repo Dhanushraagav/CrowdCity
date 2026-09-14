@@ -43,14 +43,14 @@
 html[data-theme="dark"],
 html.dark-theme,
 html.theme-dark {
-  --bg-canvas: #0b0f19;
-  --bg-card: #1e293b;
-  --border-color: #334155;
-  --border-light: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-light: #cbd5e1;
-  --primary-light: rgba(2, 132, 199, 0.18);
+  --bg-canvas: #000000;
+  --bg-card: #0a0a0a;
+  --border-color: #1f1f1f;
+  --border-light: #141414;
+  --text-main: #ffffff;
+  --text-muted: #a3a3a3;
+  --text-light: #d4d4d4;
+  --primary-light: rgba(13, 148, 136, 0.18);
   
   --badge-pending-bg: rgba(245, 158, 11, 0.18);
   --badge-pending-text: #fbbf24;

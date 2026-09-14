@@ -143,66 +143,76 @@ html.lang-ta.cc-i18n-loading [data-i18n] {
 
 /* ==========================================================================
    Centralized Global Dark Mode Design Tokens
-   Designed for CrowdCity Civic Tech Palette (Slate / Zinc / Emerald / Teal)
+   AMOLED / True Black Palette (Pure Black / Neutral Charcoal / Teal Accents)
    ========================================================================== */
 :root[data-theme="dark"],
 html[data-theme="dark"],
 html.dark-theme,
 html.theme-dark {
-  /* Core Theme Backgrounds */
-  --bg-app: #0b0f19;
-  --bg-surface: #1e293b;
-  --bg-surface-hover: #334155;
-  --bg-header: #0f172a;
-  --border-color: #334155;
-  --border-color-hover: #475569;
-  --bg-sidebar: #0f172a;
+  /* Core Theme Backgrounds - AMOLED Surface Hierarchy */
+  --bg-app: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-surface-hover: #141414;
+  --bg-header: #050505;
+  --border-color: #1f1f1f;
+  --border-color-hover: #333333;
+  --bg-sidebar: #050505;
 
-  /* Typography Colors */
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-inverse: #0f172a;
+  /* Typography Colors - High Contrast Crisp White & Neutral Grays */
+  --text-main: #ffffff;
+  --text-secondary: #d4d4d4;
+  --text-muted: #a3a3a3;
+  --text-inverse: #ffffff;
 
-  /* Polished Component Specific Variables */
+  /* CrowdCity Brand Accents */
+  --primary: #0d9488;
+  --primary-hover: #14b8a6;
   --btn-primary-bg: #0d9488;
   --btn-primary-hover: #14b8a6;
   --btn-primary-text: #ffffff;
 
-  --btn-secondary-bg: #1e293b;
-  --btn-secondary-border: #334155;
-  --btn-secondary-text: #f8fafc;
-  --btn-secondary-hover: #334155;
+  --btn-secondary-bg: #0a0a0a;
+  --btn-secondary-border: #222222;
+  --btn-secondary-text: #ffffff;
+  --btn-secondary-hover: #141414;
 
-  --input-bg: #0f172a;
-  --input-border: #334155;
-  --input-focus-border: #14b8a6;
-  --input-text: #f8fafc;
+  --input-bg: #080808;
+  --input-border: #222222;
+  --input-focus-border: #0d9488;
+  --input-text: #ffffff;
 
-  --card-bg: #1e293b;
-  --card-border: #334155;
+  --card-bg: #0a0a0a;
+  --card-border: #1f1f1f;
 
   /* Linear/Notion Panel tokens */
-  --glass-bg: rgba(30, 41, 59, 0.9);
-  --glass-border: rgba(51, 65, 85, 0.7);
-  --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(10, 10, 10, 0.95);
+  --glass-border: rgba(38, 38, 38, 0.8);
+  --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.85);
 
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.45);
-  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.65);
-  --shadow-hover: 0 10px 24px -4px rgba(13, 148, 136, 0.25);
-  --shadow-glow: 0 0 0 3px rgba(13, 148, 136, 0.25);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.7);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.8);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.85);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.95);
+  --shadow-hover: 0 4px 14px rgba(13, 148, 136, 0.2);
+  --shadow-glow: 0 0 0 2px rgba(13, 148, 136, 0.35);
 
-  /* Slate Shorthand Overrides for Components using Slate directly */
-  --slate-50: #0f172a;
-  --slate-100: #1e293b;
-  --slate-200: #334155;
-  --slate-300: #475569;
-  --slate-400: #94a3b8;
-  --slate-500: #cbd5e1;
-  --slate-600: #e2e8f0;
-  --slate-700: #f1f5f9;
-  --slate-800: #f8fafc;
+  /* Semantic Status Colors - Vivid on AMOLED Black */
+  --status-reported: #f97316;
+  --status-investigating: #a855f7;
+  --status-in-progress: #14b8a6;
+  --status-resolved: #22c55e;
+  --status-duplicate: #ef4444;
+
+  /* Neutral Dark Gray Shorthand Overrides (Zero Blue/Navy Cast) */
+  --slate-50: #050505;
+  --slate-100: #0a0a0a;
+  --slate-200: #141414;
+  --slate-300: #222222;
+  --slate-400: #737373;
+  --slate-500: #a3a3a3;
+  --slate-600: #d4d4d4;
+  --slate-700: #e5e5e5;
+  --slate-800: #f5f5f5;
   --slate-900: #ffffff;
 }
 
@@ -213,8 +223,8 @@ html.theme-dark {
 }
 
 [data-theme="dark"] ::placeholder {
-  color: #64748b !important;
-  opacity: 0.85;
+  color: #737373 !important;
+  opacity: 0.9;
 }
 
 [data-theme="dark"] input,
@@ -226,20 +236,20 @@ html.theme-dark {
 [data-theme="dark"] input:-webkit-autofill,
 [data-theme="dark"] textarea:-webkit-autofill,
 [data-theme="dark"] select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
-  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0 1000px #080808 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* Dark Mode Scrollbars */
 [data-theme="dark"] ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: #000000;
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #262626;
   border-radius: 6px;
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #383838;
 }
 
 /* Base Resets & Mobile Tap Highlight Removal */

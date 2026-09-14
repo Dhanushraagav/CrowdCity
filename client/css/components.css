@@ -346,8 +346,8 @@
 }
 
 [data-theme="dark"] .form-select option {
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
 }
 
 .form-input:focus, .form-textarea:focus, .form-select:focus {
@@ -7016,61 +7016,71 @@ a,
 }
 
 /* ==========================================================================
-   Global Dark Mode Components & Utilities
+   Global Dark Mode Components & Utilities (AMOLED True Black Hierarchy)
    ========================================================================== */
 [data-theme="dark"] .app-sidebar,
 html.dark-theme .app-sidebar {
-  background-color: var(--bg-sidebar) !important;
-  border-right-color: var(--border-color) !important;
+  background-color: var(--bg-sidebar, #050505) !important;
+  border-right: 1px solid #1a1a1a !important;
 }
 
 [data-theme="dark"] .app-header-main,
 html.dark-theme .app-header-main {
-  background-color: var(--bg-header) !important;
-  border-bottom-color: var(--border-color) !important;
+  background-color: var(--bg-header, #050505) !important;
+  border-bottom: 1px solid #1a1a1a !important;
 }
 
 [data-theme="dark"] .app-sidebar-link,
 html.dark-theme .app-sidebar-link {
-  color: var(--text-muted) !important;
+  color: #a3a3a3 !important;
 }
 
 [data-theme="dark"] .app-sidebar-link:hover,
-[data-theme="dark"] .app-sidebar-link.active,
-html.dark-theme .app-sidebar-link:hover,
-html.dark-theme .app-sidebar-link.active {
-  background-color: rgba(13, 148, 136, 0.15) !important;
-  color: #14b8a6 !important;
+html.dark-theme .app-sidebar-link:hover {
+  background-color: #121212 !important;
+  color: #ffffff !important;
 }
 
-/* Modals & Dialogs */
+[data-theme="dark"] .app-sidebar-link.active,
+html.dark-theme .app-sidebar-link.active {
+  background-color: rgba(13, 148, 136, 0.18) !important;
+  color: #2dd4bf !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="dark"] .app-sidebar-link i,
+html.dark-theme .app-sidebar-link i {
+  color: #2dd4bf !important;
+}
+
+/* Modals & Dialogs - Elevated Surface #101010 */
 [data-theme="dark"] .custom-modal-content,
 [data-theme="dark"] .modal-card,
 [data-theme="dark"] .cc-modal-dialog,
 html.dark-theme .custom-modal-content,
 html.dark-theme .modal-card,
 html.dark-theme .cc-modal-dialog {
-  background-color: var(--bg-surface) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-main) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+  background-color: #101010 !important;
+  border: 1px solid #222222 !important;
+  color: #ffffff !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.95) !important;
 }
 
 [data-theme="dark"] .custom-modal-header,
 [data-theme="dark"] .modal-header,
 html.dark-theme .custom-modal-header,
 html.dark-theme .modal-header {
-  border-bottom-color: var(--border-color) !important;
+  border-bottom: 1px solid #1a1a1a !important;
 }
 
 [data-theme="dark"] .custom-modal-footer,
 [data-theme="dark"] .modal-footer,
 html.dark-theme .custom-modal-footer,
 html.dark-theme .modal-footer {
-  border-top-color: var(--border-color) !important;
+  border-top: 1px solid #1a1a1a !important;
 }
 
-/* Dropdowns & Popups */
+/* Dropdowns & Popups - Surface #0B0B0B */
 [data-theme="dark"] .dropdown-menu,
 [data-theme="dark"] .custom-dropdown,
 [data-theme="dark"] #header-profile-dropdown,
@@ -7081,97 +7091,174 @@ html.dark-theme .custom-dropdown,
 html.dark-theme #header-profile-dropdown,
 html.dark-theme .profile-dropdown,
 html.dark-theme .user-dropdown {
-  background-color: var(--bg-surface) !important;
-  border-color: var(--border-color) !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
-  color: var(--text-main) !important;
+  background-color: #0b0b0b !important;
+  border: 1px solid #222222 !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.95) !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .dropdown-item,
 [data-theme="dark"] .dropdown-link,
 html.dark-theme .dropdown-item,
 html.dark-theme .dropdown-link {
-  color: var(--text-main) !important;
+  color: #d4d4d4 !important;
 }
 
 [data-theme="dark"] .dropdown-item:hover,
 [data-theme="dark"] .dropdown-link:hover,
 html.dark-theme .dropdown-item:hover,
 html.dark-theme .dropdown-link:hover {
-  background-color: var(--bg-surface-hover) !important;
+  background-color: #171717 !important;
+  color: #ffffff !important;
 }
 
-/* Cards & Surface Containers */
+/* Cards & Surface Containers - Surface #0A0A0A */
 [data-theme="dark"] .settings-card,
 [data-theme="dark"] .profile-sidebar-card,
 [data-theme="dark"] .profile-stat-card,
 [data-theme="dark"] .contrib-card,
 [data-theme="dark"] .stat-card,
 [data-theme="dark"] .kpi-card,
+[data-theme="dark"] .stitch-stat-card,
+[data-theme="dark"] .quick-action-card,
+[data-theme="dark"] .dash-quick-card,
 [data-theme="dark"] .quick-action-item,
 [data-theme="dark"] .notification-item,
-[data-theme="dark"] .stitch-hero,
-[data-theme="dark"] .stitch-hero-details-wrap,
 [data-theme="dark"] .timeline-content,
+[data-theme="dark"] .comment-card,
 html.dark-theme .settings-card,
 html.dark-theme .profile-sidebar-card,
 html.dark-theme .profile-stat-card,
 html.dark-theme .contrib-card,
 html.dark-theme .stat-card,
 html.dark-theme .kpi-card,
+html.dark-theme .stitch-stat-card,
+html.dark-theme .quick-action-card,
+html.dark-theme .dash-quick-card,
 html.dark-theme .quick-action-item,
 html.dark-theme .notification-item,
-html.dark-theme .stitch-hero,
-html.dark-theme .stitch-hero-details-wrap,
-html.dark-theme .timeline-content {
-  background-color: var(--bg-surface) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-main);
+html.dark-theme .timeline-content,
+html.dark-theme .comment-card {
+  background-color: #0a0a0a !important;
+  border: 1px solid #1f1f1f !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .settings-col,
 html.dark-theme .settings-col {
-  color: var(--text-main);
+  color: #ffffff !important;
+}
+
+/* Dashboard Hero Card with Tamil Nadu Temple/Beach Image */
+[data-theme="dark"] .stitch-hero,
+html.dark-theme .stitch-hero {
+  background-color: #0a0a0a !important;
+  border: 1px solid #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .stitch-hero:has(.stitch-hero-title),
+html.dark-theme .stitch-hero:has(.stitch-hero-title) {
+  background-color: #0a0a0a !important;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.92) 25%, rgba(0, 0, 0, 0.70) 55%, rgba(0, 0, 0, 0.25) 100%), 
+    url('../images/tamilnadu_temple_beach_bridge.jpg') !important;
+  border: 1px solid #1f1f1f !important;
+}
+
+@media (max-width: 768px) {
+  [data-theme="dark"] .stitch-hero:has(.stitch-hero-title),
+  html.dark-theme .stitch-hero:has(.stitch-hero-title) {
+    background-image: 
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.92) 45%, rgba(0, 0, 0, 0.55) 100%), 
+      url('../images/tamilnadu_temple_beach_bridge.jpg') !important;
+  }
+}
+
+/* Floating Weather Widget in Dark Mode */
+[data-theme="dark"] .floating-weather-widget,
+html.dark-theme .floating-weather-widget {
+  background: rgba(14, 14, 14, 0.9) !important;
+  border: 1px solid #222222 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Ticker Banner */
+[data-theme="dark"] .ticker-banner,
+html.dark-theme .ticker-banner {
+  background: #080808 !important;
+  border: 1px solid #1c1c1c !important;
+  color: #ffffff !important;
+}
+
+/* Feed Tabs & Filter Pills */
+[data-theme="dark"] .feed-tab,
+html.dark-theme .feed-tab {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .feed-tab.active,
+html.dark-theme .feed-tab.active {
+  background: rgba(13, 148, 136, 0.18) !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .filter-pill,
+html.dark-theme .filter-pill {
+  background-color: #080808 !important;
+  border: 1px solid #222222 !important;
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .filter-pill:hover,
+[data-theme="dark"] .filter-pill.active,
+html.dark-theme .filter-pill:hover,
+html.dark-theme .filter-pill.active {
+  background-color: #0d9488 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
 }
 
 /* Tables */
 [data-theme="dark"] table,
 html.dark-theme table {
-  color: var(--text-main) !important;
-  border-color: var(--border-color) !important;
+  background-color: #050505 !important;
+  color: #ffffff !important;
+  border-color: #1f1f1f !important;
 }
 
 [data-theme="dark"] th,
 html.dark-theme th {
-  background-color: var(--bg-surface-hover) !important;
-  color: var(--text-muted) !important;
-  border-bottom-color: var(--border-color) !important;
+  background-color: #0c0c0c !important;
+  color: #a3a3a3 !important;
+  border-bottom: 1px solid #1f1f1f !important;
 }
 
 [data-theme="dark"] td,
 html.dark-theme td {
-  border-bottom-color: var(--border-color) !important;
-  color: var(--text-main) !important;
+  border-bottom: 1px solid #141414 !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] tr:hover td,
 html.dark-theme tr:hover td {
-  background-color: rgba(51, 65, 85, 0.4) !important;
+  background-color: #121212 !important;
 }
 
 /* Tabs */
 [data-theme="dark"] .profile-tab-btn,
 html.dark-theme .profile-tab-btn {
-  color: var(--text-muted) !important;
+  color: #a3a3a3 !important;
 }
 
 [data-theme="dark"] .profile-tab-btn.active,
 html.dark-theme .profile-tab-btn.active {
-  color: var(--primary) !important;
-  border-bottom-color: var(--primary) !important;
+  color: #2dd4bf !important;
+  border-bottom-color: #0d9488 !important;
 }
 
-/* Forms & Inputs */
+/* Forms & Inputs - Surface #080808 */
 [data-theme="dark"] .form-control,
 [data-theme="dark"] .form-input,
 [data-theme="dark"] .form-textarea,
@@ -7180,15 +7267,33 @@ html.dark-theme .form-control,
 html.dark-theme .form-input,
 html.dark-theme .form-textarea,
 html.dark-theme .form-select {
-  background-color: var(--input-bg) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-main) !important;
+  background-color: #080808 !important;
+  border: 1px solid #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-textarea:focus,
+[data-theme="dark"] .form-select:focus,
+html.dark-theme .form-control:focus,
+html.dark-theme .form-input:focus,
+html.dark-theme .form-textarea:focus,
+html.dark-theme .form-select:focus {
+  border-color: #0d9488 !important;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25) !important;
 }
 
 [data-theme="dark"] .form-select option,
 html.dark-theme .form-select option {
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+/* Back Button Icons in Dark Mode */
+[data-theme="dark"] .universal-desktop-back-btn i,
+body.dark-theme .universal-desktop-back-btn i {
+  color: #ffffff !important;
 }
 
 /* Leaflet Map in Dark Mode */
@@ -7196,31 +7301,31 @@ html.dark-theme .form-select option {
 [data-theme="dark"] .leaflet-popup-tip,
 html.dark-theme .leaflet-popup-content-wrapper,
 html.dark-theme .leaflet-popup-tip {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-main) !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.85) !important;
 }
 
 [data-theme="dark"] .leaflet-popup-content,
 html.dark-theme .leaflet-popup-content {
-  color: var(--text-main) !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .leaflet-container a.leaflet-popup-close-button,
 html.dark-theme .leaflet-container a.leaflet-popup-close-button {
-  color: var(--text-muted) !important;
+  color: #a3a3a3 !important;
 }
 
 [data-theme="dark"] .leaflet-bar a,
 html.dark-theme .leaflet-bar a {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-main) !important;
-  border-color: var(--border-color) !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+  border-color: #222222 !important;
 }
 
 [data-theme="dark"] .leaflet-bar a:hover,
 html.dark-theme .leaflet-bar a:hover {
-  background-color: var(--bg-surface-hover) !important;
+  background-color: #171717 !important;
 }
 
 /* Civic Specific Modules in Dark Mode */
@@ -7254,9 +7359,9 @@ html.dark-theme .pin-box,
 html.dark-theme .area-item,
 html.dark-theme .scorecard-item,
 html.dark-theme .transport-card {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-main) !important;
-  border-color: var(--border-color) !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+  border-color: #1f1f1f !important;
 }
 
 [data-theme="dark"] .area-item:hover,
@@ -7265,17 +7370,17 @@ html.dark-theme .transport-card {
 html.dark-theme .area-item:hover,
 html.dark-theme .scorecard-item:hover,
 html.dark-theme .nearby-cards-grid .service-card:hover {
-  background-color: var(--bg-surface-hover) !important;
-  border-color: var(--primary) !important;
+  background-color: #141414 !important;
+  border-color: #0d9488 !important;
 }
 
 [data-theme="dark"] .power-location-switch-btn,
 [data-theme="dark"] .weather-location-switch-btn,
 html.dark-theme .power-location-switch-btn,
 html.dark-theme .weather-location-switch-btn {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-main) !important;
-  border-color: var(--border-color) !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+  border-color: #222222 !important;
 }
 
 
