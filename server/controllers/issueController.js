@@ -10,6 +10,7 @@ import { calculateSlaDeadline, resolveIssuePriority } from '../config/slaConfig.
 import { computeSlaState, checkAndProcessSlaEscalations, calculateSlaMetrics } from '../services/slaService.js';
 import { searchCivicIssues } from '../services/searchService.js';
 import { resolveResponsibleAuthority } from '../services/authorityDirectoryService.js';
+import { buildTimeline } from '../services/timelineService.js';
 
 /**
  * Get all reported civic issues.
@@ -256,11 +257,26 @@ export const getIssueById = async (req, res) => {
       logger.warn('Failed to resolve authority in getIssueById:', authErr.message);
     }
 
+    let userRole = 'citizen';
+    if (userId) {
+      try {
+        const { data: profile } = await activeClient.from('profiles').select('role').eq('id', userId).maybeSingle();
+        if (profile?.role) userRole = profile.role;
+      } catch (e) {}
+    }
+
+    const timeline = buildTimeline(
+      { ...issue, authority_resolution: authorityResolution },
+      historyError ? [] : history,
+      userRole
+    );
+
     return res.status(200).json({
       ...issue,
       authority_resolution: authorityResolution,
       comments: commentsError ? [] : comments,
       history: historyError ? [] : history,
+      timeline,
       attachments: attachError ? [] : (attachments || []),
       user_has_upvoted: userHasUpvoted
     });
@@ -587,6 +603,7 @@ export const createIssue = async (req, res) => {
       .insert({
         issue_id: issue.id,
         status: 'pending',
+        updated_by: req.user.id,
         notes: 'Complaint submitted by citizen.'
       });
 
@@ -2809,6 +2826,92 @@ export const triggerSlaSweep = async (req, res) => {
   } catch (err) {
     logger.error('triggerSlaSweep error: %O', err);
     return res.status(500).json({ error: 'SLA sweep failed' });
+  }
+};
+
+/**
+ * GET /api/issues/:id/timeline
+ * Retrieve structured, data-driven complaint lifecycle timeline.
+ * Supports UUID or Complaint ID (CC-YYYY-NNNNNN).
+ */
+export const getComplaintTimeline = async (req, res) => {
+  const { id } = req.params;
+
+  // Extract user ID and role from Authorization header if present
+  const authHeader = req.headers.authorization;
+  let userId = null;
+  let userRole = 'citizen';
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) {
+        userId = user.id;
+        const activeClient = getSupabaseClient(req);
+        const { data: profile } = await activeClient.from('profiles').select('role').eq('id', user.id).maybeSingle();
+        if (profile?.role) userRole = profile.role;
+      }
+    } catch (err) {}
+  }
+
+  try {
+    const activeClient = getSupabaseClient(req);
+    let issueQuery = activeClient
+      .from('issues')
+      .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url), assigned_officer:profiles!issues_assigned_to_fkey(full_name)');
+
+    if (typeof id === 'string' && id.toUpperCase().startsWith('CC-')) {
+      issueQuery = issueQuery.eq('complaint_id', id.toUpperCase());
+    } else {
+      issueQuery = issueQuery.eq('id', id);
+    }
+
+    const { data: issue, error: issueError } = await issueQuery.single();
+
+    if (issueError || !issue) {
+      return res.status(404).json({ error: 'Complaint not found' });
+    }
+
+    normalizeComplaintRecord(issue);
+    computeSlaState(issue);
+
+    let authorityResolution = null;
+    try {
+      if (issue.latitude && issue.longitude) {
+        authorityResolution = await resolveResponsibleAuthority({
+          latitude: issue.latitude,
+          longitude: issue.longitude,
+          address: issue.address,
+          category: issue.category,
+          manualSelection: issue.district ? {
+            districtId: issue.district,
+            subdivisionId: issue.taluk,
+            localBodyId: issue.local_body,
+            villageOrTown: issue.village_or_town
+          } : null
+        });
+      }
+    } catch (e) {}
+
+    const { data: history, error: historyError } = await activeClient
+      .from('status_history')
+      .select('*, profiles:profiles(full_name, avatar_url, role)')
+      .eq('issue_id', issue.id)
+      .order('created_at', { ascending: true });
+
+    const timeline = buildTimeline(
+      { ...issue, authority_resolution: authorityResolution },
+      historyError ? [] : history,
+      userRole
+    );
+
+    return res.status(200).json({
+      success: true,
+      timeline
+    });
+  } catch (err) {
+    logger.error('getComplaintTimeline Error: %O', err);
+    return res.status(500).json({ error: 'Failed to retrieve complaint timeline' });
   }
 };
 

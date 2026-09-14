@@ -28,7 +28,8 @@ import {
   checkIssueDuplicate,
   supportExistingIssue,
   getSlaSummary,
-  triggerSlaSweep
+  triggerSlaSweep,
+  getComplaintTimeline
 } from '../controllers/issueController.js';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 import { upload, handleUploadError } from '../middlewares/uploadMiddleware.js';
@@ -55,6 +56,7 @@ router.post('/sla/sweep', requireAuth, requireRole(['authority', 'admin']), trig
 router.post('/check-duplicate', requireAuth, checkIssueDuplicate);
 
 router.get('/:id', validateIdParam('id'), getIssueById);
+router.get('/:id/timeline', validateIdParam('id'), getComplaintTimeline);
 
 // Authenticated routes (All citizens/roles)
 router.post('/', requireAuth, upload.array('image', 5), handleUploadError, validateCreateIssue, createIssue);

@@ -1221,32 +1221,10 @@
       const timelineEl = document.getElementById('detail-timeline-list');
       if (!timelineEl) return;
 
-      const events = [
-        { title: 'Complaint Submitted', time: new Date(issue.created_at).toLocaleString() },
-        { title: 'Automated AI Classification Completed', time: new Date(new Date(issue.created_at).getTime() + 1000 * 60 * 2).toLocaleString() }
-      ];
-
-      if (issue.assigned_to) {
-        const assignedUser = currentAuthorities.find(a => a.id === issue.assigned_to);
-        const name = assignedUser ? assignedUser.full_name : 'Officer';
-        events.push({ title: `Assigned to ${name}`, time: new Date(new Date(issue.created_at).getTime() + 1000 * 60 * 15).toLocaleString() });
+      if (window.ComplaintTimeline && typeof window.ComplaintTimeline.render === 'function') {
+        window.ComplaintTimeline.render(timelineEl, issue, { role: 'authority' });
+        return;
       }
-
-      if (issue.status && issue.status !== 'pending') {
-        events.push({ title: `Status updated to ${issue.status.replace('_', ' ').toUpperCase()}`, time: new Date().toLocaleString() });
-      }
-
-      if (issue.official_remarks) {
-        events.push({ title: `Official Remarks Added: "${issue.official_remarks}"`, time: new Date().toLocaleString() });
-      }
-
-      timelineEl.innerHTML = events.map(e => `
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-title">${escapeHTML(e.title)}</div>
-          <div class="timeline-time">${e.time}</div>
-        </div>
-      `).join('');
     },
 
     handleStatusSelectChange: function() {

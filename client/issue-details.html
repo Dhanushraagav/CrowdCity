@@ -188,34 +188,34 @@
                   <div id="stepper-progress-line" style="width: 0%; height: 100%; background-color: var(--primary); transition: width 0.4s ease;"></div>
                 </div>
                 
-                <!-- Step 1: Reported -->
-                <div class="step-node active" id="step-reported" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
+                <!-- Step 1: Submitted -->
+                <div class="step-node active" id="step-submitted" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-file-invoice"></i></div>
-                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="reported">Reported</span>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="timeline_stage_submitted">Submitted</span>
                 </div>
                 
-                <!-- Step 2: Assigned -->
+                <!-- Step 2: Verified -->
+                <div class="step-node" id="step-verified" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
+                  <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-clipboard-check"></i></div>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="timeline_stage_verified">Verified</span>
+                </div>
+
+                <!-- Step 3: Assigned -->
                 <div class="step-node" id="step-assigned" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-user-check"></i></div>
-                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="assigned">Assigned</span>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="timeline_stage_assigned">Assigned</span>
                 </div>
 
-                <!-- Step 3: In Progress -->
+                <!-- Step 4: In Progress -->
                 <div class="step-node" id="step-in_progress" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="in_progress">In Progress</span>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="timeline_stage_in_progress">In Progress</span>
                 </div>
 
-                <!-- Step 4: Resolved -->
+                <!-- Step 5: Resolved -->
                 <div class="step-node" id="step-resolved" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-circle-check"></i></div>
-                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="resolved">Resolved</span>
-                </div>
-
-                <!-- Step 5: Verified -->
-                <div class="step-node" id="step-verified" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; width: 80px;">
-                  <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.4s ease;"><i class="fa-solid fa-check-double"></i></div>
-                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="verified">Verified</span>
+                  <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.4s ease;" data-i18n="timeline_stage_resolved">Resolved</span>
                 </div>
               </div>
             </div>
@@ -481,17 +481,11 @@
             </div>
           </div>
 
-          <!-- Status Timeline/History Card -->
+          <!-- Complaint Lifecycle Timeline Card -->
           <div class="glass-panel" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-            <h3 style="font-size: 1.1rem; font-family: var(--font-heading);"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="status_history">Status History</span></h3>
-            
-            <div style="display: flex; flex-direction: column; gap: 1.25rem; position: relative; padding-left: 1rem; border-left: 2px solid var(--border-color); margin-left: 0.5rem;" id="timeline-list">
-              <!-- Timeline updates -->
-              <div style="position: relative;">
-                <div style="position: absolute; left: -21px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background-color: var(--primary); border: 2px solid var(--bg-surface);"></div>
-                <div style="font-size: 0.85rem; font-weight: 700;" data-i18n="issue_reported">Issue Reported</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);" id="timeline-reported-date">Date</div>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Complaint successfully saved in public dashboard database.</p>
+            <div id="timeline-list">
+              <div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0; text-align: center;">
+                <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary);"></i> Loading complaint timeline...
               </div>
             </div>
           </div>
@@ -537,6 +531,7 @@
   <script src="js/api.js?v=6.0.0"></script>
   <script src="js/global-search.js?v=6.0.0"></script>
   <script src="js/notifications.js?v=1.0.6"></script>
+  <script src="js/timeline.js?v=1.0.0"></script>
   <script src="js/details.js?v=1.1.0"></script>
   <script src="js/chat-widget.js?v=1.0.6"></script>
 

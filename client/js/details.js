@@ -469,10 +469,15 @@ function renderCommentsList(comments) {
   }).join('');
 }
 
-// Render Status History Timeline from logs
+// Render Complaint Lifecycle Timeline
 function renderTimeline(issue) {
   const list = document.getElementById('timeline-list');
   if (!list) return;
+
+  if (window.ComplaintTimeline && typeof window.ComplaintTimeline.render === 'function') {
+    window.ComplaintTimeline.render(list, issue, { role: 'citizen' });
+    return;
+  }
 
   const history = issue.history || [];
 
@@ -493,10 +498,10 @@ function renderTimeline(issue) {
 
   list.innerHTML = history.map((log) => {
     let dotColor = 'var(--primary)';
-    if (log.status === 'resolved') dotColor = '#10b981'; // Green
-    else if (log.status === 'rejected') dotColor = '#ef4444'; // Red
-    else if (log.status === 'assigned') dotColor = '#f59e0b'; // Orange
-    else if (log.status === 'in_progress') dotColor = '#8b5cf6'; // Purple
+    if (log.status === 'resolved') dotColor = '#10b981';
+    else if (log.status === 'rejected') dotColor = '#ef4444';
+    else if (log.status === 'assigned') dotColor = '#f59e0b';
+    else if (log.status === 'in_progress') dotColor = '#8b5cf6';
 
     let statusKey = `status_${log.status}`;
     const statusLabel = window.i18n ? window.i18n.t(statusKey) : log.status.replace('_', ' ');
@@ -934,13 +939,13 @@ window.deleteComment = async function(commentId) {
 
 // Update Visual Progress Stepper
 function updateStepperUI(status) {
-  const steps = ['reported', 'assigned', 'in_progress', 'resolved', 'verified'];
+  const steps = ['submitted', 'verified', 'assigned', 'in_progress', 'resolved'];
   
-  let activeIndex = 0; // reported (pending)
-  if (status === 'assigned') activeIndex = 1;
-  else if (status === 'in_progress') activeIndex = 2;
-  else if (status === 'resolved') activeIndex = 3;
-  else if (status === 'verified') activeIndex = 4;
+  let activeIndex = 0; // submitted (pending)
+  if (status === 'verified') activeIndex = 1;
+  else if (status === 'assigned') activeIndex = 2;
+  else if (status === 'in_progress') activeIndex = 3;
+  else if (status === 'resolved' || status === 'verified_citizen') activeIndex = 4;
   else if (status === 'rejected') {
     const resolvedLabel = document.querySelector('#step-resolved .step-label');
     const resolvedCircle = document.querySelector('#step-resolved .step-circle');
@@ -948,12 +953,13 @@ function updateStepperUI(status) {
       resolvedLabel.textContent = "Rejected";
       resolvedCircle.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
     }
-    activeIndex = 3; // Make line flow all the way but marked as rejected
+    activeIndex = 4;
   }
 
   // Update nodes styling
   steps.forEach((stepName, index) => {
-    const node = document.getElementById(`step-${stepName}`);
+    let node = document.getElementById(`step-${stepName}`);
+    if (!node && stepName === 'submitted') node = document.getElementById('step-reported');
     if (!node) return;
 
     const circle = node.querySelector('.step-circle');
