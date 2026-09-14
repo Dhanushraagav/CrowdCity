@@ -145,7 +145,7 @@
             <i class="fa-solid fa-key" style="color: var(--primary);"></i> <span id="mpin-btn-label">Set MPIN</span>
           </button>
           <a href="scheme-checker.html" class="btn btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-            <i class="fa-solid fa-award"></i> <span>Check Schemes</span>
+            <i class="fa-solid fa-award"></i> <span data-i18n="check_schemes">Check Schemes</span>
           </a>
           <div id="auth-nav-container"></div>
         </div>
@@ -196,17 +196,17 @@
             </select>
 
             <button type="button" class="btn btn-primary" onclick="document.getElementById('doc-file-input').click()" style="padding: 0.65rem 1.4rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px;">
-              <span>Select File</span>
+              <span data-i18n="select_file">Select File</span>
             </button>
           </div>
         </div>
 
         <!-- Filter & Search Bar -->
         <div style="display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
-          <input id="input-doc-search" type="text" class="form-control" placeholder="Search documents by name..." style="max-width: 320px; padding: 0.65rem 1rem; font-size: 0.85rem; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);" />
+          <input id="input-doc-search" type="text" class="form-control" data-i18n-placeholder="search_docs_placeholder" placeholder="Search documents by name..." style="max-width: 320px; padding: 0.65rem 1rem; font-size: 0.85rem; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);" />
 
           <select id="select-filter-doc-type" class="form-control" style="max-width: 220px; padding: 0.65rem 1rem; font-size: 0.85rem; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
-            <option value="all">All Document Types</option>
+            <option value="all" data-i18n="all_doc_types">All Document Types</option>
             <option value="aadhaar">Aadhaar Card</option>
             <option value="ration_card">Ration Card</option>
             <option value="income_cert">Income Certificate</option>
@@ -236,7 +236,7 @@
         Enter Security MPIN
       </h3>
       <p id="mpin-modal-desc" style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 1.5rem 0; line-height: 1.5;">
-        Enter your 4-digit Security MPIN to view confidential wallet documents.
+        <span data-i18n="mpin_confidential_hint">Enter your 4-digit Security MPIN to view confidential wallet documents.</span>
       </p>
 
       <!-- Mode 1: Set New MPIN Inputs -->
@@ -300,7 +300,7 @@
         </div>
         <input type="text" id="mpin-input-otp" maxlength="6" inputmode="numeric" class="hidden-pin-input" />
         <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
-          Didn't receive code? <button type="button" id="mpin-resend-otp-btn" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;">Resend OTP</button>
+          Didn't receive code? <button type="button" id="mpin-resend-otp-btn" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;" data-i18n="resend_otp">Resend OTP</button>
         </div>
       </div>
 
@@ -316,7 +316,7 @@
 
       <!-- Password Reset Fallback Link -->
       <div id="mpin-reset-wrap" style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-muted);">
-        Forgot your Security MPIN? <button type="button" id="mpin-reset-btn" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;">Reset via Email OTP</button>
+        Forgot your Security MPIN? <button type="button" id="mpin-reset-btn" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;" data-i18n="reset_via_otp">Reset via Email OTP</button>
       </div>
     </div>
   </div>

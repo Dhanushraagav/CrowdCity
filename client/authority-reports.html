@@ -39,16 +39,16 @@
       </div>
 
       <nav class="sidebar-nav">
-        <a href="authority-dashboard.html" class="nav-item" data-pane="pane-dashboard">Dashboard</a>
-        <a href="authority-complaints.html" class="nav-item" data-pane="pane-complaints">Complaints Queue</a>
-        <a href="authority-assigned.html" class="nav-item" data-pane="pane-assigned">Assigned Cases</a>
-        <a href="authority-reports.html" class="nav-item active" data-pane="pane-reports">Operational Reports</a>
-        <a href="authority-civic-intelligence.html" class="nav-item">Civic Intelligence</a>
+        <a href="authority-dashboard.html" class="nav-item" data-pane="pane-dashboard" data-i18n="nav_dashboard">Dashboard</a>
+        <a href="authority-complaints.html" class="nav-item" data-pane="pane-complaints" data-i18n="nav_complaints_queue">Complaints Queue</a>
+        <a href="authority-assigned.html" class="nav-item" data-pane="pane-assigned" data-i18n="nav_assigned_cases">Assigned Cases</a>
+        <a href="authority-reports.html" class="nav-item active" data-pane="pane-reports" data-i18n="nav_operational_reports">Operational Reports</a>
+        <a href="authority-civic-intelligence.html" class="nav-item" data-i18n="nav_civic_intelligence">Civic Intelligence</a>
       </nav>
 
       <div class="sidebar-footer">
-        <div>Department of Municipal Administration</div>
-        <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+        <div data-i18n="dept_municipal_admin">Department of Municipal Administration</div>
+        <div style="margin-top: 0.25rem;" data-i18n="tn_operations_console">Tamil Nadu Operations Console</div>
       </div>
     </aside>
 
@@ -59,8 +59,8 @@
     <main class="portal-main">
       <header class="portal-header">
         <div class="header-title-area">
-          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu">Toggle Menu</button>
-          <span class="header-title" id="header-pane-title">Operational Reports & Analytics</span>
+          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu" data-i18n="toggle_menu">Toggle Menu</button>
+          <span class="header-title" id="header-pane-title" data-i18n="operational_reports_analytics">Operational Reports & Analytics</span>
         </div>
         
         <!-- Top-Right Header Navigation Controls -->
@@ -71,7 +71,7 @@
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span>Notifications</span>
+            <span data-i18n="nav_notifications">Notifications</span>
             <span id="header-notif-badge" style="display: none; background: #dc2626; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 999px; margin-left: 0.2rem;">0</span>
           </button>
 
@@ -85,10 +85,10 @@
             <!-- Dropdown Menu -->
             <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="event.stopPropagation(); window.location.href='authority-profile.html'">
-                Profile & Security
+                <span data-i18n="profile_and_security">Profile & Security</span>
               </button>
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: #991b1b; background: none; border: none; cursor: pointer;" onclick="logoutUser()">
-                Logout Session
+                <span data-i18n="logout_session">Logout Session</span>
               </button>
             </div>
           </div>
@@ -102,34 +102,34 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             
             <div class="content-card">
-              <div class="card-title">Complaints by Category Summary</div>
+              <div class="card-title" data-i18n="complaints_by_category_summary">Complaints by Category Summary</div>
               <div class="table-container">
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>Category</th>
-                      <th>Total Cases</th>
+                      <th data-i18n="th_category">Category</th>
+                      <th data-i18n="th_total_cases">Total Cases</th>
                     </tr>
                   </thead>
                   <tbody id="reports-category-table-body">
-                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);">Loading categories...</td></tr>
+                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);"><span data-i18n="loading_categories">Loading categories...</span></td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
             <div class="content-card">
-              <div class="card-title">Complaints by Lifecycle Status</div>
+              <div class="card-title" data-i18n="complaints_by_lifecycle">Complaints by Lifecycle Status</div>
               <div class="table-container">
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>Status</th>
+                      <th data-i18n="th_status">Status</th>
                       <th>Total Cases</th>
                     </tr>
                   </thead>
                   <tbody id="reports-status-table-body">
-                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);">Loading statuses...</td></tr>
+                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);"><span data-i18n="loading_statuses">Loading statuses...</span></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -140,7 +140,7 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
             
             <div class="content-card">
-              <div class="card-title">Resolution Rate Performance</div>
+              <div class="card-title" data-i18n="resolution_rate_performance">Resolution Rate Performance</div>
               <div style="padding: 1rem; text-align: center;">
                 <div style="font-size: 2.2rem; font-weight: 800; color: #059669;" id="reports-resolution-rate">0%</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">Percentage of total complaints resolved or verified.</div>
@@ -148,18 +148,18 @@
             </div>
 
             <div class="content-card">
-              <div class="card-title">Officer Workload Breakdown</div>
-              <div id="chart-workload-svg" class="svg-chart-container">Loading officer workload chart...</div>
+              <div class="card-title" data-i18n="officer_workload_breakdown">Officer Workload Breakdown</div>
+              <div id="chart-workload-svg" class="svg-chart-container"><span data-i18n="loading_workload_chart">Loading officer workload chart...</span></div>
               <div class="table-container" style="margin-top: 0.75rem;">
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>Officer Name</th>
-                      <th>Assigned Cases</th>
+                      <th data-i18n="th_officer_name">Officer Name</th>
+                      <th data-i18n="nav_assigned_cases">Assigned Cases</th>
                     </tr>
                   </thead>
                   <tbody id="reports-workload-table-body">
-                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);">Loading workload...</td></tr>
+                    <tr><td colspan="2" style="text-align:center; padding:1rem; color:var(--text-muted);"><span data-i18n="loading_workload">Loading workload...</span></td></tr>
                   </tbody>
                 </table>
               </div>

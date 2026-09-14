@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="css/authority-portal.css?v=3.0.1">
 
   <!-- Central Auth Router -->
+  <script src="js/i18n.js"></script>
   <script src="js/auth-router.js?v=3.1.0"></script>
 </head>
 <body>
@@ -39,16 +40,16 @@
       </div>
 
       <nav class="sidebar-nav">
-        <a href="authority-dashboard.html" class="nav-item active" data-pane="pane-dashboard">Dashboard</a>
-        <a href="authority-complaints.html" class="nav-item" data-pane="pane-complaints">Complaints Queue</a>
-        <a href="authority-assigned.html" class="nav-item" data-pane="pane-assigned">Assigned Cases</a>
-        <a href="authority-reports.html" class="nav-item" data-pane="pane-reports">Operational Reports</a>
-        <a href="authority-civic-intelligence.html" class="nav-item">Civic Intelligence</a>
+        <a href="authority-dashboard.html" class="nav-item active" data-pane="pane-dashboard" data-i18n="nav_dashboard">Dashboard</a>
+        <a href="authority-complaints.html" class="nav-item" data-pane="pane-complaints" data-i18n="nav_complaints_queue">Complaints Queue</a>
+        <a href="authority-assigned.html" class="nav-item" data-pane="pane-assigned" data-i18n="nav_assigned_cases">Assigned Cases</a>
+        <a href="authority-reports.html" class="nav-item" data-pane="pane-reports" data-i18n="nav_operational_reports">Operational Reports</a>
+        <a href="authority-civic-intelligence.html" class="nav-item" data-i18n="nav_civic_intelligence">Civic Intelligence</a>
       </nav>
 
       <div class="sidebar-footer">
-        <div>Department of Municipal Administration</div>
-        <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+        <div data-i18n="dept_municipal_admin">Department of Municipal Administration</div>
+        <div style="margin-top: 0.25rem;" data-i18n="tn_operations_console">Tamil Nadu Operations Console</div>
       </div>
     </aside>
 
@@ -59,8 +60,8 @@
     <main class="portal-main">
       <header class="portal-header">
         <div class="header-title-area">
-          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu">Toggle Menu</button>
-          <span class="header-title" id="header-pane-title">Municipal Dashboard</span>
+          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu" data-i18n="toggle_menu">Toggle Menu</button>
+          <span class="header-title" id="header-pane-title" data-i18n="municipal_dashboard">Municipal Dashboard</span>
         </div>
         
         <!-- Top-Right Header Navigation Controls -->
@@ -71,7 +72,7 @@
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span>Notifications</span>
+            <span data-i18n="nav_notifications">Notifications</span>
             <span id="header-notif-badge" style="display: none; background: #dc2626; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 999px; margin-left: 0.2rem;">0</span>
           </button>
 
@@ -85,10 +86,10 @@
             <!-- Dropdown Menu -->
             <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="event.stopPropagation(); window.location.href='authority-profile.html'">
-                Profile & Security
+                <span data-i18n="profile_and_security">Profile & Security</span>
               </button>
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: #991b1b; background: none; border: none; cursor: pointer;" onclick="logoutUser()">
-                Logout Session
+                <span data-i18n="logout_session">Logout Session</span>
               </button>
             </div>
           </div>
@@ -102,74 +103,74 @@
           <!-- Operational Metric Cards -->
           <div class="metric-grid">
             <div class="metric-box">
-              <div class="metric-box-title">Total Complaints</div>
+              <div class="metric-box-title" data-i18n="stat_total_complaints">Total Complaints</div>
               <div class="metric-box-value" id="kpi-total">0</div>
-              <div class="metric-box-subtext">All reported civic issues</div>
+              <div class="metric-box-subtext" data-i18n="all_reported_civic_issues">All reported civic issues</div>
             </div>
             <div class="metric-box">
-              <div class="metric-box-title">Pending Dispatch</div>
+              <div class="metric-box-title" data-i18n="pending_dispatch">Pending Dispatch</div>
               <div class="metric-box-value" id="kpi-pending" style="color: #d97706;">0</div>
-              <div class="metric-box-subtext">Awaiting action</div>
+              <div class="metric-box-subtext" data-i18n="awaiting_action">Awaiting action</div>
             </div>
             <div class="metric-box">
-              <div class="metric-box-title">Assigned</div>
+              <div class="metric-box-title" data-i18n="assigned">Assigned</div>
               <div class="metric-box-value" id="kpi-assigned" style="color: #2563eb;">0</div>
-              <div class="metric-box-subtext">Currently assigned</div>
+              <div class="metric-box-subtext" data-i18n="currently_assigned">Currently assigned</div>
             </div>
             <div class="metric-box">
-              <div class="metric-box-title">In Progress</div>
+              <div class="metric-box-title" data-i18n="in_progress">In Progress</div>
               <div class="metric-box-value" id="kpi-progress" style="color: #7e22ce;">0</div>
-              <div class="metric-box-subtext">Under field investigation</div>
+              <div class="metric-box-subtext" data-i18n="under_field_investigation">Under field investigation</div>
             </div>
             <div class="metric-box">
-              <div class="metric-box-title">Resolved Cases</div>
+              <div class="metric-box-title" data-i18n="resolved_issues">Resolved Cases</div>
               <div class="metric-box-value" id="kpi-resolved" style="color: #059669;">0</div>
-              <div class="metric-box-subtext">Successfully completed</div>
+              <div class="metric-box-subtext" data-i18n="successfully_completed">Successfully completed</div>
             </div>
             <div class="metric-box">
-              <div class="metric-box-title">Rejected Cases</div>
+              <div class="metric-box-title" data-i18n="rejected_cases">Rejected Cases</div>
               <div class="metric-box-value" id="kpi-rejected" style="color: #475569;">0</div>
-              <div class="metric-box-subtext">Closed / Declined</div>
+              <div class="metric-box-subtext" data-i18n="closed_declined">Closed / Declined</div>
             </div>
             <div class="metric-box">
-              <div class="metric-box-title">Emergency Priority</div>
+              <div class="metric-box-title" data-i18n="emergency_priority">Emergency Priority</div>
               <div class="metric-box-value" id="kpi-emergency" style="color: #dc2626;">0</div>
-              <div class="metric-box-subtext">Critical attention required</div>
+              <div class="metric-box-subtext" data-i18n="critical_attention_required">Critical attention required</div>
             </div>
           </div>
 
           <!-- SLA & Escalation Performance Metric Cards -->
           <div class="metric-grid" style="margin-top: 1rem; margin-bottom: 1.25rem;">
             <div class="metric-box" style="border-left: 3px solid #059669;">
-              <div class="metric-box-title">SLA Compliance</div>
+              <div class="metric-box-title" data-i18n="sla_compliance">SLA Compliance</div>
               <div class="metric-box-value" id="kpi-sla-compliance" style="color: #059669;">100%</div>
-              <div class="metric-box-subtext">Responses within deadline</div>
+              <div class="metric-box-subtext" data-i18n="responses_within_deadline">Responses within deadline</div>
             </div>
             <div class="metric-box" style="border-left: 3px solid #d97706;">
-              <div class="metric-box-title">Pending SLA</div>
+              <div class="metric-box-title" data-i18n="pending_sla">Pending SLA</div>
               <div class="metric-box-value" id="kpi-sla-pending" style="color: #d97706;">0</div>
-              <div class="metric-box-subtext">Active within response time</div>
+              <div class="metric-box-subtext" data-i18n="active_within_response_time">Active within response time</div>
             </div>
             <div class="metric-box" style="border-left: 3px solid #dc2626;">
-              <div class="metric-box-title">Overdue Complaints</div>
+              <div class="metric-box-title" data-i18n="overdue_complaints">Overdue Complaints</div>
               <div class="metric-box-value" id="kpi-sla-overdue" style="color: #dc2626;">0</div>
-              <div class="metric-box-subtext">Exceeded response SLA</div>
+              <div class="metric-box-subtext" data-i18n="exceeded_response_sla">Exceeded response SLA</div>
             </div>
             <div class="metric-box" style="border-left: 3px solid #7f1d1d;">
-              <div class="metric-box-title">Escalated Cases</div>
+              <div class="metric-box-title" data-i18n="escalated_cases">Escalated Cases</div>
               <div class="metric-box-value" id="kpi-sla-escalated" style="color: #7f1d1d;">0</div>
-              <div class="metric-box-subtext">Senior municipal review</div>
+              <div class="metric-box-subtext" data-i18n="senior_municipal_review">Senior municipal review</div>
             </div>
           </div>
 
           <!-- SVG Analytics Row 1 -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             <div class="content-card">
-              <div class="card-title">Complaints by Category (Real DB)</div>
+              <div class="card-title" data-i18n="complaints_by_category">Complaints by Category (Real DB)</div>
               <div id="chart-category-svg" class="svg-chart-container">Loading category distribution...</div>
             </div>
             <div class="content-card">
-              <div class="card-title">Lifecycle Status Distribution</div>
+              <div class="card-title" data-i18n="lifecycle_status_dist">Lifecycle Status Distribution</div>
               <div id="chart-status-svg" class="svg-chart-container">Loading status distribution...</div>
             </div>
           </div>
@@ -177,36 +178,36 @@
           <!-- SVG Analytics Row 2 -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             <div class="content-card">
-              <div class="card-title">Priority & Emergency Breakdown</div>
+              <div class="card-title" data-i18n="priority_emergency_breakdown">Priority & Emergency Breakdown</div>
               <div id="chart-priority-svg" class="svg-chart-container">Loading priority distribution...</div>
             </div>
             <div class="content-card">
-              <div class="card-title">Complaint Volume Timeline Trend</div>
+              <div class="card-title" data-i18n="volume_timeline_trend">Complaint Volume Timeline Trend</div>
               <div id="chart-trend-svg" class="svg-chart-container">Loading trend graph...</div>
             </div>
           </div>
 
           <!-- Operational Complaints Table Card -->
           <div class="content-card">
-            <div class="card-title">Recent Operational Complaints</div>
+            <div class="card-title" data-i18n="recent_operational_complaints">Recent Operational Complaints</div>
             <div class="table-container">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Ticket ID</th>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Location</th>
-                    <th>Assigned To</th>
-                    <th>Date</th>
-                    <th>Action</th>
+                    <th data-i18n="ticket_id">Ticket ID</th>
+                    <th data-i18n="th_title">Title</th>
+                    <th data-i18n="th_category">Category</th>
+                    <th data-i18n="th_priority">Priority</th>
+                    <th data-i18n="th_status">Status</th>
+                    <th data-i18n="th_location">Location</th>
+                    <th data-i18n="th_assigned_to">Assigned To</th>
+                    <th data-i18n="th_date">Date</th>
+                    <th data-i18n="th_action">Action</th>
                   </tr>
                 </thead>
                 <tbody id="dashboard-recent-table-body">
                   <tr>
-                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading operational dataset...</td>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;"><span data-i18n="loading_operational_data">Loading operational dataset...</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -215,9 +216,9 @@
 
           <!-- Recent Activity Log Card -->
           <div class="content-card">
-            <div class="card-title">System Activity Log</div>
+            <div class="card-title" data-i18n="system_activity_log">System Activity Log</div>
             <div id="dashboard-activity-list" style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
-              <div style="color: var(--text-muted);">Loading activity log...</div>
+              <div style="color: var(--text-muted);"><span data-i18n="loading_activity_log">Loading activity log...</span></div>
             </div>
           </div>
         </section>

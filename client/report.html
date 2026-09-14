@@ -504,8 +504,8 @@
 
             <!-- Page Header -->
             <div class="report-page-header" style="width: 100%; max-width: 100%; margin: 0 0 1.25rem 0;">
-              <h1 id="report-page-title">Report an Issue</h1>
-              <p id="report-page-desc">Provide details about the infrastructure or safety concern in your area. Our AI system will route it to the appropriate department.</p>
+              <h1 id="report-page-title" data-i18n="report_an_issue">Report an Issue</h1>
+              <p id="report-page-desc" data-i18n="report_civic_issue_desc">Provide details about the infrastructure or safety concern in your area. Our AI system will route it to the appropriate department.</p>
             </div>
 
             <!-- Immediate Emergency Alert Banner (Distinguishes routine SLA reporting from immediate emergency action) -->
@@ -539,8 +539,8 @@
             <div class="step-indicator-item active" id="step-ind-1" style="display: flex; align-items: center; gap: 0.65rem; z-index: 2;">
               <div class="step-circle" style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary, #0d9488); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; transition: all 0.25s ease;">1</div>
               <div>
-                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--primary, #0d9488); letter-spacing: 0.5px;">Step 1</div>
-                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main, #0f172a);">Choose Issue Type</div>
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--primary, #0d9488); letter-spacing: 0.5px;" data-i18n="step_1">Step 1</div>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main, #0f172a);" data-i18n="choose_issue_type">Choose Issue Type</div>
               </div>
             </div>
 
@@ -550,8 +550,8 @@
             <div class="step-indicator-item" id="step-ind-2" style="display: flex; align-items: center; gap: 0.65rem; z-index: 2; opacity: 0.5;">
               <div class="step-circle" style="width: 36px; height: 36px; border-radius: 50%; background: var(--bg-surface-hover, #f1f5f9); color: var(--text-muted, #64748b); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; transition: all 0.25s ease;">2</div>
               <div>
-                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted, #64748b); letter-spacing: 0.5px;">Step 2</div>
-                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main, #0f172a);">Report Details</div>
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted, #64748b); letter-spacing: 0.5px;" data-i18n="step_2">Step 2</div>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main, #0f172a);" data-i18n="report_details">Report Details</div>
               </div>
             </div>
 
@@ -561,8 +561,8 @@
             <div class="step-indicator-item" id="step-ind-3" style="display: flex; align-items: center; gap: 0.65rem; z-index: 2; opacity: 0.5;">
               <div class="step-circle" style="width: 36px; height: 36px; border-radius: 50%; background: var(--bg-surface-hover, #f1f5f9); color: var(--text-muted, #64748b); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; transition: all 0.25s ease;">3</div>
               <div>
-                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted, #64748b); letter-spacing: 0.5px;">Step 3</div>
-                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main, #0f172a);">AI Review</div>
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted, #64748b); letter-spacing: 0.5px;" data-i18n="step_3">Step 3</div>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main, #0f172a);" data-i18n="ai_review">AI Review</div>
               </div>
             </div>
           </div>
@@ -571,10 +571,10 @@
         <!-- STEP 1 CONTENT: CHOOSE ISSUE TYPE -->
         <div class="wizard-step-pane" id="wizard-step-1" style="background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: var(--radius-lg, 16px); padding: 2.25rem 2rem; box-shadow: var(--shadow-sm);">
           <div style="text-align: center; margin-bottom: 2rem;">
-            <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.4rem 0;">
+            <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.4rem 0;" data-i18n="choose_issue_type">
               Choose Issue Type
             </h2>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0 0 0.5rem 0;" data-i18n="choose_issue_type_desc">
               Select the type of civic concern to initiate structured complaint routing, Complaint ID tracking, and official SLA enforcement.
             </p>
           </div>
@@ -584,17 +584,17 @@
             <div class="stepper-type-card" onclick="goToWizardStep2('civic')" style="background: var(--bg-surface-hover, #f8fafc); border: 2px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.75rem 1.5rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;">
               <div>
                 <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 0.75rem;">
-                  <span style="font-size: 0.72rem; font-weight: 800; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;">CIVIC ISSUE</span>
+                  <span style="font-size: 0.72rem; font-weight: 800; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;" data-i18n="civic_issue_badge">CIVIC ISSUE</span>
                 </div>
-                <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.6rem 0;">Civic Issue</h3>
-                <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0 0 0.5rem 0; text-transform: uppercase;">Examples:</p>
+                <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.6rem 0;" data-i18n="civic_issue">Civic Issue</h3>
+                <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0 0 0.5rem 0; text-transform: uppercase;" data-i18n="examples_label">Examples:</p>
                 <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;">
-                  <li>Garbage Collection</li>
-                  <li>Water Supply</li>
-                  <li>Drainage</li>
-                  <li>Street Lights</li>
-                  <li>Public Property Damage</li>
-                  <li>Sanitation</li>
+                  <li data-i18n="ex_garbage_collection">Garbage Collection</li>
+                  <li data-i18n="ex_water_supply">Water Supply</li>
+                  <li data-i18n="ex_drainage">Drainage</li>
+                  <li data-i18n="ex_street_lights">Street Lights</li>
+                  <li data-i18n="ex_public_property">Public Property Damage</li>
+                  <li data-i18n="ex_sanitation">Sanitation</li>
                 </ul>
               </div>
             </div>
@@ -603,18 +603,18 @@
             <div class="stepper-type-card" onclick="goToWizardStep2('transportation')" style="background: var(--bg-surface-hover, #f8fafc); border: 2px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.75rem 1.5rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;">
               <div>
                 <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 0.75rem;">
-                  <span style="font-size: 0.72rem; font-weight: 800; background: #fef3c7; color: #b45309; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;">TRANSPORTATION ISSUE</span>
+                  <span style="font-size: 0.72rem; font-weight: 800; background: #fef3c7; color: #b45309; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;" data-i18n="transportation_issue_badge">TRANSPORTATION ISSUE</span>
                 </div>
-                <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.6rem 0;">Transportation Issue</h3>
-                <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0 0 0.5rem 0; text-transform: uppercase;">Examples:</p>
+                <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.6rem 0;" data-i18n="transportation_issue">Transportation Issue</h3>
+                <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0 0 0.5rem 0; text-transform: uppercase;" data-i18n="examples_label">Examples:</p>
                 <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;">
-                  <li>Potholes</li>
-                  <li>Damaged Roads</li>
-                  <li>Traffic Signal Failure</li>
-                  <li>Illegal Parking</li>
-                  <li>Waterlogging</li>
-                  <li>Road Block</li>
-                  <li>Bus Stop Issues</li>
+                  <li data-i18n="ex_potholes">Potholes</li>
+                  <li data-i18n="ex_damaged_roads">Damaged Roads</li>
+                  <li data-i18n="ex_traffic_signal">Traffic Signal Failure</li>
+                  <li data-i18n="ex_illegal_parking">Illegal Parking</li>
+                  <li data-i18n="ex_waterlogging">Waterlogging</li>
+                  <li data-i18n="ex_road_block">Road Block</li>
+                  <li data-i18n="ex_bus_stop">Bus Stop Issues</li>
                 </ul>
               </div>
             </div>
@@ -631,10 +631,10 @@
               <!-- Mode Switcher Indicator Banner -->
               <div id="reporting-mode-banner" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; background: rgba(13, 148, 136, 0.06); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.5rem 0.85rem;">
                 <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-main); display: flex; align-items: center; gap: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  <span>Issue Type: <strong id="mode-badge-name" style="color: var(--primary);">Civic Issue</strong></span>
+                  <span><span data-i18n="issue_type_label">Issue Type:</span> <strong id="mode-badge-name" style="color: var(--primary);" data-i18n="civic_issue">Civic Issue</strong></span>
                 </div>
                 <button type="button" onclick="goToWizardStep1()" class="btn btn-outline" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 6px; white-space: nowrap; flex-shrink: 0; margin-left: 0.5rem; height: 28px; display: inline-flex; align-items: center; gap: 0.25rem;">
-                  <i class="fa-solid fa-rotate-left" style="font-size: 0.68rem;"></i> Change
+                  <i class="fa-solid fa-rotate-left" style="font-size: 0.68rem;"></i> <span data-i18n="change_btn">Change</span>
                 </button>
               </div>
 
@@ -673,15 +673,15 @@
 
                 <!-- Mobile AI Camera Button -->
                 <button type="button" id="btn-ai-camera-trigger" class="mobile-only" aria-label="Take Photo with AI Camera" style="height: 36px; padding: 0 0.8rem; border-radius: 8px; background: #0284c7; color: #ffffff; border: none; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
-                  <i class="fa-solid fa-camera"></i> <span>AI Camera Report</span>
+                  <i class="fa-solid fa-camera"></i> <span data-i18n="ai_camera_report">AI Camera Report</span>
                 </button>
 
                 <!-- Desktop AI Upload Button -->
                 <button type="button" id="btn-ai-upload-trigger" class="desktop-only" aria-label="Upload Image for AI Analysis" style="height: 36px; padding: 0 0.8rem; border-radius: 8px; background: #0284c7; color: #ffffff; border: none; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
-                  <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Image for AI Analysis</span>
+                  <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="upload_image_ai">Upload Image for AI Analysis</span>
                 </button>
 
-                <div style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-i18n="auto_detects_hazard">
                   Auto-detects civic hazard details
                 </div>
               </div>
@@ -695,7 +695,7 @@
                 <label for="report-description" class="field-label" style="margin-bottom: 0;" data-i18n="detailed_description">Detailed Description</label>
                 <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                   <button type="button" id="btn-voice-input" class="btn-voice-reporter" title="Speak in English, Tanglish, or Tamil" style="padding: 0.45rem 0.85rem; font-size: 0.78rem; font-weight: 800; border-radius: 8px; background: rgba(13, 148, 136, 0.1); color: var(--primary, #0d9488); border: 1px solid rgba(13, 148, 136, 0.25); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
-                    <i class="fa-solid fa-microphone"></i> <span>Voice Report</span>
+                    <i class="fa-solid fa-microphone"></i> <span data-i18n="voice_report">Voice Report</span>
                   </button>
                   <select id="voice-lang-select" aria-label="Speech Recognition Language" style="height: 32px; padding: 0 0.45rem; font-size: 0.72rem; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; outline: none;">
                     <option value="en-IN" selected>EN (English / Tanglish)</option>
@@ -735,14 +735,14 @@
               <div class="la-mode-toggle-bar">
                 <div class="la-mode-status">
                   <i class="fa-solid fa-map-pin"></i>
-                  <span id="la-current-mode-label">Detecting location...</span>
+                  <span id="la-current-mode-label" data-i18n="detecting_location">Detecting location...</span>
                 </div>
                 <div>
                   <button type="button" id="btn-toggle-manual-location" class="la-toggle-btn" title="Override with 4-tier dropdown selectors">
-                    <i class="fa-solid fa-sliders"></i> <span>Change Location Manually</span>
+                    <i class="fa-solid fa-sliders"></i> <span data-i18n="change_location_manually">Change Location Manually</span>
                   </button>
                   <button type="button" id="btn-toggle-auto-location" class="la-toggle-btn hidden" title="Switch back to automated GPS/Map pin">
-                    <i class="fa-solid fa-location-crosshairs"></i> <span>Use My Current Location</span>
+                    <i class="fa-solid fa-location-crosshairs"></i> <span data-i18n="use_my_location">Use My Current Location</span>
                   </button>
                 </div>
               </div>
@@ -897,7 +897,7 @@
                 <div class="coords-row">
                   <div>
                     <label for="report-latitude" class="field-label" data-i18n="latitude">Latitude</label>
-                    <input type="text" id="report-latitude" class="form-input" readonly placeholder="Click map" required style="font-size: 0.82rem; opacity: 0.75;">
+                    <input type="text" id="report-latitude" class="form-input" readonly data-i18n-placeholder="click_map" data-i18n-placeholder="click_map" placeholder="Click map" required style="font-size: 0.82rem; opacity: 0.75;">
                   </div>
                   <div>
                     <label for="report-longitude" class="field-label" data-i18n="longitude">Longitude</label>
@@ -1001,7 +1001,7 @@
 
             <!-- Submit / Continue to Step 3 Button -->
             <button type="button" onclick="proceedToWizardStep3()" id="btn-submit-report" class="btn-submit">
-              <span>Next: AI Review</span> <i class="fa-solid fa-arrow-right"></i>
+              <span data-i18n="next_ai_review">Next: AI Review</span> <i class="fa-solid fa-arrow-right"></i>
             </button>
 
           </form>
@@ -1030,20 +1030,20 @@
           <!-- Support & Assistance Card -->
           <div class="panel-card" style="border-top: 3px solid var(--primary, #0d9488);">
             <p class="panel-card-title" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span><i class="fa-solid fa-headset" style="color: var(--primary, #0d9488); margin-right: 0.4rem;"></i> Need Assistance?</span>
-              <span style="font-size: 0.72rem; color: var(--primary, #0d9488); font-weight: 700; background: var(--primary-light-alpha, rgba(13, 148, 136, 0.1)); padding: 0.15rem 0.5rem; border-radius: 999px;">24/7 Support</span>
+              <span><i class="fa-solid fa-headset" style="color: var(--primary, #0d9488); margin-right: 0.4rem;"></i> <span data-i18n="need_assistance">Need Assistance?</span></span>
+              <span style="font-size: 0.72rem; color: var(--primary, #0d9488); font-weight: 700; background: var(--primary-light-alpha, rgba(13, 148, 136, 0.1)); padding: 0.15rem 0.5rem; border-radius: 999px;" data-i18n="support_247">24/7 Support</span>
             </p>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem; line-height: 1.4;">
-              Need help reporting an issue or verifying your location? Call or chat directly with CrowdCity Support.
+              <span data-i18n="report_help_desc">Need help reporting an issue or verifying your location? Call or chat directly with CrowdCity Support.</span>
             </p>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
               <a href="tel:+919025132196" id="report-call-support-btn" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1rem; background: var(--primary, #0d9488); color: #ffffff !important; border-radius: var(--radius-md, 8px); font-weight: 700; font-size: 0.84rem; text-decoration: none; box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25); transition: all 0.2s ease;">
                 <i class="fa-solid fa-phone" style="font-size: 0.85rem;"></i>
-                <span>Call Support</span>
+                <span data-i18n="call_support">Call Support</span>
               </a>
               <a href="https://wa.me/919025132196?text=Hi%20CrowdCity%20Support%2C%20I%20need%20assistance%20regarding%20a%20civic%20issue." target="_blank" rel="noopener noreferrer" id="report-whatsapp-support-btn" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.55rem 1rem; background: #25d366; color: #ffffff !important; border-radius: var(--radius-md, 8px); font-weight: 600; font-size: 0.84rem; text-decoration: none; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.2); transition: all 0.2s ease;">
                 <i class="fa-brands fa-whatsapp" style="font-size: 1.05rem;"></i>
-                <span>Chat on WhatsApp</span>
+                <span data-i18n="chat_whatsapp">Chat on WhatsApp</span>
               </a>
             </div>
           </div>
@@ -1058,7 +1058,7 @@
             </div>
             <div id="report-recent-activity-list">
               <!-- Populated dynamically by JS below -->
-              <div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 1rem 0;">
+              <div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 1rem 0;" data-i18n="loading_recent_activity">
                 Loading recent activity...
               </div>
             </div>
@@ -1080,13 +1080,13 @@
         </div>
 
         <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #e0f2fe; color: #0369a1; font-size: 0.75rem; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.65rem; border: 1px solid #bae6fd;">
-          <i class="fa-solid fa-shield-halved"></i> Official Government AI Verification Report
+          <i class="fa-solid fa-shield-halved"></i> <span data-i18n="ai_verification_report">Official Government AI Verification Report</span>
         </div>
 
-        <h2 style="font-family: var(--font-heading); font-size: 1.55rem; font-weight: 800; color: var(--text-main, #0f172a); margin: 0 0 0.35rem 0;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.55rem; font-weight: 800; color: var(--text-main, #0f172a); margin: 0 0 0.35rem 0;" data-i18n="ai_triage_title">
           AI Triage & Department Dispatch Preview
         </h2>
-        <p style="font-size: 0.88rem; color: var(--text-muted, #64748b); margin: 0; max-width: 620px; margin-left: auto; margin-right: auto;">
+        <p style="font-size: 0.88rem; color: var(--text-muted, #64748b); margin: 0; max-width: 620px; margin-left: auto; margin-right: auto;" data-i18n="ai_triage_desc">
           Automated classification, SLA assignment, zonal department routing, and priority verification for Tamil Nadu Smart Cities.
         </p>
       </div>
@@ -1098,49 +1098,49 @@
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color, #e2e8f0); padding-bottom: 0.85rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
           <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; font-weight: 800; color: #0d9488; letter-spacing: 0.03em;">
             <i class="fa-solid fa-shield-halved" style="color: #0d9488;"></i>
-            STATE CIVIC AI CLASSIFICATION VERIFIED
+            <span data-i18n="state_ai_verified">STATE CIVIC AI CLASSIFICATION VERIFIED</span>
           </div>
           <div style="font-size: 0.78rem; color: var(--text-muted, #64748b); font-weight: 700; background: var(--bg-surface-hover, #f8fafc); padding: 0.25rem 0.65rem; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);">
-            Ref Code: <span id="step3-ai-ref-code" style="color: var(--primary, #0d9488); font-weight: 800;">TN-AI-2026-98412</span>
+            <span data-i18n="ref_code">Ref Code:</span> <span id="step3-ai-ref-code" style="color: var(--primary, #0d9488); font-weight: 800;">TN-AI-2026-98412</span>
           </div>
         </div>
 
         <!-- 6-Metric AI Breakdown Grid -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem;">
           <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
-            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Detected Category</span>
+            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="detected_category">Detected Category</span>
             <span id="step3-ai-category" style="font-weight: 700; color: var(--text-main, #0f172a); font-size: 0.88rem; text-transform: capitalize;">Analyzing...</span>
           </div>
 
           <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
-            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Priority & Severity</span>
+            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="priority_severity">Priority & Severity</span>
             <span id="step3-ai-priority" style="font-weight: 700; color: #b45309; font-size: 0.88rem;">Medium (6.5/10)</span>
           </div>
 
           <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
-            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Target SLA Resolution</span>
+            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="target_sla_resolution">Target SLA Resolution</span>
             <span id="step3-ai-sla" style="font-weight: 700; color: #0d9488; font-size: 0.88rem;">24 Hours</span>
           </div>
 
           <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
-            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Zonal Department</span>
+            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="zonal_department">Zonal Department</span>
             <span id="step3-ai-department" style="font-weight: 700; color: var(--text-main, #0f172a); font-size: 0.88rem;">Municipal Corporation</span>
           </div>
 
                   <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
-            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">AI Model Certainty</span>
+            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="ai_model_certainty">AI Model Certainty</span>
             <span id="step3-ai-confidence" style="font-weight: 700; color: #0369a1; font-size: 0.88rem;">96.8%</span>
           </div>
 
           <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0);">
-            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Spatial Duplicate Check</span>
+            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="spatial_duplicate_check">Spatial Duplicate Check</span>
             <span id="step3-ai-duplicate" style="font-weight: 700; color: #0d9488; font-size: 0.88rem;">0 Duplicates (Unique)</span>
           </div>
 
           <div style="background: var(--bg-surface-hover, #f8fafc); padding: 0.75rem 0.9rem; border-radius: 10px; border: 1px solid var(--border-color, #e2e8f0); grid-column: 1 / -1;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;">Responsible Authority & Government Jurisdiction</span>
+                <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="responsible_authority_jurisdiction">Responsible Authority & Government Jurisdiction</span>
                 <span id="step3-ai-authority" style="font-weight: 800; color: #0f172a; font-size: 0.92rem;">Resolving authority...</span>
               </div>
               <span id="step3-ai-jurisdiction" style="font-size: 0.78rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid #bae6fd;">Tamil Nadu</span>
@@ -1152,7 +1152,7 @@
         <div style="background: var(--bg-surface-hover, #f8fafc); border-radius: 12px; padding: 1rem 1.15rem; border: 1px solid var(--border-color, #cbd5e1); display: flex; flex-direction: column; gap: 0.75rem;">
           <div>
             <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.3rem;">
-              <i class="fa-solid fa-file-lines" style="color: #0369a1; margin-right: 0.35rem;"></i> AI Executive Summary
+              <i class="fa-solid fa-file-lines" style="color: #0369a1; margin-right: 0.35rem;"></i> <span data-i18n="ai_exec_summary">AI Executive Summary</span>
             </span>
             <p id="step3-ai-summary" style="margin: 0; font-size: 0.86rem; color: var(--text-main, #0f172a); line-height: 1.5; font-weight: 500;">
               Analyzing issue description...
@@ -1161,7 +1161,7 @@
 
           <div style="border-top: 1px dashed var(--border-color, #cbd5e1); padding-top: 0.75rem;">
             <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.3rem;">
-              <i class="fa-solid fa-user-gear" style="color: #0d9488; margin-right: 0.35rem;"></i> Recommended Dispatch & Action Plan
+              <i class="fa-solid fa-user-gear" style="color: #0d9488; margin-right: 0.35rem;"></i> <span data-i18n="recommended_dispatch">Recommended Dispatch & Action Plan</span>
             </span>
             <p id="step3-ai-action" style="margin: 0; font-size: 0.86rem; color: #0f766e; font-weight: 600; line-height: 1.5;">
               Dispatch field inspection unit upon submission.
@@ -1173,10 +1173,10 @@
       <!-- Action Buttons -->
       <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
         <button type="button" onclick="goToWizardStep2()" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 10px;">
-          <i class="fa-solid fa-arrow-left"></i> Back to Edit
+          <i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_to_edit">Back to Edit</span>
         </button>
         <button type="button" onclick="submitFinalReport()" id="btn-final-submit" class="btn btn-primary" style="padding: 0.8rem 2rem; font-weight: 800; border-radius: 12px; font-size: 0.95rem; box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);">
-          <i class="fa-solid fa-paper-plane"></i> Submit Report & Dispatch
+          <i class="fa-solid fa-paper-plane"></i> <span data-i18n="submit_report_dispatch">Submit Report & Dispatch</span>
         </button>
       </div>
     </div>
@@ -1241,8 +1241,8 @@
           <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
         <div style="text-align: center; width: 100%;">
-          <h3 style="font-size: 1.25rem; font-family: var(--font-heading); font-weight: 800; margin: 0; color: var(--text-main);">Similar Complaint Already Reported</h3>
-          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.35rem; line-height: 1.5;">
+          <h3 style="font-size: 1.25rem; font-family: var(--font-heading); font-weight: 800; margin: 0; color: var(--text-main);" data-i18n="similar_complaint_title">Similar Complaint Already Reported</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.35rem; line-height: 1.5;" data-i18n="similar_complaint_desc">
             An active civic complaint matching this issue and location has already been registered by fellow citizens.
           </p>
         </div>
@@ -1267,14 +1267,14 @@
         <!-- Actions -->
         <div style="display: flex; flex-direction: column; gap: 0.65rem; width: 100%;">
           <button type="button" id="btn-dup-attach" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-            <i class="fa-solid fa-circle-check"></i> Report This Issue Too (Attach to Complaint)
+            <i class="fa-solid fa-circle-check"></i> <span data-i18n="report_issue_too">Report This Issue Too (Attach to Complaint)</span>
           </button>
           
           <div style="display: flex; gap: 0.5rem; width: 100%;">
             <button type="button" id="btn-dup-view" class="btn btn-secondary" style="flex: 1; padding: 0.6rem; font-size: 0.82rem; font-weight: 600;">
-              <i class="fa-solid fa-up-right-from-square"></i> View Complaint
+              <i class="fa-solid fa-up-right-from-square"></i> <span data-i18n="view_complaint">View Complaint</span>
             </button>
-            <button type="button" id="btn-dup-proceed-new" class="btn btn-secondary" style="flex: 1.2; padding: 0.6rem; font-size: 0.82rem; font-weight: 600;">
+            <button type="button" id="btn-dup-proceed-new" class="btn btn-secondary" style="flex: 1.2; padding: 0.6rem; font-size: 0.82rem; font-weight: 600;" data-i18n="different_issue">
               This is a Different Issue
             </button>
           </div>
@@ -1290,7 +1290,7 @@
 
         <!-- Official Complaint ID Banner -->
         <div style="width: 100%; text-align: center; background: rgba(13, 148, 136, 0.08); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(13, 148, 136, 0.25);">
-          <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block;">Official Complaint ID</span>
+          <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block;" data-i18n="official_complaint_id">Official Complaint ID</span>
           <span id="ai-res-complaint-id" style="font-size: 1.3rem; font-weight: 800; font-family: monospace; color: var(--primary); letter-spacing: 1px;">CC-2026-000001</span>
         </div>
 
@@ -1318,7 +1318,7 @@
           <span id="ai-res-priority" class="badge" style="color: white; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; padding: 0.3rem 0.65rem; border-radius: 4px; display: inline-block;"></span>
         </div>
 
-        <p id="ai-redirect-countdown" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin: 0.5rem 0 0 0; width: 100%; font-weight: 500;">
+        <p id="ai-redirect-countdown" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin: 0.5rem 0 0 0; width: 100%; font-weight: 500;" data-i18n="redirecting_countdown">
           Redirecting to Home Dashboard in 5 seconds...
         </p>
       </div>
@@ -1351,16 +1351,16 @@
       </div>
 
       <!-- Title & Subtitle -->
-      <h3 id="ai-modal-title" class="cc-modal-title">
+      <h3 id="ai-modal-title" class="cc-modal-title" data-i18n="ai_inspection_title">
         AI Visual Hazard Inspection
       </h3>
-      <div class="cc-modal-subtitle">
+      <div class="cc-modal-subtitle" data-i18n="ai_inspection_subtitle">
         Automated On-Field Photo Defect Detection &amp; Triage
       </div>
 
       <!-- Description Callout -->
       <div class="cc-modal-callout">
-        <p>
+        <p data-i18n="ai_inspection_desc">
           Automated photo defect detection is currently undergoing municipal sandbox testing. In Phase 2, live captures will automatically classify civic defects (potholes, water leaks, streetlights, garbage) and route reports directly to field engineers.
         </p>
       </div>
@@ -1371,19 +1371,19 @@
           <div class="cc-modal-feature-icon">
             <i class="fa-regular fa-clock"></i>
           </div>
-          <span>Scheduled for upcoming platform update</span>
+          <span data-i18n="scheduled_upcoming_update">Scheduled for upcoming platform update</span>
         </div>
         <div class="cc-modal-feature-item">
           <div class="cc-modal-feature-icon">
             <i class="fa-regular fa-circle-check"></i>
           </div>
-          <span>Use description, voice report, or standard photo attachment below</span>
+          <span data-i18n="use_desc_voice_photo">Use description, voice report, or standard photo attachment below</span>
         </div>
       </div>
 
       <!-- Action Button -->
       <button type="button" id="btn-close-upcoming-modal" class="cc-modal-primary-btn">
-        <span>Understood &bull; Continue Report</span>
+        <span data-i18n="understood_continue">Understood &bull; Continue Report</span>
         <i class="fa-solid fa-arrow-right"></i>
       </button>
     </div>

@@ -591,8 +591,8 @@
         <!-- Header with Title & Global Controls -->
         <div class="intel-page-header">
           <div class="intel-header-info">
-            <h1>Tamil Nadu Civic Intelligence</h1>
-            <p>Authoritative 38-district monitoring, automated SLA compliance tracking, and civic resolution analytics.</p>
+            <h1 data-i18n="tn_civic_intelligence_title">Tamil Nadu Civic Intelligence</h1>
+            <p data-i18n="tn_civic_intelligence_desc">Authoritative 38-district monitoring, automated SLA compliance tracking, and civic resolution analytics.</p>
           </div>
 
           <div class="intel-controls-row">
@@ -642,7 +642,7 @@
             <!-- Date Range Selector -->
             <select id="intel-range-select" class="intel-select" style="min-width: 160px;" aria-label="Select Analytics Date Range">
               <option value="all_time" selected>All Time</option>
-              <option value="today">Today (IST)</option>
+              <option value="today" data-i18n="today_ist">Today (IST)</option>
               <option value="7d">Last 7 Days</option>
               <option value="30d">Last 30 Days</option>
               <option value="this_year">This Year (2026)</option>
@@ -651,7 +651,7 @@
             <!-- Manual Refresh Button -->
             <button id="btn-intel-refresh" type="button" class="btn btn-secondary" style="padding: 0.65rem 1.1rem; border-radius: 10px; font-weight: 700; gap: 0.45rem;">
               <i class="fa-solid fa-arrows-rotate" id="intel-refresh-icon"></i>
-              <span>Refresh</span>
+              <span data-i18n="refresh">Refresh</span>
             </button>
           </div>
         </div>
@@ -664,39 +664,39 @@
 
           <!-- Category Filter -->
           <select id="filter-category" class="intel-filter-select">
-            <option value="all">All Categories</option>
-            <option value="roads">Roads & Pavements</option>
-            <option value="streetlights">Streetlights & Electrical</option>
-            <option value="water_supply">Water Supply</option>
-            <option value="drainage">Drainage & Sewerage</option>
-            <option value="garbage">Garbage & Waste</option>
-            <option value="traffic">Traffic & Signals</option>
-            <option value="public_property">Public Property</option>
-            <option value="parks">Parks & Playgrounds</option>
-            <option value="sanitation">Sanitation</option>
-            <option value="safety_hazard">Safety Hazards</option>
-            <option value="environment">Environment & Pollution</option>
-            <option value="other">Other Concerns</option>
+            <option value="all" data-i18n="all_categories">All Categories</option>
+            <option value="roads" data-i18n="roads_pavements">Roads & Pavements</option>
+            <option value="streetlights" data-i18n="streetlights_electrical">Streetlights & Electrical</option>
+            <option value="water_supply" data-i18n="cat_water_supply">Water Supply</option>
+            <option value="drainage" data-i18n="drainage_sewerage">Drainage & Sewerage</option>
+            <option value="garbage" data-i18n="garbage_waste">Garbage & Waste</option>
+            <option value="traffic" data-i18n="traffic_signals">Traffic & Signals</option>
+            <option value="public_property" data-i18n="cat_public_property">Public Property</option>
+            <option value="parks" data-i18n="parks_playgrounds">Parks & Playgrounds</option>
+            <option value="sanitation" data-i18n="cat_sanitation">Sanitation</option>
+            <option value="safety_hazard" data-i18n="cat_safety_hazard">Safety Hazards</option>
+            <option value="environment" data-i18n="environment_pollution">Environment & Pollution</option>
+            <option value="other" data-i18n="other_concerns">Other Concerns</option>
           </select>
 
           <!-- Status Filter -->
           <select id="filter-status" class="intel-filter-select">
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="assigned">Assigned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="overdue">Overdue (SLA Breached)</option>
-            <option value="escalated">Escalated (Level 1)</option>
+            <option value="all" data-i18n="all_statuses">All Statuses</option>
+            <option value="pending" data-i18n="pending">Pending</option>
+            <option value="assigned" data-i18n="assigned">Assigned</option>
+            <option value="in_progress" data-i18n="in_progress">In Progress</option>
+            <option value="resolved" data-i18n="resolved">Resolved</option>
+            <option value="overdue" data-i18n="overdue_sla_breached">Overdue (SLA Breached)</option>
+            <option value="escalated" data-i18n="escalated_level_1">Escalated (Level 1)</option>
           </select>
 
           <!-- Priority Filter -->
           <select id="filter-priority" class="intel-filter-select">
-            <option value="all">All Priorities</option>
-            <option value="critical">Critical / Emergency</option>
-            <option value="high">High Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="low">Low Priority</option>
+            <option value="all" data-i18n="all_priorities">All Priorities</option>
+            <option value="critical" data-i18n="critical_emergency">Critical / Emergency</option>
+            <option value="high" data-i18n="priority_high">High Priority</option>
+            <option value="medium" data-i18n="priority_medium">Medium Priority</option>
+            <option value="low" data-i18n="priority_low">Low Priority</option>
           </select>
 
           <!-- Reset Filters -->
@@ -862,7 +862,7 @@
               Most Affected Areas & Localities
             </h3>
             <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
-              High-concentration civic reporting locations derived from real verified complaint addresses.
+              <span data-i18n="high_concentration_desc">High-concentration civic reporting locations derived from real verified complaint addresses.</span>
             </p>
 
             <div id="most-affected-areas-list">
@@ -883,7 +883,7 @@
 
         <!-- 3. 38-District Directory (Compact with pagination) -->
         <div class="intel-section-heading">
-          <span>All 38 Tamil Nadu Districts</span>
+          <span data-i18n="all_38_districts">All 38 Tamil Nadu Districts</span>
         </div>
 
         <div class="district-controls-bar">
@@ -899,7 +899,7 @@
 
           <!-- Instant Search Box -->
           <div style="position: relative; width: 260px;">
-            <input type="text" id="input-search-districts" placeholder="Search 38 districts..." style="width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
+            <input type="text" id="input-search-districts" data-i18n-placeholder="search_38_districts_placeholder" placeholder="Search 38 districts..." style="width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
             <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-muted);"></i>
           </div>
         </div>

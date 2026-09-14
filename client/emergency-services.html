@@ -125,24 +125,24 @@
       <section class="emergency-section" id="map-section">
         <div class="emergency-section-inner">
           <div class="emergency-section-header">
-            <h2 class="emergency-section-title">Live Nearby Emergency Map</h2>
-            <p class="emergency-section-desc">Interactive Leaflet map powered by OpenStreetMap & Overpass API.</p>
+            <h2 class="emergency-section-title" data-i18n="live_emergency_map">Live Nearby Emergency Map</h2>
+            <p class="emergency-section-desc" data-i18n="live_emergency_map_desc">Interactive Leaflet map powered by OpenStreetMap & Overpass API.</p>
           </div>
 
           <!-- Straight Clean Search Bar -->
           <div class="map-filter-bar">
             <div class="search-input-group">
               <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
-              <input type="text" id="emergency-search-input" placeholder="Search by city, area, district, or pincode..." />
+              <input type="text" id="emergency-search-input" data-i18n-placeholder="emergency_search_placeholder" placeholder="Search by city, area, district, or pincode..." />
             </div>
           </div>
 
           <!-- Type Filter Pills -->
           <div class="type-filter-pills-row">
-            <button class="btn-emergency-secondary type-filter-btn active" data-type="all">All Services</button>
-            <button class="btn-emergency-secondary type-filter-btn" data-type="hospital">Hospitals</button>
-            <button class="btn-emergency-secondary type-filter-btn" data-type="police">Police</button>
-            <button class="btn-emergency-secondary type-filter-btn" data-type="fire">Fire Stations</button>
+            <button class="btn-emergency-secondary type-filter-btn active" data-type="all" data-i18n="all_services">All Services</button>
+            <button class="btn-emergency-secondary type-filter-btn" data-type="hospital" data-i18n="hospitals">Hospitals</button>
+            <button class="btn-emergency-secondary type-filter-btn" data-type="police" data-i18n="police">Police</button>
+            <button class="btn-emergency-secondary type-filter-btn" data-type="fire" data-i18n="fire_stations">Fire Stations</button>
             <button onclick="recenterMap()" class="btn-emergency-secondary btn-locate-me">
               <i class="fa-solid fa-crosshairs"></i> Locate Me
             </button>
@@ -157,8 +157,8 @@
       <section class="emergency-section emergency-section-alt" id="responders-section">
         <div class="emergency-section-inner">
           <div class="emergency-section-header">
-            <h2 class="emergency-section-title">Nearby Emergency Responders</h2>
-            <p class="emergency-section-desc">Nearest verified hospitals, police stations, and fire units sorted by distance.</p>
+            <h2 class="emergency-section-title" data-i18n="nearby_emergency_responders">Nearby Emergency Responders</h2>
+            <p class="emergency-section-desc" data-i18n="nearby_responders_desc">Nearest verified hospitals, police stations, and fire units sorted by distance.</p>
           </div>
 
           <div class="responders-grid" id="responders-grid">
@@ -171,8 +171,8 @@
       <section class="emergency-section emergency-prep-guides-section">
         <div class="emergency-section-inner">
           <div class="emergency-section-header">
-            <h2 class="emergency-section-title">Emergency Preparedness Guides</h2>
-            <p class="emergency-section-desc">Official disaster preparedness protocols and immediate action steps.</p>
+            <h2 class="emergency-section-title" data-i18n="emergency_guides_title">Emergency Preparedness Guides</h2>
+            <p class="emergency-section-desc" data-i18n="emergency_guides_desc">Official disaster preparedness protocols and immediate action steps.</p>
           </div>
 
           <div class="accordion-wrapper">

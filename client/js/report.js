@@ -13,34 +13,34 @@ const DEFAULT_ZOOM = 13;
 let currentReportMode = 'civic'; // 'civic' or 'transportation'
 
 const transportationCategories = [
-  { value: 'Potholes', label: 'Potholes' },
-  { value: 'Damaged Roads', label: 'Damaged Roads' },
-  { value: 'Traffic Signal Not Working', label: 'Traffic Signal Failure' },
-  { value: 'Waterlogging', label: 'Road Waterlogging' },
-  { value: 'Broken Street Lights', label: 'Broken Street Lights' },
-  { value: 'Illegal Parking', label: 'Illegal Parking' },
-  { value: 'Missing Road Signs', label: 'Missing Road Signs' },
-  { value: 'Bus Stop Issues', label: 'Bus Stop Issues' },
-  { value: 'Road Block', label: 'Road Block' },
-  { value: 'Construction Work', label: 'Construction Work' },
-  { value: 'Accident', label: 'Accident' },
-  { value: 'Heavy Traffic', label: 'Heavy Traffic' },
-  { value: 'Other Transportation Issue', label: 'Other Transportation Issue' }
+  { value: 'Potholes', key: 'cat_trans_potholes', label: 'Potholes' },
+  { value: 'Damaged Roads', key: 'cat_trans_damaged_roads', label: 'Damaged Roads' },
+  { value: 'Traffic Signal Not Working', key: 'cat_trans_traffic_signal', label: 'Traffic Signal Failure' },
+  { value: 'Waterlogging', key: 'cat_trans_waterlogging', label: 'Road Waterlogging' },
+  { value: 'Broken Street Lights', key: 'cat_trans_broken_streetlights', label: 'Broken Street Lights' },
+  { value: 'Illegal Parking', key: 'cat_trans_illegal_parking', label: 'Illegal Parking' },
+  { value: 'Missing Road Signs', key: 'cat_trans_missing_signs', label: 'Missing Road Signs' },
+  { value: 'Bus Stop Issues', key: 'cat_trans_bus_stop', label: 'Bus Stop Issues' },
+  { value: 'Road Block', key: 'cat_trans_road_block', label: 'Road Block' },
+  { value: 'Construction Work', key: 'cat_trans_construction', label: 'Construction Work' },
+  { value: 'Accident', key: 'cat_trans_accident', label: 'Accident' },
+  { value: 'Heavy Traffic', key: 'cat_trans_heavy_traffic', label: 'Heavy Traffic' },
+  { value: 'Other Transportation Issue', key: 'cat_trans_other', label: 'Other Transportation Issue' }
 ];
 
 const civicCategories = [
-  { value: 'roads', label: 'Roads' },
-  { value: 'streetlights', label: 'Streetlights' },
-  { value: 'water_supply', label: 'Water Supply' },
-  { value: 'drainage', label: 'Drainage' },
-  { value: 'garbage', label: 'Garbage' },
-  { value: 'traffic', label: 'Traffic' },
-  { value: 'public_property', label: 'Public Property' },
-  { value: 'parks', label: 'Parks' },
-  { value: 'sanitation', label: 'Sanitation' },
-  { value: 'safety_hazard', label: 'Safety Hazard' },
-  { value: 'environment', label: 'Environment' },
-  { value: 'other', label: 'Other' }
+  { value: 'roads', key: 'cat_roads', label: 'Roads' },
+  { value: 'streetlights', key: 'cat_streetlights', label: 'Streetlights' },
+  { value: 'water_supply', key: 'cat_water_supply', label: 'Water Supply' },
+  { value: 'drainage', key: 'cat_drainage', label: 'Drainage' },
+  { value: 'garbage', key: 'cat_garbage', label: 'Garbage' },
+  { value: 'traffic', key: 'cat_traffic', label: 'Traffic' },
+  { value: 'public_property', key: 'cat_public_property', label: 'Public Property' },
+  { value: 'parks', key: 'cat_parks', label: 'Parks' },
+  { value: 'sanitation', key: 'cat_sanitation', label: 'Sanitation' },
+  { value: 'safety_hazard', key: 'cat_safety_hazard', label: 'Safety Hazard' },
+  { value: 'environment', key: 'cat_environment', label: 'Environment' },
+  { value: 'other', key: 'cat_other', label: 'Other' }
 ];
 
 let currentStep = 1;
@@ -336,38 +336,62 @@ window.selectReportMode = function(mode) {
   window.goToWizardStep2(mode);
 };
 
+function getReportCategoryLabel(c) {
+  if (c.key && window.i18n && typeof window.i18n.t === 'function') {
+    return window.i18n.t(c.key);
+  }
+  return c.label;
+}
+
 function updateFormModeUI() {
   const pageTitle = document.getElementById('report-page-title');
   const pageDesc = document.getElementById('report-page-desc');
   const modeName = document.getElementById('mode-badge-name');
   const categorySelect = document.getElementById('report-category');
+  const t = (key, fallback) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : fallback);
 
   if (currentReportMode === 'transportation') {
-    if (pageTitle) pageTitle.textContent = 'Report a Transportation Issue';
-    if (pageDesc) pageDesc.textContent = 'Report road hazards, damaged pavements, traffic signal outages, or transit infrastructure concerns.';
+    if (pageTitle) {
+      pageTitle.setAttribute('data-i18n', 'report_transportation_issue');
+      pageTitle.textContent = t('report_transportation_issue', 'Report a Transportation Issue');
+    }
+    if (pageDesc) {
+      pageDesc.setAttribute('data-i18n', 'report_transportation_issue_desc');
+      pageDesc.textContent = t('report_transportation_issue_desc', 'Report road hazards, damaged pavements, traffic signal outages, or transit infrastructure concerns.');
+    }
     if (modeName) {
-      modeName.textContent = 'Transportation Issue';
+      modeName.setAttribute('data-i18n', 'transportation_issue');
+      modeName.textContent = t('transportation_issue', 'Transportation Issue');
       modeName.style.color = '#0284c7';
     }
 
     if (categorySelect) {
+      const selectPlaceholder = t('select_transportation_category', 'Select a transportation category...');
       categorySelect.innerHTML = `
-        <option value="" disabled selected>Select a transportation category...</option>
-        ${transportationCategories.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}
+        <option value="" disabled selected data-i18n="select_transportation_category">${selectPlaceholder}</option>
+        ${transportationCategories.map(c => `<option value="${c.value}" data-i18n="${c.key}">${getReportCategoryLabel(c)}</option>`).join('')}
       `;
     }
   } else {
-    if (pageTitle) pageTitle.textContent = 'Report a Civic Issue';
-    if (pageDesc) pageDesc.textContent = 'Provide details about the infrastructure or safety concern in your area. Our AI will route it to the appropriate department.';
+    if (pageTitle) {
+      pageTitle.setAttribute('data-i18n', 'report_civic_issue');
+      pageTitle.textContent = t('report_civic_issue', 'Report a Civic Issue');
+    }
+    if (pageDesc) {
+      pageDesc.setAttribute('data-i18n', 'report_civic_issue_desc');
+      pageDesc.textContent = t('report_civic_issue_desc', 'Provide details about the infrastructure or safety concern in your area. Our AI will route it to the appropriate department.');
+    }
     if (modeName) {
-      modeName.textContent = 'Civic Issue';
+      modeName.setAttribute('data-i18n', 'civic_issue');
+      modeName.textContent = t('civic_issue', 'Civic Issue');
       modeName.style.color = 'var(--primary)';
     }
 
     if (categorySelect) {
+      const selectPlaceholder = t('select_category', 'Select a category...');
       categorySelect.innerHTML = `
-        <option value="" disabled selected>Select a category...</option>
-        ${civicCategories.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}
+        <option value="" disabled selected data-i18n="select_category">${selectPlaceholder}</option>
+        ${civicCategories.map(c => `<option value="${c.value}" data-i18n="${c.key}">${getReportCategoryLabel(c)}</option>`).join('')}
       `;
     }
   }

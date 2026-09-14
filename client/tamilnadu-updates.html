@@ -410,16 +410,16 @@
         <div class="tn-hero-banner">
           <div class="tn-hero-title-group">
             <h1><i class="fa-solid fa-newspaper" style="color: var(--primary);"></i> Tamil Nadu Live Updates</h1>
-            <p>Verified state government decisions, municipal announcements, infrastructure progress, welfare initiatives, and district civic alerts across Tamil Nadu.</p>
+            <p data-i18n="tn_updates_hero_desc">Verified state government decisions, municipal announcements, infrastructure progress, welfare initiatives, and district civic alerts across Tamil Nadu.</p>
           </div>
           <div class="tn-hero-actions">
             <div class="tn-status-pill">
               <span class="status-dot-pulse active" style="width: 8px; height: 8px;"></span>
-              <span>Live Dispatch</span>
+              <span data-i18n="live_dispatch">Live Dispatch</span>
             </div>
             <button class="btn-refresh-feed" id="btn-refresh-updates" onclick="refreshTamilNaduUpdates()">
               <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
-              <span>Refresh</span>
+              <span data-i18n="refresh">Refresh</span>
             </button>
           </div>
         </div>
@@ -428,11 +428,11 @@
         <div class="tn-filter-bar">
           <div class="tn-search-wrap">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="tn-search-input" placeholder="Search updates by headline, scheme, or keywords..." oninput="handleFilterUpdates()">
+            <input type="text" id="tn-search-input" data-i18n-placeholder="search_updates_placeholder" placeholder="Search updates by headline, scheme, or keywords..." oninput="handleFilterUpdates()">
           </div>
 
           <select class="tn-select-filter" id="tn-district-filter" onchange="handleFilterUpdates()">
-            <option value="all">All Districts (38)</option>
+            <option value="all" data-i18n="all_districts_count">All Districts (38)</option>
             <option value="Chennai">Chennai</option>
             <option value="Coimbatore">Coimbatore</option>
             <option value="Madurai">Madurai</option>
@@ -472,7 +472,7 @@
           </select>
 
           <select class="tn-select-filter" id="tn-source-filter" onchange="handleFilterUpdates()">
-            <option value="all">All Sources</option>
+            <option value="all" data-i18n="all_sources">All Sources</option>
           </select>
         </div>
 
@@ -484,16 +484,16 @@
         <!-- Empty State -->
         <div id="tn-empty-state" class="hidden" style="text-align: center; padding: 4rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px;">
           <i class="fa-regular fa-newspaper" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">No Matching Tamil Nadu Updates Found</h3>
-          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;">Try adjusting your keyword search or district filter to view more headlines.</p>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;" data-i18n="no_matching_tn_updates">No Matching Tamil Nadu Updates Found</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;"><span data-i18n="adjust_keyword_filter">Try adjusting your keyword search or district filter to view more headlines.</span></p>
           <button class="btn btn-secondary" onclick="resetFilters()" style="padding: 0.55rem 1.2rem; font-size: 0.85rem; font-weight: 600;">Reset Filters</button>
         </div>
 
         <!-- Error State -->
         <div id="tn-error-state" class="hidden" style="text-align: center; padding: 3.5rem 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px;">
           <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; color: #ef4444; margin-bottom: 1rem;"></i>
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Unable to Load Updates</h3>
-          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;" id="tn-error-message">Could not connect to the Tamil Nadu updates feed.</p>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;" data-i18n="unable_load_updates">Unable to Load Updates</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem auto;" id="tn-error-message"><span data-i18n="could_not_connect_tn_feed">Could not connect to the Tamil Nadu updates feed.</span></p>
           <button class="btn btn-primary" onclick="refreshTamilNaduUpdates()" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; font-weight: 600;">Retry</button>
         </div>
 

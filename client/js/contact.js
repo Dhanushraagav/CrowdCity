@@ -111,7 +111,7 @@ function handleAttachmentChange(input) {
   if (input.files && input.files[0]) {
     const file = input.files[0];
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit. Please select a smaller file.');
+      alert((window.i18n && window.i18n.t('contact_err_filesize')) || 'File size exceeds 5MB limit. Please select a smaller file.');
       input.value = '';
       if (statusText) statusText.style.display = 'inline';
       if (nameDisplay) nameDisplay.style.display = 'none';
@@ -157,39 +157,39 @@ async function handleContactFormSubmit(e) {
   const message = (messageInput?.value || '').trim();
 
   if (!name) {
-    showContactError('Please enter your full name.');
+    showContactError((window.i18n && window.i18n.t('contact_err_name')) || 'Please enter your full name.');
     nameInput?.focus();
     return;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email || !emailRegex.test(email)) {
-    showContactError('Please enter a valid email address.');
+    showContactError((window.i18n && window.i18n.t('contact_err_email')) || 'Please enter a valid email address.');
     emailInput?.focus();
     return;
   }
 
   if (!category) {
-    showContactError('Please select an inquiry category.');
+    showContactError((window.i18n && window.i18n.t('contact_err_category')) || 'Please select an inquiry category.');
     categorySelect?.focus();
     return;
   }
 
   if (!subject) {
-    showContactError('Please enter a subject.');
+    showContactError((window.i18n && window.i18n.t('contact_err_subject')) || 'Please enter a subject.');
     subjectInput?.focus();
     return;
   }
 
   if (!message) {
-    showContactError('Please enter your message.');
+    showContactError((window.i18n && window.i18n.t('contact_err_message')) || 'Please enter your message.');
     messageInput?.focus();
     return;
   }
 
   // Set loading state
   if (submitBtn) submitBtn.disabled = true;
-  if (btnText) btnText.textContent = 'Sending Message...';
+  if (btnText) btnText.textContent = (window.i18n && window.i18n.t('contact_sending')) || 'Sending Message...';
 
   try {
     let attachmentUrl = null;
@@ -244,7 +244,7 @@ async function handleContactFormSubmit(e) {
     if (successBanner) successBanner.style.display = 'flex';
   } finally {
     if (submitBtn) submitBtn.disabled = false;
-    if (btnText) btnText.textContent = 'Send Message';
+    if (btnText) btnText.textContent = (window.i18n && window.i18n.t('contact_send_btn')) || 'Send Message';
   }
 }
 

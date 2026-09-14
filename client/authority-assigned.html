@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="css/authority-portal.css?v=3.0.1">
 
   <!-- Central Auth Router -->
+  <script src="js/i18n.js"></script>
   <script src="js/auth-router.js?v=3.1.0"></script>
 </head>
 <body>
@@ -39,16 +40,16 @@
       </div>
 
       <nav class="sidebar-nav">
-        <a href="authority-dashboard.html" class="nav-item" data-pane="pane-dashboard">Dashboard</a>
-        <a href="authority-complaints.html" class="nav-item" data-pane="pane-complaints">Complaints Queue</a>
-        <a href="authority-assigned.html" class="nav-item active" data-pane="pane-assigned">Assigned Cases</a>
-        <a href="authority-reports.html" class="nav-item" data-pane="pane-reports">Operational Reports</a>
-        <a href="authority-civic-intelligence.html" class="nav-item">Civic Intelligence</a>
+        <a href="authority-dashboard.html" class="nav-item" data-pane="pane-dashboard" data-i18n="nav_dashboard">Dashboard</a>
+        <a href="authority-complaints.html" class="nav-item" data-pane="pane-complaints" data-i18n="nav_complaints_queue">Complaints Queue</a>
+        <a href="authority-assigned.html" class="nav-item active" data-pane="pane-assigned" data-i18n="nav_assigned_cases">Assigned Cases</a>
+        <a href="authority-reports.html" class="nav-item" data-pane="pane-reports" data-i18n="nav_operational_reports">Operational Reports</a>
+        <a href="authority-civic-intelligence.html" class="nav-item" data-i18n="nav_civic_intelligence">Civic Intelligence</a>
       </nav>
 
       <div class="sidebar-footer">
-        <div>Department of Municipal Administration</div>
-        <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+        <div data-i18n="dept_municipal_admin">Department of Municipal Administration</div>
+        <div style="margin-top: 0.25rem;" data-i18n="tn_operations_console">Tamil Nadu Operations Console</div>
       </div>
     </aside>
 
@@ -59,8 +60,8 @@
     <main class="portal-main">
       <header class="portal-header">
         <div class="header-title-area">
-          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu">Toggle Menu</button>
-          <span class="header-title" id="header-pane-title">Assigned Casework Register</span>
+          <button class="mobile-menu-btn" onclick="window.ComplaintService.toggleMobileSidebar(true)" aria-label="Toggle Menu" data-i18n="toggle_menu">Toggle Menu</button>
+          <span class="header-title" id="header-pane-title" data-i18n="assigned_casework_register">Assigned Casework Register</span>
         </div>
         
         <!-- Top-Right Header Navigation Controls -->
@@ -71,7 +72,7 @@
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span>Notifications</span>
+            <span data-i18n="nav_notifications">Notifications</span>
             <span id="header-notif-badge" style="display: none; background: #dc2626; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 999px; margin-left: 0.2rem;">0</span>
           </button>
 
@@ -85,10 +86,10 @@
             <!-- Dropdown Menu -->
             <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="event.stopPropagation(); window.location.href='authority-profile.html'">
-                Profile & Security
+                <span data-i18n="profile_and_security">Profile & Security</span>
               </button>
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: #991b1b; background: none; border: none; cursor: pointer;" onclick="logoutUser()">
-                Logout Session
+                <span data-i18n="logout_session">Logout Session</span>
               </button>
             </div>
           </div>
@@ -104,19 +105,19 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Ticket ID</th>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Location</th>
-                    <th>Date</th>
-                    <th>Action</th>
+                    <th data-i18n="ticket_id">Ticket ID</th>
+                    <th data-i18n="th_title">Title</th>
+                    <th data-i18n="th_category">Category</th>
+                    <th data-i18n="th_priority">Priority</th>
+                    <th data-i18n="th_status">Status</th>
+                    <th data-i18n="th_location">Location</th>
+                    <th data-i18n="th_date">Date</th>
+                    <th data-i18n="th_action">Action</th>
                   </tr>
                 </thead>
                 <tbody id="assigned-cases-table-body">
                   <tr>
-                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading assigned casework...</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;"><span data-i18n="loading_assigned_casework">Loading assigned casework...</span></td>
                   </tr>
                 </tbody>
               </table>

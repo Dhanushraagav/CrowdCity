@@ -777,7 +777,7 @@
             </a>
             <button class="btn-refresh-weather" id="btn-refresh-weather" title="Refresh forecast">
               <i class="fa-solid fa-arrows-rotate" id="refresh-weather-icon"></i>
-              <span>Refresh</span>
+              <span data-i18n="refresh">Refresh</span>
             </button>
           </div>
         </div>
@@ -789,7 +789,7 @@
             <span>Showing weather for your location: <strong id="weather-user-district-label">--</strong></span>
           </div>
           <button type="button" class="weather-location-switch-btn" id="btn-weather-all-districts" onclick="resetWeatherFilters()">
-            <span>View All 38 Districts</span>
+            <span data-i18n="view_all_districts">View All 38 Districts</span>
             <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>
@@ -849,7 +849,7 @@
         <!-- 38 District Weather Section (Shown when All Districts is selected) -->
         <div id="all-districts-section-wrap" class="hidden">
           <div class="districts-section-header">
-            <h2 class="districts-section-title">Tamil Nadu Districts</h2>
+            <h2 class="districts-section-title" data-i18n="tn_districts_title">Tamil Nadu Districts</h2>
             <span class="districts-count-badge">38 districts</span>
           </div>
           <div class="all-districts-grid" id="all-districts-grid-container">
@@ -875,8 +875,8 @@
 
         <!-- Error State -->
         <div id="weather-error-state" class="weather-state-box hidden">
-          <h3>Weather data unavailable.</h3>
-          <p id="weather-error-message">Unable to connect to the forecast service.</p>
+          <h3 data-i18n="weather_data_unavailable">Weather data unavailable.</h3>
+          <p id="weather-error-message" data-i18n="forecast_service_error">Unable to connect to the forecast service.</p>
           <button class="btn btn-primary" onclick="fetchWeatherForecast(true)" style="padding: 0.45rem 1.1rem; font-size: 0.82rem; font-weight: 600;">Retry</button>
         </div>
 

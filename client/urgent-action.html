@@ -1211,7 +1211,7 @@
       
       <div class="urgent-alert-notice">
         <i class="fa-solid fa-circle-info"></i>
-        <span>Location-first emergency discovery connects you directly to nearest responders. Bypasses routine complaint SLAs.</span>
+        <span><span data-i18n="urgent_desc_sla_bypass">Location-first emergency discovery connects you directly to nearest responders. Bypasses routine complaint SLAs.</span></span>
       </div>
     </div>
 
@@ -1222,15 +1222,15 @@
           <i class="fa-solid fa-location-crosshairs"></i>
         </div>
         <div class="loc-text-wrap">
-          <div class="loc-label" id="urgent-loc-status-title">LIVE LOCATION</div>
-          <div class="loc-val" id="urgent-loc-display">Finding help near you...</div>
+          <div class="loc-label" id="urgent-loc-status-title" data-i18n="live_location">LIVE LOCATION</div>
+          <div class="loc-val" id="urgent-loc-display"><span data-i18n="finding_help_near_you">Finding help near you...</span></div>
         </div>
       </div>
 
       <div class="loc-actions-block">
         <button type="button" class="btn-loc-action" id="btn-refresh-gps" onclick="retryGpsDetection()" title="Refresh live GPS">
           <i class="fa-solid fa-arrows-rotate"></i>
-          <span>Refresh</span>
+          <span data-i18n="refresh">Refresh</span>
         </button>
         <button type="button" class="btn-loc-action" id="btn-copy-gps" onclick="copyGpsCoordinates()" title="Copy coordinates for emergency dispatchers">
           <i class="fa-regular fa-copy"></i>
@@ -1247,11 +1247,11 @@
       <div class="location-warning-content">
         <div class="location-warning-text">
           <i class="fa-solid fa-triangle-exclamation"></i>
-          <span>Location access is required to find nearby emergency services.</span>
+          <span><span data-i18n="location_access_required">Location access is required to find nearby emergency services.</span></span>
         </div>
         <div class="location-warning-btns">
-          <button type="button" class="btn-warn-allow" onclick="retryGpsDetection()">Allow GPS</button>
-          <button type="button" class="btn-warn-manual" onclick="focusDistrictSelect()">Select District</button>
+          <button type="button" class="btn-warn-allow" onclick="retryGpsDetection()" data-i18n="allow_gps">Allow GPS</button>
+          <button type="button" class="btn-warn-manual" onclick="focusDistrictSelect()" data-i18n="select_district_btn">Select District</button>
         </div>
       </div>
     </div>

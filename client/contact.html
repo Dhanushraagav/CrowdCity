@@ -585,8 +585,8 @@
           
           <!-- 1. Page Header Banner -->
           <div class="contact-hero-banner">
-            <h1 class="contact-hero-title">Contact CrowdCity</h1>
-            <p class="contact-hero-desc">
+            <h1 class="contact-hero-title" data-i18n="contact_hero_title">Contact CrowdCity</h1>
+            <p class="contact-hero-desc" data-i18n="contact_hero_desc">
               Have a question, need assistance, or want to share feedback? We're here to help.
             </p>
           </div>
@@ -597,32 +597,32 @@
               <div class="contact-card-icon-wrap">
                 <i class="fa-solid fa-headset"></i>
               </div>
-              <h3 class="contact-card-title">General Support</h3>
-              <p class="contact-card-desc">Questions about using CrowdCity</p>
+              <h3 class="contact-card-title" data-i18n="contact_cat_general">General Support</h3>
+              <p class="contact-card-desc" data-i18n="contact_cat_general_desc">Questions about using CrowdCity</p>
             </div>
 
             <div class="contact-card-option" data-category="Report a Problem" onclick="selectContactCategory('Report a Problem', this)">
               <div class="contact-card-icon-wrap">
                 <i class="fa-solid fa-triangle-exclamation"></i>
               </div>
-              <h3 class="contact-card-title">Report a Problem</h3>
-              <p class="contact-card-desc">Website or application technical issues</p>
+              <h3 class="contact-card-title" data-i18n="contact_cat_problem">Report a Problem</h3>
+              <p class="contact-card-desc" data-i18n="contact_cat_problem_desc">Website or application technical issues</p>
             </div>
 
             <div class="contact-card-option" data-category="Feedback & Suggestions" onclick="selectContactCategory('Feedback & Suggestions', this)">
               <div class="contact-card-icon-wrap">
                 <i class="fa-solid fa-lightbulb"></i>
               </div>
-              <h3 class="contact-card-title">Feedback & Suggestions</h3>
-              <p class="contact-card-desc">Ideas and suggestions to improve CrowdCity</p>
+              <h3 class="contact-card-title" data-i18n="contact_cat_feedback">Feedback & Suggestions</h3>
+              <p class="contact-card-desc" data-i18n="contact_cat_feedback_desc">Ideas and suggestions to improve CrowdCity</p>
             </div>
 
             <div class="contact-card-option" data-category="Partnership / Government Enquiries" onclick="selectContactCategory('Partnership / Government Enquiries', this)">
               <div class="contact-card-icon-wrap">
                 <i class="fa-solid fa-building-columns"></i>
               </div>
-              <h3 class="contact-card-title">Partnership / Government Enquiries</h3>
-              <p class="contact-card-desc">Organizations or departments wanting to work with CrowdCity</p>
+              <h3 class="contact-card-title" data-i18n="contact_cat_partnership">Partnership / Government Enquiries</h3>
+              <p class="contact-card-desc" data-i18n="contact_cat_partnership_desc">Organizations or departments wanting to work with CrowdCity</p>
             </div>
           </div>
 
@@ -632,49 +632,49 @@
             <!-- Contact Form Column -->
             <div class="contact-form-panel">
               <div class="contact-form-header">
-                <h2 class="contact-form-title">Send a Message</h2>
-                <p class="contact-form-subtitle">Fill out the details below and our team will get back to you.</p>
+                <h2 class="contact-form-title" data-i18n="contact_form_title">Send a Message</h2>
+                <p class="contact-form-subtitle" data-i18n="contact_form_subtitle">Fill out the details below and our team will get back to you.</p>
               </div>
 
               <!-- Form State -->
               <form id="contact-form" class="contact-form" onsubmit="handleContactFormSubmit(event)" novalidate>
                 <div class="form-group-row">
                   <div class="form-field">
-                    <label for="contact-name">Name <span class="required">*</span></label>
-                    <input type="text" id="contact-name" name="name" placeholder="Your full name" required />
+                    <label for="contact-name"><span data-i18n="contact_name">Name</span> <span class="required">*</span></label>
+                    <input type="text" id="contact-name" name="name" placeholder="Your full name" data-i18n-placeholder="contact_name_placeholder" required />
                   </div>
                   <div class="form-field">
-                    <label for="contact-email">Email <span class="required">*</span></label>
-                    <input type="email" id="contact-email" name="email" placeholder="name@example.com" required />
+                    <label for="contact-email"><span data-i18n="contact_email">Email</span> <span class="required">*</span></label>
+                    <input type="email" id="contact-email" name="email" placeholder="name@example.com" data-i18n-placeholder="contact_email_placeholder" required />
                   </div>
                 </div>
 
                 <div class="form-field">
-                  <label for="contact-category">Category <span class="required">*</span></label>
+                  <label for="contact-category"><span data-i18n="contact_category">Category</span> <span class="required">*</span></label>
                   <select id="contact-category" name="category" required onchange="syncCategoryCardSelection(this.value)">
-                    <option value="">Select an inquiry category</option>
-                    <option value="General Support">General Support</option>
-                    <option value="Report a Problem">Report a Problem</option>
-                    <option value="Feedback & Suggestions">Feedback & Suggestions</option>
-                    <option value="Partnership / Government Enquiries">Partnership / Government Enquiries</option>
+                    <option value="" data-i18n="contact_select_category">Select an inquiry category</option>
+                    <option value="General Support" data-i18n="contact_cat_general">General Support</option>
+                    <option value="Report a Problem" data-i18n="contact_cat_problem">Report a Problem</option>
+                    <option value="Feedback & Suggestions" data-i18n="contact_cat_feedback">Feedback & Suggestions</option>
+                    <option value="Partnership / Government Enquiries" data-i18n="contact_cat_partnership">Partnership / Government Enquiries</option>
                   </select>
                 </div>
 
                 <div class="form-field">
-                  <label for="contact-subject">Subject <span class="required">*</span></label>
-                  <input type="text" id="contact-subject" name="subject" placeholder="Brief summary of your inquiry" required />
+                  <label for="contact-subject"><span data-i18n="contact_subject">Subject</span> <span class="required">*</span></label>
+                  <input type="text" id="contact-subject" name="subject" placeholder="Brief summary of your inquiry" data-i18n-placeholder="contact_subject_placeholder" required />
                 </div>
 
                 <div class="form-field">
-                  <label for="contact-message">Message <span class="required">*</span></label>
-                  <textarea id="contact-message" name="message" rows="5" placeholder="Provide details regarding your inquiry or request..." required></textarea>
+                  <label for="contact-message"><span data-i18n="contact_message">Message</span> <span class="required">*</span></label>
+                  <textarea id="contact-message" name="message" rows="5" placeholder="Provide details regarding your inquiry or request..." data-i18n-placeholder="contact_message_placeholder" required></textarea>
                 </div>
 
                 <div class="form-field">
-                  <label>Attachment (Optional)</label>
+                  <label><span data-i18n="contact_attachment">Attachment (Optional)</span></label>
                   <label for="contact-attachment" class="file-upload-box">
                     <i class="fa-solid fa-paperclip" style="color: var(--primary);"></i>
-                    <span class="file-upload-text" id="upload-status-text">Attach screenshot or document (PDF, PNG, JPG up to 5MB)</span>
+                    <span class="file-upload-text" id="upload-status-text" data-i18n="contact_attach_prompt">Attach screenshot or document (PDF, PNG, JPG up to 5MB)</span>
                     <span class="file-name-display" id="file-name-display"></span>
                     <input type="file" id="contact-attachment" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" onchange="handleAttachmentChange(this)" />
                   </label>
@@ -684,7 +684,7 @@
 
                 <button type="submit" id="contact-submit-btn" class="btn-send-message">
                   <i class="fa-solid fa-paper-plane"></i>
-                  <span id="btn-text">Send Message</span>
+                  <span id="btn-text" data-i18n="contact_send_btn">Send Message</span>
                 </button>
               </form>
 
@@ -693,11 +693,11 @@
                 <div class="contact-success-icon">
                   <i class="fa-solid fa-check"></i>
                 </div>
-                <h3 class="contact-success-title">Message sent successfully.</h3>
-                <p class="contact-success-desc">
+                <h3 class="contact-success-title" data-i18n="contact_success_title">Message sent successfully.</h3>
+                <p class="contact-success-desc" data-i18n="contact_success_desc">
                   Our team will review your message and get back to you.
                 </p>
-                <button type="button" class="btn btn-secondary" onclick="resetContactFormState()" style="margin-top: 0.75rem; padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 600; border-radius: 8px;">
+                <button type="button" class="btn btn-secondary" onclick="resetContactFormState()" style="margin-top: 0.75rem; padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 600; border-radius: 8px;" data-i18n="contact_send_another">
                   Send Another Message
                 </button>
               </div>
@@ -708,14 +708,14 @@
               
               <!-- 4. Contact Information -->
               <div class="contact-info-card">
-                <h3 class="contact-info-title">Contact Information</h3>
+                <h3 class="contact-info-title" data-i18n="contact_info_title">Contact Information</h3>
                 
                 <div class="contact-info-item">
                   <div class="contact-info-icon">
                     <i class="fa-solid fa-envelope"></i>
                   </div>
                   <div>
-                    <div class="contact-info-label">Official Email</div>
+                    <div class="contact-info-label" data-i18n="contact_official_email">Official Email</div>
                     <div class="contact-info-value">
                       <a href="mailto:crowdcityai@gmail.com">crowdcityai@gmail.com</a>
                     </div>
@@ -727,13 +727,13 @@
                     <i class="fa-solid fa-headset" aria-hidden="true"></i>
                   </div>
                   <div>
-                    <div class="contact-info-label">CrowdCity 24/7 Support</div>
+                    <div class="contact-info-label" data-i18n="contact_support_247">CrowdCity 24/7 Support</div>
                     <div class="contact-info-value" style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                       <a href="tel:+919025132196" class="contact-support-call-btn" id="contact-call-support-btn" role="button" aria-label="Call CrowdCity Support">
-                        <i class="fa-solid fa-phone" aria-hidden="true"></i> <span>Call CrowdCity Support</span>
+                        <i class="fa-solid fa-phone" aria-hidden="true"></i> <span data-i18n="contact_call_support">Call CrowdCity Support</span>
                       </a>
                       <a href="https://wa.me/919025132196?text=Hello%20CrowdCity%20Support%2C%20I%20would%20like%20to%20get%20in%20touch%20with%20your%20support%20team%20regarding%20an%20enquiry.%20Please%20assist%20me%20with%20the%20appropriate%20information." target="_blank" rel="noopener noreferrer" class="contact-support-whatsapp-btn" id="contact-whatsapp-support-btn" role="button" aria-label="WhatsApp: Chat with Support">
-                        <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> <span>Chat with Support</span>
+                        <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> <span data-i18n="contact_chat_support">Chat with Support</span>
                       </a>
                     </div>
                   </div>
@@ -744,8 +744,8 @@
                     <i class="fa-solid fa-clock"></i>
                   </div>
                   <div>
-                    <div class="contact-info-label">Response Hours</div>
-                    <div class="contact-info-value" style="white-space: nowrap;">Monday to Saturday, 9:00 AM - 6:00 PM IST</div>
+                    <div class="contact-info-label" data-i18n="contact_response_hours">Response Hours</div>
+                    <div class="contact-info-value" style="white-space: nowrap;" data-i18n="contact_response_time">Monday to Saturday, 9:00 AM - 6:00 PM IST</div>
                   </div>
                 </div>
 
@@ -754,52 +754,52 @@
                     <i class="fa-solid fa-shield-halved"></i>
                   </div>
                   <div>
-                    <div class="contact-info-label">Platform Verification</div>
-                    <div class="contact-info-value">Verified Citizen Redressal Portal</div>
+                    <div class="contact-info-label" data-i18n="contact_platform_verification">Platform Verification</div>
+                    <div class="contact-info-value" data-i18n="contact_verified_portal">Verified Citizen Redressal Portal</div>
                   </div>
                 </div>
               </div>
 
               <!-- 5. FAQ / Help Section -->
               <div class="faq-card">
-                <h3 class="faq-card-title">Frequently Asked Questions</h3>
+                <h3 class="faq-card-title" data-i18n="faq_title">Frequently Asked Questions</h3>
                 
                 <div class="faq-item open">
                   <div class="faq-question" onclick="toggleFaqItem(this)">
-                    <span>How do I report a civic issue?</span>
+                    <span data-i18n="faq_q1">How do I report a civic issue?</span>
                     <i class="fa-solid fa-chevron-down"></i>
                   </div>
-                  <div class="faq-answer">
+                  <div class="faq-answer" data-i18n="faq_a1">
                     Click 'Report Issue' in the navigation menu. Select your location on the interactive map, choose the appropriate category (such as Roads, Sanitation, or Streetlights), provide details, and submit to dispatch municipal authorities.
                   </div>
                 </div>
 
                 <div class="faq-item">
                   <div class="faq-question" onclick="toggleFaqItem(this)">
-                    <span>How can I track my complaint?</span>
+                    <span data-i18n="faq_q2">How can I track my complaint?</span>
                     <i class="fa-solid fa-chevron-down"></i>
                   </div>
-                  <div class="faq-answer">
+                  <div class="faq-answer" data-i18n="faq_a2">
                     Open 'My Complaints' from the sidebar to review the status progression (Pending, Assigned, In Progress, Resolved), assigned field officer, and resolution notes in real-time.
                   </div>
                 </div>
 
                 <div class="faq-item">
                   <div class="faq-question" onclick="toggleFaqItem(this)">
-                    <span>How do I update my profile?</span>
+                    <span data-i18n="faq_q3">How do I update my profile?</span>
                     <i class="fa-solid fa-chevron-down"></i>
                   </div>
-                  <div class="faq-answer">
+                  <div class="faq-answer" data-i18n="faq_a3">
                     Click on your user menu in the top right header and select 'My Profile' or 'Settings' to update your personal details, language preferences, and notification channels.
                   </div>
                 </div>
 
                 <div class="faq-item">
                   <div class="faq-question" onclick="toggleFaqItem(this)">
-                    <span>What happens after submitting a complaint?</span>
+                    <span data-i18n="faq_q4">What happens after submitting a complaint?</span>
                     <i class="fa-solid fa-chevron-down"></i>
                   </div>
-                  <div class="faq-answer">
+                  <div class="faq-answer" data-i18n="faq_a4">
                     CrowdCity AI routes your report directly to the relevant municipal department. An acknowledgment tracking ID is generated, and you receive milestone updates until final verification.
                   </div>
                 </div>

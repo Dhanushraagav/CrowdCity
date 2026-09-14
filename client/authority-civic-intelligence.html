@@ -40,12 +40,12 @@
         <a href="authority-complaints.html" class="nav-item">Complaints Queue</a>
         <a href="authority-assigned.html" class="nav-item">Assigned Cases</a>
         <a href="authority-reports.html" class="nav-item">Operational Reports</a>
-        <a href="authority-civic-intelligence.html" class="nav-item active">Civic Intelligence</a>
+        <a href="authority-civic-intelligence.html" class="nav-item active" data-i18n="nav_civic_intelligence">Civic Intelligence</a>
       </nav>
 
       <div class="sidebar-footer">
-        <div>Department of Municipal Administration</div>
-        <div style="margin-top: 0.25rem;">Tamil Nadu Operations Console</div>
+        <div data-i18n="dept_municipal_admin">Department of Municipal Administration</div>
+        <div style="margin-top: 0.25rem;" data-i18n="tn_operations_console">Tamil Nadu Operations Console</div>
       </div>
     </aside>
 
@@ -68,7 +68,7 @@
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span>Notifications</span>
+            <span data-i18n="nav_notifications">Notifications</span>
             <span id="header-notif-badge" style="display: none; background: #dc2626; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 999px; margin-left: 0.2rem;">0</span>
           </button>
 
@@ -82,10 +82,10 @@
             <!-- Dropdown Menu -->
             <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="event.stopPropagation(); window.location.href='authority-profile.html'">
-                Profile & Security
+                <span data-i18n="profile_and_security">Profile & Security</span>
               </button>
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: #991b1b; background: none; border: none; cursor: pointer;" onclick="logoutUser()">
-                Logout Session
+                <span data-i18n="logout_session">Logout Session</span>
               </button>
             </div>
           </div>
@@ -139,13 +139,13 @@
               <option value="all" selected>All Categories</option>
               <option value="roads">Roads</option>
               <option value="streetlights">Streetlights</option>
-              <option value="water_supply">Water Supply</option>
+              <option value="water_supply" data-i18n="cat_water_supply">Water Supply</option>
               <option value="drainage">Drainage</option>
               <option value="garbage">Garbage</option>
               <option value="traffic">Traffic</option>
-              <option value="public_property">Public Property</option>
+              <option value="public_property" data-i18n="cat_public_property">Public Property</option>
               <option value="parks">Parks</option>
-              <option value="sanitation">Sanitation</option>
+              <option value="sanitation" data-i18n="cat_sanitation">Sanitation</option>
               <option value="safety_hazard">Safety Hazard</option>
               <option value="environment">Environment</option>
               <option value="other">Other</option>
@@ -156,7 +156,7 @@
             <label for="filter-intel-priority" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Priority</label>
             <select id="filter-intel-priority" class="form-select" style="min-width: 120px;" onchange="window.AuthorityCivicIntel.loadData()">
               <option value="all" selected>All Priorities</option>
-              <option value="critical">Critical / Emergency</option>
+              <option value="critical" data-i18n="critical_emergency">Critical / Emergency</option>
               <option value="high">High</option>
               <option value="medium">Medium</option>
               <option value="low">Low</option>
@@ -167,11 +167,11 @@
             <label for="filter-intel-status" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Status</label>
             <select id="filter-intel-status" class="form-select" style="min-width: 130px;" onchange="window.AuthorityCivicIntel.loadData()">
               <option value="all" selected>All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="assigned">Assigned</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="overdue">Overdue (SLA Breached)</option>
+              <option value="pending" data-i18n="pending">Pending</option>
+              <option value="assigned" data-i18n="assigned">Assigned</option>
+              <option value="in_progress" data-i18n="in_progress">In Progress</option>
+              <option value="resolved" data-i18n="resolved">Resolved</option>
+              <option value="overdue" data-i18n="overdue_sla_breached">Overdue (SLA Breached)</option>
               <option value="escalated">Escalated</option>
             </select>
           </div>
@@ -189,7 +189,7 @@
         <!-- Section 1: Authority Operational Overview (8 Metric Boxes) -->
         <div class="metric-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
           <div class="metric-box">
-            <div class="metric-box-title">Total Complaints</div>
+            <div class="metric-box-title" data-i18n="stat_total_complaints">Total Complaints</div>
             <div class="metric-box-value" id="kpi-intel-total">0</div>
             <div class="metric-box-subtext">Cumulative registered</div>
           </div>
@@ -199,7 +199,7 @@
             <div class="metric-box-subtext">Open under action</div>
           </div>
           <div class="metric-box">
-            <div class="metric-box-title">Resolved Cases</div>
+            <div class="metric-box-title" data-i18n="resolved_issues">Resolved Cases</div>
             <div class="metric-box-value" id="kpi-intel-resolved" style="color: #059669;">0</div>
             <div class="metric-box-subtext">Completed & verified</div>
           </div>
@@ -219,12 +219,12 @@
             <div class="metric-box-subtext">SLA deadline breached</div>
           </div>
           <div class="metric-box">
-            <div class="metric-box-title">Escalated Cases</div>
+            <div class="metric-box-title" data-i18n="escalated_cases">Escalated Cases</div>
             <div class="metric-box-value" id="kpi-intel-escalated" style="color: #991b1b;">0</div>
             <div class="metric-box-subtext">Level 1/2 escalated</div>
           </div>
           <div class="metric-box">
-            <div class="metric-box-title">SLA Compliance</div>
+            <div class="metric-box-title" data-i18n="sla_compliance">SLA Compliance</div>
             <div class="metric-box-value" id="kpi-intel-sla-compliance" style="color: #0284c7;">100%</div>
             <div class="metric-box-subtext">On-track resolution</div>
           </div>
