@@ -1,4 +1,4 @@
-﻿-- Migration Version: v14_user_preferences_sync.sql
+-- Migration Version: v14_user_preferences_sync.sql
 -- Description: Add language and theme preferences to public.profiles and synchronize new user creation
 
 -- 1. Add language preference column to public.profiles
@@ -26,7 +26,7 @@ UPDATE public.profiles
 -- When a user is created via Supabase Auth (Email, OTP, Google OAuth),
 -- extract any explicit preferences from user_metadata or apply default values ('ta', 'light').
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger AS \$\$
+RETURNS trigger AS $$
 BEGIN
   INSERT INTO public.profiles (
     id, 
@@ -49,4 +49,4 @@ BEGIN
     theme = COALESCE(public.profiles.theme, EXCLUDED.theme);
   RETURN new;
 END;
-\$\$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
