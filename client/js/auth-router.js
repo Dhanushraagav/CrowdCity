@@ -373,7 +373,7 @@ window.authRouter = {
         -webkit-user-select: none !important;
       }
       .demo-notice-card {
-        background: #ffffff !important;
+        background: var(--bg-surface, #ffffff) !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 20px !important;
         max-width: 520px !important;
@@ -398,7 +398,7 @@ window.authRouter = {
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
-        background: #ffffff !important;
+        background: var(--bg-surface, #ffffff) !important;
       }
       .demo-notice-header-left {
         display: flex !important;
@@ -440,7 +440,7 @@ window.authRouter = {
         -webkit-overflow-scrolling: touch !important;
         max-height: calc(90vh - 130px) !important;
         max-height: calc(90dvh - 130px) !important;
-        background: #ffffff !important;
+        background: var(--bg-surface, #ffffff) !important;
       }
       .demo-notice-box {
         background: #f8fafc !important;
@@ -506,7 +506,7 @@ window.authRouter = {
         height: 22px !important;
         border-radius: 6px !important;
         border: 2px solid #94a3b8 !important;
-        background: #ffffff !important;
+        background: var(--input-bg, #ffffff) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -564,7 +564,7 @@ window.authRouter = {
         font-family: system-ui, -apple-system, sans-serif !important;
       }
       .demo-notice-btn-learn {
-        background: #ffffff !important;
+        background: var(--bg-surface, #ffffff) !important;
         color: #475569 !important;
         border: 1px solid #cbd5e1 !important;
         text-decoration: none !important;
@@ -590,6 +590,59 @@ window.authRouter = {
       .demo-notice-btn-continue.active:hover {
         transform: translate3d(0, -1.5px, 0) !important;
         box-shadow: 0 6px 18px rgba(13, 148, 136, 0.45) !important;
+      }
+      [data-theme="dark"] .demo-notice-card,
+      html.dark-theme .demo-notice-card {
+        background: #0a0a0a !important;
+        border-color: #1f1f1f !important;
+        color: #ffffff !important;
+      }
+      [data-theme="dark"] .demo-notice-header,
+      html.dark-theme .demo-notice-header {
+        background: #0a0a0a !important;
+        border-bottom-color: #1a1a1a !important;
+      }
+      [data-theme="dark"] .demo-notice-title,
+      html.dark-theme .demo-notice-title {
+        color: #ffffff !important;
+      }
+      [data-theme="dark"] .demo-notice-body,
+      html.dark-theme .demo-notice-body {
+        background: #0a0a0a !important;
+      }
+      [data-theme="dark"] .demo-notice-box,
+      html.dark-theme .demo-notice-box {
+        background: #050505 !important;
+        border-color: #1f1f1f !important;
+      }
+      [data-theme="dark"] .demo-notice-text,
+      html.dark-theme .demo-notice-text {
+        color: #d4d4d4 !important;
+      }
+      [data-theme="dark"] .demo-notice-checkbox-block,
+      html.dark-theme .demo-notice-checkbox-block {
+        background: #050505 !important;
+        border-color: #222222 !important;
+      }
+      [data-theme="dark"] .demo-notice-check-box,
+      html.dark-theme .demo-notice-check-box {
+        background: #0a0a0a !important;
+        border-color: #333333 !important;
+      }
+      [data-theme="dark"] .demo-notice-checkbox-label,
+      html.dark-theme .demo-notice-checkbox-label {
+        color: #ffffff !important;
+      }
+      [data-theme="dark"] .demo-notice-footer,
+      html.dark-theme .demo-notice-footer {
+        background: #050505 !important;
+        border-top-color: #1a1a1a !important;
+      }
+      [data-theme="dark"] .demo-notice-btn-learn,
+      html.dark-theme .demo-notice-btn-learn {
+        background: #141414 !important;
+        color: #e5e5e5 !important;
+        border-color: #262626 !important;
       }
     `;
     document.head.appendChild(modalStyle);

@@ -67,8 +67,8 @@
   gap: 0.95rem 1.15rem;
   margin-bottom: 1.1rem;
   padding: 1.15rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 12px;
   box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.02);
   box-sizing: border-box;
@@ -1200,3 +1200,55 @@
   height: 1px;
   background: var(--border-color, #e2e8f0);
 }
+
+/* ==========================================================================
+   AMOLED / True Black Dark Mode Overrides for Location Authority
+   ========================================================================== */
+[data-theme="dark"] .la-manual-grid,
+html.dark-theme .la-manual-grid,
+html[data-theme="dark"] .la-manual-grid {
+  background-color: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-mode-toggle-bar,
+html.dark-theme .la-mode-toggle-bar {
+  background: #080808 !important;
+  border-color: #1f1f1f !important;
+}
+
+[data-theme="dark"] .la-mode-status,
+html.dark-theme .la-mode-status {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-form-group label,
+html.dark-theme .la-form-group label {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .la-select,
+[data-theme="dark"] .la-input,
+html.dark-theme .la-select,
+html.dark-theme .la-input {
+  background-color: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-select option,
+html.dark-theme .la-select option {
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-authority-card,
+[data-theme="dark"] .la-contact-card,
+html.dark-theme .la-authority-card,
+html.dark-theme .la-contact-card {
+  background-color: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+

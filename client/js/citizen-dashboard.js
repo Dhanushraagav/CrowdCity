@@ -199,7 +199,7 @@
             : (isTa ? `புதுப்பிக்கப்பட்டது ${formatRelativeTime(item.updated_at || item.created_at)}` : `Updated ${formatRelativeTime(item.updated_at || item.created_at)}`);
 
           return `
-            <div class="activity-item" style="background: #ffffff; cursor: pointer;" onclick="window.location.href='issue-details.html?id=${item.id}'">
+            <div class="activity-item" style="cursor: pointer;" onclick="window.location.href='issue-details.html?id=${item.id}'">
               <div class="activity-item-details">
                 <h4 class="activity-item-title">${escapeHtml(item.title || (isTa ? 'செயலில் உள்ள புகார்' : 'Active Complaint'))}</h4>
                 <div class="activity-item-meta">

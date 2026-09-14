@@ -99,9 +99,9 @@ window.EmergencyMap = {
         top: 10px;
         right: 10px;
         z-index: 1000;
-        background: #ffffff;
-        color: #0f172a;
-        border: 1px solid #cbd5e1;
+        background: var(--bg-surface, #ffffff);
+        color: var(--text-main, #0f172a);
+        border: 1px solid var(--border-color, #cbd5e1);
         padding: 0.35rem 0.75rem;
         border-radius: 20px;
         font-size: 0.75rem;

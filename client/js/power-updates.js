@@ -84,7 +84,7 @@
     const container = document.getElementById('power-outages-container');
     if (!container) return;
     container.innerHTML = `
-      <div class="power-loading-card" style="padding: 2.5rem; text-align: center; grid-column: 1 / -1; background: #fff; border: 1px solid var(--border-color); border-radius: 14px;">
+      <div class="power-loading-card" style="padding: 2.5rem; text-align: center; grid-column: 1 / -1; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px;">
         <i class="fa-solid fa-location-crosshairs fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.75rem;"></i>
         <h4 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700; color: var(--text-main);">Detecting Current Location...</h4>
         <p style="margin: 0; font-size: 0.84rem; color: var(--text-muted);">Retrieving official TNPDCL planned electricity shutdown schedules for your area</p>

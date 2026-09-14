@@ -76,9 +76,9 @@ function renderFilteredRespondersUI(respondersList, type) {
 
   if (!filtered || filtered.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; padding: 2.25rem 1.5rem; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); text-align: center; color: var(--text-muted);">
+      <div style="grid-column: 1 / -1; padding: 2.25rem 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); text-align: center; color: var(--text-muted);">
         <i class="fa-solid fa-compass" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
-        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-dark); font-weight: 700;">No ${type === 'all' ? 'emergency' : type} services found</h4>
+        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-main); font-weight: 700;">No ${type === 'all' ? 'emergency' : type} services found</h4>
         <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted);">Try selecting another filter or increasing the search radius.</p>
       </div>
     `;

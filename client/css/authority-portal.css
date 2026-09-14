@@ -7,6 +7,9 @@
 :root {
   --bg-canvas: #f8fafc;
   --bg-card: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-app: #f8fafc;
   --border-color: #cbd5e1;
   --border-light: #e2e8f0;
   --text-main: #0f172a;
@@ -45,6 +48,9 @@ html.dark-theme,
 html.theme-dark {
   --bg-canvas: #000000;
   --bg-card: #0a0a0a;
+  --bg-surface: #0b0b0b;
+  --bg-surface-hover: #171717;
+  --bg-app: #000000;
   --border-color: #1f1f1f;
   --border-light: #141414;
   --text-main: #ffffff;
@@ -618,7 +624,7 @@ h4, h5, h6 {
 
 /* 3D Profile Card Styling */
 .card-3d {
-  background: #ffffff;
+  background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.5rem;
@@ -681,7 +687,7 @@ h4, h5, h6 {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   transition: opacity 0.3s ease, transform 0.3s ease;
-  background: #ffffff;
+  background: var(--bg-card, #ffffff);
   margin: 0;
 }
 
@@ -768,3 +774,63 @@ body.authority-portal-mode .app-main,
   flex: 1 1 auto !important;
   min-width: 0 !important;
 }
+
+/* ==========================================================================
+   AMOLED / True Black Dark Mode Overrides for Authority Portal
+   ========================================================================== */
+[data-theme="dark"] #header-profile-dropdown,
+html[data-theme="dark"] #header-profile-dropdown,
+html.dark-theme #header-profile-dropdown,
+html.theme-dark #header-profile-dropdown {
+  background-color: #0b0b0b !important;
+  border: 1px solid #222222 !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.95) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] #header-profile-dropdown button,
+html.dark-theme #header-profile-dropdown button {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] #header-profile-dropdown button:hover,
+html.dark-theme #header-profile-dropdown button:hover {
+  background-color: #171717 !important;
+}
+
+[data-theme="dark"] #header-profile-dropdown button[onclick*="logoutUser"],
+html.dark-theme #header-profile-dropdown button[onclick*="logoutUser"] {
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] .portal-sidebar,
+html.dark-theme .portal-sidebar {
+  background-color: #050505 !important;
+  border-right-color: #141414 !important;
+}
+
+[data-theme="dark"] .portal-header,
+html.dark-theme .portal-header {
+  background-color: #050505 !important;
+  border-bottom-color: #141414 !important;
+}
+
+[data-theme="dark"] .metric-box,
+[data-theme="dark"] .card-3d,
+[data-theme="dark"] .table-card,
+html.dark-theme .metric-box,
+html.dark-theme .card-3d,
+html.dark-theme .table-card {
+  background-color: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .toast-box,
+html.dark-theme .toast-box {
+  background-color: #101010 !important;
+  border: 1px solid #222222 !important;
+  color: #ffffff !important;
+}
+

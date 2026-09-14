@@ -124,7 +124,7 @@ body.emergency-body .app-sidebar.active {
   box-sizing: border-box !important;
   float: none !important;
   clear: both !important;
-  background-color: #ffffff;
+  background-color: var(--bg-surface, #ffffff);
 }
 
 .emergency-section-alt {
@@ -220,8 +220,8 @@ body.emergency-body .app-sidebar.active {
 }
 
 .btn-emergency-secondary {
-  background-color: #ffffff;
-  color: var(--text-dark);
+  background-color: var(--bg-surface, #ffffff);
+  color: var(--text-main, var(--text-dark));
   border: 1px solid var(--border-strong);
   padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
@@ -242,7 +242,7 @@ body.emergency-body .app-sidebar.active {
 }
 
 .quick-action-card {
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1.15rem;
@@ -292,7 +292,7 @@ body.emergency-body .app-sidebar.active {
   -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
 }
 
 .emergency-contacts-table {
@@ -365,7 +365,7 @@ body.emergency-body .app-sidebar.active {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 0.6rem 1rem;
@@ -377,6 +377,8 @@ body.emergency-body .app-sidebar.active {
   outline: none;
   width: 100%;
   font-size: 0.9rem;
+  background: transparent;
+  color: var(--text-main);
 }
 
 .radius-selector-group {
@@ -386,7 +388,7 @@ body.emergency-body .app-sidebar.active {
 }
 
 .radius-btn {
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-subtle);
   padding: 0.45rem 0.75rem;
   border-radius: 6px;
@@ -429,7 +431,7 @@ body.emergency-body .app-sidebar.active {
 }
 
 .responder-card {
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1.25rem;
@@ -465,7 +467,7 @@ body.emergency-body .app-sidebar.active {
   font-size: 1.05rem;
   font-weight: 800;
   margin: 0;
-  color: var(--text-dark);
+  color: var(--text-main, var(--text-dark));
 }
 
 .responder-address {
@@ -506,7 +508,7 @@ body.emergency-body .app-sidebar.active {
 .accordion-item {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   overflow: hidden;
 }
 
@@ -536,7 +538,7 @@ body.emergency-body .app-sidebar.active {
 }
 
 .prep-box {
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-subtle);
   padding: 1rem;
   border-radius: var(--radius-sm);
@@ -566,7 +568,7 @@ body.emergency-body .app-sidebar.active {
   left: 0;
   right: 0;
   width: 100%;
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border-top: 1px solid var(--border-subtle);
   padding: 0.75rem 1rem;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
@@ -679,7 +681,7 @@ body.emergency-body .app-sidebar.active {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
-    background: #ffffff !important;
+    background: var(--bg-surface, #ffffff) !important;
     border: 1px solid var(--border-subtle) !important;
     border-radius: 8px !important;
     padding: 0.55rem 0.75rem !important;
@@ -738,7 +740,7 @@ body.emergency-body .app-sidebar.active {
     border: 1px solid var(--border-strong) !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    background: #ffffff !important;
+    background: var(--bg-surface, #ffffff) !important;
   }
 
   .search-input-group input {
@@ -795,3 +797,117 @@ body.emergency-body .app-sidebar.active {
     padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* ==========================================================================
+   AMOLED / True Black Dark Mode Overrides for Emergency Services
+   ========================================================================== */
+[data-theme="dark"] .emergency-page,
+[data-theme="dark"].emergency-page,
+[data-theme="dark"] body.emergency-body,
+html.dark-theme body.emergency-body,
+html[data-theme="dark"] body.emergency-body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .emergency-section,
+html.dark-theme .emergency-section {
+  background-color: #000000 !important;
+  border-bottom-color: #1a1a1a !important;
+}
+
+[data-theme="dark"] .emergency-section-alt,
+html.dark-theme .emergency-section-alt {
+  background-color: #050505 !important;
+}
+
+[data-theme="dark"] .quick-action-card,
+[data-theme="dark"] .responder-card,
+[data-theme="dark"] .emergency-contacts-table-wrapper,
+[data-theme="dark"] .accordion-item,
+[data-theme="dark"] .prep-box,
+[data-theme="dark"] .emergency-map-container,
+html.dark-theme .quick-action-card,
+html.dark-theme .responder-card,
+html.dark-theme .emergency-contacts-table-wrapper,
+html.dark-theme .accordion-item,
+html.dark-theme .prep-box,
+html.dark-theme .emergency-map-container {
+  background-color: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .accordion-header,
+html.dark-theme .accordion-header {
+  background-color: #080808 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .emergency-contacts-table th,
+html.dark-theme .emergency-contacts-table th {
+  background-color: #080808 !important;
+  color: #a3a3a3 !important;
+  border-bottom-color: #1f1f1f !important;
+}
+
+[data-theme="dark"] .emergency-contacts-table td,
+html.dark-theme .emergency-contacts-table td {
+  border-bottom-color: #141414 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .emergency-contacts-table tr,
+html.dark-theme .emergency-contacts-table tr {
+  background-color: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+}
+
+[data-theme="dark"] .search-input-group,
+html.dark-theme .search-input-group {
+  background: #080808 !important;
+  border-color: #222222 !important;
+}
+
+[data-theme="dark"] .search-input-group input,
+html.dark-theme .search-input-group input {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .radius-btn,
+html.dark-theme .radius-btn {
+  background: #0a0a0a !important;
+  border-color: #222222 !important;
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .radius-btn.active,
+html.dark-theme .radius-btn.active {
+  background: #0d9488 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .sticky-mobile-emergency-bar,
+html.dark-theme .sticky-mobile-emergency-bar {
+  background: #050505 !important;
+  border-top-color: #1a1a1a !important;
+}
+
+[data-theme="dark"] .btn-card-nav,
+[data-theme="dark"] .sticky-mobile-btn.btn-share,
+html.dark-theme .btn-card-nav,
+html.dark-theme .sticky-mobile-btn.btn-share {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .quick-action-title,
+[data-theme="dark"] .responder-name,
+html.dark-theme .quick-action-title,
+html.dark-theme .responder-name {
+  color: #ffffff !important;
+}
+

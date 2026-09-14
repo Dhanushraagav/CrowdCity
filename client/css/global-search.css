@@ -493,3 +493,97 @@
     -webkit-tap-highlight-color: transparent !important;
   }
 }
+
+/* ==========================================================================
+   AMOLED / True Black Dark Mode Overrides for Global Civic Search
+   ========================================================================== */
+[data-theme="dark"] .global-search-input-box,
+html.dark-theme .global-search-input-box {
+  background: #080808 !important;
+  border-color: #222222 !important;
+}
+
+[data-theme="dark"] .global-search-input,
+html.dark-theme .global-search-input {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .global-search-kbd,
+html.dark-theme .global-search-kbd {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .global-search-dropdown,
+html.dark-theme .global-search-dropdown {
+  background: #0b0b0b !important;
+  border: 1px solid #222222 !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.95) !important;
+}
+
+[data-theme="dark"] .global-search-panel-header,
+html.dark-theme .global-search-panel-header {
+  background: #080808 !important;
+  border-bottom: 1px solid #1f1f1f !important;
+}
+
+[data-theme="dark"] .global-search-panel-title,
+html.dark-theme .global-search-panel-title {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .global-search-filter-drawer,
+html.dark-theme .global-search-filter-drawer {
+  background: #080808 !important;
+  border-bottom: 1px solid #1f1f1f !important;
+}
+
+[data-theme="dark"] .global-search-select,
+html.dark-theme .global-search-select {
+  background: #0a0a0a !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .global-search-select option,
+html.dark-theme .global-search-select option {
+  background: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .global-search-item,
+html.dark-theme .global-search-item {
+  border-bottom-color: #141414 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .global-search-item:hover,
+[data-theme="dark"] .global-search-item.active,
+html.dark-theme .global-search-item:hover,
+html.dark-theme .global-search-item.active {
+  background: #141414 !important;
+}
+
+[data-theme="dark"] .global-search-item-title,
+html.dark-theme .global-search-item-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .global-search-item-meta,
+html.dark-theme .global-search-item-meta {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .global-search-empty,
+html.dark-theme .global-search-empty {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .global-search-footer,
+html.dark-theme .global-search-footer {
+  background: #080808 !important;
+  border-top: 1px solid #1f1f1f !important;
+  color: #a3a3a3 !important;
+}
+

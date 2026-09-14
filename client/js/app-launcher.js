@@ -108,7 +108,7 @@ window.AppLauncher = {
         display: flex;
         align-items: center;
         gap: 0.6rem;
-        background: #ffffff;
+        background: var(--input-bg, #ffffff);
         border: 1px solid var(--border-color, #cbd5e1);
         border-radius: 10px;
         padding: 0.5rem 0.85rem;
@@ -117,6 +117,7 @@ window.AppLauncher = {
         border: none;
         outline: none;
         width: 100%;
+        background: transparent;
         font-family: inherit;
         font-size: 0.9rem;
         color: var(--text-main, #0f172a);
