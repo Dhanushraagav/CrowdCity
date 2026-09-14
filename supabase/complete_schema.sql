@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   full_name text,
   avatar_url text,
   role text DEFAULT 'citizen' CHECK (role IN ('citizen', 'authority', 'admin')),
+  language text DEFAULT 'ta' CHECK (language IN ('ta', 'en')),
+  theme text DEFAULT 'light' CHECK (theme IN ('light', 'dark')),
   points integer DEFAULT 0,
   is_suspended boolean DEFAULT false,
   is_verified_authority boolean DEFAULT false,
@@ -270,13 +272,18 @@ CREATE OR REPLACE TRIGGER on_vote_deleted
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url, role)
+  INSERT INTO public.profiles (id, full_name, avatar_url, role, language, theme)
   VALUES (
     NEW.id,
     coalesce(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', 'Citizen'),
     coalesce(NEW.raw_user_meta_data->>'avatar_url', ''),
-    'citizen'
-  );
+    'citizen',
+    coalesce(NEW.raw_user_meta_data->>'language', 'ta'),
+    coalesce(NEW.raw_user_meta_data->>'theme', 'light')
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    language = coalesce(public.profiles.language, EXCLUDED.language),
+    theme = coalesce(public.profiles.theme, EXCLUDED.theme);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -340,9 +340,9 @@
         const user = getCurrentUser();
         const role = getUserRole();
         if (!user || role !== 'citizen') {
-          // If authority or admin, redirect them to authority-settings
+          // If authority or admin, redirect them to authority-profile
           if (user && (role === 'authority' || role === 'admin')) {
-            window.location.href = 'authority-settings.html';
+            window.location.href = 'authority-profile.html';
           } else {
             window.authRouter.redirectToLogin('citizen');
           }
@@ -355,7 +355,7 @@
         const role = getUserRole();
         if (role !== 'citizen') {
           if (role === 'authority' || role === 'admin') {
-            window.location.href = 'authority-settings.html';
+            window.location.href = 'authority-profile.html';
           } else {
             window.authRouter.redirectToLogin('citizen');
           }
@@ -419,13 +419,19 @@
 
       // Language selection logic
       window.setPortalLanguage = function(lang) {
-        if (window.i18n) {
-          window.i18n.setLanguage(lang);
+        if (typeof window.saveAccountPreference === 'function') {
+          window.saveAccountPreference('language', lang).catch(err => {
+            console.error('[Settings] Error saving language preference to account:', err);
+          });
         } else {
-          localStorage.setItem('crowdcity_language', lang);
-          localStorage.setItem('cc_lang', lang);
-          localStorage.setItem('preferred_language', lang);
-          window.location.reload();
+          if (window.i18n) {
+            window.i18n.setLanguage(lang);
+          } else {
+            localStorage.setItem('crowdcity_language', lang);
+            localStorage.setItem('cc_lang', lang);
+            localStorage.setItem('preferred_language', lang);
+            window.location.reload();
+          }
         }
         updateLangUI();
       };
@@ -464,20 +470,26 @@
 
       // Theme selection logic
       window.setPortalTheme = function(theme) {
-        if (window.CrowdCityTheme) {
-          window.CrowdCityTheme.setTheme(theme);
+        if (typeof window.saveAccountPreference === 'function') {
+          window.saveAccountPreference('theme', theme).catch(err => {
+            console.error('[Settings] Error saving theme preference to account:', err);
+          });
         } else {
-          try {
-            localStorage.setItem('crowdcity_theme', theme);
-            localStorage.setItem('cc_theme', theme);
-            document.documentElement.setAttribute('data-theme', theme);
-            var isDark = (theme === 'dark');
-            document.documentElement.classList.toggle('dark-theme', isDark);
-            document.documentElement.classList.toggle('theme-dark', isDark);
-            document.documentElement.classList.toggle('light-theme', !isDark);
-            document.documentElement.classList.toggle('theme-light', !isDark);
-            window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: theme } }));
-          } catch(e) {}
+          if (window.CrowdCityTheme) {
+            window.CrowdCityTheme.setTheme(theme);
+          } else {
+            try {
+              localStorage.setItem('crowdcity_theme', theme);
+              localStorage.setItem('cc_theme', theme);
+              document.documentElement.setAttribute('data-theme', theme);
+              var isDark = (theme === 'dark');
+              document.documentElement.classList.toggle('dark-theme', isDark);
+              document.documentElement.classList.toggle('theme-dark', isDark);
+              document.documentElement.classList.toggle('light-theme', !isDark);
+              document.documentElement.classList.toggle('theme-light', !isDark);
+              window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: theme } }));
+            } catch(e) {}
+          }
         }
         updateThemeUI();
       };

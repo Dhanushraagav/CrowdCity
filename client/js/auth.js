@@ -380,6 +380,9 @@ function _attachAuthStateListener() {
     if (session) {
       localStorage.setItem('cc_session', JSON.stringify(session));
 
+      // Reconcile cloud account preferences on authentication event
+      syncAccountPreferences(session.user, null);
+
       const path = window.location.pathname;
       const normalizedPath = path.replace(/\.html$/, '');
       const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
@@ -508,16 +511,21 @@ function _attachAuthStateListener() {
 // Fetch user profile from Supabase and cache the role locally
 async function fetchAndCacheRole(token) {
   try {
-    const user = getUser();
+    const user = typeof getUser === 'function' ? getUser() : getCurrentUser();
     if (user && user.id) {
       const client = typeof getSupabase === 'function' ? getSupabase() : (typeof supabaseClient !== 'undefined' ? supabaseClient : window.supabaseClient);
       if (client) {
         const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-        if (profile && profile.role) {
-          localStorage.setItem('cc_user_role', profile.role);
-          localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-          verifyRoleForCurrentPage(profile.role);
-          return;
+        if (profile) {
+          syncAccountPreferences(user, profile);
+          if (profile.role) {
+            localStorage.setItem('cc_user_role', profile.role);
+            localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+            verifyRoleForCurrentPage(profile.role);
+            return;
+          }
+        } else {
+          syncAccountPreferences(user, null);
         }
       }
     }
@@ -530,16 +538,21 @@ async function fetchAndCacheRole(token) {
 // Fetch fresh profile in the background and update cache/UI if changed
 async function syncUserProfileBackground() {
   try {
-    const user = getUser();
+    const user = typeof getUser === 'function' ? getUser() : getCurrentUser();
     if (user && user.id) {
       const client = typeof getSupabase === 'function' ? getSupabase() : (typeof supabaseClient !== 'undefined' ? supabaseClient : window.supabaseClient);
       if (client) {
         const { data: freshProfile } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-        if (freshProfile && freshProfile.role) {
-          localStorage.setItem('cc_user_role', freshProfile.role);
-          localStorage.setItem('cc_user_profile', JSON.stringify(freshProfile));
-          verifyRoleForCurrentPage(freshProfile.role);
-          updateAuthUI();
+        if (freshProfile) {
+          syncAccountPreferences(user, freshProfile);
+          if (freshProfile.role) {
+            localStorage.setItem('cc_user_role', freshProfile.role);
+            localStorage.setItem('cc_user_profile', JSON.stringify(freshProfile));
+            verifyRoleForCurrentPage(freshProfile.role);
+            updateAuthUI();
+          }
+        } else {
+          syncAccountPreferences(user, null);
         }
       }
     }
@@ -649,6 +662,260 @@ function getCurrentUser() {
   const session = getSession();
   return session ? session.user : null;
 }
+window.getCurrentUser = getCurrentUser;
+
+function getUser() {
+  return getCurrentUser();
+}
+window.getUser = getUser;
+
+// =========================================================================
+// CROSS-DEVICE ACCOUNT-LEVEL PREFERENCES SYNCHRONIZATION (Language & Theme)
+// =========================================================================
+
+/**
+ * Apply language and theme preferences globally and update local cache.
+ */
+function applyAccountPreferences(prefs) {
+  if (!prefs || typeof prefs !== 'object') return;
+  const { language, theme } = prefs;
+
+  // 1. Language application
+  if (language === 'ta' || language === 'en') {
+    try {
+      localStorage.setItem('crowdcity_language', language);
+      localStorage.setItem('cc_lang', language);
+      localStorage.setItem('preferred_language', language);
+    } catch (e) {}
+
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.lang = language;
+      document.documentElement.setAttribute('data-lang', language);
+      document.documentElement.classList.remove('lang-en', 'lang-ta', 'cc-i18n-loading');
+      document.documentElement.classList.add(language === 'ta' ? 'lang-ta' : 'lang-en');
+    }
+
+    if (window.i18n && typeof window.i18n.setLanguage === 'function') {
+      if (window.i18n.getLanguage() !== language) {
+        window.i18n.setLanguage(language);
+      }
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('language-change', { detail: { language } }));
+    }
+  }
+
+  // 2. Theme application
+  if (theme === 'light' || theme === 'dark') {
+    try {
+      localStorage.setItem('crowdcity_theme', theme);
+      localStorage.setItem('cc_theme', theme);
+    } catch (e) {}
+
+    if (typeof document !== 'undefined' && document.documentElement) {
+      const isDark = (theme === 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark-theme', isDark);
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('light-theme', !isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+    }
+
+    if (window.CrowdCityTheme && typeof window.CrowdCityTheme.setTheme === 'function') {
+      if (window.CrowdCityTheme.getTheme() !== theme) {
+        window.CrowdCityTheme.setTheme(theme);
+      }
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme, isDark: theme === 'dark' } }));
+    }
+  }
+}
+window.applyAccountPreferences = applyAccountPreferences;
+
+/**
+ * Reconcile cloud account preferences with the current device.
+ * Cloud preferences ALWAYS win for authenticated users.
+ * If brand-new user has no cloud preferences, defaults to Tamil ('ta') and Light ('light').
+ */
+async function syncAccountPreferences(user, profile) {
+  if (!user && !profile) return;
+  const activeUser = user || getCurrentUser();
+  if (!activeUser || !activeUser.id) return;
+
+  // Cloud Resolution:
+  // 1. profile from public.profiles table
+  // 2. activeUser.user_metadata from Supabase Auth
+  let cloudLang = null;
+  if (profile && (profile.language === 'ta' || profile.language === 'en')) {
+    cloudLang = profile.language;
+  } else if (activeUser.user_metadata && (activeUser.user_metadata.language === 'ta' || activeUser.user_metadata.language === 'en')) {
+    cloudLang = activeUser.user_metadata.language;
+  }
+
+  let cloudTheme = null;
+  if (profile && (profile.theme === 'light' || profile.theme === 'dark')) {
+    cloudTheme = profile.theme;
+  } else if (activeUser.user_metadata && (activeUser.user_metadata.theme === 'light' || activeUser.user_metadata.theme === 'dark')) {
+    cloudTheme = activeUser.user_metadata.theme;
+  }
+
+  // System defaults for new accounts with no preferences
+  const finalLang = cloudLang || 'ta';
+  const finalTheme = cloudTheme || 'light';
+
+  // Apply cloud preferences to UI & local cache immediately
+  applyAccountPreferences({ language: finalLang, theme: finalTheme });
+
+  // If this account had no saved preferences at all (brand new user), initialize them in the cloud
+  if (!cloudLang || !cloudTheme) {
+    console.log('[Auth Prefs] Initializing default preferences in cloud account for user:', activeUser.id);
+    saveAccountPreferenceDirect(activeUser.id, {
+      language: finalLang,
+      theme: finalTheme
+    }).catch(e => console.warn('[Auth Prefs] Initial preference save notice:', e));
+  }
+}
+window.syncAccountPreferences = syncAccountPreferences;
+
+/**
+ * Direct helper to save preferences to Supabase without UI dispatch loops
+ */
+async function saveAccountPreferenceDirect(userId, updates) {
+  const client = typeof getSupabaseClient === 'function' 
+    ? await getSupabaseClient() 
+    : (typeof supabaseClient !== 'undefined' ? supabaseClient : window.supabaseClient);
+
+  // 1. Update Supabase Auth user_metadata
+  if (client && client.auth) {
+    try {
+      await client.auth.updateUser({ data: updates });
+    } catch (e) {
+      console.warn('[Auth Prefs] client.auth.updateUser notice:', e);
+    }
+  }
+
+  // 2. Update public.profiles table
+  if (client && userId) {
+    try {
+      await client.from('profiles').update(updates).eq('id', userId);
+    } catch (e) {
+      console.warn('[Auth Prefs] client.profiles.update notice:', e);
+    }
+  }
+
+  // 3. Update server API endpoint
+  try {
+    const token = getAuthToken() || (client && (await client.auth.getSession())?.data?.session?.access_token);
+    if (token) {
+      await fetch('/api/auth/preferences', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updates)
+      });
+    }
+  } catch (e) {
+    console.warn('[Auth Prefs] Server API preference sync notice:', e);
+  }
+}
+
+/**
+ * Save user preference (language or theme) to authenticated Supabase account.
+ * Updates UI immediately, saves to cloud, and warns user if cloud update fails.
+ */
+async function saveAccountPreference(key, value) {
+  if (key !== 'language' && key !== 'theme') {
+    throw new Error('Invalid preference key. Must be "language" or "theme"');
+  }
+
+  // 1. Optimistically apply locally and update UI
+  applyAccountPreferences({ [key]: value });
+
+  const user = getCurrentUser();
+  if (!user || !user.id) {
+    // Unauthenticated user: local storage change only
+    return { success: true, localOnly: true };
+  }
+
+  let saveSuccess = false;
+  let lastError = null;
+
+  // 2. Try Supabase Auth metadata update
+  const client = typeof getSupabaseClient === 'function' 
+    ? await getSupabaseClient() 
+    : (typeof supabaseClient !== 'undefined' ? supabaseClient : window.supabaseClient);
+
+  if (client && client.auth) {
+    try {
+      const { data, error } = await client.auth.updateUser({ data: { [key]: value } });
+      if (!error && data && data.user) {
+        saveSuccess = true;
+        // Also update cached session user metadata if present
+        const currentSession = getSession();
+        if (currentSession && currentSession.user) {
+          currentSession.user.user_metadata = data.user.user_metadata;
+          localStorage.setItem('cc_session', JSON.stringify(currentSession));
+        }
+      } else if (error) {
+        lastError = error;
+      }
+    } catch (e) {
+      lastError = e;
+    }
+  }
+
+  // 3. Try public.profiles table update
+  if (client && user.id) {
+    try {
+      const { error: profileErr } = await client
+        .from('profiles')
+        .update({ [key]: value })
+        .eq('id', user.id);
+      if (!profileErr) {
+        saveSuccess = true;
+        // Update cached profile
+        const cachedProfileStr = localStorage.getItem('cc_user_profile');
+        if (cachedProfileStr) {
+          try {
+            const p = JSON.parse(cachedProfileStr);
+            p[key] = value;
+            localStorage.setItem('cc_user_profile', JSON.stringify(p));
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 4. Try Express API endpoint
+  try {
+    const token = getAuthToken() || (client && (await client.auth.getSession())?.data?.session?.access_token);
+    if (token) {
+      const resp = await fetch('/api/auth/preferences', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ [key]: value })
+      });
+      if (resp.ok) {
+        saveSuccess = true;
+      }
+    }
+  } catch (e) {}
+
+  if (!saveSuccess && lastError) {
+    console.error('[Auth Prefs] Failed to synchronize preference to account:', lastError);
+    if (typeof window.showToast === 'function') {
+      window.showToast(window.i18n ? window.i18n.t('error_saving_preferences') || 'Could not save preference to account.' : 'Could not save preference to account.', 'error');
+    }
+    return { success: false, error: lastError };
+  }
+
+  return { success: true };
+}
+window.saveAccountPreference = saveAccountPreference;
 
 // Get User Role (Citizen, Authority, Admin)
 function getUserRole() {
@@ -845,7 +1112,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
     
     const queryPromise = supabase
       .from('profiles')
-      .select('role,is_verified:is_verified_authority')
+      .select('*')
       .eq('id', user.id)
       .single();
       
@@ -878,10 +1145,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
         if (response.ok) {
           const freshProfile = await response.json();
           console.log("[Auth Client] Profile retrieved successfully from Express API:", freshProfile);
-          profile = {
-            role: freshProfile.role,
-            is_verified: freshProfile.is_verified_authority || freshProfile.is_verified
-          };
+          profile = freshProfile;
         } else {
           console.error("[Auth Client] Express API profile fetch returned non-ok status:", response.status);
         }
@@ -902,6 +1166,8 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       email: user.email || '',
       full_name: userName,
       role: 'citizen',
+      language: user.user_metadata?.language || 'ta',
+      theme: user.user_metadata?.theme || 'light',
       is_verified_authority: false,
       points: 50,
       created_at: new Date().toISOString()
@@ -920,11 +1186,16 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       role: 'citizen',
       is_verified: false,
       full_name: userName,
+      language: synthesizedProfile.language,
+      theme: synthesizedProfile.theme,
       points: 50
     };
     localStorage.setItem('cc_user_role', 'citizen');
     localStorage.setItem('cc_user_profile', JSON.stringify(synthesizedProfile));
   }
+
+  // Synchronize and apply account-level preferences (language + theme)
+  await syncAccountPreferences(user, profile);
 
   console.log("PROFILE FOUND");
   console.log("- User ID:", user.id);

@@ -7,6 +7,8 @@ create table public.profiles (
   full_name text,
   avatar_url text,
   role text default 'citizen' check (role in ('citizen', 'authority', 'admin')),
+  language text default 'ta' check (language in ('ta', 'en')),
+  theme text default 'light' check (theme in ('light', 'dark')),
   welcome_email_sent boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -30,13 +32,18 @@ create policy "Authenticated user may insert own profile" on public.profiles
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, full_name, avatar_url, role)
+  insert into public.profiles (id, full_name, avatar_url, role, language, theme)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', 'Citizen'),
     coalesce(new.raw_user_meta_data->>'avatar_url', ''),
-    'citizen'
-  );
+    'citizen',
+    coalesce(new.raw_user_meta_data->>'language', 'ta'),
+    coalesce(new.raw_user_meta_data->>'theme', 'light')
+  )
+  on conflict (id) do update set
+    language = coalesce(public.profiles.language, excluded.language),
+    theme = coalesce(public.profiles.theme, excluded.theme);
   return new;
 end;
 $$ language plpgsql security definer;

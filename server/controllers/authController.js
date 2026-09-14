@@ -172,7 +172,24 @@ export const getProfile = async (req, res) => {
       profile = profiles[0];
     }
 
-    profileToReturn = profile;
+    // Resolve cloud account preferences: public.profiles takes top priority, followed by auth user_metadata, defaulting to ta / light
+    const resolvedLanguage = (profile && (profile.language === 'ta' || profile.language === 'en'))
+      ? profile.language
+      : ((req.user.user_metadata?.language === 'ta' || req.user.user_metadata?.language === 'en')
+          ? req.user.user_metadata.language
+          : 'ta');
+
+    const resolvedTheme = (profile && (profile.theme === 'light' || profile.theme === 'dark'))
+      ? profile.theme
+      : ((req.user.user_metadata?.theme === 'light' || req.user.user_metadata?.theme === 'dark')
+          ? req.user.user_metadata.theme
+          : 'light');
+
+    profileToReturn = {
+      ...profile,
+      language: resolvedLanguage,
+      theme: resolvedTheme
+    };
 
     // Trigger welcome email asynchronously ONLY if the profile was just created
     if (justCreated && userEmail && profileToReturn) {
@@ -185,6 +202,76 @@ export const getProfile = async (req, res) => {
   } catch (err) {
     logger.error('getProfile Error: %O', err);
     return res.status(500).json({ error: 'Server error retrieving profile' });
+  }
+};
+
+/**
+ * Update the authenticated user's account preferences (language, theme).
+ * Synchronizes to both public.profiles and auth.users user_metadata.
+ */
+export const updateUserPreferences = async (req, res) => {
+  const userId = req.user.id;
+  const { language, theme } = req.body;
+
+  if (language === undefined && theme === undefined) {
+    return res.status(400).json({ error: 'Please provide language and/or theme to update' });
+  }
+
+  const updates = {};
+  if (language !== undefined) {
+    if (language !== 'ta' && language !== 'en') {
+      return res.status(400).json({ error: 'Invalid language preference. Allowed values: "ta", "en"' });
+    }
+    updates.language = language;
+  }
+
+  if (theme !== undefined) {
+    if (theme !== 'light' && theme !== 'dark') {
+      return res.status(400).json({ error: 'Invalid theme preference. Allowed values: "light", "dark"' });
+    }
+    updates.theme = theme;
+  }
+
+  try {
+    const activeClient = getSupabaseClient(req);
+
+    // 1. Update public.profiles table (RLS enforces auth.uid() = id)
+    try {
+      const { error: profileError } = await activeClient
+        .from('profiles')
+        .update(updates)
+        .eq('id', userId);
+
+      if (profileError) {
+        logger.warn(`[updateUserPreferences] Note on profiles table update: ${profileError.message}`);
+      }
+    } catch (dbErr) {
+      logger.warn(`[updateUserPreferences] Exception updating profiles table: ${dbErr.message}`);
+    }
+
+    // 2. Synchronize to auth.users user_metadata for reliable cross-device consistency
+    if (supabaseAdmin && supabaseAdmin.auth && supabaseAdmin.auth.admin) {
+      const currentMeta = req.user.user_metadata || {};
+      const { error: metaError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          ...currentMeta,
+          ...updates
+        }
+      });
+      if (metaError) {
+        logger.warn(`[updateUserPreferences] Note on auth.users metadata update: ${metaError.message}`);
+      }
+    }
+
+    logger.info(`[updateUserPreferences] Successfully saved account preferences for user ${userId}: %O`, updates);
+    return res.status(200).json({
+      success: true,
+      message: 'Preferences updated successfully',
+      preferences: updates
+    });
+  } catch (err) {
+    logger.error('updateUserPreferences Error: %O', err);
+    return res.status(500).json({ error: 'Server error updating preferences' });
   }
 };
 

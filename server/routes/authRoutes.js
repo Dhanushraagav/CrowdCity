@@ -13,7 +13,8 @@ import {
   requestPasswordRecovery,
   resetPasswordOverride,
   checkAuthMethods,
-  submitContactInquiry
+  submitContactInquiry,
+  updateUserPreferences
 } from '../controllers/authController.js';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 import { validateUserId } from '../middlewares/validationMiddleware.js';
@@ -34,6 +35,7 @@ router.post('/reset-password', resetPasswordOverride);
 router.use(requireAuth);
 
 router.get('/profile', getProfile);
+router.patch('/preferences', updateUserPreferences);
 
 // Admin-only endpoints
 router.get('/users', requireRole(['admin']), getAllUsers);
