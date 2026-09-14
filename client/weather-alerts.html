@@ -75,11 +75,11 @@
       font-size: 1rem;
     }
     .weather-location-banner-content strong {
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
       font-weight: 700;
     }
     .weather-location-switch-btn {
-      background: #ffffff;
+      background: var(--bg-surface, #ffffff);
       border: 1px solid rgba(13, 148, 136, 0.35);
       color: #0f766e;
       border-radius: 8px;
@@ -126,12 +126,12 @@
       align-items: center;
       gap: 0.35rem;
       padding: 0.35rem 0.75rem;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
+      background: var(--bg-app, #f8fafc);
+      border: 1px solid var(--border-color, #cbd5e1);
       border-radius: 6px;
       font-size: 0.74rem;
       font-weight: 600;
-      color: #475569;
+      color: var(--text-muted, #475569);
     }
 
     .btn-official-source, .btn-refresh-weather {
@@ -204,8 +204,8 @@
     }
 
     .weather-tab-btn.active {
-      background: #0f172a;
-      border-color: #0f172a;
+      background: var(--primary, #0f172a);
+      border-color: var(--primary, #0f172a);
       color: #ffffff;
       font-weight: 600;
     }
@@ -243,8 +243,8 @@
     }
 
     .weather-search-wrap input:focus {
-      border-color: #0f172a;
-      background: #ffffff;
+      border-color: var(--primary, #0d9488);
+      background: var(--bg-surface, #ffffff);
     }
 
     .weather-search-wrap i {
@@ -270,8 +270,8 @@
     }
 
     .weather-select-filter:focus {
-      border-color: #0f172a;
-      background: #ffffff;
+      border-color: var(--primary, #0d9488);
+      background: var(--bg-surface, #ffffff);
     }
 
     /* Current Weather Panel */
@@ -329,7 +329,7 @@
       gap: 0.4rem;
       font-size: 1.05rem;
       font-weight: 600;
-      color: #334155;
+      color: var(--text-muted, #334155);
     }
 
     .current-condition-text i {
@@ -422,7 +422,7 @@
     .forecast-day-tag {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
     }
 
     .forecast-date-tag {
@@ -439,7 +439,7 @@
 
     .forecast-condition-row i {
       font-size: 1.1rem;
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
       width: 20px;
       text-align: center;
     }
@@ -447,7 +447,7 @@
     .forecast-condition-text {
       font-size: 0.88rem;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
     }
 
     .forecast-temps-row {
@@ -460,7 +460,7 @@
     .forecast-temp-max {
       font-size: 1.3rem;
       font-weight: 800;
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
     }
 
     .forecast-temp-min {
@@ -474,7 +474,7 @@
       flex-direction: column;
       gap: 0.35rem;
       font-size: 0.76rem;
-      color: #334155;
+      color: var(--text-muted, #334155);
       margin-bottom: 0.75rem;
     }
 
@@ -500,7 +500,7 @@
 
     .forecast-detail-val {
       font-weight: 600;
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
     }
 
     .forecast-card-footer {
@@ -511,7 +511,7 @@
       padding-top: 0.6rem;
       margin-top: 0.35rem;
       font-size: 0.72rem;
-      color: #94a3b8;
+      color: var(--text-muted, #94a3b8);
     }
 
     .weather-btn-share {
@@ -530,7 +530,7 @@
 
     .weather-btn-share:hover {
       background: var(--bg-hover, #f1f5f9);
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
     }
 
     /* 38 District Weather Section */
@@ -575,7 +575,7 @@
     }
 
     .district-card:hover {
-      border-color: #94a3b8;
+      border-color: var(--border-color-hover, #94a3b8);
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
 
@@ -589,12 +589,12 @@
     .district-card-name {
       font-size: 0.9rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
     }
 
     .district-card-condition {
       font-size: 0.75rem;
-      color: #64748b;
+      color: var(--text-muted, #64748b);
       margin-top: 0.1rem;
       display: flex;
       align-items: center;
@@ -604,7 +604,7 @@
     .district-card-temp {
       font-size: 1.25rem;
       font-weight: 800;
-      color: #0f172a;
+      color: var(--text-main, #0f172a);
       white-space: nowrap;
     }
 
@@ -683,6 +683,131 @@
       .current-temperature {
         font-size: 2.2rem;
       }
+    }
+
+    /* Local Dark Mode Overrides for Weather Alerts */
+    [data-theme="dark"] .weather-hero-banner,
+    [data-theme="dark"] .weather-state-box,
+    [data-theme="dark"] .district-card,
+    [data-theme="dark"] .forecast-card,
+    [data-theme="dark"] .current-weather-panel,
+    html.dark-theme .weather-hero-banner,
+    html.dark-theme .weather-state-box,
+    html.dark-theme .district-card,
+    html.dark-theme .forecast-card,
+    html.dark-theme .current-weather-panel {
+      background: #0a0a0a !important;
+      border-color: #1f1f1f !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .district-card:hover,
+    html.dark-theme .district-card:hover {
+      background: #121212 !important;
+      border-color: #0d9488 !important;
+    }
+
+    [data-theme="dark"] .weather-location-banner,
+    html.dark-theme .weather-location-banner {
+      background: rgba(13, 148, 136, 0.12) !important;
+      border-color: rgba(13, 148, 136, 0.35) !important;
+      color: #2dd4bf !important;
+    }
+
+    [data-theme="dark"] .weather-location-banner-content strong,
+    html.dark-theme .weather-location-banner-content strong {
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-location-switch-btn,
+    html.dark-theme .weather-location-switch-btn {
+      background: #0e0e0e !important;
+      color: #2dd4bf !important;
+      border-color: rgba(13, 148, 136, 0.45) !important;
+    }
+
+    [data-theme="dark"] .weather-location-switch-btn:hover,
+    html.dark-theme .weather-location-switch-btn:hover {
+      background: #0d9488 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-stale-pill,
+    html.dark-theme .weather-stale-pill {
+      background: #141414 !important;
+      border-color: #262626 !important;
+      color: #d4d4d4 !important;
+    }
+
+    [data-theme="dark"] .weather-tab-btn,
+    html.dark-theme .weather-tab-btn {
+      background: #0e0e0e !important;
+      border-color: #222222 !important;
+      color: #a3a3a3 !important;
+    }
+
+    [data-theme="dark"] .weather-tab-btn:hover,
+    html.dark-theme .weather-tab-btn:hover {
+      background: #171717 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-tab-btn.active,
+    html.dark-theme .weather-tab-btn.active {
+      background: #0d9488 !important;
+      border-color: #0d9488 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-search-wrap input,
+    [data-theme="dark"] .weather-select-filter,
+    html.dark-theme .weather-search-wrap input,
+    html.dark-theme .weather-select-filter {
+      background: #080808 !important;
+      border-color: #222222 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-search-wrap input:focus,
+    [data-theme="dark"] .weather-select-filter:focus,
+    html.dark-theme .weather-search-wrap input:focus,
+    html.dark-theme .weather-select-filter:focus {
+      background: #0c0c0c !important;
+      border-color: #0d9488 !important;
+    }
+
+    [data-theme="dark"] .weather-select-filter option,
+    html.dark-theme .weather-select-filter option {
+      background: #0a0a0a !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .current-condition-text,
+    [data-theme="dark"] .forecast-day-tag,
+    [data-theme="dark"] .forecast-condition-row i,
+    [data-theme="dark"] .forecast-condition-text,
+    [data-theme="dark"] .forecast-temp-max,
+    [data-theme="dark"] .forecast-detail-val,
+    [data-theme="dark"] .district-card-name,
+    [data-theme="dark"] .district-card-temp,
+    html.dark-theme .current-condition-text,
+    html.dark-theme .forecast-day-tag,
+    html.dark-theme .forecast-condition-row i,
+    html.dark-theme .forecast-condition-text,
+    html.dark-theme .forecast-temp-max,
+    html.dark-theme .forecast-detail-val,
+    html.dark-theme .district-card-name,
+    html.dark-theme .district-card-temp {
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .forecast-details-list,
+    [data-theme="dark"] .district-card-condition,
+    [data-theme="dark"] .district-card-bottom,
+    html.dark-theme .forecast-details-list,
+    html.dark-theme .district-card-condition,
+    html.dark-theme .district-card-bottom {
+      color: #a3a3a3 !important;
     }
   </style>
 

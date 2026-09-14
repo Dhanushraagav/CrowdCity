@@ -237,8 +237,8 @@
       const badge = document.getElementById(`badge-${cat}-count`);
       if (badge) {
         badge.textContent = 'Location Needed';
-        badge.style.background = '#fef2f2';
-        badge.style.color = '#b91c1c';
+        badge.classList.add('badge-alert');
+        badge.classList.remove('badge-success');
       }
       if (grid) {
         grid.innerHTML = `
@@ -356,12 +356,12 @@
     if (badge) {
       if (preparedItems.length === 0) {
         badge.textContent = 'None in range';
-        badge.style.background = '#fef2f2';
-        badge.style.color = '#b91c1c';
+        badge.classList.add('badge-alert');
+        badge.classList.remove('badge-success');
       } else {
         badge.textContent = `${preparedItems.length} nearby`;
-        badge.style.background = '#ecfdf5';
-        badge.style.color = '#047857';
+        badge.classList.remove('badge-alert');
+        badge.classList.add('badge-success');
       }
     }
 
@@ -642,8 +642,8 @@
         copyBtn.style.color = '#ffffff';
         setTimeout(() => {
           copyText.textContent = originalText;
-          copyBtn.style.background = '#f8fafc';
-          copyBtn.style.color = '#334155';
+          copyBtn.style.background = '';
+          copyBtn.style.color = '';
         }, 2500);
       }
     }

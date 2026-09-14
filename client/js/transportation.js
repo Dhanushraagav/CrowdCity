@@ -38,7 +38,7 @@
       return '<span class="status-badge-sm badge-resolved">Resolved</span>';
     }
     if (s === 'ASSIGNED') {
-      return '<span class="status-badge-sm" style="background: #e0e7ff; color: #3730a3; font-weight: 700;">Assigned</span>';
+      return '<span class="status-badge-sm badge-assigned">Assigned</span>';
     }
     return '<span class="status-badge-sm badge-pending">Submitted</span>';
   }
@@ -150,7 +150,7 @@
     gridEl.innerHTML = reports.map(r => {
       const conf = categoryConfig[r.category] || { color: '#0d9488', icon: 'fa-road' };
       const photoHtml = (r.photo_urls && r.photo_urls.length > 0)
-        ? `<div style="height: 140px; border-radius: 12px; overflow: hidden; margin-bottom: 0.85rem; background: #f8fafc;"><img src="${escapeHtml(r.photo_urls[0])}" alt="Issue Photo" style="width: 100%; height: 100%; object-fit: cover;" /></div>`
+        ? `<div style="height: 140px; border-radius: 12px; overflow: hidden; margin-bottom: 0.85rem; background: var(--bg-surface-hover, #f8fafc);"><img src="${escapeHtml(r.photo_urls[0])}" alt="Issue Photo" style="width: 100%; height: 100%; object-fit: cover;" /></div>`
         : `<div style="height: 110px; border-radius: 12px; margin-bottom: 0.85rem; background: var(--bg-surface-hover, #f8fafc); border: 1px dashed var(--border-color, #cbd5e1); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 0.35rem;">
             <i class="fa-solid ${conf.icon}" style="font-size: 1.5rem; color: ${conf.color};"></i>
             <span style="font-size: 0.75rem; font-weight: 600;">Transportation Infrastructure Report</span>
@@ -160,7 +160,7 @@
         <div class="transport-card">
           ${photoHtml}
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.4rem;">
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 800; color: ${conf.color}; background: #f8fafc; padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);">
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 800; color: ${conf.color}; background: var(--bg-surface-hover, #f8fafc); padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);">
               <i class="fa-solid ${conf.icon}"></i> ${escapeHtml(r.category)}
             </span>
             ${getPriorityPill(r.priority)}

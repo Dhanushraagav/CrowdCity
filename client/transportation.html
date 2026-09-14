@@ -132,7 +132,9 @@
       pointer-events: auto;
     }
     .modal-box {
-      background: #ffffff;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      color: var(--text-main, #0f172a);
       border-radius: 20px;
       width: 100%;
       max-width: 680px;
@@ -146,6 +148,41 @@
     .modal-overlay.active .modal-box {
       transform: translateY(0);
     }
+
+    /* Dark Mode Overrides for Transportation */
+    [data-theme="dark"] .modal-box,
+    html.dark-theme .modal-box {
+      background: #101010 !important;
+      border-color: #222222 !important;
+      color: #ffffff !important;
+    }
+    [data-theme="dark"] .modal-box select,
+    [data-theme="dark"] .modal-box input,
+    [data-theme="dark"] .modal-box textarea,
+    html.dark-theme .modal-box select,
+    html.dark-theme .modal-box input,
+    html.dark-theme .modal-box textarea {
+      background: #141414 !important;
+      border-color: #262626 !important;
+      color: #ffffff !important;
+    }
+    [data-theme="dark"] #ai-triage-preview,
+    html.dark-theme #ai-triage-preview {
+      background: rgba(13, 148, 136, 0.12) !important;
+      border-color: rgba(13, 148, 136, 0.35) !important;
+    }
+    [data-theme="dark"] #ai-preview-text,
+    html.dark-theme #ai-preview-text {
+      color: #2dd4bf !important;
+    }
+    [data-theme="dark"] .priority-critical,
+    html.dark-theme .priority-critical { background: rgba(239, 68, 68, 0.15) !important; color: #fca5a5 !important; border-color: rgba(239, 68, 68, 0.3) !important; }
+    [data-theme="dark"] .priority-high,
+    html.dark-theme .priority-high { background: rgba(249, 115, 22, 0.15) !important; color: #fdba74 !important; border-color: rgba(249, 115, 22, 0.3) !important; }
+    [data-theme="dark"] .priority-medium,
+    html.dark-theme .priority-medium { background: rgba(234, 179, 8, 0.15) !important; color: #fde047 !important; border-color: rgba(234, 179, 8, 0.3) !important; }
+    [data-theme="dark"] .priority-low,
+    html.dark-theme .priority-low { background: rgba(34, 197, 94, 0.15) !important; color: #86efac !important; border-color: rgba(34, 197, 94, 0.3) !important; }
   </style>
 </head>
 <body class="protected-page">

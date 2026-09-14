@@ -364,8 +364,8 @@
       width: 48px;
       height: 54px;
       border-radius: 14px;
-      background: #ffffff;
-      border: 2px solid #e2e8f0;
+      background: var(--bg-surface, #ffffff);
+      border: 2px solid var(--border-color, #e2e8f0);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -386,17 +386,38 @@
 
     .pin-box.active {
       border: 2px solid #0d9488 !important;
-      background: #ffffff !important;
+      background: var(--bg-surface, #ffffff) !important;
       box-shadow: none !important;
       transform: translateY(-2px) !important;
     }
 
     .pin-box.filled {
       border: 2px solid #0d9488 !important;
-      background: #ffffff !important;
+      background: var(--bg-surface, #ffffff) !important;
       color: #0d9488 !important;
       box-shadow: none !important;
       animation: mpinDigitPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    [data-theme="dark"] .pin-box,
+    html.dark-theme .pin-box {
+      background: #080808 !important;
+      border-color: #222222 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .pin-box.active,
+    html.dark-theme .pin-box.active {
+      background: #0c0c0c !important;
+      border-color: #0d9488 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .pin-box.filled,
+    html.dark-theme .pin-box.filled {
+      background: #0c0c0c !important;
+      border-color: #0d9488 !important;
+      color: #2dd4bf !important;
     }
 
     @keyframes mpinDigitPop {

@@ -2088,6 +2088,19 @@ body:not(.admin-portal-body) .page-inner {
 .badge-pending { background: rgba(217, 119, 6, 0.1); color: #d97706; }
 .badge-progress { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
 .badge-resolved { background: rgba(5, 150, 105, 0.1); color: #059669; }
+.badge-assigned { background: #e0e7ff; color: #3730a3; }
+
+[data-theme="dark"] .badge-pending,
+html.dark-theme .badge-pending { background: rgba(245, 158, 11, 0.18) !important; color: #fbbf24 !important; }
+
+[data-theme="dark"] .badge-progress,
+html.dark-theme .badge-progress { background: rgba(59, 130, 246, 0.18) !important; color: #93c5fd !important; }
+
+[data-theme="dark"] .badge-resolved,
+html.dark-theme .badge-resolved { background: rgba(16, 185, 129, 0.18) !important; color: #34d399 !important; }
+
+[data-theme="dark"] .badge-assigned,
+html.dark-theme .badge-assigned { background: rgba(99, 102, 241, 0.18) !important; color: #a5b4fc !important; }
 
 /* City Announcements List */
 .announcements-list {
@@ -5390,6 +5403,19 @@ body.dark-theme .universal-mobile-back-btn {
   color: #ffffff !important;
 }
 
+[data-theme="dark"] .universal-mobile-back-btn:hover,
+body.dark-theme .universal-mobile-back-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .universal-mobile-back-btn:active,
+body.dark-theme .universal-mobile-back-btn:active {
+  background: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
 [data-theme="dark"] .universal-mobile-back-btn i,
 body.dark-theme .universal-mobile-back-btn i,
 [data-theme="dark"] .universal-mobile-back-btn svg,
@@ -5545,10 +5571,33 @@ body.dark-theme .universal-mobile-back-btn svg {
 }
 
 [data-theme="dark"] .universal-desktop-back-btn,
-body.dark-theme .universal-desktop-back-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+body.dark-theme .universal-desktop-back-btn,
+html.dark-theme .universal-desktop-back-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .universal-desktop-back-btn:hover,
+body.dark-theme .universal-desktop-back-btn:hover,
+html.dark-theme .universal-desktop-back-btn:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .universal-desktop-back-btn:active,
+body.dark-theme .universal-desktop-back-btn:active,
+html.dark-theme .universal-desktop-back-btn:active {
+  background: rgba(255, 255, 255, 0.24) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .universal-desktop-back-btn i,
+body.dark-theme .universal-desktop-back-btn i,
+html.dark-theme .universal-desktop-back-btn i {
+  color: #ffffff !important;
 }
 
 @media (max-width: 1023px) {
@@ -7527,13 +7576,789 @@ html.dark-theme .nearby-cards-grid .service-card:hover {
   border-color: #0d9488 !important;
 }
 
-[data-theme="dark"] .power-location-switch-btn,
-[data-theme="dark"] .weather-location-switch-btn,
-html.dark-theme .power-location-switch-btn,
-html.dark-theme .weather-location-switch-btn {
-  background-color: #0a0a0a !important;
+/* ==========================================================================
+   POWER UPDATES COMPLETE DARK MODE SYSTEM
+   ========================================================================== */
+
+/* Hero Banner & Header Actions */
+[data-theme="dark"] .power-hero-banner,
+html.dark-theme .power-hero-banner {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .power-hero-title-group h1,
+html.dark-theme .power-hero-title-group h1 {
   color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-hero-title-group p,
+html.dark-theme .power-hero-title-group p {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .btn-official-source,
+html.dark-theme .btn-official-source {
+  background: #0e0e0e !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-official-source:hover,
+html.dark-theme .btn-official-source:hover {
+  background: #171717 !important;
+  border-color: #f59e0b !important;
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .btn-refresh-power,
+html.dark-theme .btn-refresh-power {
+  background: #0e0e0e !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-refresh-power:hover,
+html.dark-theme .btn-refresh-power:hover {
+  background: #171717 !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
+}
+
+/* Citizen Location Detection Banner */
+[data-theme="dark"] .power-location-banner,
+html.dark-theme .power-location-banner {
+  background: rgba(13, 148, 136, 0.12) !important;
+  border-color: rgba(13, 148, 136, 0.35) !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .power-location-banner-content strong,
+html.dark-theme .power-location-banner-content strong {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-location-switch-btn,
+html.dark-theme .power-location-switch-btn {
+  background-color: #0e0e0e !important;
+  color: #2dd4bf !important;
+  border-color: rgba(13, 148, 136, 0.45) !important;
+}
+
+[data-theme="dark"] .power-location-switch-btn:hover,
+html.dark-theme .power-location-switch-btn:hover {
+  background-color: #0d9488 !important;
+  color: #ffffff !important;
+  border-color: #0d9488 !important;
+}
+
+/* Reassuring No-Outages Local District Card */
+[data-theme="dark"] .power-district-clear-card,
+html.dark-theme .power-district-clear-card {
+  background: #0a0a0a !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .power-district-clear-card h3,
+html.dark-theme .power-district-clear-card h3 {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-district-clear-card p,
+html.dark-theme .power-district-clear-card p {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-district-clear-actions .btn,
+html.dark-theme .power-district-clear-actions .btn {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-district-clear-actions .btn:hover,
+html.dark-theme .power-district-clear-actions .btn:hover {
+  background: #1f1f1f !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
+}
+
+/* Filter Card & Controls */
+[data-theme="dark"] .power-filter-card,
+html.dark-theme .power-filter-card {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .power-tab-btn,
+html.dark-theme .power-tab-btn {
+  background: #0e0e0e !important;
   border-color: #222222 !important;
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-tab-btn:hover,
+html.dark-theme .power-tab-btn:hover {
+  background: #171717 !important;
+  color: #ffffff !important;
+  border-color: #333333 !important;
+}
+
+[data-theme="dark"] .power-tab-btn.active,
+html.dark-theme .power-tab-btn.active {
+  background: #0d9488 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35) !important;
+}
+
+[data-theme="dark"] .power-search-wrap input,
+html.dark-theme .power-search-wrap input {
+  background: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-search-wrap input:focus,
+html.dark-theme .power-search-wrap input:focus {
+  background: #0c0c0c !important;
+  border-color: #0d9488 !important;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25) !important;
+}
+
+[data-theme="dark"] .power-search-wrap i,
+html.dark-theme .power-search-wrap i {
+  color: #737373 !important;
+}
+
+[data-theme="dark"] .power-select-filter,
+html.dark-theme .power-select-filter {
+  background: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-select-filter:focus,
+html.dark-theme .power-select-filter:focus {
+  border-color: #0d9488 !important;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25) !important;
+}
+
+[data-theme="dark"] .power-select-filter option,
+html.dark-theme .power-select-filter option {
+  background: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-date-input,
+html.dark-theme .power-date-input {
+  background: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+  color-scheme: dark !important;
+}
+
+[data-theme="dark"] .power-date-input:focus,
+html.dark-theme .power-date-input:focus {
+  border-color: #0d9488 !important;
+}
+
+/* Power Outage Cards */
+[data-theme="dark"] .power-card,
+html.dark-theme .power-card {
+  background: #0a0a0a !important;
+  background-color: #0a0a0a !important;
+  border: 1px solid #1f1f1f !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .power-card:hover,
+html.dark-theme .power-card:hover {
+  border-color: #333333 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Highlight for Citizen Detected Location Card */
+[data-theme="dark"] .power-card.user-location-highlight,
+html.dark-theme .power-card.user-location-highlight {
+  background: #0a0a0a !important;
+  background-color: #0a0a0a !important;
+  border: 1.5px solid rgba(13, 148, 136, 0.6) !important;
+  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.25), 0 6px 22px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="dark"] .power-card.user-location-highlight:hover,
+html.dark-theme .power-card.user-location-highlight:hover {
+  border-color: rgba(20, 184, 166, 0.9) !important;
+  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.4), 0 8px 26px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Power Card Child Elements */
+[data-theme="dark"] .power-district-badge,
+html.dark-theme .power-district-badge {
+  background: #141414 !important;
+  color: #e5e5e5 !important;
+  border: 1px solid #262626 !important;
+}
+
+[data-theme="dark"] .power-district-badge i,
+html.dark-theme .power-district-badge i {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-division-badge,
+html.dark-theme .power-division-badge {
+  background: #121212 !important;
+  color: #d4d4d4 !important;
+  border: 1px solid #222222 !important;
+}
+
+[data-theme="dark"] .power-area-pill,
+html.dark-theme .power-area-pill {
+  background: rgba(13, 148, 136, 0.18) !important;
+  color: #2dd4bf !important;
+  border: 1px solid rgba(13, 148, 136, 0.4) !important;
+}
+
+/* Status Badges with High-Contrast AMOLED Aesthetics */
+[data-theme="dark"] .status-scheduled,
+html.dark-theme .status-scheduled {
+  background: #141414 !important;
+  color: #d4d4d4 !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+[data-theme="dark"] .status-dot-scheduled,
+html.dark-theme .status-dot-scheduled {
+  background: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .status-ongoing,
+html.dark-theme .status-ongoing {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+[data-theme="dark"] .status-ongoing-dot,
+html.dark-theme .status-ongoing-dot {
+  background: #f59e0b !important;
+}
+
+[data-theme="dark"] .status-restored,
+html.dark-theme .status-restored {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(34, 197, 94, 0.4) !important;
+}
+
+[data-theme="dark"] .status-dot-restored,
+html.dark-theme .status-dot-restored {
+  background: #22c55e !important;
+}
+
+[data-theme="dark"] .status-cancelled,
+html.dark-theme .status-cancelled {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+[data-theme="dark"] .status-dot-cancelled,
+html.dark-theme .status-dot-cancelled {
+  background: #ef4444 !important;
+}
+
+/* Card Titles, Time Windows & Areas */
+[data-theme="dark"] .power-substation-title,
+html.dark-theme .power-substation-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-time-window,
+html.dark-theme .power-time-window {
+  background: #111111 !important;
+  border: 1px solid #222222 !important;
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .power-time-window i,
+html.dark-theme .power-time-window i {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-areas-label,
+html.dark-theme .power-areas-label {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-area-tag,
+html.dark-theme .power-area-tag {
+  background: #121212 !important;
+  border: 1px solid #222222 !important;
+  color: #d4d4d4 !important;
+}
+
+/* Card Footer, Source & Share */
+[data-theme="dark"] .power-card-footer,
+html.dark-theme .power-card-footer {
+  border-top: 1px solid #1a1a1a !important;
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-source-tag,
+html.dark-theme .power-source-tag {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-source-tag i,
+html.dark-theme .power-source-tag i {
+  color: #737373 !important;
+}
+
+[data-theme="dark"] .power-btn-share,
+html.dark-theme .power-btn-share {
+  color: #d4d4d4 !important;
+}
+
+[data-theme="dark"] .power-btn-share:hover,
+html.dark-theme .power-btn-share:hover {
+  background: #1c1c1c !important;
+  color: #ffffff !important;
+}
+
+/* Center State Boxes & Footnotes */
+[data-theme="dark"] .power-state-box,
+html.dark-theme .power-state-box {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .power-state-box h3,
+html.dark-theme .power-state-box h3 {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .power-state-box p,
+html.dark-theme .power-state-box p {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .power-disclaimer-footnote,
+html.dark-theme .power-disclaimer-footnote {
+  color: #737373 !important;
+  border-top-color: #1f1f1f !important;
+}
+
+/* Loading Card */
+[data-theme="dark"] .power-loading-card,
+html.dark-theme .power-loading-card {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+}
+
+/* ==========================================================================
+   WEATHER ALERTS COMPLETE DARK MODE SYSTEM
+   ========================================================================== */
+[data-theme="dark"] .weather-location-banner,
+html.dark-theme .weather-location-banner {
+  background: rgba(13, 148, 136, 0.12) !important;
+  border-color: rgba(13, 148, 136, 0.35) !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .weather-location-banner-content strong,
+html.dark-theme .weather-location-banner-content strong {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .weather-location-switch-btn,
+html.dark-theme .weather-location-switch-btn {
+  background-color: #0e0e0e !important;
+  color: #2dd4bf !important;
+  border-color: rgba(13, 148, 136, 0.45) !important;
+}
+
+[data-theme="dark"] .weather-location-switch-btn:hover,
+html.dark-theme .weather-location-switch-btn:hover {
+  background-color: #0d9488 !important;
+  color: #ffffff !important;
+  border-color: #0d9488 !important;
+}
+
+[data-theme="dark"] .weather-stale-pill,
+html.dark-theme .weather-stale-pill {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #d4d4d4 !important;
+}
+
+[data-theme="dark"] .weather-tab-btn,
+html.dark-theme .weather-tab-btn {
+  background: #0e0e0e !important;
+  border-color: #222222 !important;
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .weather-tab-btn:hover,
+html.dark-theme .weather-tab-btn:hover {
+  background: #171717 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .weather-tab-btn.active,
+html.dark-theme .weather-tab-btn.active {
+  background: #0d9488 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .weather-search-wrap input,
+html.dark-theme .weather-search-wrap input {
+  background: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .weather-search-wrap input:focus,
+html.dark-theme .weather-search-wrap input:focus {
+  background: #0c0c0c !important;
+  border-color: #0d9488 !important;
+}
+
+[data-theme="dark"] .weather-select-filter,
+html.dark-theme .weather-select-filter {
+  background: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .weather-select-filter:focus,
+html.dark-theme .weather-select-filter:focus {
+  border-color: #0d9488 !important;
+}
+
+[data-theme="dark"] .weather-select-filter option,
+html.dark-theme .weather-select-filter option {
+  background: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .current-condition-text,
+html.dark-theme .current-condition-text {
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .forecast-day-tag,
+html.dark-theme .forecast-day-tag {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .forecast-condition-row i,
+html.dark-theme .forecast-condition-row i {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .forecast-condition-text,
+html.dark-theme .forecast-condition-text {
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .forecast-temp-max,
+html.dark-theme .forecast-temp-max {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .forecast-details-list,
+html.dark-theme .forecast-details-list {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .forecast-detail-val,
+html.dark-theme .forecast-detail-val {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .district-card-name,
+html.dark-theme .district-card-name {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .district-card-temp,
+html.dark-theme .district-card-temp {
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   URGENT ACTION COMPLETE DARK MODE SYSTEM
+   ========================================================================== */
+[data-theme="dark"] .urgent-nav-bar,
+html.dark-theme .urgent-nav-bar {
+  background: #050505 !important;
+  border-bottom: 1px solid #1a1a1a !important;
+}
+
+[data-theme="dark"] .urgent-back-button,
+html.dark-theme .urgent-back-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .urgent-back-button:hover,
+html.dark-theme .urgent-back-button:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+[data-theme="dark"] .urgent-page-sub,
+html.dark-theme .urgent-page-sub {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .urgent-alert-notice,
+html.dark-theme .urgent-alert-notice {
+  background: #111111 !important;
+  border-left-color: #dc2626 !important;
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .loc-icon-indicator,
+html.dark-theme .loc-icon-indicator {
+  background: #141414 !important;
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .loc-val,
+html.dark-theme .loc-val {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-loc-action,
+html.dark-theme .btn-loc-action {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-loc-action:hover,
+html.dark-theme .btn-loc-action:hover {
+  background: #1f1f1f !important;
+  border-color: #333333 !important;
+}
+
+[data-theme="dark"] .select-district-fallback,
+html.dark-theme .select-district-fallback {
+  background: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+  color-scheme: dark !important;
+}
+
+[data-theme="dark"] .situations-title,
+html.dark-theme .situations-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .situation-card,
+html.dark-theme .situation-card {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .situation-card:hover,
+html.dark-theme .situation-card:hover {
+  background: #121212 !important;
+  border-color: #0d9488 !important;
+}
+
+[data-theme="dark"] .situation-icon,
+html.dark-theme .situation-icon {
+  background: #141414 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .nearby-section-title,
+html.dark-theme .nearby-section-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .badge-facility-type,
+html.dark-theme .nearby-cards-grid .badge-facility-type {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #d4d4d4 !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .badge-emergency-status.status-unverified,
+html.dark-theme .nearby-cards-grid .badge-emergency-status.status-unverified {
+  background: #141414 !important;
+  color: #a3a3a3 !important;
+  border-color: #262626 !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .service-name,
+html.dark-theme .nearby-cards-grid .service-name {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .service-address,
+html.dark-theme .nearby-cards-grid .service-address {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .service-actions-row,
+html.dark-theme .nearby-cards-grid .service-actions-row {
+  border-top-color: #1f1f1f !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .btn-service-directions,
+html.dark-theme .nearby-cards-grid .btn-service-directions {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .btn-service-directions:hover,
+html.dark-theme .nearby-cards-grid .btn-service-directions:hover {
+  background: #1f1f1f !important;
+  border-color: #333333 !important;
+}
+
+[data-theme="dark"] .btn-view-more,
+html.dark-theme .btn-view-more {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-view-more:hover,
+html.dark-theme .btn-view-more:hover {
+  background: #1f1f1f !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .service-empty-title,
+html.dark-theme .service-empty-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .general-emergency-title,
+html.dark-theme .general-emergency-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .general-number-card,
+html.dark-theme .general-number-card {
+  background: #111111 !important;
+  border-color: #222222 !important;
+}
+
+[data-theme="dark"] .general-number-card:hover,
+html.dark-theme .general-number-card:hover {
+  background: #171717 !important;
+  border-color: #333333 !important;
+}
+
+[data-theme="dark"] .general-card-info h4,
+html.dark-theme .general-card-info h4 {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .general-dial-badge.secondary-badge,
+html.dark-theme .general-dial-badge.secondary-badge {
+  background: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .routine-notice-banner,
+html.dark-theme .routine-notice-banner {
+  background: #0e0e0e !important;
+  border-color: #222222 !important;
+}
+
+[data-theme="dark"] .routine-notice-text h4,
+html.dark-theme .routine-notice-text h4 {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .routine-notice-text p,
+html.dark-theme .routine-notice-text p {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .btn-routine-report,
+html.dark-theme .btn-routine-report {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   SHARED UI PILLS, CHIPS, SKELETONS, MODALS & REUSABLE CONTROLS
+   ========================================================================== */
+[data-theme="dark"] .pulse-badge-soon,
+html.dark-theme .pulse-badge-soon {
+  background: #171717 !important;
+  color: #a3a3a3 !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+[data-theme="dark"] .status-closed,
+html.dark-theme .status-closed {
+  background: #171717 !important;
+  color: #a3a3a3 !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+[data-theme="dark"] .kpi-progress-bar-wrap,
+html.dark-theme .kpi-progress-bar-wrap {
+  background: #1f1f1f !important;
+}
+
+[data-theme="dark"] .cc-modal-callout,
+html.dark-theme .cc-modal-callout {
+  background: #0e0e0e !important;
+  border-color: #1f1f1f !important;
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .error-retry-card .btn-retry,
+html.dark-theme .error-retry-card .btn-retry {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .error-retry-card .btn-retry:hover,
+html.dark-theme .error-retry-card .btn-retry:hover {
+  background: #1f1f1f !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .pin-box,
+html.dark-theme .pin-box {
+  background-color: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .pin-box.active,
+html.dark-theme .pin-box.active {
+  background-color: #0c0c0c !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .pin-box.filled,
+html.dark-theme .pin-box.filled {
+  background-color: #0c0c0c !important;
+  border-color: #0d9488 !important;
+  color: #2dd4bf !important;
 }
 
 /* Modal Close Buttons & Hero Cards in Dark Mode */

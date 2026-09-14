@@ -1252,3 +1252,63 @@ html.dark-theme .la-contact-card {
   color: #ffffff !important;
 }
 
+[data-theme="dark"] .la-authority-card-content h3,
+html.dark-theme .la-authority-card-content h3 {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-authority-card-content p,
+html.dark-theme .la-authority-card-content p {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .la-select:disabled,
+html.dark-theme .la-select:disabled {
+  background-color: #0e0e0e !important;
+  border-color: #1f1f1f !important;
+  color: #555555 !important;
+}
+
+[data-theme="dark"] .la-badge,
+[data-theme="dark"] .la-badge-district,
+[data-theme="dark"] .la-badge-taluk,
+[data-theme="dark"] .la-badge-village,
+[data-theme="dark"] .la-badge-localbody,
+[data-theme="dark"] .la-dept-tag,
+[data-theme="dark"] .la-item-badge,
+html.dark-theme .la-badge,
+html.dark-theme .la-badge-district,
+html.dark-theme .la-badge-taluk,
+html.dark-theme .la-badge-village,
+html.dark-theme .la-badge-localbody,
+html.dark-theme .la-dept-tag,
+html.dark-theme .la-item-badge {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .la-card-icon,
+html.dark-theme .la-card-icon {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .la-fallback-banner,
+html.dark-theme .la-fallback-banner {
+  background: #0d1413 !important;
+  border-color: rgba(13, 148, 136, 0.35) !important;
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .la-contact-na,
+html.dark-theme .la-contact-na {
+  color: #737373 !important;
+}
+
+[data-theme="dark"] .la-support-line,
+html.dark-theme .la-support-line {
+  background: #1f1f1f !important;
+}
+

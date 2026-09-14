@@ -776,14 +776,14 @@
 
     /* Premium right-side form panel overrides */
     .auth-form-panel {
-      background: #F8FAFC;
+      background: var(--bg-app, #F8FAFC);
     }
 
     .auth-card {
-      background-color: #FFFFFF !important;
+      background-color: var(--bg-surface, #FFFFFF) !important;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
-      border: 1px solid #E2E8F0 !important;
+      border: 1px solid var(--border-color, #E2E8F0) !important;
       border-radius: 8px !important;
       padding: 3rem 2.5rem !important;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
@@ -791,8 +791,8 @@
 
     .auth-tabs {
       display: flex;
-      background-color: #F1F5F9 !important;
-      border: 1px solid #E2E8F0 !important;
+      background-color: var(--bg-hover, #F1F5F9) !important;
+      border: 1px solid var(--border-color, #E2E8F0) !important;
       border-radius: 6px !important;
       padding: 4px !important;
       margin-bottom: 2.5rem !important;
@@ -806,7 +806,7 @@
       font-size: 0.9rem !important;
       border-radius: 4px !important;
       border-bottom: none !important;
-      color: #4B5563 !important;
+      color: var(--text-muted, #4B5563) !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
@@ -817,9 +817,9 @@
     }
 
     .form-input {
-      background-color: #FFFFFF !important;
-      border: 1px solid #CBD5E1 !important;
-      color: #1F2937 !important;
+      background-color: var(--bg-surface, #FFFFFF) !important;
+      border: 1px solid var(--border-color, #CBD5E1) !important;
+      color: var(--text-main, #1F2937) !important;
       padding: 0.85rem 1.1rem !important;
       border-radius: 4px !important;
       font-size: 0.95rem !important;
@@ -827,13 +827,13 @@
     }
 
     .form-input::placeholder {
-      color: #94A3B8 !important;
+      color: var(--text-muted, #94A3B8) !important;
     }
 
     .form-input:focus {
       border-color: var(--primary) !important;
       box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
-      background-color: #FFFFFF !important;
+      background-color: var(--bg-surface, #FFFFFF) !important;
       padding-left: 1.4rem !important;
     }
 
@@ -886,35 +886,35 @@
     }
 
     .oauth-divider::before, .oauth-divider::after {
-      border-bottom: 1px solid #E2E8F0 !important;
+      border-bottom: 1px solid var(--border-color, #E2E8F0) !important;
     }
 
     .btn-google {
-      background-color: #FFFFFF !important;
-      border: 1px solid #E2E8F0 !important;
-      color: #4B5563 !important;
+      background-color: var(--bg-surface, #FFFFFF) !important;
+      border: 1px solid var(--border-color, #E2E8F0) !important;
+      color: var(--text-main, #4B5563) !important;
       border-radius: 4px !important;
       padding: 0.8rem 1.2rem !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .btn-google:hover {
-      background-color: #F8FAFC !important;
-      border-color: #CBD5E1 !important;
+      background-color: var(--bg-hover, #F8FAFC) !important;
+      border-color: var(--border-color-hover, #CBD5E1) !important;
       transform: translateY(-2px) !important;
       box-shadow: none !important;
     }
 
     .authority-card-container {
-      background-color: #F8FAFC !important;
-      border: 1px solid #E2E8F0 !important;
+      background-color: var(--bg-hover, #F8FAFC) !important;
+      border: 1px solid var(--border-color, #E2E8F0) !important;
       border-radius: 6px !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .authority-card-container:hover {
-      background-color: #F1F5F9 !important;
-      border-color: #CBD5E1 !important;
+      background-color: var(--bg-hover-subtle, #F1F5F9) !important;
+      border-color: var(--border-color-hover, #CBD5E1) !important;
       transform: translateY(-2px) !important;
     }
 
@@ -924,6 +924,98 @@
 
     .authority-card-link {
       color: var(--primary) !important;
+    }
+
+    /* ==========================================================================
+       DARK MODE EXPLICIT OVERRIDES FOR AUTH PORTAL
+       ========================================================================== */
+    [data-theme="dark"] .auth-form-panel,
+    html.dark-theme .auth-form-panel {
+      background: #000000 !important;
+    }
+
+    [data-theme="dark"] .auth-card,
+    html.dark-theme .auth-card {
+      background-color: #0a0a0a !important;
+      border-color: #1f1f1f !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    [data-theme="dark"] .auth-tabs,
+    html.dark-theme .auth-tabs {
+      background-color: #121212 !important;
+      border-color: #1f1f1f !important;
+    }
+
+    [data-theme="dark"] .auth-tab,
+    html.dark-theme .auth-tab {
+      color: #a3a3a3 !important;
+    }
+
+    [data-theme="dark"] .auth-tab.active,
+    html.dark-theme .auth-tab.active {
+      background-color: var(--primary, #0d9488) !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .form-input,
+    html.dark-theme .form-input {
+      background-color: #121212 !important;
+      border-color: #262626 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .form-input::placeholder,
+    html.dark-theme .form-input::placeholder {
+      color: #737373 !important;
+    }
+
+    [data-theme="dark"] .form-input:focus,
+    html.dark-theme .form-input:focus {
+      border-color: var(--primary, #0d9488) !important;
+      background-color: #161616 !important;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.25) !important;
+    }
+
+    [data-theme="dark"] .btn-google,
+    html.dark-theme .btn-google {
+      background-color: #121212 !important;
+      border-color: #262626 !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .btn-google:hover,
+    html.dark-theme .btn-google:hover {
+      background-color: #1a1a1a !important;
+      border-color: #333333 !important;
+    }
+
+    [data-theme="dark"] .authority-card-container,
+    html.dark-theme .authority-card-container {
+      background-color: #121212 !important;
+      border-color: #1f1f1f !important;
+    }
+
+    [data-theme="dark"] .authority-card-container:hover,
+    html.dark-theme .authority-card-container:hover {
+      background-color: #1a1a1a !important;
+      border-color: #262626 !important;
+    }
+
+    [data-theme="dark"] .form-label,
+    [data-theme="dark"] .auth-header h1,
+    [data-theme="dark"] .authority-card-title,
+    html.dark-theme .form-label,
+    html.dark-theme .auth-header h1,
+    html.dark-theme .authority-card-title {
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .auth-header p,
+    [data-theme="dark"] .authority-card-desc,
+    html.dark-theme .auth-header p,
+    html.dark-theme .authority-card-desc {
+      color: #a3a3a3 !important;
     }
 
     /* Page Entrance Animations */

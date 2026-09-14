@@ -683,13 +683,13 @@
   function getHeroSkeletonHtml() {
     return `
       <div class="current-weather-panel" style="opacity: 0.6; pointer-events: none;">
-        <div style="height: 24px; background: #e2e8f0; border-radius: 6px; width: 30%; margin-bottom: 0.75rem;"></div>
-        <div style="height: 44px; background: #e2e8f0; border-radius: 6px; width: 45%; margin-bottom: 1.25rem;"></div>
+        <div style="height: 24px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 30%; margin-bottom: 0.75rem;"></div>
+        <div style="height: 44px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 45%; margin-bottom: 1.25rem;"></div>
         <div class="current-metrics-row">
-          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
-          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
-          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
-          <div style="height: 52px; background: #f1f5f9; border-radius: 8px;"></div>
+          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
+          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
+          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
+          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
         </div>
       </div>
     `;
@@ -698,10 +698,10 @@
   function getForecastSkeletonHtml() {
     return Array(5).fill(0).map(() => `
       <div class="forecast-card" style="opacity: 0.6; pointer-events: none;">
-        <div style="height: 18px; background: #e2e8f0; border-radius: 6px; width: 45%; margin-bottom: 0.85rem;"></div>
-        <div style="height: 24px; background: #e2e8f0; border-radius: 6px; width: 65%; margin-bottom: 0.85rem;"></div>
-        <div style="height: 32px; background: #f1f5f9; border-radius: 6px; width: 100%; margin-bottom: 0.85rem;"></div>
-        <div style="height: 16px; background: #f1f5f9; border-radius: 4px; width: 40%;"></div>
+        <div style="height: 18px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 45%; margin-bottom: 0.85rem;"></div>
+        <div style="height: 24px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 65%; margin-bottom: 0.85rem;"></div>
+        <div style="height: 32px; background: var(--bg-hover, #f1f5f9); border-radius: 6px; width: 100%; margin-bottom: 0.85rem;"></div>
+        <div style="height: 16px; background: var(--bg-hover, #f1f5f9); border-radius: 4px; width: 40%;"></div>
       </div>
     `).join('');
   }
