@@ -13,9 +13,10 @@
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=3.1.0"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="View your CrowdCity AI profile, check your civic engagement points, watchdog rank, and see your unlocked achievement medals.">
+  <meta name="description" content="View your CrowdCity AI profile, track your reported civic complaints, and monitor community resolution progress.">
   <title>Profile - CrowdCity AI</title>
   <!-- Premium Fonts - Inter & Noto Sans Tamil -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -90,55 +91,22 @@
       border: 4px solid var(--border-color);
       box-shadow: var(--shadow-sm);
     }
-
-    .badge-item-card {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      padding: 1.25rem;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      background-color: var(--card-bg);
-      position: relative;
-    }
-
-    .badge-item-card.locked {
-      opacity: 0.55;
-      background-color: var(--bg-app);
-    }
-
-    .badge-item-card.unlocked {
-      border-color: var(--primary-light-alpha);
-      background: linear-gradient(135deg, var(--card-bg) 0%, var(--primary-light-alpha) 100%);
-    }
-
-    .badge-item-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: var(--radius-round);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      flex-shrink: 0;
-      background-color: var(--bg-app);
-      color: var(--slate-400);
-      border: 1px solid var(--card-border);
-    }
-
-    .badge-item-card.unlocked .badge-item-icon {
-      background-color: var(--primary-light-alpha);
-      color: var(--primary);
-      border-color: var(--primary-light-alpha);
-    }
   </style>
 </head>
 <body>
 
   <script>
     (function() {
-      document.documentElement.classList.add('light-theme');
-      document.documentElement.classList.remove('dark-theme');
+      try {
+        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+        var theme = (t === 'dark') ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        var isDark = (theme === 'dark');
+        document.documentElement.classList.toggle('dark-theme', isDark);
+        document.documentElement.classList.toggle('theme-dark', isDark);
+        document.documentElement.classList.toggle('light-theme', !isDark);
+        document.documentElement.classList.toggle('theme-light', !isDark);
+      } catch (e) {}
     })();
   </script>
 
@@ -224,15 +192,6 @@
             <li class="profile-meta-item">
               <span id="profile-joined-display"></span>
             </li>
-            <li class="profile-meta-item">
-              <span><span data-i18n="points">Points</span>: <strong id="profile-points-display" style="color: var(--primary);">0 pts</strong></span>
-            </li>
-            <li class="profile-meta-item">
-              <span><span data-i18n="rank">Rank</span>: <strong id="profile-level-display">-</strong></span>
-            </li>
-            <li class="profile-meta-item">
-              <span><span data-i18n="streak">Streak</span>: <strong id="profile-streak-display">0-day streak</strong></span>
-            </li>
           </ul>
         </div>
       </aside>
@@ -244,9 +203,6 @@
           <button class="profile-tab-btn active" id="tab-overview-btn" onclick="switchTab('overview')" data-i18n="overview">
             Overview
           </button>
-          <button class="profile-tab-btn" id="tab-achievements-btn" onclick="switchTab('achievements')" data-i18n="achievements">
-            Achievements
-          </button>
           <button class="profile-tab-btn" id="tab-activity-btn" onclick="switchTab('activity')" data-i18n="activity">
             Activity
           </button>
@@ -255,16 +211,8 @@
         <!-- Tab Panel 1: Overview -->
         <div class="profile-tab-panel active" id="panel-overview">
           
-          <!-- Stats Cards Row -->
+          <!-- Stats Cards Row: Authentic Civic Metrics -->
           <div class="profile-stats-grid">
-            <div class="profile-stat-card">
-              <span class="profile-stat-val" id="stats-total-points">0</span>
-              <span class="profile-stat-lbl" data-i18n="total_points">Total Points</span>
-            </div>
-            <div class="profile-stat-card">
-              <span class="profile-stat-val" id="stats-streak-days" style="color: #f97316;">1</span>
-              <span class="profile-stat-lbl" data-i18n="active_streak">Active Streak</span>
-            </div>
             <div class="profile-stat-card">
               <span class="profile-stat-val" id="stats-total-reports">0</span>
               <span class="profile-stat-lbl" data-i18n="reports_filed">Reports Filed</span>
@@ -273,19 +221,13 @@
               <span class="profile-stat-val" id="stats-resolved-reports" style="color: #10b981;">0</span>
               <span class="profile-stat-lbl" data-i18n="resolved_cases">Resolved Cases</span>
             </div>
-          </div>
-          
-          <!-- Progression & Rank Progress -->
-          <div class="xp-progress-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
-              <span style="font-weight: 700; color: var(--text-main);" data-i18n="rank_progression">Rank Progression</span>
-              <span id="stats-xp-text" style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">0 / 50 XP</span>
+            <div class="profile-stat-card">
+              <span class="profile-stat-val" id="stats-active-cases" style="color: #6366f1;">0</span>
+              <span class="profile-stat-lbl" data-i18n="in_progress_reports">In Progress</span>
             </div>
-            <div style="width: 100%; height: 8px; background-color: var(--border-color); border-radius: var(--radius-round); overflow: hidden; position: relative;">
-              <div id="stats-xp-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--btn-primary-bg) 0%, #2dd4bf 100%); transition: width 0.5s ease; border-radius: var(--radius-round);"></div>
-            </div>
-            <div id="stats-next-rank-tip" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
-              Earn points to rank up to Local Watchdog!
+            <div class="profile-stat-card">
+              <span class="profile-stat-val" id="stats-resolution-rate-badge" style="color: var(--primary);">0%</span>
+              <span class="profile-stat-lbl" data-i18n="stat_resolution_rate">Resolution Rate</span>
             </div>
           </div>
           
@@ -306,21 +248,7 @@
           </div>
         </div>
         
-        <!-- Tab Panel 2: Achievements -->
-        <div class="profile-tab-panel" id="panel-achievements">
-          <div class="contrib-card">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0; color: var(--text-main);" data-i18n="unlocked_medal_chest">
-              Unlocked Medal Chest
-            </h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Earn points by filing verified reports, adding details, or participating in upvotes to unlock achievements. Click on unlocked medals for a celebration!</p>
-            
-            <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;" id="profile-badges-list">
-              <!-- Badges dynamically rendered here -->
-            </div>
-          </div>
-        </div>
-        
-        <!-- Tab Panel 3: Activity Timeline -->
+        <!-- Tab Panel 2: Activity Timeline -->
         <div class="profile-tab-panel" id="panel-activity">
           <div class="contrib-card">
             <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 1.25rem 0; color: var(--text-main);" data-i18n="reporting_activity">
@@ -344,9 +272,6 @@
       <!-- Footer Removed -->
     </div>
   </div>
-
-  <!-- Confetti Canvas overlay -->
-  <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:99999;"></canvas>
 
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

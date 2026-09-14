@@ -79,7 +79,6 @@ async function request(endpoint, options = {}) {
   const isCacheablePublic = isGet && !options.auth && (
     endpoint.startsWith('/locations/') ||
     endpoint.startsWith('/tamilnadu-updates') ||
-    endpoint.startsWith('/gamification/badges') ||
     endpoint.startsWith('/config') ||
     Boolean(options.cacheTtlMs)
   );
@@ -382,15 +381,7 @@ const API = {
     });
   },
 
-  // 20. Get current user badges
-  getUserBadges: async () => {
-    return request('/gamification/badges', {
-      method: 'GET',
-      auth: true
-    });
-  },
-
-  // 21. Get advanced analytics data
+  // 20. Get advanced analytics data
   getAdvancedAnalytics: async () => {
     return request('/issues/analytics', {
       method: 'GET',

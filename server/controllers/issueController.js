@@ -1,6 +1,5 @@
 import { supabase, supabaseAdmin, getSupabaseClient } from '../config/supabase.js';
 import { createNotification } from './notificationController.js';
-import { awardPointsAndCheckBadges } from './gamificationController.js';
 import logger from '../config/logger.js';
 import { analyzeComplaint } from '../services/groqService.js';
 import { validateServiceArea } from '../services/serviceAreaService.js';
@@ -599,8 +598,6 @@ export const createIssue = async (req, res) => {
       });
     }
 
-    awardPointsAndCheckBadges(req.user.id, 10, 'report', req).catch(err => logger.error('Background gamification error:', err));
-
     // Send confirmation email (background)
     getUserEmail(req.user.id).then(email => {
       if (email) sendIssueCreatedEmail(email, req.user.user_metadata?.full_name || 'Citizen', issue);
@@ -641,7 +638,6 @@ export const upvoteIssue = async (req, res) => {
 
       if (deleteError) throw deleteError;
       
-      awardPointsAndCheckBadges(user_id, -2, 'upvote_retract', req).catch(err => logger.error('Background gamification error:', err));
       return res.status(200).json({ upvoted: false, message: 'Upvote removed' });
     } else {
       const { error: insertError } = await activeClient
@@ -650,7 +646,6 @@ export const upvoteIssue = async (req, res) => {
 
       if (insertError) throw insertError;
       
-      awardPointsAndCheckBadges(user_id, 2, 'upvote', req).catch(err => logger.error('Background gamification error:', err));
       return res.status(200).json({ upvoted: true, message: 'Upvote recorded' });
     }
   } catch (err) {
@@ -687,7 +682,6 @@ export const addComment = async (req, res) => {
 
     if (error) throw error;
 
-    awardPointsAndCheckBadges(user_id, 5, 'comment', req).catch(err => logger.error('Background gamification error:', err));
     return res.status(201).json(data);
   } catch (err) {
     logger.error('addComment Error: %O', err);
@@ -1062,17 +1056,11 @@ export const verifyIssue = async (req, res) => {
       logger.error('Failed to log verification status history: %O', historyError);
     }
 
-    // Award gamification points on verification
-    awardPointsAndCheckBadges(issue.reporter_id, 50, 'report_verified', req).catch(err => logger.error('Background gamification error:', err));
-    if (issue.assigned_to) {
-      awardPointsAndCheckBadges(issue.assigned_to, 20, 'resolve_complaint', req).catch(err => logger.error('Background gamification error:', err));
-    }
-
     // Send notifications
     await createNotification(
       issue.reporter_id,
       "Complaint Resolution Approved",
-      `You have successfully approved and verified the resolution of '${issue.title}'. +50 XP awarded!`,
+      `You have successfully approved and verified the resolution of '${issue.title}'.`,
       "status_change",
       id
     );
@@ -1081,7 +1069,7 @@ export const verifyIssue = async (req, res) => {
       await createNotification(
         issue.assigned_to,
         "Complaint Resolution Verified",
-        `The citizen reporter has verified and approved your resolution for '${issue.title}'. +20 XP awarded!`,
+        `The citizen reporter has verified and approved your resolution for '${issue.title}'.`,
         "status_change",
         id
       );
@@ -1828,7 +1816,6 @@ export const deleteComment = async (req, res) => {
 
     if (error) throw error;
 
-    awardPointsAndCheckBadges(existingComment.user_id, -5, 'comment_delete', req).catch(err => logger.error('Background gamification error:', err));
     return res.status(200).json({ message: 'Comment deleted successfully' });
   } catch (err) {
     logger.error('deleteComment Error: %O', err);
@@ -2772,13 +2759,6 @@ export const supportExistingIssue = async (req, res) => {
       });
     } catch (shErr) {
       logger.warn('status_history insert note: %s', shErr.message);
-    }
-
-    // 7. Award community points
-    try {
-      await awardPointsAndCheckBadges(citizen_id, 5, 'report', req);
-    } catch (badgeErr) {
-      logger.warn('awardPoints note: %s', badgeErr.message);
     }
 
     return res.status(200).json({

@@ -3160,15 +3160,6 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   color: #15803d;
 }
 
-.kpi-points-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 20px;
-  background: rgba(245, 158, 11, 0.12);
-  color: #b45309;
-}
-
 .kpi-progress-bar-wrap {
   width: 100%;
   height: 5px;
@@ -4014,43 +4005,6 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--text-muted);
-  }
-
-  /* Full screen sliding settings subpages */
-  .settings-card {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    z-index: 1210 !important;
-    background: var(--bg-surface) !important;
-    display: none !important;
-    flex-direction: column !important;
-    padding: 1.5rem !important;
-    height: 100vh !important;
-    width: 100vw !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-sizing: border-box !important;
-    overflow-y: auto !important;
-  }
-  .settings-card.open {
-    display: flex !important;
-  }
-  .subpage-back-btn {
-    align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: none;
-    border: none;
-    color: var(--primary);
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 1.5rem;
-    padding: 0.5rem 0;
   }
 
   /* Quick Actions Grid */
@@ -7060,4 +7014,268 @@ a,
     border-radius: 14px;
   }
 }
+
+/* ==========================================================================
+   Global Dark Mode Components & Utilities
+   ========================================================================== */
+[data-theme="dark"] .app-sidebar,
+html.dark-theme .app-sidebar {
+  background-color: var(--bg-sidebar) !important;
+  border-right-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .app-header-main,
+html.dark-theme .app-header-main {
+  background-color: var(--bg-header) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .app-sidebar-link,
+html.dark-theme .app-sidebar-link {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .app-sidebar-link:hover,
+[data-theme="dark"] .app-sidebar-link.active,
+html.dark-theme .app-sidebar-link:hover,
+html.dark-theme .app-sidebar-link.active {
+  background-color: rgba(13, 148, 136, 0.15) !important;
+  color: #14b8a6 !important;
+}
+
+/* Modals & Dialogs */
+[data-theme="dark"] .custom-modal-content,
+[data-theme="dark"] .modal-card,
+[data-theme="dark"] .cc-modal-dialog,
+html.dark-theme .custom-modal-content,
+html.dark-theme .modal-card,
+html.dark-theme .cc-modal-dialog {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] .custom-modal-header,
+[data-theme="dark"] .modal-header,
+html.dark-theme .custom-modal-header,
+html.dark-theme .modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .custom-modal-footer,
+[data-theme="dark"] .modal-footer,
+html.dark-theme .custom-modal-footer,
+html.dark-theme .modal-footer {
+  border-top-color: var(--border-color) !important;
+}
+
+/* Dropdowns & Popups */
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .custom-dropdown,
+[data-theme="dark"] #header-profile-dropdown,
+[data-theme="dark"] .profile-dropdown,
+[data-theme="dark"] .user-dropdown,
+html.dark-theme .dropdown-menu,
+html.dark-theme .custom-dropdown,
+html.dark-theme #header-profile-dropdown,
+html.dark-theme .profile-dropdown,
+html.dark-theme .user-dropdown {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .dropdown-item,
+[data-theme="dark"] .dropdown-link,
+html.dark-theme .dropdown-item,
+html.dark-theme .dropdown-link {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-link:hover,
+html.dark-theme .dropdown-item:hover,
+html.dark-theme .dropdown-link:hover {
+  background-color: var(--bg-surface-hover) !important;
+}
+
+/* Cards & Surface Containers */
+[data-theme="dark"] .settings-card,
+[data-theme="dark"] .profile-sidebar-card,
+[data-theme="dark"] .profile-stat-card,
+[data-theme="dark"] .contrib-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .quick-action-item,
+[data-theme="dark"] .notification-item,
+[data-theme="dark"] .stitch-hero,
+[data-theme="dark"] .stitch-hero-details-wrap,
+[data-theme="dark"] .timeline-content,
+html.dark-theme .settings-card,
+html.dark-theme .profile-sidebar-card,
+html.dark-theme .profile-stat-card,
+html.dark-theme .contrib-card,
+html.dark-theme .stat-card,
+html.dark-theme .kpi-card,
+html.dark-theme .quick-action-item,
+html.dark-theme .notification-item,
+html.dark-theme .stitch-hero,
+html.dark-theme .stitch-hero-details-wrap,
+html.dark-theme .timeline-content {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .settings-col,
+html.dark-theme .settings-col {
+  color: var(--text-main);
+}
+
+/* Tables */
+[data-theme="dark"] table,
+html.dark-theme table {
+  color: var(--text-main) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] th,
+html.dark-theme th {
+  background-color: var(--bg-surface-hover) !important;
+  color: var(--text-muted) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] td,
+html.dark-theme td {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] tr:hover td,
+html.dark-theme tr:hover td {
+  background-color: rgba(51, 65, 85, 0.4) !important;
+}
+
+/* Tabs */
+[data-theme="dark"] .profile-tab-btn,
+html.dark-theme .profile-tab-btn {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .profile-tab-btn.active,
+html.dark-theme .profile-tab-btn.active {
+  color: var(--primary) !important;
+  border-bottom-color: var(--primary) !important;
+}
+
+/* Forms & Inputs */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea,
+[data-theme="dark"] .form-select,
+html.dark-theme .form-control,
+html.dark-theme .form-input,
+html.dark-theme .form-textarea,
+html.dark-theme .form-select {
+  background-color: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .form-select option,
+html.dark-theme .form-select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* Leaflet Map in Dark Mode */
+[data-theme="dark"] .leaflet-popup-content-wrapper,
+[data-theme="dark"] .leaflet-popup-tip,
+html.dark-theme .leaflet-popup-content-wrapper,
+html.dark-theme .leaflet-popup-tip {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content,
+html.dark-theme .leaflet-popup-content {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .leaflet-container a.leaflet-popup-close-button,
+html.dark-theme .leaflet-container a.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .leaflet-bar a,
+html.dark-theme .leaflet-bar a {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .leaflet-bar a:hover,
+html.dark-theme .leaflet-bar a:hover {
+  background-color: var(--bg-surface-hover) !important;
+}
+
+/* Civic Specific Modules in Dark Mode */
+[data-theme="dark"] .urgent-header-compact,
+[data-theme="dark"] .urgent-location-bar,
+[data-theme="dark"] .nearby-section,
+[data-theme="dark"] .nearby-cards-grid .service-card,
+[data-theme="dark"] .service-empty-fallback,
+[data-theme="dark"] .general-emergency-section,
+[data-theme="dark"] .emergency-nav,
+[data-theme="dark"] .modal-box,
+[data-theme="dark"] .power-district-clear-card,
+[data-theme="dark"] .power-card,
+[data-theme="dark"] .weather-card,
+[data-theme="dark"] .pin-box,
+[data-theme="dark"] .area-item,
+[data-theme="dark"] .scorecard-item,
+[data-theme="dark"] .transport-card,
+html.dark-theme .urgent-header-compact,
+html.dark-theme .urgent-location-bar,
+html.dark-theme .nearby-section,
+html.dark-theme .nearby-cards-grid .service-card,
+html.dark-theme .service-empty-fallback,
+html.dark-theme .general-emergency-section,
+html.dark-theme .emergency-nav,
+html.dark-theme .modal-box,
+html.dark-theme .power-district-clear-card,
+html.dark-theme .power-card,
+html.dark-theme .weather-card,
+html.dark-theme .pin-box,
+html.dark-theme .area-item,
+html.dark-theme .scorecard-item,
+html.dark-theme .transport-card {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .area-item:hover,
+[data-theme="dark"] .scorecard-item:hover,
+[data-theme="dark"] .nearby-cards-grid .service-card:hover,
+html.dark-theme .area-item:hover,
+html.dark-theme .scorecard-item:hover,
+html.dark-theme .nearby-cards-grid .service-card:hover {
+  background-color: var(--bg-surface-hover) !important;
+  border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .power-location-switch-btn,
+[data-theme="dark"] .weather-location-switch-btn,
+html.dark-theme .power-location-switch-btn,
+html.dark-theme .weather-location-switch-btn {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-color) !important;
+}
+
 

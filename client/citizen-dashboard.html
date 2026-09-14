@@ -16,6 +16,7 @@
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=3.1.0"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
   <script src="js/app-launcher.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -75,8 +76,16 @@
 
   <script>
     (function() {
-      document.documentElement.classList.add('light-theme');
-      document.documentElement.classList.remove('dark-theme');
+      try {
+        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+        var theme = (t === 'dark') ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        var isDark = (theme === 'dark');
+        document.documentElement.classList.toggle('dark-theme', isDark);
+        document.documentElement.classList.toggle('theme-dark', isDark);
+        document.documentElement.classList.toggle('light-theme', !isDark);
+        document.documentElement.classList.toggle('theme-light', !isDark);
+      } catch (e) {}
     })();
   </script>
 
@@ -156,7 +165,7 @@
           <div class="stitch-hero-container">
             <div class="stitch-hero-details-wrap">
               <h1 id="hero-greeting" class="stitch-hero-title"></h1>
-              <p class="stitch-hero-desc" id="hero-desc" data-i18n="hero_desc_default">Transforming citizen voices into rapid community action. Report local issues, track live department resolutions, and earn Civic Impact points.</p>
+              <p class="stitch-hero-desc" id="hero-desc" data-i18n="hero_desc_default">Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.</p>
               <div class="stitch-hero-actions">
                 <a href="report.html" class="btn btn-primary" style="padding: 0.65rem 1.35rem; font-size: 0.88rem; font-weight: 700; background-color: var(--primary); color: var(--text-inverse); border: none;">
                   <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">Report Issue</span>

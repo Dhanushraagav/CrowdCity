@@ -2021,13 +2021,12 @@ function updateAuthUI() {
       `;
     }
 
-    // Preserve the theme toggle and auth container elements
+    // Preserve the auth container element
     let authContainer = document.getElementById('auth-nav-container');
     if (!authContainer) {
       authContainer = document.createElement('div');
       authContainer.id = 'auth-nav-container';
     }
-    const themeToggle = document.getElementById('header-theme-toggle');
 
     navMenu.innerHTML = '';
     
@@ -2037,9 +2036,6 @@ function updateAuthUI() {
       navMenu.appendChild(tempDiv.firstChild);
     }
 
-    if (themeToggle) {
-      navMenu.appendChild(themeToggle);
-    }
     navMenu.appendChild(authContainer);
   }
 
@@ -2694,19 +2690,26 @@ function initAuthModule() {
     });
   }
 
-  // Apply saved theme on page load immediately (lock to light-theme)
-  document.documentElement.classList.add('light-theme');
-  document.documentElement.classList.remove('dark-theme');
-  localStorage.setItem('cc_theme', 'light');
+  // Synchronize centralized theme preference
+  const currentTheme = (typeof window !== 'undefined' && window.getPortalTheme) 
+    ? window.getPortalTheme() 
+    : (((localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme')) === 'dark') ? 'dark' : 'light');
+  
+  if (typeof document !== 'undefined' && document.documentElement) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    const isDark = (currentTheme === 'dark');
+    document.documentElement.classList.toggle('dark-theme', isDark);
+    document.documentElement.classList.toggle('theme-dark', isDark);
+    document.documentElement.classList.toggle('light-theme', !isDark);
+    document.documentElement.classList.toggle('theme-light', !isDark);
+  }
 
   localStorage.removeItem('cc_mock_session');
-
 
   // Bootstrap clock and authentication
   initHeaderClock();
   updateAuthUI(); // <-- Render navbar instantly from cached profile data!
   initAuth();
-  initThemeToggle();
 }
 
 if (document.readyState === 'loading') {
@@ -2715,106 +2718,10 @@ if (document.readyState === 'loading') {
   initAuthModule();
 }
 
-/**
- * Fetch user points/level/badges count to render in dropdown
- */
-async function fetchDropdownGamificationStats(userId) {
-  try {
-    const token = getAuthToken();
-    if (!token) return;
-
-    const profileRes = await fetch('/api/auth/profile', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    const badgesRes = await fetch('/api/gamification/badges', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    if (profileRes.ok && badgesRes.ok) {
-      const profile = await profileRes.json();
-      const badges = await badgesRes.json();
-
-      const points = profile.points || 0;
-      const level = getLevelFromPoints(points);
-      const badgeCount = badges ? badges.length : 0;
-
-      const ptsEl = document.getElementById('user-points-display');
-      const lvlEl = document.getElementById('user-level-display');
-      const bdgEl = document.getElementById('user-badges-display');
-
-      if (ptsEl) {
-        ptsEl.className = '';
-        ptsEl.style = 'color: var(--primary); font-weight: 800;';
-        ptsEl.innerText = `${points} pts`;
-      }
-      if (lvlEl) {
-        lvlEl.className = '';
-        lvlEl.style = 'font-weight: 700; font-size: 0.75rem;';
-        lvlEl.innerText = level;
-      }
-      if (bdgEl) {
-        bdgEl.className = '';
-        bdgEl.style = 'color: var(--primary);';
-        bdgEl.innerHTML = `<i class="fa-solid fa-medal"></i> ${badgeCount}`;
-      }
-    }
-  } catch (err) {
-    console.error('Failed to fetch dropdown gamification stats:', err);
-  }
-}
-
-function getLevelFromPoints(points) {
-  let key = "level_civic_novice";
-  if (points >= 300) key = "level_city_legend";
-  else if (points >= 150) key = "level_civic_leader";
-  else if (points >= 50) key = "level_local_watchdog";
-  
-  if (window.i18n && typeof window.i18n.t === 'function') {
-    return window.i18n.t(key);
-  }
-  
-  if (points >= 300) return "City Legend";
-  if (points >= 150) return "Civic Leader";
-  if (points >= 50) return "Local Watchdog";
-  return "Civic Novice";
-}
-
-function updateDailyStreak() {
-  const todayStr = new Date().toISOString().split('T')[0];
-  const lastActive = localStorage.getItem('cc_last_active_date');
-  let streak = parseInt(localStorage.getItem('cc_login_streak') || '0', 10);
-
-  if (lastActive === todayStr) {
-    return streak || 1;
-  }
-
-  if (lastActive) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-    if (lastActive === yesterdayStr) {
-      streak += 1;
-    } else {
-      streak = 1;
-    }
-  } else {
-    streak = 1;
-  }
-
-  localStorage.setItem('cc_last_active_date', todayStr);
-  localStorage.setItem('cc_login_streak', streak.toString());
-  return streak;
-}
-
-function initThemeToggle() {
-  // Theme toggle disabled to enforce clean professional white theme
-  return;
-}
-
 function getActiveTheme() {
-  return 'light';
+  return (typeof window !== 'undefined' && window.getPortalTheme)
+    ? window.getPortalTheme()
+    : (((localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme')) === 'dark') ? 'dark' : 'light');
 }
 
 window.addEventListener('language-change', () => {

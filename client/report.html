@@ -13,6 +13,7 @@
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=3.1.0"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
   <script src="js/serviceArea.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -429,8 +430,16 @@
 
   <script>
     (function() {
-      document.documentElement.classList.add('light-theme');
-      document.documentElement.classList.remove('dark-theme');
+      try {
+        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+        var theme = (t === 'dark') ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        var isDark = (theme === 'dark');
+        document.documentElement.classList.toggle('dark-theme', isDark);
+        document.documentElement.classList.toggle('theme-dark', isDark);
+        document.documentElement.classList.toggle('light-theme', !isDark);
+        document.documentElement.classList.toggle('theme-light', !isDark);
+      } catch (e) {}
     })();
   </script>
 </head>
@@ -697,7 +706,7 @@
                   <button type="button" id="btn-voice-input" class="btn-voice-reporter" title="Speak in English, Tanglish, or Tamil" style="padding: 0.45rem 0.85rem; font-size: 0.78rem; font-weight: 800; border-radius: 8px; background: rgba(13, 148, 136, 0.1); color: var(--primary, #0d9488); border: 1px solid rgba(13, 148, 136, 0.25); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
                     <i class="fa-solid fa-microphone"></i> <span data-i18n="voice_report">Voice Report</span>
                   </button>
-                  <select id="voice-lang-select" aria-label="Speech Recognition Language" style="height: 32px; padding: 0 0.45rem; font-size: 0.72rem; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; outline: none;">
+                  <select id="voice-lang-select" aria-label="Speech Recognition Language" style="height: 32px; padding: 0 0.45rem; font-size: 0.72rem; font-weight: 700; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); cursor: pointer; outline: none;">
                     <option value="en-IN" selected>EN (English / Tanglish)</option>
                     <option value="ta-IN">TA (தமிழ்)</option>
                   </select>
@@ -1092,7 +1101,7 @@
       </div>
 
       <!-- Government Document Card (Clean Formal White/Light Gray UI) -->
-      <div style="background: #ffffff; color: var(--text-main, #0f172a); border-radius: 16px; padding: 1.5rem 1.75rem; margin-bottom: 1.75rem; box-shadow: var(--shadow-sm, 0 4px 12px rgba(0,0,0,0.05)); border: 1px solid var(--border-color, #cbd5e1);">
+      <div style="background: var(--bg-surface); color: var(--text-main); border-radius: 16px; padding: 1.5rem 1.75rem; margin-bottom: 1.75rem; box-shadow: var(--shadow-sm, 0 4px 12px rgba(0,0,0,0.05)); border: 1px solid var(--border-color, #cbd5e1);">
         
         <!-- Live AI Status Line -->
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color, #e2e8f0); padding-bottom: 0.85rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1141,7 +1150,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <div>
                 <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #64748b); font-weight: 700; display: block; margin-bottom: 0.2rem;" data-i18n="responsible_authority_jurisdiction">Responsible Authority & Government Jurisdiction</span>
-                <span id="step3-ai-authority" style="font-weight: 800; color: #0f172a; font-size: 0.92rem;">Resolving authority...</span>
+                <span id="step3-ai-authority" style="font-weight: 800; color: var(--text-main); font-size: 0.92rem;">Resolving authority...</span>
               </div>
               <span id="step3-ai-jurisdiction" style="font-size: 0.78rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid #bae6fd;">Tamil Nadu</span>
             </div>

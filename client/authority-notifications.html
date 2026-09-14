@@ -83,7 +83,7 @@
             </button>
 
             <!-- Dropdown Menu -->
-            <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
+            <div id="header-profile-dropdown" style="display: none; position: absolute; right: 0; top: calc(100% + 0.4rem); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); width: 180px; z-index: 600; overflow: hidden;">
               <button type="button" style="width: 100%; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--text-main); background: none; border: none; border-bottom: 1px solid var(--border-light); cursor: pointer;" onclick="event.stopPropagation(); window.location.href='authority-profile.html'">
                 <span data-i18n="profile_and_security">Profile & Security</span>
               </button>
@@ -118,6 +118,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Client Script files -->
+  <script src="js/theme.js"></script>
   <script src="js/auth.js?v=7.5.0"></script>
   <script src="js/api.js?v=3.3.0"></script>
   <script src="js/notifications.js?v=3.3.0"></script>

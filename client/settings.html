@@ -39,14 +39,22 @@
     .settings-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 2rem;
+      gap: 1.75rem;
       width: 100%;
+      max-width: 1200px;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 880px) {
       .settings-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 2rem;
       }
+    }
+
+    .settings-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
     }
 
     .settings-card {
@@ -57,14 +65,39 @@
       box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.25rem;
+      position: static !important;
+      height: auto !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    @media (max-width: 768px) {
+      .settings-page .settings-card {
+        position: static !important;
+        display: flex !important;
+        height: auto !important;
+        width: 100% !important;
+        border-radius: var(--radius-lg) !important;
+        border: 1px solid var(--border-color) !important;
+        padding: 1.5rem !important;
+        box-shadow: var(--shadow-sm) !important;
+      }
     }
   </style>
 
   <script>
     (function() {
-      document.documentElement.classList.add('light-theme');
-      document.documentElement.classList.remove('dark-theme');
+      try {
+        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+        var theme = (t === 'dark') ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        var isDark = (theme === 'dark');
+        document.documentElement.classList.toggle('dark-theme', isDark);
+        document.documentElement.classList.toggle('theme-dark', isDark);
+        document.documentElement.classList.toggle('light-theme', !isDark);
+        document.documentElement.classList.toggle('theme-light', !isDark);
+      } catch (e) {}
     })();
   </script>
 </head>
@@ -139,183 +172,146 @@
     <!-- Page Header -->
     <section style="margin-bottom: 2.5rem;">
       <h1 style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.35rem;" data-i18n="account_settings">Account Settings</h1>
-      <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="settings_description">Manage your citizen profile information, view your points, and update security credentials.</p>
+      <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="settings_description">Manage your citizen profile information and update security credentials.</p>
     </section>
 
-    <!-- Settings Grid -->
+    <!-- Settings Grid: Balanced 2-Column Responsive Layout -->
     <section class="settings-grid">
       
-      <!-- Card 1: Citizen Profile Details -->
-      <div class="settings-card" id="citizen-profile-card">
-        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fa-solid fa-circle-user" style="color: var(--primary);"></i> <span data-i18n="citizen_profile">Citizen Profile</span>
-        </h3>
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;" data-i18n="citizen_profile_description">Your profile details and civic credentials. Full name and email address are locked for verification.</p>
+      <!-- Column 1: Citizen Profile Details & Language Preference -->
+      <div class="settings-col">
         
-        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
-          <div class="form-group">
-            <label class="form-label" data-i18n="full_name">Full Name</label>
-            <input type="text" id="settings-name" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85;">
-          </div>
-          <div class="form-group">
-            <label class="form-label" data-i18n="email_address">Email Address</label>
-            <input type="email" id="settings-email" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85;">
-          </div>
-          <div class="form-group">
-            <label class="form-label" data-i18n="current_points">Current Points</label>
-            <input type="text" id="settings-points" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85; font-weight: 700; color: var(--primary);">
-          </div>
-          <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); padding: 0.85rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 0.75rem; font-size: 0.82rem; color: var(--primary); font-weight: 600;">
-            <i class="fa-solid fa-award"></i>
-            <span>Active Citizen Status &bull; Help improve the community</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 2: Security & Password Update -->
-      <div class="settings-card" id="change-password-card">
-        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
-          <span data-i18n="change_password">Change Password</span>
-        </h3>
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;" data-i18n="change_password_description">Update your credentials regularly to secure your account. Choose a strong alphanumeric password.</p>
-        
-        <form id="change-password-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
-          <div class="form-group">
-            <label for="current-password" class="form-label" data-i18n="current_password">Current Password</label>
-            <input type="password" id="current-password" class="form-input" data-i18n-placeholder="enter_current_password" placeholder="Enter current password" required minlength="6">
-          </div>
-          <div class="form-group">
-            <label for="new-password" class="form-label" data-i18n="new_password">New Password</label>
-            <input type="password" id="new-password" class="form-input" data-i18n-placeholder="enter_new_password" placeholder="Enter new password" required minlength="6">
-          </div>
-          <div class="form-group">
-            <label for="confirm-password" class="form-label" data-i18n="confirm_new_password">Confirm New Password</label>
-            <input type="password" id="confirm-password" class="form-input" data-i18n-placeholder="confirm_new_password_placeholder" placeholder="Confirm new password" required minlength="6">
-          </div>
+        <!-- Card 1: Citizen Profile Details -->
+        <div class="settings-card" id="citizen-profile-card">
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-circle-user" style="color: var(--primary);"></i> <span data-i18n="citizen_profile">Citizen Profile</span>
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;" data-i18n="citizen_profile_description">Your profile details and civic credentials. Full name and email address are locked for verification.</p>
           
-          <button type="submit" id="btn-save-password" class="btn btn-primary" style="margin-top: 0.5rem; align-self: flex-start; padding: 0.65rem 1.5rem; font-size: 0.85rem; font-weight: 700;" data-i18n="update_password">
-            Update Password
-          </button>
-        </form>
-      </div>
-
-      <!-- Card 3: Language & Localization Preferences -->
-      <div class="settings-card" id="language-settings-card">
-        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fa-solid fa-globe" style="color: var(--primary);"></i> <span data-i18n="language">Language & Localization</span>
-        </h3>
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;">
-          Select your preferred portal display language. Changes are instantly applied across all dashboards, forms, and services.
-        </p>
-
-        <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.5rem;">
-          <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Preferred Language</label>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem;">
-            
-            <button type="button" class="lang-setting-card-btn" id="btn-desktop-lang-en" onclick="setPortalLanguage('en')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
-              <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem;">
-                  EN
-                </div>
-                <div style="text-align: left;">
-                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">English</div>
-                </div>
-              </div>
-              <i class="fa-solid fa-circle-check lang-check-icon" id="check-desktop-en" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
-            </button>
-
-            <button type="button" class="lang-setting-card-btn" id="btn-desktop-lang-ta" onclick="setPortalLanguage('ta')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
-              <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem;">
-                  த
-                </div>
-                <div style="text-align: left;">
-                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">தமிழ் (Tamil)</div>
-                </div>
-              </div>
-              <i class="fa-solid fa-circle-check lang-check-icon" id="check-desktop-ta" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
-            </button>
-
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+            <div class="form-group">
+              <label class="form-label" data-i18n="full_name">Full Name</label>
+              <input type="text" id="settings-name" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85;">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="email_address">Email Address</label>
+              <input type="email" id="settings-email" class="form-input" readonly style="background-color: var(--bg-app); cursor: not-allowed; opacity: 0.85;">
+            </div>
           </div>
         </div>
+
+        <!-- Card 2: Language & Localization Preferences -->
+        <div class="settings-card" id="language-settings-card">
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-globe" style="color: var(--primary);"></i> <span data-i18n="language">Language & Localization</span>
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;">
+            Select your preferred portal display language. Changes are instantly applied across all dashboards, forms, and services.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.5rem;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Preferred Language</label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem;">
+              
+              <button type="button" class="lang-setting-card-btn" id="btn-desktop-lang-en" onclick="setPortalLanguage('en')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem;">
+                    EN
+                  </div>
+                  <div style="text-align: left;">
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">English</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-circle-check lang-check-icon" id="check-desktop-en" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
+              </button>
+
+              <button type="button" class="lang-setting-card-btn" id="btn-desktop-lang-ta" onclick="setPortalLanguage('ta')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem;">
+                    த
+                  </div>
+                  <div style="text-align: left;">
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">தமிழ் (Tamil)</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-circle-check lang-check-icon" id="check-desktop-ta" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Appearance / Theme Preferences -->
+        <div class="settings-card" id="theme-settings-card">
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-circle-half-stroke" style="color: var(--primary);"></i> <span data-i18n="theme">Appearance / Theme</span>
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;" data-i18n="appearance_language_desc">
+            Customize application theme preference. Changes apply instantly across the entire platform.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.5rem;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);" data-i18n="theme">Theme Preference</label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem;">
+              
+              <button type="button" class="theme-setting-card-btn" id="btn-theme-light" onclick="setPortalTheme('light')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                    <i class="fa-solid fa-sun"></i>
+                  </div>
+                  <div style="text-align: left;">
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);" data-i18n="light_theme">Light Theme</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-circle-check theme-check-icon" id="check-theme-light" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
+              </button>
+
+              <button type="button" class="theme-setting-card-btn" id="btn-theme-dark" onclick="setPortalTheme('dark')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: all 0.2s ease;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(99, 102, 241, 0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                    <i class="fa-solid fa-moon"></i>
+                  </div>
+                  <div style="text-align: left;">
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);" data-i18n="dark_theme">Dark Theme</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-circle-check theme-check-icon" id="check-theme-dark" style="color: var(--primary); font-size: 1.15rem; display: none;"></i>
+              </button>
+
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Modern Mobile Settings List (Visible only on mobile) -->
-      <div class="settings-mobile-container mobile-only">
+      <!-- Column 2: Security & Password Update -->
+      <div class="settings-col">
         
-        <!-- Appearance Section -->
-        <div class="settings-group">
-          <div class="settings-group-title" data-i18n="appearance">Appearance</div>
-
-          <div class="settings-item">
-            <div class="settings-item-info">
-              <span class="settings-item-title" data-i18n="language">Language</span>
-              <span class="settings-item-desc">Select your language preference</span>
-            </div>
-            <div class="md3-segmented-control">
-              <button class="segmented-btn" id="lang-en-btn" data-lang="en">EN</button>
-              <button class="segmented-btn" id="lang-ta-btn" data-lang="ta">தமிழ்</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Profile Section -->
-        <div class="settings-group">
-          <div class="settings-group-title" data-i18n="profile">Profile</div>
+        <!-- Card 3: Security & Password Update -->
+        <div class="settings-card" id="change-password-card">
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-lock" style="color: var(--primary);"></i> <span data-i18n="change_password">Change Password</span>
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;" data-i18n="change_password_description">Update your credentials regularly to secure your account. Choose a strong alphanumeric password.</p>
           
-          <div class="settings-item profile-photo-item" style="flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 1.5rem 1rem;">
-            <div class="profile-avatar-container" style="position: relative; width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background-color: var(--primary-light-alpha); border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span id="settings-avatar-initial" style="font-size: 2.25rem; font-weight: 800; color: var(--primary);">U</span>
-              <img id="settings-avatar-img" src="" alt="Profile Picture" class="hidden" style="width: 100%; height: 100%; object-fit: cover;" decoding="async">
+          <form id="change-password-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+            <div class="form-group">
+              <label for="current-password" class="form-label" data-i18n="current_password">Current Password</label>
+              <input type="password" id="current-password" class="form-input" data-i18n-placeholder="enter_current_password" placeholder="Enter current password" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label for="new-password" class="form-label" data-i18n="new_password">New Password</label>
+              <input type="password" id="new-password" class="form-input" data-i18n-placeholder="enter_new_password" placeholder="Enter new password" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label for="confirm-password" class="form-label" data-i18n="confirm_new_password">Confirm New Password</label>
+              <input type="password" id="confirm-password" class="form-input" data-i18n-placeholder="confirm_new_password_placeholder" placeholder="Confirm new password" required minlength="6">
             </div>
             
-            <div class="profile-photo-buttons" style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; width: 100%;">
-              <button id="btn-upload-photo" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600;" data-i18n="upload_photo">Upload Photo</button>
-              <button id="btn-remove-photo" type="button" class="btn btn-text hidden" style="padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; background: transparent;" data-i18n="remove_photo">Remove Photo</button>
-            </div>
-            <input type="file" id="profile-photo-file-input" accept="image/*" class="hidden">
-          </div>
-        </div>
-
-        <!-- Account Section -->
-        <div class="settings-group">
-          <div class="settings-group-title" data-i18n="account">Account</div>
-          <div class="settings-item clickable" onclick="openProfileSubpage()">
-            <div class="settings-item-info">
-              <span class="settings-item-title" data-i18n="edit_profile">Edit Profile</span>
-              <span class="settings-item-desc">View and manage your personal details</span>
-            </div>
-            <i class="fa-solid fa-chevron-right settings-arrow"></i>
-          </div>
-          <div class="settings-item clickable" onclick="openPasswordSubpage()">
-            <div class="settings-item-info">
-              <span class="settings-item-title" data-i18n="change_password">Change Password</span>
-              <span class="settings-item-desc">Update your login security credentials</span>
-            </div>
-            <i class="fa-solid fa-chevron-right settings-arrow"></i>
-          </div>
-
-          <div class="settings-item clickable" onclick="window.location.href='about.html'">
-            <div class="settings-item-info">
-              <span class="settings-item-title" data-i18n="about_crowdcity">About Us</span>
-              <span class="settings-item-desc">Meet the engineering, leadership, and founder team</span>
-            </div>
-            <i class="fa-solid fa-chevron-right settings-arrow"></i>
-          </div>
-          <div class="settings-item clickable" onclick="window.location.href='contact.html'">
-            <div class="settings-item-info">
-              <span class="settings-item-title" data-i18n="nav_contact_us">Contact Us</span>
-              <span class="settings-item-desc">Get in touch for support, feedback, and inquiries</span>
-            </div>
-            <i class="fa-solid fa-chevron-right settings-arrow"></i>
-          </div>
-          <div class="settings-item settings-item-version">
-            <div class="settings-item-info">
-              <span class="settings-item-title" data-i18n="app_version">App Version</span>
-              <span class="settings-item-desc">Production Build</span>
-            </div>
-            <span class="settings-version-tag">v1.2.0</span>
-          </div>
+            <button type="submit" id="btn-save-password" class="btn btn-primary" style="margin-top: 0.5rem; align-self: flex-start; padding: 0.65rem 1.5rem; font-size: 0.85rem; font-weight: 700;" data-i18n="update_password">
+              Update Password
+            </button>
+          </form>
         </div>
 
       </div>
@@ -332,6 +328,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Client Script files -->
+  <script src="js/theme.js"></script>
   <script src="js/auth.js?v=3.1.0"></script>
   <script src="js/api.js"></script>
   <script src="js/chat-widget.js"></script>
@@ -372,28 +369,22 @@
         if (!user) return;
         
         let fullName = user.user_metadata?.full_name || 'Citizen';
-        let points = 0;
         
         const profileStr = localStorage.getItem('cc_user_profile');
         if (profileStr) {
           try {
             const profile = JSON.parse(profileStr);
-            if (profile) {
-              if (profile.full_name) fullName = profile.full_name;
-              points = profile.points || 0;
+            if (profile && profile.full_name) {
+              fullName = profile.full_name;
             }
           } catch(e) {}
         }
         
         const nameEl = document.getElementById('settings-name');
         const emailEl = document.getElementById('settings-email');
-        const pointsEl = document.getElementById('settings-points');
 
         if (nameEl) nameEl.value = fullName;
-        if (emailEl) emailEl.value = user.email;
-        if (pointsEl) pointsEl.value = `${points} Points`;
-
-
+        if (emailEl) emailEl.value = user.email || '';
       }
 
       const passwordForm = document.getElementById('change-password-form');
@@ -426,14 +417,7 @@
         });
       }
 
-
-
-
-
-      // Language selection logic (both Desktop Card and Mobile Segmented Control)
-      const langEnBtn = document.getElementById('lang-en-btn');
-      const langTaBtn = document.getElementById('lang-ta-btn');
-
+      // Language selection logic
       window.setPortalLanguage = function(lang) {
         if (window.i18n) {
           window.i18n.setLanguage(lang);
@@ -449,7 +433,6 @@
       function updateLangUI() {
         const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
 
-        // 1. Update Desktop Settings Card UI
         const btnEn = document.getElementById('btn-desktop-lang-en');
         const btnTa = document.getElementById('btn-desktop-lang-ta');
         const checkEn = document.getElementById('check-desktop-en');
@@ -474,317 +457,70 @@
             if (checkTa) checkTa.style.display = 'none';
           }
         }
-
-        // 2. Update Mobile Segmented Control UI
-        if (langTaBtn && langEnBtn) {
-          if (currentLang === 'ta') {
-            langTaBtn.classList.add('active');
-            langEnBtn.classList.remove('active');
-          } else {
-            langEnBtn.classList.add('active');
-            langTaBtn.classList.remove('active');
-          }
-        }
       }
       
       updateLangUI();
-      if (langEnBtn && langTaBtn) {
-        langEnBtn.addEventListener('click', () => setPortalLanguage('en'));
-        langTaBtn.addEventListener('click', () => setPortalLanguage('ta'));
-      }
       window.addEventListener('language-change', updateLangUI);
 
-      // Profile photo upload, change, and remove logic
-      const photoInput = document.getElementById('profile-photo-file-input');
-      const uploadBtn = document.getElementById('btn-upload-photo');
-      const removeBtn = document.getElementById('btn-remove-photo');
-      const avatarImg = document.getElementById('settings-avatar-img');
-      const avatarInitial = document.getElementById('settings-avatar-initial');
-
-      function updateProfilePhotoUI(avatarUrl, userName) {
-        const initial = userName ? userName.charAt(0).toUpperCase() : 'U';
-        if (avatarUrl) {
-          if (avatarImg) {
-            avatarImg.src = avatarUrl;
-            avatarImg.classList.remove('hidden');
-          }
-          if (avatarInitial) {
-            avatarInitial.classList.add('hidden');
-          }
-          if (uploadBtn) {
-            uploadBtn.textContent = window.i18n ? window.i18n.t('change_photo') : 'Change Photo';
-          }
-          if (removeBtn) {
-            removeBtn.classList.remove('hidden');
-          }
+      // Theme selection logic
+      window.setPortalTheme = function(theme) {
+        if (window.CrowdCityTheme) {
+          window.CrowdCityTheme.setTheme(theme);
         } else {
-          if (avatarImg) {
-            avatarImg.src = '';
-            avatarImg.classList.add('hidden');
-          }
-          if (avatarInitial) {
-            avatarInitial.textContent = initial;
-            avatarInitial.classList.remove('hidden');
-          }
-          if (uploadBtn) {
-            uploadBtn.textContent = window.i18n ? window.i18n.t('upload_photo') : 'Upload Photo';
-          }
-          if (removeBtn) {
-            removeBtn.classList.add('hidden');
-          }
-        }
-      }
-
-      async function syncSettingsPhoto() {
-        const user = getCurrentUser();
-        if (!user) return;
-        
-        let avatarUrl = user.user_metadata?.avatar_url || '';
-        let fullName = user.user_metadata?.full_name || 'Citizen';
-
-        const profileStr = localStorage.getItem('cc_user_profile');
-        if (profileStr) {
           try {
-            const profile = JSON.parse(profileStr);
-            if (profile) {
-              if (profile.avatar_url) avatarUrl = profile.avatar_url;
-              if (profile.full_name) fullName = profile.full_name;
-            }
+            localStorage.setItem('crowdcity_theme', theme);
+            localStorage.setItem('cc_theme', theme);
+            document.documentElement.setAttribute('data-theme', theme);
+            var isDark = (theme === 'dark');
+            document.documentElement.classList.toggle('dark-theme', isDark);
+            document.documentElement.classList.toggle('theme-dark', isDark);
+            document.documentElement.classList.toggle('light-theme', !isDark);
+            document.documentElement.classList.toggle('theme-light', !isDark);
+            window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: theme } }));
           } catch(e) {}
         }
-        updateProfilePhotoUI(avatarUrl, fullName);
-      }
+        updateThemeUI();
+      };
 
-      if (uploadBtn && photoInput) {
-        uploadBtn.addEventListener('click', () => {
-          photoInput.click();
-        });
-      }
+      function updateThemeUI() {
+        var currentTheme = (typeof window.getPortalTheme === 'function')
+          ? window.getPortalTheme()
+          : (localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme') || 'light');
 
-      if (photoInput) {
-        photoInput.addEventListener('change', async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
+        var btnLight = document.getElementById('btn-theme-light');
+        var btnDark = document.getElementById('btn-theme-dark');
+        var checkLight = document.getElementById('check-theme-light');
+        var checkDark = document.getElementById('check-theme-dark');
 
-          if (file.size > 1024 * 1024) {
-            window.showToast("Please choose an image under 1MB.", "warning");
-            return;
+        if (btnLight && btnDark) {
+          if (currentTheme === 'dark') {
+            btnDark.style.borderColor = 'var(--primary)';
+            btnDark.style.background = 'rgba(99, 102, 241, 0.12)';
+            if (checkDark) checkDark.style.display = 'block';
+
+            btnLight.style.borderColor = 'var(--border-color)';
+            btnLight.style.background = 'var(--bg-app)';
+            if (checkLight) checkLight.style.display = 'none';
+          } else {
+            btnLight.style.borderColor = 'var(--primary)';
+            btnLight.style.background = 'rgba(245, 158, 11, 0.12)';
+            if (checkLight) checkLight.style.display = 'block';
+
+            btnDark.style.borderColor = 'var(--border-color)';
+            btnDark.style.background = 'var(--bg-app)';
+            if (checkDark) checkDark.style.display = 'none';
           }
-
-          const reader = new FileReader();
-          reader.onload = async () => {
-            const base64Url = reader.result;
-            
-            // Show loading indicator
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-            try {
-              const user = getCurrentUser();
-              // Update database
-              const { error: dbError } = await supabaseClient
-                .from('profiles')
-                .update({ avatar_url: base64Url })
-                .eq('id', user.id);
-
-              if (dbError) throw dbError;
-
-              // Update auth metadata
-              const { error: authError } = await supabaseClient.auth.updateUser({
-                data: { avatar_url: base64Url }
-              });
-
-              if (authError) throw authError;
-
-              // Update profile cache
-              const profileStr = localStorage.getItem('cc_user_profile');
-              if (profileStr) {
-                const profile = JSON.parse(profileStr);
-                profile.avatar_url = base64Url;
-                localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-              }
-
-              window.showToast("Profile photo updated successfully!", "success");
-              syncSettingsPhoto();
-              window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
-            } catch (err) {
-              console.error("Error updating profile picture:", err);
-              window.showToast("Failed to update profile picture: " + (err.message || err), "error");
-            } finally {
-              uploadBtn.disabled = false;
-              syncSettingsPhoto();
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      const removePhotoModal = document.getElementById('remove-photo-modal');
-      const confirmRemoveBtn = document.getElementById('btn-confirm-remove-photo');
-      const cancelRemoveBtn = document.getElementById('btn-cancel-remove-photo');
-      const cancelRemoveBtnX = document.getElementById('btn-cancel-remove-photo-x');
-      const removePhotoBackdrop = document.getElementById('remove-photo-modal-backdrop');
-
-      function openRemovePhotoModal() {
-        if (!removePhotoModal) return;
-        removePhotoModal.classList.remove('hidden');
-        removePhotoModal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-      }
-
-      function closeRemovePhotoModal() {
-        if (!removePhotoModal) return;
-        removePhotoModal.classList.add('hidden');
-        removePhotoModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        if (confirmRemoveBtn) {
-          confirmRemoveBtn.disabled = false;
-          confirmRemoveBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> <span>Remove Photo</span>';
         }
       }
 
-      if (removeBtn) {
-        removeBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          openRemovePhotoModal();
-        });
-      }
+      updateThemeUI();
+      window.addEventListener('theme-change', updateThemeUI);
 
-      if (cancelRemoveBtn) cancelRemoveBtn.addEventListener('click', closeRemovePhotoModal);
-      if (cancelRemoveBtnX) cancelRemoveBtnX.addEventListener('click', closeRemovePhotoModal);
-      if (removePhotoBackdrop) removePhotoBackdrop.addEventListener('click', closeRemovePhotoModal);
-
-      if (confirmRemoveBtn) {
-        confirmRemoveBtn.addEventListener('click', async () => {
-          confirmRemoveBtn.disabled = true;
-          if (cancelRemoveBtn) cancelRemoveBtn.disabled = true;
-          confirmRemoveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Removing...</span>';
-
-          try {
-            const user = getCurrentUser();
-            if (!user) throw new Error("User session not found.");
-
-            const { error: dbError } = await supabaseClient
-              .from('profiles')
-              .update({ avatar_url: '' })
-              .eq('id', user.id);
-
-            if (dbError) throw dbError;
-
-            const { error: authError } = await supabaseClient.auth.updateUser({
-              data: { avatar_url: '' }
-            });
-
-            if (authError) throw authError;
-
-            const profileStr = localStorage.getItem('cc_user_profile');
-            if (profileStr) {
-              const profile = JSON.parse(profileStr);
-              profile.avatar_url = '';
-              localStorage.setItem('cc_user_profile', JSON.stringify(profile));
-            }
-
-            if (window.showToast) window.showToast("Profile photo removed.", "success");
-            syncSettingsPhoto();
-            window.dispatchEvent(new CustomEvent('auth-change', { detail: { loggedIn: true, user: getCurrentUser() } }));
-            closeRemovePhotoModal();
-          } catch (err) {
-            console.error("Error removing profile picture:", err);
-            if (window.showToast) window.showToast("Failed to remove profile picture: " + (err.message || err), "error");
-          } finally {
-            confirmRemoveBtn.disabled = false;
-            if (cancelRemoveBtn) cancelRemoveBtn.disabled = false;
-            confirmRemoveBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> <span>Remove Photo</span>';
-          }
-        });
-      }
-
-      // Initial synchronization of photo settings
-      window.addEventListener('auth-change', syncSettingsPhoto);
-      if (getCurrentUser()) {
-        syncSettingsPhoto();
-      }
-
-      // Mobile subpage triggers
-      window.openProfileSubpage = function() {
-        const card = document.getElementById('citizen-profile-card');
-        if (card) card.classList.add('open');
-      };
-      window.openPasswordSubpage = function() {
-        const card = document.getElementById('change-password-card');
-        if (card) card.classList.add('open');
-      };
-
-      window.closeSubpage = function(id) {
-        const card = document.getElementById(id);
-        if (card) card.classList.remove('open');
-      };
-      window.openAboutModal = function() {
-        window.location.href = 'about.html';
-      };
-      window.closeAboutModal = function() {
-        const modal = document.getElementById('about-modal');
-        if (modal) modal.classList.add('hidden');
-      };
-
-      // Trigger ready class
       setTimeout(() => {
         document.body.classList.add('ready');
       }, 100);
     });
   </script>
-
-  <!-- About CrowdCity Modal (Mobile Only) -->
-  <div id="about-modal" class="custom-modal hidden">
-    <div class="custom-modal-backdrop" onclick="closeAboutModal()"></div>
-    <div class="custom-modal-content">
-      <div class="custom-modal-header">
-        <h3 data-i18n="about_crowdcity">About CrowdCity</h3>
-        <button onclick="closeAboutModal()" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="custom-modal-body" style="line-height: 1.6; font-size: 0.9rem; color: var(--text-muted);">
-        <p>CrowdCity AI is a modern citizen-driven civic support platform. It empowers local communities to report public issues such as potholes, garbage, broken streetlights, and water leakage.</p>
-        <p>Using advanced AI, the platform auto-categorizes and routes reports to municipal authorities immediately, expediting resolution and keeping citizens updated in real-time.</p>
-        <p style="margin-top: 1rem; font-weight: 700; color: var(--primary);">Empower your city, report issues today.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Custom CrowdCity Remove Photo Confirmation Modal -->
-  <div id="remove-photo-modal" class="custom-modal hidden" aria-hidden="true" role="dialog" aria-labelledby="remove-photo-modal-title">
-    <div class="custom-modal-backdrop" id="remove-photo-modal-backdrop"></div>
-    <div class="custom-modal-content" style="max-width: 380px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
-      
-      <div class="custom-modal-header" style="padding: 1.15rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-            <i class="fa-solid fa-trash-can"></i>
-          </div>
-          <h3 id="remove-photo-modal-title" style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--text-main);">Remove Profile Photo?</h3>
-        </div>
-        <button type="button" class="close-modal-btn" id="btn-cancel-remove-photo-x" aria-label="Close modal">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="custom-modal-body" style="padding: 1.25rem;">
-        <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
-          Are you sure you want to remove your profile photo?
-        </p>
-      </div>
-
-      <div style="padding: 1rem 1.25rem 1.25rem 1.25rem; display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid var(--border-color); background: var(--bg-app);">
-        <button type="button" class="btn btn-secondary" id="btn-cancel-remove-photo" style="padding: 0.6rem 1.15rem; font-size: 0.85rem; font-weight: 600; border-radius: 10px;">
-          Cancel
-        </button>
-        <button type="button" class="btn btn-danger" id="btn-confirm-remove-photo" style="padding: 0.6rem 1.15rem; font-size: 0.85rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
-          <i class="fa-solid fa-trash-can"></i>
-          <span>Remove Photo</span>
-        </button>
-      </div>
-
-    </div>
-  </div>
 
 </body>
 </html>

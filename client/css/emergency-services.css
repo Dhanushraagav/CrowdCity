@@ -28,6 +28,19 @@
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+:root[data-theme="dark"],
+html[data-theme="dark"],
+html.dark-theme,
+html.theme-dark {
+  --bg-page: #0b0f19;
+  --bg-surface-gray: #1e293b;
+  --bg-card-hover: #334155;
+  --border-subtle: #334155;
+  --border-strong: #475569;
+  --text-dark: #f8fafc;
+  --text-body: #cbd5e1;
+}
+
 /* Global Page Base */
 html, body.emergency-body {
   background-color: var(--bg-page) !important;

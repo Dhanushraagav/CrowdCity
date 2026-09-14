@@ -13,6 +13,7 @@
   <!-- Central Authentication Router -->
   <script src="js/auth-router.js?v=3.1.0"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="AI Government Assistant - Ask anything about government welfare schemes, eligibility rules, and document requirements.">
@@ -33,8 +34,16 @@
 
   <script>
     (function() {
-      document.documentElement.classList.add('light-theme');
-      document.documentElement.classList.remove('dark-theme');
+      try {
+        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+        var theme = (t === 'dark') ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        var isDark = (theme === 'dark');
+        document.documentElement.classList.toggle('dark-theme', isDark);
+        document.documentElement.classList.toggle('theme-dark', isDark);
+        document.documentElement.classList.toggle('light-theme', !isDark);
+        document.documentElement.classList.toggle('theme-light', !isDark);
+      } catch (e) {}
     })();
   </script>
 </head>
