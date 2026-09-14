@@ -137,19 +137,38 @@
 
     .helpline-actions {
       display: flex;
+      align-items: stretch;
       gap: 0.5rem;
       margin-top: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .helpline-action-btn {
-      flex: 1;
-      padding: 0.5rem;
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 38px;
+      box-sizing: border-box;
+      padding: 0.5rem 0.75rem;
       font-size: 0.75rem;
       font-weight: 700;
       text-align: center;
       border-radius: var(--radius-md);
       text-decoration: none;
-      transition: background-color var(--transition-fast), color var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      line-height: 1.2;
+      transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .helpline-action-btn i {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      flex-shrink: 0;
     }
 
     .helpline-action-call {

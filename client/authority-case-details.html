@@ -162,11 +162,17 @@
                 </div>
 
                 <div style="border-top: 1px solid var(--border-light); margin-top: 0.75rem; padding-top: 0.75rem;">
-                  <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem;">Responsible Authority Office</div>
+                  <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem;" data-i18n="responsible_authority_office">Responsible Authority Office</div>
                   <strong id="detail-authority-name" style="color: var(--primary); font-size: 0.95rem; display: block;">Local Administrative Authority</strong>
-                  <div style="display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.82rem; flex-wrap: wrap;">
-                    <span id="detail-authority-phone-wrap"><i class="fa-solid fa-phone" style="color: #0d9488;"></i> <a id="detail-authority-phone" href="#" style="color: var(--primary); font-weight: 600;">Phone</a></span>
-                    <span id="detail-authority-email-wrap"><i class="fa-solid fa-envelope" style="color: #0284c7;"></i> <a id="detail-authority-email" href="#" style="color: #0284c7; font-weight: 600;">Email</a></span>
+                  <div class="authority-contact-actions">
+                    <span id="detail-authority-phone-wrap" class="authority-contact-btn authority-contact-phone" onclick="var a=document.getElementById('detail-authority-phone'); if(a && event.target!==a) a.click();">
+                      <i class="fa-solid fa-phone"></i>
+                      <a id="detail-authority-phone" href="#" data-i18n="phone">Phone</a>
+                    </span>
+                    <span id="detail-authority-email-wrap" class="authority-contact-btn authority-contact-email" onclick="var a=document.getElementById('detail-authority-email'); if(a && event.target!==a) a.click();">
+                      <i class="fa-solid fa-envelope"></i>
+                      <a id="detail-authority-email" href="#" data-i18n="contact_email">Email</a>
+                    </span>
                   </div>
                 </div>
 

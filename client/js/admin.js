@@ -949,7 +949,7 @@
         if (authPhone && authPhone !== 'Contact information unavailable') {
           phoneEl.textContent = authPhone;
           phoneEl.href = `tel:${authPhone.replace(/[^0-9+]/g, '')}`;
-          phoneWrap.style.display = 'inline';
+          phoneWrap.style.display = 'inline-flex';
         } else {
           phoneWrap.style.display = 'none';
         }
@@ -961,7 +961,7 @@
         if (authEmail && authEmail !== 'Contact information unavailable') {
           emailEl.textContent = authEmail;
           emailEl.href = `mailto:${authEmail}`;
-          emailWrap.style.display = 'inline';
+          emailWrap.style.display = 'inline-flex';
         } else {
           emailWrap.style.display = 'none';
         }

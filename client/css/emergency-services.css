@@ -349,7 +349,19 @@ body.emergency-body .app-sidebar.active {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
+  min-height: 34px;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.btn-table-call i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 /* Map Controls & Responders Grid */
@@ -484,7 +496,7 @@ body.emergency-body .app-sidebar.active {
 }
 
 .btn-card-action {
-  padding: 0.6rem;
+  padding: 0.55rem 0.75rem;
   border-radius: 6px;
   font-size: 0.82rem;
   font-weight: 700;
@@ -493,7 +505,18 @@ body.emergency-body .app-sidebar.active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.45rem;
+  min-height: 40px;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.btn-card-action i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
 }
 .btn-card-call { background: var(--emergency-red); color: #ffffff; }
 .btn-card-nav { background: var(--bg-surface-gray); color: var(--text-dark); border: 1px solid var(--border-strong); }
