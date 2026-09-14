@@ -128,9 +128,9 @@ window.EmergencyMap = {
         this.map.dragging.disable();
         this.map.touchZoom.disable();
         toggleBtn.innerHTML = '<i class="fa-solid fa-hand"></i> Tap to Interact';
-        toggleBtn.style.background = '#ffffff';
-        toggleBtn.style.color = '#0f172a';
-        toggleBtn.style.borderColor = '#cbd5e1';
+        toggleBtn.style.background = 'var(--bg-surface, #ffffff)';
+        toggleBtn.style.color = 'var(--text-main, #0f172a)';
+        toggleBtn.style.borderColor = 'var(--border-color, #cbd5e1)';
       }
     });
   },
@@ -178,13 +178,13 @@ window.EmergencyMap = {
           <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #dc2626; margin-bottom: 2px;">
             ${responder.type} &bull; ${distText}
           </div>
-          <h4 style="margin: 0 0 6px 0; font-size: 0.95rem; color: #0f172a; font-weight: 700;">${responder.name}</h4>
-          <p style="margin: 0 0 10px 0; font-size: 0.8rem; color: #64748b;">${responder.address}</p>
+          <h4 style="margin: 0 0 6px 0; font-size: 0.95rem; color: var(--text-main, #0f172a); font-weight: 700;">${responder.name}</h4>
+          <p style="margin: 0 0 10px 0; font-size: 0.8rem; color: var(--text-muted, #64748b);">${responder.address}</p>
           <div style="display: flex; gap: 6px;">
             <a href="tel:${responder.phone}" style="flex: 1; background: #dc2626; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 700; padding: 6px; border-radius: 4px; text-align: center;">
               Call ${responder.phone}
             </a>
-            <a href="${googleNavUrl}" target="_blank" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; text-decoration: none; font-size: 0.75rem; font-weight: 600; padding: 6px 8px; border-radius: 4px;">
+            <a href="${googleNavUrl}" target="_blank" style="background: var(--bg-hover, #f1f5f9); color: var(--text-main, #0f172a); border: 1px solid var(--border-color, #cbd5e1); text-decoration: none; font-size: 0.75rem; font-weight: 600; padding: 6px 8px; border-radius: 4px;">
               Directions
             </a>
           </div>

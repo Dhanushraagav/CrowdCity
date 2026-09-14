@@ -183,6 +183,57 @@
     html.dark-theme .priority-medium { background: rgba(234, 179, 8, 0.15) !important; color: #fde047 !important; border-color: rgba(234, 179, 8, 0.3) !important; }
     [data-theme="dark"] .priority-low,
     html.dark-theme .priority-low { background: rgba(34, 197, 94, 0.15) !important; color: #86efac !important; border-color: rgba(34, 197, 94, 0.3) !important; }
+
+    /* Map Legend Chips */
+    .map-legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+    .chip-road { background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48; }
+    .chip-signal { background: #fff7ed; border: 1px solid #ffedd5; color: #c2410c; }
+    .chip-water { background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; }
+
+    [data-theme="dark"] .chip-road,
+    html.dark-theme .chip-road,
+    html.theme-dark .chip-road {
+      background: rgba(225, 29, 72, 0.18) !important;
+      border-color: rgba(225, 29, 72, 0.35) !important;
+      color: #fca5a5 !important;
+    }
+    [data-theme="dark"] .chip-signal,
+    html.dark-theme .chip-signal,
+    html.theme-dark .chip-signal {
+      background: rgba(234, 88, 12, 0.18) !important;
+      border-color: rgba(234, 88, 12, 0.35) !important;
+      color: #fdba74 !important;
+    }
+    [data-theme="dark"] .chip-water,
+    html.dark-theme .chip-water,
+    html.theme-dark .chip-water {
+      background: rgba(2, 132, 199, 0.18) !important;
+      border-color: rgba(2, 132, 199, 0.35) !important;
+      color: #7dd3fc !important;
+    }
+
+    .ai-triage-preview-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 0.82rem;
+    }
+    [data-theme="dark"] .ai-triage-preview-box,
+    html.dark-theme .ai-triage-preview-box,
+    html.theme-dark .ai-triage-preview-box {
+      background: rgba(5, 150, 105, 0.12) !important;
+      border-color: rgba(5, 150, 105, 0.35) !important;
+      color: #6ee7b7 !important;
+    }
   </style>
 </head>
 <body class="protected-page">
@@ -323,9 +374,9 @@
               </h2>
             </div>
             <div style="display: flex; gap: 0.4rem; font-size: 0.78rem; flex-wrap: wrap;">
-              <span style="display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.5rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; color: #e11d48; font-weight: 600;"><i class="fa-solid fa-location-dot"></i> Road Damage</span>
-              <span style="display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.5rem; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 6px; color: #c2410c; font-weight: 600;"><i class="fa-solid fa-location-dot"></i> Signal / Traffic</span>
-              <span style="display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.5rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; color: #0284c7; font-weight: 600;"><i class="fa-solid fa-location-dot"></i> Waterlogging</span>
+              <span class="map-legend-chip chip-road"><i class="fa-solid fa-location-dot"></i> Road Damage</span>
+              <span class="map-legend-chip chip-signal"><i class="fa-solid fa-location-dot"></i> Signal / Traffic</span>
+              <span class="map-legend-chip chip-water"><i class="fa-solid fa-location-dot"></i> Waterlogging</span>
             </div>
           </div>
           <div id="transportation-map" class="transport-map-container"></div>
@@ -454,7 +505,7 @@
           </div>
 
           <!-- Real-Time AI Triage Preview -->
-          <div id="ai-triage-preview" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1rem; font-size: 0.82rem;">
+          <div id="ai-triage-preview" class="ai-triage-preview-box">
             <div style="display: flex; align-items: center; gap: 0.4rem; color: #166534; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; margin-bottom: 0.35rem;">
               <i class="fa-solid fa-robot"></i> Automated AI Triage Prediction
             </div>

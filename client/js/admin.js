@@ -1354,7 +1354,7 @@
           const timeStr = new Date(c.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
           return `
-            <div style="background: ${isAuthority ? '#f1f5f9' : '#ffffff'}; border: 1px solid var(--border-color); padding: 0.45rem 0.65rem; border-radius: 4px; font-size: 0.82rem;">
+            <div style="background: ${isAuthority ? 'var(--bg-surface-hover, #f1f5f9)' : 'var(--bg-surface, #ffffff)'}; border: 1px solid var(--border-color); padding: 0.45rem 0.65rem; border-radius: 4px; font-size: 0.82rem;">
               <div style="display: flex; justify-content: space-between; font-weight: 700; color: ${isAuthority ? 'var(--primary)' : 'var(--text-main)'}; margin-bottom: 0.2rem; font-size: 0.75rem;">
                 <span>${escapeHTML(senderName)} (${(c.user_role || 'user').toUpperCase()})</span>
                 <span style="font-weight: 400; color: var(--text-light);">${timeStr}</span>

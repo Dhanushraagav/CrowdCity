@@ -22,6 +22,30 @@
 
   <!-- Central Auth Router -->
   <script src="js/auth-router.js?v=3.3.0"></script>
+
+  <style>
+    #profile-avatar-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #e0f2fe;
+      border: 2px solid #0284c7;
+      color: #0369a1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    [data-theme="dark"] #profile-avatar-circle,
+    html.dark-theme #profile-avatar-circle,
+    html.theme-dark #profile-avatar-circle {
+      background: rgba(2, 132, 199, 0.18) !important;
+      color: #7dd3fc !important;
+      border-color: #0284c7 !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -103,7 +127,7 @@
           <!-- 3D Officer Profile Card -->
           <div class="card-3d" style="max-width: 650px; margin-bottom: 1.5rem;">
             <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem;">
-              <div id="profile-avatar-circle" style="width: 56px; height: 56px; border-radius: 50%; background: #e0f2fe; border: 2px solid #0284c7; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; text-transform: uppercase;">
+              <div id="profile-avatar-circle">
                 AO
               </div>
               <div>

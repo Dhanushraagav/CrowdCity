@@ -8604,31 +8604,197 @@ html.dark-theme .activity-item:hover {
 
 /* Emergency & Urgent Reporting Banners in Dark Mode */
 [data-theme="dark"] .urgent-reporting-notice-banner,
-html.dark-theme .urgent-reporting-notice-banner {
-  background: rgba(225, 29, 72, 0.12) !important;
-  border: 1.5px solid rgba(225, 29, 72, 0.3) !important;
+html[data-theme="dark"] .urgent-reporting-notice-banner,
+html.dark-theme .urgent-reporting-notice-banner,
+html.theme-dark .urgent-reporting-notice-banner {
+  background: #0f0507 !important;
+  border: 1.5px solid rgba(225, 29, 72, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(225, 29, 72, 0.12) !important;
 }
 
-[data-theme="dark"] .urgent-reporting-notice-banner div,
-[data-theme="dark"] .urgent-reporting-notice-banner p,
-[data-theme="dark"] .urgent-reporting-notice-banner span,
-html.dark-theme .urgent-reporting-notice-banner div,
-html.dark-theme .urgent-reporting-notice-banner p,
-html.dark-theme .urgent-reporting-notice-banner span {
+[data-theme="dark"] .urgent-notice-icon-box,
+html[data-theme="dark"] .urgent-notice-icon-box,
+html.dark-theme .urgent-notice-icon-box,
+html.theme-dark .urgent-notice-icon-box {
+  background: rgba(225, 29, 72, 0.18) !important;
+  color: #fb7185 !important;
+  border: 1px solid rgba(225, 29, 72, 0.35) !important;
+}
+
+[data-theme="dark"] .urgent-notice-title,
+html[data-theme="dark"] .urgent-notice-title,
+html.dark-theme .urgent-notice-title,
+html.theme-dark .urgent-notice-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .urgent-notice-desc,
+html[data-theme="dark"] .urgent-notice-desc,
+html.dark-theme .urgent-notice-desc,
+html.theme-dark .urgent-notice-desc {
   color: #fecdd3 !important;
 }
 
+[data-theme="dark"] .urgent-notice-btn,
+html[data-theme="dark"] .urgent-notice-btn,
+html.dark-theme .urgent-notice-btn,
+html.theme-dark .urgent-notice-btn {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4) !important;
+}
+
+[data-theme="dark"] .urgent-notice-btn:hover,
+html[data-theme="dark"] .urgent-notice-btn:hover,
+html.dark-theme .urgent-notice-btn:hover,
+html.theme-dark .urgent-notice-btn:hover {
+  background: #ef4444 !important;
+}
+
 [data-theme="dark"] #emergency-warning-box,
-html.dark-theme #emergency-warning-box {
-  background: rgba(220, 38, 38, 0.12) !important;
-  border: 1px solid rgba(220, 38, 38, 0.3) !important;
-  border-left: 4px solid #dc2626 !important;
+[data-theme="dark"] .emergency-warning-box,
+html[data-theme="dark"] #emergency-warning-box,
+html[data-theme="dark"] .emergency-warning-box,
+html.dark-theme #emergency-warning-box,
+html.dark-theme .emergency-warning-box,
+html.theme-dark #emergency-warning-box,
+html.theme-dark .emergency-warning-box {
+  background: #140507 !important;
+  border: 1px solid rgba(220, 38, 38, 0.4) !important;
+  border-left: 4px solid #ef4444 !important;
   color: #fca5a5 !important;
 }
 
-[data-theme="dark"] #emergency-warning-box strong,
-html.dark-theme #emergency-warning-box strong {
+[data-theme="dark"] #emergency-warning-box i,
+[data-theme="dark"] .emergency-warning-box i,
+html[data-theme="dark"] #emergency-warning-box i,
+html.dark-theme #emergency-warning-box i,
+html.theme-dark #emergency-warning-box i {
   color: #f87171 !important;
+}
+
+[data-theme="dark"] #emergency-warning-box strong,
+[data-theme="dark"] .emergency-warning-box strong,
+html[data-theme="dark"] #emergency-warning-box strong,
+html.dark-theme #emergency-warning-box strong,
+html.theme-dark #emergency-warning-box strong {
+  color: #ffffff !important;
+}
+
+/* Dedicated 108 Emergency Ambulance Card & Badges in Dark Mode */
+[data-theme="dark"] .service-card-dedicated-108,
+[data-theme="dark"] .nearby-cards-grid .service-card-dedicated-108,
+html[data-theme="dark"] .service-card-dedicated-108,
+html[data-theme="dark"] .nearby-cards-grid .service-card-dedicated-108,
+html.dark-theme .service-card-dedicated-108,
+html.dark-theme .nearby-cards-grid .service-card-dedicated-108,
+html.theme-dark .service-card-dedicated-108,
+html.theme-dark .nearby-cards-grid .service-card-dedicated-108 {
+  background: #0a0a0a !important;
+  border: 2px solid #059669 !important;
+  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15) !important;
+}
+
+[data-theme="dark"] .service-distance-badge,
+[data-theme="dark"] .nearby-cards-grid .service-distance-badge,
+html[data-theme="dark"] .service-distance-badge,
+html.dark-theme .service-distance-badge,
+html.theme-dark .service-distance-badge {
+  background: rgba(5, 150, 105, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(5, 150, 105, 0.35) !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .badge-emergency-status.status-verified,
+html.dark-theme .nearby-cards-grid .badge-emergency-status.status-verified,
+html.theme-dark .nearby-cards-grid .badge-emergency-status.status-verified {
+  background: rgba(5, 150, 105, 0.18) !important;
+  color: #6ee7b7 !important;
+  border: 1px solid rgba(5, 150, 105, 0.35) !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .ownership-government,
+html.dark-theme .nearby-cards-grid .ownership-government,
+html.theme-dark .nearby-cards-grid .ownership-government {
+  background: rgba(37, 99, 235, 0.18) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(37, 99, 235, 0.35) !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .ownership-private,
+html.dark-theme .nearby-cards-grid .ownership-private,
+html.theme-dark .nearby-cards-grid .ownership-private {
+  background: rgba(109, 40, 217, 0.18) !important;
+  color: #c4b5fd !important;
+  border: 1px solid rgba(109, 40, 217, 0.35) !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .ownership-trust,
+[data-theme="dark"] .nearby-cards-grid .ownership-ngo,
+html.dark-theme .nearby-cards-grid .ownership-trust,
+html.dark-theme .nearby-cards-grid .ownership-ngo,
+html.theme-dark .nearby-cards-grid .ownership-trust,
+html.theme-dark .nearby-cards-grid .ownership-ngo {
+  background: rgba(192, 38, 211, 0.18) !important;
+  color: #f0abfc !important;
+  border: 1px solid rgba(192, 38, 211, 0.35) !important;
+}
+
+[data-theme="dark"] .nearby-cards-grid .badge-facility-clinic,
+html.dark-theme .nearby-cards-grid .badge-facility-clinic,
+html.theme-dark .nearby-cards-grid .badge-facility-clinic {
+  background: rgba(217, 119, 6, 0.18) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(217, 119, 6, 0.35) !important;
+}
+
+[data-theme="dark"] .district-helpline-card,
+html.dark-theme .district-helpline-card,
+html.theme-dark .district-helpline-card {
+  background: #0f0809 !important;
+  border: 1px solid #3b1418 !important;
+}
+
+[data-theme="dark"] .district-helpline-info h4,
+html.dark-theme .district-helpline-info h4,
+html.theme-dark .district-helpline-info h4 {
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .district-helpline-info p,
+html.dark-theme .district-helpline-info p,
+html.theme-dark .district-helpline-info p {
+  color: #fecdd3 !important;
+}
+
+[data-theme="dark"] .road-block-pivot-card,
+html.dark-theme .road-block-pivot-card,
+html.theme-dark .road-block-pivot-card {
+  background: #061a18 !important;
+  border: 1px solid rgba(13, 148, 136, 0.35) !important;
+  border-left: 3px solid #0d9488 !important;
+  color: #5eead4 !important;
+}
+
+/* Local Body Badges */
+.badge-localbody-type,
+#detail-localbody-type-badge,
+#citizen-detail-localbody-type-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+[data-theme="dark"] .badge-localbody-type,
+[data-theme="dark"] #detail-localbody-type-badge,
+[data-theme="dark"] #citizen-detail-localbody-type-badge,
+html.dark-theme #detail-localbody-type-badge,
+html.dark-theme #citizen-detail-localbody-type-badge,
+html.theme-dark #detail-localbody-type-badge,
+html.theme-dark #citizen-detail-localbody-type-badge {
+  background: rgba(3, 105, 161, 0.2) !important;
+  color: #7dd3fc !important;
+  border: 1px solid rgba(3, 105, 161, 0.35) !important;
 }
 
 /* Toast Notifications in Dark Mode */

@@ -71,6 +71,24 @@
       transform: translateY(-2px);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
     }
+    #mpin-modal-error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.65rem 0.85rem;
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+    }
+    [data-theme="dark"] #mpin-modal-error,
+    html.dark-theme #mpin-modal-error,
+    html.theme-dark #mpin-modal-error {
+      background: #16080a !important;
+      color: #fca5a5 !important;
+      border-color: #3b1418 !important;
+    }
   </style>
 
   <script>
@@ -314,7 +332,7 @@
       </div>
 
       <!-- Error Message Box -->
-      <div id="mpin-modal-error" style="display: none; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-size: 0.8rem; font-weight: 600; padding: 0.65rem 0.85rem; border-radius: 10px; margin-bottom: 1.25rem; line-height: 1.4;">
+      <div id="mpin-modal-error" style="display: none;">
       </div>
 
       <!-- Footer Buttons -->
