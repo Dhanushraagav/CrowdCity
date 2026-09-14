@@ -57,6 +57,8 @@ class CrowdCityThemeService {
     try {
       localStorage.setItem('crowdcity_theme', theme);
       localStorage.setItem('cc_theme', theme);
+      localStorage.setItem('cc_theme_explicit', theme);
+      localStorage.setItem('cc_theme_updated_at', String(Date.now()));
     } catch (e) {
       console.warn('[CrowdCityTheme] Failed to persist theme to localStorage:', e);
     }
@@ -115,17 +117,37 @@ class CrowdCityThemeService {
   }
 
   init() {
+    this.currentTheme = this.getTheme();
     this.applyTheme(this.currentTheme);
 
     // Re-sync on DOM ready to update any theme control UI
     if (typeof document !== 'undefined') {
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          this.applyTheme(this.currentTheme);
-        });
-      } else {
+      const syncTheme = () => {
+        this.currentTheme = this.getTheme();
         this.applyTheme(this.currentTheme);
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncTheme);
+      } else {
+        syncTheme();
       }
+    }
+
+    // Handle Back/Forward Cache (BFCache) navigation
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pageshow', (event) => {
+        this.currentTheme = this.getTheme();
+        this.applyTheme(this.currentTheme);
+      });
+
+      // Synchronize across open browser tabs
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'crowdcity_theme' || event.key === 'cc_theme') {
+          this.currentTheme = this.getTheme();
+          this.applyTheme(this.currentTheme);
+        }
+      });
     }
   }
 }

@@ -381,7 +381,12 @@ function _attachAuthStateListener() {
       localStorage.setItem('cc_session', JSON.stringify(session));
 
       // Reconcile cloud account preferences on authentication event
-      syncAccountPreferences(session.user, null);
+      let cachedProf = null;
+      try {
+        const rawProf = localStorage.getItem('cc_user_profile');
+        if (rawProf) cachedProf = JSON.parse(rawProf);
+      } catch (e) {}
+      syncAccountPreferences(session.user, cachedProf);
 
       const path = window.location.pathname;
       const normalizedPath = path.replace(/\.html$/, '');
@@ -721,9 +726,7 @@ function applyAccountPreferences(prefs) {
     }
 
     if (window.CrowdCityTheme && typeof window.CrowdCityTheme.setTheme === 'function') {
-      if (window.CrowdCityTheme.getTheme() !== theme) {
-        window.CrowdCityTheme.setTheme(theme);
-      }
+      window.CrowdCityTheme.setTheme(theme);
     } else if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme, isDark: theme === 'dark' } }));
     }
@@ -733,17 +736,41 @@ window.applyAccountPreferences = applyAccountPreferences;
 
 /**
  * Reconcile cloud account preferences with the current device.
- * Cloud preferences ALWAYS win for authenticated users.
- * If brand-new user has no cloud preferences, defaults to Tamil ('ta') and Light ('light').
+ * Invariants:
+ * 1. Explicit local selection (e.g. user chose Dark in Settings) MUST be respected immediately
+ *    and NOT overwritten by a delayed, stale, or null/default cloud fetch.
+ * 2. Cross-device sync: When opening a fresh browser or another device (Mobile), the account's
+ *    cloud preferences are inherited immediately.
+ * 3. Never blindly default to 'light' if the user has already selected Dark.
  */
 async function syncAccountPreferences(user, profile) {
   if (!user && !profile) return;
   const activeUser = user || getCurrentUser();
   if (!activeUser || !activeUser.id) return;
 
-  // Cloud Resolution:
-  // 1. profile from public.profiles table
-  // 2. activeUser.user_metadata from Supabase Auth
+  // 1. Read local preferences
+  let localTheme = null;
+  let localThemeExplicit = null;
+  let localThemeExplicitTs = 0;
+  try {
+    localTheme = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+    localThemeExplicit = localStorage.getItem('cc_theme_explicit') || localTheme;
+    localThemeExplicitTs = parseInt(localStorage.getItem('cc_theme_updated_at') || '0', 10);
+    // If localTheme is set but no timestamp, establish baseline timestamp so it's not discarded
+    if (localTheme && !localThemeExplicitTs) {
+      localThemeExplicitTs = Date.now();
+      localStorage.setItem('cc_theme_updated_at', String(localThemeExplicitTs));
+      localStorage.setItem('cc_theme_explicit', localTheme);
+    }
+  } catch (e) {}
+
+  let localLang = null;
+  try {
+    localLang = localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language');
+  } catch (e) {}
+
+  // 2. Cloud Language Resolution:
+  // profile from public.profiles table or activeUser.user_metadata
   let cloudLang = null;
   if (profile && (profile.language === 'ta' || profile.language === 'en')) {
     cloudLang = profile.language;
@@ -751,18 +778,50 @@ async function syncAccountPreferences(user, profile) {
     cloudLang = activeUser.user_metadata.language;
   }
 
+  // 3. Cloud Theme Resolution & Timestamps
   let cloudTheme = null;
+  let cloudThemeTs = 0;
   if (profile && (profile.theme === 'light' || profile.theme === 'dark')) {
     cloudTheme = profile.theme;
+    if (profile.updated_at) {
+      cloudThemeTs = new Date(profile.updated_at).getTime() || 0;
+    }
   } else if (activeUser.user_metadata && (activeUser.user_metadata.theme === 'light' || activeUser.user_metadata.theme === 'dark')) {
     cloudTheme = activeUser.user_metadata.theme;
+    cloudThemeTs = activeUser.user_metadata.theme_updated_at || 0;
   }
 
-  // System defaults for new accounts with no preferences
-  const finalLang = cloudLang || 'ta';
-  const finalTheme = cloudTheme || 'light';
+  // Language: Cloud language takes priority for authenticated accounts, falling back to local choice
+  const finalLang = cloudLang || localLang || 'ta';
 
-  // Apply cloud preferences to UI & local cache immediately
+  // Theme:
+  let finalTheme = 'light';
+
+  if (localThemeExplicit && (localThemeExplicit === 'dark' || localThemeExplicit === 'light')) {
+    // The user explicitly made a selection on this device.
+    // Respect local selection immediately unless cloud has an unambiguously newer timestamp from another device.
+    if (cloudTheme && cloudThemeTs > localThemeExplicitTs && cloudThemeTs > 0 && localThemeExplicitTs > 0) {
+      finalTheme = cloudTheme;
+    } else {
+      finalTheme = localThemeExplicit;
+      // If cloud does not match the local explicit selection, sync local selection up to cloud
+      if (cloudTheme !== finalTheme) {
+        saveAccountPreferenceDirect(activeUser.id, {
+          theme: finalTheme,
+          theme_updated_at: localThemeExplicitTs || Date.now()
+        }).catch(e => console.warn('[Auth Prefs] Cloud theme sync notice:', e));
+      }
+    }
+  } else if (cloudTheme) {
+    // Fresh browser / new device with no prior explicit local choice: inherit account's cloud theme
+    finalTheme = cloudTheme;
+  } else if (localTheme === 'dark' || localTheme === 'light') {
+    finalTheme = localTheme;
+  } else {
+    finalTheme = 'light';
+  }
+
+  // Apply resolved preferences to UI & local cache immediately
   applyAccountPreferences({ language: finalLang, theme: finalTheme });
 
   // If this account had no saved preferences at all (brand new user), initialize them in the cloud
@@ -770,7 +829,8 @@ async function syncAccountPreferences(user, profile) {
     console.log('[Auth Prefs] Initializing default preferences in cloud account for user:', activeUser.id);
     saveAccountPreferenceDirect(activeUser.id, {
       language: finalLang,
-      theme: finalTheme
+      theme: finalTheme,
+      theme_updated_at: Date.now()
     }).catch(e => console.warn('[Auth Prefs] Initial preference save notice:', e));
   }
 }
@@ -796,18 +856,21 @@ async function saveAccountPreferenceDirect(userId, updates) {
   // 2. Update public.profiles table
   if (client && userId) {
     try {
-      await client.from('profiles').update(updates).eq('id', userId);
+      const profileUpdates = { ...updates };
+      delete profileUpdates.theme_updated_at;
+      await client.from('profiles').update(profileUpdates).eq('id', userId);
     } catch (e) {
       console.warn('[Auth Prefs] client.profiles.update notice:', e);
     }
   }
 
-  // 3. Update server API endpoint
+  // 3. Update server API endpoint with keepalive: true so navigation does not drop the request
   try {
     const token = getAuthToken() || (client && (await client.auth.getSession())?.data?.session?.access_token);
     if (token) {
       await fetch('/api/auth/preferences', {
         method: 'PATCH',
+        keepalive: true,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -829,8 +892,45 @@ async function saveAccountPreference(key, value) {
     throw new Error('Invalid preference key. Must be "language" or "theme"');
   }
 
-  // 1. Optimistically apply locally and update UI
+  const now = Date.now();
+
+  // 1. Optimistically apply locally and update UI synchronously
   applyAccountPreferences({ [key]: value });
+
+  if (key === 'theme') {
+    try {
+      localStorage.setItem('crowdcity_theme', value);
+      localStorage.setItem('cc_theme', value);
+      localStorage.setItem('cc_theme_explicit', value);
+      localStorage.setItem('cc_theme_updated_at', String(now));
+    } catch (e) {}
+  }
+
+  // Synchronously update cc_session in cache
+  try {
+    const currentSession = getSession();
+    if (currentSession && currentSession.user) {
+      currentSession.user.user_metadata = currentSession.user.user_metadata || {};
+      currentSession.user.user_metadata[key] = value;
+      if (key === 'theme') {
+        currentSession.user.user_metadata.theme_updated_at = now;
+      }
+      localStorage.setItem('cc_session', JSON.stringify(currentSession));
+    }
+  } catch (e) {}
+
+  // Synchronously update cc_user_profile in cache
+  try {
+    const cachedProfileStr = localStorage.getItem('cc_user_profile');
+    if (cachedProfileStr) {
+      const p = JSON.parse(cachedProfileStr);
+      p[key] = value;
+      if (key === 'theme') {
+        p.theme_updated_at = now;
+      }
+      localStorage.setItem('cc_user_profile', JSON.stringify(p));
+    }
+  } catch (e) {}
 
   const user = getCurrentUser();
   if (!user || !user.id) {
@@ -846,9 +946,14 @@ async function saveAccountPreference(key, value) {
     ? await getSupabaseClient() 
     : (typeof supabaseClient !== 'undefined' ? supabaseClient : window.supabaseClient);
 
+  const metaUpdates = { [key]: value };
+  if (key === 'theme') {
+    metaUpdates.theme_updated_at = now;
+  }
+
   if (client && client.auth) {
     try {
-      const { data, error } = await client.auth.updateUser({ data: { [key]: value } });
+      const { data, error } = await client.auth.updateUser({ data: metaUpdates });
       if (!error && data && data.user) {
         saveSuccess = true;
         // Also update cached session user metadata if present
@@ -874,25 +979,17 @@ async function saveAccountPreference(key, value) {
         .eq('id', user.id);
       if (!profileErr) {
         saveSuccess = true;
-        // Update cached profile
-        const cachedProfileStr = localStorage.getItem('cc_user_profile');
-        if (cachedProfileStr) {
-          try {
-            const p = JSON.parse(cachedProfileStr);
-            p[key] = value;
-            localStorage.setItem('cc_user_profile', JSON.stringify(p));
-          } catch (e) {}
-        }
       }
     } catch (e) {}
   }
 
-  // 4. Try Express API endpoint
+  // 4. Try Express API endpoint with keepalive: true so page navigation does not terminate save
   try {
     const token = getAuthToken() || (client && (await client.auth.getSession())?.data?.session?.access_token);
     if (token) {
       const resp = await fetch('/api/auth/preferences', {
         method: 'PATCH',
+        keepalive: true,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -1167,7 +1264,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       full_name: userName,
       role: 'citizen',
       language: user.user_metadata?.language || 'ta',
-      theme: user.user_metadata?.theme || 'light',
+      theme: user.user_metadata?.theme || (localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme') || 'light'),
       is_verified_authority: false,
       points: 50,
       created_at: new Date().toISOString()
@@ -3313,7 +3410,7 @@ window.renderTurnstileWidgets = function() {
   }
 
   const siteKey = window.supabaseConfig?.turnstileSiteKey || '1x00000000000000000000AA';
-  const theme = 'light';
+  const theme = (typeof getActiveTheme === 'function') ? getActiveTheme() : 'light';
 
   if (document.getElementById('login-captcha') && window.loginWidgetId === null) {
     try {

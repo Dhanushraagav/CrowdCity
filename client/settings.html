@@ -470,26 +470,32 @@
 
       // Theme selection logic
       window.setPortalTheme = function(theme) {
+        var validTheme = (theme === 'dark') ? 'dark' : 'light';
+        try {
+          localStorage.setItem('crowdcity_theme', validTheme);
+          localStorage.setItem('cc_theme', validTheme);
+          localStorage.setItem('cc_theme_explicit', validTheme);
+          localStorage.setItem('cc_theme_updated_at', String(Date.now()));
+        } catch (e) {}
+
+        if (window.CrowdCityTheme && typeof window.CrowdCityTheme.setTheme === 'function') {
+          window.CrowdCityTheme.setTheme(validTheme);
+        } else {
+          try {
+            document.documentElement.setAttribute('data-theme', validTheme);
+            var isDark = (validTheme === 'dark');
+            document.documentElement.classList.toggle('dark-theme', isDark);
+            document.documentElement.classList.toggle('theme-dark', isDark);
+            document.documentElement.classList.toggle('light-theme', !isDark);
+            document.documentElement.classList.toggle('theme-light', !isDark);
+            window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: validTheme, isDark: isDark } }));
+          } catch(e) {}
+        }
+
         if (typeof window.saveAccountPreference === 'function') {
-          window.saveAccountPreference('theme', theme).catch(err => {
+          window.saveAccountPreference('theme', validTheme).catch(err => {
             console.error('[Settings] Error saving theme preference to account:', err);
           });
-        } else {
-          if (window.CrowdCityTheme) {
-            window.CrowdCityTheme.setTheme(theme);
-          } else {
-            try {
-              localStorage.setItem('crowdcity_theme', theme);
-              localStorage.setItem('cc_theme', theme);
-              document.documentElement.setAttribute('data-theme', theme);
-              var isDark = (theme === 'dark');
-              document.documentElement.classList.toggle('dark-theme', isDark);
-              document.documentElement.classList.toggle('theme-dark', isDark);
-              document.documentElement.classList.toggle('light-theme', !isDark);
-              document.documentElement.classList.toggle('theme-light', !isDark);
-              window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: theme } }));
-            } catch(e) {}
-          }
         }
         updateThemeUI();
       };
