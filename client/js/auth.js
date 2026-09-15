@@ -1,3 +1,13 @@
+function isAuthPage() {
+  if (typeof window === 'undefined' || !window.location) return false;
+  var path = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+  var file = path.split('/').pop().replace(/\.html$/, '');
+  return file === 'auth' || file === 'authority-login' || file === 'reset-password';
+}
+if (typeof window !== 'undefined') {
+  window.isAuthPage = isAuthPage;
+}
+
 // CrowdCity - Authentication Manager
 if (typeof window !== 'undefined' && window.location.hostname === 'crowdcity.co.in') {
   window.location.replace('https://www.crowdcity.co.in' + window.location.pathname + window.location.search + window.location.hash);
@@ -714,21 +724,34 @@ function applyAccountPreferences(prefs) {
     try {
       localStorage.setItem('crowdcity_theme', theme);
       localStorage.setItem('cc_theme', theme);
+      localStorage.setItem('cc_theme_explicit', theme);
+      localStorage.setItem('cc_theme_updated_at', String(Date.now()));
     } catch (e) {}
 
-    if (typeof document !== 'undefined' && document.documentElement) {
-      const isDark = (theme === 'dark');
-      document.documentElement.setAttribute('data-theme', theme);
-      document.documentElement.classList.toggle('dark-theme', isDark);
-      document.documentElement.classList.toggle('theme-dark', isDark);
-      document.documentElement.classList.toggle('light-theme', !isDark);
-      document.documentElement.classList.toggle('theme-light', !isDark);
-    }
+    // Only apply theme visually to DOM if NOT on an auth page!
+    // Auth pages (auth.html, authority-login.html, reset-password.html) MUST ALWAYS REMAIN LIGHT MODE.
+    const isAuth = typeof isAuthPage === 'function' ? isAuthPage() : (window.isAuthPage ? window.isAuthPage() : false);
+    if (!isAuth) {
+      if (typeof document !== 'undefined' && document.documentElement) {
+        const isDark = (theme === 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.classList.toggle('dark-theme', isDark);
+        document.documentElement.classList.toggle('theme-dark', isDark);
+        document.documentElement.classList.toggle('light-theme', !isDark);
+        document.documentElement.classList.toggle('theme-light', !isDark);
+      }
 
-    if (window.CrowdCityTheme && typeof window.CrowdCityTheme.setTheme === 'function') {
-      window.CrowdCityTheme.setTheme(theme);
-    } else if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme, isDark: theme === 'dark' } }));
+      if (window.CrowdCityTheme && typeof window.CrowdCityTheme.setTheme === 'function') {
+        window.CrowdCityTheme.setTheme(theme);
+      } else if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme, isDark: theme === 'dark' } }));
+      }
+    } else {
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.documentElement.classList.remove('dark-theme', 'theme-dark');
+        document.documentElement.classList.add('light-theme', 'theme-light');
+      }
     }
   }
 }
@@ -743,34 +766,22 @@ window.applyAccountPreferences = applyAccountPreferences;
  *    cloud preferences are inherited immediately.
  * 3. Never blindly default to 'light' if the user has already selected Dark.
  */
+/**
+ * Reconcile account preferences with Supabase cloud account.
+ * Architectural Rules:
+ * 1. For authenticated accounts, SUPABASE ACCOUNT PREFERENCE is THE AUTHORITATIVE SOURCE OF TRUTH.
+ * 2. Cross-device synchronization: Regardless of what is in local storage on Device B (mobile),
+ *    the authenticated account's cloud preferences in Supabase are fetched and applied.
+ * 3. Default for genuinely new accounts without saved preferences: Language = 'ta', Theme = 'light'.
+ * 4. Auth pages always remain in Light Mode visually.
+ */
 async function syncAccountPreferences(user, profile) {
   if (!user && !profile) return;
   const activeUser = user || getCurrentUser();
   if (!activeUser || !activeUser.id) return;
 
-  // 1. Read local preferences
-  let localTheme = null;
-  let localThemeExplicit = null;
-  let localThemeExplicitTs = 0;
-  try {
-    localTheme = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
-    localThemeExplicit = localStorage.getItem('cc_theme_explicit') || localTheme;
-    localThemeExplicitTs = parseInt(localStorage.getItem('cc_theme_updated_at') || '0', 10);
-    // If localTheme is set but no timestamp, establish baseline timestamp so it's not discarded
-    if (localTheme && !localThemeExplicitTs) {
-      localThemeExplicitTs = Date.now();
-      localStorage.setItem('cc_theme_updated_at', String(localThemeExplicitTs));
-      localStorage.setItem('cc_theme_explicit', localTheme);
-    }
-  } catch (e) {}
-
-  let localLang = null;
-  try {
-    localLang = localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language');
-  } catch (e) {}
-
-  // 2. Cloud Language Resolution:
-  // profile from public.profiles table or activeUser.user_metadata
+  // 1. Cloud Language Resolution:
+  // Priority: profile table -> user_metadata -> default 'ta'
   let cloudLang = null;
   if (profile && (profile.language === 'ta' || profile.language === 'en')) {
     cloudLang = profile.language;
@@ -778,51 +789,32 @@ async function syncAccountPreferences(user, profile) {
     cloudLang = activeUser.user_metadata.language;
   }
 
-  // 3. Cloud Theme Resolution & Timestamps
+  // 2. Cloud Theme Resolution:
+  // Priority: profile table -> user_metadata -> default 'light'
   let cloudTheme = null;
-  let cloudThemeTs = 0;
   if (profile && (profile.theme === 'light' || profile.theme === 'dark')) {
     cloudTheme = profile.theme;
-    if (profile.updated_at) {
-      cloudThemeTs = new Date(profile.updated_at).getTime() || 0;
-    }
   } else if (activeUser.user_metadata && (activeUser.user_metadata.theme === 'light' || activeUser.user_metadata.theme === 'dark')) {
     cloudTheme = activeUser.user_metadata.theme;
-    cloudThemeTs = activeUser.user_metadata.theme_updated_at || 0;
   }
 
-  // Language: Cloud language takes priority for authenticated accounts, falling back to local choice
-  const finalLang = cloudLang || localLang || 'ta';
-
-  // Theme:
-  let finalTheme = 'light';
-
-  if (localThemeExplicit && (localThemeExplicit === 'dark' || localThemeExplicit === 'light')) {
-    // The user explicitly made a selection on this device.
-    // Respect local selection immediately unless cloud has an unambiguously newer timestamp from another device.
-    if (cloudTheme && cloudThemeTs > localThemeExplicitTs && cloudThemeTs > 0 && localThemeExplicitTs > 0) {
-      finalTheme = cloudTheme;
-    } else {
-      finalTheme = localThemeExplicit;
-      // If cloud does not match the local explicit selection, sync local selection up to cloud
-      if (cloudTheme !== finalTheme) {
-        saveAccountPreferenceDirect(activeUser.id, {
-          theme: finalTheme,
-          theme_updated_at: localThemeExplicitTs || Date.now()
-        }).catch(e => console.warn('[Auth Prefs] Cloud theme sync notice:', e));
-      }
-    }
-  } else if (cloudTheme) {
-    // Fresh browser / new device with no prior explicit local choice: inherit account's cloud theme
-    finalTheme = cloudTheme;
-  } else if (localTheme === 'dark' || localTheme === 'light') {
-    finalTheme = localTheme;
-  } else {
-    finalTheme = 'light';
-  }
+  // Authoritative preferences: Cloud account preference takes absolute precedence
+  const finalLang = (cloudLang === 'ta' || cloudLang === 'en') ? cloudLang : 'ta';
+  const finalTheme = (cloudTheme === 'light' || cloudTheme === 'dark') ? cloudTheme : 'light';
 
   // Apply resolved preferences to UI & local cache immediately
   applyAccountPreferences({ language: finalLang, theme: finalTheme });
+
+  // Update local cache for instant 0ms transitions on future refreshes/navigations
+  try {
+    localStorage.setItem('crowdcity_language', finalLang);
+    localStorage.setItem('cc_lang', finalLang);
+    localStorage.setItem('preferred_language', finalLang);
+    localStorage.setItem('crowdcity_theme', finalTheme);
+    localStorage.setItem('cc_theme', finalTheme);
+    localStorage.setItem('cc_theme_explicit', finalTheme);
+    localStorage.setItem('cc_theme_updated_at', String(Date.now()));
+  } catch (e) {}
 
   // If this account had no saved preferences at all (brand new user), initialize them in the cloud
   if (!cloudLang || !cloudTheme) {
@@ -1264,7 +1256,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       full_name: userName,
       role: 'citizen',
       language: user.user_metadata?.language || 'ta',
-      theme: user.user_metadata?.theme || (localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme') || 'light'),
+      theme: user.user_metadata?.theme || 'light',
       is_verified_authority: false,
       points: 50,
       created_at: new Date().toISOString()
@@ -1367,8 +1359,10 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       id: user.id,
       email: user.email,
       role: role,
-      full_name: user.user_metadata?.full_name || 'User',
-      avatar_url: user.user_metadata?.avatar_url || ''
+      language: profile.language || 'ta',
+      theme: profile.theme || 'light',
+      full_name: user.user_metadata?.full_name || profile.full_name || 'User',
+      avatar_url: user.user_metadata?.avatar_url || profile.avatar_url || ''
     }));
   } catch (e) {}
 
@@ -1652,6 +1646,15 @@ async function logoutUser() {
     try { localStorage.removeItem(k); } catch (e) {}
     try { sessionStorage.removeItem(k); } catch (e) {}
   });
+
+  // Reset local theme cache to default 'light' to enforce Account Isolation
+  // This guarantees auth pages display in Light Mode and prevents previous user's theme from leaking to another account.
+  try {
+    localStorage.setItem('crowdcity_theme', 'light');
+    localStorage.setItem('cc_theme', 'light');
+    localStorage.setItem('cc_theme_explicit', 'light');
+    localStorage.removeItem('cc_theme_updated_at');
+  } catch (e) {}
 
   // Also remove native Supabase tokens from localStorage
   try {
@@ -3058,18 +3061,28 @@ function initAuthModule() {
     });
   }
 
-  // Synchronize centralized theme preference
-  const currentTheme = (typeof window !== 'undefined' && window.getPortalTheme) 
-    ? window.getPortalTheme() 
-    : (((localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme')) === 'dark') ? 'dark' : 'light');
-  
-  if (typeof document !== 'undefined' && document.documentElement) {
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    const isDark = (currentTheme === 'dark');
-    document.documentElement.classList.toggle('dark-theme', isDark);
-    document.documentElement.classList.toggle('theme-dark', isDark);
-    document.documentElement.classList.toggle('light-theme', !isDark);
-    document.documentElement.classList.toggle('theme-light', !isDark);
+  const isAuth = typeof isAuthPage === 'function' ? isAuthPage() : (window.isAuthPage ? window.isAuthPage() : false);
+  if (!isAuth) {
+    // Synchronize centralized theme preference for authenticated/application pages
+    const currentTheme = (typeof window !== 'undefined' && window.getPortalTheme) 
+      ? window.getPortalTheme() 
+      : (((localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme')) === 'dark') ? 'dark' : 'light');
+    
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      const isDark = (currentTheme === 'dark');
+      document.documentElement.classList.toggle('dark-theme', isDark);
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('light-theme', !isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+    }
+  } else {
+    // Authentication pages MUST ALWAYS remain Light Mode
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.classList.remove('dark-theme', 'theme-dark');
+      document.documentElement.classList.add('light-theme', 'theme-light');
+    }
   }
 
   localStorage.removeItem('cc_mock_session');

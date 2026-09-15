@@ -28,6 +28,18 @@
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
   <link rel="stylesheet" href="css/components.css?v=3.1.0">
   
+  <script>
+    (function() {
+      // Auth pages MUST ALWAYS remain Light Mode
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.classList.remove('dark-theme', 'theme-dark');
+      document.documentElement.classList.add('light-theme', 'theme-light');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('ready');
+      });
+    })();
+  </script>
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   

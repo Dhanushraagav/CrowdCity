@@ -2,13 +2,24 @@
  * CrowdCity AI - Centralized Theme Management Service
  * 
  * Production Architecture:
- * 1. Single source of truth: localStorage 'crowdcity_theme' / 'cc_theme'
+ * 1. Single source of truth for authenticated users: Supabase Account Profile
  * 2. Default theme for new users: 'light'
  * 3. Early synchronous evaluation: applies 'data-theme' and theme classes to <html>
  *    before first paint to guarantee zero flash of wrong theme (0ms layout shift).
- * 4. Strictly decoupled from language preference.
- * 5. Theme controls reside EXCLUSIVELY in Settings -> Appearance / Theme.
+ * 4. Auth pages (auth.html, authority-login.html, reset-password.html) MUST ALWAYS REMAIN LIGHT MODE.
+ * 5. Strictly decoupled from language preference.
+ * 6. Theme controls reside EXCLUSIVELY in Settings -> Appearance / Theme.
  */
+
+function isAuthPage() {
+  if (typeof window === 'undefined' || !window.location) return false;
+  var path = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+  var file = path.split('/').pop().replace(/\.html$/, '');
+  return file === 'auth' || file === 'authority-login' || file === 'reset-password';
+}
+if (typeof window !== 'undefined') {
+  window.isAuthPage = isAuthPage;
+}
 
 (function() {
   function getSavedTheme() {
@@ -22,8 +33,9 @@
 
   function applyThemeImmediately(theme) {
     if (typeof document === 'undefined' || !document.documentElement) return;
-    var isDark = (theme === 'dark');
-    document.documentElement.setAttribute('data-theme', theme);
+    var effectiveTheme = isAuthPage() ? 'light' : theme;
+    var isDark = (effectiveTheme === 'dark');
+    document.documentElement.setAttribute('data-theme', effectiveTheme);
     document.documentElement.classList.toggle('dark-theme', isDark);
     document.documentElement.classList.toggle('theme-dark', isDark);
     document.documentElement.classList.toggle('light-theme', !isDark);
@@ -31,7 +43,8 @@
   }
 
   // Synchronous early paint bootstrap
-  var initialTheme = getSavedTheme();
+  // Auth pages MUST ALWAYS be Light Mode
+  var initialTheme = isAuthPage() ? 'light' : getSavedTheme();
   applyThemeImmediately(initialTheme);
 })();
 
@@ -77,8 +90,9 @@ class CrowdCityThemeService {
 
   applyTheme(theme) {
     if (typeof document === 'undefined' || !document.documentElement) return;
-    var isDark = (theme === 'dark');
-    document.documentElement.setAttribute('data-theme', theme);
+    var effectiveTheme = isAuthPage() ? 'light' : theme;
+    var isDark = (effectiveTheme === 'dark');
+    document.documentElement.setAttribute('data-theme', effectiveTheme);
     document.documentElement.classList.toggle('dark-theme', isDark);
     document.documentElement.classList.toggle('theme-dark', isDark);
     document.documentElement.classList.toggle('light-theme', !isDark);

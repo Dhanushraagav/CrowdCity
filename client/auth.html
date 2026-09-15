@@ -29,16 +29,10 @@
   <link rel="stylesheet" href="css/components.css?v=3.1.0">
   <script>
     (function() {
-      try {
-        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
-        var theme = (t === 'dark') ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        var isDark = (theme === 'dark');
-        document.documentElement.classList.toggle('dark-theme', isDark);
-        document.documentElement.classList.toggle('theme-dark', isDark);
-        document.documentElement.classList.toggle('light-theme', !isDark);
-        document.documentElement.classList.toggle('theme-light', !isDark);
-      } catch (e) {}
+      // Auth pages MUST ALWAYS remain Light Mode
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.classList.remove('dark-theme', 'theme-dark');
+      document.documentElement.classList.add('light-theme', 'theme-light');
       document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('ready');
       });
@@ -926,99 +920,7 @@
       color: var(--primary) !important;
     }
 
-    /* ==========================================================================
-       DARK MODE EXPLICIT OVERRIDES FOR AUTH PORTAL
-       ========================================================================== */
-    [data-theme="dark"] .auth-form-panel,
-    html.dark-theme .auth-form-panel {
-      background: #000000 !important;
-    }
-
-    [data-theme="dark"] .auth-card,
-    html.dark-theme .auth-card {
-      background-color: #0a0a0a !important;
-      border-color: #1f1f1f !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-    }
-
-    [data-theme="dark"] .auth-tabs,
-    html.dark-theme .auth-tabs {
-      background-color: #121212 !important;
-      border-color: #1f1f1f !important;
-    }
-
-    [data-theme="dark"] .auth-tab,
-    html.dark-theme .auth-tab {
-      color: #a3a3a3 !important;
-    }
-
-    [data-theme="dark"] .auth-tab.active,
-    html.dark-theme .auth-tab.active {
-      background-color: var(--primary, #0d9488) !important;
-      color: #ffffff !important;
-    }
-
-    [data-theme="dark"] .form-input,
-    html.dark-theme .form-input {
-      background-color: #121212 !important;
-      border-color: #262626 !important;
-      color: #ffffff !important;
-    }
-
-    [data-theme="dark"] .form-input::placeholder,
-    html.dark-theme .form-input::placeholder {
-      color: #737373 !important;
-    }
-
-    [data-theme="dark"] .form-input:focus,
-    html.dark-theme .form-input:focus {
-      border-color: var(--primary, #0d9488) !important;
-      background-color: #161616 !important;
-      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.25) !important;
-    }
-
-    [data-theme="dark"] .btn-google,
-    html.dark-theme .btn-google {
-      background-color: #121212 !important;
-      border-color: #262626 !important;
-      color: #ffffff !important;
-    }
-
-    [data-theme="dark"] .btn-google:hover,
-    html.dark-theme .btn-google:hover {
-      background-color: #1a1a1a !important;
-      border-color: #333333 !important;
-    }
-
-    [data-theme="dark"] .authority-card-container,
-    html.dark-theme .authority-card-container {
-      background-color: #121212 !important;
-      border-color: #1f1f1f !important;
-    }
-
-    [data-theme="dark"] .authority-card-container:hover,
-    html.dark-theme .authority-card-container:hover {
-      background-color: #1a1a1a !important;
-      border-color: #262626 !important;
-    }
-
-    [data-theme="dark"] .form-label,
-    [data-theme="dark"] .auth-header h1,
-    [data-theme="dark"] .authority-card-title,
-    html.dark-theme .form-label,
-    html.dark-theme .auth-header h1,
-    html.dark-theme .authority-card-title {
-      color: #ffffff !important;
-    }
-
-    [data-theme="dark"] .auth-header p,
-    [data-theme="dark"] .authority-card-desc,
-    html.dark-theme .auth-header p,
-    html.dark-theme .authority-card-desc {
-      color: #a3a3a3 !important;
-    }
-
-    /* Page Entrance Animations */
+        /* Page Entrance Animations */
     @keyframes slideUpFade {
       from {
         opacity: 0;

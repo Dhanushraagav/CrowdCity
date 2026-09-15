@@ -40,8 +40,15 @@
     }
 
     // Synchronous early theme bootstrap (guarantees 0ms zero-flash of wrong theme)
+    // Auth pages (auth.html, authority-login.html, reset-password.html) MUST ALWAYS remain Light Mode
     try {
-      var storedTheme = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+      var isAuth = false;
+      if (typeof window !== 'undefined' && window.location) {
+        var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+        var f = p.split('/').pop().replace(/\.html$/, '');
+        isAuth = (f === 'auth' || f === 'authority-login' || f === 'reset-password');
+      }
+      var storedTheme = isAuth ? 'light' : (localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme'));
       var currentTheme = (storedTheme === 'dark') ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', currentTheme);
       var isDark = (currentTheme === 'dark');
