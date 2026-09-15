@@ -1154,44 +1154,9 @@ html.dark-theme .la-contact-na {
   border: 1.5px solid var(--border-color, #e2e8f0);
   border-left: 4px solid var(--primary, #0d9488);
   border-radius: 10px;
-  padding: 0.85rem 2.4rem 0.85rem 1rem;
+  padding: 0.85rem 1rem;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   animation: laStreamFadeIn 0.25s ease;
-}
-
-.la-confirm-clear-btn {
-  position: absolute;
-  top: 0.55rem;
-  right: 0.55rem;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(148, 163, 184, 0.12);
-  color: var(--text-muted, #94a3b8);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  z-index: 5;
-  touch-action: manipulation;
-}
-
-.la-confirm-clear-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-.la-confirm-clear-btn:active {
-  transform: scale(0.92);
-}
-
-.la-confirm-clear-btn i {
-  font-size: 0.85rem;
-  pointer-events: none;
 }
 
 .la-confirm-grid {
@@ -1712,18 +1677,6 @@ html.dark-theme .la-typeahead-clear-btn {
 html.dark-theme .la-typeahead-clear-btn:hover {
   color: #ffffff !important;
   background: rgba(255, 255, 255, 0.12) !important;
-}
-
-[data-theme="dark"] .la-confirm-clear-btn,
-html.dark-theme .la-confirm-clear-btn {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #94a3b8 !important;
-}
-
-[data-theme="dark"] .la-confirm-clear-btn:hover,
-html.dark-theme .la-confirm-clear-btn:hover {
-  background: rgba(239, 68, 68, 0.25) !important;
-  color: #f87171 !important;
 }
 
 [data-theme="dark"] .la-gps-notice,

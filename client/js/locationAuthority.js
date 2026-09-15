@@ -771,18 +771,9 @@
         });
       }
 
-      const confirmClearBtn = document.getElementById('la-confirm-clear-btn');
-      if (confirmClearBtn) {
-        confirmClearBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          LocationAuthority.clearLocation();
-        });
-      }
-
-      // Universal click delegation for any clear button
+      // Universal click delegation for location clear button
       document.addEventListener('click', (e) => {
-        const targetBtn = e.target && e.target.closest && e.target.closest('#la-search-clear-btn, .la-typeahead-clear-btn, #la-confirm-clear-btn, .la-confirm-clear-btn');
+        const targetBtn = e.target && e.target.closest && e.target.closest('#la-search-clear-btn, .la-typeahead-clear-btn');
         if (targetBtn) {
           e.preventDefault();
           e.stopPropagation();
