@@ -1013,6 +1013,249 @@ html.dark-theme .la-contact-na {
 }
 
 /* ==============================================================================
+ * Citizen-First Location Selection & Confirmation Styles
+ * ============================================================================== */
+.citizen-location-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.citizen-location-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.citizen-location-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+}
+
+.citizen-current-location-status {
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  background: var(--bg-surface-hover, #f1f5f9);
+  border: 1px solid var(--border-color, #e2e8f0);
+  font-size: 0.76rem;
+}
+
+.citizen-primary-actions {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 680px) {
+  .citizen-primary-actions {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+}
+
+.citizen-gps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 46px;
+  padding: 0.65rem 1.15rem;
+  border-radius: 10px;
+  background: var(--primary, #0d9488);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.25);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.citizen-gps-btn:hover {
+  background: #0f766e;
+  box-shadow: 0 4px 10px rgba(13, 148, 136, 0.35);
+  transform: translateY(-1px);
+}
+
+.citizen-or-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  letter-spacing: 0.05em;
+  padding: 0 0.25rem;
+}
+
+@media (max-width: 680px) {
+  .citizen-or-divider {
+    position: relative;
+    padding: 0.25rem 0;
+  }
+  .citizen-or-divider::before,
+  .citizen-or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color, #e2e8f0);
+    margin: 0 0.75rem;
+  }
+}
+
+.citizen-search-box {
+  width: 100%;
+  min-width: 0;
+}
+
+.citizen-search-input {
+  min-height: 46px;
+  height: 46px;
+  font-size: 0.88rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.la-item-authority {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--primary, #0d9488);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+}
+
+/* GPS Detection Notice Banner */
+.la-gps-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(13, 148, 136, 0.08);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  color: var(--primary, #0d9488);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Selected Location & Authority Confirmation Card */
+.la-confirmation-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-left: 4px solid var(--primary, #0d9488);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  animation: laStreamFadeIn 0.25s ease;
+}
+
+.la-confirm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+
+@media (max-width: 680px) {
+  .la-confirm-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+}
+
+.la-confirm-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.la-confirm-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.la-confirm-label i {
+  color: var(--primary, #0d9488);
+}
+
+.la-confirm-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  word-break: break-word;
+}
+
+/* Collapsible Advanced Administrative Area Details */
+.la-advanced-details {
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  background: var(--bg-surface-hover, #f8fafc);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.la-advanced-details[open] {
+  background: var(--bg-surface, #ffffff);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.la-advanced-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.95rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+  list-style: none;
+}
+
+.la-advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.la-advanced-summary-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-main, #0f172a);
+  font-weight: 700;
+}
+
+.la-advanced-summary-left i {
+  color: var(--primary, #0d9488);
+}
+
+.la-advanced-summary-right {
+  font-size: 0.72rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.la-advanced-details[open] .la-manual-grid {
+  border: none;
+  box-shadow: none;
+  padding: 0.85rem 1rem 1rem 1rem;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+/* ==============================================================================
  * Step 2 Search-First Typeahead & Administrative Hierarchy Filter Styles
  * ============================================================================== */
 .la-typeahead-section {
@@ -1361,4 +1604,135 @@ html.dark-theme .la-contact-na {
 html.dark-theme .la-support-line {
   background: #1f1f1f !important;
 }
+
+/* ==========================================================================
+   AMOLED / True Black Dark Mode Overrides for Citizen Location Elements
+   ========================================================================== */
+[data-theme="dark"] .citizen-location-title,
+html.dark-theme .citizen-location-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .citizen-current-location-status,
+html.dark-theme .citizen-current-location-status {
+  background: #0d0d0d !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .citizen-gps-btn,
+html.dark-theme .citizen-gps-btn {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(45, 212, 191, 0.3) !important;
+}
+
+[data-theme="dark"] .citizen-gps-btn:hover,
+html.dark-theme .citizen-gps-btn:hover {
+  background: #0f766e !important;
+}
+
+[data-theme="dark"] .citizen-search-input,
+html.dark-theme .citizen-search-input {
+  background-color: #080808 !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .citizen-search-input:focus,
+html.dark-theme .citizen-search-input:focus {
+  background-color: #0d0d0d !important;
+  border-color: #0d9488 !important;
+}
+
+[data-theme="dark"] .la-item-authority,
+html.dark-theme .la-item-authority {
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .la-gps-notice,
+html.dark-theme .la-gps-notice {
+  background: #091a18 !important;
+  border-color: rgba(13, 148, 136, 0.35) !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .la-confirmation-card,
+html.dark-theme .la-confirmation-card {
+  background-color: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-confirm-label,
+html.dark-theme .la-confirm-label {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .la-confirm-value,
+html.dark-theme .la-confirm-value {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-advanced-details,
+html.dark-theme .la-advanced-details {
+  background: #080808 !important;
+  border-color: #1f1f1f !important;
+}
+
+[data-theme="dark"] .la-advanced-details[open],
+html.dark-theme .la-advanced-details[open] {
+  background: #0a0a0a !important;
+}
+
+[data-theme="dark"] .la-advanced-summary-left,
+html.dark-theme .la-advanced-summary-left {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-advanced-summary-right,
+html.dark-theme .la-advanced-summary-right {
+  color: #737373 !important;
+}
+
+[data-theme="dark"] .la-advanced-details[open] .la-manual-grid,
+html.dark-theme .la-advanced-details[open] .la-manual-grid {
+  border-top-color: #1f1f1f !important;
+  background-color: #0a0a0a !important;
+}
+
+[data-theme="dark"] .la-typeahead-dropdown,
+html.dark-theme .la-typeahead-dropdown {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] .la-typeahead-item,
+html.dark-theme .la-typeahead-item {
+  border-bottom-color: #171717 !important;
+}
+
+[data-theme="dark"] .la-typeahead-item:hover,
+[data-theme="dark"] .la-typeahead-item.focused,
+html.dark-theme .la-typeahead-item:hover,
+html.dark-theme .la-typeahead-item.focused {
+  background: #141414 !important;
+}
+
+[data-theme="dark"] .la-item-title,
+html.dark-theme .la-item-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .la-item-context,
+html.dark-theme .la-item-context {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .citizen-or-divider,
+html.dark-theme .citizen-or-divider {
+  color: #737373 !important;
+}
+
 

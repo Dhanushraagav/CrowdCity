@@ -322,7 +322,82 @@ export async function searchLocations({ query = '', districtId = '', adminType =
 
   const exactPrefixMatches = [];
   const containsMatches = [];
+  const seenIds = new Set();
 
+  // 1. Search Urban Local Bodies (Corporations, Municipalities, Town Panchayats)
+  // Allows citizens to find major towns/cities (e.g. "Coimbatore", "Tambaram", "Avadi") directly
+  const ulbs = Array.isArray(URBAN_LOCAL_BODIES_DATA) ? URBAN_LOCAL_BODIES_DATA : [];
+  for (const ulb of ulbs) {
+    if (cleanDist && ulb.district_id.toLowerCase() !== cleanDist) {
+      continue;
+    }
+
+    if (cleanType && cleanType !== 'all') {
+      const uType = (ulb.type || '').toLowerCase();
+      if (cleanType === 'village' || cleanType === 'village_panchayat' || cleanType === 'revenue_village') {
+        continue;
+      }
+      if (cleanType !== 'urban' && uType !== cleanType) {
+        continue;
+      }
+    }
+
+    const enName = (ulb.name || '').toLowerCase();
+    const taName = (ulb.name_ta || ulb.tamil_name || '').toLowerCase();
+    const dist = districtsMap.get(ulb.district_id.toLowerCase());
+    const distName = dist ? dist.name : ulb.district_id;
+    const typeLabel = formatLocationTypeLabel(ulb.type);
+
+    const formattedULB = {
+      id: ulb.id,
+      name: ulb.name,
+      name_en: ulb.name,
+      tamil_name: ulb.name_ta || ulb.tamil_name || ulb.name,
+      name_ta: ulb.name_ta || ulb.tamil_name || ulb.name,
+      location_type: ulb.type || 'corporation',
+      administrative_type: ulb.type || 'corporation',
+      type_label: typeLabel,
+      lgd_code: null,
+      official_code: ulb.id,
+      district: distName,
+      district_id: ulb.district_id,
+      district_name: distName,
+      district_name_ta: dist ? dist.tamil_name : '',
+      taluk_id: ulb.taluk_id || null,
+      taluk_name: '',
+      taluk_name_ta: '',
+      block_id: null,
+      block_name: '',
+      block_name_ta: '',
+      local_body_id: ulb.id,
+      urban_local_body_id: ulb.id,
+      parent_id: ulb.district_id,
+      parent_name: distName,
+      parent_type: 'district',
+      parent_context: `${typeLabel}, ${distName}`,
+      local_authority_label: ulb.name,
+      verified: true,
+      is_verified: true,
+      source_name: ulb.source_name || 'cma_dtp',
+      source_url: ulb.source_url || 'https://tnurbantree.tn.gov.in'
+    };
+
+    if (q) {
+      if (enName.startsWith(q) || taName.startsWith(q) || (distName.toLowerCase() === q && enName.includes(q))) {
+        if (!seenIds.has(ulb.name.toLowerCase() + '_' + ulb.district_id)) {
+          seenIds.add(ulb.name.toLowerCase() + '_' + ulb.district_id);
+          exactPrefixMatches.push(formattedULB);
+        }
+      } else if (enName.includes(q) || taName.includes(q)) {
+        if (!seenIds.has(ulb.name.toLowerCase() + '_' + ulb.district_id)) {
+          seenIds.add(ulb.name.toLowerCase() + '_' + ulb.district_id);
+          containsMatches.push(formattedULB);
+        }
+      }
+    }
+  }
+
+  // 2. Search Authoritative Location Settlements (Village Panchayats, Town Panchayats, Revenue Villages, Localities)
   for (const loc of LOCATIONS_DATA) {
     if (!includeQuarantined && loc.is_quarantined) {
       continue;
@@ -343,15 +418,14 @@ export async function searchLocations({ query = '', districtId = '', adminType =
       }
     }
 
+    const enName = (loc.name || '').toLowerCase();
+    const taName = (loc.tamil_name || '').toLowerCase();
+
     if (!q) {
-      // Return top locations if no query specified
       containsMatches.push(loc);
       if (containsMatches.length >= maxResults) break;
       continue;
     }
-
-    const enName = (loc.name || '').toLowerCase();
-    const taName = (loc.tamil_name || '').toLowerCase();
 
     if (enName.startsWith(q) || taName.startsWith(q)) {
       exactPrefixMatches.push(loc);
@@ -364,6 +438,11 @@ export async function searchLocations({ query = '', districtId = '', adminType =
   const combined = [...exactPrefixMatches, ...containsMatches].slice(0, maxResults);
 
   return combined.map(loc => {
+    // If already formatted (from ULBs), return directly
+    if (loc.local_authority_label && loc.parent_context) {
+      return loc;
+    }
+
     const dist = districtsMap.get(loc.district_id.toLowerCase());
     const taluk = loc.taluk_id ? talukByIdMap.get(loc.taluk_id.toLowerCase()) : null;
     const block = loc.block_id ? blockByIdMap.get(loc.block_id.toLowerCase()) : null;
@@ -373,30 +452,50 @@ export async function searchLocations({ query = '', districtId = '', adminType =
     let parentName = '';
     let parentType = loc.parent_type || 'taluk';
 
+    const distName = dist ? dist.name : loc.district_id;
+    const talukName = taluk ? taluk.name : '';
+    const blockName = block ? block.name : '';
+
     if (adminType === 'village_panchayat') {
       parentType = 'block';
-      parentName = block ? block.name : (loc.block_id || '');
-      parentContext = `${parentName || (taluk ? taluk.name : '')} Block, ${dist ? dist.name : loc.district_id}`;
+      parentName = blockName || talukName;
+      parentContext = parentName ? `${parentName} Block, ${distName}` : distName;
     } else if (adminType === 'revenue_village') {
       parentType = 'taluk';
-      parentName = taluk ? taluk.name : (loc.taluk_id || '');
-      parentContext = `${parentName} Taluk, ${dist ? dist.name : loc.district_id}`;
+      parentName = talukName || loc.taluk_id || '';
+      parentContext = parentName ? `${parentName} Taluk, ${distName}` : distName;
     } else if (adminType === 'town_panchayat') {
       parentType = 'district';
-      parentName = dist ? dist.name : loc.district_id;
-      parentContext = `Town Panchayat, ${dist ? dist.name : loc.district_id}`;
+      parentName = talukName || distName;
+      parentContext = talukName ? `${talukName}, ${distName}` : `Town Panchayat, ${distName}`;
     } else if (adminType === 'municipality') {
       parentType = 'district';
-      parentName = dist ? dist.name : loc.district_id;
-      parentContext = `Municipality, ${dist ? dist.name : loc.district_id}`;
+      parentName = distName;
+      parentContext = `Municipality, ${distName}`;
     } else if (adminType === 'corporation') {
       parentType = 'district';
-      parentName = dist ? dist.name : loc.district_id;
-      parentContext = `Municipal Corporation, ${dist ? dist.name : loc.district_id}`;
+      parentName = distName;
+      parentContext = `Municipal Corporation, ${distName}`;
     } else {
       parentType = loc.local_body_id ? 'urban_local_body' : (loc.taluk_id ? 'taluk' : 'district');
-      parentName = taluk ? taluk.name : (dist ? dist.name : '');
-      parentContext = `${taluk ? `${taluk.name} Taluk, ` : ''}${dist ? dist.name : loc.district_id}`;
+      parentName = talukName || distName;
+      parentContext = `${talukName ? `${talukName}, ` : ''}${distName}`;
+    }
+
+    // Citizen-friendly local authority title
+    let localAuthorityLabel = '';
+    if (adminType === 'village_panchayat') {
+      localAuthorityLabel = `${loc.name} Village Panchayat`;
+    } else if (adminType === 'town_panchayat') {
+      localAuthorityLabel = `${loc.name} Town Panchayat`;
+    } else if (adminType === 'municipality') {
+      localAuthorityLabel = `${loc.name} Municipality`;
+    } else if (adminType === 'corporation') {
+      localAuthorityLabel = `${loc.name} Municipal Corporation`;
+    } else if (adminType === 'revenue_village') {
+      localAuthorityLabel = talukName ? `Taluk Office, ${talukName}` : `${loc.name} Revenue Village`;
+    } else {
+      localAuthorityLabel = talukName ? `${talukName} Administrative Area` : `${loc.name} Civic Area`;
     }
 
     return {
@@ -409,16 +508,16 @@ export async function searchLocations({ query = '', districtId = '', adminType =
       administrative_type: adminType,
       type_label: formatLocationTypeLabel(adminType),
       lgd_code: loc.lgd_code || null,
-      official_code: loc.lgd_code || null,
-      district: dist ? dist.name : loc.district_id,
+      official_code: loc.lgd_code || loc.official_code || null,
+      district: distName,
       district_id: loc.district_id,
-      district_name: dist ? dist.name : loc.district_id,
+      district_name: distName,
       district_name_ta: dist ? dist.tamil_name : '',
       taluk_id: loc.taluk_id || null,
-      taluk_name: taluk ? taluk.name : '',
+      taluk_name: talukName,
       taluk_name_ta: taluk ? taluk.tamil_name : '',
       block_id: loc.block_id || null,
-      block_name: block ? block.name : '',
+      block_name: blockName,
       block_name_ta: block ? block.tamil_name : '',
       local_body_id: loc.local_body_id || null,
       urban_local_body_id: loc.local_body_id || null,
@@ -426,6 +525,7 @@ export async function searchLocations({ query = '', districtId = '', adminType =
       parent_name: parentName,
       parent_type: parentType,
       parent_context: parentContext,
+      local_authority_label: localAuthorityLabel,
       verified: !!loc.is_verified,
       is_verified: !!loc.is_verified,
       source_name: loc.source_name || 'tnrd',

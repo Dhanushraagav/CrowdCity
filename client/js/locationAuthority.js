@@ -201,6 +201,18 @@
         });
       }
 
+      const advDetails = document.getElementById('la-advanced-details');
+      if (advDetails) {
+        advDetails.addEventListener('toggle', () => {
+          if (advDetails.open) {
+            isManualOverride = true;
+            const dist = this.state.districtId || 'coimbatore';
+            this.populateDistricts();
+            this.populateStream(dist, this.state.stream || 'rural');
+          }
+        });
+      }
+
       if (districtSelect) {
         const handleDistrictSelect = async (force = false) => {
           const distId = districtSelect.value || this.state.districtId || 'coimbatore';
@@ -511,9 +523,12 @@
         if (clearBtn) clearBtn.classList.remove('hidden');
 
         try {
-          const dist = LocationAuthority.state.districtId || '';
+          const advDetails = document.getElementById('la-advanced-details');
           let url = `${API_LOCATIONS}/search?q=${encodeURIComponent(q)}&type=${encodeURIComponent(activeTypeFilter)}&limit=25`;
-          if (dist) url += `&district=${encodeURIComponent(dist)}`;
+          // Only filter by district if user explicitly has advanced manual panel open with selected district
+          if (advDetails && advDetails.open && LocationAuthority.state.districtId) {
+            url += `&district=${encodeURIComponent(LocationAuthority.state.districtId)}`;
+          }
 
           const res = await fetch(url);
           if (!res.ok) {
@@ -546,12 +561,14 @@
                              (item.location_type === 'municipality' || item.location_type === 'corporation' ? 'badge-urban' : 'badge-revenue'));
           const typeLabel = item.type_label || LocationAuthority.formatLocationTypeBadge(item.location_type);
           const context = item.parent_context || (item.district_name ? `${item.district_name}` : '');
+          const localAuth = item.local_authority_label || (item.name + (item.location_type === 'village_panchayat' ? ' Village Panchayat' : ''));
 
           html += `
             <div class="la-typeahead-item" data-idx="${idx}">
               <div class="la-item-main">
                 <div class="la-item-title">${item.name}${taPart}</div>
                 <div class="la-item-context"><i class="fa-solid fa-location-dot" style="font-size: 0.65rem;"></i> ${context}</div>
+                <div class="la-item-authority"><i class="fa-solid fa-building-columns" style="font-size: 0.65rem;"></i> ${localAuth}</div>
               </div>
               <span class="la-item-badge ${badgeClass}">${typeLabel}</span>
             </div>
@@ -578,6 +595,28 @@
         dropdown.innerHTML = '';
         if (clearBtn) clearBtn.classList.remove('hidden');
 
+        // Sync report-address input field so standard complaint payload has full address
+        const addrInput = document.getElementById('report-address');
+        const fullAddr = `${item.name}, ${item.parent_context || item.district_name || 'Tamil Nadu'}`;
+        if (addrInput) {
+          addrInput.value = fullAddr;
+        }
+
+        // Populate Confirmation Card immediately
+        const confirmCard = document.getElementById('la-confirmation-card');
+        const confirmLoc = document.getElementById('la-confirm-location');
+        const confirmLocalBody = document.getElementById('la-confirm-local-body');
+        const confirmRespAuth = document.getElementById('la-confirm-responsible-auth');
+
+        if (confirmCard) confirmCard.classList.remove('hidden');
+        if (confirmLoc) confirmLoc.textContent = fullAddr;
+        if (confirmLocalBody) {
+          confirmLocalBody.textContent = item.local_authority_label || item.name;
+        }
+        if (confirmRespAuth) {
+          confirmRespAuth.textContent = 'Resolving responsible authority...';
+        }
+
         const adminType = item.administrative_type || item.location_type || '';
         const distId = item.district_id || '';
 
@@ -592,7 +631,7 @@
           if (streamSelect) streamSelect.disabled = false;
         }
 
-        // 2. Determine stream
+        // 2. Determine stream automatically
         let stream = 'rural';
         if (['corporation', 'municipality', 'town_panchayat', 'locality', 'urban'].includes(adminType)) {
           stream = 'urban';
@@ -644,7 +683,29 @@
         LocationAuthority.syncLegacyElements(item);
         LocationAuthority.updateLocationHeaderLabel();
         LocationAuthority.triggerResolution();
+
+        // Position map pin if geocoder available
+        if (window.ServiceArea && typeof window.ServiceArea.validateAddressText === 'function') {
+          window.ServiceArea.validateAddressText(fullAddr).then(result => {
+            if (result && result.isValid && result.lat && result.lng) {
+              const latInput = document.getElementById('report-latitude');
+              const lngInput = document.getElementById('report-longitude');
+              if (latInput) latInput.value = result.lat.toFixed(6);
+              if (lngInput) lngInput.value = result.lng.toFixed(6);
+              LocationAuthority.state.lat = result.lat;
+              LocationAuthority.state.lng = result.lng;
+              if (window.reportMap) {
+                window.reportMap.setView([result.lat, result.lng], 14);
+              }
+              if (window.reportMarker) {
+                window.reportMarker.setLatLng([result.lat, result.lng]);
+              }
+            }
+          }).catch(() => {});
+        }
       };
+
+      LocationAuthority.selectLocation = selectLocation;
 
       input.addEventListener('input', (e) => {
         clearTimeout(searchDebounce);
@@ -1560,16 +1621,25 @@
       this.state.lng = lng;
       this.state.address = address;
 
+      // Show GPS detected notice banner
+      const noticeBanner = document.getElementById('la-gps-notice-banner');
+      if (noticeBanner) {
+        noticeBanner.classList.remove('hidden');
+      }
+
       if (nominatimData && nominatimData.address) {
         const addr = nominatimData.address;
         const loc = addr.village || addr.town || addr.city || addr.suburb || addr.neighbourhood || addr.subdistrict || '';
         const dist = addr.county || addr.district || addr.state_district || '';
-        if (loc && dist && loc.toLowerCase() !== dist.toLowerCase()) {
-          this.updateLocationHeaderLabel(`${loc}, ${dist}`);
-        } else if (loc || dist) {
-          this.updateLocationHeaderLabel(loc || dist);
-        } else {
-          this.updateLocationHeaderLabel();
+        const detectedText = (loc && dist && loc.toLowerCase() !== dist.toLowerCase()) ? `${loc}, ${dist}` : (loc || dist || address);
+        this.updateLocationHeaderLabel(detectedText);
+
+        // Pre-fill typeahead search input if empty so citizen can see detected location
+        const searchInput = document.getElementById('la-search-typeahead-input');
+        if (searchInput && (!searchInput.value || searchInput.value.trim() === '')) {
+          searchInput.value = detectedText;
+          const clearBtn = document.getElementById('la-search-clear-btn');
+          if (clearBtn) clearBtn.classList.remove('hidden');
         }
 
         // Match district name if available from Nominatim
@@ -1667,7 +1737,7 @@
 
         if (distName) parts.push(distName);
 
-        const text = parts.length > 0 ? parts.join(', ') : 'Select Location Manually';
+        const text = parts.length > 0 ? parts.join(', ') : 'Select Location';
         labelEl.textContent = text;
         labelEl.title = text;
       } else {
@@ -1739,6 +1809,31 @@
       const esc = res.escalationContact;
       const sup = res.supportFallback;
 
+      // Synchronize Clean Confirmation Card
+      const confirmCard = document.getElementById('la-confirmation-card');
+      const confirmLoc = document.getElementById('la-confirm-location');
+      const confirmLocalBody = document.getElementById('la-confirm-local-body');
+      const confirmRespAuth = document.getElementById('la-confirm-responsible-auth');
+
+      if (confirmCard) confirmCard.classList.remove('hidden');
+
+      if (confirmLoc) {
+        const locParts = [];
+        if (j.villageOrTown) locParts.push(j.villageOrTown);
+        if (j.taluk && j.taluk !== j.villageOrTown) locParts.push(j.taluk);
+        if (j.district) locParts.push(j.district);
+        const fullLoc = locParts.length > 0 ? locParts.join(', ') : (j.district || 'Tamil Nadu');
+        confirmLoc.textContent = fullLoc;
+      }
+
+      if (confirmLocalBody) {
+        confirmLocalBody.textContent = j.localBody || (j.villageOrTown ? `${j.villageOrTown} Local Body` : `${j.district || ''} Local Administration`);
+      }
+
+      if (confirmRespAuth) {
+        confirmRespAuth.textContent = a.office ? `${a.office}${a.designation ? ` (${a.designation})` : ''}` : 'Local Administrative Office';
+      }
+
       // 1. Hierarchy Badges
       const badgesEl = document.getElementById('la-card-hierarchy-badges');
       if (badgesEl) {
@@ -1759,7 +1854,7 @@
           <span class="la-badge" title="${j.localBodyType || 'Local Body'}">
             <span class="la-badge-label">Local Body:</span>
             <strong class="la-badge-value">${j.localBody || 'Local Body'}</strong>
-            <span class="la-badge-sub">(${j.localBodyType || 'Village Panchayat'} &bull; ${j.tier || 'Rural'})</span>
+            <span class="la-badge-sub">(${j.localBodyType || 'Local Body'})</span>
           </span>
         `;
       }
