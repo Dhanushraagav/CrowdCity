@@ -8,23 +8,70 @@
  * 4. Zero flash/flicker of English text when Tamil is selected
  * 5. Full embedded synchronous dictionary (0ms network delay)
  */
+// Central Page Scope Classifier
+function getPageScope() {
+  if (typeof window === 'undefined' || !window.location) return 'citizen-portal';
+  var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+  var f = p.split('/').pop().replace(/\.html$/, '');
+
+  // 1. Authority Auth
+  if (f === 'authority-login') return 'authority-auth';
+
+  // 2. Citizen Auth (Login, Signup, Forgot Password, Reset Password)
+  if (f === 'auth' || f === 'reset-password' || f === 'login' || f === 'signup' || f === 'forgot-password') return 'citizen-auth';
+
+  // 3. Authority Portal Pages (Dashboard, Reports, Complaints, Details, Intelligence, Admin)
+  if (f.startsWith('authority-') || f === 'admin' || f === 'services-admin') return 'authority-portal';
+
+  // 4. Citizen Portal Pages (Default)
+  return 'citizen-portal';
+}
+
+if (typeof window !== 'undefined') {
+  window.getPageScope = getPageScope;
+  window.isAuthPage = function() {
+    var s = getPageScope();
+    return s === 'citizen-auth' || s === 'authority-auth';
+  };
+}
+
 (function() {
-  var stored = null;
-  try {
-    stored = localStorage.getItem('crowdcity_language') || 
-             localStorage.getItem('cc_lang') || 
-             localStorage.getItem('preferred_language');
-  } catch (e) {}
+  var scope = getPageScope();
+  var lang = 'en';
 
-  var lang = (stored === 'en' || stored === 'ta') ? stored : 'ta';
-
-  // Persist default immediately for first-time visitors
-  if (!stored) {
+  if (scope === 'authority-portal' || scope === 'authority-auth') {
+    // Authority Portal & Authority Login MUST ALWAYS BE STRICTLY ENGLISH
+    lang = 'en';
+  } else if (scope === 'citizen-auth') {
+    // Citizen Auth pages MUST ALWAYS DEFAULT TO ENGLISH
+    // Only temporary in-session auth display toggle can switch display language for this page
     try {
-      localStorage.setItem('crowdcity_language', 'ta');
-      localStorage.setItem('cc_lang', 'ta');
-      localStorage.setItem('preferred_language', 'ta');
+      var authDisplayLang = sessionStorage.getItem('cc_auth_display_lang');
+      lang = (authDisplayLang === 'ta') ? 'ta' : 'en';
+    } catch (e) {
+      lang = 'en';
+    }
+  } else {
+    // Citizen Portal pages use saved account preference
+    var stored = null;
+    try {
+      stored = localStorage.getItem('crowdcity_citizen_language') || 
+               localStorage.getItem('crowdcity_language') || 
+               localStorage.getItem('cc_lang') || 
+               localStorage.getItem('preferred_language');
     } catch (e) {}
+
+    lang = (stored === 'en' || stored === 'ta') ? stored : 'ta';
+
+    // Persist default immediately for first-time visitors
+    if (!stored) {
+      try {
+        localStorage.setItem('crowdcity_citizen_language', 'ta');
+        localStorage.setItem('crowdcity_language', 'ta');
+        localStorage.setItem('cc_lang', 'ta');
+        localStorage.setItem('preferred_language', 'ta');
+      } catch (e) {}
+    }
   }
 
   // Set document root attributes synchronously before first paint
@@ -34,20 +81,17 @@
     document.documentElement.classList.remove('lang-en', 'lang-ta');
     document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
 
-    // If Tamil is active, attach anti-flicker loading guard
-    if (lang === 'ta') {
+    // Attach anti-flicker loading guard only for Tamil in Citizen Portal
+    if (lang === 'ta' && scope === 'citizen-portal') {
       document.documentElement.classList.add('cc-i18n-loading');
+    } else {
+      document.documentElement.classList.remove('cc-i18n-loading');
     }
 
     // Synchronous early theme bootstrap (guarantees 0ms zero-flash of wrong theme)
     // Auth pages (auth.html, authority-login.html, reset-password.html) MUST ALWAYS remain Light Mode
     try {
-      var isAuth = false;
-      if (typeof window !== 'undefined' && window.location) {
-        var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
-        var f = p.split('/').pop().replace(/\.html$/, '');
-        isAuth = (f === 'auth' || f === 'authority-login' || f === 'reset-password');
-      }
+      var isAuth = (scope === 'citizen-auth' || scope === 'authority-auth');
       var storedTheme = isAuth ? 'light' : (localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme'));
       var currentTheme = (storedTheme === 'dark') ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', currentTheme);
@@ -60,7 +104,7 @@
   }
 
   // Inject anti-flicker CSS guard immediately in <head> if not already present
-  if (typeof document !== 'undefined') {
+  if (typeof document !== 'undefined' && scope === 'citizen-portal') {
     var guard = document.getElementById('cc-anti-flicker-guard');
     if (!guard && (document.head || document.documentElement)) {
       guard = document.createElement('style');
@@ -2556,21 +2600,41 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
 
 class I18nService {
   constructor() {
-    let stored = null;
-    try {
-      stored = localStorage.getItem('crowdcity_language') || 
-               localStorage.getItem('cc_lang') || 
-               localStorage.getItem('preferred_language');
-    } catch (e) {}
+    this.pageScope = (typeof window !== 'undefined' && typeof window.getPageScope === 'function') 
+      ? window.getPageScope() 
+      : 'citizen-portal';
 
-    this.currentLanguage = (stored === 'en' || stored === 'ta') ? stored : 'ta';
+    if (this.pageScope === 'authority-portal' || this.pageScope === 'authority-auth') {
+      // Authority Portal and Authority Login are STRICTLY ENGLISH ONLY
+      this.currentLanguage = 'en';
+    } else if (this.pageScope === 'citizen-auth') {
+      // Citizen Auth pages default to English; allow temporary in-session auth display toggle
+      try {
+        var authDisplayLang = sessionStorage.getItem('cc_auth_display_lang');
+        this.currentLanguage = (authDisplayLang === 'ta') ? 'ta' : 'en';
+      } catch (e) {
+        this.currentLanguage = 'en';
+      }
+    } else {
+      // Citizen Portal: authoritative saved preference
+      let stored = null;
+      try {
+        stored = localStorage.getItem('crowdcity_citizen_language') || 
+                 localStorage.getItem('crowdcity_language') || 
+                 localStorage.getItem('cc_lang') || 
+                 localStorage.getItem('preferred_language');
+      } catch (e) {}
 
-    // Synchronize all persistence keys
-    try {
-      localStorage.setItem('crowdcity_language', this.currentLanguage);
-      localStorage.setItem('cc_lang', this.currentLanguage);
-      localStorage.setItem('preferred_language', this.currentLanguage);
-    } catch (e) {}
+      this.currentLanguage = (stored === 'en' || stored === 'ta') ? stored : 'ta';
+
+      // Synchronize persistence keys for citizen portal
+      try {
+        localStorage.setItem('crowdcity_citizen_language', this.currentLanguage);
+        localStorage.setItem('crowdcity_language', this.currentLanguage);
+        localStorage.setItem('cc_lang', this.currentLanguage);
+        localStorage.setItem('preferred_language', this.currentLanguage);
+      } catch (e) {}
+    }
 
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.lang = this.currentLanguage;
@@ -2581,9 +2645,9 @@ class I18nService {
 
     // Full translations available synchronously (0ms delay)
     this.fallbackTranslations = INLINE_EMBEDDED_TRANSLATIONS.en;
-    this.translations = this.currentLanguage === 'ta'
-      ? INLINE_EMBEDDED_TRANSLATIONS.ta
-      : INLINE_EMBEDDED_TRANSLATIONS.en;
+    this.translations = (this.pageScope === 'authority-portal' || this.pageScope === 'authority-auth')
+      ? INLINE_EMBEDDED_TRANSLATIONS.en
+      : (this.currentLanguage === 'ta' ? INLINE_EMBEDDED_TRANSLATIONS.ta : INLINE_EMBEDDED_TRANSLATIONS.en);
 
     this.reverseEnglishMap = {};
     this.observer = null;
@@ -2591,8 +2655,8 @@ class I18nService {
     // Build reverse map synchronously on startup
     this.buildReverseMap();
 
-    // Listen to browser Back/Forward (bfcache) navigation
-    if (typeof window !== 'undefined') {
+    // Listen to browser Back/Forward (bfcache) navigation & storage ONLY if in Citizen Portal
+    if (typeof window !== 'undefined' && this.pageScope === 'citizen-portal') {
       window.addEventListener('pageshow', (e) => this.onPageShow(e));
       window.addEventListener('storage', (e) => this.onStorageChange(e));
     }
@@ -2620,8 +2684,10 @@ class I18nService {
   }
 
   onPageShow(event) {
+    if (this.pageScope !== 'citizen-portal') return;
     try {
-      const stored = localStorage.getItem('crowdcity_language') || 
+      const stored = localStorage.getItem('crowdcity_citizen_language') || 
+                     localStorage.getItem('crowdcity_language') || 
                      localStorage.getItem('cc_lang') || 
                      localStorage.getItem('preferred_language');
       const targetLang = (stored === 'en' || stored === 'ta') ? stored : 'ta';
@@ -2632,7 +2698,8 @@ class I18nService {
   }
 
   onStorageChange(event) {
-    if (event.key === 'crowdcity_language' || event.key === 'cc_lang' || event.key === 'preferred_language') {
+    if (this.pageScope !== 'citizen-portal') return;
+    if (event.key === 'crowdcity_citizen_language' || event.key === 'crowdcity_language' || event.key === 'cc_lang' || event.key === 'preferred_language') {
       if (event.newValue && (event.newValue === 'en' || event.newValue === 'ta') && event.newValue !== this.currentLanguage) {
         this.setLanguage(event.newValue);
       }
@@ -2656,10 +2723,23 @@ class I18nService {
 
   setLanguage(lang) {
     if (lang !== 'en' && lang !== 'ta') return;
+
+    if (this.pageScope === 'authority-portal' || this.pageScope === 'authority-auth') {
+      // Authority Portal and Login are STRICTLY ENGLISH ONLY
+      return;
+    }
+
+    if (this.pageScope === 'citizen-auth') {
+      // On auth pages, setLanguage behaves as auth-only display toggle
+      this.setAuthLanguage(lang);
+      return;
+    }
+
     this.currentLanguage = lang;
 
-    // Immediately persist across all keys
+    // Immediately persist across all keys for Citizen Portal
     try {
+      localStorage.setItem('crowdcity_citizen_language', lang);
       localStorage.setItem('crowdcity_language', lang);
       localStorage.setItem('cc_lang', lang);
       localStorage.setItem('preferred_language', lang);
@@ -2680,6 +2760,36 @@ class I18nService {
     this.translatePage();
 
     window.dispatchEvent(new CustomEvent('language-change', { detail: { language: lang } }));
+  }
+
+  /**
+   * Set display language ONLY for the active Citizen Authentication page.
+   * Does NOT touch localStorage citizen language or user's Supabase account profile.
+   */
+  setAuthLanguage(lang) {
+    if (lang !== 'en' && lang !== 'ta') return;
+    if (this.pageScope === 'authority-portal' || this.pageScope === 'authority-auth') {
+      return; // Authority pages are strictly English
+    }
+
+    this.currentLanguage = lang;
+    try {
+      sessionStorage.setItem('cc_auth_display_lang', lang);
+    } catch (e) {}
+
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.classList.remove('lang-en', 'lang-ta', 'cc-i18n-loading');
+      document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
+    }
+
+    this.translations = lang === 'ta'
+      ? INLINE_EMBEDDED_TRANSLATIONS.ta
+      : INLINE_EMBEDDED_TRANSLATIONS.en;
+
+    this.translatePage();
+    window.dispatchEvent(new CustomEvent('auth-language-change', { detail: { language: lang } }));
   }
 
   buildReverseMap() {
@@ -2748,6 +2858,17 @@ class I18nService {
   }
 
   t(key, variables = {}) {
+    if (this.pageScope === 'authority-portal' || this.pageScope === 'authority-auth') {
+      // Authority Portal is GUARANTEED 100% English
+      let text = (this.fallbackTranslations && this.fallbackTranslations[key]) || key;
+      if (variables && typeof variables === 'object') {
+        Object.keys(variables).forEach(varName => {
+          text = text.replace(new RegExp(`\\{${varName}\\}`, 'g'), variables[varName]);
+        });
+      }
+      return text;
+    }
+
     let text = (this.translations && this.translations[key]) || (this.fallbackTranslations && this.fallbackTranslations[key]);
     if (!text) {
       text = this.formatFallbackKey(key);
@@ -2788,6 +2909,16 @@ class I18nService {
   }
 
   translatePage() {
+    if (typeof document !== 'undefined') {
+      if (this.pageScope === 'authority-portal' || this.pageScope === 'authority-auth') {
+        // Force document attributes to English
+        document.documentElement.lang = 'en';
+        document.documentElement.setAttribute('data-lang', 'en');
+        document.documentElement.classList.remove('lang-ta', 'cc-i18n-loading');
+        document.documentElement.classList.add('lang-en');
+      }
+    }
+
     if (typeof document === 'undefined') return;
 
     // 1. Scan and translate explicit data-i18n elements
@@ -2828,8 +2959,8 @@ class I18nService {
       }
     });
 
-    // 4. Smart auto-translation & data-i18n auto-stamping (when language is Tamil)
-    if (this.currentLanguage === 'ta') {
+    // 4. Smart auto-translation & data-i18n auto-stamping (strictly for Tamil in Citizen Portal)
+    if (this.currentLanguage === 'ta' && this.pageScope === 'citizen-portal') {
       const selector = 'span, a, button, h1, h2, h3, h4, h5, h6, label, p, small, strong, li, td, th, .nav-link, .app-sidebar-link, .badge, .status-badge, .category-tag';
       const targets = document.querySelectorAll(selector);
 
@@ -2865,8 +2996,8 @@ class I18nService {
           }
         }
       });
-    } else if (this.currentLanguage === 'en') {
-      // Restore original English text when toggling back
+    } else if (this.currentLanguage === 'en' || this.pageScope === 'authority-portal' || this.pageScope === 'authority-auth') {
+      // Restore original English text when toggling back or in Authority Portal
       const origElements = document.querySelectorAll('[data-orig-en]');
       origElements.forEach(el => {
         const origText = el.getAttribute('data-orig-en');

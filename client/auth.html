@@ -1021,6 +1021,51 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Minimal & Premium Auth-Only Language Toggle */
+    .auth-lang-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.75rem;
+      width: 100%;
+    }
+    .auth-lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 0.22rem 0.65rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+      user-select: none;
+    }
+    .auth-lang-btn {
+      background: none;
+      border: none;
+      padding: 0.15rem 0.4rem;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1.2;
+    }
+    .auth-lang-btn:hover {
+      color: var(--primary, #0d9488);
+    }
+    .auth-lang-btn.active {
+      color: var(--primary, #0d9488);
+      font-weight: 800;
+      background: rgba(13, 148, 136, 0.12);
+    }
+    .auth-lang-divider {
+      color: #cbd5e1;
+      font-size: 0.7rem;
+    }
   </style>
 </head>
 <body>
@@ -1068,6 +1113,15 @@
     <!-- Right Forms Panel -->
     <main class="auth-form-panel">
       <div class="auth-card">
+
+        <!-- Auth-Only Language Toggle (Minimal & Premium) -->
+        <div class="auth-lang-bar">
+          <div class="auth-lang-toggle" role="group" aria-label="Auth page display language">
+            <button type="button" class="auth-lang-btn active" id="auth-lang-btn-en" onclick="setAuthDisplayLanguage('en')" title="English">English</button>
+            <span class="auth-lang-divider">|</span>
+            <button type="button" class="auth-lang-btn" id="auth-lang-btn-ta" onclick="setAuthDisplayLanguage('ta')" title="தமிழ்">தமிழ்</button>
+          </div>
+        </div>
         
         <!-- Mobile branding logo (hidden on desktop) -->
         <div class="mobile-brand-header" style="display: none; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem;">
@@ -2504,10 +2558,54 @@
       })();
     }
 
+    function setAuthDisplayLanguage(lang) {
+      if (lang !== 'en' && lang !== 'ta') return;
+      try {
+        sessionStorage.setItem('cc_auth_display_lang', lang);
+      } catch (e) {}
+
+      if (window.i18n && typeof window.i18n.setAuthLanguage === 'function') {
+        window.i18n.setAuthLanguage(lang);
+      } else if (window.i18n && typeof window.i18n.setLanguage === 'function') {
+        window.i18n.setLanguage(lang);
+      }
+
+      updateAuthLangToggleUI(lang);
+    }
+
+    function updateAuthLangToggleUI(lang) {
+      var current = lang;
+      if (!current) {
+        try {
+          current = sessionStorage.getItem('cc_auth_display_lang') || 'en';
+        } catch (e) {
+          current = 'en';
+        }
+      }
+      var btnEn = document.getElementById('auth-lang-btn-en');
+      var btnTa = document.getElementById('auth-lang-btn-ta');
+      if (btnEn && btnTa) {
+        if (current === 'ta') {
+          btnTa.classList.add('active');
+          btnEn.classList.remove('active');
+        } else {
+          btnEn.classList.add('active');
+          btnTa.classList.remove('active');
+        }
+      }
+    }
+
+    window.setAuthDisplayLanguage = setAuthDisplayLanguage;
+    window.updateAuthLangToggleUI = updateAuthLangToggleUI;
+
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initFormBindings);
+      document.addEventListener('DOMContentLoaded', function() {
+        initFormBindings();
+        updateAuthLangToggleUI();
+      });
     } else {
       initFormBindings();
+      updateAuthLangToggleUI();
     }
   </script>
 </body>

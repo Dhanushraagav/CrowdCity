@@ -12,10 +12,14 @@
  */
 
 function isAuthPage() {
+  if (typeof window !== 'undefined' && typeof window.getPageScope === 'function') {
+    var s = window.getPageScope();
+    return s === 'citizen-auth' || s === 'authority-auth';
+  }
   if (typeof window === 'undefined' || !window.location) return false;
   var path = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
   var file = path.split('/').pop().replace(/\.html$/, '');
-  return file === 'auth' || file === 'authority-login' || file === 'reset-password';
+  return file === 'auth' || file === 'authority-login' || file === 'reset-password' || file === 'login' || file === 'signup' || file === 'forgot-password';
 }
 if (typeof window !== 'undefined') {
   window.isAuthPage = isAuthPage;

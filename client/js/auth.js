@@ -1,10 +1,23 @@
-function isAuthPage() {
-  if (typeof window === 'undefined' || !window.location) return false;
-  var path = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
-  var file = path.split('/').pop().replace(/\.html$/, '');
-  return file === 'auth' || file === 'authority-login' || file === 'reset-password';
+function getPageScope() {
+  if (typeof window !== 'undefined' && typeof window.getPageScope === 'function' && window.getPageScope !== getPageScope) {
+    return window.getPageScope();
+  }
+  if (typeof window === 'undefined' || !window.location) return 'citizen-portal';
+  var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+  var f = p.split('/').pop().replace(/\.html$/, '');
+  if (f === 'authority-login') return 'authority-auth';
+  if (f === 'auth' || f === 'reset-password' || f === 'login' || f === 'signup' || f === 'forgot-password') return 'citizen-auth';
+  if (f.startsWith('authority-') || f === 'admin' || f === 'services-admin') return 'authority-portal';
+  return 'citizen-portal';
 }
+
+function isAuthPage() {
+  var s = getPageScope();
+  return s === 'citizen-auth' || s === 'authority-auth';
+}
+
 if (typeof window !== 'undefined') {
+  window.getPageScope = getPageScope;
   window.isAuthPage = isAuthPage;
 }
 
@@ -690,32 +703,53 @@ window.getUser = getUser;
 
 /**
  * Apply language and theme preferences globally and update local cache.
+ * Strictly respects page classification:
+ * - Auth pages (auth.html, authority-login.html, reset-password.html): MUST REMAIN ENGLISH + LIGHT MODE
+ * - Authority Portal pages (authority-*.html): MUST REMAIN STRICTLY ENGLISH ONLY
+ * - Citizen Portal pages: Apportion saved cloud/account language and theme
  */
 function applyAccountPreferences(prefs) {
   if (!prefs || typeof prefs !== 'object') return;
   const { language, theme } = prefs;
+  const scope = (typeof window.getPageScope === 'function') ? window.getPageScope() : getPageScope();
+  const isAuth = (scope === 'citizen-auth' || scope === 'authority-auth');
+  const isAuthority = (scope === 'authority-portal' || scope === 'authority-auth');
 
   // 1. Language application
   if (language === 'ta' || language === 'en') {
+    // Always persist to local cache for citizen portal navigation
     try {
+      localStorage.setItem('crowdcity_citizen_language', language);
       localStorage.setItem('crowdcity_language', language);
       localStorage.setItem('cc_lang', language);
       localStorage.setItem('preferred_language', language);
     } catch (e) {}
 
-    if (typeof document !== 'undefined' && document.documentElement) {
-      document.documentElement.lang = language;
-      document.documentElement.setAttribute('data-lang', language);
-      document.documentElement.classList.remove('lang-en', 'lang-ta', 'cc-i18n-loading');
-      document.documentElement.classList.add(language === 'ta' ? 'lang-ta' : 'lang-en');
-    }
-
-    if (window.i18n && typeof window.i18n.setLanguage === 'function') {
-      if (window.i18n.getLanguage() !== language) {
-        window.i18n.setLanguage(language);
+    // ONLY apply language to the DOM if we are on a Citizen Portal page!
+    // Auth pages (ALWAYS English by default) and Authority Portal pages (ALWAYS English only) MUST NOT inherit this!
+    if (scope === 'citizen-portal') {
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.lang = language;
+        document.documentElement.setAttribute('data-lang', language);
+        document.documentElement.classList.remove('lang-en', 'lang-ta', 'cc-i18n-loading');
+        document.documentElement.classList.add(language === 'ta' ? 'lang-ta' : 'lang-en');
       }
-    } else if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('language-change', { detail: { language } }));
+
+      if (window.i18n && typeof window.i18n.setLanguage === 'function') {
+        if (window.i18n.getLanguage() !== language) {
+          window.i18n.setLanguage(language);
+        }
+      } else if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('language-change', { detail: { language } }));
+      }
+    } else if (isAuthority) {
+      // Ensure Authority Portal remains locked to English
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.lang = 'en';
+        document.documentElement.setAttribute('data-lang', 'en');
+        document.documentElement.classList.remove('lang-ta', 'cc-i18n-loading');
+        document.documentElement.classList.add('lang-en');
+      }
     }
   }
 
@@ -728,9 +762,7 @@ function applyAccountPreferences(prefs) {
       localStorage.setItem('cc_theme_updated_at', String(Date.now()));
     } catch (e) {}
 
-    // Only apply theme visually to DOM if NOT on an auth page!
-    // Auth pages (auth.html, authority-login.html, reset-password.html) MUST ALWAYS REMAIN LIGHT MODE.
-    const isAuth = typeof isAuthPage === 'function' ? isAuthPage() : (window.isAuthPage ? window.isAuthPage() : false);
+    // Auth pages (auth.html, authority-login.html, reset-password.html) MUST ALWAYS REMAIN LIGHT MODE visually!
     if (!isAuth) {
       if (typeof document !== 'undefined' && document.documentElement) {
         const isDark = (theme === 'dark');
@@ -758,27 +790,20 @@ function applyAccountPreferences(prefs) {
 window.applyAccountPreferences = applyAccountPreferences;
 
 /**
- * Reconcile cloud account preferences with the current device.
- * Invariants:
- * 1. Explicit local selection (e.g. user chose Dark in Settings) MUST be respected immediately
- *    and NOT overwritten by a delayed, stale, or null/default cloud fetch.
- * 2. Cross-device sync: When opening a fresh browser or another device (Mobile), the account's
- *    cloud preferences are inherited immediately.
- * 3. Never blindly default to 'light' if the user has already selected Dark.
- */
-/**
  * Reconcile account preferences with Supabase cloud account.
  * Architectural Rules:
  * 1. For authenticated accounts, SUPABASE ACCOUNT PREFERENCE is THE AUTHORITATIVE SOURCE OF TRUTH.
  * 2. Cross-device synchronization: Regardless of what is in local storage on Device B (mobile),
  *    the authenticated account's cloud preferences in Supabase are fetched and applied.
  * 3. Default for genuinely new accounts without saved preferences: Language = 'ta', Theme = 'light'.
- * 4. Auth pages always remain in Light Mode visually.
+ * 4. Auth pages always remain in English and Light Mode visually.
+ * 5. Authority Portal always remains English only.
  */
 async function syncAccountPreferences(user, profile) {
   if (!user && !profile) return;
   const activeUser = user || getCurrentUser();
   if (!activeUser || !activeUser.id) return;
+  const userRole = (profile && profile.role) || (activeUser.user_metadata && activeUser.user_metadata.role) || 'citizen';
 
   // 1. Cloud Language Resolution:
   // Priority: profile table -> user_metadata -> default 'ta'
@@ -802,11 +827,12 @@ async function syncAccountPreferences(user, profile) {
   const finalLang = (cloudLang === 'ta' || cloudLang === 'en') ? cloudLang : 'ta';
   const finalTheme = (cloudTheme === 'light' || cloudTheme === 'dark') ? cloudTheme : 'light';
 
-  // Apply resolved preferences to UI & local cache immediately
+  // Apply resolved preferences (respecting page scope)
   applyAccountPreferences({ language: finalLang, theme: finalTheme });
 
-  // Update local cache for instant 0ms transitions on future refreshes/navigations
+  // Update local cache for instant transitions on future navigations
   try {
+    localStorage.setItem('crowdcity_citizen_language', finalLang);
     localStorage.setItem('crowdcity_language', finalLang);
     localStorage.setItem('cc_lang', finalLang);
     localStorage.setItem('preferred_language', finalLang);
@@ -816,8 +842,8 @@ async function syncAccountPreferences(user, profile) {
     localStorage.setItem('cc_theme_updated_at', String(Date.now()));
   } catch (e) {}
 
-  // If this account had no saved preferences at all (brand new user), initialize them in the cloud
-  if (!cloudLang || !cloudTheme) {
+  // If this account had no saved preferences at all (brand new citizen), initialize them in the cloud
+  if ((!cloudLang || !cloudTheme) && userRole === 'citizen') {
     console.log('[Auth Prefs] Initializing default preferences in cloud account for user:', activeUser.id);
     saveAccountPreferenceDirect(activeUser.id, {
       language: finalLang,
@@ -895,6 +921,13 @@ async function saveAccountPreference(key, value) {
       localStorage.setItem('cc_theme', value);
       localStorage.setItem('cc_theme_explicit', value);
       localStorage.setItem('cc_theme_updated_at', String(now));
+    } catch (e) {}
+  } else if (key === 'language') {
+    try {
+      localStorage.setItem('crowdcity_citizen_language', value);
+      localStorage.setItem('crowdcity_language', value);
+      localStorage.setItem('cc_lang', value);
+      localStorage.setItem('preferred_language', value);
     } catch (e) {}
   }
 
