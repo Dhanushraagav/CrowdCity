@@ -135,7 +135,7 @@ export const getProfile = async (req, res) => {
   let userEmail = req.user.email;
 
   try {
-    const activeClient = getSupabaseClient(req);
+    const activeClient = supabaseAdmin || getSupabaseClient(req);
     const { data: profiles, error } = await activeClient
       .from('profiles')
       .select('*')
@@ -155,9 +155,11 @@ export const getProfile = async (req, res) => {
         .from('profiles')
         .insert({
           id: userId,
-          full_name: req.user.user_metadata?.full_name || 'Citizen',
-          avatar_url: '',
-          role: 'citizen'
+          full_name: req.user.user_metadata?.full_name || req.user.user_metadata?.name || 'Citizen',
+          avatar_url: req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture || '',
+          role: 'citizen',
+          language: (req.user.user_metadata?.language === 'ta' || req.user.user_metadata?.language === 'en') ? req.user.user_metadata.language : 'ta',
+          theme: (req.user.user_metadata?.theme === 'light' || req.user.user_metadata?.theme === 'dark') ? req.user.user_metadata.theme : 'light'
         })
         .select();
 

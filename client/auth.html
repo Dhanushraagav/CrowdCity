@@ -1710,6 +1710,21 @@
       const googleBtn = document.getElementById('btn-google-login');
       const alertBanner = document.getElementById('auth-alert');
 
+      // Check for Google OAuth callback errors or active token exchange
+      if (typeof checkAndHandleOAuthError === 'function') {
+        const hasError = checkAndHandleOAuthError();
+        if (hasError) return;
+      }
+      const hash = (typeof window !== 'undefined' && window.location && window.location.hash) || '';
+      const search = (typeof window !== 'undefined' && window.location && window.location.search) || '';
+      const isOAuthReturn = hash.includes('access_token=') || hash.includes('refresh_token=') || search.includes('code=');
+      if (isOAuthReturn) {
+        window.cc_manual_signin = true;
+        if (typeof setGoogleButtonLoading === 'function') {
+          setGoogleButtonLoading('Signing you in with Google...');
+        }
+      }
+
       const emailInput = document.getElementById('login-email');
       if (emailInput) {
         emailInput.addEventListener('input', () => {

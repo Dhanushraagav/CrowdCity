@@ -381,11 +381,196 @@ function _tryInitFromCache() {
   }
 }
 
+// =========================================================================
+// GOOGLE OAUTH & SESSION ROUTING GUARDS
+// =========================================================================
+
+// Single-flight routing promise to prevent race conditions & duplicate routing
+let activeRoutingPromise = null;
+async function routeAuthenticatedUserOnce(user, showAlert, accessToken = null) {
+  if (activeRoutingPromise) {
+    console.log('[Auth Client] Routing already in progress, awaiting existing operation.');
+    return activeRoutingPromise;
+  }
+  activeRoutingPromise = verifyProfileAndRoute(user, showAlert, accessToken)
+    .catch(err => {
+      console.error('[Auth Client] verifyProfileAndRoute failed:', err);
+      activeRoutingPromise = null;
+      throw err;
+    });
+  return activeRoutingPromise;
+}
+window.routeAuthenticatedUserOnce = routeAuthenticatedUserOnce;
+
+// Restore Google login button to default state
+function restoreGoogleButtonState() {
+  if (typeof document === 'undefined') return;
+  const googleBtn = document.getElementById('btn-google-login');
+  if (googleBtn) {
+    googleBtn.disabled = false;
+    const svgHtml = `<svg style="width: 18px; height: 18px;" viewBox="0 0 24 24">
+        <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3A11.91 11.91 0 0 0 12 .909a11.968 11.968 0 0 0-9.664 4.945L5.266 9.765z"/>
+        <path fill="#4285F4" d="M23.045 12.182c0-.818-.073-1.609-.209-2.373H12v4.5H18.2c-.268 1.44-.945 2.659-2.1 3.44l3.227 2.505c1.89-1.745 2.973-4.314 2.973-7.209z"/>
+        <path fill="#FBBC05" d="M5.266 9.765L2.336 5.854A11.968 11.968 0 0 0 .091 12c0 2.29.645 4.436 1.764 6.264l3.41-2.655a7.078 7.078 0 0 1-1.764-3.609c0-2.02.682-3.886 1.764-5.235z"/>
+        <path fill="#34A853" d="M12 23.091a11.518 11.518 0 0 0 7.973-2.964l-3.227-2.505A7.077 7.077 0 0 1 12 19.091c-3.155 0-5.836-2.127-6.79-5.01l-3.41 2.655a11.968 11.968 0 0 0 10.2 6.355z"/>
+      </svg>`;
+    const continueText = (window.i18n && typeof window.i18n.t === 'function') ? window.i18n.t('continue_with_google') : 'Continue with Google';
+    googleBtn.innerHTML = `${svgHtml} <span data-i18n="continue_with_google">${continueText}</span>`;
+  }
+}
+window.restoreGoogleButtonState = restoreGoogleButtonState;
+
+// Set Google button to loading state
+function setGoogleButtonLoading(text = 'Signing you in with Google...') {
+  if (typeof document === 'undefined') return;
+  const googleBtn = document.getElementById('btn-google-login');
+  if (googleBtn) {
+    googleBtn.disabled = true;
+    const svgHtml = `<svg style="width: 18px; height: 18px;" viewBox="0 0 24 24">
+        <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3A11.91 11.91 0 0 0 12 .909a11.968 11.968 0 0 0-9.664 4.945L5.266 9.765z"/>
+        <path fill="#4285F4" d="M23.045 12.182c0-.818-.073-1.609-.209-2.373H12v4.5H18.2c-.268 1.44-.945 2.659-2.1 3.44l3.227 2.505c1.89-1.745 2.973-4.314 2.973-7.209z"/>
+        <path fill="#FBBC05" d="M5.266 9.765L2.336 5.854A11.968 11.968 0 0 0 .091 12c0 2.29.645 4.436 1.764 6.264l3.41-2.655a7.078 7.078 0 0 1-1.764-3.609c0-2.02.682-3.886 1.764-5.235z"/>
+        <path fill="#34A853" d="M12 23.091a11.518 11.518 0 0 0 7.973-2.964l-3.227-2.505A7.077 7.077 0 0 1 12 19.091c-3.155 0-5.836-2.127-6.79-5.01l-3.41 2.655a11.968 11.968 0 0 0 10.2 6.355z"/>
+      </svg>`;
+    googleBtn.innerHTML = `${svgHtml} <i class="fa-solid fa-circle-notch fa-spin" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i> <span>${text}</span>`;
+  }
+}
+window.setGoogleButtonLoading = setGoogleButtonLoading;
+
+// Check and handle OAuth return errors (e.g. user cancelled or access denied)
+function checkAndHandleOAuthError() {
+  if (typeof window === 'undefined' || !window.location) return false;
+  const hash = window.location.hash || '';
+  const search = window.location.search || '';
+
+  let errorMsg = null;
+  let hasError = false;
+
+  if (search) {
+    try {
+      const searchParams = new URLSearchParams(search);
+      if (searchParams.has('error') || searchParams.has('error_description')) {
+        hasError = true;
+        errorMsg = searchParams.get('error_description') || searchParams.get('error');
+      }
+    } catch (e) {}
+  }
+
+  if (!hasError && hash && (hash.includes('error=') || hash.includes('error_description='))) {
+    try {
+      const hashStr = hash.startsWith('#') ? hash.substring(1) : hash;
+      const hashParams = new URLSearchParams(hashStr);
+      if (hashParams.has('error') || hashParams.has('error_description')) {
+        hasError = true;
+        errorMsg = hashParams.get('error_description') || hashParams.get('error');
+      }
+    } catch (e) {}
+  }
+
+  if (hasError) {
+    console.warn('[Auth Client] OAuth error returned in URL:', errorMsg);
+    try {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (e) {}
+
+    let friendlyMessage = 'Google sign-in was not completed. Please try again.';
+    if (errorMsg) {
+      const decoded = decodeURIComponent(String(errorMsg).replace(/\+/g, ' '));
+      if (decoded.toLowerCase().includes('access_denied') || decoded.toLowerCase().includes('denied')) {
+        friendlyMessage = 'Google sign-in was cancelled or access was denied.';
+      } else {
+        friendlyMessage = decoded;
+      }
+    }
+
+    if (typeof showAuthAlert === 'function') {
+      showAuthAlert(friendlyMessage);
+    } else {
+      setTimeout(() => {
+        if (typeof showAuthAlert === 'function') showAuthAlert(friendlyMessage);
+      }, 200);
+    }
+
+    restoreGoogleButtonState();
+    return true;
+  }
+  return false;
+}
+window.checkAndHandleOAuthError = checkAndHandleOAuthError;
+
+// Wait for Supabase to resolve OAuth session from URL tokens without race condition
+function waitForOAuthSession(client, timeoutMs = 10000) {
+  return new Promise((resolve) => {
+    let settled = false;
+    let authSub = null;
+    let intervalId = null;
+
+    const cleanup = () => {
+      settled = true;
+      if (authSub && typeof authSub.unsubscribe === 'function') {
+        try { authSub.unsubscribe(); } catch (e) {}
+      }
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      if (!settled) {
+        cleanup();
+        resolve(null);
+      }
+    }, timeoutMs);
+
+    // 1. Check getSession immediately
+    client.auth.getSession().then(({ data, error }) => {
+      if (!settled && data && data.session && data.session.user) {
+        clearTimeout(timer);
+        cleanup();
+        resolve(data.session);
+      }
+    }).catch(() => {});
+
+    // 2. Subscribe to auth state change
+    try {
+      const res = client.auth.onAuthStateChange((event, session) => {
+        if (!settled && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user) {
+          clearTimeout(timer);
+          cleanup();
+          resolve(session);
+        }
+      });
+      if (res && res.data && res.data.subscription) {
+        authSub = res.data.subscription;
+      }
+    } catch (e) {}
+
+    // 3. Fallback polling every 200ms
+    intervalId = setInterval(async () => {
+      if (settled) return;
+      try {
+        const { data } = await client.auth.getSession();
+        if (!settled && data && data.session && data.session.user) {
+          clearTimeout(timer);
+          cleanup();
+          resolve(data.session);
+        }
+      } catch (e) {}
+    }, 200);
+  });
+}
+window.waitForOAuthSession = waitForOAuthSession;
+
 // Attach the Supabase auth-state listener.
 // Extracted so it can be called from multiple init paths.
 function _attachAuthStateListener() {
+  // First check for OAuth errors returned in the URL
+  if (checkAndHandleOAuthError()) {
+    return;
+  }
+
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    // Proper logging for Goal 7: SIGNED_IN, PASSWORD_RECOVERY, SIGNED_OUT
+    // Proper logging: SIGNED_IN, PASSWORD_RECOVERY, SIGNED_OUT
     if (event === 'SIGNED_IN') {
       console.log('[Auth Log] SIGNED_IN event triggered');
     } else if (event === 'PASSWORD_RECOVERY') {
@@ -420,14 +605,12 @@ function _attachAuthStateListener() {
 
       // Prevent automatic dashboard redirects if recovery is active (Goal 3 & 6)
       if (isLoginOrRoot && !isResetPage && !isRecoveryActive) {
-        console.log('[Auth] OAuth SIGNED_IN on login page. Routing user.');
+        console.log('[Auth] SIGNED_IN event on login page. Routing user via routeAuthenticatedUserOnce.');
         const hasHash = window.location.hash.includes('access_token') || window.location.search.includes('code=');
         if (hasHash) {
           window.cc_manual_signin = true;
         }
-        // Reset routing guard so each fresh sign-in can proceed
-        window.cc_routing_in_progress = false;
-        await verifyProfileAndRoute(session.user, showAuthAlert, session.access_token);
+        await routeAuthenticatedUserOnce(session.user, showAuthAlert, session.access_token);
       } else {
         await fetchAndCacheRole(session.access_token);
         syncUserProfileBackground();
@@ -468,72 +651,109 @@ function _attachAuthStateListener() {
     updateAuthUI();
   });
 
-  // --- OAuth return handler ---
-  // When the user returns from Google OAuth, Supabase exchanges the URL hash
-  // tokens and resolves the session BEFORE onAuthStateChange fires. We probe
-  // getSession() here so we catch sessions that are already resolved.
-  (async () => {
-    try {
-      const { data: { session }, error } = await supabaseClient.auth.getSession();
-      if (error) {
-        console.warn('[Auth] getSession() error after listener attach:', error.message);
-        return;
-      }
-      if (session) {
-        const path = window.location.pathname;
-        const normalizedPath = path.replace(/\.html$/, '');
-        const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
-        const isAuthorityLoginPage = normalizedPath.includes('authority-login');
-        const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
-        const isResetPage = normalizedPath.includes('reset-password');
-        const isRecoveryActive = localStorage.getItem('cc_password_recovery_active') === 'true';
+  // --- OAuth return & Session Probe handler ---
+  const hash = window.location.hash || '';
+  const search = window.location.search || '';
+  const isOAuthReturn = hash.includes('access_token=') || hash.includes('refresh_token=') || search.includes('code=');
 
-        if (isLoginOrRoot && !isResetPage && !isRecoveryActive) {
-          console.log('[Auth] Session found via getSession() on login page (OAuth return). Routing user.');
+  if (isOAuthReturn) {
+    // When returning from Google OAuth, Supabase needs time to parse hash or exchange code.
+    // Explicitly wait for session resolution; DO NOT execute null-session cache invalidation!
+    window.cc_manual_signin = true;
+    setGoogleButtonLoading('Signing you in with Google...');
+
+    (async () => {
+      try {
+        console.log('[Auth] OAuth return detected. Awaiting authenticated Supabase session...');
+        const session = await waitForOAuthSession(supabaseClient, 10000);
+        if (session && session.user) {
+          console.log('[Auth] OAuth session successfully resolved for user:', session.user.email || session.user.id);
+          try {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch (e) {}
           localStorage.setItem('cc_session', JSON.stringify(session));
-          // Allow routing even if onAuthStateChange already fired
-          window.cc_routing_in_progress = false;
-          await verifyProfileAndRoute(session.user, showAuthAlert, session.access_token);
+          await routeAuthenticatedUserOnce(session.user, showAuthAlert, session.access_token);
         } else {
-          // On dashboard/protected pages: just refresh cache silently
-          localStorage.setItem('cc_session', JSON.stringify(session));
-          await fetchAndCacheRole(session.access_token);
-          updateAuthUI();
-
-          // If recovery is active and we are not on reset-password.html, redirect to reset-password.html (Goal 6)
-          if (isRecoveryActive && !isResetPage) {
-            console.log('[Auth] Recovery active in session probe. Redirecting to reset-password.html');
-            window.location.href = 'reset-password.html';
+          console.warn('[Auth] OAuth session resolution timed out.');
+          try {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch (e) {}
+          restoreGoogleButtonState();
+          if (typeof showAuthAlert === 'function') {
+            showAuthAlert('Google sign-in timed out. Please try again.');
           }
         }
-      } else {
-        // Probe returned null session: user is not authenticated.
-        // If we had a cached session, clear it now since we're sure it's invalid.
-        if (localStorage.getItem('cc_session')) {
-          console.log('[Auth] Session probe returned null. Invalidating cache.');
-          localStorage.removeItem('cc_session');
-          localStorage.removeItem('cc_user_role');
-          localStorage.removeItem('cc_user_profile');
-          updateAuthUI();
-
+      } catch (err) {
+        console.error('[Auth] OAuth session resolution exception:', err);
+        try {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (e) {}
+        restoreGoogleButtonState();
+        if (typeof showAuthAlert === 'function') {
+          showAuthAlert(err.message || 'Google authentication failed. Please try again.');
+        }
+      }
+    })();
+  } else {
+    // Non-OAuth normal session check
+    (async () => {
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) {
+          console.warn('[Auth] getSession() error after listener attach:', error.message);
+          return;
+        }
+        if (session) {
           const path = window.location.pathname;
           const normalizedPath = path.replace(/\.html$/, '');
           const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
           const isAuthorityLoginPage = normalizedPath.includes('authority-login');
           const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
           const isResetPage = normalizedPath.includes('reset-password');
+          const isRecoveryActive = localStorage.getItem('cc_password_recovery_active') === 'true';
 
-          if (!isLoginOrRoot && !isResetPage) {
-            console.warn('[Auth] Session is inactive on a protected page. Redirecting to login.');
-            const isAuthorityPage = normalizedPath.includes('authority-') || normalizedPath.includes('authority') || normalizedPath.includes('admin');
-            window.authRouter.redirectToLogin(isAuthorityPage ? 'authority' : 'citizen');
+          if (isLoginOrRoot && !isResetPage && !isRecoveryActive) {
+            console.log('[Auth] Session found via getSession() on login page. Routing user.');
+            localStorage.setItem('cc_session', JSON.stringify(session));
+            await routeAuthenticatedUserOnce(session.user, showAuthAlert, session.access_token);
+          } else {
+            localStorage.setItem('cc_session', JSON.stringify(session));
+            await fetchAndCacheRole(session.access_token);
+            updateAuthUI();
+
+            if (isRecoveryActive && !isResetPage) {
+              console.log('[Auth] Recovery active in session probe. Redirecting to reset-password.html');
+              window.location.href = 'reset-password.html';
+            }
+          }
+        } else {
+          // Probe returned null session: user is not authenticated.
+          if (localStorage.getItem('cc_session')) {
+            console.log('[Auth] Session probe returned null. Invalidating cache.');
+            localStorage.removeItem('cc_session');
+            localStorage.removeItem('cc_user_role');
+            localStorage.removeItem('cc_user_profile');
+            updateAuthUI();
+
+            const path = window.location.pathname;
+            const normalizedPath = path.replace(/\.html$/, '');
+            const isCitizenLoginPage = normalizedPath.endsWith('/auth') || normalizedPath === 'auth';
+            const isAuthorityLoginPage = normalizedPath.includes('authority-login');
+            const isLoginOrRoot = isCitizenLoginPage || isAuthorityLoginPage || normalizedPath.endsWith('/') || normalizedPath.endsWith('/index');
+            const isResetPage = normalizedPath.includes('reset-password');
+
+            if (!isLoginOrRoot && !isResetPage) {
+              console.warn('[Auth] Session is inactive on a protected page. Redirecting to login.');
+              const isAuthorityPage = normalizedPath.includes('authority-') || normalizedPath.includes('authority') || normalizedPath.includes('admin');
+              window.authRouter.redirectToLogin(isAuthorityPage ? 'authority' : 'citizen');
+            }
           }
         }
+      } catch (e) {
+        console.warn('[Auth] getSession() probe error:', e);
       }
-    } catch (e) {
-      console.warn('[Auth] getSession() probe error:', e);
-    }
-  })();
+    })();
+  }
 }
 
 // Fetch user profile from Supabase and cache the role locally
@@ -1162,6 +1382,9 @@ function restoreSubmitButtons() {
     signupBtn.disabled = false;
     signupBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
   }
+  if (typeof restoreGoogleButtonState === 'function') {
+    restoreGoogleButtonState();
+  }
 }
 
 // Strict client-side route role verification to prevent Page Flash/Execution After Redirect
@@ -1236,29 +1459,29 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
       
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Timeout')), 5000)
     );
 
     const result = await Promise.race([queryPromise, timeoutPromise]);
-    const data = result.data;
-    const error = result.error;
-
-    if (error) {
-      console.error("[Auth Client] Error fetching profile from Supabase:", error.message || error);
-      throw error;
-    } else {
-      console.log("[Auth Client] Profile queried successfully from Supabase:", data);
-      profile = data;
+    if (result && !result.error && result.data) {
+      console.log("[Auth Client] Profile queried successfully from Supabase:", result.data);
+      profile = result.data;
+    } else if (result && result.error) {
+      console.warn("[Auth Client] Error fetching profile from Supabase:", result.error.message || result.error);
     }
   } catch (err) {
-    console.warn("[Auth Client] Direct Supabase profile query failed or timed out. Attempting server fallback API...", err);
+    console.warn("[Auth Client] Direct Supabase profile query failed or timed out:", err);
+  }
+
+  // If not found in direct Supabase query, try the server profile API
+  if (!profile) {
     try {
       const token = passedToken || getAuthToken() || await getOrRefreshAccessToken();
       if (token) {
-        console.log("[Auth Client] Fetching profile via Express API endpoint /api/auth/profile...");
+        console.log("[Auth Client] Fetching / creating profile via Express API endpoint /api/auth/profile...");
         const response = await fetch('/api/auth/profile', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -1267,7 +1490,9 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
         if (response.ok) {
           const freshProfile = await response.json();
           console.log("[Auth Client] Profile retrieved successfully from Express API:", freshProfile);
-          profile = freshProfile;
+          if (freshProfile && freshProfile.role) {
+            profile = freshProfile;
+          }
         } else {
           console.error("[Auth Client] Express API profile fetch returned non-ok status:", response.status);
         }
@@ -1279,41 +1504,51 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
     }
   }
 
+  // Handle first-time user: create and link profile if still missing
   if (!profile) {
-    console.log("[Auth Client] Profile record not found. Auto-synthesizing citizen profile...");
+    console.log("[Auth Client] Profile record not found for new user. Auto-creating citizen profile...");
     const userName = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || 
                      (user.email ? user.email.split('@')[0] : 'Citizen');
-    const synthesizedProfile = {
+    const userAvatar = (user.user_metadata && (user.user_metadata.avatar_url || user.user_metadata.picture)) || '';
+    const userLang = (user.user_metadata && (user.user_metadata.language === 'en' || user.user_metadata.language === 'ta'))
+                     ? user.user_metadata.language : 'ta';
+    const userTheme = (user.user_metadata && (user.user_metadata.theme === 'dark' || user.user_metadata.theme === 'light'))
+                      ? user.user_metadata.theme : 'light';
+
+    const newProfileData = {
       id: user.id,
-      email: user.email || '',
       full_name: userName,
+      avatar_url: userAvatar,
       role: 'citizen',
-      language: user.user_metadata?.language || 'ta',
-      theme: user.user_metadata?.theme || 'light',
-      is_verified_authority: false,
-      points: 50,
-      created_at: new Date().toISOString()
+      language: userLang,
+      theme: userTheme
     };
 
     try {
       const supabase = await getOrInitSupabaseClient();
       if (supabase) {
-        await supabase.from('profiles').upsert(synthesizedProfile, { onConflict: 'id' });
+        const { data: upserted, error: upsertErr } = await supabase
+          .from('profiles')
+          .upsert(newProfileData, { onConflict: 'id' })
+          .select()
+          .maybeSingle();
+
+        if (!upsertErr && upserted) {
+          profile = upserted;
+          console.log("[Auth Client] Profile row upserted directly in Supabase:", profile);
+        }
       }
     } catch (e) {
-      console.warn("[Auth Client] Background profile auto-creation notice:", e);
+      console.warn("[Auth Client] Direct profile upsert notice:", e);
     }
 
-    profile = {
-      role: 'citizen',
-      is_verified: false,
-      full_name: userName,
-      language: synthesizedProfile.language,
-      theme: synthesizedProfile.theme,
-      points: 50
-    };
-    localStorage.setItem('cc_user_role', 'citizen');
-    localStorage.setItem('cc_user_profile', JSON.stringify(synthesizedProfile));
+    if (!profile) {
+      profile = {
+        ...newProfileData,
+        points: 50,
+        is_verified: false
+      };
+    }
   }
 
   // Synchronize and apply account-level preferences (language + theme)
@@ -1338,6 +1573,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       console.log("ROLE DETECTED: citizen");
       console.log("ACCESS DENIED: WRONG PORTAL");
       window.cc_routing_in_progress = false;
+      activeRoutingPromise = null;
       await clearSessionSilent();
       showAlert("Citizen accounts cannot access the Authority Portal.");
       restoreSubmitButtons();
@@ -1349,6 +1585,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       console.log("ROLE DETECTED: " + role);
       console.log("ACCESS DENIED: WRONG PORTAL");
       window.cc_routing_in_progress = false;
+      activeRoutingPromise = null;
       await clearSessionSilent();
       showAlert("This account belongs to the Authority Portal. Please use the Authority Login page.");
       restoreSubmitButtons();
@@ -1365,6 +1602,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
     } else {
       console.warn("Authority user is not verified");
       window.cc_routing_in_progress = false;
+      activeRoutingPromise = null;
       await clearSessionSilent();
       showAlert("Access Denied: Your authority account is not yet verified by an administrator.");
       restoreSubmitButtons();
@@ -1377,6 +1615,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   } else {
     console.warn("Unknown role designated:", role);
     window.cc_routing_in_progress = false;
+    activeRoutingPromise = null;
     await clearSessionSilent();
     showAlert("Unauthorized role designations.");
     restoreSubmitButtons();
@@ -1394,8 +1633,8 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       role: role,
       language: profile.language || 'ta',
       theme: profile.theme || 'light',
-      full_name: user.user_metadata?.full_name || profile.full_name || 'User',
-      avatar_url: user.user_metadata?.avatar_url || profile.avatar_url || ''
+      full_name: (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || profile.full_name || 'User',
+      avatar_url: (user.user_metadata && (user.user_metadata.avatar_url || user.user_metadata.picture)) || profile.avatar_url || ''
     }));
   } catch (e) {}
 
@@ -1406,7 +1645,8 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
   if (isManual) {
     const successOverlay = document.getElementById('auth-success-overlay');
     if (successOverlay) {
-      const fullName = user.user_metadata?.full_name || user.email || 'Citizen';
+      const fullName = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || 
+                       profile.full_name || user.email || 'Citizen';
       const nameElem = document.getElementById('success-user-name');
       if (nameElem) nameElem.textContent = fullName;
       

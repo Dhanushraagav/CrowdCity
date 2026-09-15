@@ -136,14 +136,19 @@ window.authRouter = {
     return;
   }
 
-  // 1. Detect OAuth callback — Supabase returns access_token in the URL hash
-  // after Google OAuth. auth.js must process these tokens; DO NOT redirect away.
-  const hasOAuthHash = hash.includes('access_token') ||
-                       hash.includes('refresh_token') ||
-                       hash.includes('type=signup') ||
-                       search.includes('code=');   // PKCE flow
-  if (isCitizenLoginPage && hasOAuthHash) {
-    console.log('[Auth Router] OAuth callback detected on auth.html. Delegating to auth.js.');
+  // 1. Detect OAuth callback and OAuth error parameters
+  // Supabase returns tokens in the URL hash/search or returns error parameters on auth.html.
+  // auth.js must process these tokens/errors; DO NOT redirect away.
+  const hasOAuthCallback = hash.includes('access_token') ||
+                          hash.includes('refresh_token') ||
+                          hash.includes('type=signup') ||
+                          search.includes('code=') ||
+                          hash.includes('error=') ||
+                          search.includes('error=') ||
+                          hash.includes('error_description=') ||
+                          search.includes('error_description=');
+  if (isCitizenLoginPage && hasOAuthCallback) {
+    console.log('[Auth Router] OAuth callback or response detected on auth.html. Delegating to auth.js.');
     return;
   }
 
