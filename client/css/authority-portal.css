@@ -852,3 +852,183 @@ html.dark-theme .data-table th {
   color: #a3a3a3 !important;
 }
 
+/* Button Processing, Loading and Disabled States */
+.btn-action:disabled,
+.btn-secondary:disabled,
+.btn-action[aria-busy="true"],
+.btn-secondary[aria-busy="true"],
+.btn-action.is-loading,
+.btn-secondary.is-loading {
+  opacity: 0.65;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-action .fa-spinner,
+.btn-secondary .fa-spinner {
+  margin-right: 0.4rem;
+}
+
+/* Complaint Activity Feed Styles */
+.activity-timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.activity-event-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 0.9rem;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-left: 3px solid var(--primary);
+}
+
+.activity-event-card.event-assigned {
+  border-left-color: #2563eb;
+}
+
+.activity-event-card.event-work_started,
+.activity-event-card.event-in_progress {
+  border-left-color: #7e22ce;
+}
+
+.activity-event-card.event-authority_update {
+  border-left-color: #0284c7;
+}
+
+.activity-event-card.event-resolved {
+  border-left-color: #059669;
+}
+
+.activity-event-card.event-rejected {
+  border-left-color: #dc2626;
+}
+
+.activity-event-card.event-verified {
+  border-left-color: #0d9488;
+}
+
+.activity-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.activity-event-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.activity-event-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.activity-status-transition {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.activity-status-transition .transition-arrow {
+  color: var(--primary);
+}
+
+.activity-event-time {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.activity-event-body {
+  font-size: 0.84rem;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
+.activity-detail-highlight {
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+}
+
+.activity-proof-thumb-wrapper {
+  margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.activity-proof-thumb {
+  max-height: 70px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.activity-event-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+  padding-top: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.activity-actor-name {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+
+/* Dark theme specific overrides for Complaint Activity */
+[data-theme="dark"] .activity-event-card,
+html.dark-theme .activity-event-card {
+  background-color: #0b0b0b !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .activity-status-transition,
+html.dark-theme .activity-status-transition,
+[data-theme="dark"] .activity-detail-highlight,
+html.dark-theme .activity-detail-highlight {
+  background-color: #000000 !important;
+  border-color: #1e1e1e !important;
+  color: #e2e8f0 !important;
+}
+
+

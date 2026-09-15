@@ -7,6 +7,8 @@
   let currentNotifications = [];
   let activeDetailIssueId = null;
   let activeProofPhotoUrl = null;
+  let isMutating = false;
+  let activeCaseChannel = null;
 
   // ----------------------------------------------------
   // HELPER: Floating Popup Toast Notification
@@ -51,6 +53,40 @@
       "'": '&#39;',
       '"': '&quot;'
     }[tag] || tag));
+  }
+
+  function t(key, fallback) {
+    if (window.i18n && typeof window.i18n.t === 'function') {
+      const val = window.i18n.t(key);
+      if (val && val !== key) return val;
+    }
+    return fallback;
+  }
+
+  function formatStatusName(st) {
+    if (!st) return 'Pending';
+    const s = String(st).toLowerCase();
+    if (s === 'in_progress') return 'In Progress';
+    return s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ');
+  }
+
+  function formatActivityDate(ts) {
+    if (!ts) return '';
+    try {
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      return String(ts);
+    }
   }
 
   function formatCategory(cat) {
@@ -847,11 +883,17 @@
         issue = currentComplaints.find(c => c.id === cleanId || c.id === rawIssueId || (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id))));
       }
 
-      if (!issue && cleanId) {
+      // Always fetch fresh details with full status_history audit logs and timeline
+      if (cleanId) {
         try {
           const res = await API.request(`/issues/${cleanId}`, { method: 'GET' });
-          if (res && res.data) issue = res.data;
-          else if (res && !res.error && res.id) issue = res;
+          const freshData = (res && res.data) ? res.data : (res && !res.error && res.id ? res : null);
+          if (freshData) {
+            issue = Object.assign({}, issue || {}, freshData);
+            const idx = currentComplaints.findIndex(c => c.id === cleanId || c.id === rawIssueId);
+            if (idx !== -1) currentComplaints[idx] = issue;
+            else currentComplaints.unshift(issue);
+          }
         } catch (e) {
           console.warn("Direct issue fetch fallback error:", e);
         }
@@ -1088,8 +1130,10 @@
         fallbackEl.style.display = 'block';
       }
 
-      // Activity Timeline
+      // Activity Timeline & Operational Activity Feed
       this.renderTimeline(issue);
+      this.renderComplaintActivity(issue);
+      this.subscribeActiveCaseRealtime(issue.id);
 
       // Delegate select
       const delegateSelect = document.getElementById('detail-delegate-select');
@@ -1230,21 +1274,107 @@
     handleStatusSelectChange: function() {
       const statusSelect = document.getElementById('detail-status-select');
       const badge = document.getElementById('detail-proof-required-badge');
-      if (!statusSelect || !badge) return;
+      const btnUpdate = document.getElementById('btn-update-status');
+      const remarksInput = document.getElementById('detail-remarks-input');
+      if (!statusSelect) return;
 
-      if (statusSelect.value === 'resolved') {
-        badge.style.display = 'inline-block';
-      } else {
-        badge.style.display = 'none';
+      const val = statusSelect.value;
+      if (badge) {
+        badge.style.display = (val === 'resolved') ? 'inline-block' : 'none';
+      }
+
+      if (btnUpdate && !isMutating) {
+        const currentIssue = currentComplaints.find(c => c.id === activeDetailIssueId);
+        const currentStatus = currentIssue ? (currentIssue.status || 'pending').toLowerCase() : 'pending';
+        const hasRemarks = remarksInput && remarksInput.value.trim().length > 0;
+
+        if (val === 'resolved') {
+          btnUpdate.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span id="btn-update-status-text">${t('action_resolve_complaint', 'Resolve Complaint')}</span>`;
+        } else if (val === 'in_progress') {
+          btnUpdate.innerHTML = `<i class="fa-solid fa-play"></i> <span id="btn-update-status-text">${t('action_start_work', 'Start Work / In Progress')}</span>`;
+        } else if (val === currentStatus && hasRemarks) {
+          btnUpdate.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> <span id="btn-update-status-text">${t('action_save_update', 'Save Authority Update')}</span>`;
+        } else {
+          btnUpdate.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> <span id="btn-update-status-text">${t('action_update_status', 'Update Status')}</span>`;
+        }
+      }
+    },
+
+    assignDetailOfficer: async function() {
+      if (isMutating) {
+        console.warn("Assignment already in progress, ignoring duplicate click.");
+        return;
+      }
+      if (!activeDetailIssueId) return;
+
+      const issueId = activeDetailIssueId;
+      const delegateSelect = document.getElementById('detail-delegate-select');
+      const delegateId = delegateSelect ? delegateSelect.value : null;
+      const currentIssue = currentComplaints.find(c => c.id === issueId);
+      const prevAssignedTo = currentIssue ? currentIssue.assigned_to : null;
+
+      const btnAssign = document.getElementById('btn-assign-complaint');
+      const btnUpdate = document.getElementById('btn-update-status');
+      const originalBtnHtml = btnAssign ? btnAssign.innerHTML : '';
+
+      try {
+        isMutating = true;
+        if (btnAssign) {
+          btnAssign.disabled = true;
+          btnAssign.setAttribute('aria-busy', 'true');
+          btnAssign.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${t('action_assigning', 'Assigning...')}</span>`;
+        }
+        if (btnUpdate) {
+          btnUpdate.disabled = true;
+        }
+        if (delegateSelect) {
+          delegateSelect.disabled = true;
+        }
+
+        const res = await API.assignIssue(issueId, delegateId || null);
+        if (res && res.error) {
+          throw new Error(res.error);
+        }
+
+        showToast(t('success_assigned', 'Complaint assigned successfully.'), 'success');
+        await this.refreshActiveCase(issueId);
+      } catch (err) {
+        console.error("assignDetailOfficer error:", err);
+        if (delegateSelect) {
+          delegateSelect.value = prevAssignedTo || '';
+        }
+        showToast(err.message || t('error_assign_failed', 'Unable to assign complaint. Please try again.'), 'error');
+      } finally {
+        isMutating = false;
+        if (btnAssign) {
+          btnAssign.disabled = false;
+          btnAssign.removeAttribute('aria-busy');
+          btnAssign.innerHTML = originalBtnHtml || `<i class="fa-solid fa-user-check"></i> <span>${t('action_assign_complaint', 'Assign Complaint')}</span>`;
+        }
+        if (btnUpdate) {
+          btnUpdate.disabled = false;
+        }
+        if (delegateSelect) {
+          delegateSelect.disabled = false;
+        }
+        this.handleStatusSelectChange();
       }
     },
 
     saveDetailStatusUpdate: async function() {
+      if (isMutating) {
+        console.warn("Update already in progress, ignoring duplicate click.");
+        return;
+      }
       if (!activeDetailIssueId) return;
+
       const issueId = activeDetailIssueId;
-      const newStatus = document.getElementById('detail-status-select').value;
-      const remarks = document.getElementById('detail-remarks-input').value.trim();
-      const delegateId = document.getElementById('detail-delegate-select').value;
+      const currentIssue = currentComplaints.find(c => c.id === issueId);
+      const prevStatus = currentIssue ? (currentIssue.status || 'pending').toLowerCase() : 'pending';
+      const statusSelect = document.getElementById('detail-status-select');
+      const remarksInput = document.getElementById('detail-remarks-input');
+      const newStatus = statusSelect ? statusSelect.value : prevStatus;
+      const remarks = remarksInput ? remarksInput.value.trim() : '';
 
       // Resolve photo if input has file or preview img is populated
       if (!activeProofPhotoUrl) {
@@ -1266,7 +1396,7 @@
 
       // STRICT VALIDATION: Resolution proof image is required to resolve a complaint
       if (newStatus === 'resolved' && !activeProofPhotoUrl) {
-        showToast("Resolution proof image is strictly required to resolve a complaint.", "error");
+        showToast(t('error_resolution_proof_required', 'Resolution proof image is strictly required to resolve a complaint.'), 'error');
         const fileInput = document.getElementById('detail-proof-file');
         if (fileInput) {
           fileInput.focus();
@@ -1278,8 +1408,7 @@
 
       // STRICT VALIDATION: Official remarks are required to reject a complaint
       if (newStatus === 'rejected' && !remarks) {
-        showToast("Official remarks/reasons are strictly required to reject a complaint.", "error");
-        const remarksInput = document.getElementById('detail-remarks-input');
+        showToast(t('error_rejection_remarks_required', 'Official remarks/reasons are strictly required to reject a complaint.'), 'error');
         if (remarksInput) {
           remarksInput.focus();
           remarksInput.style.borderColor = '#dc2626';
@@ -1288,11 +1417,29 @@
         return;
       }
 
-      try {
-        showToast("Saving status update...");
+      const btnUpdate = document.getElementById('btn-update-status');
+      const btnAssign = document.getElementById('btn-assign-complaint');
+      const originalBtnHtml = btnUpdate ? btnUpdate.innerHTML : '';
 
-        if (delegateId !== undefined) {
-          await API.assignIssue(issueId, delegateId || null);
+      let loadingVerb = t('action_updating', 'Updating...');
+      if (newStatus === 'resolved') {
+        loadingVerb = t('action_resolving', 'Resolving...');
+      } else if (newStatus === prevStatus && remarks) {
+        loadingVerb = t('action_saving', 'Saving...');
+      }
+
+      try {
+        isMutating = true;
+        if (btnUpdate) {
+          btnUpdate.disabled = true;
+          btnUpdate.setAttribute('aria-busy', 'true');
+          btnUpdate.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${loadingVerb}</span>`;
+        }
+        if (btnAssign) {
+          btnAssign.disabled = true;
+        }
+        if (statusSelect) {
+          statusSelect.disabled = true;
         }
 
         const updateData = {
@@ -1302,15 +1449,254 @@
         };
 
         const res = await API.updateIssueStatus(issueId, updateData);
-        if (res.error) throw new Error(res.error);
+        if (res && res.error) {
+          throw new Error(res.error);
+        }
 
-        showToast("Status updated successfully.", "success");
-        await this.loadAllData();
-        this.openCaseDetails(issueId);
+        let successMsg = t('success_status_updated', 'Status updated successfully.');
+        if (newStatus === 'resolved') {
+          successMsg = t('success_resolved', 'Complaint resolved successfully.');
+        } else if (newStatus === prevStatus && remarks) {
+          successMsg = t('success_update_saved', 'Authority update saved successfully.');
+        }
+
+        showToast(successMsg, 'success');
+        if (remarksInput) {
+          remarksInput.value = '';
+        }
+
+        await this.refreshActiveCase(issueId);
       } catch (err) {
         console.error("saveDetailStatusUpdate error:", err);
-        showToast(err.message || "Failed to update status.", "error");
+        if (statusSelect) {
+          statusSelect.value = prevStatus;
+        }
+        showToast(err.message || t('error_update_failed', 'Unable to update complaint. Please try again.'), 'error');
+      } finally {
+        isMutating = false;
+        if (btnUpdate) {
+          btnUpdate.disabled = false;
+          btnUpdate.removeAttribute('aria-busy');
+        }
+        if (btnAssign) {
+          btnAssign.disabled = false;
+        }
+        if (statusSelect) {
+          statusSelect.disabled = false;
+        }
+        this.handleStatusSelectChange();
       }
+    },
+
+    refreshActiveCase: async function(issueId) {
+      if (!issueId) return null;
+      const cleanId = String(issueId).replace(/^-+/, '').trim();
+      try {
+        const res = await API.request(`/issues/${cleanId}`, { method: 'GET' });
+        const freshData = (res && res.data) ? res.data : (res && !res.error && res.id ? res : null);
+        if (freshData) {
+          const idx = currentComplaints.findIndex(c => c.id === cleanId || c.id === issueId);
+          if (idx !== -1) {
+            currentComplaints[idx] = Object.assign({}, currentComplaints[idx], freshData);
+          } else {
+            currentComplaints.unshift(freshData);
+          }
+          await this.openCaseDetails(cleanId);
+          return freshData;
+        }
+      } catch (e) {
+        console.warn("refreshActiveCase fetch error:", e);
+      }
+      return null;
+    },
+
+    renderComplaintActivity: function(issue) {
+      const container = document.getElementById('detail-activity-list');
+      const countBadge = document.getElementById('detail-activity-count');
+      if (!container || !issue) return;
+
+      const rawLogs = Array.isArray(issue.history) ? [...issue.history] : [];
+      // Sort chronologically ascending to compute transitions accurately
+      rawLogs.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+      const authorityActions = [];
+      let previousStatus = 'pending';
+
+      rawLogs.forEach((log, index) => {
+        const logStatus = (log.status || '').toLowerCase();
+        
+        // Skip pure citizen submission from authority action list
+        if (logStatus === 'pending' && index === 0 && !log.notes?.toLowerCase().includes('authority')) {
+          previousStatus = 'pending';
+          return;
+        }
+
+        const currentStatus = logStatus === 'timeline_update' ? previousStatus : logStatus;
+        const actorName = log.profiles?.full_name || (log.updated_by ? 'Authority Official' : (issue.assigned_officer?.full_name || 'Administrative Authority'));
+        const actorRole = log.profiles?.role || 'authority';
+        const notes = log.notes || log.remarks || '';
+        const timestamp = log.created_at;
+
+        let actionType = 'status_changed';
+        let actionTitle = t('activity_action_status_changed', 'Status Changed');
+        let icon = 'fa-arrows-rotate';
+        let detailText = '';
+        let assignedTarget = null;
+        let proofPhotoUrl = null;
+
+        if (logStatus === 'assigned') {
+          actionType = 'assigned';
+          actionTitle = t('activity_action_assigned', 'Complaint Assigned');
+          icon = 'fa-user-check';
+          const match = notes.match(/assigned to (?:inspector )?([^.]+)/i);
+          assignedTarget = match ? match[1].trim() : (issue.assigned_officer?.full_name || 'Responsible Department');
+          detailText = `${t('activity_assigned_to_label', 'Assigned to')}: ${assignedTarget}`;
+        } else if (logStatus === 'in_progress') {
+          if (previousStatus !== 'in_progress') {
+            actionType = 'work_started';
+            actionTitle = t('activity_action_work_started', 'Work Started');
+            icon = 'fa-play';
+            detailText = notes || 'Field work and inspection initiated.';
+          } else {
+            actionType = 'authority_update';
+            actionTitle = t('activity_action_authority_update', 'Authority Update');
+            icon = 'fa-comment-dots';
+            detailText = notes;
+          }
+        } else if (logStatus === 'timeline_update' || (previousStatus === currentStatus && notes)) {
+          actionType = 'authority_update';
+          actionTitle = t('activity_action_authority_update', 'Authority Update');
+          icon = 'fa-comment-dots';
+          detailText = notes;
+        } else if (logStatus === 'resolved') {
+          actionType = 'resolved';
+          actionTitle = t('activity_action_resolved', 'Complaint Resolved');
+          icon = 'fa-circle-check';
+          detailText = notes || issue.completion_notes || 'Resolution completed.';
+          proofPhotoUrl = issue.completion_photo_url || issue.completion_proof_url || null;
+        } else if (logStatus === 'verified') {
+          actionType = 'verified';
+          actionTitle = t('activity_action_verified', 'Complaint Verified');
+          icon = 'fa-shield-check';
+          detailText = notes || 'Complaint verified and approved for action.';
+        } else if (logStatus === 'rejected') {
+          actionType = 'rejected';
+          actionTitle = t('activity_action_rejected', 'Complaint Rejected');
+          icon = 'fa-circle-xmark';
+          detailText = notes;
+        } else {
+          detailText = notes || `Status updated to ${currentStatus.replace('_', ' ').toUpperCase()}`;
+        }
+
+        const transitionLabel = (previousStatus && previousStatus !== currentStatus) 
+          ? `${formatStatusName(previousStatus)} → ${formatStatusName(currentStatus)}`
+          : null;
+
+        authorityActions.push({
+          id: log.id || `act-${index}`,
+          type: actionType,
+          title: actionTitle,
+          icon: icon,
+          transition: transitionLabel,
+          details: detailText,
+          notes: notes,
+          assignedTarget: assignedTarget,
+          proofPhotoUrl: proofPhotoUrl,
+          actorName: actorName,
+          actorRole: actorRole,
+          timestamp: timestamp,
+          timestampFormatted: formatActivityDate(timestamp)
+        });
+
+        previousStatus = currentStatus;
+      });
+
+      if (countBadge) {
+        countBadge.textContent = `${authorityActions.length} ${authorityActions.length === 1 ? 'Action' : 'Actions'}`;
+      }
+
+      if (authorityActions.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 1.5rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
+            <i class="fa-solid fa-clock-rotate-left" style="font-size: 1.5rem; opacity: 0.45; margin-bottom: 0.5rem; display: block;"></i>
+            ${t('no_complaint_activity', 'No authority activity recorded yet. Actions taken on this case will appear here.')}
+          </div>
+        `;
+        return;
+      }
+
+      // Display newest activity first
+      const displayActions = [...authorityActions].reverse();
+
+      container.innerHTML = displayActions.map(act => {
+        return `
+          <div class="activity-event-card event-${act.type}">
+            <div class="activity-event-header">
+              <div class="activity-event-title-group">
+                <span class="activity-event-title">
+                  <i class="fa-solid ${act.icon}"></i> ${escapeHTML(act.title)}
+                </span>
+                ${act.transition ? `
+                  <span class="activity-status-transition">
+                    ${escapeHTML(act.transition.split('→')[0].trim())} <span class="transition-arrow">→</span> ${escapeHTML(act.transition.split('→')[1].trim())}
+                  </span>
+                ` : ''}
+              </div>
+              <div class="activity-event-time">
+                <i class="fa-regular fa-clock"></i> ${escapeHTML(act.timestampFormatted)}
+              </div>
+            </div>
+
+            ${act.details ? `
+              <div class="activity-event-body">
+                <div class="activity-detail-highlight">${escapeHTML(act.details)}</div>
+              </div>
+            ` : ''}
+
+            ${act.proofPhotoUrl ? `
+              <div class="activity-proof-thumb-wrapper">
+                <a href="${escapeHTML(act.proofPhotoUrl)}" target="_blank" rel="noopener noreferrer">
+                  <img src="${escapeHTML(act.proofPhotoUrl)}" alt="Resolution Proof" class="activity-proof-thumb" / decoding="async">
+                </a>
+              </div>
+            ` : ''}
+
+            <div class="activity-event-footer">
+              <span class="activity-actor-name">
+                <i class="fa-solid fa-user-shield"></i> ${escapeHTML(act.actorName)}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    },
+
+    subscribeActiveCaseRealtime: function(issueId) {
+      if (activeCaseChannel) {
+        try {
+          const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+          if (client && typeof client.removeChannel === 'function') {
+            client.removeChannel(activeCaseChannel);
+          }
+        } catch (e) {}
+        activeCaseChannel = null;
+      }
+
+      if (!issueId || !window.API || typeof window.API.subscribeRealtime !== 'function') return;
+
+      activeCaseChannel = window.API.subscribeRealtime({
+        channelName: `public:authority_case:${issueId}`,
+        events: [
+          { event: 'UPDATE', table: 'issues', filter: `id=eq.${issueId}` },
+          { event: 'INSERT', table: 'status_history', filter: `issue_id=eq.${issueId}` }
+        ],
+        onEvent: (event, payload) => {
+          console.log(`[Authority Case Realtime] Event ${event} received:`, payload);
+          if (!isMutating && activeDetailIssueId === issueId) {
+            this.refreshActiveCase(issueId).catch(err => console.warn("Realtime refresh error:", err));
+          }
+        }
+      });
     },
 
     loadChatMessages: async function(issueId) {

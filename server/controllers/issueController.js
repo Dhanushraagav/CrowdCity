@@ -212,9 +212,16 @@ export const getIssueById = async (req, res) => {
 
     const { data: history, error: historyError } = await activeClient
       .from('status_history')
-      .select('*, profiles:profiles(full_name, avatar_url)')
+      .select('*, profiles:profiles(full_name, avatar_url, role)')
       .eq('issue_id', issue.id)
       .order('created_at', { ascending: true });
+
+    if (history && history.length > 0 && !issue.official_remarks) {
+      const latestNoteLog = [...history].reverse().find(h => h.notes && h.notes.trim());
+      if (latestNoteLog) {
+        issue.official_remarks = latestNoteLog.notes;
+      }
+    }
 
     // Check if user has upvoted
     let userHasUpvoted = false;
@@ -841,13 +848,27 @@ export const updateIssueStatus = async (req, res) => {
     }
 
     // 2. Insert timeline tracking entry using request-scoped client
+    const prevStatus = (originalIssue.status || 'pending').toLowerCase();
+    let defaultNotes = '';
+    if (targetStatus === 'in_progress' && prevStatus !== 'in_progress') {
+      defaultNotes = 'Work started by field authority.';
+    } else if (targetStatus === 'resolved') {
+      defaultNotes = 'Complaint resolved successfully.';
+    } else if (targetStatus === 'assigned') {
+      defaultNotes = 'Complaint assigned to authority department.';
+    } else if (status === 'timeline_update') {
+      defaultNotes = 'Caselog timeline update posted.';
+    } else {
+      defaultNotes = `Status updated to ${targetStatus.toUpperCase()} by authority dispatch.`;
+    }
+
     const { error: historyError } = await activeClient
       .from('status_history')
       .insert({
         issue_id: id,
         status: targetStatus,
         updated_by: req.user.id,
-        notes: notes || official_remarks || (status === 'timeline_update' ? 'Caselog timeline update posted.' : `Status updated to ${status.toUpperCase()} by authority dispatch.`)
+        notes: notes || official_remarks || defaultNotes
       });
 
     if (historyError) {
@@ -891,10 +912,10 @@ export const updateIssueStatus = async (req, res) => {
 export const assignIssue = async (req, res) => {
   const { id } = req.params;
   const { assigned_to } = req.body;
-  let authorityId = assigned_to || req.user.id;
+  let authorityId = (assigned_to && typeof assigned_to === 'string' && assigned_to.trim()) ? assigned_to.trim() : req.user.id;
 
-  // Enforce self-assignment for authority inspectors
-  if (req.user && req.user.role === 'authority') {
+  // Default to self-assignment for authority inspectors if no explicit assignee is specified
+  if (req.user && req.user.role === 'authority' && (!assigned_to || assigned_to === '')) {
     authorityId = req.user.id;
   }
 

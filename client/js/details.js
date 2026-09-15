@@ -335,7 +335,8 @@ function initRealtimeDetails() {
     channelName: `public:issue_details:${issueId}`,
     events: [
       { event: 'UPDATE', table: 'issues', filter: `id=eq.${issueId}` },
-      { event: 'INSERT', table: 'comments', filter: `issue_id=eq.${issueId}` }
+      { event: 'INSERT', table: 'comments', filter: `issue_id=eq.${issueId}` },
+      { event: 'INSERT', table: 'status_history', filter: `issue_id=eq.${issueId}` }
     ],
     onEvent: (event, payload) => {
       console.log(`[Details Realtime] Event ${event} received.`, payload);

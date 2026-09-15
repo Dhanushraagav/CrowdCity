@@ -241,6 +241,20 @@
                 </div>
               </div>
 
+              <!-- Authority Complaint Activity Log -->
+              <div class="content-card" id="card-complaint-activity" style="border-left: 3px solid #0d9488;">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="display: flex; align-items: center; gap: 0.4rem;">
+                    <i class="fa-solid fa-clipboard-check" style="color: var(--primary);"></i>
+                    <span data-i18n="complaint_activity_heading">Complaint Activity</span>
+                  </span>
+                  <span id="detail-activity-count" class="status-badge" style="background: rgba(13,148,136,0.1); color: var(--primary); font-size: 0.72rem; font-weight: 700;">0 Actions</span>
+                </div>
+                <div id="detail-activity-list" class="activity-timeline-list">
+                  <div style="color: var(--text-muted); font-size: 0.82rem; padding: 0.75rem 0;" data-i18n="loading_complaint_activity">Loading complaint activity...</div>
+                </div>
+              </div>
+
             </div>
 
             <!-- Right Column: Dispatch Action Form & Live Communication -->
@@ -251,10 +265,15 @@
                 
                 <div style="display: flex; flex-direction: column; gap: 0.85rem;">
                   <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Assign / Delegate Officer</label>
-                    <select id="detail-delegate-select" class="form-select" style="width: 100%;">
-                      <option value="">Unassigned</option>
-                    </select>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;" data-i18n="assign_to">Assign / Delegate Officer</label>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                      <select id="detail-delegate-select" class="form-select" style="flex: 1; min-width: 180px;">
+                        <option value="">Unassigned</option>
+                      </select>
+                      <button type="button" id="btn-assign-complaint" class="btn-action" style="padding: 0.5rem 0.85rem; white-space: nowrap;" onclick="window.ComplaintService.assignDetailOfficer()">
+                        <i class="fa-solid fa-user-check"></i> <span data-i18n="action_assign_complaint">Assign Complaint</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div>
@@ -271,7 +290,7 @@
 
                   <div>
                     <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem;">Official Remarks / Action Log</label>
-                    <textarea id="detail-remarks-input" class="form-textarea" rows="3" placeholder="Enter resolution notes, field inspection updates or rejection reasons..." style="width: 100%;"></textarea>
+                    <textarea id="detail-remarks-input" class="form-textarea" rows="3" placeholder="Enter resolution notes, field inspection updates or rejection reasons..." style="width: 100%;" oninput="window.ComplaintService.handleStatusSelectChange()"></textarea>
                   </div>
 
                   <div>
@@ -288,7 +307,9 @@
                     </div>
                   </div>
 
-                  <button class="btn-action" style="width: 100%; padding: 0.6rem;" onclick="window.ComplaintService.saveDetailStatusUpdate()">Save Status & Remarks</button>
+                  <button type="button" id="btn-update-status" class="btn-action" style="width: 100%; padding: 0.65rem; margin-top: 0.25rem;" onclick="window.ComplaintService.saveDetailStatusUpdate()">
+                    <i class="fa-solid fa-arrows-rotate"></i> <span id="btn-update-status-text" data-i18n="action_update_status">Update Status</span>
+                  </button>
                 </div>
               </div>
 

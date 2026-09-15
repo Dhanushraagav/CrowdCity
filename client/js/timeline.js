@@ -75,7 +75,9 @@
       const submittedLog = logs.find(l => l.status === 'pending') || null;
       const verifiedLog = logs.find(l => l.status === 'verified') || null;
       const assignedLog = logs.find(l => l.status === 'assigned') || null;
-      const inProgressLog = logs.find(l => l.status === 'in_progress') || null;
+      const inProgressLogs = logs.filter(l => l.status === 'in_progress');
+      const inProgressLog = inProgressLogs.length > 0 ? inProgressLogs[0] : null;
+      const latestProgLog = inProgressLogs.length > 0 ? inProgressLogs[inProgressLogs.length - 1] : null;
       const resolvedLog = logs.find(l => l.status === 'resolved') || null;
 
       const authorityName =
@@ -180,9 +182,9 @@
 
       if (inProgressLog) {
         progState = status === 'in_progress' ? 'current' : (status === 'resolved' ? 'completed' : 'pending');
-        progTs = inProgressLog.created_at;
-        progNotes = inProgressLog.notes || issue.official_remarks || t('timeline_in_progress_desc', 'Field inspection & resolution work underway.');
-        progActor = inProgressLog.profiles?.full_name || authorityName;
+        progTs = latestProgLog?.created_at || inProgressLog.created_at;
+        progNotes = latestProgLog?.notes || inProgressLog.notes || issue.official_remarks || t('timeline_in_progress_desc', 'Field inspection & resolution work underway.');
+        progActor = latestProgLog?.profiles?.full_name || inProgressLog.profiles?.full_name || authorityName;
       } else if (status === 'in_progress') {
         progState = 'current';
         progTs = issue.updated_at || null;
@@ -241,7 +243,8 @@
       };
 
       const auditEvents = [];
-      logs.forEach(log => {
+      const firstProgIdx = logs.findIndex(l => l.status === 'in_progress');
+      logs.forEach((log, idx) => {
         if (['overdue', 'escalated', 'rejected', 'withdrawn', 'timeline_update'].includes(log.status)) {
           auditEvents.push({
             id: log.id,
@@ -251,6 +254,16 @@
             notes: log.notes || log.remarks || '',
             actor_name: log.profiles?.full_name || 'Municipal System',
             actor_role: log.profiles?.role || 'system'
+          });
+        } else if (log.status === 'in_progress' && idx > firstProgIdx && log.notes) {
+          auditEvents.push({
+            id: log.id,
+            event_type: 'authority_update',
+            timestamp: log.created_at,
+            timestamp_formatted: formatTimestamp(log.created_at),
+            notes: log.notes,
+            actor_name: log.profiles?.full_name || authorityName,
+            actor_role: 'authority'
           });
         }
       });

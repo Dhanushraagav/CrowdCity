@@ -44,7 +44,9 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
   const submittedLog = logs.find(l => l.status === 'pending') || null;
   const verifiedLog = logs.find(l => l.status === 'verified') || null;
   const assignedLog = logs.find(l => l.status === 'assigned') || null;
-  const inProgressLog = logs.find(l => l.status === 'in_progress') || null;
+  const inProgressLogs = logs.filter(l => l.status === 'in_progress');
+  const inProgressLog = inProgressLogs.length > 0 ? inProgressLogs[0] : null;
+  const latestInProgressLog = inProgressLogs.length > 0 ? inProgressLogs[inProgressLogs.length - 1] : null;
   const resolvedLog = logs.find(l => l.status === 'resolved') || null;
 
   // Derive department/authority display name
@@ -166,9 +168,9 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
 
   if (inProgressLog) {
     inProgressState = status === 'in_progress' ? 'current' : (status === 'resolved' ? 'completed' : 'pending');
-    inProgressTimestamp = inProgressLog.created_at;
-    inProgressNotes = inProgressLog.notes || issue.official_remarks || 'Field work and inspection initiated.';
-    inProgressActor = inProgressLog.profiles?.full_name || authorityDisplay;
+    inProgressTimestamp = latestInProgressLog?.created_at || inProgressLog.created_at;
+    inProgressNotes = latestInProgressLog?.notes || inProgressLog.notes || issue.official_remarks || 'Field work and inspection initiated.';
+    inProgressActor = latestInProgressLog?.profiles?.full_name || inProgressLog.profiles?.full_name || authorityDisplay;
   } else if (status === 'in_progress') {
     inProgressState = 'current';
     inProgressTimestamp = issue.updated_at || null;
@@ -242,9 +244,10 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
   else if (verifiedState === 'current') currentStageId = 'verified';
   else if (status === 'rejected' || status === 'withdrawn') currentStageId = status;
 
-  // Extract non-linear / audit milestones
+  // Extract non-linear / audit milestones & authority update notes
   const auditEvents = [];
-  logs.forEach(log => {
+  const firstProgIdx = logs.findIndex(l => l.status === 'in_progress');
+  logs.forEach((log, idx) => {
     if (['overdue', 'escalated', 'rejected', 'withdrawn', 'timeline_update'].includes(log.status)) {
       auditEvents.push({
         id: log.id,
@@ -254,6 +257,16 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
         notes: log.notes || log.remarks || '',
         actor_name: log.profiles?.full_name || (isAuthorityOrAdmin ? 'System Audit' : 'Authority System'),
         actor_role: log.profiles?.role || 'system'
+      });
+    } else if (log.status === 'in_progress' && idx > firstProgIdx && log.notes) {
+      auditEvents.push({
+        id: log.id,
+        event_type: 'authority_update',
+        timestamp: log.created_at,
+        timestamp_formatted: formatTamilNaduDate(log.created_at),
+        notes: log.notes,
+        actor_name: log.profiles?.full_name || (isAuthorityOrAdmin ? 'Field Officer' : 'Authority Official'),
+        actor_role: log.profiles?.role || 'authority'
       });
     }
   });
