@@ -1011,7 +1011,7 @@
                       placeholder="Search your village, town, panchayat or area..."
                       autocomplete="off"
                     >
-                    <button type="button" id="la-search-clear-btn" class="la-typeahead-clear-btn hidden" title="Clear search">
+                    <button type="button" id="la-search-clear-btn" class="la-typeahead-clear-btn hidden" title="Clear search" aria-label="Clear location">
                       <i class="fa-solid fa-xmark"></i>
                     </button>
                     <div id="la-typeahead-dropdown" class="la-typeahead-dropdown hidden"></div>
@@ -1027,6 +1027,9 @@
 
               <!-- Clean Location & Authority Confirmation Card -->
               <div id="la-confirmation-card" class="la-confirmation-card hidden">
+                <button type="button" id="la-confirm-clear-btn" class="la-confirm-clear-btn" title="Clear selected location" aria-label="Clear location">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
                 <div class="la-confirm-grid">
                   <div class="la-confirm-item">
                     <div class="la-confirm-label"><i class="fa-solid fa-location-dot"></i> <span data-i18n="location">Location</span></div>

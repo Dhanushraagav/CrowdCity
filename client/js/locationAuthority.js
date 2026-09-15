@@ -590,10 +590,17 @@
       };
 
       const selectLocation = async (item) => {
+        isManualOverride = true;
+        LocationAuthority.state.selectedLocationItem = item;
+
         input.value = `${item.name}${item.tamil_name && item.tamil_name !== item.name ? ` (${item.tamil_name})` : ''}`;
         dropdown.classList.add('hidden');
         dropdown.innerHTML = '';
         if (clearBtn) clearBtn.classList.remove('hidden');
+
+        // Hide GPS banner since manual location is selected
+        const noticeBanner = document.getElementById('la-gps-notice-banner');
+        if (noticeBanner) noticeBanner.classList.add('hidden');
 
         // Sync report-address input field so standard complaint payload has full address
         const addrInput = document.getElementById('report-address');
@@ -682,7 +689,7 @@
         // Backward compatibility sync with legacy selectors
         LocationAuthority.syncLegacyElements(item);
         LocationAuthority.updateLocationHeaderLabel();
-        LocationAuthority.triggerResolution();
+        await LocationAuthority.triggerResolution();
 
         // Position map pin if geocoder available
         if (window.ServiceArea && typeof window.ServiceArea.validateAddressText === 'function') {
@@ -699,6 +706,16 @@
               }
               if (window.reportMarker) {
                 window.reportMarker.setLatLng([result.lat, result.lng]);
+              } else if (window.reportMap && typeof L !== 'undefined') {
+                window.reportMarker = L.marker([result.lat, result.lng], { draggable: true }).addTo(window.reportMap);
+                window.reportMarker.on('dragend', (event) => {
+                  const markerLatlng = event.target.getLatLng();
+                  if (latInput) latInput.value = markerLatlng.lat.toFixed(6);
+                  if (lngInput) lngInput.value = markerLatlng.lng.toFixed(6);
+                  if (typeof reverseGeocode === 'function') {
+                    reverseGeocode(markerLatlng.lat, markerLatlng.lng);
+                  }
+                });
               }
             }
           }).catch(() => {});
@@ -716,6 +733,7 @@
           if (clearBtn) clearBtn.classList.add('hidden');
           return;
         }
+        if (clearBtn) clearBtn.classList.remove('hidden');
         searchDebounce = setTimeout(() => {
           triggerSearch(val);
         }, 250);
@@ -746,14 +764,31 @@
       });
 
       if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-          input.value = '';
-          clearBtn.classList.add('hidden');
-          dropdown.classList.add('hidden');
-          dropdown.innerHTML = '';
-          input.focus();
+        clearBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          LocationAuthority.clearLocation();
         });
       }
+
+      const confirmClearBtn = document.getElementById('la-confirm-clear-btn');
+      if (confirmClearBtn) {
+        confirmClearBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          LocationAuthority.clearLocation();
+        });
+      }
+
+      // Universal click delegation for any clear button
+      document.addEventListener('click', (e) => {
+        const targetBtn = e.target && e.target.closest && e.target.closest('#la-search-clear-btn, .la-typeahead-clear-btn, #la-confirm-clear-btn, .la-confirm-clear-btn');
+        if (targetBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          LocationAuthority.clearLocation();
+        }
+      });
 
       // Close dropdown on outside click
       document.addEventListener('click', (e) => {
@@ -1614,50 +1649,242 @@
     },
 
     /**
-     * Called when reverseGeocode finishes in report.js.
+     * Called immediately when GPS detection starts (e.g. user clicks "Use my current location").
+     * Resets manual override and prepares UI for incoming GPS coordinates.
      */
-    onGeocodeResolved: function(lat, lng, address, nominatimData) {
+    onGPSRequested: function() {
+      isManualOverride = false;
+      this.state.selectedLocationItem = null;
+      this.state.subdivisionId = '';
+      this.state.localBodyId = '';
+      this.state.villageOrTown = '';
+      this.state.blockId = '';
+      this.state.villagePanchayatId = '';
+      this.state.habitation = '';
+      this.state.urbanBodyId = '';
+      this.state.urbanLocality = '';
+      this.state.talukId = '';
+      this.state.revenueVillageId = '';
+
+      const searchInput = document.getElementById('la-search-typeahead-input');
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      const clearBtn = document.getElementById('la-search-clear-btn');
+      if (clearBtn) {
+        clearBtn.classList.add('hidden');
+      }
+
+      // Show confirmation card in detecting state so stale manual data immediately disappears
+      const confirmCard = document.getElementById('la-confirmation-card');
+      const confirmLoc = document.getElementById('la-confirm-location');
+      const confirmLocalBody = document.getElementById('la-confirm-local-body');
+      const confirmRespAuth = document.getElementById('la-confirm-responsible-auth');
+      if (confirmCard) confirmCard.classList.remove('hidden');
+      if (confirmLoc) confirmLoc.textContent = 'Detecting current location via GPS...';
+      if (confirmLocalBody) confirmLocalBody.textContent = 'Locating local authority...';
+      if (confirmRespAuth) confirmRespAuth.textContent = 'Resolving responsible authority...';
+
+      const noticeBanner = document.getElementById('la-gps-notice-banner');
+      if (noticeBanner) {
+        noticeBanner.classList.remove('hidden');
+        const noticeText = document.getElementById('la-gps-notice-text');
+        if (noticeText) noticeText.textContent = window.i18n ? window.i18n.t('detecting_location') || 'Detecting location...' : 'Detecting location...';
+      }
+
+      this.updateLocationHeaderLabel('Detecting location via GPS...');
+    },
+
+    /**
+     * Called if browser geolocation fails or is denied.
+     */
+    onGPSFailed: function(error) {
+      const confirmLoc = document.getElementById('la-confirm-location');
+      const confirmLocalBody = document.getElementById('la-confirm-local-body');
+      const confirmRespAuth = document.getElementById('la-confirm-responsible-auth');
+      if (confirmLoc) confirmLoc.textContent = 'GPS location unavailable. Please search or pin on map.';
+      if (confirmLocalBody) confirmLocalBody.textContent = '-';
+      if (confirmRespAuth) confirmRespAuth.textContent = '-';
+      this.updateLocationHeaderLabel('GPS location unavailable');
+    },
+
+    /**
+     * Called when reverseGeocode finishes in report.js.
+     * Newly detected GPS location completely replaces any previous manual location everywhere.
+     */
+    onGeocodeResolved: async function(lat, lng, address, nominatimData) {
+      // 1. GPS becomes the single active source of truth
+      isManualOverride = false;
+      this.state.selectedLocationItem = null;
+      this.state.subdivisionId = '';
+      this.state.localBodyId = '';
+      this.state.villageOrTown = '';
+      this.state.blockId = '';
+      this.state.villagePanchayatId = '';
+      this.state.habitation = '';
+      this.state.urbanBodyId = '';
+      this.state.urbanLocality = '';
+      this.state.talukId = '';
+      this.state.revenueVillageId = '';
+
       this.state.lat = lat;
       this.state.lng = lng;
       this.state.address = address;
 
-      // Show GPS detected notice banner
-      const noticeBanner = document.getElementById('la-gps-notice-banner');
-      if (noticeBanner) {
-        noticeBanner.classList.remove('hidden');
-      }
-
+      // 2. Extract readable location and district
+      let detectedText = address || '';
+      let detectedDist = '';
       if (nominatimData && nominatimData.address) {
         const addr = nominatimData.address;
         const loc = addr.village || addr.town || addr.city || addr.suburb || addr.neighbourhood || addr.subdistrict || '';
         const dist = addr.county || addr.district || addr.state_district || '';
-        const detectedText = (loc && dist && loc.toLowerCase() !== dist.toLowerCase()) ? `${loc}, ${dist}` : (loc || dist || address);
-        this.updateLocationHeaderLabel(detectedText);
-
-        // Pre-fill typeahead search input if empty so citizen can see detected location
-        const searchInput = document.getElementById('la-search-typeahead-input');
-        if (searchInput && (!searchInput.value || searchInput.value.trim() === '')) {
-          searchInput.value = detectedText;
-          const clearBtn = document.getElementById('la-search-clear-btn');
-          if (clearBtn) clearBtn.classList.remove('hidden');
-        }
-
-        // Match district name if available from Nominatim
-        if (dist && !isManualOverride) {
-          const normDist = dist.toLowerCase().replace(/district|dt/gi, '').trim();
-          const matched = districtsCache.find(d => d.id === normDist || d.name.toLowerCase() === normDist || normDist.includes(d.id));
-          if (matched) {
-            this.state.districtId = matched.id;
-            const distSelect = document.getElementById('la-district-select');
-            if (distSelect) distSelect.value = matched.id;
-          }
-        }
-      } else {
-        this.updateLocationHeaderLabel();
+        detectedDist = dist;
+        detectedText = (loc && dist && loc.toLowerCase() !== dist.toLowerCase()) ? `${loc}, ${dist}` : (loc || dist || address);
       }
 
-      if (!isManualOverride) {
-        this.triggerResolution();
+      // 3. Unconditionally update search input to show the new GPS location
+      const searchInput = document.getElementById('la-search-typeahead-input');
+      if (searchInput) {
+        searchInput.value = detectedText;
+      }
+      const clearBtn = document.getElementById('la-search-clear-btn');
+      if (clearBtn) {
+        clearBtn.classList.remove('hidden');
+      }
+
+      // 4. Update GPS notice banner
+      const noticeBanner = document.getElementById('la-gps-notice-banner');
+      if (noticeBanner) {
+        noticeBanner.classList.remove('hidden');
+        const noticeText = document.getElementById('la-gps-notice-text');
+        if (noticeText) {
+          const confirmPrefix = window.i18n ? window.i18n.t('location_detected_confirm') || 'Location detected. Please confirm your area if needed.' : 'Location detected. Please confirm your area if needed.';
+          noticeText.textContent = `${confirmPrefix} (${detectedText})`;
+        }
+      }
+
+      // 5. Unconditionally update Confirmation Card immediately
+      const confirmCard = document.getElementById('la-confirmation-card');
+      const confirmLoc = document.getElementById('la-confirm-location');
+      const confirmLocalBody = document.getElementById('la-confirm-local-body');
+      const confirmRespAuth = document.getElementById('la-confirm-responsible-auth');
+
+      if (confirmCard) confirmCard.classList.remove('hidden');
+      if (confirmLoc) confirmLoc.textContent = detectedText;
+      if (confirmLocalBody) confirmLocalBody.textContent = 'Resolving local authority...';
+      if (confirmRespAuth) confirmRespAuth.textContent = 'Resolving responsible authority...';
+
+      // 6. Match district name if available from Nominatim
+      if (detectedDist) {
+        const normDist = detectedDist.toLowerCase().replace(/district|dt/gi, '').trim();
+        const matched = districtsCache.find(d => d.id === normDist || d.name.toLowerCase() === normDist || normDist.includes(d.id));
+        if (matched) {
+          this.state.districtId = matched.id;
+          const distSelect = document.getElementById('la-district-select');
+          if (distSelect) distSelect.value = matched.id;
+        }
+      }
+
+      this.updateLocationHeaderLabel(detectedText);
+
+      // 7. Resolve authoritative jurisdiction & contacts for this GPS location
+      await this.triggerResolution();
+    },
+
+    /**
+     * Completely clear the selected location and reset UI + state.
+     * Does NOT clear unrelated complaint fields (title, description, category, attachments, priority).
+     */
+    clearLocation: function() {
+      isManualOverride = false;
+      currentResolution = null;
+
+      this.state.lat = null;
+      this.state.lng = null;
+      this.state.address = '';
+      this.state.districtId = '';
+      this.state.stream = 'rural';
+      this.state.blockId = '';
+      this.state.villagePanchayatId = '';
+      this.state.habitation = '';
+      this.state.urbanTypeFilter = 'all';
+      this.state.urbanBodyId = '';
+      this.state.urbanLocality = '';
+      this.state.talukId = '';
+      this.state.revenueVillageId = '';
+      this.state.subdivisionId = '';
+      this.state.localBodyId = '';
+      this.state.villageOrTown = '';
+      this.state.selectedLocationItem = null;
+
+      // Clear search input & hide clear button
+      const searchInput = document.getElementById('la-search-typeahead-input');
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('la-search-clear-btn');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      const dropdown = document.getElementById('la-typeahead-dropdown');
+      if (dropdown) {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+      }
+
+      // Clear form inputs
+      const addrInput = document.getElementById('report-address');
+      if (addrInput) addrInput.value = '';
+      const latInput = document.getElementById('report-latitude');
+      if (latInput) latInput.value = '';
+      const lngInput = document.getElementById('report-longitude');
+      if (lngInput) lngInput.value = '';
+
+      // Hide & reset Confirmation Card
+      const confirmCard = document.getElementById('la-confirmation-card');
+      if (confirmCard) confirmCard.classList.add('hidden');
+      const confirmLoc = document.getElementById('la-confirm-location');
+      if (confirmLoc) confirmLoc.textContent = '-';
+      const confirmLocalBody = document.getElementById('la-confirm-local-body');
+      if (confirmLocalBody) confirmLocalBody.textContent = '-';
+      const confirmRespAuth = document.getElementById('la-confirm-responsible-auth');
+      if (confirmRespAuth) confirmRespAuth.textContent = '-';
+
+      // Hide GPS Notice Banner
+      const noticeBanner = document.getElementById('la-gps-notice-banner');
+      if (noticeBanner) noticeBanner.classList.add('hidden');
+
+      // Hide Authority Card Container
+      const cardContainer = document.getElementById('la-authority-card-container');
+      if (cardContainer) cardContainer.classList.add('hidden');
+
+      // Reset legacy selectors
+      const distSelect = document.getElementById('la-district-select');
+      if (distSelect) distSelect.value = '';
+      const streamSelect = document.getElementById('la-stream-select');
+      if (streamSelect) streamSelect.value = 'rural';
+      this.resetStreamSelectors();
+      this.resetVillagesAndLocalBodies();
+      const habInput = document.getElementById('la-habitation-input');
+      if (habInput) habInput.value = '';
+      const urbLocInput = document.getElementById('la-urban-locality-input');
+      if (urbLocInput) urbLocInput.value = '';
+
+      // Reset mode header label
+      this.updateLocationHeaderLabel(window.i18n ? window.i18n.t('detecting_location') || 'No location selected' : 'No location selected');
+
+      // Remove map boundary circle and marker
+      if (boundaryCircle && window.reportMap) {
+        window.reportMap.removeLayer(boundaryCircle);
+        boundaryCircle = null;
+      }
+      if (window.reportMarker && window.reportMap) {
+        window.reportMap.removeLayer(window.reportMarker);
+        window.reportMarker = null;
+      }
+      if (typeof reportMarker !== 'undefined' && reportMarker && window.reportMap) {
+        window.reportMap.removeLayer(reportMarker);
+        reportMarker = null;
+      }
+
+      if (searchInput) {
+        searchInput.focus();
       }
     },
 

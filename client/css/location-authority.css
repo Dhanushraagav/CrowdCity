@@ -1149,13 +1149,49 @@ html.dark-theme .la-contact-na {
 
 /* Selected Location & Authority Confirmation Card */
 .la-confirmation-card {
+  position: relative;
   background: var(--bg-surface, #ffffff);
   border: 1.5px solid var(--border-color, #e2e8f0);
   border-left: 4px solid var(--primary, #0d9488);
   border-radius: 10px;
-  padding: 0.85rem 1rem;
+  padding: 0.85rem 2.4rem 0.85rem 1rem;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   animation: laStreamFadeIn 0.25s ease;
+}
+
+.la-confirm-clear-btn {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  z-index: 5;
+  touch-action: manipulation;
+}
+
+.la-confirm-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.la-confirm-clear-btn:active {
+  transform: scale(0.92);
+}
+
+.la-confirm-clear-btn i {
+  font-size: 0.85rem;
+  pointer-events: none;
 }
 
 .la-confirm-grid {
@@ -1336,7 +1372,7 @@ html.dark-theme .la-contact-na {
 
 .la-typeahead-input {
   width: 100%;
-  padding: 0.65rem 2.2rem 0.65rem 2.2rem;
+  padding: 0.65rem 2.6rem 0.65rem 2.2rem;
   font-size: 0.84rem;
   font-family: inherit;
   color: var(--text-main, #0f172a);
@@ -1356,23 +1392,40 @@ html.dark-theme .la-contact-na {
 
 .la-typeahead-clear-btn {
   position: absolute;
-  right: 0.75rem;
+  right: 0.6rem;
   top: 50%;
   transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   background: transparent;
   border: none;
   color: var(--text-muted, #94a3b8);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: color 0.15s ease;
+  z-index: 10;
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
 }
 
 .la-typeahead-clear-btn:hover {
   color: var(--text-main, #0f172a);
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.la-typeahead-clear-btn:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.la-typeahead-clear-btn i {
+  font-size: 0.95rem;
+  pointer-events: none;
 }
 
 .la-typeahead-dropdown {
@@ -1648,6 +1701,29 @@ html.dark-theme .citizen-search-input:focus {
 [data-theme="dark"] .la-item-authority,
 html.dark-theme .la-item-authority {
   color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .la-typeahead-clear-btn,
+html.dark-theme .la-typeahead-clear-btn {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .la-typeahead-clear-btn:hover,
+html.dark-theme .la-typeahead-clear-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .la-confirm-clear-btn,
+html.dark-theme .la-confirm-clear-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .la-confirm-clear-btn:hover,
+html.dark-theme .la-confirm-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #f87171 !important;
 }
 
 [data-theme="dark"] .la-gps-notice,

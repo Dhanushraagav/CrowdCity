@@ -943,6 +943,9 @@ function initReportMap() {
 
   // Click handler on map
   reportMap.on('click', (e) => {
+    if (window.LocationAuthority && typeof window.LocationAuthority.onGPSRequested === 'function') {
+      window.LocationAuthority.onGPSRequested();
+    }
     setCoordinates(e.latlng.lat, e.latlng.lng);
   });
 
@@ -986,6 +989,9 @@ function setCoordinates(lat, lng) {
       const markerLatlng = event.target.getLatLng();
       document.getElementById('report-latitude').value = markerLatlng.lat.toFixed(6);
       document.getElementById('report-longitude').value = markerLatlng.lng.toFixed(6);
+      if (window.LocationAuthority && typeof window.LocationAuthority.onGPSRequested === 'function') {
+        window.LocationAuthority.onGPSRequested();
+      }
       reverseGeocode(markerLatlng.lat, markerLatlng.lng);
     });
   }
@@ -1025,6 +1031,9 @@ function requestBrowserLocation(showAlerts = false) {
     },
     (error) => {
       console.warn("Geolocation permission denied or timed out:", error.message);
+      if (window.LocationAuthority && typeof window.LocationAuthority.onGPSFailed === 'function') {
+        window.LocationAuthority.onGPSFailed(error);
+      }
       if (showAlerts) {
         window.showToast(`Failed to retrieve location: ${error.message}. Please click on the map to set location manually.`, "error");
       }
@@ -1037,7 +1046,12 @@ function requestBrowserLocation(showAlerts = false) {
 function setupGPSButton() {
   const gpsBtn = document.getElementById('btn-use-gps');
   if (gpsBtn) {
-    gpsBtn.addEventListener('click', () => requestBrowserLocation(true));
+    gpsBtn.addEventListener('click', () => {
+      if (window.LocationAuthority && typeof window.LocationAuthority.onGPSRequested === 'function') {
+        window.LocationAuthority.onGPSRequested();
+      }
+      requestBrowserLocation(true);
+    });
   }
 }
 
@@ -1095,6 +1109,9 @@ function setupSearchButton() {
             const markerLatlng = event.target.getLatLng();
             document.getElementById('report-latitude').value = markerLatlng.lat.toFixed(6);
             document.getElementById('report-longitude').value = markerLatlng.lng.toFixed(6);
+            if (window.LocationAuthority && typeof window.LocationAuthority.onGPSRequested === 'function') {
+              window.LocationAuthority.onGPSRequested();
+            }
             reverseGeocode(markerLatlng.lat, markerLatlng.lng);
           });
         }
