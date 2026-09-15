@@ -3423,13 +3423,14 @@ window.renderTurnstileWidgets = function() {
   }
 
   const siteKey = window.supabaseConfig?.turnstileSiteKey || '1x00000000000000000000AA';
-  const theme = (typeof getActiveTheme === 'function') ? getActiveTheme() : 'light';
+  // Turnstile on authentication pages MUST ALWAYS explicitly use the 'light' theme
+  const turnstileTheme = 'light';
 
   if (document.getElementById('login-captcha') && window.loginWidgetId === null) {
     try {
       window.loginWidgetId = turnstile.render('#login-captcha', {
         sitekey: siteKey,
-        theme: theme,
+        theme: turnstileTheme,
         callback: function(token) {
           console.log('[Turnstile] Login challenge completed');
         }
@@ -3443,7 +3444,7 @@ window.renderTurnstileWidgets = function() {
     try {
       window.signupWidgetId = turnstile.render('#signup-captcha', {
         sitekey: siteKey,
-        theme: theme,
+        theme: turnstileTheme,
         callback: function(token) {
           console.log('[Turnstile] Signup challenge completed');
         }
@@ -3457,7 +3458,7 @@ window.renderTurnstileWidgets = function() {
     try {
       window.recoveryWidgetId = turnstile.render('#recovery-captcha', {
         sitekey: siteKey,
-        theme: theme,
+        theme: turnstileTheme,
         callback: function(token) {
           console.log('[Turnstile] Recovery challenge completed');
         }
