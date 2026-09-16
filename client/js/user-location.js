@@ -762,8 +762,197 @@
   "jolarpet": "Tirupathur",
   "ஜோலார்பேட்டை": "Tirupathur",
   "yelagiri": "Tirupathur",
-  "ஏலகிரி": "Tirupathur"
+  "ஏலகிரி": "Tirupathur",
+  "kannampalayam": "Coimbatore",
+  "கண்ணம்பாளையம்": "Coimbatore",
+  "irugur": "Coimbatore",
+  "இருகூர்": "Coimbatore",
+  "pappampatti": "Coimbatore",
+  "பப்பம்பட்டி": "Coimbatore"
 };
+
+  // Bilingual translation dictionary for specific localities, towns, and taluks across Tamil Nadu
+  const LOCALITY_NAMES_TA = {
+    'sulur': 'சூலூர்',
+    'kannampalayam': 'கண்ணம்பாளையம்',
+    'irugur': 'இருகூர்',
+    'pappampatti': 'பப்பம்பட்டி',
+    'peelamedu': 'பீளமேடு',
+    'singanallur': 'சிங்கநல்லூர்',
+    'gandhipuram': 'காந்திபுரம்',
+    'saravanampatti': 'சரவணம்பட்டி',
+    'pollachi': 'பொள்ளாச்சி',
+    'mettupalayam': 'மேட்டுப்பாளையம்',
+    'valparai': 'வால்பாறை',
+    'kinathukadavu': 'கிணத்துக்கடவு',
+    'madukkarai': 'மதுக்கரை',
+    'perur': 'பேரூர்',
+    'annur': 'அன்னூர்',
+    'anaimalai': 'ஆனைமலை',
+    'thudiyalur': 'துடியலூர்',
+    'vadavalli': 'வடவள்ளி',
+    'kurichi': 'குறிச்சி',
+    'ondipudur': 'ஒண்டிப்புதூர்',
+    'vellalore': 'வெள்ளலூர்',
+    'kuniyamuthur': 'குனியமுத்தூர்',
+    'rs puram': 'ஆர்.எஸ்.புரம்',
+    'coimbatore': 'கோயம்புத்தூர்',
+    'mylapore': 'மயிலாப்பூர்',
+    'adyar': 'அடையாறு',
+    't nagar': 'தி நகர்',
+    'anna nagar': 'அண்ணா நகர்',
+    'velachery': 'வேளச்சேரி',
+    'guindy': 'கிண்டி',
+    'egmore': 'எழும்பூர்',
+    'triplicane': 'திருவல்லிக்கேணி',
+    'royapettah': 'இராயப்பேட்டை',
+    'royapuram': 'ராயபுரம்',
+    'sholinganallur': 'சோழிங்கநல்லூர்',
+    'alandur': 'ஆலந்தூர்',
+    'ambattur': 'அம்பத்தூர்',
+    'madhavaram': 'மாதவரம்',
+    'thiruvottiyur': 'திருவொற்றியூர்',
+    'tondiarpet': 'தண்டையார்பேட்டை',
+    'perambur': 'பெரம்பூர்',
+    'purasawalkam': 'புரசைவாக்கம்',
+    'mambalam': 'மாம்பலம்',
+    'ayanavaram': 'அயனாவரம்',
+    'aminjikarai': 'அமிஞ்சிக்கரை',
+    'maduravoyal': 'மதுரவாயல்',
+    'kolathur': 'கொளத்தூர்',
+    'chennai': 'சென்னை',
+    'tambaram': 'தாம்பரம்',
+    'chromepet': 'குரோம்பேட்டை',
+    'pallavaram': 'பல்லாவரம்',
+    'vandalur': 'வண்டலூர்',
+    'chengalpattu': 'செங்கல்பட்டு',
+    'maduranthakam': 'மதுராந்தகம்',
+    'cheyyur': 'செய்யூர்',
+    'tirukalukundram': 'திருக்கழுக்குன்றம்',
+    'tiruporur': 'திருப்போரூர்',
+    'kovilpatti': 'கோவில்பட்டி',
+    'srivaikuntam': 'ஸ்ரீவைகுண்டம்',
+    'tiruchendur': 'திருச்செந்தூர்',
+    'sattankulam': 'சாத்தான்குளம்',
+    'ottapidaram': 'ஒட்டப்பிடாரம்',
+    'vilathikulam': 'விளாத்திகுளம்',
+    'kayathar': 'கயத்தாறு',
+    'eral': 'ஏரல்',
+    'alwarthirunagari': 'ஆழ்வார்திருநகரி',
+    'thoothukudi': 'தூத்துக்குடி',
+    'avadi': 'ஆவடி',
+    'poonamallee': 'பூந்தமல்லி',
+    'ponneri': 'பொன்னேரி',
+    'gummidipoondi': 'கும்மிடிப்பூண்டி',
+    'tiruttani': 'திருத்தணி',
+    'tiruvallur': 'திருவள்ளூர்',
+    'srirangam': 'ஸ்ரீரங்கம்',
+    'manapparai': 'மணப்பாறை',
+    'thiruverumbur': 'திருவெறும்பூர்',
+    'lalgudi': 'லால்குடி',
+    'musiri': 'முசிறி',
+    'thuraiyur': 'துறையூர்',
+    'tiruchirappalli': 'திருச்சிராப்பள்ளி',
+    'kumbakonam': 'கும்பகோணம்',
+    'pattukkottai': 'பட்டுக்கோட்டை',
+    'thiruvaiyaru': 'திருவையாறு',
+    'papanasam': 'பாபநாசம்',
+    'orathanadu': 'ஒரத்தநாடு',
+    'peravurani': 'பேராவூரணி',
+    'thanjavur': 'தஞ்சாவூர்',
+    'mannargudi': 'மன்னார்குடி',
+    'thiruthuraipoondi': 'திருத்துறைப்பூண்டி',
+    'nannilam': 'நன்னிலம்',
+    'tiruvarur': 'திருவாரூர்',
+    'karaikudi': 'காரைக்குடி',
+    'devakottai': 'தேவகோட்டை',
+    'manamadurai': 'மானாமதுரை',
+    'sivaganga': 'சிவகங்கை',
+    'sivakasi': 'சிவகாசி',
+    'rajapalayam': 'ராஜபாளையம்',
+    'srivilliputhur': 'ஸ்ரீவில்லிபுத்தூர்',
+    'aruppukkottai': 'அருப்புக்கோட்டை',
+    'sattur': 'சாத்தூர்',
+    'virudhunagar': 'விருதுநகர்',
+    'dharapuram': 'தாராபுரம்',
+    'kangeyam': 'காங்கேயம்',
+    'avinashi': 'அவினாசி',
+    'palladam': 'பல்லடம்',
+    'udumalaipettai': 'உடுமலைப்பேட்டை',
+    'uthukuli': 'ஊத்துக்குளி',
+    'tiruppur': 'திருப்பூர்',
+    'mettur': 'மேட்டூர்',
+    'edappadi': 'எடப்பாடி',
+    'sankari': 'சங்ககிரி',
+    'attur': 'ஆத்தூர்',
+    'omalur': 'ஓமலூர்',
+    'yercaud': 'ஏற்காடு',
+    'salem': 'சேலம்',
+    'bhavani': 'பவானி',
+    'gobichettipalayam': 'கோபிசெட்டிபாளையம்',
+    'sathyamangalam': 'சத்தியமங்கலம்',
+    'perundurai': 'பெருந்துறை',
+    'erode': 'ஈரோடு',
+    'palani': 'பழனி',
+    'kodaikanal': 'கொடைக்கானல்',
+    'vedasandur': 'வேடசந்தூர்',
+    'natham': 'நத்தம்',
+    'nilakottai': 'நிலக்கோட்டை',
+    'dindigul': 'திண்டுக்கல்',
+    'bodinayakanur': 'போடிநாயக்கனூர்',
+    'periyakulam': 'பெரியகுளம்',
+    'uthamapalayam': 'உத்தமபாளையம்',
+    'andipatti': 'ஆண்டிபட்டி',
+    'theni': 'தேனி',
+    'ambasamudram': 'அம்பாசமுத்திரம்',
+    'cheranmahadevi': 'சேரன்மகாதேவி',
+    'palayamkottai': 'பாளையங்கோட்டை',
+    'radhapuram': 'ராதாபுரம்',
+    'tirunelveli': 'திருநெல்வேலி',
+    'tenkasi': 'தென்காசி',
+    'sankarankovil': 'சங்கரன்கோவில்',
+    'shenkottai': 'செங்கோட்டை',
+    'kadayanallur': 'கடையநல்லூர்',
+    'alankulam': 'ஆலங்குளம்',
+    'hosur': 'ஓசூர்',
+    'denkanikottai': 'தேன்கனிக்கோட்டை',
+    'pochampalli': 'போச்சம்பள்ளி',
+    'krishnagiri': 'கிருஷ்ணகிரி',
+    'udhagamandalam': 'உதகமண்டலம்',
+    'coonoor': 'குன்னூர்',
+    'kotagiri': 'கோத்தகிரி',
+    'gudalur': 'கூடலூர்',
+    'nilgiris': 'நீலகிரி',
+    'vellore': 'வேலூர்',
+    'katpadi': 'காட்பாடி',
+    'gudiyatham': 'குடியாத்தம்',
+    'ambur': 'ஆம்பூர்',
+    'vaniyambadi': 'வாணியம்பாடி',
+    'tirupathur': 'திருப்பத்தூர்',
+    'arakkonam': 'அரக்கோணம்',
+    'arcot': 'ஆற்காடு',
+    'walajah': 'வாலாஜா',
+    'ranipet': 'ராணிப்பேட்டை',
+    'sholinghur': 'சோளிங்கர்'
+  };
+
+  /**
+   * Translate a locality name to Tamil if language is 'ta'.
+   */
+  function translateLocalityName(name, lang = 'en') {
+    if (!name || typeof name !== 'string') return '';
+    if (lang !== 'ta') return name.trim();
+    const lower = name.toLowerCase().trim();
+    if (LOCALITY_NAMES_TA[lower]) return LOCALITY_NAMES_TA[lower];
+    
+    // Check if name contains any known locality
+    for (const [key, val] of Object.entries(LOCALITY_NAMES_TA)) {
+      if (lower.includes(key) || key.includes(lower)) {
+        return val;
+      }
+    }
+    return name.trim();
+  }
 
   /**
    * Normalize an arbitrary location string (district, taluk, town, locality)
@@ -1011,14 +1200,335 @@
   }
 
   /**
+   * Extract the most specific reliable locality from a reverse geocode address object.
+   * Specificity Hierarchy:
+   * Level 1: Locality / Suburb / Neighbourhood / Hamlet
+   * Level 2: Village Panchayat / Town / Municipality
+   * Level 3: Taluk / Sub-district
+   * Level 4: District / City
+   * 
+   * Strict Rules:
+   * - Never show house numbers, street names, postal codes, or raw coordinates.
+   * - Maximum 1–2 words or "Locality, Taluk" format.
+   * - If only district is known, fallback to district.
+   */
+  function extractSpecificLocality(addressObj, lang = 'en') {
+    if (!addressObj || typeof addressObj !== 'object') return null;
+
+    const cleanField = (val) => {
+      if (!val || typeof val !== 'string') return '';
+      return val
+        .replace(/^(?:door\s*(?:no\.?)?|no\.?|plot\s*no\.?|flat\s*no\.?|ward\s*no\.?)\s*\d+[\w-]*\s*[, -]*/i, '')
+        .replace(/^\d+[\w-]*\s*[, -]*/i, '')
+        .replace(/\b\d{6}\b/g, '') // remove pin codes
+        .replace(/\b\d+[-/]\d+\b/g, '') // remove door numbers
+        .replace(/ taluk$/i, '')
+        .replace(/ subdistrict$/i, '')
+        .replace(/ district$/i, '')
+        .replace(/ corporation$/i, '')
+        .replace(/ municipality$/i, '')
+        .replace(/ வட்டம்$/i, '')
+        .replace(/ மாவட்டம்$/i, '')
+        .replace(/ மாநகராட்சி$/i, '')
+        .replace(/ நகராட்சி$/i, '')
+        .trim();
+    };
+
+    const village = cleanField(
+      addressObj.village ||
+      addressObj.hamlet ||
+      addressObj.village_panchayat ||
+      ''
+    );
+
+    const neighbourhood = cleanField(
+      addressObj.neighbourhood ||
+      addressObj.suburb ||
+      addressObj.residential ||
+      addressObj.quarter ||
+      addressObj.locality ||
+      ''
+    );
+
+    const locality = neighbourhood || village;
+
+    const town = cleanField(
+      addressObj.town ||
+      addressObj.municipality ||
+      addressObj.city_district ||
+      ''
+    );
+
+    const taluk = cleanField(
+      addressObj.subdistrict ||
+      addressObj.county ||
+      addressObj.taluk ||
+      ''
+    );
+
+    const district = cleanField(
+      addressObj.state_district ||
+      addressObj.district ||
+      addressObj.city ||
+      ''
+    );
+
+    let specificEn = '';
+    let specificTa = '';
+
+    // Hierarchy decision
+    if (locality && town && locality.toLowerCase() !== town.toLowerCase()) {
+      // e.g. "Kannampalayam, Sulur"
+      specificEn = `${locality}, ${town}`;
+      const locTa = translateLocalityName(locality, 'ta');
+      const townTa = translateLocalityName(town, 'ta');
+      specificTa = `${locTa}, ${townTa}`;
+    } else if (locality && taluk && locality.toLowerCase() !== taluk.toLowerCase()) {
+      // e.g. "Kannampalayam, Sulur"
+      specificEn = `${locality}, ${taluk}`;
+      const locTa = translateLocalityName(locality, 'ta');
+      const talukTa = translateLocalityName(taluk, 'ta');
+      specificTa = `${locTa}, ${talukTa}`;
+    } else if (locality) {
+      // e.g. "Mylapore"
+      specificEn = locality;
+      specificTa = translateLocalityName(locality, 'ta');
+    } else if (town) {
+      // e.g. "Sulur" or "Kovilpatti"
+      specificEn = town;
+      specificTa = translateLocalityName(town, 'ta');
+    } else if (taluk) {
+      // e.g. "Sulur"
+      specificEn = taluk;
+      specificTa = translateLocalityName(taluk, 'ta');
+    } else if (district) {
+      specificEn = district;
+      specificTa = translateLocalityName(district, 'ta');
+    }
+
+    if (!specificEn) return null;
+
+    // Determine parent district
+    let parentDistrict = normalizeDistrictName(district) ||
+                         normalizeDistrictName(taluk) ||
+                         normalizeDistrictName(town) ||
+                         normalizeDistrictName(locality);
+
+    return {
+      specificName: specificEn,
+      specificNameTa: specificTa || specificEn,
+      locality: locality || town || taluk,
+      town: town || taluk,
+      taluk: taluk,
+      district: parentDistrict || district || 'Tamil Nadu',
+      displayName: lang === 'ta' ? (specificTa || specificEn) : specificEn
+    };
+  }
+
+  /**
+   * Reverse geocode geographic coordinates to a structured specific locality.
+   */
+  async function reverseGeocodeCoords(lat, lon, lang = 'en') {
+    const parsedLat = parseFloat(lat);
+    const parsedLon = parseFloat(lon);
+    if (isNaN(parsedLat) || isNaN(parsedLon)) return null;
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?lat=${parsedLat}&lon=${parsedLon}&format=json&zoom=14&addressdetails=1`;
+      const res = await fetch(url, {
+        headers: {
+          'Accept-Language': lang === 'ta' ? 'ta,en;q=0.8' : 'en,ta;q=0.8'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          const parsed = extractSpecificLocality(data.address, lang);
+          if (parsed) {
+            parsed.lat = parsedLat;
+            parsed.lng = parsedLon;
+            return parsed;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[UserLocation] Nominatim reverse geocode warning:', e);
+    }
+    return null;
+  }
+
+  /**
+   * Synchronously retrieve the saved/cached specific location.
+   */
+  function getSavedSpecificLocation(lang = 'en') {
+    try {
+      // 1. Check if specific location object is cached
+      const specificCached = localStorage.getItem('cc_specific_location');
+      if (specificCached) {
+        try {
+          const obj = JSON.parse(specificCached);
+          if (obj && (obj.specificName || obj.locality || obj.district)) {
+            const displayName = (lang === 'ta' && obj.specificNameTa) ? obj.specificNameTa : (obj.specificName || obj.locality || obj.district);
+            return {
+              ...obj,
+              displayName
+            };
+          }
+        } catch (e) {}
+      }
+
+      // 2. Check weather cache for town / district
+      const weatherCacheStr = localStorage.getItem(lang === 'ta' ? 'cc_weather_cache_ta' : 'cc_weather_cache_en') ||
+                              localStorage.getItem('cc_weather_cache_en') ||
+                              localStorage.getItem('cc_weather_cache_ta');
+      if (weatherCacheStr) {
+        try {
+          const c = JSON.parse(weatherCacheStr);
+          if (c && (c.locality || c.town || c.district)) {
+            const rawPlace = c.locality || c.town || c.district;
+            const disp = (lang === 'ta') ? translateLocalityName(rawPlace, 'ta') : rawPlace;
+            const dist = normalizeDistrictName(rawPlace) || 'Tamil Nadu';
+            return {
+              specificName: rawPlace,
+              specificNameTa: translateLocalityName(rawPlace, 'ta'),
+              district: dist,
+              displayName: disp
+            };
+          }
+        } catch (e) {}
+      }
+
+      // 3. Check saved user_district in localStorage
+      const direct = localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district');
+      if (direct && direct !== 'all' && direct !== 'Tamil Nadu') {
+        const disp = (lang === 'ta') ? translateLocalityName(direct, 'ta') : direct;
+        return {
+          specificName: direct,
+          specificNameTa: translateLocalityName(direct, 'ta'),
+          district: normalizeDistrictName(direct) || direct,
+          displayName: disp
+        };
+      }
+    } catch (err) {
+      console.warn('[UserLocation] getSavedSpecificLocation warning:', err);
+    }
+
+    return {
+      specificName: 'Tamil Nadu',
+      specificNameTa: 'தமிழ்நாடு',
+      district: 'Tamil Nadu',
+      displayName: lang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu'
+    };
+  }
+
+  /**
+   * Detect user specific location using browser GPS and reverse geocoding.
+   */
+  async function detectSpecificLocation(options = {}) {
+    const timeoutMs = options.timeoutMs || 5000;
+    const forceGps = options.forceGps === true;
+    const lang = options.lang || (typeof window !== 'undefined' && window.i18n && typeof window.i18n.getLanguage === 'function' ? window.i18n.getLanguage() : 'ta');
+
+    // 1. Check instant cache if not forced
+    if (!forceGps) {
+      const saved = getSavedSpecificLocation(lang);
+      if (saved && saved.specificName && saved.specificName !== 'Tamil Nadu') {
+        return saved;
+      }
+    }
+
+    // 2. Try browser geolocation
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      try {
+        const coords = await new Promise((resolve) => {
+          let resolved = false;
+          const timer = setTimeout(() => {
+            if (!resolved) { resolved = true; resolve(null); }
+          }, timeoutMs);
+
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              if (resolved) return;
+              resolved = true;
+              clearTimeout(timer);
+              resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            },
+            () => {
+              if (resolved) return;
+              resolved = true;
+              clearTimeout(timer);
+              resolve(null);
+            },
+            { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: forceGps ? 0 : 300000 }
+          );
+        });
+
+        if (coords) {
+          localStorage.setItem('cc_weather_coords', JSON.stringify({ lat: coords.lat, lon: coords.lng, ts: Date.now() }));
+          
+          // Reverse geocode to get specific locality
+          const resolvedLoc = await reverseGeocodeCoords(coords.lat, coords.lng, lang);
+          if (resolvedLoc) {
+            localStorage.setItem('cc_specific_location', JSON.stringify(resolvedLoc));
+            localStorage.setItem('user_district', resolvedLoc.district);
+            
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
+                detail: {
+                  ...resolvedLoc,
+                  lat: coords.lat,
+                  lng: coords.lng
+                }
+              }));
+            }
+            return resolvedLoc;
+          }
+
+          // Fallback to nearest district if reverse geocode failed
+          const nearestDist = findNearestDistrictByCoords(coords.lat, coords.lng);
+          if (nearestDist) {
+            const locObj = {
+              specificName: nearestDist,
+              specificNameTa: translateLocalityName(nearestDist, 'ta'),
+              district: nearestDist,
+              lat: coords.lat,
+              lng: coords.lng,
+              displayName: lang === 'ta' ? translateLocalityName(nearestDist, 'ta') : nearestDist
+            };
+            localStorage.setItem('cc_specific_location', JSON.stringify(locObj));
+            localStorage.setItem('user_district', nearestDist);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
+                detail: locObj
+              }));
+            }
+            return locObj;
+          }
+        }
+      } catch (err) {
+        console.warn('[UserLocation] detectSpecificLocation GPS error:', err);
+      }
+    }
+
+    // 3. Fallback to saved
+    return getSavedSpecificLocation(lang);
+  }
+
+  /**
    * Re-detect live location directly via browser GPS, bypassing any stored values.
    */
   async function reDetectLiveLocation(timeoutMs = 6000) {
     try {
       localStorage.removeItem('user_district');
       localStorage.removeItem('cc_weather_coords');
+      localStorage.removeItem('cc_specific_location');
+      localStorage.removeItem('cc_weather_cache_en');
+      localStorage.removeItem('cc_weather_cache_ta');
     } catch (e) {}
-    return await detectUserDistrict({ forceGps: true, timeoutMs });
+    
+    // Trigger detection with forceGps
+    const res = await detectSpecificLocation({ forceGps: true, timeoutMs });
+    return res ? (res.district || res.specificName) : await detectUserDistrict({ forceGps: true, timeoutMs });
   }
 
   /**
@@ -1028,9 +1538,15 @@
     const norm = normalizeDistrictName(districtName);
     if (norm) {
       localStorage.setItem('user_district', norm);
+      localStorage.setItem('cc_specific_location', JSON.stringify({
+        specificName: norm,
+        specificNameTa: translateLocalityName(norm, 'ta'),
+        district: norm,
+        displayName: norm
+      }));
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('crowdcity:location_changed', {
-          detail: { district: norm }
+          detail: { district: norm, specificName: norm }
         }));
       }
       return norm;
@@ -1043,6 +1559,12 @@
     TN_DISTRICTS_CENTROIDS,
     DISTRICT_ALIASES,
     TALUK_TO_DISTRICT,
+    LOCALITY_NAMES_TA,
+    translateLocalityName,
+    extractSpecificLocality,
+    reverseGeocodeCoords,
+    getSavedSpecificLocation,
+    detectSpecificLocation,
     normalizeDistrictName,
     findNearestDistrictByCoords,
     getSavedUserDistrict,

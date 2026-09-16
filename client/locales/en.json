@@ -38,6 +38,7 @@
   "pulse_emergency_alerts_desc": "Disaster management & public safety warnings",
   "pulse_weather_alerts": "Weather Forecast",
   "pulse_weather_alerts_desc": "5-day regional weather forecasts & conditions",
+  "view_weather_forecast": "View Weather Forecast",
   "pulse_transport_updates": "Public Transport Updates",
   "pulse_transport_updates_desc": "TNSTC, MTC & metro transit notices",
   "pulse_active": "ACTIVE",

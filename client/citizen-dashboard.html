@@ -236,6 +236,15 @@
                 </a>
               </div>
             </div>
+
+            <!-- Compact Hero Weather & Specific Location Badge -->
+            <a href="weather-alerts.html" class="floating-weather-widget weather-widget hero-weather-badge loading" id="hero-weather-badge" title="View Weather Forecast • Click to view details" aria-label="Current Weather and Location">
+              <div class="weather-icon" id="hero-weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+              <div class="weather-info">
+                <span class="weather-city" id="hero-weather-city">Detecting...</span>
+                <span class="weather-temp" id="hero-weather-temp">--°C</span>
+              </div>
+            </a>
           </div>
         </div>
 
@@ -471,9 +480,18 @@
     const powerStatusEl = document.getElementById('strip-power-status');
     const updatedTextEl = document.getElementById('strip-updated-text');
 
+    // Hero Weather & Specific Location Badge elements
+    const heroWeatherBadge = document.getElementById('hero-weather-badge');
+    const heroWeatherIconEl = document.getElementById('hero-weather-icon');
+    const heroWeatherCityEl = document.getElementById('hero-weather-city');
+    const heroWeatherTempEl = document.getElementById('hero-weather-temp');
+
     if (!strip) return;
 
     let currentDistrict = '';
+    let currentSpecificLoc = null;
+    let currentLat = null;
+    let currentLng = null;
     let isFetching = false;
     let cachedWeatherData = null;
     let cachedPowerData = null;
@@ -548,6 +566,30 @@
       return clean;
     }
 
+    function updateLocationDisplay(locInfo) {
+      if (!locInfo) return;
+      currentSpecificLoc = locInfo;
+      const isTa = getLang() === 'ta';
+      const specNameEn = locInfo.specificName || locInfo.locality || locInfo.district || 'Tamil Nadu';
+      const specNameTa = locInfo.specificNameTa || (window.CrowdCityLocation && typeof window.CrowdCityLocation.translateLocalityName === 'function' ? window.CrowdCityLocation.translateLocalityName(specNameEn, 'ta') : specNameEn);
+      const displayLoc = isTa ? specNameTa : specNameEn;
+
+      if (heroWeatherCityEl) {
+        heroWeatherCityEl.textContent = displayLoc;
+      }
+      if (locNameEl) {
+        locNameEl.textContent = formatDistrictDisplay(locInfo.district || specNameEn);
+      }
+
+      if (typeof locInfo.lat === 'number' && typeof locInfo.lng === 'number') {
+        currentLat = locInfo.lat;
+        currentLng = locInfo.lng;
+      } else if (typeof locInfo.lat === 'number' && typeof locInfo.lon === 'number') {
+        currentLat = locInfo.lat;
+        currentLng = locInfo.lon;
+      }
+    }
+
     function formatISTTime(dateObj = new Date()) {
       try {
         return new Intl.DateTimeFormat('en-US', {
@@ -616,17 +658,31 @@
       return 'fa-cloud';
     }
 
-    async function updateStatusStrip(districtToUse, force = false) {
+    async function updateStatusStrip(districtToUse, force = false, lat = null, lon = null) {
       if (isFetching && !force) return;
       isFetching = true;
       strip.classList.add('is-fetching');
 
       const district = districtToUse || (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function' ? window.CrowdCityLocation.getSavedUserDistrict() : (localStorage.getItem('user_district') || 'Tamil Nadu'));
       currentDistrict = district;
-      locNameEl.textContent = formatDistrictDisplay(district);
+
+      if (!currentSpecificLoc) {
+        const savedLoc = window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function'
+          ? window.CrowdCityLocation.getSavedSpecificLocation(getLang())
+          : null;
+        if (savedLoc) {
+          updateLocationDisplay(savedLoc);
+        } else {
+          locNameEl.textContent = formatDistrictDisplay(district);
+          if (heroWeatherCityEl) heroWeatherCityEl.textContent = formatDistrictDisplay(district);
+        }
+      }
+
+      const useLat = (typeof lat === 'number' && !isNaN(lat)) ? lat : currentLat;
+      const useLon = (typeof lon === 'number' && !isNaN(lon)) ? lon : currentLng;
 
       // Concurrent fetching of Weather & Power Status
-      const weatherPromise = fetchWeatherStatus(district);
+      const weatherPromise = fetchWeatherStatus(district, useLat, useLon);
       const powerPromise = fetchPowerStatus(district);
 
       await Promise.allSettled([weatherPromise, powerPromise]);
@@ -640,15 +696,19 @@
       isFetching = false;
     }
 
-    async function fetchWeatherStatus(district) {
+    async function fetchWeatherStatus(district, lat = null, lon = null) {
       try {
-        const res = await fetch(`/api/public-pulse/weather?district=${encodeURIComponent(district)}`, {
+        let url = `/api/public-pulse/weather?district=${encodeURIComponent(district || '')}`;
+        if (typeof lat === 'number' && typeof lon === 'number' && !isNaN(lat) && !isNaN(lon)) {
+          url += `&lat=${lat}&lon=${lon}`;
+        }
+        const res = await fetch(url, {
           headers: { 'Accept': 'application/json' }
         });
         
         if (res.ok) {
           const data = await res.json();
-          const currentObj = (data && data.current_district && data.current_district.current) || (data && data.current);
+          const currentObj = (data && data.current) || (data && data.current_district && data.current_district.current);
           if (data && data.success && currentObj && typeof currentObj.temperature_c === 'number') {
             cachedWeatherData = {
               temp: Math.round(currentObj.temperature_c),
@@ -661,11 +721,29 @@
         }
         throw new Error('API weather unavailable');
       } catch (err) {
-        // Fallback: Check if coordinates centroid exists
+        // Fallback 1: Direct Open-Meteo with exact coordinates if available
         let fallbackDone = false;
-        if (window.CrowdCityLocation && window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS) {
+        if (typeof lat === 'number' && typeof lon === 'number' && !isNaN(lat) && !isNaN(lon)) {
+          try {
+            const omRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+            if (omRes.ok) {
+              const omData = await omRes.json();
+              if (omData && omData.current_weather) {
+                const temp = Math.round(omData.current_weather.temperature);
+                const code = omData.current_weather.weathercode;
+                const icon = getWeatherIconClass(code, temp);
+                cachedWeatherData = { temp, condition: 'Clear', icon };
+                renderWeather(cachedWeatherData);
+                fallbackDone = true;
+              }
+            }
+          } catch (e) {}
+        }
+
+        // Fallback 2: Check if coordinates centroid exists for district
+        if (!fallbackDone && window.CrowdCityLocation && window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS) {
           const centroid = window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS.find(c =>
-            c.name.toLowerCase() === district.toLowerCase() || c.id.toLowerCase() === district.toLowerCase()
+            c.name.toLowerCase() === (district || '').toLowerCase() || c.id.toLowerCase() === (district || '').toLowerCase()
           );
           if (centroid) {
             try {
@@ -687,8 +765,7 @@
 
         if (!fallbackDone) {
           cachedWeatherData = null;
-          weatherIconEl.className = 'fa-solid fa-cloud strip-weather-icon';
-          weatherTextEl.textContent = `--°C ${t('weather_unavailable_short', 'Weather unavailable')}`;
+          renderWeather(null);
         }
       }
     }
@@ -697,12 +774,29 @@
       if (!data) {
         weatherIconEl.className = 'fa-solid fa-cloud strip-weather-icon';
         weatherTextEl.textContent = `--°C ${t('weather_unavailable_short', 'Weather unavailable')}`;
+        if (heroWeatherBadge) heroWeatherBadge.classList.add('loading');
+        if (heroWeatherTempEl) heroWeatherTempEl.textContent = '--°C';
+        if (heroWeatherIconEl) heroWeatherIconEl.innerHTML = '<i class="fa-solid fa-cloud"></i>';
         return;
       }
       const icon = data.icon.startsWith('fa-') ? data.icon : `fa-${data.icon}`;
       weatherIconEl.className = `fa-solid ${icon} strip-weather-icon`;
       const translatedCond = translateCondition(data.condition);
       weatherTextEl.textContent = `${data.temp}°C ${translatedCond}`;
+
+      // Update Hero Weather Badge
+      if (heroWeatherBadge) {
+        heroWeatherBadge.classList.remove('loading');
+        const isTa = getLang() === 'ta';
+        const locName = currentSpecificLoc ? (isTa ? currentSpecificLoc.specificNameTa : currentSpecificLoc.specificName) : formatDistrictDisplay(currentDistrict);
+        heroWeatherBadge.title = `${locName} — ${data.temp}°C (${t('view_weather_forecast', 'View Weather Forecast')})`;
+      }
+      if (heroWeatherTempEl) {
+        heroWeatherTempEl.textContent = `${data.temp}°C`;
+      }
+      if (heroWeatherIconEl) {
+        heroWeatherIconEl.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+      }
     }
 
     async function fetchPowerStatus(district) {
@@ -758,14 +852,18 @@
     if (locSegment) {
       locSegment.addEventListener('click', async () => {
         locNameEl.textContent = t('status_detecting_location', 'Detecting...');
+        if (heroWeatherCityEl) heroWeatherCityEl.textContent = t('status_detecting_location', 'Detecting...');
+        if (heroWeatherBadge) heroWeatherBadge.classList.add('loading');
         if (window.CrowdCityLocation && typeof window.CrowdCityLocation.reDetectLiveLocation === 'function') {
-          const newDistrict = await window.CrowdCityLocation.reDetectLiveLocation(6000);
-          if (newDistrict) {
-            updateStatusStrip(newDistrict, true);
+          await window.CrowdCityLocation.reDetectLiveLocation(6000);
+          const updatedLoc = window.CrowdCityLocation.getSavedSpecificLocation(getLang());
+          if (updatedLoc) {
+            updateLocationDisplay(updatedLoc);
+            updateStatusStrip(updatedLoc.district, true, updatedLoc.lat, updatedLoc.lng);
             return;
           }
         }
-        updateStatusStrip(currentDistrict, true);
+        updateStatusStrip(currentDistrict, true, currentLat, currentLng);
       });
 
       locSegment.addEventListener('keydown', (e) => {
@@ -778,19 +876,26 @@
 
     // Reactive event listeners
     window.addEventListener('crowdcity:location_detected', (e) => {
-      if (e.detail && e.detail.district) {
-        updateStatusStrip(e.detail.district, true);
+      if (e.detail) {
+        updateLocationDisplay(e.detail);
+        updateStatusStrip(e.detail.district || currentDistrict, true, e.detail.lat, e.detail.lng);
       }
     });
 
     window.addEventListener('crowdcity:location_changed', (e) => {
-      if (e.detail && e.detail.district) {
-        updateStatusStrip(e.detail.district, true);
+      if (e.detail) {
+        updateLocationDisplay(e.detail);
+        updateStatusStrip(e.detail.district || currentDistrict, true, e.detail.lat, e.detail.lng);
       }
     });
 
     window.addEventListener('language-change', () => {
-      locNameEl.textContent = formatDistrictDisplay(currentDistrict);
+      if (currentSpecificLoc) {
+        updateLocationDisplay(currentSpecificLoc);
+      } else {
+        locNameEl.textContent = formatDistrictDisplay(currentDistrict);
+        if (heroWeatherCityEl) heroWeatherCityEl.textContent = formatDistrictDisplay(currentDistrict);
+      }
       if (cachedWeatherData) renderWeather(cachedWeatherData);
       if (cachedPowerData) renderPowerStatus(cachedPowerData);
       const timeStr = formatISTTime();
@@ -799,26 +904,49 @@
     });
 
     // Initial Execution
-    const initialDistrict = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
-      ? window.CrowdCityLocation.getSavedUserDistrict()
-      : (localStorage.getItem('user_district') || 'Tamil Nadu');
+    const savedLoc = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function')
+      ? window.CrowdCityLocation.getSavedSpecificLocation(getLang())
+      : null;
 
-    updateStatusStrip(initialDistrict);
+    if (savedLoc) {
+      updateLocationDisplay(savedLoc);
+      currentDistrict = savedLoc.district || 'Tamil Nadu';
+    } else {
+      const initialDistrict = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
+        ? window.CrowdCityLocation.getSavedUserDistrict()
+        : (localStorage.getItem('user_district') || 'Tamil Nadu');
+      currentDistrict = initialDistrict;
+      updateLocationDisplay({ specificName: initialDistrict, district: initialDistrict });
+    }
 
-    // If initial district is generic or not yet detected, kick off non-blocking background detection
-    if (!initialDistrict || initialDistrict === 'Tamil Nadu') {
-      if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
-        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 4000, requestGps: true })
+    try {
+      const coordsStr = localStorage.getItem('cc_weather_coords');
+      if (coordsStr) {
+        const coords = JSON.parse(coordsStr);
+        if (coords && typeof coords.lat === 'number' && typeof coords.lon === 'number') {
+          currentLat = coords.lat;
+          currentLng = coords.lon;
+        }
+      }
+    } catch (e) {}
+
+    updateStatusStrip(currentDistrict, false, currentLat, currentLng);
+
+    // If initial district/location is generic or not yet detected, kick off non-blocking background detection
+    if (!savedLoc || !savedLoc.specificName || savedLoc.specificName === 'Tamil Nadu' || savedLoc.district === 'Tamil Nadu') {
+      if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectSpecificLocation === 'function') {
+        window.CrowdCityLocation.detectSpecificLocation({ timeoutMs: 5000, lang: getLang() })
           .then(det => {
-            if (det && det !== initialDistrict) {
-              updateStatusStrip(det, true);
+            if (det && det.specificName) {
+              updateLocationDisplay(det);
+              updateStatusStrip(det.district, true, det.lat, det.lng);
             }
           })
           .catch(() => {});
       }
     }
 
-    window.cc_refreshStatusStrip = () => updateStatusStrip(currentDistrict, true);
+    window.cc_refreshStatusStrip = () => updateStatusStrip(currentDistrict, true, currentLat, currentLng);
   })();
   </script>
 

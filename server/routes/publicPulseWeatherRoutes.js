@@ -22,9 +22,13 @@ const router = express.Router();
  */
 const handleWeatherForecast = async (req, res) => {
   try {
-    const { district, days, refresh } = req.query;
+    const { district, lat, lon, latitude, longitude, days, refresh } = req.query;
+    const resolvedLat = lat || latitude;
+    const resolvedLon = lon || longitude;
     const result = await getWeatherForecast({
       district,
+      lat: resolvedLat !== undefined ? parseFloat(resolvedLat) : undefined,
+      lon: resolvedLon !== undefined ? parseFloat(resolvedLon) : undefined,
       days: days ? parseInt(days, 10) : 5,
       refresh
     });

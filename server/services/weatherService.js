@@ -403,6 +403,45 @@ export async function getWeatherForecast(options = {}) {
   // Default selected district: Chennai or the first available if not explicitly filtered
   const primaryDistrict = singleDistrictResult || districtsMap.get('chennai') || allForecasts[0] || null;
 
+  // If specific coordinates (lat, lon) provided, fetch live current weather for exact location
+  if (typeof options.lat === 'number' && typeof options.lon === 'number' && !isNaN(options.lat) && !isNaN(options.lon)) {
+    try {
+      const raw = await fetchFromOpenMeteo(options.lat, options.lon);
+      if (raw && raw.current) {
+        const currentWmo = getWMOInterpretation(raw.current.weather_code);
+        const currentData = {
+          time: raw.current.time || null,
+          time_ist: formatTimeIST(raw.current.time),
+          temperature_c: typeof raw.current.temperature_2m === 'number' ? Math.round(raw.current.temperature_2m * 10) / 10 : null,
+          apparent_temperature_c: typeof raw.current.apparent_temperature === 'number' ? Math.round(raw.current.apparent_temperature * 10) / 10 : null,
+          relative_humidity_pct: typeof raw.current.relative_humidity_2m === 'number' ? raw.current.relative_humidity_2m : null,
+          precipitation_mm: typeof raw.current.precipitation === 'number' ? raw.current.precipitation : 0,
+          condition: currentWmo.label,
+          icon_class: currentWmo.icon,
+          weather_code: typeof raw.current.weather_code === 'number' ? raw.current.weather_code : 0
+        };
+
+        return {
+          success: true,
+          source_available: true,
+          is_stale: false,
+          last_updated_ist: getCurrentISTTimestamp(),
+          source: OPEN_METEO_SOURCE,
+          coordinates: { lat: options.lat, lon: options.lon },
+          current: currentData,
+          current_district: {
+            ...(primaryDistrict || {}),
+            current: currentData
+          },
+          districts_forecast: allForecasts,
+          total_districts: allForecasts.length
+        };
+      }
+    } catch (coordErr) {
+      logger.warn(`[WeatherService] Coordinate weather fetch fallback: ${coordErr.message}`);
+    }
+  }
+
   return {
     success: true,
     source_available: true,

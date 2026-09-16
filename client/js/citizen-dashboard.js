@@ -69,6 +69,9 @@
     let userCity = '';
     if (user && (user.city || user.district)) {
       userCity = user.city || user.district;
+    } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function') {
+      const savedLoc = window.CrowdCityLocation.getSavedSpecificLocation();
+      userCity = savedLoc?.specificName || savedLoc?.district || '';
     } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
       userCity = window.CrowdCityLocation.getSavedUserDistrict() || '';
     } else if (localStorage.getItem('user_district')) {
@@ -157,13 +160,15 @@
 
     // Listen for live location detected or changed event to update header and complaints dynamically
     function handleLocationUpdate(evt) {
-      if (evt.detail && evt.detail.district) {
-        const detected = evt.detail.district.replace(/ district$/i, '').trim();
-        userCity = detected;
-        updateCityHeaders(detected);
-        renderRecentComplaints(detected);
-        renderNearbyIssues(detected);
-        renderAnnouncements(detected);
+      if (evt.detail) {
+        const detected = (evt.detail.specificName || evt.detail.district || '').replace(/ district$/i, '').trim();
+        if (detected) {
+          userCity = detected;
+          updateCityHeaders(detected);
+          renderRecentComplaints(detected);
+          renderNearbyIssues(detected);
+          renderAnnouncements(detected);
+        }
       }
     }
     window.addEventListener('crowdcity:location_detected', handleLocationUpdate);

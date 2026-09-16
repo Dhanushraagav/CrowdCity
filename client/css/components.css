@@ -2221,6 +2221,76 @@ html.dark-theme .badge-assigned { background: rgba(99, 102, 241, 0.18) !importan
   100% { transform: translateY(-6px); }
 }
 
+/* Hero Weather & Specific Location Badge */
+.hero-weather-badge,
+.hero-weather-badge.weather-widget {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.48rem 0.95rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-left: auto;
+  z-index: 5;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-weather-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.22);
+  border-color: rgba(13, 148, 136, 0.4);
+}
+
+.hero-weather-badge .weather-icon {
+  font-size: 1.35rem;
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-weather-badge .weather-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.hero-weather-badge .weather-city {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-weather-badge .weather-temp {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0d9488;
+}
+
+.hero-weather-badge.loading .weather-city {
+  color: #64748b;
+}
+
+.hero-weather-badge.loading .weather-temp {
+  color: #94a3b8;
+}
+
 /* Rain Effect & Falling Drops */
 .weather-widget.weather-rain {
   background: linear-gradient(135deg, rgba(224, 242, 254, 0.95), rgba(186, 230, 253, 0.95)) !important;
@@ -3480,7 +3550,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   color: var(--text-muted);
 }
 @media (max-width: 768px) {
-  .weather-widget { display: none; }
+  .weather-widget:not(.hero-weather-badge) { display: none; }
 }
 
 /* ==========================================================================
@@ -3599,6 +3669,30 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 1.25rem !important;
+  }
+
+  .hero-weather-badge,
+  .hero-weather-badge.weather-widget {
+    display: inline-flex !important;
+    order: -1 !important;
+    align-self: flex-end !important;
+    margin-left: auto !important;
+    margin-bottom: 0.25rem !important;
+    padding: 0.35rem 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .hero-weather-badge .weather-icon {
+    font-size: 1.15rem !important;
+  }
+
+  .hero-weather-badge .weather-city {
+    font-size: 0.76rem !important;
+    max-width: 140px !important;
+  }
+
+  .hero-weather-badge .weather-temp {
+    font-size: 0.74rem !important;
   }
 
   .stitch-hero-details-wrap {
@@ -7583,6 +7677,34 @@ html.dark-theme .floating-weather-widget {
   border: 1px solid #222222 !important;
   color: #ffffff !important;
   box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.9) !important;
+}
+
+[data-theme="dark"] .hero-weather-badge,
+html.dark-theme .hero-weather-badge {
+  background: rgba(14, 14, 14, 0.88) !important;
+  border: 1px solid #262626 !important;
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.85) !important;
+}
+
+[data-theme="dark"] .hero-weather-badge:hover,
+html.dark-theme .hero-weather-badge:hover {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 8px 24px -4px rgba(56, 189, 248, 0.25) !important;
+}
+
+[data-theme="dark"] .hero-weather-badge .weather-city,
+html.dark-theme .hero-weather-badge .weather-city {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .hero-weather-badge .weather-temp,
+html.dark-theme .hero-weather-badge .weather-temp {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .hero-weather-badge.loading .weather-city,
+html.dark-theme .hero-weather-badge.loading .weather-city {
+  color: #94a3b8 !important;
 }
 
 /* Ticker Banner */
