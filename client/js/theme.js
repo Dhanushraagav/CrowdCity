@@ -69,6 +69,9 @@ class CrowdCityThemeService {
 
   setTheme(newTheme) {
     var theme = (newTheme === 'dark') ? 'dark' : 'light';
+    var isSameTheme = (this.currentTheme === theme && 
+      document.documentElement && 
+      document.documentElement.getAttribute('data-theme') === theme);
     this.currentTheme = theme;
 
     try {
@@ -83,7 +86,7 @@ class CrowdCityThemeService {
     this.applyTheme(theme);
 
     // Dispatch global custom event for reactive components (maps, charts, widgets)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isSameTheme) {
       window.dispatchEvent(new CustomEvent('theme-change', {
         detail: { theme: theme, isDark: theme === 'dark' }
       }));
@@ -96,14 +99,30 @@ class CrowdCityThemeService {
     if (typeof document === 'undefined' || !document.documentElement) return;
     var effectiveTheme = isAuthPage() ? 'light' : theme;
     var isDark = (effectiveTheme === 'dark');
-    document.documentElement.setAttribute('data-theme', effectiveTheme);
-    document.documentElement.classList.toggle('dark-theme', isDark);
-    document.documentElement.classList.toggle('theme-dark', isDark);
-    document.documentElement.classList.toggle('light-theme', !isDark);
-    document.documentElement.classList.toggle('theme-light', !isDark);
+    var root = document.documentElement;
+
+    // Suppress CSS transitions during instantaneous theme toggle to prevent color fade flicker
+    root.classList.add('theme-switching');
+
+    root.setAttribute('data-theme', effectiveTheme);
+    root.classList.toggle('dark-theme', isDark);
+    root.classList.toggle('theme-dark', isDark);
+    root.classList.toggle('light-theme', !isDark);
+    root.classList.toggle('theme-light', !isDark);
 
     // Sync Settings UI if present on the page
     this.updateSettingsUI(theme);
+
+    // Release theme-switching on next frame so normal component transitions function smoothly
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(function() {
+        root.classList.remove('theme-switching');
+      });
+    } else {
+      setTimeout(function() {
+        root.classList.remove('theme-switching');
+      }, 50);
+    }
   }
 
   updateSettingsUI(theme) {

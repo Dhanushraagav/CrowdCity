@@ -1,9 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Early Theme & Language Synchronous Bootstrap (Prevents any FOUC / flicker) -->
+  <script>
+    (function() {
+      var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+      var f = p.split('/').pop().replace(/\.html$/, '');
+      var isAuth = (f === 'auth' || f === 'authority-login' || f === 'reset-password' || f === 'login' || f === 'signup' || f === 'forgot-password');
+      var isAuthority = (f.indexOf('authority-') === 0 || f === 'admin' || f === 'services-admin');
+      
+      var theme = 'light';
+      if (!isAuth) {
+        try {
+          var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+          if (t === 'dark') theme = 'dark';
+        } catch(e) {}
+      }
+      var isDark = (theme === 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark-theme', isDark);
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('light-theme', !isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+
+      var lang = 'en';
+      if (!isAuthority && !isAuth) {
+        try {
+          var l = localStorage.getItem('crowdcity_citizen_language') || localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language');
+          lang = (l === 'en' || l === 'ta') ? l : 'ta';
+        } catch(e) { lang = 'ta'; }
+      } else if (isAuth) {
+        try {
+          var al = sessionStorage.getItem('cc_auth_display_lang');
+          lang = (al === 'ta') ? 'ta' : 'en';
+        } catch(e) { lang = 'en'; }
+      }
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.classList.remove('lang-en', 'lang-ta');
+      document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
+    })();
+  </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About Us — CrowdCity AI Citizen Portal</title>
+  <title>About CrowdCity AI — Founder, Platform & Civic Technology</title>
+  <meta name="description" content="CrowdCity AI is an AI-powered civic platform founded by Sandeep Kumar J and developed by Dhanush Raagav S and team. Delivering transparent civic grievance reporting, AI welfare scheme discovery, and emergency helplines across Tamil Nadu." />
+  <meta name="keywords" content="CrowdCity AI, CrowdCity, Sandeep Kumar J, Dhanush Raagav S, Tamil Nadu Civic Portal, Civic Tech India, Pothole Reporting, Municipal Grievance Tamil Nadu, AI Welfare Schemes, Emergency Helplines" />
+  <link rel="canonical" href="https://crowdcity.in/about.html" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph / Social Media Metadata -->
+  <meta property="og:site_name" content="CrowdCity AI" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://crowdcity.in/about.html" />
+  <meta property="og:title" content="About CrowdCity AI — Founder, Platform & Civic Technology" />
+  <meta property="og:description" content="CrowdCity AI is an AI-powered civic platform founded by Sandeep Kumar J and developed by Dhanush Raagav S and team. Delivering transparent civic grievance reporting, AI welfare scheme discovery, and emergency helplines across Tamil Nadu." />
+  <meta property="og:image" content="https://crowdcity.in/images/crowdcity_icon_transparent.png" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter / X Card Metadata -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="About CrowdCity AI — Founder, Platform & Civic Technology" />
+  <meta name="twitter:description" content="CrowdCity AI is an AI-powered civic platform founded by Sandeep Kumar J and developed by Dhanush Raagav S and team. Delivering transparent civic grievance reporting, AI welfare scheme discovery, and emergency helplines across Tamil Nadu." />
+  <meta name="twitter:image" content="https://crowdcity.in/images/crowdcity_icon_transparent.png" />
+
+  <!-- Machine-Readable Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://crowdcity.in/#organization",
+        "name": "CrowdCity AI",
+        "alternateName": ["CrowdCity", "CrowdCity AI Platform"],
+        "url": "https://crowdcity.in",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://crowdcity.in/images/crowdcity_icon_transparent.png",
+          "caption": "CrowdCity AI Logo"
+        },
+        "description": "CrowdCity AI is an AI-powered civic issue reporting and citizen engagement platform empowering citizens and municipal authorities across Tamil Nadu.",
+        "email": "crowdcityai@gmail.com",
+        "telephone": "+919025132196",
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": "Tamil Nadu",
+          "addressCountry": "IN"
+        },
+        "founder": {
+          "@type": "Person",
+          "@id": "https://crowdcity.in/#founder",
+          "name": "Sandeep Kumar J",
+          "jobTitle": "Founder — CrowdCity AI",
+          "description": "Founder of CrowdCity AI and an entrepreneur focused on building technology-driven solutions for smarter and more connected communities."
+        },
+        "employee": [
+          {
+            "@type": "Person",
+            "@id": "https://crowdcity.in/#developer",
+            "name": "Dhanush Raagav S",
+            "jobTitle": "Developer",
+            "description": "Technology enthusiast and developer passionate about building modern digital products and intelligent civic applications."
+          },
+          {
+            "@type": "Person",
+            "name": "Tulasiram V",
+            "jobTitle": "Test Engineer",
+            "description": "Test Engineer for CrowdCity AI, focusing on quality, reliability, and real-world usability."
+          },
+          {
+            "@type": "Person",
+            "name": "Aathi Shankar A",
+            "jobTitle": "Software Architect",
+            "description": "Software Architect focusing on system structure, scalability, and platform architecture."
+          },
+          {
+            "@type": "Person",
+            "name": "Padmadev D",
+            "jobTitle": "DevOps Engineer",
+            "description": "DevOps Engineer focusing on deployment, infrastructure, development workflows, and system reliability."
+          },
+          {
+            "@type": "Person",
+            "name": "Aakash M",
+            "jobTitle": "End-to-End Developer",
+            "description": "End-to-End Developer specializing in full-stack architectures and civic tech features."
+          },
+          {
+            "@type": "Person",
+            "name": "Praneesh P",
+            "jobTitle": "Systems Engineer",
+            "description": "Systems Engineer managing system architecture, server performance, and infrastructure integrity."
+          },
+          {
+            "@type": "Person",
+            "name": "Gladwin Levis J",
+            "jobTitle": "API Engineer",
+            "description": "API Engineer designing high-throughput REST endpoints and secure backend integrations."
+          }
+        ]
+      },
+      {
+        "@type": "Person",
+        "@id": "https://crowdcity.in/#founder",
+        "name": "Sandeep Kumar J",
+        "jobTitle": "Founder — CrowdCity AI",
+        "description": "Founder of CrowdCity AI and an entrepreneur focused on building technology-driven solutions for smarter and more connected communities.",
+        "worksFor": {
+          "@id": "https://crowdcity.in/#organization"
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://crowdcity.in/#developer",
+        "name": "Dhanush Raagav S",
+        "jobTitle": "Developer",
+        "description": "Technology enthusiast and developer passionate about building modern digital products and intelligent civic applications.",
+        "worksFor": {
+          "@id": "https://crowdcity.in/#organization"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://crowdcity.in/#website",
+        "name": "CrowdCity AI",
+        "url": "https://crowdcity.in",
+        "description": "Empowering Citizens for a Better Tamil Nadu through AI-driven civic issue reporting and government welfare scheme discovery.",
+        "publisher": {
+          "@id": "https://crowdcity.in/#organization"
+        },
+        "inLanguage": ["en", "ta"]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://crowdcity.in/#software",
+        "name": "CrowdCity AI",
+        "applicationCategory": "GovernmentApplication",
+        "operatingSystem": "Web, Progressive Web App (PWA)",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        },
+        "author": {
+          "@id": "https://crowdcity.in/#organization"
+        },
+        "description": "Civic grievance reporting and municipal resolution platform featuring automated AI triage, live SLA tracking, and welfare scheme navigation for Tamil Nadu."
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://crowdcity.in/about.html#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is CrowdCity AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "CrowdCity AI is an AI-powered civic tech and citizen redressal platform designed for Tamil Nadu. It enables citizens to report public issues such as potholes, garbage, streetlights, and water leakage with GPS and photo evidence, track resolution in real time, discover government welfare schemes, and access 1-tap emergency helplines."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Who founded CrowdCity AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "CrowdCity AI was founded by Sandeep Kumar J, an entrepreneur and visionary focused on building technology-driven solutions for smarter, more connected, and transparent communities."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Who developed CrowdCity AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "CrowdCity AI is developed by an engineering and leadership team: Sandeep Kumar J (Founder), Dhanush Raagav S (Developer), Tulasiram V (Test Engineer), Aathi Shankar A (Software Architect), Padmadev D (DevOps Engineer), Aakash M (End-to-End Developer), Praneesh P (Systems Engineer), and Gladwin Levis J (API Engineer)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What problem does CrowdCity solve?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "CrowdCity AI bridges the gap between citizens and municipal authorities. It replaces opaque, slow paper-based grievance systems with transparent digital complaint tracking, automatic AI categorization, GPS location verification, official SLA countdown clocks, officer assignment, and photo-verified resolutions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is CrowdCity's geographic scope?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "CrowdCity AI operates across the state of Tamil Nadu, India, covering all 38 districts including Chennai, Coimbatore, Madurai, Tiruchirappalli, Salem, and Tirunelveli across municipal corporations, municipalities, taluks, and town panchayats."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are the major features of CrowdCity AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Key features include GPS-enabled Civic Grievance Reporting with photo uploads; AI automated issue categorization and department triage; Real-time 5-stage Case Progression with SLA tracking; Authority Inspection and Dispatch Console; AI Government Welfare Scheme Finder; 1-Tap Emergency Helplines; and Bilingual support in Tamil and English."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What technologies are used in CrowdCity AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "CrowdCity AI is built using modern web standards (HTML5, responsive CSS3 with AMOLED dark mode support, ES6+ JavaScript), Node.js and Express REST APIs, Supabase (PostgreSQL database, authentication, storage, realtime subscriptions), and Groq AI / Llama 3 for intelligent triage and conversational government scheme assistance."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the purpose and vision of CrowdCity AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The purpose and vision of CrowdCity AI is to establish accountable, citizen-first urban governance across Tamil Nadu by replacing slow bureaucratic processes with transparent, AI-assisted civic workflows."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can citizens and authorities contact CrowdCity AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Citizens and municipal officers can contact CrowdCity AI via official email at crowdcityai@gmail.com, telephone support at +91 90251 32196, or through the official Contact page at https://crowdcity.in/contact.html."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
   
   <!-- Central Authentication Router & i18n -->
   <script src="js/auth-router.js?v=3.1.0"></script>
@@ -935,26 +1201,263 @@
       .ambient-orb,
       .photo-glowing-ring,
       #hero-canvas {
-        display: none !important;
+    /* Hero Tagline & Entity Meta Pills */
+    .hero-tagline-sub {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--abt-teal);
+      margin: -0.25rem 0 1.25rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-meta-badges {
+      display: flex;
+      justify-content: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-top: 1.75rem;
+    }
+
+    .hero-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--abt-text-main);
+      background: var(--abt-card-bg);
+      border: 1px solid var(--abt-card-border);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .hero-pill-badge i {
+      color: var(--abt-teal);
+      font-size: 0.82rem;
+    }
+
+    .hero-pill-badge:hover {
+      border-color: var(--abt-teal);
+      transform: translateY(-1px);
+    }
+
+    /* Technology Architecture Section */
+    .tech-section {
+      padding: 5rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      border-top: 1px solid var(--abt-card-border);
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .tech-card {
+      background: var(--abt-card-bg);
+      border: 1.5px solid var(--abt-card-border);
+      border-radius: 18px;
+      padding: 1.85rem 1.4rem;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tech-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--abt-teal);
+      box-shadow: 0 16px 32px rgba(13, 148, 136, 0.12);
+    }
+
+    .tech-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(13, 148, 136, 0.12);
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: var(--abt-teal);
+      margin-bottom: 0.25rem;
+    }
+
+    .tech-card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--abt-text-main);
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .tech-card-desc {
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: var(--abt-text-muted);
+      margin: 0;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+      padding: 5.5rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      border-top: 1px solid var(--abt-card-border);
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .faq-card {
+      background: var(--abt-card-bg);
+      border: 1.5px solid var(--abt-card-border);
+      border-radius: 18px;
+      padding: 1.85rem 1.65rem;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .faq-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--abt-teal);
+      box-shadow: 0 16px 32px rgba(13, 148, 136, 0.1);
+    }
+
+    .faq-question {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--abt-text-main);
+      margin: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      line-height: 1.35;
+    }
+
+    .faq-question i {
+      color: var(--abt-teal);
+      font-size: 0.95rem;
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+
+    .faq-answer {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--abt-text-muted);
+      margin: 0;
+    }
+
+    .faq-answer strong {
+      color: var(--abt-text-main);
+    }
+
+    .faq-answer a {
+      color: var(--abt-teal);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .faq-answer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Official Directory Links Section */
+    .directory-section {
+      padding: 5rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      border-top: 1px solid var(--abt-card-border);
+    }
+
+    .directory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .directory-card {
+      background: var(--abt-card-bg);
+      border: 1.5px solid var(--abt-card-border);
+      border-radius: 16px;
+      padding: 1.4rem 1.25rem;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .directory-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--abt-teal);
+      box-shadow: 0 12px 24px rgba(13, 148, 136, 0.15);
+    }
+
+    .directory-card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(13, 148, 136, 0.12);
+      border: 1px solid rgba(13, 148, 136, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--abt-teal);
+    }
+
+    .directory-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--abt-text-main);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .directory-card-title i {
+      font-size: 0.75rem;
+      color: var(--abt-text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .directory-card:hover .directory-card-title i {
+      transform: translateX(3px);
+      color: var(--abt-teal);
+    }
+
+    .directory-card-desc {
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--abt-text-muted);
+      margin: 0;
+    }
+
+    /* Crawlability & Print Fallback */
+    @media print {
+      .story-block {
+        opacity: 1 !important;
+        transform: none !important;
       }
     }
   </style>
 
-  <script>
-    (function() {
-      try {
-        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
-        var theme = (t === 'dark') ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        var isDark = (theme === 'dark');
-        document.documentElement.classList.toggle('dark-theme', isDark);
-        document.documentElement.classList.toggle('theme-dark', isDark);
-        document.documentElement.classList.toggle('light-theme', !isDark);
-        document.documentElement.classList.toggle('theme-light', !isDark);
-      } catch (e) {}
-    })();
-  </script>
-</head>
+  </head>
 <body class="protected-page">
   <div class="scroll-progress-top-line" id="scroll-progress-top"></div>
   <div class="ambient-orb ambient-orb-1"></div>
@@ -974,19 +1477,68 @@
   <div class="about-fullscreen-wrapper">
     
     <!-- Hero Section -->
-    <section class="about-hero">
+    <section class="about-hero" id="hero">
       <canvas id="hero-canvas"></canvas>
       <div class="hero-content">
         <div class="hero-tag" data-i18n="about_tag">CROWDCITY AI PLATFORM</div>
-        <h1 class="hero-title" data-i18n="about_hero_title">Empowering Citizens for a Better Tamil Nadu.</h1>
+        <h1 class="hero-title">CrowdCity AI</h1>
+        <div class="hero-tagline-sub" data-i18n="about_hero_title">Empowering Citizens for a Better Tamil Nadu</div>
         <p class="hero-subheading" data-i18n="about_hero_sub">
           CrowdCity AI is your all-in-one digital civic portal. From reporting street issues to discovering government welfare schemes and securing essential documents — we make public services transparent and accessible to everyone.
         </p>
+
+        <div class="hero-meta-badges">
+          <span class="hero-pill-badge"><i class="fa-solid fa-location-dot"></i> Tamil Nadu, India</span>
+          <span class="hero-pill-badge"><i class="fa-solid fa-user-tie"></i> Founder: Sandeep Kumar J</span>
+          <span class="hero-pill-badge"><i class="fa-solid fa-code"></i> Developer: Dhanush Raagav S</span>
+          <span class="hero-pill-badge"><i class="fa-solid fa-microchip"></i> AI-Powered Civic Tech</span>
+        </div>
       </div>
     </section>
 
-    <!-- Citizen Help & Platform Services Section -->
-    <section class="citizen-help-section">
+    <!-- What CrowdCity Does & The Civic Problem Solved Section -->
+    <section class="citizen-help-section" id="what-crowdcity-does">
+      <div class="section-header-center">
+        <span class="section-label">WHAT CROWDCITY DOES</span>
+        <h2 class="section-title">Solving Civic Redressal & Public Transparency</h2>
+        <p class="section-desc">CrowdCity AI bridges the gap between citizens and municipal authorities, replacing bureaucratic opacity with verifiable accountability.</p>
+      </div>
+
+      <div class="citizen-help-grid">
+        <div class="help-card">
+          <div class="help-icon-wrap">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <h3 class="help-card-title">The Civic Challenge</h3>
+          <p class="help-card-desc">
+            Traditional municipal grievance reporting has historically suffered from manual paperwork, unverified reports, delayed response times, and lack of real-time visibility for citizens into complaint resolution progress.
+          </p>
+        </div>
+
+        <div class="help-card">
+          <div class="help-icon-wrap">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <h3 class="help-card-title">The AI-Powered Solution</h3>
+          <p class="help-card-desc">
+            CrowdCity AI automates issue triage, routes complaints to responsible local bodies using GPS coordinates, enforces SLA countdown deadlines, and provides citizens with a transparent 5-stage live status tracker with photo proof.
+          </p>
+        </div>
+
+        <div class="help-card">
+          <div class="help-icon-wrap">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <h3 class="help-card-title">Inclusive Citizen Empowerment</h3>
+          <p class="help-card-desc">
+            By providing full bilingual access in Tamil and English, 1-tap emergency helplines, and personalized welfare scheme discovery, CrowdCity AI bridges the digital divide for every citizen across Tamil Nadu.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Platform Features Section -->
+    <section class="citizen-help-section" id="key-features" style="padding-top: 0;">
       <div class="section-header-center">
         <span class="section-label" data-i18n="about_help_label">HOW CROWDCITY HELPS YOU</span>
         <h2 class="section-title" data-i18n="about_help_title">Everything You Need for Your City & Welfare</h2>
@@ -1023,11 +1575,41 @@
             Instant 1-tap emergency helplines for police, fire, ambulance, disaster response, and women safety across all Tamil Nadu districts.
           </p>
         </div>
+
+        <div class="help-card">
+          <div class="help-icon-wrap">
+            <i class="fa-solid fa-timeline"></i>
+          </div>
+          <h3 class="help-card-title">5-Stage Status Tracking</h3>
+          <p class="help-card-desc">
+            Follow complaint lifecycle progress from Submission to Verification, Officer Assignment, In-Progress work, and Final Resolution with photo proof.
+          </p>
+        </div>
+
+        <div class="help-card">
+          <div class="help-icon-wrap">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <h3 class="help-card-title">Municipal Authority Console</h3>
+          <p class="help-card-desc">
+            Dedicated operational portal for municipal commissioners, engineers, and inspectors with automated SLA clocks and direct citizen chat.
+          </p>
+        </div>
+
+        <div class="help-card">
+          <div class="help-icon-wrap">
+            <i class="fa-solid fa-language"></i>
+          </div>
+          <h3 class="help-card-title">Bilingual Civic Access</h3>
+          <p class="help-card-desc">
+            Native bilingual experience in both Tamil (தமிழ்) and English to ensure equal civic accessibility across all demographic groups.
+          </p>
+        </div>
       </div>
     </section>
 
-    <!-- Core Principles Section -->
-    <section class="purpose-section">
+    <!-- Core Principles & Vision / Mission Section -->
+    <section class="purpose-section" id="mission-vision">
       <div class="section-header-center">
         <span class="section-label" data-i18n="about_principle_label">OUR CORE PRINCIPLES</span>
         <h2 class="section-title" data-i18n="about_principle_title">Built on Transparency, Speed & Equity</h2>
@@ -1058,12 +1640,98 @@
       </div>
     </section>
 
+    <!-- Technology Architecture Section -->
+    <section class="tech-section" id="technology">
+      <div class="section-header-center">
+        <span class="section-label">ENGINEERING ARCHITECTURE</span>
+        <h2 class="section-title">Technologies Powering CrowdCity AI</h2>
+        <p class="section-desc">Built with modern web standards, resilient cloud data stores, and real-time civic intelligence.</p>
+      </div>
+
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="tech-card-icon">
+            <i class="fa-brands fa-html5"></i>
+          </div>
+          <h3 class="tech-card-title">Modern Web & PWA</h3>
+          <p class="tech-card-desc">
+            Semantic HTML5, responsive CSS3 with AMOLED Dark & Light themes, and offline-capable Progressive Web App architecture.
+          </p>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-icon">
+            <i class="fa-brands fa-node-js"></i>
+          </div>
+          <h3 class="tech-card-title">Node.js & Express REST</h3>
+          <p class="tech-card-desc">
+            Scalable, high-throughput REST APIs handling issue triage, officer delegation, real-time SLA computation, and secure session routing.
+          </p>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-icon">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <h3 class="tech-card-title">Supabase PostgreSQL</h3>
+          <p class="tech-card-desc">
+            PostgreSQL relational database with Row-Level Security (RLS), Realtime WebSocket updates, and encrypted photo evidence storage.
+          </p>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-icon">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <h3 class="tech-card-title">Groq AI & Llama 3</h3>
+          <p class="tech-card-desc">
+            AI-driven automated complaint categorization, severity assessment, recommended municipal department routing, and welfare assistance.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Geographic Scope — Tamil Nadu Focus Section -->
+    <section class="purpose-section" id="geographic-scope">
+      <div class="section-header-center">
+        <span class="section-label">GEOGRAPHIC FOCUS</span>
+        <h2 class="section-title">Built Exclusively for Tamil Nadu</h2>
+        <p class="section-desc">CrowdCity AI is geographically mapped to Tamil Nadu's administrative infrastructure.</p>
+      </div>
+
+      <div class="purpose-grid">
+        <div class="purpose-card">
+          <span class="purpose-num">38 DISTRICTS</span>
+          <h3 class="purpose-card-title">Statewide District Reach</h3>
+          <p class="purpose-card-desc">
+            Complete district coverage from Chennai, Coimbatore, and Madurai to Tiruchirappalli, Salem, Tirunelveli, and all 38 districts across Tamil Nadu.
+          </p>
+        </div>
+
+        <div class="purpose-card">
+          <span class="purpose-num">LOCAL BODIES</span>
+          <h3 class="purpose-card-title">Multi-Tier Administration</h3>
+          <p class="purpose-card-desc">
+            Integrated routing across Municipal Corporations, Municipalities, Taluks, Revenue Blocks, and Town Panchayats for precise jurisdictional assignment.
+          </p>
+        </div>
+
+        <div class="purpose-card">
+          <span class="purpose-num">LOCALIZED CARE</span>
+          <h3 class="purpose-card-title">Language & Culture</h3>
+          <p class="purpose-card-desc">
+            Designed specifically with Tamil language typography, regional helpline directories, and state welfare schemes (Kalaignar Magalir Urimai, Pudhumai Penn, etc.).
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- Team Story Layout (Alternating Vertical Network Timeline) -->
-    <section class="team-story-section">
+    <section class="team-story-section" id="team">
       <div class="section-header-center" style="margin-bottom: 4rem;">
-        <span class="section-label" data-i18n="about_team_label">MEET THE TEAM</span>
-        <h2 class="section-title" data-i18n="about_team_title">Engineers & Visionaries Behind CrowdCity AI</h2>
-        <p class="section-desc" data-i18n="about_team_desc">Meet the developers building digital civic technology for Tamil Nadu.</p>
+        <span class="section-label" data-i18n="about_team_label">FOUNDER & ENGINEERING TEAM</span>
+        <h2 class="section-title" data-i18n="about_team_title">Founder & Development Team Behind CrowdCity AI</h2>
+        <p class="section-desc">Meet the visionary founder, developer, and core engineering team building digital civic technology for Tamil Nadu.</p>
       </div>
 
       <!-- Connecting Vertical Network Track & Story Blocks -->
@@ -1073,190 +1741,363 @@
         </div>
 
         <!-- Section 1 — Founder -->
-        <div class="story-block block-left" id="team-block-1">
+        <article class="story-block block-left" id="team-block-1" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/sandeep-kumar.jpg" alt="Sandeep Kumar J — Founder" loading="lazy" decoding="async" />
+                <img src="images/team/sandeep-kumar.jpg" alt="Sandeep Kumar J — Founder" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
-          <div class="story-text-wrap">
+          <div class="story-text-wrap" id="founder">
             <span class="member-num-label"><span class="online-pulse-dot"></span>01 — FOUNDER</span>
-            <h3 class="member-name">Sandeep Kumar J</h3>
-            <div class="member-role">Founder — CrowdCity AI</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Sandeep Kumar J</h3>
+            <div class="member-role" itemprop="jobTitle">Founder — CrowdCity AI</div>
+            <p class="member-about" itemprop="description">
               Sandeep Kumar is the founder of CrowdCity AI and an entrepreneur focused on building technology-driven solutions for smarter and more connected communities. His vision is to use innovation and AI to make civic interaction more efficient, transparent, and accessible.
             </p>
           </div>
-        </div>
+        </article>
 
         <!-- Section 2 — Developer -->
-        <div class="story-block block-right" id="team-block-2">
+        <article class="story-block block-right" id="team-block-2" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/dhanush-raagav.jpg" alt="Dhanush Raagav S — Developer" loading="lazy" decoding="async" />
+                <img src="images/team/dhanush-raagav.jpg" alt="Dhanush Raagav S — Developer" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
-          <div class="story-text-wrap">
+          <div class="story-text-wrap" id="developer">
             <span class="member-num-label"><span class="online-pulse-dot"></span>02 — DEVELOPER</span>
-            <h3 class="member-name">Dhanush Raagav S</h3>
-            <div class="member-role">Developer</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Dhanush Raagav S</h3>
+            <div class="member-role" itemprop="jobTitle">Developer</div>
+            <p class="member-about" itemprop="description">
               Dhanush Raagav is a technology enthusiast and developer passionate about building modern digital products and intelligent applications. He focuses on transforming ideas into scalable, user-friendly solutions through clean development and innovative technology.
             </p>
           </div>
-        </div>
+        </article>
 
         <!-- Section 3 — Test Engineer -->
-        <div class="story-block block-left" id="team-block-3">
+        <article class="story-block block-left" id="team-block-3" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/tulasiram-v.jpg" alt="Tulasiram V — Test Engineer" loading="lazy" decoding="async" />
+                <img src="images/team/tulasiram-v.jpg" alt="Tulasiram V — Test Engineer" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <div class="story-text-wrap">
             <span class="member-num-label"><span class="online-pulse-dot"></span>03 — TEST ENGINEER</span>
-            <h3 class="member-name">Tulasiram V</h3>
-            <div class="member-role">Test Engineer</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Tulasiram V</h3>
+            <div class="member-role" itemprop="jobTitle">Test Engineer</div>
+            <p class="member-about" itemprop="description">
               Tulasiram works as the Test Engineer for CrowdCity AI, focusing on quality, reliability, and real-world usability. He helps identify issues, validate system behaviour, and ensure that every major feature delivers a consistent user experience.
             </p>
           </div>
-        </div>
+        </article>
 
         <!-- Section 4 — Software Architect -->
-        <div class="story-block block-right" id="team-block-4">
+        <article class="story-block block-right" id="team-block-4" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/aathi-shankar.jpg" alt="Aathi Shankar A — Software Architect" loading="lazy" decoding="async" />
+                <img src="images/team/aathi-shankar.jpg" alt="Aathi Shankar A — Software Architect" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <div class="story-text-wrap">
             <span class="member-num-label"><span class="online-pulse-dot"></span>04 — SOFTWARE ARCHITECT</span>
-            <h3 class="member-name">Aathi Shankar A</h3>
-            <div class="member-role">Software Architect</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Aathi Shankar A</h3>
+            <div class="member-role" itemprop="jobTitle">Software Architect</div>
+            <p class="member-about" itemprop="description">
               Aathi Shankar contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
             </p>
           </div>
-        </div>
+        </article>
 
         <!-- Section 5 — DevOps Engineer -->
-        <div class="story-block block-left" id="team-block-5">
+        <article class="story-block block-left" id="team-block-5" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/padmadev-d.jpg?v=2" alt="Padmadev D — DevOps Engineer" loading="lazy" decoding="async" />
+                <img src="images/team/padmadev-d.jpg?v=2" alt="Padmadev D — DevOps Engineer" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <div class="story-text-wrap">
             <span class="member-num-label"><span class="online-pulse-dot"></span>05 — DEVOPS ENGINEER</span>
-            <h3 class="member-name">Padmadev D</h3>
-            <div class="member-role">DevOps Engineer</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Padmadev D</h3>
+            <div class="member-role" itemprop="jobTitle">DevOps Engineer</div>
+            <p class="member-about" itemprop="description">
               Padmadev contributes as the DevOps Engineer, focusing on deployment, infrastructure, development workflows, and system reliability. He helps ensure that CrowdCity AI can move efficiently from development to a stable and maintainable production environment.
             </p>
           </div>
-        </div>
+        </article>
 
         <!-- Section 6 — End-to-End Developer -->
-        <div class="story-block block-right" id="team-block-6">
+        <article class="story-block block-right" id="team-block-6" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/aakash.jpg" alt="Aakash M — End-to-End Developer" loading="lazy" decoding="async" />
+                <img src="images/team/aakash.jpg" alt="Aakash M — End-to-End Developer" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <div class="story-text-wrap">
             <span class="member-num-label"><span class="online-pulse-dot"></span>06 — END-TO-END DEVELOPER</span>
-            <h3 class="member-name">Aakash M</h3>
-            <div class="member-role">End-to-End Developer</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Aakash M</h3>
+            <div class="member-role" itemprop="jobTitle">End-to-End Developer</div>
+            <p class="member-about" itemprop="description">
               Aakash is an End-to-End Developer for CrowdCity AI, specializing in building seamlessly integrated full-stack architectures, high-performance APIs, and robust front-end user experiences. He focuses on delivering end-to-end reliability, scalable workflows, and intelligent civic tech features across the entire platform.
             </p>
           </div>
-        </div>
+        </article>
 
         <!-- Section 7 — Systems Engineer -->
-        <div class="story-block block-left" id="team-block-7">
+        <article class="story-block block-left" id="team-block-7" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/praneesh-p.jpg" alt="Praneesh P — Systems Engineer" loading="lazy" decoding="async" />
+                <img src="images/team/praneesh-p.jpg" alt="Praneesh P — Systems Engineer" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <div class="story-text-wrap">
             <span class="member-num-label"><span class="online-pulse-dot"></span>07 — SYSTEMS ENGINEER</span>
-            <h3 class="member-name">Praneesh P</h3>
-            <div class="member-role">Systems Engineer</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Praneesh P</h3>
+            <div class="member-role" itemprop="jobTitle">Systems Engineer</div>
+            <p class="member-about" itemprop="description">
               Praneesh serves as the Systems Engineer for CrowdCity AI, managing core system architecture, server performance, data pipelines, and infrastructure integrity. He ensures high availability, seamless hardware-software integration, and robust operational readiness across all civic tech services.
             </p>
           </div>
-        </div>
+        </article>
 
         <!-- Section 8 — API Engineer -->
-        <div class="story-block block-right" id="team-block-8">
+        <article class="story-block block-right" id="team-block-8" itemscope itemtype="https://schema.org/Person">
           <div class="timeline-node-point"></div>
 
           <div class="story-image-wrap">
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/gladwin-levis.jpg" alt="Gladwin Levis J — API Engineer" loading="lazy" decoding="async" />
+                <img src="images/team/gladwin-levis.jpg" alt="Gladwin Levis J — API Engineer" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <div class="story-text-wrap">
             <span class="member-num-label"><span class="online-pulse-dot"></span>08 — API ENGINEER</span>
-            <h3 class="member-name">Gladwin Levis J</h3>
-            <div class="member-role">API Engineer</div>
-            <p class="member-about">
+            <h3 class="member-name" itemprop="name">Gladwin Levis J</h3>
+            <div class="member-role" itemprop="jobTitle">API Engineer</div>
+            <p class="member-about" itemprop="description">
               Gladwin specializes as the API Engineer for CrowdCity AI, designing high-throughput REST endpoints, secure authentication bridges, and real-time backend integrations. He ensures fast, reliable, and standardized data exchange between municipal systems and citizen-facing client interfaces.
             </p>
           </div>
-        </div>
+        </article>
       </div>
 
+    </section>
+
+    <!-- Frequently Asked Questions (FAQ) Section -->
+    <section class="faq-section" id="faq">
+      <div class="section-header-center">
+        <span class="section-label">QUESTIONS & ANSWERS</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-desc">Everything search engines, AI models, and citizens need to know about CrowdCity AI.</p>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> What is CrowdCity AI?</h3>
+          <p class="faq-answer">
+            CrowdCity AI is an AI-powered civic technology and citizen redressal platform built for the state of Tamil Nadu. It allows citizens to report public issues such as potholes, garbage dumps, streetlights, and water leakage with live GPS coordinates and photo proof, follow resolution updates in real time, discover government welfare schemes, and access emergency helplines.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> Who founded CrowdCity AI?</h3>
+          <p class="faq-answer">
+            CrowdCity AI was founded by <strong>Sandeep Kumar J</strong>. He is an entrepreneur and visionary focused on building technology-driven solutions for smarter, more connected, and transparent public communities through AI innovation.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> Who developed CrowdCity AI?</h3>
+          <p class="faq-answer">
+            CrowdCity AI is developed by an engineering and leadership team: <strong>Dhanush Raagav S</strong> (Developer), <strong>Tulasiram V</strong> (Test Engineer), <strong>Aathi Shankar A</strong> (Software Architect), <strong>Padmadev D</strong> (DevOps Engineer), <strong>Aakash M</strong> (End-to-End Developer), <strong>Praneesh P</strong> (Systems Engineer), and <strong>Gladwin Levis J</strong> (API Engineer), with founder <strong>Sandeep Kumar J</strong>.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> What problem does CrowdCity solve?</h3>
+          <p class="faq-answer">
+            CrowdCity AI solves the lack of accountability and long delays in municipal grievance handling. It replaces manual paperwork with digital tracking, automated AI triage to municipal departments, GPS location validation, strict SLA response clocks, and photo-verified resolutions.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> What is CrowdCity's geographic scope?</h3>
+          <p class="faq-answer">
+            CrowdCity AI operates across the state of <strong>Tamil Nadu, India</strong>, covering all 38 districts including Chennai, Coimbatore, Madurai, Tiruchirappalli, Salem, and Tirunelveli, spanning municipal corporations, municipalities, taluks, and town panchayats.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> What are the major features of CrowdCity?</h3>
+          <p class="faq-answer">
+            Core features include: GPS-enabled civic issue reporting with photo upload; AI auto-categorization and department triage; 5-stage case progress tracking with SLA clocks; Municipal Authority inspection and dispatch console; AI welfare scheme finder; 1-tap emergency helplines; and full bilingual access in English and Tamil.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> What technologies power CrowdCity AI?</h3>
+          <p class="faq-answer">
+            CrowdCity AI is built on semantic HTML5, responsive CSS3 with AMOLED dark mode, Vanilla JavaScript (ES6+), Node.js, Express RESTful APIs, Supabase (PostgreSQL, Realtime, Storage, Auth), and Groq AI / Llama 3 for intelligent triage and conversational assistance.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> What is the purpose and vision of CrowdCity AI?</h3>
+          <p class="faq-answer">
+            The purpose and vision of CrowdCity AI is to establish transparent, citizen-first civic governance across Tamil Nadu. By equipping citizens with intelligent reporting tools and giving municipal authorities automated triage and SLA tracking, CrowdCity ensures public grievances are acknowledged and resolved promptly.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> How can citizens contact CrowdCity AI?</h3>
+          <p class="faq-answer">
+            Citizens and authorities can reach CrowdCity AI via official email at <a href="mailto:crowdcityai@gmail.com">crowdcityai@gmail.com</a>, phone support at <a href="tel:+919025132196">+91 90251 32196</a>, or via the official <a href="contact.html">Contact Us</a> page.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Official Links & Navigation Directory Section -->
+    <section class="directory-section" id="official-links">
+      <div class="section-header-center">
+        <span class="section-label">DIRECTORY & OFFICIAL LINKS</span>
+        <h2 class="section-title">Explore CrowdCity AI Portals</h2>
+        <p class="section-desc">Quickly navigate to verified civic services, reporting tools, and official support channels.</p>
+      </div>
+
+      <div class="directory-grid">
+        <a href="report.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>Report Civic Grievance</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">Submit road, garbage, water, or lighting complaints with GPS and photos.</p>
+        </a>
+
+        <a href="my-complaints.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>Track Public Grievances</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">Check live 5-stage progression, officer actions, and resolution proof photos.</p>
+        </a>
+
+        <a href="map.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>Civic Issues Map</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">Interactive geographic view of verified civic complaints across Tamil Nadu.</p>
+        </a>
+
+        <a href="services.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-hands-holding-child"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>Welfare Schemes</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">Discover state and central government assistance programs for your family.</p>
+        </a>
+
+        <a href="assistant.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>AI Civic Assistant</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">Ask questions about civic procedures, welfare schemes, and portal navigation.</p>
+        </a>
+
+        <a href="emergency-services.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-phone-volume"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>Emergency Helplines</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">1-tap access to police (100), ambulance (108), fire (101), and district emergency contacts.</p>
+        </a>
+
+        <a href="contact.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-envelope"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>Contact & Support</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">Reach out to our support team at crowdcityai@gmail.com or +91 90251 32196.</p>
+        </a>
+
+        <a href="citizen-dashboard.html" class="directory-card">
+          <div class="directory-card-icon">
+            <i class="fa-solid fa-gauge-high"></i>
+          </div>
+          <div class="directory-card-title">
+            <span>Citizen Dashboard</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+          <p class="directory-card-desc">Access your centralized civic control panel, reminders, and documents.</p>
+        </a>
+      </div>
     </section>
 
     <!-- Final Closing Section -->

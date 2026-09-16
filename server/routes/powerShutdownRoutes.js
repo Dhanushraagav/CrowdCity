@@ -34,10 +34,14 @@ router.get('/', async (req, res) => {
     logger.error(`[PowerShutdownRoutes] Error retrieving power updates: ${error.message}`);
     return res.status(500).json({
       success: false,
+      status: 'unable_to_verify',
+      verification_status: 'unable_to_verify',
+      message: 'TNPDCL shutdown information could not be verified right now.',
       error: 'Failed to retrieve power shutdown updates',
       shutdowns: [],
       official_source: {
         name: 'TNPDCL',
+        display_name: 'TNPDCL / TANGEDCO Official',
         url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml'
       }
     });

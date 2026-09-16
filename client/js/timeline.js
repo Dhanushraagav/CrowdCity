@@ -297,8 +297,8 @@
           
           <div class="timeline-header-bar">
             <div class="timeline-header-left">
-              <i class="fa-solid fa-timeline-arrow" style="color: var(--primary);"></i>
-              <h4 class="timeline-header-title">${t('complaint_timeline', 'Complaint Timeline')}</h4>
+              <i class="fa-solid fa-timeline" style="color: var(--primary);"></i>
+              <h4 class="timeline-header-title">${isAuthority ? t('case_activity_timeline', 'CASE ACTIVITY TIMELINE') : t('complaint_timeline', 'Complaint Timeline')}</h4>
             </div>
             <div class="timeline-header-right">
               <span class="timeline-cid-tag"><i class="fa-solid fa-hashtag"></i> ${escapeHTML(data.complaint_id)}</span>
@@ -351,7 +351,7 @@
 
                     ${stage.is_inferred && stage.state === 'completed' ? `
                       <div class="timeline-inferred-pill">
-                        <i class="fa-solid fa-shield-check"></i> ${t('timeline_inferred_note', 'Status confirmed via lifecycle progression')}
+                        <i class="fa-solid fa-circle-check"></i> ${t('timeline_inferred_note', 'Status confirmed via lifecycle progression')}
                       </div>
                     ` : ''}
 

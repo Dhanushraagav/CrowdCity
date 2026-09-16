@@ -173,7 +173,16 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "tab_this_week": "This Week",
   "tab_this_month": "This Month",
   "tab_all": "All",
-  "power_no_outages": "No planned power shutdowns found for this selection.",
+  "power_no_outages": "No planned power shutdown was found in the available TNPDCL data for this date.",
+  "power_verified_no_outages": "No planned power shutdown was found in the available TNPDCL data for this date.",
+  "power_unable_to_verify": "TNPDCL shutdown information could not be verified right now.",
+  "power_check_official_schedule": "Please check the official TNPDCL outage portal for the latest schedule.",
+  "power_captcha_notice": "Official TNPDCL portal requires interactive CAPTCHA verification and could not be verified automatically for this selection. CrowdCity strictly adheres to government access policies and does not bypass CAPTCHA.",
+  "power_source_conflict_title": "Source information differs",
+  "power_supplementary_heading": "Supplementary Reports (Unofficial)",
+  "power_verification_status_verified": "Verified",
+  "power_verification_status_unverified": "Unable to verify",
+  "power_official_source_title": "TNPDCL / TANGEDCO Official",
   "power_source_unavailable": "Official power shutdown schedules are published directly by TNPDCL / TANGEDCO. You can view all active outage notices on the official portal.",
   "power_selected_location": "Shutdowns for your selected district:",
   "power_time_window": "Outage Window",
@@ -1413,7 +1422,16 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "tab_this_week": "இந்த வாரம்",
   "tab_this_month": "இந்த மாதம்",
   "tab_all": "அனைத்தும்",
-  "power_no_outages": "இந்த தேர்வுக்கு திட்டமிடப்பட்ட மின் வெட்டு எதுவும் இல்லை.",
+  "power_no_outages": "இந்த தேதிக்கான TNPDCL தரவுகளில் திட்டமிடப்பட்ட மின் வெட்டு எதுவும் கண்டறியப்படவில்லை.",
+  "power_verified_no_outages": "இந்த தேதிக்கான TNPDCL தரவுகளில் திட்டமிடப்பட்ட மின் வெட்டு எதுவும் கண்டறியப்படவில்லை.",
+  "power_unable_to_verify": "TNPDCL மின் வெட்டு தகவலை தற்போது சரிபார்க்க முடியவில்லை.",
+  "power_check_official_schedule": "சமீபத்திய அட்டவணைக்கு அதிகாரப்பூர்வ TNPDCL போர்ட்டலை சரிபார்க்கவும்.",
+  "power_captcha_notice": "அதிகாரப்பூர்வ TNPDCL போர்ட்டலில் CAPTCHA பாதுகாப்பு உள்ளதால் இந்த மாவட்டத்திற்கான தகவலை தானியங்கு முறையில் சரிபார்க்க முடியவில்லை. CrowdCity அரசாங்க பாதுகாப்புக் கட்டுப்பாடுகளைக் கடந்து செயல்படாது.",
+  "power_source_conflict_title": "தகவல் மூலங்களில் முரண்பாடு உள்ளது",
+  "power_supplementary_heading": "கூடுதல் தகவல்கள் (அதிகாரப்பூர்வமற்றவை)",
+  "power_verification_status_verified": "சரிபார்க்கப்பட்டது",
+  "power_verification_status_unverified": "சரிபார்க்க முடியவில்லை",
+  "power_official_source_title": "அதிகாரப்பூர்வ TNPDCL / TANGEDCO",
   "power_source_unavailable": "அதிகாரப்பூர்வ மின் பணிநிறுத்த அட்டவணைகள் TNPDCL / TANGEDCO மூலம் நேரடியாக வெளியிடப்படுகின்றன. தற்போதைய சுற்றறிக்கைகளை அதிகாரப்பூர்வ போர்ட்டலில் காணலாம்.",
   "power_selected_location": "நீங்கள் தேர்ந்தெடுத்த மாவட்டத்திற்கான பணிநிறுத்தங்கள்:",
   "power_time_window": "நேர இடைவெளி",
@@ -2743,6 +2761,7 @@ class I18nService {
       localStorage.setItem('crowdcity_language', lang);
       localStorage.setItem('cc_lang', lang);
       localStorage.setItem('preferred_language', lang);
+      localStorage.setItem('cc_lang_updated_at', String(Date.now()));
     } catch (e) {}
 
     if (typeof document !== 'undefined' && document.documentElement) {
@@ -2760,6 +2779,7 @@ class I18nService {
     this.translatePage();
 
     window.dispatchEvent(new CustomEvent('language-change', { detail: { language: lang } }));
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
   }
 
   /**
@@ -2790,6 +2810,8 @@ class I18nService {
 
     this.translatePage();
     window.dispatchEvent(new CustomEvent('auth-language-change', { detail: { language: lang } }));
+    window.dispatchEvent(new CustomEvent('language-change', { detail: { language: lang } }));
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
   }
 
   buildReverseMap() {

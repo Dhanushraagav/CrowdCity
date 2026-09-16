@@ -921,6 +921,12 @@ window.getUser = getUser;
 // CROSS-DEVICE ACCOUNT-LEVEL PREFERENCES SYNCHRONIZATION (Language & Theme)
 // =========================================================================
 
+// In-memory tracker for explicit user interactions to prevent stale cloud overwrite
+const lastExplicitUserPrefUpdate = {
+  theme: 0,
+  language: 0
+};
+
 /**
  * Apply language and theme preferences globally and update local cache.
  * Strictly respects page classification:
@@ -949,10 +955,13 @@ function applyAccountPreferences(prefs) {
     // Auth pages (ALWAYS English by default) and Authority Portal pages (ALWAYS English only) MUST NOT inherit this!
     if (scope === 'citizen-portal') {
       if (typeof document !== 'undefined' && document.documentElement) {
-        document.documentElement.lang = language;
-        document.documentElement.setAttribute('data-lang', language);
-        document.documentElement.classList.remove('lang-en', 'lang-ta', 'cc-i18n-loading');
-        document.documentElement.classList.add(language === 'ta' ? 'lang-ta' : 'lang-en');
+        const currentLang = document.documentElement.getAttribute('data-lang') || document.documentElement.lang;
+        if (currentLang !== language) {
+          document.documentElement.lang = language;
+          document.documentElement.setAttribute('data-lang', language);
+          document.documentElement.classList.remove('lang-en', 'lang-ta', 'cc-i18n-loading');
+          document.documentElement.classList.add(language === 'ta' ? 'lang-ta' : 'lang-en');
+        }
       }
 
       if (window.i18n && typeof window.i18n.setLanguage === 'function') {
@@ -961,6 +970,7 @@ function applyAccountPreferences(prefs) {
         }
       } else if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('language-change', { detail: { language } }));
+        window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language } }));
       }
     } else if (isAuthority) {
       // Ensure Authority Portal remains locked to English
@@ -985,16 +995,25 @@ function applyAccountPreferences(prefs) {
     // Auth pages (auth.html, authority-login.html, reset-password.html) MUST ALWAYS REMAIN LIGHT MODE visually!
     if (!isAuth) {
       if (typeof document !== 'undefined' && document.documentElement) {
-        const isDark = (theme === 'dark');
-        document.documentElement.setAttribute('data-theme', theme);
-        document.documentElement.classList.toggle('dark-theme', isDark);
-        document.documentElement.classList.toggle('theme-dark', isDark);
-        document.documentElement.classList.toggle('light-theme', !isDark);
-        document.documentElement.classList.toggle('theme-light', !isDark);
+        const currentDomTheme = document.documentElement.getAttribute('data-theme');
+        if (currentDomTheme !== theme) {
+          document.documentElement.classList.add('theme-switching');
+          const isDark = (theme === 'dark');
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.classList.toggle('dark-theme', isDark);
+          document.documentElement.classList.toggle('theme-dark', isDark);
+          document.documentElement.classList.toggle('light-theme', !isDark);
+          document.documentElement.classList.toggle('theme-light', !isDark);
+          requestAnimationFrame(() => {
+            document.documentElement.classList.remove('theme-switching');
+          });
+        }
       }
 
       if (window.CrowdCityTheme && typeof window.CrowdCityTheme.setTheme === 'function') {
-        window.CrowdCityTheme.setTheme(theme);
+        if (window.CrowdCityTheme.getTheme() !== theme) {
+          window.CrowdCityTheme.setTheme(theme);
+        }
       } else if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme, isDark: theme === 'dark' } }));
       }
@@ -1016,14 +1035,44 @@ window.applyAccountPreferences = applyAccountPreferences;
  * 2. Cross-device synchronization: Regardless of what is in local storage on Device B (mobile),
  *    the authenticated account's cloud preferences in Supabase are fetched and applied.
  * 3. Default for genuinely new accounts without saved preferences: Language = 'ta', Theme = 'light'.
- * 4. Auth pages always remain in English and Light Mode visually.
- * 5. Authority Portal always remains English only.
+ * 4. Stale-override guard: If the user explicitly toggled Theme or Language locally within 30s,
+ *    do not revert their selection with outdated cloud metadata during asynchronous update cycles.
+ * 5. Auth pages always remain in English and Light Mode visually.
+ * 6. Authority Portal always remains English only.
  */
 async function syncAccountPreferences(user, profile) {
   if (!user && !profile) return;
   const activeUser = user || getCurrentUser();
   if (!activeUser || !activeUser.id) return;
   const userRole = (profile && profile.role) || (activeUser.user_metadata && activeUser.user_metadata.role) || 'citizen';
+
+  const now = Date.now();
+  const themeRecentThresholdMs = 30000;
+  const langRecentThresholdMs = 30000;
+
+  let localThemeUpdatedAt = 0;
+  try {
+    localThemeUpdatedAt = parseInt(localStorage.getItem('cc_theme_updated_at') || '0', 10) || 0;
+  } catch (e) {}
+  const isThemeRecentlyUpdatedLocally = (now - Math.max(lastExplicitUserPrefUpdate.theme, localThemeUpdatedAt)) < themeRecentThresholdMs;
+
+  let localLangUpdatedAt = 0;
+  try {
+    localLangUpdatedAt = parseInt(localStorage.getItem('cc_lang_updated_at') || '0', 10) || 0;
+  } catch (e) {}
+  const isLangRecentlyUpdatedLocally = (now - Math.max(lastExplicitUserPrefUpdate.language, localLangUpdatedAt)) < langRecentThresholdMs;
+
+  let localStoredTheme = null;
+  try {
+    localStoredTheme = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+    if (localStoredTheme !== 'light' && localStoredTheme !== 'dark') localStoredTheme = null;
+  } catch (e) {}
+
+  let localStoredLang = null;
+  try {
+    localStoredLang = localStorage.getItem('crowdcity_citizen_language') || localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang');
+    if (localStoredLang !== 'ta' && localStoredLang !== 'en') localStoredLang = null;
+  } catch (e) {}
 
   // 1. Cloud Language Resolution:
   // Priority: profile table -> user_metadata -> default 'ta'
@@ -1043,12 +1092,41 @@ async function syncAccountPreferences(user, profile) {
     cloudTheme = activeUser.user_metadata.theme;
   }
 
-  // Authoritative preferences: Cloud account preference takes absolute precedence
-  const finalLang = (cloudLang === 'ta' || cloudLang === 'en') ? cloudLang : 'ta';
-  const finalTheme = (cloudTheme === 'light' || cloudTheme === 'dark') ? cloudTheme : 'light';
+  // Resolve finalLang (with race-condition / stale protection)
+  let finalLang;
+  if (isLangRecentlyUpdatedLocally && localStoredLang) {
+    finalLang = localStoredLang;
+  } else if (cloudLang) {
+    finalLang = cloudLang;
+  } else if (localStoredLang) {
+    finalLang = localStoredLang;
+  } else {
+    finalLang = 'ta';
+  }
+
+  // Resolve finalTheme (with race-condition / stale protection)
+  let finalTheme;
+  if (isThemeRecentlyUpdatedLocally && localStoredTheme) {
+    finalTheme = localStoredTheme;
+  } else if (cloudTheme) {
+    finalTheme = cloudTheme;
+  } else if (localStoredTheme) {
+    finalTheme = localStoredTheme;
+  } else {
+    finalTheme = 'light';
+  }
+
+  const currentDomTheme = (typeof document !== 'undefined' && document.documentElement)
+    ? (document.documentElement.getAttribute('data-theme') || (document.documentElement.classList.contains('dark-theme') ? 'dark' : 'light'))
+    : 'light';
+  const currentDomLang = (typeof document !== 'undefined' && document.documentElement)
+    ? (document.documentElement.getAttribute('data-lang') || document.documentElement.lang || 'en')
+    : 'en';
 
   // Apply resolved preferences (respecting page scope)
-  applyAccountPreferences({ language: finalLang, theme: finalTheme });
+  if (finalTheme !== currentDomTheme || finalLang !== currentDomLang) {
+    applyAccountPreferences({ language: finalLang, theme: finalTheme });
+  }
 
   // Update local cache for instant transitions on future navigations
   try {
@@ -1059,7 +1137,6 @@ async function syncAccountPreferences(user, profile) {
     localStorage.setItem('crowdcity_theme', finalTheme);
     localStorage.setItem('cc_theme', finalTheme);
     localStorage.setItem('cc_theme_explicit', finalTheme);
-    localStorage.setItem('cc_theme_updated_at', String(Date.now()));
   } catch (e) {}
 
   // If this account had no saved preferences at all (brand new citizen), initialize them in the cloud
@@ -1131,6 +1208,7 @@ async function saveAccountPreference(key, value) {
   }
 
   const now = Date.now();
+  lastExplicitUserPrefUpdate[key] = now;
 
   // 1. Optimistically apply locally and update UI synchronously
   applyAccountPreferences({ [key]: value });
@@ -1148,6 +1226,7 @@ async function saveAccountPreference(key, value) {
       localStorage.setItem('crowdcity_language', value);
       localStorage.setItem('cc_lang', value);
       localStorage.setItem('preferred_language', value);
+      localStorage.setItem('cc_lang_updated_at', String(now));
     } catch (e) {}
   }
 
@@ -1624,15 +1703,31 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
 
   console.log("REDIRECT TARGET: " + redirectTarget);
 
-  // Store user profile & role in cache before routing
+  // Store user profile, role, theme, and language in cache before routing
+  const resolvedLang = (profile.language === 'ta' || profile.language === 'en')
+    ? profile.language
+    : ((user.user_metadata && (user.user_metadata.language === 'ta' || user.user_metadata.language === 'en')) ? user.user_metadata.language : 'ta');
+  const resolvedTheme = (profile.theme === 'light' || profile.theme === 'dark')
+    ? profile.theme
+    : ((user.user_metadata && (user.user_metadata.theme === 'light' || user.user_metadata.theme === 'dark')) ? user.user_metadata.theme : 'light');
+
   try {
     localStorage.setItem('cc_user_role', role);
+    if (role === 'citizen') {
+      localStorage.setItem('crowdcity_citizen_language', resolvedLang);
+      localStorage.setItem('crowdcity_language', resolvedLang);
+      localStorage.setItem('cc_lang', resolvedLang);
+      localStorage.setItem('preferred_language', resolvedLang);
+      localStorage.setItem('crowdcity_theme', resolvedTheme);
+      localStorage.setItem('cc_theme', resolvedTheme);
+      localStorage.setItem('cc_theme_explicit', resolvedTheme);
+    }
     localStorage.setItem('cc_user_profile', JSON.stringify({
       id: user.id,
       email: user.email,
       role: role,
-      language: profile.language || 'ta',
-      theme: profile.theme || 'light',
+      language: resolvedLang,
+      theme: resolvedTheme,
       full_name: (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || profile.full_name || 'User',
       avatar_url: (user.user_metadata && (user.user_metadata.avatar_url || user.user_metadata.picture)) || profile.avatar_url || ''
     }));

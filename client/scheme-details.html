@@ -1,6 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Early Theme & Language Synchronous Bootstrap (Prevents any FOUC / flicker) -->
+  <script>
+    (function() {
+      var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+      var f = p.split('/').pop().replace(/\.html$/, '');
+      var isAuth = (f === 'auth' || f === 'authority-login' || f === 'reset-password' || f === 'login' || f === 'signup' || f === 'forgot-password');
+      var isAuthority = (f.indexOf('authority-') === 0 || f === 'admin' || f === 'services-admin');
+      
+      var theme = 'light';
+      if (!isAuth) {
+        try {
+          var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+          if (t === 'dark') theme = 'dark';
+        } catch(e) {}
+      }
+      var isDark = (theme === 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark-theme', isDark);
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('light-theme', !isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+
+      var lang = 'en';
+      if (!isAuthority && !isAuth) {
+        try {
+          var l = localStorage.getItem('crowdcity_citizen_language') || localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language');
+          lang = (l === 'en' || l === 'ta') ? l : 'ta';
+        } catch(e) { lang = 'ta'; }
+      } else if (isAuth) {
+        try {
+          var al = sessionStorage.getItem('cc_auth_display_lang');
+          lang = (al === 'ta') ? 'ta' : 'en';
+        } catch(e) { lang = 'en'; }
+      }
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.classList.remove('lang-en', 'lang-ta');
+      document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
+    })();
+  </script>
+
   <!-- PWA Meta and Manifest -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon-192.png">
@@ -149,21 +190,7 @@
     }
   </style>
 
-  <script>
-    (function() {
-      try {
-        var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
-        var theme = (t === 'dark') ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        var isDark = (theme === 'dark');
-        document.documentElement.classList.toggle('dark-theme', isDark);
-        document.documentElement.classList.toggle('theme-dark', isDark);
-        document.documentElement.classList.toggle('light-theme', !isDark);
-        document.documentElement.classList.toggle('theme-light', !isDark);
-      } catch (e) {}
-    })();
-  </script>
-</head>
+  </head>
 <body class="protected-page">
 
   <div class="app-layout">

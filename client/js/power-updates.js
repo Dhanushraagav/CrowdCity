@@ -15,16 +15,34 @@
 (function () {
   'use strict';
 
+  function t(key, fallback) {
+    if (window.i18n && typeof window.i18n.t === 'function') {
+      const val = window.i18n.t(key);
+      if (val && val !== key) return val;
+    }
+    return fallback;
+  }
+
   let powerState = {
     selectedDistrict: 'all',
     searchQuery: '',
     selectedDate: '',
     selectedTab: 'all',
     outages: [],
+    supplementaryReports: [],
+    status: 'unable_to_verify',
+    verificationStatus: 'unable_to_verify',
+    sourceName: 'TNPDCL / TANGEDCO Official',
+    lastChecked: '',
     lastUpdated: '',
+    hasConflict: false,
+    conflictNotice: null,
+    statusMessage: '',
+    statusReason: '',
     isLoading: false,
     isDetectingLocation: false,
     userDetectedDistrict: null,
+    locationIsDetected: false,
     hasManuallyChangedDistrict: false
   };
 
@@ -51,7 +69,7 @@
     }
 
     if (detected) {
-      applyDetectedDistrict(detected);
+      applyDetectedDistrict(detected, true);
       fetchPowerShutdowns();
     } else {
       // 2. Fallback to cached location or statewide overview (do not force GPS prompt on page load)
@@ -59,7 +77,7 @@
       if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
         window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 3000, requestGps: false }).then(cachedDistrict => {
           if (cachedDistrict && !powerState.hasManuallyChangedDistrict) {
-            applyDetectedDistrict(cachedDistrict);
+            applyDetectedDistrict(cachedDistrict, true);
           }
           updateLocationBanner();
           fetchPowerShutdowns();
@@ -72,6 +90,8 @@
 
     // Listen for language change events
     window.addEventListener('languageChanged', () => {
+      updateSourceStatusStrip();
+      updateConflictBanner();
       renderOutages();
     });
 
@@ -95,15 +115,16 @@
   function handleLocationEvent(e) {
     if (e.detail && e.detail.district && !powerState.hasManuallyChangedDistrict) {
       powerState.isDetectingLocation = false;
-      applyDetectedDistrict(e.detail.district);
+      applyDetectedDistrict(e.detail.district, true);
       fetchPowerShutdowns();
     }
   }
 
-  function applyDetectedDistrict(districtName) {
+  function applyDetectedDistrict(districtName, isDetected = false) {
     if (!districtName) return;
     powerState.userDetectedDistrict = districtName.trim();
     powerState.selectedDistrict = powerState.userDetectedDistrict;
+    powerState.locationIsDetected = isDetected;
     updateLocationBanner();
 
     const districtSelect = document.getElementById('power-district-filter');
@@ -114,7 +135,7 @@
       if (matchOpt) {
         districtSelect.value = matchOpt.value;
         powerState.selectedDistrict = matchOpt.value;
-        if (!matchOpt.text.includes('(Your Location)')) {
+        if (isDetected && !matchOpt.text.includes('(Your Location)')) {
           matchOpt.text = `${matchOpt.value} (Your Location)`;
         }
       }
@@ -141,25 +162,38 @@
       return;
     }
 
-    if (powerState.userDetectedDistrict) {
+    if (powerState.userDetectedDistrict && powerState.locationIsDetected && powerState.selectedDistrict && powerState.selectedDistrict.toLowerCase() === powerState.userDetectedDistrict.toLowerCase()) {
       highlightBanner.classList.remove('hidden');
       if (switchBtn) switchBtn.style.display = 'inline-flex';
       if (bannerContent) {
-        if (powerState.selectedDistrict === 'all') {
-          bannerContent.innerHTML = `
-            <i class="fa-solid fa-globe"></i>
-            <span>Showing all districts across Tamil Nadu. Your detected location: <strong>${escapeHtml(powerState.userDetectedDistrict)}</strong></span>
-          `;
-          switchBtn.innerHTML = `<span>Back to ${escapeHtml(powerState.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
-          switchBtn.onclick = () => window.selectUserDetectedDistrict();
-        } else {
-          bannerContent.innerHTML = `
-            <i class="fa-solid fa-location-dot"></i>
-            <span>Showing planned power shutdowns for your current location: <strong>${escapeHtml(powerState.selectedDistrict)}</strong></span>
-          `;
-          switchBtn.innerHTML = `<span>View All Districts (38)</span> <i class="fa-solid fa-arrow-right"></i>`;
-          switchBtn.onclick = () => window.clearDistrictFilter();
-        }
+        bannerContent.innerHTML = `
+          <i class="fa-solid fa-location-dot"></i>
+          <span>Showing planned power shutdowns for your current location: <strong>${escapeHtml(powerState.selectedDistrict)}</strong></span>
+        `;
+        switchBtn.innerHTML = `<span>View All Districts (38)</span> <i class="fa-solid fa-arrow-right"></i>`;
+        switchBtn.onclick = () => window.clearDistrictFilter();
+      }
+    } else if (powerState.selectedDistrict && powerState.selectedDistrict !== 'all') {
+      highlightBanner.classList.remove('hidden');
+      if (switchBtn) switchBtn.style.display = 'inline-flex';
+      if (bannerContent) {
+        bannerContent.innerHTML = `
+          <i class="fa-solid fa-location-dot"></i>
+          <span>Showing planned power shutdowns for selected district: <strong>${escapeHtml(powerState.selectedDistrict)}</strong></span>
+        `;
+        switchBtn.innerHTML = `<span>View All Districts (38)</span> <i class="fa-solid fa-arrow-right"></i>`;
+        switchBtn.onclick = () => window.clearDistrictFilter();
+      }
+    } else if (powerState.userDetectedDistrict && powerState.locationIsDetected) {
+      highlightBanner.classList.remove('hidden');
+      if (switchBtn) switchBtn.style.display = 'inline-flex';
+      if (bannerContent) {
+        bannerContent.innerHTML = `
+          <i class="fa-solid fa-globe"></i>
+          <span>Showing all districts across Tamil Nadu. Your detected location: <strong>${escapeHtml(powerState.userDetectedDistrict)}</strong></span>
+        `;
+        switchBtn.innerHTML = `<span>Back to ${escapeHtml(powerState.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
+        switchBtn.onclick = () => window.selectUserDetectedDistrict();
       }
     } else {
       highlightBanner.classList.remove('hidden');
@@ -175,7 +209,7 @@
 
   window.selectUserDetectedDistrict = function() {
     if (powerState.userDetectedDistrict) {
-      applyDetectedDistrict(powerState.userDetectedDistrict);
+      applyDetectedDistrict(powerState.userDetectedDistrict, true);
       powerState.hasManuallyChangedDistrict = false;
       updateLocationBanner();
       fetchPowerShutdowns();
@@ -200,6 +234,7 @@
       districtFilter.addEventListener('change', (e) => {
         powerState.selectedDistrict = e.target.value;
         powerState.hasManuallyChangedDistrict = true;
+        powerState.locationIsDetected = false;
         updateLocationBanner();
         fetchPowerShutdowns();
       });
@@ -268,19 +303,29 @@
 
       if (data && data.success) {
         powerState.outages = data.shutdowns || [];
+        powerState.supplementaryReports = data.supplementary_reports || [];
+        powerState.status = data.status || (powerState.outages.length > 0 ? 'verified' : 'verified_no_shutdown');
+        powerState.verificationStatus = data.verification_status || (powerState.status === 'verified' ? 'verified' : (powerState.status === 'verified_no_shutdown' ? 'verified' : 'unable_to_verify'));
+        powerState.sourceName = data.source_display || data.source || 'TNPDCL / TANGEDCO Official';
+        powerState.lastChecked = data.last_checked_ist || data.last_updated_ist || '';
         powerState.lastUpdated = data.last_updated_ist || '';
+        powerState.hasConflict = Boolean(data.has_conflict);
+        powerState.conflictNotice = data.conflict_notice || null;
+        powerState.statusMessage = data.message || '';
+        powerState.statusReason = data.reason || '';
+        powerState.officialPortalUrl = data.official_source_url || 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml';
 
-        const lastUpdatedEl = document.getElementById('power-last-updated-text');
-        if (lastUpdatedEl && powerState.lastUpdated) {
-          lastUpdatedEl.textContent = powerState.lastUpdated;
-        }
-
+        updateSourceStatusStrip();
+        updateConflictBanner();
         renderOutages();
       } else {
         throw new Error(data.message || 'Failed to fetch power updates');
       }
     } catch (err) {
       console.error('[PowerUpdates] Fetch error:', err);
+      powerState.status = 'unable_to_verify';
+      powerState.verificationStatus = 'unable_to_verify';
+      updateSourceStatusStrip();
       if (container) container.innerHTML = '';
       if (errorState) {
         const errorMsgEl = document.getElementById('power-error-message');
@@ -295,6 +340,56 @@
     }
   }
 
+  function updateSourceStatusStrip() {
+    const sourceNameEl = document.getElementById('power-source-name-text');
+    const badgeEl = document.getElementById('power-verification-badge');
+    const badgeTextEl = document.getElementById('power-verification-text');
+    const badgeIconEl = document.getElementById('power-verification-icon');
+    const lastCheckedEl = document.getElementById('power-last-checked-text');
+    const lastUpdatedEl = document.getElementById('power-last-updated-text');
+
+    if (sourceNameEl) {
+      sourceNameEl.textContent = powerState.sourceName || t('power_official_source_title', 'TNPDCL / TANGEDCO Official');
+    }
+
+    const isVerified = (powerState.verificationStatus === 'verified' || powerState.status === 'verified' || powerState.status === 'verified_no_shutdown');
+    if (badgeEl) {
+      if (isVerified) {
+        badgeEl.className = 'verification-badge badge-verified';
+        if (badgeIconEl) badgeIconEl.className = 'fa-solid fa-circle-check';
+        if (badgeTextEl) badgeTextEl.textContent = t('power_verification_status_verified', 'Verified');
+      } else {
+        badgeEl.className = 'verification-badge badge-unverified';
+        if (badgeIconEl) badgeIconEl.className = 'fa-solid fa-triangle-exclamation';
+        if (badgeTextEl) badgeTextEl.textContent = t('power_verification_status_unverified', 'Unable to verify');
+      }
+    }
+
+    if (lastCheckedEl) {
+      lastCheckedEl.textContent = powerState.lastChecked || powerState.lastUpdated || '--';
+    }
+
+    if (lastUpdatedEl && powerState.lastUpdated) {
+      lastUpdatedEl.textContent = powerState.lastUpdated;
+    }
+  }
+
+  function updateConflictBanner() {
+    const bannerEl = document.getElementById('power-conflict-banner');
+    const officialEl = document.getElementById('conflict-official-status');
+    const suppEl = document.getElementById('conflict-supplementary-status');
+
+    if (!bannerEl) return;
+
+    if (powerState.hasConflict && powerState.conflictNotice) {
+      bannerEl.classList.remove('hidden');
+      if (officialEl) officialEl.textContent = powerState.conflictNotice.official_status || 'No official publication found for selected district';
+      if (suppEl) suppEl.textContent = powerState.conflictNotice.supplementary_status || 'Third-party sources report planned shutdown';
+    } else {
+      bannerEl.classList.add('hidden');
+    }
+  }
+
   /**
    * Render outage cards or authentic empty/official state.
    */
@@ -305,77 +400,224 @@
 
     if (!container) return;
 
-    if (powerState.outages.length === 0) {
-      container.innerHTML = '';
-      const hasActiveFilters = (powerState.selectedDistrict !== 'all') ||
-        (powerState.selectedTab !== 'all') ||
-        Boolean(powerState.searchQuery) ||
-        Boolean(powerState.selectedDate);
-
-      if (hasActiveFilters) {
-        // If the user's filtered/detected district has no shutdowns and no sub-filters are applied:
-        if (powerState.selectedDistrict !== 'all' && !powerState.searchQuery && !powerState.selectedDate && powerState.selectedTab === 'all') {
-          container.innerHTML = createNoOutageLocalHtml(powerState.selectedDistrict);
-          if (emptyState) emptyState.classList.add('hidden');
-          if (officialInfoBox) officialInfoBox.classList.add('hidden');
-          return;
-        }
-        if (emptyState) emptyState.classList.remove('hidden');
-        if (officialInfoBox) officialInfoBox.classList.add('hidden');
-      } else {
-        // Statewide view with zero records in database -> Direct to official source
-        if (officialInfoBox) officialInfoBox.classList.remove('hidden');
-        if (emptyState) emptyState.classList.add('hidden');
-      }
-      return;
-    }
-
     if (emptyState) emptyState.classList.add('hidden');
     if (officialInfoBox) officialInfoBox.classList.add('hidden');
 
-    // When viewing all districts, sort user's detected district outages to the top
-    let sortedOutages = [...powerState.outages];
-    if (powerState.userDetectedDistrict) {
-      const userDist = powerState.userDetectedDistrict.toLowerCase();
-      sortedOutages.sort((a, b) => {
-        const aMatches = (a.district && a.district.toLowerCase() === userDist) ? 1 : 0;
-        const bMatches = (b.district && b.district.toLowerCase() === userDist) ? 1 : 0;
-        return bMatches - aMatches;
-      });
+    const hasOutages = powerState.outages && powerState.outages.length > 0;
+    const hasSupplementary = powerState.supplementaryReports && powerState.supplementaryReports.length > 0;
+    const selectedDist = (powerState.selectedDistrict && powerState.selectedDistrict !== 'all') ? powerState.selectedDistrict : '';
+
+    // STATE C: Official source is unable to verify
+    if (powerState.status === 'unable_to_verify') {
+      let html = createUnableToVerifyHtml(selectedDist || 'Tamil Nadu');
+      if (hasSupplementary) {
+        html += renderSupplementarySectionHtml(powerState.supplementaryReports);
+      }
+      container.innerHTML = html;
+      return;
     }
 
-    container.innerHTML = sortedOutages.map(item => createOutageCardHtml(item)).join('');
+    // STATE B: Verified check completed and no outages found
+    if (!hasOutages && powerState.status === 'verified_no_shutdown') {
+      let html = createVerifiedNoOutageHtml(selectedDist || 'Tamil Nadu');
+      if (hasSupplementary) {
+        html += renderSupplementarySectionHtml(powerState.supplementaryReports);
+      }
+      container.innerHTML = html;
+      return;
+    }
+
+    // STATE A: Verified shutdowns found
+    if (hasOutages) {
+      let sortedOutages = [...powerState.outages];
+      if (powerState.userDetectedDistrict) {
+        const userDist = powerState.userDetectedDistrict.toLowerCase();
+        sortedOutages.sort((a, b) => {
+          const aMatches = (a.district && a.district.toLowerCase() === userDist) ? 1 : 0;
+          const bMatches = (b.district && b.district.toLowerCase() === userDist) ? 1 : 0;
+          return bMatches - aMatches;
+        });
+      }
+
+      let html = sortedOutages.map(item => createOutageCardHtml(item)).join('');
+      if (hasSupplementary) {
+        html += renderSupplementarySectionHtml(powerState.supplementaryReports);
+      }
+      container.innerHTML = html;
+      return;
+    }
+
+    // Fallback: When no records and unverified/unfiltered
+    if (powerState.selectedDistrict === 'all' && !powerState.searchQuery && !powerState.selectedDate && powerState.selectedTab === 'all') {
+      if (officialInfoBox) officialInfoBox.classList.remove('hidden');
+    } else {
+      if (emptyState) emptyState.classList.remove('hidden');
+    }
+    container.innerHTML = '';
   }
 
   /**
-   * HTML template for reassurance when user's district has no scheduled outages.
+   * HTML template for verified state when no scheduled outages exist in official records.
    */
-  function createNoOutageLocalHtml(districtName) {
-    const isUserLocation = powerState.userDetectedDistrict &&
-      powerState.userDetectedDistrict.toLowerCase() === districtName.toLowerCase();
-    
-    const subtitle = isUserLocation
-      ? `No scheduled power shutdowns found for your district (${escapeHtml(districtName)}). Electricity supply is operating normally under TNPDCL.`
-      : `No scheduled power shutdowns found for ${escapeHtml(districtName)}. Electricity supply is operating normally under TNPDCL.`;
+  function createVerifiedNoOutageHtml(districtName) {
+    const isAll = !districtName || districtName === 'all' || districtName.toLowerCase() === 'all';
+    const displayName = isAll ? 'Tamil Nadu' : districtName;
+    const title = t('power_verified_no_outages', 'No planned power shutdown was found in the available TNPDCL data for this date.');
+    const subtitle = isAll
+      ? 'No planned power shutdowns are recorded in the available TNPDCL official database for all audited circles.'
+      : `No planned power shutdown was found in the available TNPDCL data for ${escapeHtml(displayName)}.`;
 
     return `
       <div class="power-district-clear-card">
         <div class="power-district-clear-icon">
           <i class="fa-solid fa-circle-check"></i>
         </div>
-        <h3>No Scheduled Shutdowns in ${escapeHtml(districtName)}</h3>
-        <p>${subtitle}</p>
+        <h3 style="margin-bottom: 0.5rem;">${escapeHtml(displayName)}</h3>
+        <p style="font-size: 0.95rem; font-weight: 600; color: #15803d; margin-bottom: 0.5rem;">${title}</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted, #64748b); max-width: 540px; margin: 0 auto 1.25rem;">${subtitle}</p>
         <div class="power-district-clear-actions">
+          ${!isAll ? `
           <button type="button" class="btn btn-secondary" onclick="clearDistrictFilter()">
             <i class="fa-solid fa-list-ul"></i>
             <span>View All Districts (38)</span>
           </button>
-          <a href="https://www.tnebltd.gov.in/outages/viewshutdown.xhtml" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+          ` : ''}
+          <a href="${escapeHtml(powerState.officialPortalUrl || 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml')}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
             <span>Official TNPDCL Portal</span>
           </a>
+          <button type="button" class="btn btn-secondary" onclick="refreshPowerUpdates()">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Re-verify</span>
+          </button>
         </div>
       </div>
+    `;
+  }
+
+  /**
+   * HTML template for State C: when official live status cannot be verified automatically.
+   */
+  function createUnableToVerifyHtml(districtName) {
+    const isAll = !districtName || districtName === 'all' || districtName.toLowerCase() === 'all';
+    const displayName = isAll ? 'selected location' : districtName;
+
+    const mainTitle = t('power_unable_to_verify', 'TNPDCL shutdown information could not be verified right now.');
+    const instruction = t('power_check_official_schedule', 'Please check the official TNPDCL outage portal for the latest schedule.');
+    const captchaNotice = t('power_captcha_notice', 'Official TNPDCL portal requires interactive CAPTCHA verification and could not be verified automatically for this selection. CrowdCity strictly adheres to government access policies and does not bypass CAPTCHA.');
+
+    return `
+      <div class="power-district-unable-card">
+        <div class="power-district-unable-icon">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <div class="power-district-unable-badge">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Official Verification Pending (${escapeHtml(displayName)})</span>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0.5rem 0 0.4rem 0;">${mainTitle}</h3>
+        <p style="font-size: 0.88rem; font-weight: 500; color: var(--text-main, #334155); margin-bottom: 0.6rem;">${instruction}</p>
+        <p class="power-district-unable-note">${captchaNotice}</p>
+        <div class="power-district-clear-actions" style="margin-top: 1.25rem;">
+          <a href="${escapeHtml(powerState.officialPortalUrl || 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml')}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.45rem; text-decoration: none;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Open Official TNPDCL Outage Portal</span>
+          </a>
+          <button type="button" class="btn btn-secondary" onclick="refreshPowerUpdates()">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Retry Verification</span>
+          </button>
+          ${!isAll ? `
+          <button type="button" class="btn btn-secondary" onclick="clearDistrictFilter()">
+            <i class="fa-solid fa-list-ul"></i>
+            <span>View All Districts (38)</span>
+          </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * HTML wrapper for supplementary/secondary reports section.
+   */
+  function renderSupplementarySectionHtml(reports) {
+    if (!reports || reports.length === 0) return '';
+    const heading = t('power_supplementary_heading', 'Supplementary Reports (Unofficial)');
+    const cardsHtml = reports.map(r => createSupplementaryCardHtml(r)).join('');
+    return `
+      <div class="power-supplementary-section" style="grid-column: 1 / -1; margin-top: 1.5rem;">
+        <div class="supplementary-section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; padding-bottom: 0.4rem; border-bottom: 1px dashed var(--border-color, #cbd5e1);">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b; font-size: 0.95rem;"></i>
+            <h3 style="font-size: 0.98rem; font-weight: 700; margin: 0; color: var(--text-main, #0f172a);">${heading}</h3>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); font-weight: 500;">CrowdCity does not vouch for unofficial reports</span>
+        </div>
+        <div class="power-outages-grid" style="padding: 0;">
+          ${cardsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * HTML card for unofficial/supplementary report.
+   */
+  function createSupplementaryCardHtml(item) {
+    const dateFormatted = formatDate(item.shutdown_date);
+    const timeWindow = `${item.start_time || '09:00'} - ${item.end_time || '17:00'}`;
+    const areasStr = item.affected_area || item.area || 'Connected feeders';
+    const areaTags = areasStr.split(/[,;\n]/).map(s => s.trim()).filter(Boolean).slice(0, 10);
+    const tagsHtml = areaTags.map(t => `<span class="power-area-tag">${escapeHtml(t)}</span>`).join('');
+    const moreCount = areasStr.split(/[,;\n]/).map(s => s.trim()).filter(Boolean).length - 10;
+    const morePill = moreCount > 0 ? `<span class="power-area-tag">+${moreCount} more</span>` : '';
+
+    return `
+      <article class="power-card supplementary-report-card">
+        <div>
+          <div class="power-card-header">
+            <div class="power-badges-wrap">
+              <span class="power-district-badge">
+                <i class="fa-solid fa-location-dot" style="font-size: 0.68rem; color: #64748b;"></i>
+                ${escapeHtml(item.district || 'Tamil Nadu')}
+              </span>
+              <span class="badge-supplementary-tag">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                UNOFFICIAL / MEDIA REPORT
+              </span>
+            </div>
+          </div>
+
+          <h2 class="power-substation-title">
+            ${escapeHtml(item.area || 'Reported Maintenance')}
+          </h2>
+
+          <div class="power-time-window">
+            <i class="fa-regular fa-clock"></i>
+            <span>${dateFormatted} &bull; ${timeWindow}</span>
+          </div>
+
+          <div class="power-areas-section">
+            <div class="power-areas-label">Reported Affected Areas</div>
+            <div class="power-areas-tags">
+              ${tagsHtml}
+              ${morePill}
+            </div>
+          </div>
+        </div>
+
+        <div class="power-card-footer">
+          <span class="power-source-tag" style="color: #b45309;">
+            <i class="fa-solid fa-newspaper" style="font-size: 0.72rem;"></i>
+            Source: ${escapeHtml(item.source || 'Secondary News / Community Report')}
+          </span>
+          <button class="power-btn-share" onclick="shareOutage('${escapeHtml(item.area || '')}', '${escapeHtml(item.district || '')}', '${dateFormatted}', '${timeWindow}')" title="Copy outage details">
+            <i class="fa-regular fa-copy"></i>
+            <span>Share</span>
+          </button>
+        </div>
+      </article>
     `;
   }
 
@@ -474,12 +716,17 @@
         <div class="power-card-footer">
           <span class="power-source-tag">
             <i class="fa-solid fa-building-columns" style="font-size: 0.72rem; color: #94a3b8;"></i>
-            Source: TNPDCL
+            Source: ${escapeHtml(item.source || 'TNPDCL / TANGEDCO Official')}
           </span>
-          <button class="power-btn-share" onclick="shareOutage('${escapeHtml(item.area || '')}', '${escapeHtml(item.district || '')}', '${dateFormatted}', '${timeWindow}')" title="Copy outage details">
-            <i class="fa-regular fa-copy"></i>
-            <span>Share</span>
-          </button>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 0.7rem; color: #15803d; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
+              <i class="fa-solid fa-circle-check"></i> ${escapeHtml(item.last_verified_ist ? `Verified: ${item.last_verified_ist}` : 'Verified')}
+            </span>
+            <button class="power-btn-share" onclick="shareOutage('${escapeHtml(item.area || '')}', '${escapeHtml(item.district || '')}', '${dateFormatted}', '${timeWindow}')" title="Copy outage details">
+              <i class="fa-regular fa-copy"></i>
+              <span>Share</span>
+            </button>
+          </div>
         </div>
       </article>
     `;

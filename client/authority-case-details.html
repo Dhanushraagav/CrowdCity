@@ -1,6 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Early Theme & Language Synchronous Bootstrap (Prevents any FOUC / flicker) -->
+  <script>
+    (function() {
+      var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+      var f = p.split('/').pop().replace(/\.html$/, '');
+      var isAuth = (f === 'auth' || f === 'authority-login' || f === 'reset-password' || f === 'login' || f === 'signup' || f === 'forgot-password');
+      var isAuthority = (f.indexOf('authority-') === 0 || f === 'admin' || f === 'services-admin');
+      
+      var theme = 'light';
+      if (!isAuth) {
+        try {
+          var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+          if (t === 'dark') theme = 'dark';
+        } catch(e) {}
+      }
+      var isDark = (theme === 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark-theme', isDark);
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('light-theme', !isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+
+      var lang = 'en';
+      if (!isAuthority && !isAuth) {
+        try {
+          var l = localStorage.getItem('crowdcity_citizen_language') || localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language');
+          lang = (l === 'en' || l === 'ta') ? l : 'ta';
+        } catch(e) { lang = 'ta'; }
+      } else if (isAuth) {
+        try {
+          var al = sessionStorage.getItem('cc_auth_display_lang');
+          lang = (al === 'ta') ? 'ta' : 'en';
+        } catch(e) { lang = 'en'; }
+      }
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.classList.remove('lang-en', 'lang-ta');
+      document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
+    })();
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="CrowdCity AI Municipal Authority Case Inspection Console">
@@ -18,7 +59,157 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Authority Portal Stylesheet -->
-  <link rel="stylesheet" href="css/authority-portal.css?v=3.0.1">
+  <link rel="stylesheet" href="css/authority-portal.css?v=4.1.0">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Dedicated Two-Column Case Details & Timeline Layout -->
+  <style>
+    /* Dedicated Two-Column Case Management Layout */
+    .complaint-details-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      width: 100%;
+    }
+
+    .complaint-main-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .complaint-activity-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      min-width: 0;
+      width: 100%;
+    }
+
+    @media (min-width: 992px) {
+      .complaint-details-layout {
+        grid-template-columns: minmax(0, 1.85fr) minmax(320px, 1fr);
+        gap: 1.5rem;
+      }
+
+      .complaint-activity-column {
+        position: sticky;
+        top: 1.25rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .complaint-details-layout {
+        grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
+        gap: 1.75rem;
+      }
+    }
+
+    /* Compact Resolution Proof Thumbnail (80-120px range) */
+    .timeline-proof-container {
+      margin-top: 0.5rem;
+      padding: 0.55rem 0.75rem;
+      background: var(--bg-canvas, rgba(0, 0, 0, 0.03));
+      border: 1px solid var(--border-light, rgba(0, 0, 0, 0.08));
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .timeline-proof-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .timeline-proof-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      width: fit-content;
+    }
+
+    .timeline-proof-thumb {
+      width: 100px;
+      height: 70px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1.5px solid var(--border-color);
+      flex-shrink: 0;
+      cursor: pointer;
+      display: block;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .timeline-proof-thumb:hover {
+      transform: scale(1.04);
+      border-color: var(--primary);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+    }
+
+    .timeline-proof-link-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .activity-proof-thumb-wrapper {
+      margin-top: 0.4rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .activity-proof-thumb {
+      width: 90px;
+      height: 64px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border-color);
+      object-fit: cover;
+      cursor: pointer;
+      display: block;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .activity-proof-thumb:hover {
+      transform: scale(1.04);
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Dark theme overrides for timeline and proof thumbnails */
+    [data-theme="dark"] .timeline-proof-container,
+    html.dark-theme .timeline-proof-container,
+    html.theme-dark .timeline-proof-container {
+      background: #111111 !important;
+      border-color: #222222 !important;
+    }
+
+    [data-theme="dark"] .timeline-proof-thumb,
+    [data-theme="dark"] .activity-proof-thumb,
+    html.dark-theme .timeline-proof-thumb,
+    html.dark-theme .activity-proof-thumb,
+    html.theme-dark .timeline-proof-thumb,
+    html.theme-dark .activity-proof-thumb {
+      border-color: #333333 !important;
+      background-color: #141414 !important;
+    }
+  </style>
 
   <!-- Central Auth Router -->
   <script src="js/i18n.js"></script>
@@ -103,10 +294,10 @@
         <section id="pane-details" class="tab-pane active-pane">
           <a href="authority-complaints.html" class="btn-secondary" style="margin-bottom: 1rem; text-decoration: none; display: inline-block;">Back to Complaints Queue</a>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+          <div class="complaint-details-layout authority-case-layout-grid">
             
-            <!-- Left Column: Case Information & Evidence -->
-            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Left Column: Case Details, Action Controls, SLA, Jurisdiction, AI, Evidence & Live Chat -->
+            <main class="complaint-main-column authority-case-main-col">
               
               <div class="content-card">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
@@ -135,131 +326,7 @@
                 </div>
               </div>
 
-              <!-- Administrative Jurisdiction & Responsible Authority Card -->
-              <div class="content-card" style="border-left: 3px solid #0284c7;">
-                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-                  <span><i class="fa-solid fa-landmark"></i> Administrative Jurisdiction & Authority</span>
-                  <span id="detail-localbody-type-badge" class="status-badge badge-localbody-type" style="font-size: 0.72rem;">Local Body</span>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem; margin-top: 0.75rem;">
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">District</div>
-                    <strong id="detail-district" style="color: var(--text-main);">Tamil Nadu</strong>
-                  </div>
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Taluk / Block</div>
-                    <strong id="detail-taluk" style="color: var(--text-main);">-</strong>
-                  </div>
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Village / Town</div>
-                    <span id="detail-village-town" style="color: var(--text-main);">-</span>
-                  </div>
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Local Body Name</div>
-                    <strong id="detail-local-body" style="color: var(--text-main);">-</strong>
-                  </div>
-                </div>
-
-                <div style="border-top: 1px solid var(--border-light); margin-top: 0.75rem; padding-top: 0.75rem;">
-                  <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem;" data-i18n="responsible_authority_office">Responsible Authority Office</div>
-                  <strong id="detail-authority-name" style="color: var(--primary); font-size: 0.95rem; display: block;">Local Administrative Authority</strong>
-                  <div class="authority-contact-actions">
-                    <span id="detail-authority-phone-wrap" class="authority-contact-btn authority-contact-phone" onclick="var a=document.getElementById('detail-authority-phone'); if(a && event.target!==a) a.click();">
-                      <i class="fa-solid fa-phone"></i>
-                      <a id="detail-authority-phone" href="#" data-i18n="phone">Phone</a>
-                    </span>
-                    <span id="detail-authority-email-wrap" class="authority-contact-btn authority-contact-email" onclick="var a=document.getElementById('detail-authority-email'); if(a && event.target!==a) a.click();">
-                      <i class="fa-solid fa-envelope"></i>
-                      <a id="detail-authority-email" href="#" data-i18n="contact_email">Email</a>
-                    </span>
-                  </div>
-                </div>
-
-                <div id="detail-higher-auth-section" style="border-top: 1px dashed var(--border-light); margin-top: 0.75rem; padding-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
-                  <span>Level 1 Escalation Officer: </span>
-                  <strong id="detail-higher-authority" style="color: var(--text-main);">District Collectorate</strong>
-                </div>
-              </div>
-
-              <!-- SLA Response & Escalation Tracker -->
-              <div class="content-card" style="border-left: 3px solid var(--primary);">
-                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-                  <span>SLA Response & Escalation Tracker</span>
-                  <span id="detail-sla-status-badge" class="status-badge status-pending" style="font-size: 0.72rem;">Within SLA</span>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem; margin-top: 0.5rem;">
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Response Deadline</div>
-                    <strong id="detail-sla-deadline" style="color: var(--text-main); font-family: var(--font-sans); font-variant-numeric: tabular-nums;">Loading...</strong>
-                  </div>
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">SLA Clock</div>
-                    <strong id="detail-sla-time-remaining" style="color: var(--primary);">Loading...</strong>
-                  </div>
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">First Authority Action</div>
-                    <span id="detail-sla-responded-at" style="color: var(--text-main);">Pending response</span>
-                  </div>
-                  <div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Escalation Status</div>
-                    <span id="detail-sla-escalation-status" style="color: var(--text-main);">Normal (Level 0)</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- AI Auto-Triage Box -->
-              <div class="content-card">
-                <div class="card-title">Automated AI Triage Analysis</div>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
-                  <div>AI Category: <strong id="detail-ai-category" style="color: var(--text-main);">Roads</strong></div>
-                  <div>AI Priority Level: <strong id="detail-ai-priority" style="color: var(--primary);">Normal</strong></div>
-                  <div>Recommended Department: <strong id="detail-ai-dept" style="color: var(--text-main);">Municipal Engineering</strong></div>
-                  <div style="border-top: 1px solid var(--border-light); padding-top: 0.5rem; margin-top: 0.25rem;">
-                    <div style="font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">AI Reasoning Summary</div>
-                    <p id="detail-ai-summary" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.45; margin-top: 0.2rem;">Loading summary...</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Evidence Photo Viewer -->
-              <div class="content-card">
-                <div class="card-title">Evidence Photo Proof</div>
-                <div id="detail-photo-wrapper" style="min-height: 180px; max-height: 350px; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                  <img id="detail-photo-img" src="" alt="Evidence Photo" style="width: 100%; height: 100%; max-height: 350px; object-fit: contain; display: none; cursor: pointer;" onclick="window.open(this.src, '_blank')" / decoding="async">
-                  <div id="detail-photo-fallback" style="padding: 2rem; text-align: center; color: var(--text-light); font-size: 0.85rem;">
-                    No evidence photo attached by citizen.
-                  </div>
-                </div>
-              </div>
-
-              <!-- Case Activity Timeline -->
-              <div class="content-card">
-                <div class="card-title">Case Activity Timeline</div>
-                <div id="detail-timeline-list" class="timeline-list">
-                  <div style="color: var(--text-muted); font-size: 0.82rem;">Loading activity timeline...</div>
-                </div>
-              </div>
-
-              <!-- Authority Complaint Activity Log -->
-              <div class="content-card" id="card-complaint-activity" style="border-left: 3px solid #0d9488;">
-                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="display: flex; align-items: center; gap: 0.4rem;">
-                    <i class="fa-solid fa-clipboard-check" style="color: var(--primary);"></i>
-                    <span data-i18n="complaint_activity_heading">Complaint Activity</span>
-                  </span>
-                  <span id="detail-activity-count" class="status-badge" style="background: rgba(13,148,136,0.1); color: var(--primary); font-size: 0.72rem; font-weight: 700;">0 Actions</span>
-                </div>
-                <div id="detail-activity-list" class="activity-timeline-list">
-                  <div style="color: var(--text-muted); font-size: 0.82rem; padding: 0.75rem 0;" data-i18n="loading_complaint_activity">Loading complaint activity...</div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Right Column: Dispatch Action Form & Live Communication -->
-            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-              
+              <!-- Authority Action & Dispatch Controls -->
               <div class="content-card">
                 <div class="card-title">Authority Action & Dispatch Controls</div>
                 
@@ -313,6 +380,104 @@
                 </div>
               </div>
 
+              <!-- SLA Response & Escalation Tracker -->
+              <div class="content-card" style="border-left: 3px solid var(--primary);">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>SLA Response & Escalation Tracker</span>
+                  <span id="detail-sla-status-badge" class="status-badge status-pending" style="font-size: 0.72rem;">Within SLA</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem; margin-top: 0.5rem;">
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Response Deadline</div>
+                    <strong id="detail-sla-deadline" style="color: var(--text-main); font-family: var(--font-sans); font-variant-numeric: tabular-nums;">Loading...</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">SLA Clock</div>
+                    <strong id="detail-sla-time-remaining" style="color: var(--primary);">Loading...</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">First Authority Action</div>
+                    <span id="detail-sla-responded-at" style="color: var(--text-main);">Pending response</span>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Escalation Status</div>
+                    <span id="detail-sla-escalation-status" style="color: var(--text-main);">Normal (Level 0)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Administrative Jurisdiction & Responsible Authority Card -->
+              <div class="content-card" style="border-left: 3px solid #0284c7;">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span><i class="fa-solid fa-landmark"></i> Administrative Jurisdiction & Authority</span>
+                  <span id="detail-localbody-type-badge" class="status-badge badge-localbody-type" style="font-size: 0.72rem;">Local Body</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem; margin-top: 0.75rem;">
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">District</div>
+                    <strong id="detail-district" style="color: var(--text-main);">Tamil Nadu</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Taluk / Block</div>
+                    <strong id="detail-taluk" style="color: var(--text-main);">-</strong>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Village / Town</div>
+                    <span id="detail-village-town" style="color: var(--text-main);">-</span>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Local Body Name</div>
+                    <strong id="detail-local-body" style="color: var(--text-main);">-</strong>
+                  </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-light); margin-top: 0.75rem; padding-top: 0.75rem;">
+                  <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem;" data-i18n="responsible_authority_office">Responsible Authority Office</div>
+                  <strong id="detail-authority-name" style="color: var(--primary); font-size: 0.95rem; display: block;">Local Administrative Authority</strong>
+                  <div class="authority-contact-actions">
+                    <span id="detail-authority-phone-wrap" class="authority-contact-btn authority-contact-phone" onclick="var a=document.getElementById('detail-authority-phone'); if(a && event.target!==a) a.click();">
+                      <i class="fa-solid fa-phone"></i>
+                      <a id="detail-authority-phone" href="#" data-i18n="phone">Phone</a>
+                    </span>
+                    <span id="detail-authority-email-wrap" class="authority-contact-btn authority-contact-email" onclick="var a=document.getElementById('detail-authority-email'); if(a && event.target!==a) a.click();">
+                      <i class="fa-solid fa-envelope"></i>
+                      <a id="detail-authority-email" href="#" data-i18n="contact_email">Email</a>
+                    </span>
+                  </div>
+                </div>
+
+                <div id="detail-higher-auth-section" style="border-top: 1px dashed var(--border-light); margin-top: 0.75rem; padding-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+                  <span>Level 1 Escalation Officer: </span>
+                  <strong id="detail-higher-authority" style="color: var(--text-main);">District Collectorate</strong>
+                </div>
+              </div>
+
+              <!-- AI Auto-Triage Box -->
+              <div class="content-card">
+                <div class="card-title">Automated AI Triage Analysis</div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
+                  <div>AI Category: <strong id="detail-ai-category" style="color: var(--text-main);">Roads</strong></div>
+                  <div>AI Priority Level: <strong id="detail-ai-priority" style="color: var(--primary);">Normal</strong></div>
+                  <div>Recommended Department: <strong id="detail-ai-dept" style="color: var(--text-main);">Municipal Engineering</strong></div>
+                  <div style="border-top: 1px solid var(--border-light); padding-top: 0.5rem; margin-top: 0.25rem;">
+                    <div style="font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">AI Reasoning Summary</div>
+                    <p id="detail-ai-summary" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.45; margin-top: 0.2rem;">Loading summary...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Evidence Photo Viewer -->
+              <div class="content-card">
+                <div class="card-title">Evidence Photo Proof</div>
+                <div id="detail-photo-wrapper" style="min-height: 180px; max-height: 350px; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img id="detail-photo-img" src="" alt="Evidence Photo" style="width: 100%; height: 100%; max-height: 350px; object-fit: contain; display: none; cursor: pointer;" onclick="window.open(this.src, '_blank')" / decoding="async">
+                  <div id="detail-photo-fallback" style="padding: 2rem; text-align: center; color: var(--text-light); font-size: 0.85rem;">
+                    No evidence photo attached by citizen.
+                  </div>
+                </div>
+              </div>
+
               <!-- Authority-Citizen Live Communication -->
               <div class="content-card" style="display: flex; flex-direction: column; height: 350px;">
                 <div class="card-title">
@@ -333,7 +498,35 @@
                 </form>
               </div>
 
-            </div>
+            </main>
+
+            <!-- Right Column: Dedicated Vertical Activity & Timeline Panel -->
+            <aside class="complaint-activity-column authority-case-sidebar-col">
+              
+              <!-- Case Activity Timeline -->
+              <div class="content-card" id="card-case-timeline">
+                <div id="detail-timeline-list">
+                  <div style="color: var(--text-muted); font-size: 0.82rem; padding: 1rem 0; text-align: center;">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary);"></i> Loading activity timeline...
+                  </div>
+                </div>
+              </div>
+
+              <!-- Authority Complaint Activity Log -->
+              <div class="content-card" id="card-complaint-activity" style="border-left: 3px solid #0d9488;">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="display: flex; align-items: center; gap: 0.4rem;">
+                    <i class="fa-solid fa-clipboard-check" style="color: var(--primary);"></i>
+                    <span data-i18n="complaint_activity_heading">Complaint Activity</span>
+                  </span>
+                  <span id="detail-activity-count" class="status-badge" style="background: rgba(13,148,136,0.1); color: var(--primary); font-size: 0.72rem; font-weight: 700;">0 Actions</span>
+                </div>
+                <div id="detail-activity-list" class="activity-timeline-list">
+                  <div style="color: var(--text-muted); font-size: 0.82rem; padding: 0.75rem 0;" data-i18n="loading_complaint_activity">Loading complaint activity...</div>
+                </div>
+              </div>
+
+            </aside>
 
           </div>
         </section>
@@ -381,7 +574,7 @@
   <script src="js/auth.js?v=7.5.0"></script>
   <script src="js/api.js?v=4.0.1"></script>
   <script src="js/notifications.js?v=4.0.1"></script>
-  <script src="js/timeline.js?v=1.0.0"></script>
+  <script src="js/timeline.js?v=2.0.0"></script>
   <script src="js/admin.js?v=5.0.0"></script>
   <script src="js/authority-case-details.js?v=4.0.1"></script>
 
