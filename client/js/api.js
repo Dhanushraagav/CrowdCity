@@ -57,7 +57,7 @@ async function request(endpoint, options = {}) {
     } catch (e) {}
   }
 
-  if (token && typeof token === 'string' && token.split('.').length === 3) {
+  if (options.auth !== false && token && typeof token === 'string' && token.split('.').length === 3) {
     headers['Authorization'] = `Bearer ${token}`;
   } else if (options.auth === true) {
     return {

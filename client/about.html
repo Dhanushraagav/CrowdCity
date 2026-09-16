@@ -112,7 +112,7 @@
           },
           {
             "@type": "Person",
-            "name": "Aathi Shankar A",
+            "name": "Aathisankar A",
             "jobTitle": "Software Architect",
             "description": "Software Architect focusing on system structure, scalability, and platform architecture."
           },
@@ -214,7 +214,7 @@
             "name": "Who developed CrowdCity AI?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "CrowdCity AI is developed by an engineering and leadership team: Sandeep Kumar J (Founder), Dhanush Raagav S (Developer), Tulasiram V (Test Engineer), Aathi Shankar A (Software Architect), Padmadev D (DevOps Engineer), Aakash M (End-to-End Developer), Praneesh P (Systems Engineer), and Gladwin Levis J (API Engineer)."
+              "text": "CrowdCity AI is developed by an engineering and leadership team: Sandeep Kumar J (Founder), Dhanush Raagav S (Developer), Tulasiram V (Test Engineer), Aathisankar A (Software Architect), Padmadev D (DevOps Engineer), Aakash M (End-to-End Developer), Praneesh P (Systems Engineer), and Gladwin Levis J (API Engineer)."
             }
           },
           {
@@ -343,11 +343,14 @@
     }
 
     .about-header-inner {
-      max-width: 1200px;
+      max-width: 1440px;
+      width: 100%;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 0 clamp(1rem, 2.5vw, 2.5rem);
+      box-sizing: border-box;
     }
 
     .about-brand-logo {
@@ -427,11 +430,12 @@
     /* Hero Section */
     .about-hero {
       position: relative;
-      padding: 5.5rem 2rem 4.5rem 2rem;
+      padding: 5.5rem clamp(1.25rem, 3.5vw, 3rem) 4.5rem;
       text-align: center;
       overflow: hidden;
       border-bottom: 1px solid var(--abt-card-border);
       background: radial-gradient(circle at 50% 30%, rgba(13, 148, 136, 0.22) 0%, rgba(56, 189, 248, 0.1) 40%, transparent 80%);
+      box-sizing: border-box;
     }
 
     #hero-canvas {
@@ -448,8 +452,10 @@
     .hero-content {
       position: relative;
       z-index: 1;
-      max-width: 860px;
+      max-width: 1180px;
+      width: 100%;
       margin: 0 auto;
+      box-sizing: border-box;
     }
 
     /* Keyframe Animations */
@@ -581,9 +587,10 @@
 
     .hero-subheading {
       font-size: 1.15rem;
-      line-height: 1.65;
+      line-height: 1.7;
       color: var(--abt-text-muted) !important;
-      max-width: 680px;
+      max-width: 980px;
+      width: 100%;
       margin: 0 auto;
       font-weight: 500;
     }
@@ -614,18 +621,21 @@
     }
 
     .section-desc {
-      font-size: 1rem;
+      font-size: 1.05rem;
       color: var(--abt-text-muted);
-      max-width: 620px;
+      max-width: 860px;
+      width: 100%;
       margin: 0.6rem auto 0 auto;
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
     /* How CrowdCity Helps Citizens Grid */
     .citizen-help-section {
-      padding: 5rem 2rem;
-      max-width: 1100px;
+      padding: 5rem clamp(1.25rem, 3.5vw, 3rem);
+      max-width: 1440px;
+      width: 100%;
       margin: 0 auto;
+      box-sizing: border-box;
     }
 
     .citizen-help-grid {
@@ -684,10 +694,12 @@
 
     /* Core Principles Section */
     .purpose-section {
-      padding: 5rem 2rem;
-      max-width: 1100px;
+      padding: 5rem clamp(1.25rem, 3.5vw, 3rem);
+      max-width: 1440px;
+      width: 100%;
       margin: 0 auto;
       border-top: 1px solid var(--abt-card-border);
+      box-sizing: border-box;
     }
 
     .purpose-grid {
@@ -742,10 +754,12 @@
     /* Alternating Vertical Timeline Network Section */
     .team-story-section {
       position: relative;
-      padding: 5.5rem 2rem;
-      max-width: 1100px;
+      padding: 5.5rem clamp(1.25rem, 3.5vw, 3rem);
+      max-width: 1360px;
+      width: 100%;
       margin: 0 auto;
       border-top: 1px solid var(--abt-card-border);
+      box-sizing: border-box;
     }
 
     /* Central Connecting Technology Line */
@@ -997,7 +1011,8 @@
     }
 
     .closing-wrapper {
-      max-width: 760px;
+      max-width: 880px;
+      width: 100%;
       margin: 0 auto;
     }
 
@@ -1066,10 +1081,20 @@
     }
 
     /* Responsive Mobile & Device Breakpoints */
+    @media (max-width: 1100px) {
+      .tech-grid,
+      .directory-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     @media (max-width: 991px) {
       .citizen-help-grid,
       .purpose-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+      .faq-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -1081,7 +1106,10 @@
         padding: 3.5rem 1.25rem 2.5rem 1.25rem;
       }
       .citizen-help-grid,
-      .purpose-grid {
+      .purpose-grid,
+      .tech-grid,
+      .faq-grid,
+      .directory-grid {
         grid-template-columns: 1fr;
       }
       .timeline-track-container {
@@ -1201,6 +1229,10 @@
       .ambient-orb,
       .photo-glowing-ring,
       #hero-canvas {
+        display: none !important;
+      }
+    }
+
     /* Hero Tagline & Entity Meta Pills */
     .hero-tagline-sub {
       font-size: 1.4rem;
@@ -1213,48 +1245,54 @@
     .hero-meta-badges {
       display: flex;
       justify-content: center;
-      gap: 0.65rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
       margin-top: 1.75rem;
+      width: 100%;
     }
 
     .hero-pill-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      font-size: 0.8rem;
+      gap: 0.5rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: var(--abt-text-main);
       background: var(--abt-card-bg);
       border: 1px solid var(--abt-card-border);
-      padding: 0.35rem 0.85rem;
+      padding: 0.45rem 1.05rem;
       border-radius: 999px;
       backdrop-filter: blur(8px);
-      transition: border-color 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .hero-pill-badge i {
       color: var(--abt-teal);
-      font-size: 0.82rem;
+      font-size: 0.85rem;
     }
 
     .hero-pill-badge:hover {
       border-color: var(--abt-teal);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(13, 148, 136, 0.15);
     }
 
     /* Technology Architecture Section */
     .tech-section {
-      padding: 5rem 2rem;
-      max-width: 1100px;
+      padding: 5rem clamp(1.25rem, 3.5vw, 3rem);
+      max-width: 1440px;
+      width: 100%;
       margin: 0 auto;
       border-top: 1px solid var(--abt-card-border);
+      box-sizing: border-box;
     }
 
     .tech-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1.5rem;
+      width: 100%;
     }
 
     .tech-card {
@@ -1306,16 +1344,19 @@
 
     /* FAQ Section */
     .faq-section {
-      padding: 5.5rem 2rem;
-      max-width: 1100px;
+      padding: 5.5rem clamp(1.25rem, 3.5vw, 3rem);
+      max-width: 1440px;
+      width: 100%;
       margin: 0 auto;
       border-top: 1px solid var(--abt-card-border);
+      box-sizing: border-box;
     }
 
     .faq-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
+      width: 100%;
     }
 
     .faq-card {
@@ -1377,16 +1418,19 @@
 
     /* Official Directory Links Section */
     .directory-section {
-      padding: 5rem 2rem;
-      max-width: 1100px;
+      padding: 5rem clamp(1.25rem, 3.5vw, 3rem);
+      max-width: 1440px;
+      width: 100%;
       margin: 0 auto;
       border-top: 1px solid var(--abt-card-border);
+      box-sizing: border-box;
     }
 
     .directory-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1.25rem;
+      width: 100%;
     }
 
     .directory-card {
@@ -1491,6 +1535,7 @@
           <span class="hero-pill-badge"><i class="fa-solid fa-location-dot"></i> Tamil Nadu, India</span>
           <span class="hero-pill-badge"><i class="fa-solid fa-user-tie"></i> Founder: Sandeep Kumar J</span>
           <span class="hero-pill-badge"><i class="fa-solid fa-code"></i> Developer: Dhanush Raagav S</span>
+          <span class="hero-pill-badge"><i class="fa-solid fa-compass-drafting"></i> Architect: Aathisankar A</span>
           <span class="hero-pill-badge"><i class="fa-solid fa-microchip"></i> AI-Powered Civic Tech</span>
         </div>
       </div>
@@ -1817,17 +1862,17 @@
             <div class="photo-aura-wrap">
               <div class="photo-glowing-ring"></div>
               <div class="profile-photo-circle">
-                <img src="images/team/aathi-shankar.jpg" alt="Aathi Shankar A — Software Architect" itemprop="image" loading="lazy" decoding="async" />
+                <img src="images/team/aathi-shankar.jpg" alt="Aathisankar A — Software Architect" itemprop="image" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <div class="story-text-wrap">
             <span class="member-num-label"><span class="online-pulse-dot"></span>04 — SOFTWARE ARCHITECT</span>
-            <h3 class="member-name" itemprop="name">Aathi Shankar A</h3>
+            <h3 class="member-name" itemprop="name">Aathisankar A</h3>
             <div class="member-role" itemprop="jobTitle">Software Architect</div>
             <p class="member-about" itemprop="description">
-              Aathi Shankar contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
+              Aathisankar A contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
             </p>
           </div>
         </article>
@@ -1953,7 +1998,7 @@
         <div class="faq-card">
           <h3 class="faq-question"><i class="fa-solid fa-circle-question"></i> Who developed CrowdCity AI?</h3>
           <p class="faq-answer">
-            CrowdCity AI is developed by an engineering and leadership team: <strong>Dhanush Raagav S</strong> (Developer), <strong>Tulasiram V</strong> (Test Engineer), <strong>Aathi Shankar A</strong> (Software Architect), <strong>Padmadev D</strong> (DevOps Engineer), <strong>Aakash M</strong> (End-to-End Developer), <strong>Praneesh P</strong> (Systems Engineer), and <strong>Gladwin Levis J</strong> (API Engineer), with founder <strong>Sandeep Kumar J</strong>.
+            CrowdCity AI is developed by an engineering and leadership team: <strong>Dhanush Raagav S</strong> (Developer), <strong>Tulasiram V</strong> (Test Engineer), <strong>Aathisankar A</strong> (Software Architect), <strong>Padmadev D</strong> (DevOps Engineer), <strong>Aakash M</strong> (End-to-End Developer), <strong>Praneesh P</strong> (Systems Engineer), and <strong>Gladwin Levis J</strong> (API Engineer), with founder <strong>Sandeep Kumar J</strong>.
           </p>
         </div>
 

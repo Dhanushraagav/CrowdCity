@@ -73,12 +73,32 @@
       logs.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
       const submittedLog = logs.find(l => l.status === 'pending') || null;
-      const verifiedLog = logs.find(l => l.status === 'verified') || null;
       const assignedLog = logs.find(l => l.status === 'assigned') || null;
       const inProgressLogs = logs.filter(l => l.status === 'in_progress');
       const inProgressLog = inProgressLogs.length > 0 ? inProgressLogs[0] : null;
       const latestProgLog = inProgressLogs.length > 0 ? inProgressLogs[inProgressLogs.length - 1] : null;
       const resolvedLog = logs.find(l => l.status === 'resolved') || null;
+
+      // Disambiguate pre-assignment triage verification from post-resolution citizen verification
+      const hasAssigned = !!(issue.assigned_to || assignedLog || status === 'assigned');
+      const hasResolvedProof = !!(issue.completion_proof_url || issue.completion_notes);
+      const isPostResolutionVerified = (status === 'verified') && (hasResolvedProof || resolvedLog || hasAssigned);
+      const isTriageVerified = (status === 'verified') && !isPostResolutionVerified;
+
+      const preAssignmentVerifiedLog = logs.find(l => {
+        if (l.status !== 'verified') return false;
+        if (assignedLog && new Date(l.created_at).getTime() > new Date(assignedLog.created_at).getTime()) return false;
+        if (resolvedLog && new Date(l.created_at).getTime() > new Date(resolvedLog.created_at).getTime()) return false;
+        if (l.notes && /resolution.*approved|verified.*citizen/i.test(l.notes)) return false;
+        return true;
+      }) || null;
+
+      const postResolutionVerifiedLog = logs.find(l => {
+        if (l.status !== 'verified') return false;
+        if (resolvedLog && new Date(l.created_at).getTime() >= new Date(resolvedLog.created_at).getTime()) return true;
+        if (l.notes && /resolution.*approved|verified.*citizen/i.test(l.notes)) return true;
+        return false;
+      }) || null;
 
       const authorityName =
         issue.assigned_officer?.full_name ||
@@ -107,17 +127,17 @@
       let verActor = null;
       let verInferred = false;
 
-      if (verifiedLog) {
-        verState = status === 'verified' ? 'current' : 'completed';
-        verTs = verifiedLog.created_at;
-        verNotes = verifiedLog.notes || verifiedLog.remarks || t('timeline_verified_desc', 'Complaint verified and approved for action.');
-        verActor = verifiedLog.profiles?.full_name || 'Municipal Officer';
-      } else if (status === 'verified') {
+      if (preAssignmentVerifiedLog) {
+        verState = isTriageVerified ? 'current' : 'completed';
+        verTs = preAssignmentVerifiedLog.created_at;
+        verNotes = preAssignmentVerifiedLog.notes || preAssignmentVerifiedLog.remarks || t('timeline_verified_desc', 'Complaint verified and approved for action.');
+        verActor = preAssignmentVerifiedLog.profiles?.full_name || 'Municipal Officer';
+      } else if (isTriageVerified) {
         verState = 'current';
         verTs = issue.updated_at || null;
         verNotes = issue.official_remarks || t('timeline_verified_desc', 'Complaint verified and approved for action.');
         verActor = 'Municipal Officer';
-      } else if (['assigned', 'in_progress', 'resolved'].includes(status)) {
+      } else if (['assigned', 'in_progress', 'resolved', 'verified'].includes(status) || hasAssigned || isPostResolutionVerified) {
         verState = 'completed';
         verTs = null;
         verNotes = t('timeline_verified_desc', 'Complaint verified and approved for action.');
@@ -144,16 +164,16 @@
       let assInferred = false;
 
       if (assignedLog) {
-        assState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) ? 'completed' : 'pending');
+        assState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) || isPostResolutionVerified ? 'completed' : 'pending');
         assTs = assignedLog.created_at;
         assNotes = assignedLog.notes || `${t('timeline_assigned_desc', 'Assigned to department & field officer.')} (${authorityName})`;
         assActor = assignedLog.profiles?.full_name || authorityName;
       } else if (issue.assigned_to || status === 'assigned') {
-        assState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) ? 'completed' : 'pending');
-        assTs = issue.updated_at || null;
+        assState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) || isPostResolutionVerified ? 'completed' : 'pending');
+        assTs = issue.assigned_at || issue.updated_at || null;
         assNotes = `${t('timeline_assigned_desc', 'Assigned to department & field officer.')} (${authorityName})`;
         assActor = authorityName;
-      } else if (['in_progress', 'resolved'].includes(status)) {
+      } else if (['in_progress', 'resolved'].includes(status) || isPostResolutionVerified) {
         assState = 'completed';
         assTs = null;
         assNotes = `${t('timeline_assigned_desc', 'Assigned to department & field officer.')} (${authorityName})`;
@@ -181,7 +201,7 @@
       let progInferred = false;
 
       if (inProgressLog) {
-        progState = status === 'in_progress' ? 'current' : (status === 'resolved' ? 'completed' : 'pending');
+        progState = status === 'in_progress' ? 'current' : (['resolved'].includes(status) || isPostResolutionVerified ? 'completed' : 'pending');
         progTs = latestProgLog?.created_at || inProgressLog.created_at;
         progNotes = latestProgLog?.notes || inProgressLog.notes || issue.official_remarks || t('timeline_in_progress_desc', 'Field inspection & resolution work underway.');
         progActor = latestProgLog?.profiles?.full_name || inProgressLog.profiles?.full_name || authorityName;
@@ -190,7 +210,7 @@
         progTs = issue.updated_at || null;
         progNotes = issue.official_remarks || t('timeline_in_progress_desc', 'Field inspection & resolution work underway.');
         progActor = authorityName;
-      } else if (status === 'resolved') {
+      } else if (status === 'resolved' || isPostResolutionVerified) {
         progState = 'completed';
         progTs = null;
         progNotes = t('timeline_in_progress_desc', 'Field inspection & resolution work underway.');
@@ -219,13 +239,13 @@
       if (resolvedLog) {
         resState = 'completed';
         resTs = resolvedLog.created_at;
-        resNotes = resolvedLog.notes || issue.completion_notes || t('timeline_resolved_desc', 'Resolution work completed with evidence proof.');
+        resNotes = resolvedLog.notes || issue.completion_notes || (isPostResolutionVerified ? t('timeline_resolved_verified_desc', 'Resolution approved and verified by citizen reporter.') : t('timeline_resolved_desc', 'Resolution work completed with evidence proof.'));
         resActor = resolvedLog.profiles?.full_name || authorityName;
         resProof = issue.completion_proof_url || null;
-      } else if (status === 'resolved' || status === 'verified' && issue.completion_notes) {
+      } else if (status === 'resolved' || isPostResolutionVerified || (hasResolvedProof && ['assigned', 'in_progress', 'resolved', 'verified'].includes(status))) {
         resState = 'completed';
-        resTs = issue.updated_at || null;
-        resNotes = issue.completion_notes || issue.official_remarks || t('timeline_resolved_desc', 'Resolution work completed with evidence proof.');
+        resTs = issue.resolved_at || (status === 'resolved' ? issue.updated_at : null) || null;
+        resNotes = issue.completion_notes || issue.official_remarks || (isPostResolutionVerified ? t('timeline_resolved_verified_desc', 'Resolution approved and verified by citizen reporter.') : t('timeline_resolved_desc', 'Resolution work completed with evidence proof.'));
         resActor = authorityName;
         resProof = issue.completion_proof_url || null;
       }
@@ -241,6 +261,45 @@
         proof_url: resProof,
         is_inferred: false
       };
+
+      const stages = [stageSubmitted, stageVerified, stageAssigned, stageInProgress, stageResolved];
+
+      const CANONICAL_ORDER = {
+        submitted: 1,
+        verified: 2,
+        assigned: 3,
+        in_progress: 4,
+        resolved: 5
+      };
+
+      // Strictly enforce chronological event ordering (oldest at top -> newest at bottom).
+      stages.sort((a, b) => {
+        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : null;
+        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : null;
+        const orderA = CANONICAL_ORDER[a.id] || 0;
+        const orderB = CANONICAL_ORDER[b.id] || 0;
+
+        // 1. Both have valid timestamps: STRICT CHRONOLOGICAL ORDER
+        if (timeA !== null && timeB !== null) {
+          if (timeA !== timeB) {
+            return timeA - timeB; // Ascending: oldest first
+          }
+          return orderA - orderB;
+        }
+
+        // 2. Both lack timestamps:
+        if (timeA === null && timeB === null) {
+          if (a.state !== 'pending' && b.state === 'pending') return -1;
+          if (a.state === 'pending' && b.state !== 'pending') return 1;
+          return orderA - orderB;
+        }
+
+        // 3. One has timestamp, the other lacks timestamp:
+        if (a.state === 'pending') return 1;
+        if (b.state === 'pending') return -1;
+
+        return orderA - orderB;
+      });
 
       const auditEvents = [];
       const firstProgIdx = logs.findIndex(l => l.status === 'in_progress');
@@ -268,11 +327,25 @@
         }
       });
 
+      if (postResolutionVerifiedLog) {
+        auditEvents.push({
+          id: postResolutionVerifiedLog.id,
+          event_type: 'resolution_verified',
+          timestamp: postResolutionVerifiedLog.created_at,
+          timestamp_formatted: formatTimestamp(postResolutionVerifiedLog.created_at),
+          notes: postResolutionVerifiedLog.notes || 'Resolution approved and verified by citizen reporter.',
+          actor_name: postResolutionVerifiedLog.profiles?.full_name || 'Citizen Reporter',
+          actor_role: 'citizen'
+        });
+      }
+
+      auditEvents.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
       return {
         complaint_id: issue.complaint_id || `CC-2026-${String(issue.id || '').substring(0, 6)}`,
         issue_id: issue.id,
         current_status: status,
-        stages: [stageSubmitted, stageVerified, stageAssigned, stageInProgress, stageResolved],
+        stages: stages,
         audit_events: auditEvents
       };
     },

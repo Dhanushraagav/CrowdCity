@@ -10,6 +10,8 @@ async function initDetailsPage() {
   const urlParams = new URLSearchParams(window.location.search);
   issueId = urlParams.get('id');
 
+  console.log("[Details] initDetailsPage() starting with issueId:", issueId);
+
   if (!issueId) {
     console.error("No issue ID found in URL parameters");
     window.location.href = 'citizen-dashboard.html';
@@ -33,7 +35,9 @@ async function loadIssueDetails() {
   const loader = document.getElementById('details-loader');
   const content = document.getElementById('details-content');
 
+  console.log("[Details] Calling window.API.getIssueDetails for:", issueId);
   const { data: issue, error } = await window.API.getIssueDetails(issueId);
+  console.log("[Details] API.getIssueDetails returned: hasData=" + (!!issue) + " error=" + error);
 
   if (error || !issue) {
     if (loader) {
@@ -52,7 +56,9 @@ async function loadIssueDetails() {
 
   issueDetailData = issue;
 
-  // Render elements
+  try {
+    console.log("[Details] Starting DOM rendering for issue:", issue.complaint_id || issue.id);
+    // Render elements
   document.getElementById('issue-title').textContent = issue.title;
   document.getElementById('issue-description').textContent = issue.description;
   document.getElementById('issue-address').textContent = issue.address || 'Location detected. Address unavailable.';
@@ -309,14 +315,17 @@ async function loadIssueDetails() {
     }
   }
 
-  // Hide loader, show content
-  if (loader) loader.classList.add('hidden');
-  if (content) content.classList.remove('hidden');
+    // Hide loader, show content
+    if (loader) loader.classList.add('hidden');
+    if (content) content.classList.remove('hidden');
 
-  // Load new features (evidence, chat, citizen actions)
-  await loadNewFeatures(issue);
+    // Load new features (evidence, chat, citizen actions)
+    await loadNewFeatures(issue);
 
-  initRealtimeDetails();
+    initRealtimeDetails();
+  } catch (renderErr) {
+    console.error("[Details] CRASH during DOM rendering:", renderErr);
+  }
 }
 
 function initRealtimeDetails() {
@@ -793,9 +802,13 @@ window.addEventListener('auth-change', async () => {
 });
 
 // Bootstrap details page
-window.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => {
+    initDetailsPage();
+  });
+} else {
   initDetailsPage();
-});
+}
 
 window.addEventListener('language-change', () => {
   if (window.i18n) {

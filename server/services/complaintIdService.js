@@ -23,7 +23,7 @@ let _cachedYear = 0;
  * @param {Date|string} [creationDate=new Date()]
  * @returns {Promise<string>} e.g. "CC-2026-000001"
  */
-export async function generateNextComplaintId(creationDate = new Date()) {
+export async function generateNextComplaintId(creationDate = new Date(), customClient = null) {
   const dateObj = creationDate ? new Date(creationDate) : new Date();
   const year = isNaN(dateObj.getTime()) ? new Date().getFullYear() : dateObj.getFullYear();
   const yearPrefix = `CC-${year}-`;
@@ -32,7 +32,7 @@ export async function generateNextComplaintId(creationDate = new Date()) {
   return new Promise((resolve, reject) => {
     _idGenerationLock = _idGenerationLock.then(async () => {
       try {
-        const client = supabaseAdmin || supabase;
+        const client = customClient || supabaseAdmin || supabase;
 
         if (year !== _cachedYear) {
           _cachedYear = year;
@@ -52,24 +52,29 @@ export async function generateNextComplaintId(creationDate = new Date()) {
           // RPC nextval not exposed or sequence not created yet; proceed to authoritative table lookup
         }
 
-        // 2. Query the highest issued Complaint ID for the given year
+        // 2. Query recent issues to find authoritative highest issued Complaint ID for the given year
         let dbHighest = 0;
 
         try {
           const { data, error } = await client
             .from('issues')
             .select('complaint_id')
+            .not('complaint_id', 'is', null)
             .ilike('complaint_id', `${yearPrefix}%`)
-            .order('complaint_id', { ascending: false })
-            .limit(1);
+            .order('created_at', { ascending: false })
+            .limit(50);
 
-          if (!error && data && data.length > 0 && data[0].complaint_id) {
-            const rawId = data[0].complaint_id.trim();
-            const parts = rawId.split('-');
-            if (parts.length === 3) {
-              const num = parseInt(parts[2], 10);
-              if (!isNaN(num) && num > dbHighest) {
-                dbHighest = num;
+          if (!error && Array.isArray(data) && data.length > 0) {
+            for (const row of data) {
+              if (row && row.complaint_id) {
+                const rawId = String(row.complaint_id).trim();
+                const parts = rawId.split('-');
+                if (parts.length === 3) {
+                  const num = parseInt(parts[2], 10);
+                  if (!isNaN(num) && num > dbHighest) {
+                    dbHighest = num;
+                  }
+                }
               }
             }
           }

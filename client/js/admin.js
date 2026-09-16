@@ -124,15 +124,27 @@
 
   // Service Controller
   window.ComplaintService = {
+    _initialized: false,
+    _isLoadingData: false,
+    _hashRoutingBound: false,
+    _inspectDelegated: false,
+
     init: async function() {
+      if (this._initialized) return;
+      this._initialized = true;
+
       if (!checkAccess()) return;
       
       this.bindHashRouting();
+      this.bindInspectDelegation();
       this.handleInitialHash();
       await this.loadAllData();
     },
 
     bindHashRouting: function() {
+      if (this._hashRoutingBound) return;
+      this._hashRoutingBound = true;
+
       window.addEventListener('hashchange', () => {
         this.handleInitialHash();
       });
@@ -140,6 +152,99 @@
       document.addEventListener('click', () => {
         this.toggleProfileDropdown(false);
       });
+    },
+
+    bindInspectDelegation: function() {
+      if (this._inspectDelegated) return;
+      this._inspectDelegated = true;
+
+      // Reliable event delegation on document: catches clicks on any dynamically rendered inspect button
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action="inspect-case"], button.btn-inspect-case');
+        if (btn && !e.__inspectHandled) {
+          this.handleInspectCase(e, btn);
+        }
+      });
+    },
+
+    handleInspectCase: function(event, button) {
+      if (!button) return;
+
+      if (event) {
+        if (event.__inspectHandled) return;
+        event.__inspectHandled = true;
+        if (typeof event.stopPropagation === 'function') {
+          event.stopPropagation();
+        }
+      }
+
+      // Prevent redundant clicks if already navigating or disabled
+      if (button.disabled || button.classList.contains('is-loading')) {
+        return;
+      }
+
+      const complaintId = button.getAttribute('data-complaint-id') || 
+                          button.getAttribute('data-issue-id') || 
+                          (button.dataset ? (button.dataset.complaintId || button.dataset.issueId) : '') ||
+                          '';
+
+      if (!complaintId) {
+        console.warn("Inspect Case: No complaint ID found on button", button);
+        return;
+      }
+
+      // Step 1: Immediate visual feedback on the clicked button ONLY
+      button.disabled = true;
+      button.classList.add('is-loading');
+      button.setAttribute('aria-busy', 'true');
+      const originalHtml = button.innerHTML;
+      button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opening Case...';
+
+      try {
+        const cleanId = String(complaintId).trim();
+        
+        // Match in current memory dataset
+        const issue = currentComplaints.find(c => 
+          c.id === cleanId || 
+          c.complaint_id === cleanId || 
+          (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
+          (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
+        );
+
+        // Pre-cache issue data in sessionStorage for instant (0ms) render on case details page
+        if (issue) {
+          try {
+            sessionStorage.setItem('cc_active_inspect_case', JSON.stringify(issue));
+          } catch (e) {}
+        }
+
+        const targetId = (issue && (issue.complaint_id || issue.id)) ? (issue.id || issue.complaint_id) : cleanId;
+
+        // If #pane-details is present on current page, open directly in-pane
+        if (document.getElementById('pane-details')) {
+          this.openCaseDetails(targetId).catch(err => {
+            console.error("openCaseDetails in-pane error:", err);
+            this._restoreInspectButton(button, originalHtml);
+          });
+          return;
+        }
+
+        // Navigate immediately to destination page using the resolved complaint ID
+        const targetUrl = `authority-case-details.html?id=${encodeURIComponent(targetId)}`;
+        window.location.href = targetUrl;
+      } catch (err) {
+        console.error("Inspect Case navigation error:", err);
+        this._restoreInspectButton(button, originalHtml);
+        showToast("Failed to open case. Please try again.", "error");
+      }
+    },
+
+    _restoreInspectButton: function(button, originalHtml) {
+      if (!button) return;
+      button.disabled = false;
+      button.classList.remove('is-loading');
+      button.removeAttribute('aria-busy');
+      button.innerHTML = originalHtml || 'Inspect Case';
     },
 
     handleInitialHash: async function() {
@@ -298,10 +403,15 @@
         this.renderDashboard();
       }
       if (document.getElementById('pane-complaints') || document.getElementById('complaints-queue-table-body')) {
-        this.renderComplaintsQueue();
+        // Do not overwrite complaints table if user just clicked an inspect button and navigation is occurring
+        if (!document.querySelector('#complaints-queue-table-body button.btn-inspect-case.is-loading')) {
+          this.renderComplaintsQueue();
+        }
       }
       if (document.getElementById('pane-assigned') || document.getElementById('assigned-cases-table-body')) {
-        this.renderAssignedCases();
+        if (!document.querySelector('#assigned-cases-table-body button.btn-inspect-case.is-loading')) {
+          this.renderAssignedCases();
+        }
       }
       if (document.getElementById('pane-reports') || document.getElementById('reports-category-table-body')) {
         this.renderReports();
@@ -315,18 +425,21 @@
     },
 
     loadAllData: async function() {
-      // Instant load from session cache for 0ms page transitions
-      this.loadCachedData();
-
-      const fetchWithTimeout = (apiFn, ms = 10000) => {
-        if (typeof apiFn !== 'function') return Promise.resolve({ data: [] });
-        return Promise.race([
-          apiFn(),
-          new Promise(resolve => setTimeout(() => resolve({ data: [], error: 'timeout' }), ms))
-        ]);
-      };
+      if (this._isLoadingData) return;
+      this._isLoadingData = true;
 
       try {
+        // Instant load from session cache for 0ms page transitions
+        this.loadCachedData();
+
+        const fetchWithTimeout = (apiFn, ms = 10000) => {
+          if (typeof apiFn !== 'function') return Promise.resolve({ data: [] });
+          return Promise.race([
+            apiFn(),
+            new Promise(resolve => setTimeout(() => resolve({ data: [], error: 'timeout' }), ms))
+          ]);
+        };
+
         // Fast primary fetch for complaints
         const [issuesRes, transRes, usersRes, notifsRes] = await Promise.allSettled([
           fetchWithTimeout(() => API.getIssues(), 10000),
@@ -387,6 +500,8 @@
       } catch (err) {
         console.error("loadAllData error:", err);
         showToast("Failed to sync database data.", "error");
+      } finally {
+        this._isLoadingData = false;
       }
     },
 
@@ -496,7 +611,7 @@
                 <td>${assignedUser ? escapeHTML(assignedUser.full_name) : 'Unassigned'}</td>
                 <td>${new Date(c.created_at).toLocaleDateString()}</td>
                 <td>
-                  <button class="btn-action" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="window.ComplaintService.openCaseDetails('${c.id}')">Inspect</button>
+                  <button type="button" class="btn-action btn-inspect-case" data-action="inspect-case" data-complaint-id="${escapeHTML(c.complaint_id || c.id)}" data-issue-id="${escapeHTML(c.id)}" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="window.ComplaintService.handleInspectCase(event, this)">Inspect</button>
                 </td>
               </tr>
             `;
@@ -679,11 +794,12 @@
 
       const filtered = currentComplaints.filter(c => {
         if (search) {
+          const matchId = (c.complaint_id || '').toLowerCase().includes(search) || (c.id || '').toLowerCase().includes(search);
           const matchTitle = (c.title || '').toLowerCase().includes(search);
           const matchDesc = (c.description || '').toLowerCase().includes(search);
           const matchAddr = (c.address || '').toLowerCase().includes(search);
           const matchReporter = c.reporter ? (c.reporter.full_name || '').toLowerCase().includes(search) : false;
-          if (!matchTitle && !matchDesc && !matchAddr && !matchReporter) return false;
+          if (!matchId && !matchTitle && !matchDesc && !matchAddr && !matchReporter) return false;
         }
 
         if (statusFilter) {
@@ -761,7 +877,7 @@
             <td>${assignedUser ? escapeHTML(assignedUser.full_name) : 'Unassigned'}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td>
-              <button class="btn-action" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" onclick="window.ComplaintService.openCaseDetails('${c.id}')">Inspect Case</button>
+              <button type="button" class="btn-action btn-inspect-case" data-action="inspect-case" data-complaint-id="${escapeHTML(c.complaint_id || c.id)}" data-issue-id="${escapeHTML(c.id)}" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" onclick="window.ComplaintService.handleInspectCase(event, this)">Inspect Case</button>
             </td>
           </tr>
         `;
@@ -802,7 +918,7 @@
             <td>${escapeHTML(c.address || 'Location recorded')}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td>
-              <button class="btn-action" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" onclick="window.ComplaintService.openCaseDetails('${c.id}')">Inspect Case</button>
+              <button type="button" class="btn-action btn-inspect-case" data-action="inspect-case" data-complaint-id="${escapeHTML(c.complaint_id || c.id)}" data-issue-id="${escapeHTML(c.id)}" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" onclick="window.ComplaintService.handleInspectCase(event, this)">Inspect Case</button>
             </td>
           </tr>
         `;
@@ -876,11 +992,55 @@
       if (!rawIssueId) return;
 
       const cleanId = String(rawIssueId).replace(/^-+/, '').trim();
-      let issue = currentComplaints.find(c => c.id === cleanId || c.id === rawIssueId || (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id))));
+
+      // Check if we are on an authority page without pane-details (e.g. authority-complaints.html)
+      // Immediately navigate without waiting for slow remote API requests
+      if (!document.getElementById('pane-details')) {
+        let issue = currentComplaints.find(c => 
+          c.id === cleanId || 
+          c.complaint_id === cleanId || 
+          (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
+          (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
+        );
+        const targetId = (issue && (issue.complaint_id || issue.id)) ? (issue.id || issue.complaint_id) : cleanId;
+        if (issue) {
+          try {
+            sessionStorage.setItem('cc_active_inspect_case', JSON.stringify(issue));
+          } catch (e) {}
+        }
+        window.location.href = `authority-case-details.html?id=${encodeURIComponent(targetId)}`;
+        return;
+      }
+
+      // --- We are on authority-case-details.html (with #pane-details) ---
+      let issue = currentComplaints.find(c => 
+        c.id === cleanId || 
+        c.complaint_id === cleanId || 
+        (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
+        (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
+      );
+
+      // Check instant sessionStorage cache for 0ms initial render
+      if (!issue) {
+        try {
+          const cachedCase = sessionStorage.getItem('cc_active_inspect_case');
+          if (cachedCase) {
+            const parsed = JSON.parse(cachedCase);
+            if (parsed && (parsed.id === cleanId || parsed.complaint_id === cleanId)) {
+              issue = parsed;
+            }
+          }
+        } catch (e) {}
+      }
 
       if (!issue && currentComplaints.length === 0) {
         await this.loadAllData();
-        issue = currentComplaints.find(c => c.id === cleanId || c.id === rawIssueId || (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id))));
+        issue = currentComplaints.find(c => 
+          c.id === cleanId || 
+          c.complaint_id === cleanId || 
+          (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
+          (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
+        );
       }
 
       // Always fetch fresh details with full status_history audit logs and timeline
@@ -890,7 +1050,7 @@
           const freshData = (res && res.data) ? res.data : (res && !res.error && res.id ? res : null);
           if (freshData) {
             issue = Object.assign({}, issue || {}, freshData);
-            const idx = currentComplaints.findIndex(c => c.id === cleanId || c.id === rawIssueId);
+            const idx = currentComplaints.findIndex(c => c.id === cleanId || c.complaint_id === cleanId || c.id === rawIssueId);
             if (idx !== -1) currentComplaints[idx] = issue;
             else currentComplaints.unshift(issue);
           }
@@ -906,11 +1066,6 @@
       }
 
       activeDetailIssueId = issue.id;
-
-      if (!document.getElementById('pane-details')) {
-        window.location.href = `authority-case-details.html?id=${issue.id}`;
-        return;
-      }
 
       this.showPane('pane-details', false);
       if (!window.location.search.includes(issue.id) && !window.location.hash.includes(issue.id)) {
@@ -1625,8 +1780,8 @@
         return;
       }
 
-      // Display newest activity first
-      const displayActions = [...authorityActions].reverse();
+      // Display activity in strict chronological order (oldest activity -> newest activity)
+      const displayActions = [...authorityActions];
 
       container.innerHTML = displayActions.map(act => {
         return `
@@ -1840,7 +1995,21 @@
     }
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    window.ComplaintService.init();
+  // Reset button loading state on back/forward cache navigation
+  window.addEventListener('pageshow', () => {
+    document.querySelectorAll('button.btn-inspect-case.is-loading').forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('is-loading');
+      btn.removeAttribute('aria-busy');
+      btn.innerHTML = 'Inspect Case';
+    });
   });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.ComplaintService.init();
+    });
+  } else {
+    window.ComplaintService.init();
+  }
 })();

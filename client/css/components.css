@@ -9491,3 +9491,272 @@ html.theme-dark .authority-contact-email i {
   }
 }
 
+/* ==========================================================================
+   Compact Location Weather + Power Status Bar (Citizen Dashboard)
+   Placement: Directly below .ticker-banner and directly above .stitch-hero
+   ========================================================================== */
+
+.dash-live-status-strip {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0.35rem 1rem;
+  margin: 0 0 1.25rem 0;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.status-strip-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.status-strip-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-main, #1e293b);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.status-strip-location {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.status-strip-location:hover .strip-location-name {
+  color: var(--primary, #0d9488);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.status-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #10b981;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+  animation: stripPulseDot 2.2s infinite;
+}
+
+@keyframes stripPulseDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.status-strip-sep {
+  color: var(--border-color, #cbd5e1);
+  font-weight: 300;
+  font-size: 0.85rem;
+  padding: 0 0.15rem;
+  user-select: none;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.status-strip-weather {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status-strip-weather:hover {
+  color: var(--primary, #0d9488);
+}
+
+.status-strip-weather .strip-weather-icon {
+  font-size: 0.88rem;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+/* Power Section: Clickable to power-updates.html with STRICTLY NO EMOJIS */
+.status-strip-power {
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.status-strip-power:hover .strip-power-status {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.strip-power-label {
+  color: var(--text-muted, #64748b);
+  font-weight: 600;
+  margin-right: 0.15rem;
+}
+
+.strip-power-status {
+  font-weight: 700;
+  transition: color 0.15s ease;
+}
+
+/* Power Three States */
+.strip-power-status.status-verified-shutdown {
+  color: #d97706; /* Amber / Orange */
+}
+
+.strip-power-status.status-verified-clear {
+  color: #15803d; /* Emerald Green */
+}
+
+.strip-power-status.status-unable-verify {
+  color: var(--text-muted, #64748b); /* Slate Neutral */
+}
+
+.strip-power-status.status-loading {
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+}
+
+/* Meta: Updated Time & Arrow Link */
+.status-strip-meta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.strip-updated-text {
+  font-size: 0.74rem;
+  color: var(--text-muted, #64748b);
+  white-space: nowrap;
+}
+
+.strip-arrow-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg-surface-alt, rgba(0, 0, 0, 0.04));
+  color: var(--text-muted, #64748b);
+  font-size: 0.72rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.strip-arrow-link:hover,
+.status-strip-power:hover ~ .status-strip-meta .strip-arrow-link {
+  background: var(--primary, #0d9488);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+/* Subtle Shimmer while initial fetch is happening */
+.dash-live-status-strip.is-fetching::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary, #0d9488), transparent);
+  animation: stripLoadingBar 1.6s infinite;
+}
+
+@keyframes stripLoadingBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .dash-live-status-strip {
+    padding: 0.35rem 0.75rem;
+  }
+  .status-strip-segment {
+    font-size: 0.78rem;
+  }
+  .strip-updated-text {
+    font-size: 0.71rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .dash-live-status-strip {
+    min-height: auto;
+    padding: 0.45rem 0.75rem;
+  }
+  .status-strip-inner {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+  }
+  .status-strip-meta {
+    margin-left: auto;
+  }
+}
+
+/* AMOLED Dark Mode */
+[data-theme="dark"] .dash-live-status-strip,
+html.dark-theme .dash-live-status-strip,
+html.theme-dark .dash-live-status-strip {
+  background: #0a0a0a !important;
+  border-color: #222222 !important;
+  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .status-strip-sep,
+html.dark-theme .status-strip-sep,
+html.theme-dark .status-strip-sep {
+  color: #333333 !important;
+}
+
+[data-theme="dark"] .strip-power-status.status-verified-clear,
+html.dark-theme .strip-power-status.status-verified-clear,
+html.theme-dark .strip-power-status.status-verified-clear {
+  color: #4ade80 !important;
+}
+
+[data-theme="dark"] .strip-power-status.status-verified-shutdown,
+html.dark-theme .strip-power-status.status-verified-shutdown,
+html.theme-dark .strip-power-status.status-verified-shutdown {
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .strip-power-status.status-unable-verify,
+html.dark-theme .strip-power-status.status-unable-verify,
+html.theme-dark .strip-power-status.status-unable-verify {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .strip-arrow-link,
+html.dark-theme .strip-arrow-link,
+html.theme-dark .strip-arrow-link {
+  background: #171717 !important;
+  color: #a1a1aa !important;
+}
+
+[data-theme="dark"] .strip-arrow-link:hover,
+html.dark-theme .strip-arrow-link:hover,
+html.theme-dark .strip-arrow-link:hover {
+  background: var(--primary, #0d9488) !important;
+  color: #ffffff !important;
+}
+
+

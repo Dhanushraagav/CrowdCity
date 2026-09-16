@@ -186,6 +186,41 @@
           <span class="ticker-text-wrapper"><span class="ticker-text" id="civic-intelligence-feed-text">தமிழ்நாடு அரசு மற்றும் நகராட்சி சேவைகள் 38 மாவட்டங்களிலும் செயல்பட்டு வருகின்றன.</span><span class="ticker-cursor"></span></span>
         </div>
 
+        <!-- Compact Location Weather + Power Status Bar -->
+        <aside id="dash-live-status-strip" class="dash-live-status-strip is-fetching" role="region" aria-label="Location Weather and Power Status">
+          <div class="status-strip-inner">
+            <!-- Location Segment (Clickable to Re-detect) -->
+            <div class="status-strip-segment status-strip-location" id="strip-location-segment" role="button" tabindex="0" title="Click to re-detect location">
+              <span class="status-indicator-dot" id="strip-location-dot"></span>
+              <span class="strip-location-name" id="strip-location-name">Tamil Nadu</span>
+            </div>
+
+            <span class="status-strip-sep" aria-hidden="true">|</span>
+
+            <!-- Weather Segment (Links to weather-alerts.html) -->
+            <a href="weather-alerts.html" class="status-strip-segment status-strip-weather" id="strip-weather-segment" title="View Weather Forecast">
+              <i id="strip-weather-icon" class="fa-solid fa-cloud-sun strip-weather-icon"></i>
+              <span class="strip-weather-text" id="strip-weather-text">--°C Loading...</span>
+            </a>
+
+            <span class="status-strip-sep" aria-hidden="true">|</span>
+
+            <!-- Power Status Segment (Strictly Links to power-updates.html with NO EMOJIS) -->
+            <a href="power-updates.html" class="status-strip-segment status-strip-power" id="strip-power-segment" title="View Power Outage Schedules">
+              <span class="strip-power-label" data-i18n="power_label">Power:</span>
+              <span class="strip-power-status status-loading" id="strip-power-status">Checking...</span>
+            </a>
+
+            <!-- Meta: Updated Time & Arrow Link -->
+            <div class="status-strip-meta">
+              <span class="strip-updated-text" id="strip-updated-text">--</span>
+              <a href="power-updates.html" class="strip-arrow-link" id="strip-arrow-link" aria-label="View Power Updates" title="View Power Updates">
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </aside>
+
         <!-- Stitch Hero card -->
         <div class="stitch-hero" style="position: relative;">
           <div class="stitch-hero-container">
@@ -201,15 +236,6 @@
                 </a>
               </div>
             </div>
-            
-            <!-- Floating Live Weather Widget -->
-            <a href="weather-alerts.html" class="floating-weather-widget weather-widget loading" id="weather-widget" title="View Weather Forecast" style="text-decoration: none; cursor: pointer;">
-              <div class="weather-icon" id="weather-icon" style="font-size: 1.5rem; color: #f59e0b;"><i class="fa-solid fa-cloud-sun"></i></div>
-              <div class="weather-info" style="display: flex; flex-direction: column;">
-                <span class="weather-city" id="weather-city" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Detecting...</span>
-                <span class="weather-temp" id="weather-temp" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">--°C</span>
-              </div>
-            </a>
           </div>
         </div>
 
@@ -434,61 +460,147 @@
   <script src="js/user-location.js?v=1.0.0"></script>
   <script src="js/citizen-dashboard.js?v=2.2.0"></script>
 
-  <!-- Weather Widget Logic -->
+  <!-- Live Location, Weather & Power Status Strip Controller -->
   <script>
-  (function initWeather() {
-    const cityEl = document.getElementById('weather-city');
-    const tempEl = document.getElementById('weather-temp');
-    const iconEl = document.getElementById('weather-icon');
-    const widget = document.getElementById('weather-widget');
-    if (!cityEl || !tempEl) return;
+  (function initDashboardLiveStatusBar() {
+    const strip = document.getElementById('dash-live-status-strip');
+    const locSegment = document.getElementById('strip-location-segment');
+    const locNameEl = document.getElementById('strip-location-name');
+    const weatherIconEl = document.getElementById('strip-weather-icon');
+    const weatherTextEl = document.getElementById('strip-weather-text');
+    const powerStatusEl = document.getElementById('strip-power-status');
+    const updatedTextEl = document.getElementById('strip-updated-text');
 
-    window.cc_initWeather = initWeather;
-    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
+    if (!strip) return;
 
-    // Apply weather theme class & particle animation
-    function applyWeatherTheme(code, temp) {
-      widget.classList.remove('weather-rain', 'weather-thunder', 'weather-sun', 'weather-snow', 'weather-clouds');
-      
-      const oldParticles = widget.querySelector('.weather-particle-rain');
-      if (oldParticles) oldParticles.remove();
+    let currentDistrict = '';
+    let isFetching = false;
+    let cachedWeatherData = null;
+    let cachedPowerData = null;
 
-      if (code >= 95 || code === 96 || code === 99) {
-        widget.classList.add('weather-thunder');
-      } else if (temp >= 30) {
-        // High heat (>= 30°C): hot sunny/cloudy weather; strictly NO rain animations on hot days
-        if (code === 0 || code === 1 || temp >= 32) {
-          widget.classList.add('weather-sun');
-        } else {
-          widget.classList.add('weather-clouds');
-        }
-      } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-        widget.classList.add('weather-rain');
-        injectRainParticles();
-      } else if ((code >= 71 && code <= 77) || temp <= 16) {
-        widget.classList.add('weather-snow');
-      } else if (code === 0 || code === 1 || temp >= 32) {
-        widget.classList.add('weather-sun');
-      } else {
-        widget.classList.add('weather-clouds');
+    function getLang() {
+      if (window.i18n && typeof window.i18n.getLanguage === 'function') {
+        return window.i18n.getLanguage();
+      }
+      return localStorage.getItem('crowdcity_citizen_language') ||
+             localStorage.getItem('crowdcity_language') ||
+             localStorage.getItem('cc_lang') || 'ta';
+    }
+
+    function t(key, fallback) {
+      if (window.i18n && typeof window.i18n.t === 'function') {
+        const res = window.i18n.t(key);
+        if (res && res !== key) return res;
+      }
+      return fallback;
+    }
+
+    // Tamil District names mapping for display in Tamil mode
+    const TN_DISTRICT_NAMES_TA = {
+      'ariyalur': 'அரியலூர்',
+      'chengalpattu': 'செங்கல்பட்டு',
+      'chennai': 'சென்னை',
+      'coimbatore': 'கோயம்புத்தூர்',
+      'cuddalore': 'கடலூர்',
+      'dharmapuri': 'தருமபுரி',
+      'dindigul': 'திண்டுக்கல்',
+      'erode': 'ஈரோடு',
+      'kallakurichi': 'கள்ளக்குறிச்சி',
+      'kancheepuram': 'காஞ்சிபுரம்',
+      'kanchipuram': 'காஞ்சிபுரம்',
+      'kanniyakumari': 'கன்னியாகுமரி',
+      'karur': 'கரூர்',
+      'krishnagiri': 'கிருஷ்ணகிரி',
+      'madurai': 'மதுரை',
+      'mayiladuthurai': 'மயிலாடுதுறை',
+      'nagapattinam': 'நாகப்பட்டினம்',
+      'namakkal': 'நாமக்கல்',
+      'nilgiris': 'நீலகிரி',
+      'perambalur': 'பெரம்பலூர்',
+      'pudukkottai': 'புதுக்கோட்டை',
+      'ramanathapuram': 'இராமநாதபுரம்',
+      'ranipet': 'ராணிப்பேட்டை',
+      'salem': 'சேலம்',
+      'sivaganga': 'சிவகங்கை',
+      'tenkasi': 'தென்காசி',
+      'thanjavur': 'தஞ்சாவூர்',
+      'theni': 'தேனி',
+      'thoothukudi': 'தூத்துக்குடி',
+      'tiruchirappalli': 'திருச்சிராப்பள்ளி',
+      'tirunelveli': 'திருநெல்வேலி',
+      'tirupathur': 'திருப்பத்தூர்',
+      'tiruppur': 'திருப்பூர்',
+      'tiruvallur': 'திருவள்ளூர்',
+      'tiruvannamalai': 'திருவண்ணாமலை',
+      'tiruvarur': 'திருவாரூர்',
+      'vellore': 'வேலூர்',
+      'viluppuram': 'விழுப்புரம்',
+      'virudhunagar': 'விருதுநகர்'
+    };
+
+    function formatDistrictDisplay(districtName) {
+      if (!districtName) return getLang() === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
+      const clean = districtName.replace(/ district$/i, '').trim();
+      if (getLang() === 'ta') {
+        const lower = clean.toLowerCase();
+        if (TN_DISTRICT_NAMES_TA[lower]) return TN_DISTRICT_NAMES_TA[lower];
+      }
+      return clean;
+    }
+
+    function formatISTTime(dateObj = new Date()) {
+      try {
+        return new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }).format(dateObj);
+      } catch (e) {
+        return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
     }
 
-    function injectRainParticles() {
-      const particleWrap = document.createElement('div');
-      particleWrap.className = 'weather-particle-rain';
-      for (let i = 0; i < 8; i++) {
-        const drop = document.createElement('div');
-        drop.className = 'rain-drop';
-        drop.style.left = `${8 + i * 11}%`;
-        drop.style.animationDelay = `${(i * 0.12).toFixed(2)}s`;
-        particleWrap.appendChild(drop);
+    // Weather condition translations in Tamil
+    const WEATHER_CONDITIONS_TA = {
+      'clear sky': 'தெளிவான வானம்',
+      'mainly clear': 'பெரும்பாலும் தெளிவானது',
+      'partly cloudy': 'ஓரளவு மேகமூட்டம்',
+      'overcast': 'மேகமூட்டம்',
+      'fog': 'மூடுபனி',
+      'depositing rime fog': 'பனிமூட்டம்',
+      'light drizzle': 'தூறல் மழை',
+      'moderate drizzle': 'தூறல் மழை',
+      'dense drizzle': 'அடர்ந்த தூறல்',
+      'light freezing drizzle': 'உறைபனி தூறல்',
+      'dense freezing drizzle': 'அடர்ந்த உறைபனி தூறல்',
+      'slight rain': 'லேசான மழை',
+      'moderate rain': 'மிதமான மழை',
+      'heavy rain': 'கனமழை',
+      'light freezing rain': 'உறைபனி மழை',
+      'heavy freezing rain': 'கன உறைபனி மழை',
+      'slight snow fall': 'லேசான பனிப்பொழிவு',
+      'moderate snow fall': 'மிதமான பனிப்பொழிவு',
+      'heavy snow fall': 'கன பனிப்பொழிவு',
+      'snow grains': 'பனிப்பொழிவு',
+      'slight rain showers': 'மழைப்பொழிவு',
+      'moderate rain showers': 'மழைப்பொழிவு',
+      'violent rain showers': 'கனமழை பொழிவு',
+      'thunderstorm': 'இடியுடன் கூடிய மழை',
+      'thunderstorm with slight hail': 'இடியுடன் கூடிய ஆலங்கட்டி மழை',
+      'thunderstorm with heavy hail': 'கடுமையான இடியுடன் ஆலங்கட்டி மழை'
+    };
+
+    function translateCondition(condition) {
+      if (!condition) return '';
+      if (getLang() === 'ta') {
+        const lower = condition.toLowerCase().trim();
+        if (WEATHER_CONDITIONS_TA[lower]) return WEATHER_CONDITIONS_TA[lower];
       }
-      widget.appendChild(particleWrap);
+      return condition;
     }
 
-    // WMO weather code to icon mapping
-    function getWeatherIcon(code, temp) {
+    function getWeatherIconClass(code, temp) {
       if (typeof temp === 'number' && temp >= 30 && code < 95) {
         if (code === 0 || code === 1 || temp >= 32) return 'fa-sun';
         return 'fa-cloud-sun';
@@ -497,167 +609,217 @@
       if (code <= 3) return 'fa-cloud-sun';
       if (code <= 48) return 'fa-smog';
       if (code <= 57) return 'fa-cloud-rain';
-      if (code <= 67) return 'fa-cloud-showers-water';
+      if (code <= 67) return 'fa-cloud-showers-heavy';
       if (code <= 77) return 'fa-snowflake';
       if (code <= 82) return 'fa-cloud-showers-heavy';
-      if (code <= 99) return 'fa-bolt-lightning';
+      if (code <= 99) return 'fa-cloud-bolt';
       return 'fa-cloud';
     }
 
-    function getWeatherColor(code, temp) {
-      if (typeof temp === 'number' && temp >= 30 && code < 95) {
-        return (code === 0 || code === 1 || temp >= 32) ? '#d97706' : '#f59e0b';
-      }
-      if (code === 0) return '#d97706';      // sunny amber
-      if (code <= 3) return '#f59e0b';        // partly cloudy
-      if (code <= 48) return '#64748b';       // fog/mist grey
-      if (code <= 67) return '#0284c7';       // rain blue
-      if (code <= 77) return '#38bdf8';       // snow cyan
-      if (code <= 99) return '#fbbf24';       // thunderstorm yellow
-      return '#64748b';
+    async function updateStatusStrip(districtToUse, force = false) {
+      if (isFetching && !force) return;
+      isFetching = true;
+      strip.classList.add('is-fetching');
+
+      const district = districtToUse || (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function' ? window.CrowdCityLocation.getSavedUserDistrict() : (localStorage.getItem('user_district') || 'Tamil Nadu'));
+      currentDistrict = district;
+      locNameEl.textContent = formatDistrictDisplay(district);
+
+      // Concurrent fetching of Weather & Power Status
+      const weatherPromise = fetchWeatherStatus(district);
+      const powerPromise = fetchPowerStatus(district);
+
+      await Promise.allSettled([weatherPromise, powerPromise]);
+
+      // Update timestamp
+      const timeStr = formatISTTime();
+      const updatedPrefix = t('status_updated_prefix', 'Updated');
+      updatedTextEl.textContent = `${updatedPrefix} ${timeStr}`;
+
+      strip.classList.remove('is-fetching');
+      isFetching = false;
     }
 
-    async function fetchWeather(lat, lon, isForced = false) {
+    async function fetchWeatherStatus(district) {
       try {
-        // Reverse geocode with zoom=12 for precise city/town detection
-        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=12&addressdetails=1`, {
-          headers: { 'Accept-Language': currentLang }
+        const res = await fetch(`/api/public-pulse/weather?district=${encodeURIComponent(district)}`, {
+          headers: { 'Accept': 'application/json' }
         });
-        const geoData = await geoRes.json();
-        const addr = geoData.address || {};
-        // Prioritize specific city/town/suburb before falling back to district
-        const detectedPlace = addr.city || addr.town || addr.municipality || addr.suburb || addr.village || addr.state_district || addr.county || 'Tamil Nadu';
-        const cleanDistrict = detectedPlace.replace(/ district$/i, '').replace(/ taluk$/i, '').replace(/ Corporation$/i, '').replace(/ Municipality$/i, '');
-
-        // Fetch weather from Open-Meteo
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-        const weatherData = await weatherRes.json();
-        const current = weatherData.current_weather;
-
-        const temp = Math.round(current.temperature);
-        const code = current.weathercode;
-        cityEl.textContent = cleanDistrict;
-        tempEl.textContent = `${temp}\u00B0C`;
-        iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(code, temp)}"></i>`;
-        iconEl.style.color = getWeatherColor(code, temp);
-        applyWeatherTheme(code, temp);
-        widget.classList.remove('loading');
-        widget.title = `${cleanDistrict} — ${temp}\u00B0C (Click to re-detect location)`;
-
-        // Cache for 10 min with language key
-        localStorage.setItem(`cc_weather_cache_${currentLang}`, JSON.stringify({
-          district: cleanDistrict, temp, code, lang: currentLang, ts: Date.now()
-        }));
-
-        // Synchronize detected location with CrowdCity universal location service
-        try {
-          if (window.CrowdCityLocation && typeof window.CrowdCityLocation.setUserDistrict === 'function') {
-            window.CrowdCityLocation.setUserDistrict(cleanDistrict);
-          } else {
-            localStorage.setItem('user_district', cleanDistrict);
-            window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
-              detail: { district: cleanDistrict, lat, lng: lon }
-            }));
+        
+        if (res.ok) {
+          const data = await res.json();
+          const currentObj = (data && data.current_district && data.current_district.current) || (data && data.current);
+          if (data && data.success && currentObj && typeof currentObj.temperature_c === 'number') {
+            cachedWeatherData = {
+              temp: Math.round(currentObj.temperature_c),
+              condition: currentObj.condition || 'Clear sky',
+              icon: currentObj.icon_class || 'fa-cloud-sun'
+            };
+            renderWeather(cachedWeatherData);
+            return;
           }
-        } catch (syncErr) {}
-      } catch (e) {
-        console.warn('Weather fetch failed:', e);
-        cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
-        tempEl.textContent = '--\u00B0C';
-        widget.classList.remove('loading');
-      }
-    }
-
-    // Function to trigger live geolocation
-    function detectLiveLocation(isForced = false) {
-      if (navigator.geolocation) {
-        widget.classList.add('loading');
-        tempEl.textContent = 'Detecting...';
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            localStorage.setItem('cc_weather_coords', JSON.stringify({ lat, lon, ts: Date.now() }));
-            fetchWeather(lat, lon, isForced);
-          },
-          (err) => {
-            console.warn('Geolocation unavailable or denied:', err.message);
-            // Check if user previously had a valid detected district
-            const savedDistrict = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
-              ? window.CrowdCityLocation.getSavedUserDistrict()
-              : localStorage.getItem('user_district');
-            if (savedDistrict && window.CrowdCityLocation && window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS) {
-              const centroid = window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS.find(c => 
-                c.name.toLowerCase() === savedDistrict.toLowerCase() || c.id.toLowerCase() === savedDistrict.toLowerCase()
-              );
-              if (centroid) {
-                fetchWeather(centroid.lat, centroid.lng, isForced);
-                return;
-              }
-            }
-            cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
-            tempEl.textContent = currentLang === 'ta' ? 'இருப்பிடம் தேவை' : 'Location Required';
-            widget.classList.remove('loading');
-            widget.title = currentLang === 'ta' ? 'நேரலை வானிலைக்கு இருப்பிடத்தை இயக்கவும்' : 'Click to enable location for live weather';
-          },
-          { enableHighAccuracy: true, timeout: 8000, maximumAge: isForced ? 0 : 300000 }
-        );
-      } else {
-        cityEl.textContent = currentLang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu';
-        tempEl.textContent = '--\u00B0C';
-        widget.classList.remove('loading');
-      }
-    }
-
-    // Click on weather widget to instantly re-detect live GPS coordinates
-    widget.style.cursor = 'pointer';
-    widget.addEventListener('click', () => {
-      localStorage.removeItem(`cc_weather_cache_${currentLang}`);
-      localStorage.removeItem('cc_weather_coords');
-      detectLiveLocation(true);
-    });
-
-    // Check language-specific cache first (10 min TTL)
-    const cacheKey = `cc_weather_cache_${currentLang}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      try {
-        const c = JSON.parse(cached);
-        if (c.lang === currentLang && Date.now() - c.ts < 10 * 60 * 1000) {
-          cityEl.textContent = c.district;
-          tempEl.textContent = `${c.temp}\u00B0C`;
-          iconEl.innerHTML = `<i class="fa-solid ${getWeatherIcon(c.code, c.temp)}"></i>`;
-          iconEl.style.color = getWeatherColor(c.code, c.temp);
-          applyWeatherTheme(c.code, c.temp);
-          widget.classList.remove('loading');
-          widget.title = `${c.district} — ${c.temp}\u00B0C (Click to re-detect location)`;
-          return; // Use cached data
         }
-      } catch (e) { /* ignore parse errors */ }
+        throw new Error('API weather unavailable');
+      } catch (err) {
+        // Fallback: Check if coordinates centroid exists
+        let fallbackDone = false;
+        if (window.CrowdCityLocation && window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS) {
+          const centroid = window.CrowdCityLocation.TN_DISTRICTS_CENTROIDS.find(c =>
+            c.name.toLowerCase() === district.toLowerCase() || c.id.toLowerCase() === district.toLowerCase()
+          );
+          if (centroid) {
+            try {
+              const omRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${centroid.lat}&longitude=${centroid.lng}&current_weather=true`);
+              if (omRes.ok) {
+                const omData = await omRes.json();
+                if (omData && omData.current_weather) {
+                  const temp = Math.round(omData.current_weather.temperature);
+                  const code = omData.current_weather.weathercode;
+                  const icon = getWeatherIconClass(code, temp);
+                  cachedWeatherData = { temp, condition: 'Clear', icon };
+                  renderWeather(cachedWeatherData);
+                  fallbackDone = true;
+                }
+              }
+            } catch (e) {}
+          }
+        }
+
+        if (!fallbackDone) {
+          cachedWeatherData = null;
+          weatherIconEl.className = 'fa-solid fa-cloud strip-weather-icon';
+          weatherTextEl.textContent = `--°C ${t('weather_unavailable_short', 'Weather unavailable')}`;
+        }
+      }
     }
 
-    // Check if we have cached coordinates (15 min TTL)
-    const cachedCoords = localStorage.getItem('cc_weather_coords');
-    if (cachedCoords) {
+    function renderWeather(data) {
+      if (!data) {
+        weatherIconEl.className = 'fa-solid fa-cloud strip-weather-icon';
+        weatherTextEl.textContent = `--°C ${t('weather_unavailable_short', 'Weather unavailable')}`;
+        return;
+      }
+      const icon = data.icon.startsWith('fa-') ? data.icon : `fa-${data.icon}`;
+      weatherIconEl.className = `fa-solid ${icon} strip-weather-icon`;
+      const translatedCond = translateCondition(data.condition);
+      weatherTextEl.textContent = `${data.temp}°C ${translatedCond}`;
+    }
+
+    async function fetchPowerStatus(district) {
       try {
-        const coords = JSON.parse(cachedCoords);
-        if (coords && coords.lat && coords.lon && coords.ts && Date.now() - coords.ts < 15 * 60 * 1000) {
-          fetchWeather(coords.lat, coords.lon);
+        const res = await fetch(`/api/power-updates?district=${encodeURIComponent(district)}`, {
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          cachedPowerData = data;
+          renderPowerStatus(data);
           return;
         }
-      } catch (e) { /* ignore */ }
+        throw new Error('API power unavailable');
+      } catch (err) {
+        cachedPowerData = { verification_status: 'unable_to_verify', status: 'unable_to_verify' };
+        renderPowerStatus(cachedPowerData);
+      }
     }
 
-    // Request fresh geolocation
-    detectLiveLocation(false);
+    function renderPowerStatus(data) {
+      powerStatusEl.className = 'strip-power-status';
+
+      const hasShutdowns = data && Array.isArray(data.shutdowns) && data.shutdowns.length > 0;
+      const isVerifiedClear = data && (data.status === 'verified_no_shutdown' || (data.verification_status === 'verified' && !hasShutdowns));
+      const isVerifiedShutdown = data && hasShutdowns && (data.verification_status === 'verified' || data.status === 'verified');
+
+      // State A: Verified Planned Shutdown
+      if (isVerifiedShutdown) {
+        const s = data.shutdowns[0];
+        const start = (s.start_time || '09:00').slice(0, 5);
+        const end = (s.end_time || '17:00').slice(0, 5);
+        const label = t('power_planned_shutdown_short', 'Planned shutdown');
+        powerStatusEl.textContent = `${label} ${start}–${end}`;
+        powerStatusEl.classList.add('status-verified-shutdown');
+        return;
+      }
+
+      // State B: Verified No Planned Shutdown
+      if (isVerifiedClear) {
+        powerStatusEl.textContent = t('power_no_planned_shutdown_short', 'No planned shutdown found');
+        powerStatusEl.classList.add('status-verified-clear');
+        return;
+      }
+
+      // State C: Unable to Verify (strictly NEVER convert missing data into "No planned shutdown")
+      powerStatusEl.textContent = t('power_unable_to_verify_short', 'Unable to verify');
+      powerStatusEl.classList.add('status-unable-verify');
+    }
+
+    // Interactive location click: Trigger live GPS re-detection
+    if (locSegment) {
+      locSegment.addEventListener('click', async () => {
+        locNameEl.textContent = t('status_detecting_location', 'Detecting...');
+        if (window.CrowdCityLocation && typeof window.CrowdCityLocation.reDetectLiveLocation === 'function') {
+          const newDistrict = await window.CrowdCityLocation.reDetectLiveLocation(6000);
+          if (newDistrict) {
+            updateStatusStrip(newDistrict, true);
+            return;
+          }
+        }
+        updateStatusStrip(currentDistrict, true);
+      });
+
+      locSegment.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          locSegment.click();
+        }
+      });
+    }
+
+    // Reactive event listeners
+    window.addEventListener('crowdcity:location_detected', (e) => {
+      if (e.detail && e.detail.district) {
+        updateStatusStrip(e.detail.district, true);
+      }
+    });
+
+    window.addEventListener('crowdcity:location_changed', (e) => {
+      if (e.detail && e.detail.district) {
+        updateStatusStrip(e.detail.district, true);
+      }
+    });
+
+    window.addEventListener('language-change', () => {
+      locNameEl.textContent = formatDistrictDisplay(currentDistrict);
+      if (cachedWeatherData) renderWeather(cachedWeatherData);
+      if (cachedPowerData) renderPowerStatus(cachedPowerData);
+      const timeStr = formatISTTime();
+      const updatedPrefix = t('status_updated_prefix', 'Updated');
+      updatedTextEl.textContent = `${updatedPrefix} ${timeStr}`;
+    });
+
+    // Initial Execution
+    const initialDistrict = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
+      ? window.CrowdCityLocation.getSavedUserDistrict()
+      : (localStorage.getItem('user_district') || 'Tamil Nadu');
+
+    updateStatusStrip(initialDistrict);
+
+    // If initial district is generic or not yet detected, kick off non-blocking background detection
+    if (!initialDistrict || initialDistrict === 'Tamil Nadu') {
+      if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
+        window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 4000, requestGps: true })
+          .then(det => {
+            if (det && det !== initialDistrict) {
+              updateStatusStrip(det, true);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+
+    window.cc_refreshStatusStrip = () => updateStatusStrip(currentDistrict, true);
   })();
-
-  // Listen to language-change event to re-fetch/re-render weather in the correct language
-  window.addEventListener('language-change', () => {
-    if (typeof window.cc_initWeather === 'function') {
-      window.cc_initWeather();
-    }
-  });
   </script>
 
   <!-- Emergency Contacts Modal (Mobile Only) -->

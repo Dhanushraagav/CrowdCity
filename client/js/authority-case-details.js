@@ -1,6 +1,12 @@
 // Authority Case Details Inspection Console Module
-document.addEventListener('DOMContentLoaded', () => {
+function bootAuthorityDetails() {
   if (window.ComplaintService && typeof window.ComplaintService.init === 'function') {
     window.ComplaintService.init();
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootAuthorityDetails);
+} else {
+  bootAuthorityDetails();
+}

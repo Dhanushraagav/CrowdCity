@@ -178,7 +178,24 @@ export const getIssueById = async (req, res) => {
       issueQuery = issueQuery.eq('id', id);
     }
 
-    const { data: issue, error: issueError } = await issueQuery.single();
+    let { data: issue, error: issueError } = await issueQuery.single();
+
+    // Fallback to default public anon client if user-scoped client failed (e.g. invalid auth token on public read)
+    if (issueError && activeClient !== supabase) {
+      let fallbackQuery = supabase
+        .from('issues')
+        .select('*, reporter:profiles!issues_reporter_id_fkey(full_name, avatar_url)');
+      if (typeof id === 'string' && id.toUpperCase().startsWith('CC-')) {
+        fallbackQuery = fallbackQuery.eq('complaint_id', id.toUpperCase());
+      } else {
+        fallbackQuery = fallbackQuery.eq('id', id);
+      }
+      const fbResult = await fallbackQuery.single();
+      if (!fbResult.error && fbResult.data) {
+        issue = fbResult.data;
+        issueError = null;
+      }
+    }
 
     if (issueError) {
       logger.error('getIssueById DB Error: %O', issueError);
@@ -337,6 +354,13 @@ const isSchemaMissingColumnError = (err) => {
   return msg.includes('column') || msg.includes('schema cache') || msg.includes('does not exist');
 };
 
+const isDuplicateComplaintIdError = (err) => {
+  if (!err) return false;
+  if (err.code === '23505') return true;
+  const msg = (err.message || '').toLowerCase();
+  return msg.includes('issues_complaint_id_key') || (msg.includes('duplicate key') && msg.includes('complaint_id'));
+};
+
 /**
  * Report a new issue.
  */
@@ -477,8 +501,11 @@ export const createIssue = async (req, res) => {
     const finalAuthorityEmail = authority_email || authHierarchy?.administrativeAuthority?.email || null;
     const finalHigherAuthority = higher_authority_name || authHierarchy?.escalationContact?.office || null;
 
+    // Production flow: insert to Supabase using request-scoped client
+    const activeClient = getSupabaseClient(req);
+
     // Generate authoritative Complaint ID (CC-YYYY-NNNNNN)
-    const generatedComplaintId = await generateNextComplaintId();
+    const generatedComplaintId = await generateNextComplaintId(new Date(), activeClient);
 
     const resolvedPriority = (is_emergency === 'true' || is_emergency === true) ? 'critical' : (aiResult.priority ? aiResult.priority.toLowerCase() : 'medium');
     const calculatedSlaDeadline = calculateSlaDeadline(new Date(), resolvedPriority, is_emergency);
@@ -512,61 +539,83 @@ export const createIssue = async (req, res) => {
       ai_priority: resolvedPriority,
       is_emergency: is_emergency === 'true' || is_emergency === true,
 
-      // Location-Aware Authority fields
-      district: finalDistrict,
-      taluk: finalTaluk,
-      village_or_town: finalVillageTown,
-      local_body: finalLocalBody,
-      local_body_type: finalLocalBodyType,
-      responsible_authority_name: finalAuthorityName,
-      authority_phone: finalAuthorityPhone,
-      authority_email: finalAuthorityEmail,
-      higher_authority_name: finalHigherAuthority
+      // Location-Aware District (verified present in schema)
+      district: finalDistrict
     };
 
-    // Production flow: insert to Supabase using request-scoped client
-    const activeClient = getSupabaseClient(req);
-    let { data: issue, error } = await activeClient
-      .from('issues')
-      .insert(newIssue)
-      .select()
-      .single();
+    let issue = null;
+    let lastError = null;
+    const MAX_INSERT_ATTEMPTS = 5;
 
-    if (isSchemaMissingColumnError(error)) {
-      logger.warn('Extended columns not found in Supabase schema, retrying without them:', error.message);
-      delete newIssue.complaint_id;
-      delete newIssue.citizen_count;
-      delete newIssue.sla_deadline;
-      delete newIssue.sla_status;
-      delete newIssue.escalation_level;
-      delete newIssue.taluk;
-      delete newIssue.village_or_town;
-      delete newIssue.local_body;
-      delete newIssue.local_body_type;
-      delete newIssue.responsible_authority_name;
-      delete newIssue.authority_phone;
-      delete newIssue.authority_email;
-      delete newIssue.higher_authority_name;
-      const retry = await activeClient.from('issues').insert(newIssue).select().single();
-      if (retry.error) {
-        logger.error('Failed to insert issue into Supabase on fallback: %O', retry.error);
-        return res.status(400).json({
-          error: `Supabase insert failed: ${retry.error.message}`,
-          details: retry.error.details,
-          hint: retry.error.hint
-        });
+    for (let attempt = 1; attempt <= MAX_INSERT_ATTEMPTS; attempt++) {
+      let { data, error } = await activeClient
+        .from('issues')
+        .insert(newIssue)
+        .select()
+        .single();
+
+      // Gracefully handle unmigrated location columns without stripping complaint_id or SLA tracking
+      if (error && isSchemaMissingColumnError(error)) {
+        logger.warn('Extended columns not found in Supabase schema, retrying with core schema columns:', error.message);
+        delete newIssue.taluk;
+        delete newIssue.village_or_town;
+        delete newIssue.local_body;
+        delete newIssue.local_body_type;
+        delete newIssue.responsible_authority_name;
+        delete newIssue.authority_phone;
+        delete newIssue.authority_email;
+        delete newIssue.higher_authority_name;
+
+        const retry = await activeClient.from('issues').insert(newIssue).select().single();
+        data = retry.data;
+        error = retry.error;
       }
-      issue = retry.data;
-      issue.complaint_id = generatedComplaintId;
-      issue.citizen_count = 1;
-      issue.sla_deadline = calculatedSlaDeadline.toISOString();
-      issue.sla_status = 'within_sla';
-    } else if (error) {
-      logger.error('Failed to insert issue into Supabase: %O', error);
+
+      // Self-healing: if complaint_id hits a duplicate key collision, auto-advance and retry
+      if (error && isDuplicateComplaintIdError(error)) {
+        logger.warn(`Complaint ID collision on attempt ${attempt} for ID ${newIssue.complaint_id}: ${error.message}. Auto-advancing sequence...`);
+
+        const clientForLookup = supabaseAdmin || activeClient;
+        const { data: recent } = await clientForLookup
+          .from('issues')
+          .select('complaint_id')
+          .order('created_at', { ascending: false })
+          .limit(30);
+
+        const year = new Date().getFullYear();
+        let highestNum = 0;
+        (recent || []).forEach(r => {
+          if (r && r.complaint_id) {
+            const parts = String(r.complaint_id).trim().split('-');
+            if (parts.length === 3) {
+              const n = parseInt(parts[2], 10);
+              if (!isNaN(n) && n > highestNum) highestNum = n;
+            }
+          }
+        });
+
+        // Advance past current maximum by attempt offset
+        const nextSeq = Math.max(highestNum, 0) + attempt;
+        newIssue.complaint_id = `CC-${year}-${String(nextSeq).padStart(6, '0')}`;
+        lastError = error;
+        continue;
+      }
+
+      if (error) {
+        lastError = error;
+        break;
+      }
+
+      issue = data;
+      break;
+    }
+
+    if (!issue && lastError) {
+      logger.error('Failed to insert issue into Supabase after retry attempts: %O', lastError);
       return res.status(400).json({
-        error: `Supabase insert failed: ${error.message}`,
-        details: error.details,
-        hint: error.hint
+        error: `Supabase insert failed: ${lastError.message}`,
+        details: lastError.details,
+        hint: lastError.hint
       });
     }
 
@@ -720,7 +769,7 @@ export const updateIssueStatus = async (req, res) => {
   const { id } = req.params;
   const { status, notes, official_remarks } = req.body || {};
 
-  const validStatuses = ['pending', 'assigned', 'in_progress', 'resolved', 'rejected', 'timeline_update'];
+  const validStatuses = ['pending', 'verified', 'assigned', 'in_progress', 'resolved', 'rejected', 'timeline_update'];
   if (!status || !validStatuses.includes(status)) {
     return res.status(400).json({ error: 'Please provide a valid status.' });
   }
@@ -856,6 +905,8 @@ export const updateIssueStatus = async (req, res) => {
       defaultNotes = 'Complaint resolved successfully.';
     } else if (targetStatus === 'assigned') {
       defaultNotes = 'Complaint assigned to authority department.';
+    } else if (targetStatus === 'verified') {
+      defaultNotes = 'Complaint verified for department assignment by authority triage.';
     } else if (status === 'timeline_update') {
       defaultNotes = 'Caselog timeline update posted.';
     } else {

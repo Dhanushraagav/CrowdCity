@@ -486,8 +486,8 @@ CROWDCITY AI TEAM & LEADERSHIP KNOWLEDGE BASE (ABOUT OUR WEBSITE):
   About: Dhanush Raagav S is a technology enthusiast and developer passionate about building modern digital products and intelligent applications. He focuses on transforming ideas into scalable, user-friendly solutions through clean development and innovative technology.
 - Test Engineer: Tulasiram V (Test Engineer)
   About: Tulasiram V works as the Test Engineer for CrowdCity AI, focusing on quality, reliability, and real-world usability. He helps identify issues, validate system behaviour, and ensure that every major feature delivers a consistent user experience.
-- Software Architect: Aathi Shankar A (Software Architect)
-  About: Aathi Shankar A contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
+- Software Architect: Aathisankar A (Software Architect)
+  About: Aathisankar A contributes to CrowdCity AI as a Software Architect, focusing on system structure, scalability, and technical design. His role is to ensure that the platform is built on a reliable architecture capable of evolving with future requirements.
 - DevOps Engineer: Padmadev D (DevOps Engineer)
   About: Padmadev D contributes as the DevOps Engineer, focusing on deployment, infrastructure, development workflows, and system reliability. He helps ensure that CrowdCity AI can move efficiently from development to a stable and maintainable production environment.
 
@@ -531,7 +531,7 @@ function generateAssistantFallbackResponse(messages, knowledgeBase) {
 
   if (lastMsg.includes('founder') || lastMsg.includes('sandeep') || lastMsg.includes('who built') || lastMsg.includes('who created') || lastMsg.includes('team') || lastMsg.includes('developer')) {
     return {
-      text: `CrowdCity AI is built by an engineering and leadership team committed to smart city technology:\n\n1. Sandeep Kumar J — Founder (CrowdCity AI)\nVisionary entrepreneur focusing on technology-driven solutions for smarter, more connected communities.\n\n2. Dhanush Raagav S — Developer\nTransforms innovative ideas into scalable, user-friendly applications.\n\n3. Tulasiram V — Test Engineer\nEnsures quality, reliability, and real-world usability across all platform features.\n\n4. Aathi Shankar A — Software Architect\nFocuses on system structure, scalability, and platform architecture.\n\n5. Padmadev D — DevOps Engineer\nManages deployment, infrastructure, development workflows, and system reliability.`
+      text: `CrowdCity AI is built by an engineering and leadership team committed to smart city technology:\n\n1. Sandeep Kumar J — Founder (CrowdCity AI)\nVisionary entrepreneur focusing on technology-driven solutions for smarter, more connected communities.\n\n2. Dhanush Raagav S — Developer\nTransforms innovative ideas into scalable, user-friendly applications.\n\n3. Tulasiram V — Test Engineer\nEnsures quality, reliability, and real-world usability across all platform features.\n\n4. Aathisankar A — Software Architect\nFocuses on system structure, scalability, and platform architecture.\n\n5. Padmadev D — DevOps Engineer\nManages deployment, infrastructure, development workflows, and system reliability.`
     };
   } else if (lastMsg.includes('kmut') || lastMsg.includes('magalir urimai') || lastMsg.includes('women right')) {
     return {

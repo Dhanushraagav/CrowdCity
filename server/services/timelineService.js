@@ -42,12 +42,32 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
 
   // Find explicit status logs (first occurrence of each key status)
   const submittedLog = logs.find(l => l.status === 'pending') || null;
-  const verifiedLog = logs.find(l => l.status === 'verified') || null;
   const assignedLog = logs.find(l => l.status === 'assigned') || null;
   const inProgressLogs = logs.filter(l => l.status === 'in_progress');
   const inProgressLog = inProgressLogs.length > 0 ? inProgressLogs[0] : null;
   const latestInProgressLog = inProgressLogs.length > 0 ? inProgressLogs[inProgressLogs.length - 1] : null;
   const resolvedLog = logs.find(l => l.status === 'resolved') || null;
+
+  // Disambiguate pre-assignment triage verification from post-resolution citizen verification
+  const hasAssigned = !!(issue.assigned_to || assignedLog || status === 'assigned');
+  const hasResolvedProof = !!(issue.completion_proof_url || issue.completion_notes);
+  const isPostResolutionVerified = (status === 'verified') && (hasResolvedProof || resolvedLog || hasAssigned);
+  const isTriageVerified = (status === 'verified') && !isPostResolutionVerified;
+
+  const preAssignmentVerifiedLog = logs.find(l => {
+    if (l.status !== 'verified') return false;
+    if (assignedLog && new Date(l.created_at).getTime() > new Date(assignedLog.created_at).getTime()) return false;
+    if (resolvedLog && new Date(l.created_at).getTime() > new Date(resolvedLog.created_at).getTime()) return false;
+    if (l.notes && /resolution.*approved|verified.*citizen/i.test(l.notes)) return false;
+    return true;
+  }) || null;
+
+  const postResolutionVerifiedLog = logs.find(l => {
+    if (l.status !== 'verified') return false;
+    if (resolvedLog && new Date(l.created_at).getTime() >= new Date(resolvedLog.created_at).getTime()) return true;
+    if (l.notes && /resolution.*approved|verified.*citizen/i.test(l.notes)) return true;
+    return false;
+  }) || null;
 
   // Derive department/authority display name
   const authorityDisplay = 
@@ -75,27 +95,23 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
   };
 
   // 2. VERIFIED STAGE
-  // Completed if:
-  // - Explicit verified log exists, OR
-  // - Status is 'verified', 'assigned', 'in_progress', 'resolved'
-  // Current if status === 'verified'
   let verifiedState = 'pending';
   let verifiedTimestamp = null;
   let verifiedNotes = null;
   let verifiedActor = null;
   let verifiedIsInferred = false;
 
-  if (verifiedLog) {
-    verifiedState = status === 'verified' ? 'current' : 'completed';
-    verifiedTimestamp = verifiedLog.created_at;
-    verifiedNotes = verifiedLog.notes || verifiedLog.remarks || 'Complaint verified by administrative authority.';
-    verifiedActor = verifiedLog.profiles?.full_name || 'Municipal Officer';
-  } else if (status === 'verified') {
+  if (preAssignmentVerifiedLog) {
+    verifiedState = isTriageVerified ? 'current' : 'completed';
+    verifiedTimestamp = preAssignmentVerifiedLog.created_at;
+    verifiedNotes = preAssignmentVerifiedLog.notes || preAssignmentVerifiedLog.remarks || 'Complaint verified by administrative authority.';
+    verifiedActor = preAssignmentVerifiedLog.profiles?.full_name || 'Municipal Officer';
+  } else if (isTriageVerified) {
     verifiedState = 'current';
     verifiedTimestamp = issue.updated_at || null;
     verifiedNotes = issue.official_remarks || 'Complaint verified for department assignment.';
     verifiedActor = 'Municipal Officer';
-  } else if (['assigned', 'in_progress', 'resolved'].includes(status)) {
+  } else if (['assigned', 'in_progress', 'resolved', 'verified'].includes(status) || hasAssigned || isPostResolutionVerified) {
     // Inferred completed as prerequisite of assignment
     verifiedState = 'completed';
     // Do NOT invent a fake historical timestamp if no explicit log exists
@@ -127,16 +143,16 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
   let assignedIsInferred = false;
 
   if (assignedLog) {
-    assignedState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) ? 'completed' : 'pending');
+    assignedState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) || isPostResolutionVerified ? 'completed' : 'pending');
     assignedTimestamp = assignedLog.created_at;
     assignedNotes = assignedLog.notes || `Assigned to ${authorityDisplay}.`;
     assignedActor = assignedLog.profiles?.full_name || authorityDisplay;
   } else if (issue.assigned_to || status === 'assigned') {
-    assignedState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) ? 'completed' : 'pending');
-    assignedTimestamp = issue.updated_at || null;
+    assignedState = status === 'assigned' ? 'current' : (['in_progress', 'resolved'].includes(status) || isPostResolutionVerified ? 'completed' : 'pending');
+    assignedTimestamp = issue.assigned_at || issue.updated_at || null;
     assignedNotes = `Assigned to ${authorityDisplay}.`;
     assignedActor = authorityDisplay;
-  } else if (['in_progress', 'resolved'].includes(status)) {
+  } else if (['in_progress', 'resolved'].includes(status) || isPostResolutionVerified) {
     assignedState = 'completed';
     assignedTimestamp = null;
     assignedNotes = `Assigned to ${authorityDisplay}.`;
@@ -167,7 +183,7 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
   let inProgressIsInferred = false;
 
   if (inProgressLog) {
-    inProgressState = status === 'in_progress' ? 'current' : (status === 'resolved' ? 'completed' : 'pending');
+    inProgressState = status === 'in_progress' ? 'current' : (['resolved'].includes(status) || isPostResolutionVerified ? 'completed' : 'pending');
     inProgressTimestamp = latestInProgressLog?.created_at || inProgressLog.created_at;
     inProgressNotes = latestInProgressLog?.notes || inProgressLog.notes || issue.official_remarks || 'Field work and inspection initiated.';
     inProgressActor = latestInProgressLog?.profiles?.full_name || inProgressLog.profiles?.full_name || authorityDisplay;
@@ -176,7 +192,7 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
     inProgressTimestamp = issue.updated_at || null;
     inProgressNotes = issue.official_remarks || 'Field work and inspection initiated.';
     inProgressActor = authorityDisplay;
-  } else if (status === 'resolved') {
+  } else if (status === 'resolved' || isPostResolutionVerified) {
     inProgressState = 'completed';
     inProgressTimestamp = null;
     inProgressNotes = 'Field resolution work executed.';
@@ -208,13 +224,13 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
   if (resolvedLog) {
     resolvedState = 'completed';
     resolvedTimestamp = resolvedLog.created_at;
-    resolvedNotes = resolvedLog.notes || issue.completion_notes || 'Complaint resolved successfully.';
+    resolvedNotes = resolvedLog.notes || issue.completion_notes || (isPostResolutionVerified ? 'Resolution approved and verified by citizen reporter.' : 'Complaint resolved successfully.');
     resolvedActor = resolvedLog.profiles?.full_name || authorityDisplay;
     resolvedProof = issue.completion_proof_url || null;
-  } else if (status === 'resolved' || status === 'verified' && issue.completion_notes) {
+  } else if (status === 'resolved' || isPostResolutionVerified || (hasResolvedProof && ['assigned', 'in_progress', 'resolved', 'verified'].includes(status))) {
     resolvedState = 'completed';
-    resolvedTimestamp = issue.updated_at || null;
-    resolvedNotes = issue.completion_notes || issue.official_remarks || 'Complaint resolved successfully.';
+    resolvedTimestamp = issue.resolved_at || (status === 'resolved' ? issue.updated_at : null) || null;
+    resolvedNotes = issue.completion_notes || issue.official_remarks || (isPostResolutionVerified ? 'Resolution approved and verified by citizen reporter.' : 'Complaint resolved successfully.');
     resolvedActor = authorityDisplay;
     resolvedProof = issue.completion_proof_url || null;
   }
@@ -226,7 +242,7 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
     state: resolvedState,
     timestamp: resolvedTimestamp,
     timestamp_formatted: resolvedTimestamp ? formatTamilNaduDate(resolvedTimestamp) : null,
-    title: 'Resolution Completed',
+    title: isPostResolutionVerified ? 'Resolution Completed & Verified' : 'Resolution Completed',
     notes: resolvedNotes || (resolvedState === 'pending' ? 'Resolution confirmation and completion proof.' : 'Complaint resolved.'),
     actor_name: resolvedActor,
     actor_role: 'authority',
@@ -235,6 +251,48 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
   };
 
   const stages = [stageSubmitted, stageVerified, stageAssigned, stageInProgress, stageResolved];
+
+  const CANONICAL_ORDER = {
+    submitted: 1,
+    verified: 2,
+    assigned: 3,
+    in_progress: 4,
+    resolved: 5
+  };
+
+  // Strictly enforce chronological event ordering (oldest at top -> newest at bottom).
+  // Under no circumstance should a later timestamp appear above an earlier timestamp.
+  stages.sort((a, b) => {
+    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : null;
+    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : null;
+    const orderA = CANONICAL_ORDER[a.id] || 0;
+    const orderB = CANONICAL_ORDER[b.id] || 0;
+
+    // 1. Both have valid timestamps: STRICT CHRONOLOGICAL ORDER
+    if (timeA !== null && timeB !== null) {
+      if (timeA !== timeB) {
+        return timeA - timeB; // Ascending: oldest first
+      }
+      return orderA - orderB; // Tie-breaker: canonical lifecycle sequence
+    }
+
+    // 2. Both lack timestamps:
+    if (timeA === null && timeB === null) {
+      // Completed stages precede pending stages
+      if (a.state !== 'pending' && b.state === 'pending') return -1;
+      if (a.state === 'pending' && b.state !== 'pending') return 1;
+      return orderA - orderB;
+    }
+
+    // 3. One has timestamp, the other lacks timestamp:
+    // Completed stages always precede pending stages
+    if (a.state === 'pending') return 1;
+    if (b.state === 'pending') return -1;
+
+    // Both are completed (one explicit timestamp, one inferred prerequisite):
+    // Position according to canonical lifecycle sequence
+    return orderA - orderB;
+  });
 
   // Determine active stage ID
   let currentStageId = 'submitted';
@@ -270,6 +328,21 @@ export function buildTimeline(issue, historyLogs = [], userRole = 'citizen') {
       });
     }
   });
+
+  if (postResolutionVerifiedLog) {
+    auditEvents.push({
+      id: postResolutionVerifiedLog.id,
+      event_type: 'resolution_verified',
+      timestamp: postResolutionVerifiedLog.created_at,
+      timestamp_formatted: formatTamilNaduDate(postResolutionVerifiedLog.created_at),
+      notes: postResolutionVerifiedLog.notes || 'Resolution approved and verified by citizen reporter.',
+      actor_name: postResolutionVerifiedLog.profiles?.full_name || 'Citizen Reporter',
+      actor_role: 'citizen'
+    });
+  }
+
+  // Ensure audit events are strictly sorted chronologically ascending (oldest to newest)
+  auditEvents.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
   return {
     complaint_id: issue.complaint_id || `CC-2026-${String(issue.id || '').substring(0, 6)}`,

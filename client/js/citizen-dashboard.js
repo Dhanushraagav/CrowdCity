@@ -155,8 +155,8 @@
     // ----------------------------------------------------
     renderRecentComplaints(userCity);
 
-    // Listen for live location detected event to update header and complaints dynamically
-    window.addEventListener('crowdcity:location_detected', (evt) => {
+    // Listen for live location detected or changed event to update header and complaints dynamically
+    function handleLocationUpdate(evt) {
       if (evt.detail && evt.detail.district) {
         const detected = evt.detail.district.replace(/ district$/i, '').trim();
         userCity = detected;
@@ -165,7 +165,9 @@
         renderNearbyIssues(detected);
         renderAnnouncements(detected);
       }
-    });
+    }
+    window.addEventListener('crowdcity:location_detected', handleLocationUpdate);
+    window.addEventListener('crowdcity:location_changed', handleLocationUpdate);
 
     // ----------------------------------------------------
     // Section 2: My Active Complaints

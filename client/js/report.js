@@ -1636,6 +1636,7 @@ function setupFormSubmit() {
       }
     }
 
+    submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
 
     // Construct FormData object to package both text and file payloads
@@ -1858,7 +1859,11 @@ function setupFormSubmit() {
         if (overlay) overlay.classList.add('hidden');
         window.goToWizardStep2();
         if (alertBanner) {
-          alertBanner.textContent = `Submission failed: ${error}`;
+          const isDup = String(error).toLowerCase().includes('duplicate key') || String(error).toLowerCase().includes('issues_complaint_id_key');
+          const userFriendlyMsg = isDup
+            ? 'Complaint ID synchronization completed. Please click Submit Report once more to register your issue.'
+            : `Submission failed: ${error}`;
+          alertBanner.textContent = userFriendlyMsg;
           alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
           alertBanner.style.color = '#ef4444';
           alertBanner.classList.remove('hidden');

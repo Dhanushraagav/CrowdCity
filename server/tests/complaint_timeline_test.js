@@ -354,6 +354,150 @@ test('TEST 9: Accurately formats dates to IST timezone', () => {
   assert(formatted.includes('09:00') || formatted.includes('9:00'), 'Time shifted to 9:00 AM IST');
 });
 
+// -------------------------------------------------------------
+// TEST 10: Chronological Order on Post-Resolution Verification (CC-2026-000005 Bug Regression Test)
+// -------------------------------------------------------------
+test('TEST 10: Post-resolution citizen verification does NOT inject 16 Sep into Stage 2; maintains strictly non-decreasing timestamps', () => {
+  const tSub = new Date('2026-09-03T08:51:45.065Z');
+  const tAss = new Date('2026-09-12T06:41:02.030Z');
+  const tRes = new Date('2026-09-12T06:41:09.171Z');
+  const tVer = new Date('2026-09-16T06:13:11.452Z'); // Citizen approved resolution 4 days later
+
+  const issue = {
+    id: '5daeedd2-4ac6-471a-aa2d-bb6e9ab0e2c6',
+    complaint_id: 'CC-2026-000005',
+    status: 'verified', // Terminal status from citizen approval
+    created_at: tSub.toISOString(),
+    updated_at: tVer.toISOString(),
+    assigned_to: 'inspector-uuid-1',
+    completion_proof_url: 'https://swbktcwlxbnbsjrmmmjj.supabase.co/storage/v1/object/public/issue-images/resolved/resolved-1789195267631.webp',
+    completion_notes: 'Your Issue Solved !'
+  };
+
+  const history = [
+    { id: 'h1', status: 'pending', notes: 'Complaint submitted by citizen.', created_at: tSub.toISOString() },
+    { id: 'h2', status: 'assigned', notes: 'Complaint assigned to inspector Dhanush Raagav S.', created_at: tAss.toISOString() },
+    { id: 'h3', status: 'resolved', notes: 'Your Issue Solved !', created_at: tRes.toISOString() },
+    { id: 'h4', status: 'verified', notes: 'Resolution approved and verified by citizen reporter.', created_at: tVer.toISOString() }
+  ];
+
+  const timeline = buildTimeline(issue, history, 'citizen');
+  assert.strictEqual(timeline.current_stage, 'resolved');
+  assert.strictEqual(timeline.current_status, 'verified');
+
+  const [s1, s2, s3, s4, s5] = timeline.stages;
+
+  // Stage 1: Submitted (03 Sep)
+  assert.strictEqual(s1.id, 'submitted');
+  assert.strictEqual(s1.state, 'completed');
+  assert.strictEqual(s1.timestamp, tSub.toISOString());
+
+  // Stage 2: Verified (Triage prerequisite - must NOT have 16 Sep timestamp!)
+  assert.strictEqual(s2.id, 'verified');
+  assert.strictEqual(s2.state, 'completed');
+  assert.strictEqual(s2.is_inferred, true);
+  assert.strictEqual(s2.timestamp, null, 'Stage 2 must not steal the post-resolution 16 Sep timestamp');
+
+  // Stage 3: Assigned (12 Sep)
+  assert.strictEqual(s3.id, 'assigned');
+  assert.strictEqual(s3.state, 'completed');
+  assert.strictEqual(s3.timestamp, tAss.toISOString());
+
+  // Stage 4: In Progress (Completed prerequisite)
+  assert.strictEqual(s4.id, 'in_progress');
+  assert.strictEqual(s4.state, 'completed');
+
+  // Stage 5: Resolved (12 Sep)
+  assert.strictEqual(s5.id, 'resolved');
+  assert.strictEqual(s5.state, 'completed');
+  assert.strictEqual(s5.timestamp, tRes.toISOString());
+  assert.strictEqual(s5.proof_url, issue.completion_proof_url, 'Resolution proof must stay attached to resolved stage');
+
+  // Verify timestamps are strictly non-decreasing across all timestamped stages
+  const timestampedStages = timeline.stages.filter(s => s.timestamp !== null);
+  for (let i = 0; i < timestampedStages.length - 1; i++) {
+    const timeCurr = new Date(timestampedStages[i].timestamp).getTime();
+    const timeNext = new Date(timestampedStages[i + 1].timestamp).getTime();
+    assert(timeCurr <= timeNext, `Stage ${timestampedStages[i].id} (${timestampedStages[i].timestamp}) must be <= Stage ${timestampedStages[i + 1].id} (${timestampedStages[i + 1].timestamp})`);
+  }
+
+  // Verify post-resolution citizen verification is captured in audit events
+  const resVerEvent = timeline.audit_events.find(e => e.event_type === 'resolution_verified');
+  assert(resVerEvent, 'Citizen resolution verification event must be in audit events');
+  assert.strictEqual(resVerEvent.timestamp, tVer.toISOString());
+});
+
+// -------------------------------------------------------------
+// TEST 11: Full 5-Stage Complaint with Explicit Chronological Timestamps
+// -------------------------------------------------------------
+test('TEST 11: All 5 stages have explicit timestamps in strictly increasing chronological order', () => {
+  const t1 = new Date('2026-09-03T02:21:00Z');
+  const t2 = new Date('2026-09-04T10:30:00Z');
+  const t3 = new Date('2026-09-04T11:15:00Z');
+  const t4 = new Date('2026-09-04T13:00:00Z');
+  const t5 = new Date('2026-09-05T16:20:00Z');
+
+  const issue = {
+    id: 'chronological-full-case',
+    complaint_id: 'CC-2026-000777',
+    status: 'resolved',
+    created_at: t1.toISOString(),
+    completion_proof_url: 'https://example.com/proof.jpg',
+    completion_notes: 'Issue solved.'
+  };
+
+  const history = [
+    { id: 'h1', status: 'pending', created_at: t1.toISOString() },
+    { id: 'h2', status: 'verified', notes: 'Triage verification complete.', created_at: t2.toISOString() },
+    { id: 'h3', status: 'assigned', notes: 'Assigned to Inspector Senthil.', created_at: t3.toISOString() },
+    { id: 'h4', status: 'in_progress', notes: 'Work started.', created_at: t4.toISOString() },
+    { id: 'h5', status: 'resolved', notes: 'Issue solved.', created_at: t5.toISOString() }
+  ];
+
+  const timeline = buildTimeline(issue, history, 'citizen');
+  assert.strictEqual(timeline.stages.length, 5);
+
+  const stageIds = timeline.stages.map(s => s.id);
+  assert.deepStrictEqual(stageIds, ['submitted', 'verified', 'assigned', 'in_progress', 'resolved']);
+
+  for (let i = 0; i < timeline.stages.length - 1; i++) {
+    const timeCurr = new Date(timeline.stages[i].timestamp).getTime();
+    const timeNext = new Date(timeline.stages[i + 1].timestamp).getTime();
+    assert(timeCurr <= timeNext, `Chronology violated between stage ${timeline.stages[i].id} and ${timeline.stages[i+1].id}`);
+  }
+});
+
+// -------------------------------------------------------------
+// TEST 12: Inconsistent Historical Logs Guarantee (No Later Event Above Earlier)
+// -------------------------------------------------------------
+test('TEST 12: Never displays a later timestamp above an earlier timestamp even if logs arrive out of sequence', () => {
+  const tEarly = new Date('2026-09-12T10:00:00Z');
+  const tLate = new Date('2026-09-16T10:00:00Z');
+
+  const issue = {
+    id: 'out-of-order-case',
+    complaint_id: 'CC-2026-000888',
+    status: 'assigned',
+    created_at: new Date('2026-09-01T00:00:00Z').toISOString()
+  };
+
+  // Two events where verified has a later timestamp than assigned
+  const history = [
+    { id: 'h1', status: 'pending', created_at: new Date('2026-09-01T00:00:00Z').toISOString() },
+    { id: 'h_assigned', status: 'assigned', created_at: tEarly.toISOString() },
+    { id: 'h_verified', status: 'verified', notes: 'Late inspection triage record', created_at: tLate.toISOString() }
+  ];
+
+  const timeline = buildTimeline(issue, history, 'citizen');
+  const timestamped = timeline.stages.filter(s => s.timestamp !== null);
+
+  for (let i = 0; i < timestamped.length - 1; i++) {
+    const tA = new Date(timestamped[i].timestamp).getTime();
+    const tB = new Date(timestamped[i + 1].timestamp).getTime();
+    assert(tA <= tB, `Chronological inversion: ${timestamped[i].id} (${timestamped[i].timestamp}) must be <= ${timestamped[i + 1].id} (${timestamped[i + 1].timestamp})`);
+  }
+});
+
 console.log(`\n====================================================`);
 console.log(`  RESULTS: ${passedTests} PASSED, ${totalTests - passedTests} FAILED`);
 console.log(`====================================================\n`);
