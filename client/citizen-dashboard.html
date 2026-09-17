@@ -186,60 +186,6 @@
           <span class="ticker-text-wrapper"><span class="ticker-text" id="civic-intelligence-feed-text">தமிழ்நாடு அரசு மற்றும் நகராட்சி சேவைகள் 38 மாவட்டங்களிலும் செயல்பட்டு வருகின்றன.</span><span class="ticker-cursor"></span></span>
         </div>
 
-        <!-- Compact Location Weather + Power Status Bar -->
-        <aside id="dash-live-status-strip" class="dash-live-status-strip is-fetching" role="region" aria-label="Location Weather and Power Status">
-          <div class="status-strip-inner">
-            <!-- Location Segment (Clickable to Re-detect) -->
-            <div class="status-strip-segment status-strip-location" id="strip-location-segment" role="button" tabindex="0" title="Click to re-detect location">
-              <span class="status-indicator-dot" id="strip-location-dot"></span>
-              <span class="strip-location-name" id="strip-location-name">Tamil Nadu</span>
-            </div>
-
-            <span class="status-strip-sep" aria-hidden="true">|</span>
-
-            <!-- Weather Segment (Links to weather-alerts.html) -->
-            <a href="weather-alerts.html" class="status-strip-segment status-strip-weather" id="strip-weather-segment" title="View Weather Forecast">
-              <i id="strip-weather-icon" class="fa-solid fa-cloud-sun strip-weather-icon"></i>
-              <span class="strip-weather-text" id="strip-weather-text">--°C Loading...</span>
-            </a>
-
-            <span class="status-strip-sep" aria-hidden="true">|</span>
-
-            <!-- Power Status Segment (Strictly Links to power-updates.html with NO EMOJIS) -->
-            <a href="power-updates.html" class="status-strip-segment status-strip-power" id="strip-power-segment" title="View Power Outage Schedules">
-              <span class="strip-power-label" data-i18n="power_label">Power:</span>
-              <span class="strip-power-status status-loading" id="strip-power-status">Checking...</span>
-            </a>
-
-            <!-- Separator for Affected Areas (shown when shutdown exists) -->
-            <span class="status-strip-sep strip-areas-sep" id="strip-areas-sep" aria-hidden="true" style="display: none;">|</span>
-
-            <!-- Affected Areas Segment -->
-            <div class="status-strip-segment status-strip-areas" id="strip-areas-segment" style="display: none;">
-              <span class="strip-areas-label" data-i18n="areas_label">Areas:</span>
-              <span class="strip-areas-text" id="strip-areas-text">--</span>
-              <button type="button" class="strip-areas-more-btn" id="strip-areas-more-btn" style="display: none;" aria-expanded="false" aria-label="View all affected areas">+0 more</button>
-              
-              <!-- Popover for complete affected areas list -->
-              <div class="strip-areas-popover" id="strip-areas-popover" role="dialog" aria-label="Verified Affected Areas" hidden>
-                <div class="strip-areas-popover-header">
-                  <span class="strip-areas-popover-title" data-i18n="verified_affected_areas">Verified Affected Areas</span>
-                  <button type="button" class="strip-areas-popover-close" id="strip-areas-popover-close" aria-label="Close">&times;</button>
-                </div>
-                <div class="strip-areas-popover-body" id="strip-areas-popover-body"></div>
-              </div>
-            </div>
-
-            <!-- Meta: Updated Time & Arrow Link -->
-            <div class="status-strip-meta">
-              <span class="strip-updated-text" id="strip-updated-text">--</span>
-              <a href="power-updates.html" class="strip-arrow-link" id="strip-arrow-link" aria-label="View Power Updates" title="View Power Updates">
-                <i class="fa-solid fa-arrow-right"></i>
-              </a>
-            </div>
-          </div>
-        </aside>
-
         <!-- Stitch Hero card -->
         <div class="stitch-hero" style="position: relative;">
           <div class="stitch-hero-container">
@@ -488,33 +434,15 @@
   <script src="js/user-location.js?v=1.0.0"></script>
   <script src="js/citizen-dashboard.js?v=2.2.0"></script>
 
-  <!-- Live Location, Weather & Power Status Strip Controller -->
+  <!-- Hero Weather & Specific Location Controller -->
   <script>
-  (function initDashboardLiveStatusBar() {
-    const strip = document.getElementById('dash-live-status-strip');
-    const locSegment = document.getElementById('strip-location-segment');
-    const locNameEl = document.getElementById('strip-location-name');
-    const weatherIconEl = document.getElementById('strip-weather-icon');
-    const weatherTextEl = document.getElementById('strip-weather-text');
-    const powerStatusEl = document.getElementById('strip-power-status');
-    const updatedTextEl = document.getElementById('strip-updated-text');
-
-    // Hero Weather & Specific Location Badge elements
+  (function initDashboardHeroWeather() {
     const heroWeatherBadge = document.getElementById('hero-weather-badge');
     const heroWeatherIconEl = document.getElementById('hero-weather-icon');
     const heroWeatherCityEl = document.getElementById('hero-weather-city');
     const heroWeatherTempEl = document.getElementById('hero-weather-temp');
 
-    // Affected Areas Segment & Popover elements
-    const stripAreasSepEl = document.getElementById('strip-areas-sep');
-    const stripAreasSegmentEl = document.getElementById('strip-areas-segment');
-    const stripAreasTextEl = document.getElementById('strip-areas-text');
-    const stripAreasMoreBtnEl = document.getElementById('strip-areas-more-btn');
-    const stripAreasPopoverEl = document.getElementById('strip-areas-popover');
-    const stripAreasPopoverCloseEl = document.getElementById('strip-areas-popover-close');
-    const stripAreasPopoverBodyEl = document.getElementById('strip-areas-popover-body');
-
-    if (!strip) return;
+    if (!heroWeatherBadge) return;
 
     let currentDistrict = '';
     let currentSpecificLoc = null;
@@ -522,7 +450,6 @@
     let currentLng = null;
     let isFetching = false;
     let cachedWeatherData = null;
-    let cachedPowerData = null;
 
     function getLang() {
       if (window.i18n && typeof window.i18n.getLanguage === 'function') {
@@ -605,9 +532,6 @@
       if (heroWeatherCityEl) {
         heroWeatherCityEl.textContent = displayLoc;
       }
-      if (locNameEl) {
-        locNameEl.textContent = formatDistrictDisplay(locInfo.district || specNameEn);
-      }
 
       if (typeof locInfo.lat === 'number' && typeof locInfo.lng === 'number') {
         currentLat = locInfo.lat;
@@ -616,58 +540,6 @@
         currentLat = locInfo.lat;
         currentLng = locInfo.lon;
       }
-    }
-
-    function formatISTTime(dateObj = new Date()) {
-      try {
-        return new Intl.DateTimeFormat('en-US', {
-          timeZone: 'Asia/Kolkata',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        }).format(dateObj);
-      } catch (e) {
-        return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }
-    }
-
-    // Weather condition translations in Tamil
-    const WEATHER_CONDITIONS_TA = {
-      'clear sky': 'தெளிவான வானம்',
-      'mainly clear': 'பெரும்பாலும் தெளிவானது',
-      'partly cloudy': 'ஓரளவு மேகமூட்டம்',
-      'overcast': 'மேகமூட்டம்',
-      'fog': 'மூடுபனி',
-      'depositing rime fog': 'பனிமூட்டம்',
-      'light drizzle': 'தூறல் மழை',
-      'moderate drizzle': 'தூறல் மழை',
-      'dense drizzle': 'அடர்ந்த தூறல்',
-      'light freezing drizzle': 'உறைபனி தூறல்',
-      'dense freezing drizzle': 'அடர்ந்த உறைபனி தூறல்',
-      'slight rain': 'லேசான மழை',
-      'moderate rain': 'மிதமான மழை',
-      'heavy rain': 'கனமழை',
-      'light freezing rain': 'உறைபனி மழை',
-      'heavy freezing rain': 'கன உறைபனி மழை',
-      'slight snow fall': 'லேசான பனிப்பொழிவு',
-      'moderate snow fall': 'மிதமான பனிப்பொழிவு',
-      'heavy snow fall': 'கன பனிப்பொழிவு',
-      'snow grains': 'பனிப்பொழிவு',
-      'slight rain showers': 'மழைப்பொழிவு',
-      'moderate rain showers': 'மழைப்பொழிவு',
-      'violent rain showers': 'கனமழை பொழிவு',
-      'thunderstorm': 'இடியுடன் கூடிய மழை',
-      'thunderstorm with slight hail': 'இடியுடன் கூடிய ஆலங்கட்டி மழை',
-      'thunderstorm with heavy hail': 'கடுமையான இடியுடன் ஆலங்கட்டி மழை'
-    };
-
-    function translateCondition(condition) {
-      if (!condition) return '';
-      if (getLang() === 'ta') {
-        const lower = condition.toLowerCase().trim();
-        if (WEATHER_CONDITIONS_TA[lower]) return WEATHER_CONDITIONS_TA[lower];
-      }
-      return condition;
     }
 
     function getWeatherIconClass(code, temp) {
@@ -686,10 +558,9 @@
       return 'fa-cloud';
     }
 
-    async function updateStatusStrip(districtToUse, force = false, lat = null, lon = null) {
+    async function updateWeather(districtToUse, force = false, lat = null, lon = null) {
       if (isFetching && !force) return;
       isFetching = true;
-      strip.classList.add('is-fetching');
 
       const district = districtToUse || (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function' ? window.CrowdCityLocation.getSavedUserDistrict() : (localStorage.getItem('user_district') || 'Tamil Nadu'));
       currentDistrict = district;
@@ -701,7 +572,6 @@
         if (savedLoc) {
           updateLocationDisplay(savedLoc);
         } else {
-          locNameEl.textContent = formatDistrictDisplay(district);
           if (heroWeatherCityEl) heroWeatherCityEl.textContent = formatDistrictDisplay(district);
         }
       }
@@ -709,18 +579,7 @@
       const useLat = (typeof lat === 'number' && !isNaN(lat)) ? lat : currentLat;
       const useLon = (typeof lon === 'number' && !isNaN(lon)) ? lon : currentLng;
 
-      // Concurrent fetching of Weather & Power Status
-      const weatherPromise = fetchWeatherStatus(district, useLat, useLon);
-      const powerPromise = fetchPowerStatus(district);
-
-      await Promise.allSettled([weatherPromise, powerPromise]);
-
-      // Update timestamp
-      const timeStr = formatISTTime();
-      const updatedPrefix = t('status_updated_prefix', 'Updated');
-      updatedTextEl.textContent = `${updatedPrefix} ${timeStr}`;
-
-      strip.classList.remove('is-fetching');
+      await fetchWeatherStatus(district, useLat, useLon);
       isFetching = false;
     }
 
@@ -800,17 +659,12 @@
 
     function renderWeather(data) {
       if (!data) {
-        weatherIconEl.className = 'fa-solid fa-cloud strip-weather-icon';
-        weatherTextEl.textContent = `--°C ${t('weather_unavailable_short', 'Weather unavailable')}`;
         if (heroWeatherBadge) heroWeatherBadge.classList.add('loading');
         if (heroWeatherTempEl) heroWeatherTempEl.textContent = '--°C';
         if (heroWeatherIconEl) heroWeatherIconEl.innerHTML = '<i class="fa-solid fa-cloud"></i>';
         return;
       }
       const icon = data.icon.startsWith('fa-') ? data.icon : `fa-${data.icon}`;
-      weatherIconEl.className = `fa-solid ${icon} strip-weather-icon`;
-      const translatedCond = translateCondition(data.condition);
-      weatherTextEl.textContent = `${data.temp}°C ${translatedCond}`;
 
       // Update Hero Weather Badge
       if (heroWeatherBadge) {
@@ -827,204 +681,18 @@
       }
     }
 
-    async function fetchPowerStatus(district) {
-      try {
-        const res = await fetch(`/api/power-updates?district=${encodeURIComponent(district)}`, {
-          headers: { 'Accept': 'application/json' }
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          cachedPowerData = data;
-          renderPowerStatus(data);
-          return;
-        }
-        throw new Error('API power unavailable');
-      } catch (err) {
-        cachedPowerData = { verification_status: 'unable_to_verify', status: 'unable_to_verify' };
-        renderPowerStatus(cachedPowerData);
-      }
-    }
-
-    function closeAreasPopover() {
-      if (!stripAreasPopoverEl) return;
-      stripAreasPopoverEl.setAttribute('hidden', '');
-      stripAreasPopoverEl.classList.remove('is-open');
-      if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.setAttribute('aria-expanded', 'false');
-    }
-
-    function toggleAreasPopover() {
-      if (!stripAreasPopoverEl) return;
-      const isOpen = !stripAreasPopoverEl.hasAttribute('hidden');
-      if (isOpen) {
-        closeAreasPopover();
-      } else {
-        stripAreasPopoverEl.removeAttribute('hidden');
-        stripAreasPopoverEl.classList.add('is-open');
-        if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.setAttribute('aria-expanded', 'true');
-      }
-    }
-
-    if (stripAreasMoreBtnEl) {
-      stripAreasMoreBtnEl.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        toggleAreasPopover();
-      });
-    }
-
-    if (stripAreasPopoverCloseEl) {
-      stripAreasPopoverCloseEl.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        closeAreasPopover();
-      });
-    }
-
-    document.addEventListener('click', (e) => {
-      if (stripAreasPopoverEl && !stripAreasPopoverEl.hasAttribute('hidden')) {
-        if (!stripAreasPopoverEl.contains(e.target) && e.target !== stripAreasMoreBtnEl) {
-          closeAreasPopover();
-        }
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && stripAreasPopoverEl && !stripAreasPopoverEl.hasAttribute('hidden')) {
-        closeAreasPopover();
-        if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.focus();
-      }
-    });
-
-    function renderPowerStatus(data) {
-      powerStatusEl.className = 'strip-power-status';
-
-      const hasShutdowns = data && Array.isArray(data.shutdowns) && data.shutdowns.length > 0;
-      const isVerifiedClear = data && (data.status === 'verified_no_shutdown' || (data.verification_status === 'verified' && !hasShutdowns));
-      const isVerifiedShutdown = data && hasShutdowns && (data.verification_status === 'verified' || data.status === 'verified');
-
-      // State A: Verified Planned Shutdown
-      if (isVerifiedShutdown) {
-        // Find best-matching shutdown for user's specific locality if available
-        let s = data.shutdowns[0];
-        if (currentSpecificLoc && currentSpecificLoc.specificName) {
-          const specLower = currentSpecificLoc.specificName.toLowerCase();
-          const match = data.shutdowns.find(item =>
-            (item.affected_area && item.affected_area.toLowerCase().includes(specLower)) ||
-            (item.area && item.area.toLowerCase().includes(specLower)) ||
-            (item.division && item.division.toLowerCase().includes(specLower))
-          );
-          if (match) s = match;
-        }
-
-        const start = (s.start_time || '09:00').slice(0, 5);
-        const end = (s.end_time || '17:00').slice(0, 5);
-        const shutdownWord = t('power_shutdown_clean', 'Shutdown');
-        powerStatusEl.textContent = `${shutdownWord} ${start}–${end}`;
-        powerStatusEl.classList.add('status-verified-shutdown');
-
-        // Parse affected areas cleanly
-        let areas = [];
-        if (s.affected_area && typeof s.affected_area === 'string') {
-          areas = s.affected_area.split(/[,;]+/)
-            .map(a => a.trim().replace(/\s+/g, ' '))
-            .filter(a => a.length > 0 && !/^(etc|and\s+surroundings)$/i.test(a));
-          // Deduplicate
-          areas = Array.from(new Set(areas));
-        } else if (s.area) {
-          areas = [s.area.trim()];
-        }
-
-        if (areas.length > 0 && stripAreasSegmentEl && stripAreasTextEl) {
-          if (stripAreasSepEl) stripAreasSepEl.style.display = 'inline';
-          stripAreasSegmentEl.style.display = 'inline-flex';
-
-          if (areas.length <= 3) {
-            stripAreasTextEl.textContent = areas.join(', ');
-            if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.style.display = 'none';
-          } else {
-            // Show first 2 concise areas + button
-            stripAreasTextEl.textContent = areas.slice(0, 2).join(', ');
-            const remainingCount = areas.length - 2;
-            if (stripAreasMoreBtnEl) {
-              const moreWord = t('more_areas_suffix', 'more');
-              stripAreasMoreBtnEl.textContent = `+${remainingCount} ${moreWord}`;
-              stripAreasMoreBtnEl.style.display = 'inline-flex';
-              stripAreasMoreBtnEl.setAttribute('title', `View all ${areas.length} verified affected areas`);
-            }
-          }
-
-          // Populate popover body
-          if (stripAreasPopoverBodyEl) {
-            stripAreasPopoverBodyEl.innerHTML = areas.map(area => {
-              const safeArea = area.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-              return `<span class="strip-area-pill"><i class="fa-solid fa-location-dot"></i> ${safeArea}</span>`;
-            }).join('');
-          }
-        } else {
-          if (stripAreasSepEl) stripAreasSepEl.style.display = 'none';
-          if (stripAreasSegmentEl) stripAreasSegmentEl.style.display = 'none';
-          closeAreasPopover();
-        }
-        return;
-      }
-
-      // State B: Verified No Planned Shutdown
-      if (isVerifiedClear) {
-        powerStatusEl.textContent = t('power_no_planned_shutdown_clean', 'No planned shutdown');
-        powerStatusEl.classList.add('status-verified-clear');
-        if (stripAreasSepEl) stripAreasSepEl.style.display = 'none';
-        if (stripAreasSegmentEl) stripAreasSegmentEl.style.display = 'none';
-        closeAreasPopover();
-        return;
-      }
-
-      // State C: Unable to Verify (strictly NEVER convert missing data into "No planned shutdown")
-      powerStatusEl.textContent = t('power_unable_to_verify_short', 'Unable to verify');
-      powerStatusEl.classList.add('status-unable-verify');
-      if (stripAreasSepEl) stripAreasSepEl.style.display = 'none';
-      if (stripAreasSegmentEl) stripAreasSegmentEl.style.display = 'none';
-      closeAreasPopover();
-    }
-
-    // Interactive location click: Trigger live GPS re-detection
-    if (locSegment) {
-      locSegment.addEventListener('click', async () => {
-        locNameEl.textContent = t('status_detecting_location', 'Detecting...');
-        if (heroWeatherCityEl) heroWeatherCityEl.textContent = t('status_detecting_location', 'Detecting...');
-        if (heroWeatherBadge) heroWeatherBadge.classList.add('loading');
-        if (window.CrowdCityLocation && typeof window.CrowdCityLocation.reDetectLiveLocation === 'function') {
-          await window.CrowdCityLocation.reDetectLiveLocation(6000);
-          const updatedLoc = window.CrowdCityLocation.getSavedSpecificLocation(getLang());
-          if (updatedLoc) {
-            updateLocationDisplay(updatedLoc);
-            updateStatusStrip(updatedLoc.district, true, updatedLoc.lat, updatedLoc.lng);
-            return;
-          }
-        }
-        updateStatusStrip(currentDistrict, true, currentLat, currentLng);
-      });
-
-      locSegment.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          locSegment.click();
-        }
-      });
-    }
-
     // Reactive event listeners
     window.addEventListener('crowdcity:location_detected', (e) => {
       if (e.detail) {
         updateLocationDisplay(e.detail);
-        updateStatusStrip(e.detail.district || currentDistrict, true, e.detail.lat, e.detail.lng);
+        updateWeather(e.detail.district || currentDistrict, true, e.detail.lat, e.detail.lng);
       }
     });
 
     window.addEventListener('crowdcity:location_changed', (e) => {
       if (e.detail) {
         updateLocationDisplay(e.detail);
-        updateStatusStrip(e.detail.district || currentDistrict, true, e.detail.lat, e.detail.lng);
+        updateWeather(e.detail.district || currentDistrict, true, e.detail.lat, e.detail.lng);
       }
     });
 
@@ -1032,14 +700,9 @@
       if (currentSpecificLoc) {
         updateLocationDisplay(currentSpecificLoc);
       } else {
-        locNameEl.textContent = formatDistrictDisplay(currentDistrict);
         if (heroWeatherCityEl) heroWeatherCityEl.textContent = formatDistrictDisplay(currentDistrict);
       }
       if (cachedWeatherData) renderWeather(cachedWeatherData);
-      if (cachedPowerData) renderPowerStatus(cachedPowerData);
-      const timeStr = formatISTTime();
-      const updatedPrefix = t('status_updated_prefix', 'Updated');
-      updatedTextEl.textContent = `${updatedPrefix} ${timeStr}`;
     });
 
     // Initial Execution
@@ -1069,7 +732,7 @@
       }
     } catch (e) {}
 
-    updateStatusStrip(currentDistrict, false, currentLat, currentLng);
+    updateWeather(currentDistrict, false, currentLat, currentLng);
 
     // If initial district/location is generic or not yet detected, kick off non-blocking background detection
     if (!savedLoc || !savedLoc.specificName || savedLoc.specificName === 'Tamil Nadu' || savedLoc.district === 'Tamil Nadu') {
@@ -1078,14 +741,12 @@
           .then(det => {
             if (det && det.specificName) {
               updateLocationDisplay(det);
-              updateStatusStrip(det.district, true, det.lat, det.lng);
+              updateWeather(det.district, true, det.lat, det.lng);
             }
           })
           .catch(() => {});
       }
     }
-
-    window.cc_refreshStatusStrip = () => updateStatusStrip(currentDistrict, true, currentLat, currentLng);
   })();
   </script>
 
