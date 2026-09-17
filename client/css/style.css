@@ -804,12 +804,12 @@ footer,
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
 }
 
 
 .glass-card:hover {
-  transform: translateY(-4px) scale(1.01);
+  transform: translateY(-2.5px);
   box-shadow: var(--shadow-md);
   border-color: var(--primary) !important;
 }
@@ -829,7 +829,7 @@ body {
 .glass-panel {
   opacity: 1;
   transform: translateY(0);
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
   will-change: transform;
 }
 
@@ -930,7 +930,7 @@ body {
 .app-content-body > *:nth-child(7) { animation-delay: 0.42s; }
 .app-content-body > *:nth-child(8) { animation-delay: 0.48s; }
 
-/* Enhancing Hover Lift Animation */
+/* Premium Subtle Card Micro-Interaction System */
 .issue-card,
 .stitch-stat-card,
 .stitch-item-card,
@@ -938,19 +938,53 @@ body {
 .comment-card,
 .profile-stat-card,
 .glass-panel-hover {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease !important;
+  will-change: transform;
 }
 
-.issue-card:hover,
-.stitch-stat-card:hover,
-.stitch-item-card:hover,
-.timeline-content:hover,
-.comment-card:hover,
-.profile-stat-card:hover,
-.glass-panel-hover:hover {
-  transform: translateY(-8px) scale(1.025) !important;
-  border-color: var(--primary) !important;
-  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--primary-glow) !important;
+@media (hover: hover) and (pointer: fine) {
+  .issue-card:hover,
+  .stitch-stat-card:hover,
+  .stitch-item-card:hover,
+  .timeline-content:hover,
+  .comment-card:hover,
+  .profile-stat-card:hover,
+  .glass-panel-hover:hover {
+    transform: translateY(-2.5px) !important;
+    border-color: var(--primary-light, var(--primary)) !important;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  [data-theme="dark"] .issue-card:hover,
+  [data-theme="dark"] .stitch-stat-card:hover,
+  [data-theme="dark"] .stitch-item-card:hover,
+  [data-theme="dark"] .timeline-content:hover,
+  [data-theme="dark"] .comment-card:hover,
+  [data-theme="dark"] .profile-stat-card:hover,
+  [data-theme="dark"] .glass-panel-hover:hover,
+  html.dark-theme .issue-card:hover,
+  html.dark-theme .stitch-stat-card:hover,
+  html.dark-theme .stitch-item-card:hover,
+  html.dark-theme .timeline-content:hover,
+  html.dark-theme .comment-card:hover,
+  html.dark-theme .profile-stat-card:hover,
+  html.dark-theme .glass-panel-hover:hover {
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+/* Touch devices: disable sticky hover elevation */
+@media (hover: none) {
+  .issue-card:hover,
+  .stitch-stat-card:hover,
+  .stitch-item-card:hover,
+  .timeline-content:hover,
+  .comment-card:hover,
+  .profile-stat-card:hover,
+  .glass-panel-hover:hover,
+  .glass-card:hover {
+    transform: none !important;
+  }
 }
 
 
@@ -1299,7 +1333,7 @@ body {
 }
 .toggle-password-visibility:hover {
   color: var(--primary);
-  transform: translateY(-50%) scale(1.1);
+  transform: translateY(-50%);
 }
 
 /* Mobile Layout Support & Custom Scrollbars Override */
@@ -1394,17 +1428,17 @@ body:not(.admin-portal-body) .page-inner {
 .topnav-link:hover {
   color: var(--text-main, #0f172a) !important;
   background: rgba(13, 148, 136, 0.08) !important;
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.18), 0 0 0 1px rgba(13, 148, 136, 0.25) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.12), 0 0 0 1px rgba(13, 148, 136, 0.2) !important;
 }
 
 .topnav-link:hover::before {
   left: 100%;
 }
 
-/* Touch active pulse */
+/* Touch active state */
 .topnav-link:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(0);
   box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2) !important;
 }
 

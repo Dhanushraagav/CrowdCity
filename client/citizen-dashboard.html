@@ -211,6 +211,25 @@
               <span class="strip-power-status status-loading" id="strip-power-status">Checking...</span>
             </a>
 
+            <!-- Separator for Affected Areas (shown when shutdown exists) -->
+            <span class="status-strip-sep strip-areas-sep" id="strip-areas-sep" aria-hidden="true" style="display: none;">|</span>
+
+            <!-- Affected Areas Segment -->
+            <div class="status-strip-segment status-strip-areas" id="strip-areas-segment" style="display: none;">
+              <span class="strip-areas-label" data-i18n="areas_label">Areas:</span>
+              <span class="strip-areas-text" id="strip-areas-text">--</span>
+              <button type="button" class="strip-areas-more-btn" id="strip-areas-more-btn" style="display: none;" aria-expanded="false" aria-label="View all affected areas">+0 more</button>
+              
+              <!-- Popover for complete affected areas list -->
+              <div class="strip-areas-popover" id="strip-areas-popover" role="dialog" aria-label="Verified Affected Areas" hidden>
+                <div class="strip-areas-popover-header">
+                  <span class="strip-areas-popover-title" data-i18n="verified_affected_areas">Verified Affected Areas</span>
+                  <button type="button" class="strip-areas-popover-close" id="strip-areas-popover-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="strip-areas-popover-body" id="strip-areas-popover-body"></div>
+              </div>
+            </div>
+
             <!-- Meta: Updated Time & Arrow Link -->
             <div class="status-strip-meta">
               <span class="strip-updated-text" id="strip-updated-text">--</span>
@@ -485,6 +504,15 @@
     const heroWeatherIconEl = document.getElementById('hero-weather-icon');
     const heroWeatherCityEl = document.getElementById('hero-weather-city');
     const heroWeatherTempEl = document.getElementById('hero-weather-temp');
+
+    // Affected Areas Segment & Popover elements
+    const stripAreasSepEl = document.getElementById('strip-areas-sep');
+    const stripAreasSegmentEl = document.getElementById('strip-areas-segment');
+    const stripAreasTextEl = document.getElementById('strip-areas-text');
+    const stripAreasMoreBtnEl = document.getElementById('strip-areas-more-btn');
+    const stripAreasPopoverEl = document.getElementById('strip-areas-popover');
+    const stripAreasPopoverCloseEl = document.getElementById('strip-areas-popover-close');
+    const stripAreasPopoverBodyEl = document.getElementById('strip-areas-popover-body');
 
     if (!strip) return;
 
@@ -818,6 +846,56 @@
       }
     }
 
+    function closeAreasPopover() {
+      if (!stripAreasPopoverEl) return;
+      stripAreasPopoverEl.setAttribute('hidden', '');
+      stripAreasPopoverEl.classList.remove('is-open');
+      if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleAreasPopover() {
+      if (!stripAreasPopoverEl) return;
+      const isOpen = !stripAreasPopoverEl.hasAttribute('hidden');
+      if (isOpen) {
+        closeAreasPopover();
+      } else {
+        stripAreasPopoverEl.removeAttribute('hidden');
+        stripAreasPopoverEl.classList.add('is-open');
+        if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    if (stripAreasMoreBtnEl) {
+      stripAreasMoreBtnEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        toggleAreasPopover();
+      });
+    }
+
+    if (stripAreasPopoverCloseEl) {
+      stripAreasPopoverCloseEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        closeAreasPopover();
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (stripAreasPopoverEl && !stripAreasPopoverEl.hasAttribute('hidden')) {
+        if (!stripAreasPopoverEl.contains(e.target) && e.target !== stripAreasMoreBtnEl) {
+          closeAreasPopover();
+        }
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && stripAreasPopoverEl && !stripAreasPopoverEl.hasAttribute('hidden')) {
+        closeAreasPopover();
+        if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.focus();
+      }
+    });
+
     function renderPowerStatus(data) {
       powerStatusEl.className = 'strip-power-status';
 
@@ -827,25 +905,86 @@
 
       // State A: Verified Planned Shutdown
       if (isVerifiedShutdown) {
-        const s = data.shutdowns[0];
+        // Find best-matching shutdown for user's specific locality if available
+        let s = data.shutdowns[0];
+        if (currentSpecificLoc && currentSpecificLoc.specificName) {
+          const specLower = currentSpecificLoc.specificName.toLowerCase();
+          const match = data.shutdowns.find(item =>
+            (item.affected_area && item.affected_area.toLowerCase().includes(specLower)) ||
+            (item.area && item.area.toLowerCase().includes(specLower)) ||
+            (item.division && item.division.toLowerCase().includes(specLower))
+          );
+          if (match) s = match;
+        }
+
         const start = (s.start_time || '09:00').slice(0, 5);
         const end = (s.end_time || '17:00').slice(0, 5);
-        const label = t('power_planned_shutdown_short', 'Planned shutdown');
-        powerStatusEl.textContent = `${label} ${start}–${end}`;
+        const shutdownWord = t('power_shutdown_clean', 'Shutdown');
+        powerStatusEl.textContent = `${shutdownWord} ${start}–${end}`;
         powerStatusEl.classList.add('status-verified-shutdown');
+
+        // Parse affected areas cleanly
+        let areas = [];
+        if (s.affected_area && typeof s.affected_area === 'string') {
+          areas = s.affected_area.split(/[,;]+/)
+            .map(a => a.trim().replace(/\s+/g, ' '))
+            .filter(a => a.length > 0 && !/^(etc|and\s+surroundings)$/i.test(a));
+          // Deduplicate
+          areas = Array.from(new Set(areas));
+        } else if (s.area) {
+          areas = [s.area.trim()];
+        }
+
+        if (areas.length > 0 && stripAreasSegmentEl && stripAreasTextEl) {
+          if (stripAreasSepEl) stripAreasSepEl.style.display = 'inline';
+          stripAreasSegmentEl.style.display = 'inline-flex';
+
+          if (areas.length <= 3) {
+            stripAreasTextEl.textContent = areas.join(', ');
+            if (stripAreasMoreBtnEl) stripAreasMoreBtnEl.style.display = 'none';
+          } else {
+            // Show first 2 concise areas + button
+            stripAreasTextEl.textContent = areas.slice(0, 2).join(', ');
+            const remainingCount = areas.length - 2;
+            if (stripAreasMoreBtnEl) {
+              const moreWord = t('more_areas_suffix', 'more');
+              stripAreasMoreBtnEl.textContent = `+${remainingCount} ${moreWord}`;
+              stripAreasMoreBtnEl.style.display = 'inline-flex';
+              stripAreasMoreBtnEl.setAttribute('title', `View all ${areas.length} verified affected areas`);
+            }
+          }
+
+          // Populate popover body
+          if (stripAreasPopoverBodyEl) {
+            stripAreasPopoverBodyEl.innerHTML = areas.map(area => {
+              const safeArea = area.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              return `<span class="strip-area-pill"><i class="fa-solid fa-location-dot"></i> ${safeArea}</span>`;
+            }).join('');
+          }
+        } else {
+          if (stripAreasSepEl) stripAreasSepEl.style.display = 'none';
+          if (stripAreasSegmentEl) stripAreasSegmentEl.style.display = 'none';
+          closeAreasPopover();
+        }
         return;
       }
 
       // State B: Verified No Planned Shutdown
       if (isVerifiedClear) {
-        powerStatusEl.textContent = t('power_no_planned_shutdown_short', 'No planned shutdown found');
+        powerStatusEl.textContent = t('power_no_planned_shutdown_clean', 'No planned shutdown');
         powerStatusEl.classList.add('status-verified-clear');
+        if (stripAreasSepEl) stripAreasSepEl.style.display = 'none';
+        if (stripAreasSegmentEl) stripAreasSegmentEl.style.display = 'none';
+        closeAreasPopover();
         return;
       }
 
       // State C: Unable to Verify (strictly NEVER convert missing data into "No planned shutdown")
       powerStatusEl.textContent = t('power_unable_to_verify_short', 'Unable to verify');
       powerStatusEl.classList.add('status-unable-verify');
+      if (stripAreasSepEl) stripAreasSepEl.style.display = 'none';
+      if (stripAreasSegmentEl) stripAreasSegmentEl.style.display = 'none';
+      closeAreasPopover();
     }
 
     // Interactive location click: Trigger live GPS re-detection

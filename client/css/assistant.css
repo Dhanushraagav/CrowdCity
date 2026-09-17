@@ -325,5 +325,6 @@
 
 .btn-send-chat:hover {
   background: #0f766e;
-  transform: scale(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
 }
