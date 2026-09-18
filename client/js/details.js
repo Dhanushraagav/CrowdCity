@@ -158,8 +158,8 @@ async function loadIssueDetails() {
     statusBadge.style.color = '#ffffff';
   }
 
-  // Update visual stepper
-  updateStepperUI(issue.status);
+  // Update visual stepper with complete issue data & timeline
+  updateStepperUI(issue);
 
   // Toggle Emergency Alert Banner
   const emergencyBanner = document.getElementById('emergency-alert-banner');
@@ -832,7 +832,7 @@ window.addEventListener('language-change', () => {
       statusBadge.textContent = window.i18n ? window.i18n.t(statusKey) : issue.status.replace('_', ' ');
     }
 
-    updateStepperUI(issue.status);
+    updateStepperUI(issue);
 
     const showcaseCard = document.getElementById('resolution-proof-showcase');
     if (showcaseCard && !showcaseCard.classList.contains('hidden')) {
@@ -951,26 +951,46 @@ window.deleteComment = async function(commentId) {
   }
 };
 
-// Update Visual Progress Stepper
-function updateStepperUI(status) {
+// Update Visual Progress Stepper with Rich Multi-Stage Timeline Details
+function updateStepperUI(issueOrStatus) {
   const steps = ['submitted', 'verified', 'assigned', 'in_progress', 'resolved'];
   
-  let activeIndex = 0; // submitted (pending)
-  if (status === 'verified') activeIndex = 1;
-  else if (status === 'assigned') activeIndex = 2;
-  else if (status === 'in_progress') activeIndex = 3;
-  else if (status === 'resolved' || status === 'verified_citizen') activeIndex = 4;
-  else if (status === 'rejected') {
-    const resolvedLabel = document.querySelector('#step-resolved .step-label');
-    const resolvedCircle = document.querySelector('#step-resolved .step-circle');
-    if (resolvedLabel && resolvedCircle) {
-      resolvedLabel.textContent = "Rejected";
-      resolvedCircle.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
-    }
-    activeIndex = 4;
+  // Resolve issue object and current status
+  const issue = (typeof issueOrStatus === 'object' && issueOrStatus !== null)
+    ? issueOrStatus
+    : (window.issueDetailData || { status: issueOrStatus });
+  const status = (issue && issue.status ? issue.status : (typeof issueOrStatus === 'string' ? issueOrStatus : 'pending')).toLowerCase();
+
+  // Obtain rich deterministic timeline data
+  let timeline = (issue && issue.timeline && Array.isArray(issue.timeline.stages)) ? issue.timeline : null;
+  if (!timeline && window.ComplaintTimeline && typeof window.ComplaintTimeline.buildTimelineData === 'function') {
+    timeline = window.ComplaintTimeline.buildTimelineData(issue);
   }
 
-  // Update nodes styling
+  // Detect post-resolution citizen verification
+  const logs = Array.isArray(issue && issue.history) ? issue.history : [];
+  const hasAssigned = !!(issue && (issue.assigned_to || logs.some(l => l.status === 'assigned')));
+  const hasResolvedProof = !!(issue && (issue.completion_proof_url || issue.completion_notes || logs.some(l => l.status === 'resolved')));
+  const isPostResolutionVerified = (status === 'verified') && (hasResolvedProof || hasAssigned || (timeline && timeline.current_stage === 'resolved'));
+
+  // Build stage map from precalculated timeline
+  const stageMap = {};
+  if (timeline && Array.isArray(timeline.stages)) {
+    timeline.stages.forEach(st => { stageMap[st.id] = st; });
+  }
+
+  // Compute fallback active index if stage map is missing
+  let fallbackActiveIndex = 0; // submitted
+  if (isPostResolutionVerified || status === 'resolved' || status === 'verified_citizen') fallbackActiveIndex = 4;
+  else if (status === 'in_progress') fallbackActiveIndex = 3;
+  else if (status === 'assigned') fallbackActiveIndex = 2;
+  else if (status === 'verified') fallbackActiveIndex = 1;
+  else if (status === 'rejected') fallbackActiveIndex = 4;
+
+  let completedCount = 0;
+  let highestActiveIndex = 0;
+
+  // Update nodes styling & pills
   steps.forEach((stepName, index) => {
     let node = document.getElementById(`step-${stepName}`);
     if (!node && stepName === 'submitted') node = document.getElementById('step-reported');
@@ -978,32 +998,112 @@ function updateStepperUI(status) {
 
     const circle = node.querySelector('.step-circle');
     const label = node.querySelector('.step-label');
+    const timePill = document.getElementById(`step-time-${stepName}`) || node.querySelector('.step-time-pill');
 
-    if (index <= activeIndex) {
+    const stageData = stageMap[stepName] || {
+      id: stepName,
+      label: label ? label.textContent : stepName,
+      state: index <= fallbackActiveIndex ? (index === fallbackActiveIndex ? 'current' : 'completed') : 'pending',
+      timestamp_formatted: null,
+      notes: null,
+      actor_name: null
+    };
+
+    // Attach data for interactivity
+    node._stageData = stageData;
+    node._stageNumber = index + 1;
+
+    // Check state
+    const isCompleted = stageData.state === 'completed' || (index < fallbackActiveIndex) || (index === 4 && (status === 'resolved' || isPostResolutionVerified));
+    const isCurrent = stageData.state === 'current' || (index === fallbackActiveIndex && !isCompleted && status !== 'rejected');
+    const isRejected = status === 'rejected' && index === 4;
+
+    if (isCompleted) {
+      completedCount++;
+      highestActiveIndex = Math.max(highestActiveIndex, index);
+      node.classList.add('active');
+      node.classList.remove('is-current', 'is-pending');
       circle.style.borderColor = 'var(--primary)';
       circle.style.backgroundColor = 'var(--primary)';
       circle.style.color = '#ffffff';
       circle.style.boxShadow = 'var(--shadow-glow)';
-      label.style.color = 'var(--text-main)';
+      circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+      if (label) label.style.color = 'var(--text-main)';
+
+      if (timePill) {
+        if (stageData.timestamp_formatted) {
+          const parts = stageData.timestamp_formatted.split(',');
+          timePill.textContent = parts[0] ? parts[0].trim() : stageData.timestamp_formatted;
+          timePill.title = stageData.timestamp_formatted;
+        } else {
+          const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
+          timePill.textContent = isTa ? 'சரிபார்க்கப்பட்டது' : 'Verified';
+        }
+      }
+    } else if (isCurrent) {
+      highestActiveIndex = Math.max(highestActiveIndex, index);
+      node.classList.add('active', 'is-current');
+      node.classList.remove('is-pending');
+      circle.style.borderColor = 'var(--primary)';
+      circle.style.backgroundColor = 'var(--bg-surface)';
+      circle.style.color = 'var(--primary)';
+      circle.style.boxShadow = '0 0 0 3px rgba(13, 148, 136, 0.25)';
+      if (label) label.style.color = 'var(--primary)';
+
+      if (timePill) {
+        const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
+        timePill.textContent = isTa ? 'செயலில்' : 'In Progress';
+      }
+    } else if (isRejected) {
+      node.classList.add('active');
+      circle.style.borderColor = '#ef4444';
+      circle.style.backgroundColor = '#ef4444';
+      circle.style.color = '#ffffff';
+      circle.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
+      circle.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+      if (label) {
+        label.textContent = "Rejected";
+        label.style.color = '#ef4444';
+      }
+      if (timePill) timePill.textContent = "Rejected";
     } else {
+      node.classList.remove('active', 'is-current');
+      node.classList.add('is-pending');
       circle.style.borderColor = 'var(--border-color)';
       circle.style.backgroundColor = 'var(--bg-app)';
       circle.style.color = 'var(--text-muted)';
       circle.style.boxShadow = 'none';
-      label.style.color = 'var(--text-muted)';
+      if (label) label.style.color = 'var(--text-muted)';
+      if (timePill) {
+        const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
+        timePill.textContent = isTa ? 'நிலுவையில்' : 'Pending';
+      }
     }
-    
-    if (status === 'rejected' && index === 3) {
-      circle.style.borderColor = '#ef4444';
-      circle.style.backgroundColor = '#ef4444';
-      circle.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.15)';
+
+    // Attach click and keyboard listeners once
+    if (!node._hasClickListener) {
+      node._hasClickListener = true;
+      node.addEventListener('click', () => {
+        showStageDetailCard(node._stageData, node._stageNumber);
+      });
+      node.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          showStageDetailCard(node._stageData, node._stageNumber);
+        }
+      });
     }
   });
 
   // Update line progress
   const progressLine = document.getElementById('stepper-progress-line');
   if (progressLine) {
-    const percentage = (activeIndex / (steps.length - 1)) * 100;
+    let percentage = 0;
+    if (completedCount >= 5 || status === 'resolved' || isPostResolutionVerified) {
+      percentage = 100;
+    } else {
+      percentage = (highestActiveIndex / (steps.length - 1)) * 100;
+    }
     progressLine.style.width = `${percentage}%`;
     if (status === 'rejected') {
       progressLine.style.background = 'linear-gradient(90deg, var(--primary) 0%, #ef4444 100%)';
@@ -1011,6 +1111,123 @@ function updateStepperUI(status) {
       progressLine.style.background = 'var(--primary)';
     }
   }
+
+  // Setup close listener and timeline jump button on detail card once
+  const cardCloseBtn = document.getElementById('stage-detail-close');
+  if (cardCloseBtn && !cardCloseBtn._hasListener) {
+    cardCloseBtn._hasListener = true;
+    cardCloseBtn.addEventListener('click', () => {
+      const card = document.getElementById('stepper-stage-detail-card');
+      if (card) card.classList.add('hidden');
+      document.querySelectorAll('.step-node').forEach(n => n.classList.remove('is-selected'));
+    });
+  }
+
+  const scrollToTimelineBtn = document.getElementById('btn-scroll-to-timeline');
+  if (scrollToTimelineBtn && !scrollToTimelineBtn._hasListener) {
+    scrollToTimelineBtn._hasListener = true;
+    scrollToTimelineBtn.addEventListener('click', () => {
+      const timelineEl = document.getElementById('timeline-list') || document.querySelector('.complaint-timeline-widget');
+      if (timelineEl) {
+        timelineEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+}
+
+// Interactive Stage Detail Card Renderer
+function showStageDetailCard(stage, stepNumber) {
+  const card = document.getElementById('stepper-stage-detail-card');
+  if (!card || !stage) return;
+
+  // Toggle if already selected
+  const activeNode = document.getElementById(`step-${stage.id}`);
+  const isAlreadySelected = activeNode && activeNode.classList.contains('is-selected') && !card.classList.contains('hidden');
+
+  if (isAlreadySelected) {
+    card.classList.add('hidden');
+    if (activeNode) activeNode.classList.remove('is-selected');
+    return;
+  }
+
+  // Highlight selected step node
+  document.querySelectorAll('.step-node').forEach(n => n.classList.remove('is-selected'));
+  if (activeNode) activeNode.classList.add('is-selected');
+
+  // Populate card header
+  const stepNumEl = document.getElementById('stage-detail-step-num');
+  const titleEl = document.getElementById('stage-detail-title');
+  const badgeEl = document.getElementById('stage-detail-badge');
+  const iconEl = document.getElementById('stage-detail-icon');
+
+  const stepIcons = {
+    submitted: 'fa-file-invoice',
+    verified: 'fa-clipboard-check',
+    assigned: 'fa-user-check',
+    in_progress: 'fa-screwdriver-wrench',
+    resolved: 'fa-circle-check'
+  };
+
+  if (stepNumEl) stepNumEl.textContent = `STAGE ${stepNumber} OF 5`;
+  if (titleEl) titleEl.textContent = stage.title || stage.label;
+  if (iconEl) iconEl.innerHTML = `<i class="fa-solid ${stepIcons[stage.id] || 'fa-circle-info'}"></i>`;
+
+  if (badgeEl) {
+    badgeEl.className = 'stepper-stage-card-badge';
+    const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
+    if (stage.state === 'completed') {
+      badgeEl.classList.add('completed');
+      badgeEl.textContent = isTa ? 'முடிந்தது' : 'COMPLETED';
+    } else if (stage.state === 'current') {
+      badgeEl.classList.add('current');
+      badgeEl.textContent = isTa ? 'செயலில்' : 'IN PROGRESS';
+    } else {
+      badgeEl.classList.add('pending');
+      badgeEl.textContent = isTa ? 'நிலுவையில்' : 'PENDING';
+    }
+  }
+
+  // Populate items
+  const timeEl = document.getElementById('stage-detail-time');
+  const actorEl = document.getElementById('stage-detail-actor');
+  const notesEl = document.getElementById('stage-detail-notes');
+  const proofWrap = document.getElementById('stage-detail-proof-wrap');
+  const proofImg = document.getElementById('stage-detail-proof-img');
+  const proofLink = document.getElementById('stage-detail-proof-link');
+
+  if (timeEl) {
+    const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
+    if (stage.timestamp_formatted) {
+      timeEl.textContent = stage.timestamp_formatted;
+    } else if (stage.state === 'completed') {
+      timeEl.textContent = isTa ? 'பணிப்பாய்வு முன்னேற்றத்தின் மூலம் உறுதிப்படுத்தப்பட்டது' : 'Confirmed via workflow progression';
+    } else if (stage.state === 'current') {
+      timeEl.textContent = isTa ? 'தற்போது செயலில் உள்ளது' : 'Currently in progress';
+    } else {
+      timeEl.textContent = isTa ? 'முந்தைய நிலைகளுக்காக காத்திருக்கிறது' : 'Awaiting previous stages';
+    }
+  }
+
+  if (actorEl) {
+    actorEl.textContent = stage.actor_name || stage.authority_name || (stage.state === 'pending' ? 'Unassigned' : 'Administrative Authority');
+  }
+
+  if (notesEl) {
+    notesEl.textContent = stage.notes || (stage.state === 'pending' ? 'No action recorded yet.' : 'Workflow milestone recorded in public database.');
+  }
+
+  if (proofWrap) {
+    if (stage.proof_url) {
+      proofWrap.classList.remove('hidden');
+      if (proofImg) proofImg.src = stage.proof_url;
+      if (proofLink) proofLink.href = stage.proof_url;
+    } else {
+      proofWrap.classList.add('hidden');
+    }
+  }
+
+  // Display card
+  card.classList.remove('hidden');
 }
 
 // Set up Citizen Verification Actions
