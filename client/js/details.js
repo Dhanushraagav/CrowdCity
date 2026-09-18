@@ -990,6 +990,84 @@ function updateStepperUI(issueOrStatus) {
   let completedCount = 0;
   let highestActiveIndex = 0;
 
+  // Derive reliable timestamps for all 5 stages from issue and history
+  const logs = Array.isArray(issue && issue.history) ? [...issue.history] : [];
+  logs.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  const subLog = logs.find(l => l.status === 'pending');
+  const subTs = stageMap.submitted?.timestamp || subLog?.created_at || issue.created_at;
+
+  const assLog = logs.find(l => l.status === 'assigned');
+  const assTs = stageMap.assigned?.timestamp || assLog?.created_at || issue.assigned_at || (status === 'assigned' ? issue.updated_at : null);
+
+  const resLog = logs.find(l => l.status === 'resolved');
+  const resTs = stageMap.resolved?.timestamp || resLog?.created_at || issue.resolved_at || (status === 'resolved' || isPostResolutionVerified ? issue.updated_at : null);
+
+  const preVerLog = logs.find(l => l.status === 'verified' && (!assLog || new Date(l.created_at) <= new Date(assLog.created_at)));
+  const verTs = stageMap.verified?.timestamp || preVerLog?.created_at || (assTs ? assTs : (status === 'verified' && !resTs ? issue.updated_at : null));
+
+  const inProgLog = logs.find(l => l.status === 'in_progress');
+  const intermediateLog = logs.find(l => {
+    if (!assTs || !resTs) return false;
+    const t = new Date(l.created_at).getTime();
+    return t >= new Date(assTs).getTime() && t <= new Date(resTs).getTime() && l.status !== 'pending';
+  });
+  const inProgTs = stageMap.in_progress?.timestamp || inProgLog?.created_at || (resTs ? (intermediateLog?.created_at || assTs) : (status === 'in_progress' ? issue.updated_at : null));
+
+  const resolvedStageTimestamps = {
+    submitted: subTs,
+    verified: verTs,
+    assigned: assTs,
+    in_progress: inProgTs,
+    resolved: resTs
+  };
+
+  const currentLang = (window.i18n && window.i18n.currentLanguage) || 'en';
+  const isTa = currentLang === 'ta';
+
+  function formatStepperPillDate(ts, lang) {
+    if (!ts) return null;
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return null;
+
+    try {
+      const dayMonth = d.toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short'
+      });
+      const timeStr = d.toLocaleTimeString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      return `${dayMonth}, ${timeStr.toUpperCase()}`;
+    } catch (e) {
+      return d.toLocaleDateString('en-IN');
+    }
+  }
+
+  function formatStepperFullDate(ts, lang) {
+    if (!ts) return null;
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return null;
+
+    try {
+      return d.toLocaleString(lang === 'ta' ? 'ta-IN' : 'en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      return d.toLocaleString();
+    }
+  }
+
   // Update nodes styling & pills
   steps.forEach((stepName, index) => {
     let node = document.getElementById(`step-${stepName}`);
@@ -1004,10 +1082,21 @@ function updateStepperUI(issueOrStatus) {
       id: stepName,
       label: label ? label.textContent : stepName,
       state: index <= fallbackActiveIndex ? (index === fallbackActiveIndex ? 'current' : 'completed') : 'pending',
+      timestamp: null,
       timestamp_formatted: null,
       notes: null,
       actor_name: null
     };
+
+    // Attach resolved timestamp if stage has no explicit log
+    const targetTimestamp = stageData.timestamp || resolvedStageTimestamps[stepName] || null;
+    if (targetTimestamp && !stageData.timestamp) {
+      stageData.timestamp = targetTimestamp;
+      stageData.timestamp_formatted = formatStepperFullDate(targetTimestamp, currentLang);
+    }
+
+    const pillDateText = formatStepperPillDate(stageData.timestamp, currentLang);
+    const fullDateText = formatStepperFullDate(stageData.timestamp, currentLang) || stageData.timestamp_formatted;
 
     // Attach data for interactivity
     node._stageData = stageData;
@@ -1031,13 +1120,11 @@ function updateStepperUI(issueOrStatus) {
       if (label) label.style.color = 'var(--text-main)';
 
       if (timePill) {
-        if (stageData.timestamp_formatted) {
-          const parts = stageData.timestamp_formatted.split(',');
-          timePill.textContent = parts[0] ? parts[0].trim() : stageData.timestamp_formatted;
-          timePill.title = stageData.timestamp_formatted;
+        if (pillDateText) {
+          timePill.textContent = pillDateText;
+          timePill.title = fullDateText || pillDateText;
         } else {
-          const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
-          timePill.textContent = isTa ? 'சரிபார்க்கப்பட்டது' : 'Verified';
+          timePill.textContent = isTa ? 'முடிந்தது' : 'Completed';
         }
       }
     } else if (isCurrent) {
@@ -1051,8 +1138,12 @@ function updateStepperUI(issueOrStatus) {
       if (label) label.style.color = 'var(--primary)';
 
       if (timePill) {
-        const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
-        timePill.textContent = isTa ? 'செயலில்' : 'In Progress';
+        if (pillDateText) {
+          timePill.textContent = pillDateText;
+          timePill.title = fullDateText || pillDateText;
+        } else {
+          timePill.textContent = isTa ? 'செயலில்' : 'In Progress';
+        }
       }
     } else if (isRejected) {
       node.classList.add('active');
@@ -1062,10 +1153,10 @@ function updateStepperUI(issueOrStatus) {
       circle.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
       circle.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
       if (label) {
-        label.textContent = "Rejected";
+        label.textContent = isTa ? "நிராகரிக்கப்பட்டது" : "Rejected";
         label.style.color = '#ef4444';
       }
-      if (timePill) timePill.textContent = "Rejected";
+      if (timePill) timePill.textContent = isTa ? "நிராகரிக்கப்பட்டது" : "Rejected";
     } else {
       node.classList.remove('active', 'is-current');
       node.classList.add('is-pending');
@@ -1075,7 +1166,6 @@ function updateStepperUI(issueOrStatus) {
       circle.style.boxShadow = 'none';
       if (label) label.style.color = 'var(--text-muted)';
       if (timePill) {
-        const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
         timePill.textContent = isTa ? 'நிலுவையில்' : 'Pending';
       }
     }
@@ -1197,8 +1287,14 @@ function showStageDetailCard(stage, stepNumber) {
 
   if (timeEl) {
     const isTa = window.i18n && window.i18n.currentLanguage === 'ta';
-    if (stage.timestamp_formatted) {
-      timeEl.textContent = stage.timestamp_formatted;
+    if (stage.timestamp_formatted || stage.timestamp) {
+      const fullDate = stage.timestamp_formatted || stage.timestamp;
+      if (stage.is_inferred && stage.state === 'completed') {
+        const note = isTa ? '(பணிப்பாய்வு முன்னேற்றத்தின் மூலம் உறுதிப்படுத்தப்பட்டது)' : '(Confirmed via workflow progression)';
+        timeEl.innerHTML = `${escapeHTML(fullDate)} <small style="display: block; font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 3px;">${note}</small>`;
+      } else {
+        timeEl.textContent = fullDate;
+      }
     } else if (stage.state === 'completed') {
       timeEl.textContent = isTa ? 'பணிப்பாய்வு முன்னேற்றத்தின் மூலம் உறுதிப்படுத்தப்பட்டது' : 'Confirmed via workflow progression';
     } else if (stage.state === 'current') {

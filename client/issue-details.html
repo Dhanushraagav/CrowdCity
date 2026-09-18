@@ -216,35 +216,35 @@
                 </div>
                 
                 <!-- Step 1: Submitted -->
-                <div class="step-node active" id="step-submitted" role="button" tabindex="0" data-stage="submitted" aria-label="Step 1: Submitted. Click to view stage details." title="Click to view Submitted details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; width: 90px; cursor: pointer;">
+                <div class="step-node active" id="step-submitted" role="button" tabindex="0" data-stage="submitted" aria-label="Step 1: Submitted. Click to view stage details." title="Click to view Submitted details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; min-width: 100px; max-width: 125px; cursor: pointer;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.3s ease;"><i class="fa-solid fa-file-invoice"></i></div>
                   <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.3s ease;" data-i18n="timeline_stage_submitted">Submitted</span>
                   <span class="step-time-pill" id="step-time-submitted">--</span>
                 </div>
                 
                 <!-- Step 2: Verified -->
-                <div class="step-node" id="step-verified" role="button" tabindex="0" data-stage="verified" aria-label="Step 2: Verified. Click to view stage details." title="Click to view Verified details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; width: 90px; cursor: pointer;">
+                <div class="step-node" id="step-verified" role="button" tabindex="0" data-stage="verified" aria-label="Step 2: Verified. Click to view stage details." title="Click to view Verified details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; min-width: 100px; max-width: 125px; cursor: pointer;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.3s ease;"><i class="fa-solid fa-clipboard-check"></i></div>
                   <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.3s ease;" data-i18n="timeline_stage_verified">Verified</span>
                   <span class="step-time-pill" id="step-time-verified">--</span>
                 </div>
 
                 <!-- Step 3: Assigned -->
-                <div class="step-node" id="step-assigned" role="button" tabindex="0" data-stage="assigned" aria-label="Step 3: Assigned. Click to view stage details." title="Click to view Assigned details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; width: 90px; cursor: pointer;">
+                <div class="step-node" id="step-assigned" role="button" tabindex="0" data-stage="assigned" aria-label="Step 3: Assigned. Click to view stage details." title="Click to view Assigned details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; min-width: 100px; max-width: 125px; cursor: pointer;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.3s ease;"><i class="fa-solid fa-user-check"></i></div>
                   <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.3s ease;" data-i18n="timeline_stage_assigned">Assigned</span>
                   <span class="step-time-pill" id="step-time-assigned">--</span>
                 </div>
 
                 <!-- Step 4: In Progress -->
-                <div class="step-node" id="step-in_progress" role="button" tabindex="0" data-stage="in_progress" aria-label="Step 4: In Progress. Click to view stage details." title="Click to view In Progress details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; width: 90px; cursor: pointer;">
+                <div class="step-node" id="step-in_progress" role="button" tabindex="0" data-stage="in_progress" aria-label="Step 4: In Progress. Click to view stage details." title="Click to view In Progress details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; min-width: 100px; max-width: 125px; cursor: pointer;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.3s ease;"><i class="fa-solid fa-screwdriver-wrench"></i></div>
                   <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.3s ease;" data-i18n="timeline_stage_in_progress">In Progress</span>
                   <span class="step-time-pill" id="step-time-in_progress">--</span>
                 </div>
 
                 <!-- Step 5: Resolved -->
-                <div class="step-node" id="step-resolved" role="button" tabindex="0" data-stage="resolved" aria-label="Step 5: Resolved. Click to view stage details." title="Click to view Resolved details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; width: 90px; cursor: pointer;">
+                <div class="step-node" id="step-resolved" role="button" tabindex="0" data-stage="resolved" aria-label="Step 5: Resolved. Click to view stage details." title="Click to view Resolved details" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; z-index: 2; min-width: 100px; max-width: 125px; cursor: pointer;">
                   <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-app); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); transition: all 0.3s ease;"><i class="fa-solid fa-circle-check"></i></div>
                   <span class="step-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: center; transition: all 0.3s ease;" data-i18n="timeline_stage_resolved">Resolved</span>
                   <span class="step-time-pill" id="step-time-resolved">--</span>
