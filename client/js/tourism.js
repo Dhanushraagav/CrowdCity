@@ -25,6 +25,7 @@
     selectedDistrictId: 'coimbatore',
     selectedCategory: 'all',
     districtSearchQuery: '',
+    explorerDistrictQuery: '',
     touristSearchQuery: '',
     places: [],
     placesCache: {},
@@ -45,8 +46,19 @@
     'wildlife': 'fa-paw',
     'fort': 'fa-shield-halved',
     'dam': 'fa-bridge-water',
-    'nature': 'fa-leaf'
+    'nature': 'fa-leaf',
+    'museum': 'fa-monument'
   };
+
+  // Helper: Escape HTML attributes
+  function escapeAttr(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
 
   // Helper: Get Current Language ('en' or 'ta')
   function getCurrentLang() {
@@ -171,6 +183,33 @@
       });
     }
 
+    // 38-District Interactive Explorer Search Input
+    const explorerFilterInput = document.getElementById('tourism-explorer-filter-input');
+    const explorerClearBtn = document.getElementById('tourism-explorer-clear-btn');
+    if (explorerFilterInput) {
+      explorerFilterInput.addEventListener('input', (e) => {
+        state.explorerDistrictQuery = e.target.value;
+        filterExplorerDistricts(e.target.value);
+      });
+      explorerFilterInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          explorerFilterInput.value = '';
+          state.explorerDistrictQuery = '';
+          filterExplorerDistricts('');
+        }
+      });
+    }
+
+    if (explorerClearBtn && explorerFilterInput) {
+      explorerClearBtn.addEventListener('click', () => {
+        explorerFilterInput.value = '';
+        state.explorerDistrictQuery = '';
+        explorerClearBtn.classList.add('hidden');
+        explorerFilterInput.focus();
+        filterExplorerDistricts('');
+      });
+    }
+
     // Gallery Navigation Buttons
     const prevBtn = document.getElementById('gallery-prev-btn');
     const nextBtn = document.getElementById('gallery-next-btn');
@@ -288,6 +327,8 @@
         const data = await distRes.json();
         if (data.success && Array.isArray(data.districts)) {
           state.districts = data.districts;
+          updateHeroStats();
+          renderDistrictExplorer();
           renderDistrictDropdownOptions();
         }
       }
@@ -298,12 +339,106 @@
         const catData = await catRes.json();
         if (catData.success && Array.isArray(catData.categories)) {
           state.categories = catData.categories;
+          updateHeroStats();
           renderCategoryBar();
         }
       }
     } catch (err) {
       console.warn('[Tourism] Error loading metadata:', err);
     }
+  }
+
+  /**
+   * Update Dynamic Numbers on the Hero Stats Card
+   */
+  function updateHeroStats() {
+    const districtsCountEl = document.getElementById('hero-stat-districts');
+    const destinationsCountEl = document.getElementById('hero-stat-destinations');
+    const categoriesCountEl = document.getElementById('hero-stat-categories');
+
+    if (districtsCountEl && state.districts.length > 0) {
+      districtsCountEl.textContent = state.districts.length;
+    }
+
+    if (destinationsCountEl && state.districts.length > 0) {
+      const totalPlaces = state.districts.reduce((acc, d) => acc + (Number(d.placeCount) || 0), 0);
+      destinationsCountEl.textContent = totalPlaces;
+    }
+
+    if (categoriesCountEl && state.categories.length > 0) {
+      const activeCats = state.categories.filter(c => c.id !== 'all').length;
+      categoriesCountEl.textContent = activeCats || '8';
+    }
+  }
+
+  /**
+   * Render 38-District Interactive Explorer Grid
+   */
+  function renderDistrictExplorer() {
+    const grid = document.getElementById('tourism-districts-grid');
+    if (!grid || !state.districts.length) return;
+
+    grid.innerHTML = state.districts.map(dist => {
+      const isSelected = dist.id === state.selectedDistrictId;
+      const count = dist.placeCount || 0;
+
+      return `
+        <button type="button" 
+                class="tourism-district-chip ${isSelected ? 'active' : ''}" 
+                data-id="${dist.id}" 
+                data-name-en="${(dist.name || '').toLowerCase()}" 
+                data-name-ta="${(dist.nameTa || '').toLowerCase()}" 
+                title="${dist.name} (${dist.nameTa}) - ${count} verified destinations"
+                onclick="window.selectDistrict('${dist.id}', true)">
+          <div class="chip-names">
+            <span class="chip-name-en">${dist.name}</span>
+            <span class="chip-name-ta">${dist.nameTa}</span>
+          </div>
+          <span class="chip-count">${count}</span>
+        </button>
+      `;
+    }).join('');
+
+    if (state.explorerDistrictQuery) {
+      filterExplorerDistricts(state.explorerDistrictQuery);
+    }
+  }
+
+  /**
+   * Filter 38-District Explorer Chips
+   */
+  function filterExplorerDistricts(query) {
+    const cleanQuery = (query || '').trim().toLowerCase();
+    const chips = document.querySelectorAll('#tourism-districts-grid .tourism-district-chip');
+    const clearBtn = document.getElementById('tourism-explorer-clear-btn');
+
+    if (clearBtn) {
+      clearBtn.classList.toggle('hidden', cleanQuery.length === 0);
+    }
+
+    chips.forEach(chip => {
+      const nameEn = chip.getAttribute('data-name-en') || '';
+      const nameTa = chip.getAttribute('data-name-ta') || '';
+      const distId = chip.getAttribute('data-id') || '';
+      const matches = !cleanQuery || 
+        nameEn.includes(cleanQuery) || 
+        nameTa.includes(cleanQuery) ||
+        distId.includes(cleanQuery);
+
+      chip.style.display = matches ? 'flex' : 'none';
+    });
+  }
+  window.filterExplorerDistricts = filterExplorerDistricts;
+
+  /**
+   * Sync active class across Explorer Chips
+   */
+  function syncExplorerActiveChip() {
+    const chips = document.querySelectorAll('#tourism-districts-grid .tourism-district-chip');
+    chips.forEach(chip => {
+      const id = chip.getAttribute('data-id');
+      chip.classList.toggle('active', id === state.selectedDistrictId);
+    });
   }
 
   /**
@@ -341,16 +476,25 @@
 
           const banner = document.getElementById('tourism-location-banner');
           const label = document.getElementById('tourism-detected-district-label');
+          const countEl = document.getElementById('tourism-detected-district-count');
           const switchBtn = document.getElementById('btn-use-detected-district');
 
           if (banner && label) {
             const lang = getCurrentLang();
-            label.textContent = lang === 'ta' ? matched.nameTa : matched.name;
+            const primaryName = lang === 'ta' ? matched.nameTa : matched.name;
+            const secondaryName = lang === 'ta' ? matched.name : matched.nameTa;
+            label.textContent = `${primaryName} (${secondaryName})`;
+
+            if (countEl) {
+              const count = matched.placeCount || 0;
+              countEl.textContent = lang === 'ta' ? `${count} இடங்கள் உள்ளன` : `${count} destinations`;
+            }
+
             banner.classList.remove('hidden');
 
             if (switchBtn) {
               switchBtn.onclick = () => {
-                selectDistrict(matched.id);
+                selectDistrict(matched.id, true);
               };
             }
           }
@@ -361,6 +505,7 @@
     }
 
     updateSelectedDistrictTrigger();
+    syncExplorerActiveChip();
   }
 
   /**
@@ -385,7 +530,7 @@
              data-id="${dist.id}" 
              data-name-en="${(dist.name || '').toLowerCase()}" 
              data-name-ta="${(dist.nameTa || '').toLowerCase()}" 
-             onclick="window.selectDistrict('${dist.id}')">
+             onclick="window.selectDistrict('${dist.id}', false)">
           <div class="opt-text-wrap">
             <span class="opt-main-name">${displayName}</span>
             <span class="opt-sub-name">${subName}</span>
@@ -436,7 +581,7 @@
   /**
    * Select a District
    */
-  async function selectDistrict(districtId) {
+  async function selectDistrict(districtId, shouldScroll = false) {
     if (!districtId) return;
     state.selectedDistrictId = districtId;
 
@@ -460,10 +605,19 @@
     state.selectedCategory = 'all';
     renderCategoryBar();
 
-    // 5. Update header & trigger labels
+    // 5. Update header, trigger labels, and explorer chips
     updateSelectedDistrictTrigger();
+    syncExplorerActiveChip();
 
-    // 6. Fetch complete verified places
+    // 6. Smooth scroll to discovery section if requested
+    if (shouldScroll) {
+      const target = document.getElementById('tourism-discovery-section');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    // 7. Fetch complete verified places
     await fetchPlacesForDistrict(districtId);
   }
   window.selectDistrict = selectDistrict;
@@ -481,7 +635,7 @@
     const primaryName = lang === 'ta' ? district.nameTa : district.name;
     const secondaryName = lang === 'ta' ? district.name : district.nameTa;
 
-    if (label) label.textContent = primaryName;
+    if (label) label.textContent = `${primaryName} (${secondaryName})`;
     if (heading) {
       heading.innerHTML = `${primaryName} <span class="district-heading-sub">(${secondaryName})</span>`;
     }
@@ -680,58 +834,111 @@
       const shortDesc = lang === 'ta' ? place.short_desc_ta : place.short_desc_en;
       const address = lang === 'ta' ? place.address_ta : place.address_en;
       const icon = CATEGORY_ICONS[place.category.toLowerCase()] || 'fa-landmark';
+      const catClass = (place.category || '').toLowerCase().replace(/\s+/g, '-');
 
       const hasCoords = !isNaN(place.latitude) && !isNaN(place.longitude) && place.latitude !== null;
       const directionsUrl = hasCoords 
         ? `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`
         : '#';
 
+      // Check if place has verified image
+      const hasImages = Array.isArray(place.images) && place.images.length > 0 && place.images[0].url;
+      const primaryImage = hasImages ? place.images[0] : null;
+
+      const imageSection = primaryImage ? `
+        <div class="tourism-card-image-wrap">
+          <img src="${escapeAttr(primaryImage.url)}" 
+               alt="${escapeAttr(primaryName)}" 
+               class="tourism-card-img" 
+               loading="lazy" 
+               onerror="window.handleCardImageError(this, '${escapeAttr(catClass)}', '${escapeAttr(categoryName)}', '${escapeAttr(icon)}')">
+          <div class="tourism-card-overlay-top">
+            <span class="card-category-badge">
+              <i class="fa-solid ${icon}"></i>
+              <span>${categoryName}</span>
+            </span>
+            <span class="card-verified-badge" title="${t('tourism_verified_badge', 'Government Verified')}">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>${t('tourism_verified_badge', 'Verified')}</span>
+            </span>
+          </div>
+        </div>
+      ` : `
+        <div class="tourism-card-image-wrap">
+          <div class="tourism-card-fallback-banner fallback-cat-${catClass}">
+            <i class="fa-solid ${icon} fallback-cat-icon"></i>
+            <span class="fallback-cat-text">${categoryName}</span>
+          </div>
+          <div class="tourism-card-overlay-top">
+            <span class="card-category-badge">
+              <i class="fa-solid ${icon}"></i>
+              <span>${categoryName}</span>
+            </span>
+            <span class="card-verified-badge" title="${t('tourism_verified_badge', 'Government Verified')}">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>${t('tourism_verified_badge', 'Verified')}</span>
+            </span>
+          </div>
+        </div>
+      `;
+
       return `
         <article class="tourism-card" data-id="${place.id}">
-          <div class="tourism-card-header">
-            <div class="tourism-badge-row">
-              <span class="tourism-category-tag">
-                <i class="fa-solid ${icon}"></i>
-                <span>${categoryName}</span>
-              </span>
-              <span class="tourism-verified-pill" title="Verified Government Source">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>${t('tourism_verified_badge', 'Verified')}</span>
-              </span>
+          ${imageSection}
+          <div class="tourism-card-content">
+            <div class="tourism-card-header">
+              <h3 class="tourism-card-title">${primaryName}</h3>
+              <div class="tourism-card-subtitle">${secondaryName}</div>
             </div>
-            <h3 class="tourism-card-title">${primaryName}</h3>
-            <div class="tourism-card-subtitle">${secondaryName}</div>
-          </div>
 
-          <div class="tourism-card-body">
-            <p class="tourism-card-desc">${shortDesc}</p>
-            <div class="tourism-card-meta">
-              <div class="tourism-meta-item">
-                <i class="fa-solid fa-location-dot"></i>
-                <span class="tourism-meta-text" title="${address}">${address}</span>
+            <div class="tourism-card-body">
+              <p class="tourism-card-desc">${shortDesc}</p>
+              <div class="tourism-card-meta">
+                <div class="tourism-meta-item">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span class="tourism-meta-text" title="${address}">${address}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="tourism-card-actions">
-            <button type="button" class="btn-tourism-details" onclick="window.openTourismModal('${place.id}')">
-              <i class="fa-solid fa-circle-info"></i>
-              <span data-i18n="tourism_view_details">${t('tourism_view_details', 'View Details')}</span>
-            </button>
-            <a href="${directionsUrl}" 
-               target="_blank" 
-               rel="noopener noreferrer" 
-               class="btn-tourism-directions ${!hasCoords ? 'disabled' : ''}" 
-               title="Get Directions in Google Maps"
-               ${!hasCoords ? 'aria-disabled="true" onclick="return false;"' : ''}>
-              <i class="fa-solid fa-diamond-turn-right"></i>
-              <span data-i18n="tourism_get_directions">${t('tourism_get_directions', 'Directions')}</span>
-            </a>
+            <div class="tourism-card-actions">
+              <button type="button" class="btn-tourism-details" onclick="window.openTourismModal('${place.id}')">
+                <i class="fa-solid fa-circle-info"></i>
+                <span data-i18n="tourism_view_details">${t('tourism_view_details', 'View Details')}</span>
+              </button>
+              <a href="${directionsUrl}" 
+                 target="_blank" 
+                 rel="noopener noreferrer" 
+                 class="btn-tourism-directions ${!hasCoords ? 'disabled' : ''}" 
+                 title="Get Directions in Google Maps"
+                 ${!hasCoords ? 'aria-disabled="true" onclick="return false;"' : ''}>
+                <i class="fa-solid fa-diamond-turn-right"></i>
+                <span data-i18n="tourism_get_directions">${t('tourism_get_directions', 'Directions')}</span>
+              </a>
+            </div>
           </div>
         </article>
       `;
     }).join('');
   }
+
+  /**
+   * Graceful Card Image Fallback when Network Image Fails
+   */
+  function handleCardImageError(imgEl, catClass, catLabel, iconClass) {
+    if (!imgEl || !imgEl.parentElement) return;
+    const wrap = imgEl.parentElement;
+    const icon = iconClass || 'fa-landmark';
+    const fallbackHtml = `
+      <div class="tourism-card-fallback-banner fallback-cat-${catClass || 'default'}">
+        <i class="fa-solid ${icon} fallback-cat-icon"></i>
+        <span class="fallback-cat-text">${catLabel || 'Destination'}</span>
+      </div>
+    `;
+    imgEl.remove();
+    wrap.insertAdjacentHTML('afterbegin', fallbackHtml);
+  }
+  window.handleCardImageError = handleCardImageError;
 
   /**
    * Open Place Details Modal
@@ -1114,6 +1321,25 @@
    */
   function updateLocalizedLabels() {
     updateSelectedDistrictTrigger();
+    renderDistrictExplorer();
+    updateHeroStats();
+
+    if (state.detectedDistrict) {
+      const banner = document.getElementById('tourism-location-banner');
+      const label = document.getElementById('tourism-detected-district-label');
+      const countEl = document.getElementById('tourism-detected-district-count');
+      if (banner && label) {
+        const lang = getCurrentLang();
+        const primaryName = lang === 'ta' ? state.detectedDistrict.nameTa : state.detectedDistrict.name;
+        const secondaryName = lang === 'ta' ? state.detectedDistrict.name : state.detectedDistrict.nameTa;
+        label.textContent = `${primaryName} (${secondaryName})`;
+
+        if (countEl) {
+          const count = state.detectedDistrict.placeCount || 0;
+          countEl.textContent = lang === 'ta' ? `${count} இடங்கள் உள்ளன` : `${count} destinations`;
+        }
+      }
+    }
   }
 
   // Bootstrap when DOM is loaded

@@ -85,99 +85,216 @@
   box-sizing: border-box;
 }
 
-/* Tourism Hero Banner */
-.tourism-hero-banner {
-  background: var(--bg-surface, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 14px;
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 1.25rem;
+/* ==========================================================================
+   1. Immersive Hero Section
+   ========================================================================== */
+.tourism-hero-immersive {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  background-color: #0b1320;
+  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.2);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
-.tourism-hero-left {
-  flex: 1;
-  min-width: 280px;
+.tourism-hero-backdrop-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('images/tamilnadu_temple_hero.jpg');
+  background-size: cover;
+  background-position: center 35%;
+  filter: saturate(1.15) brightness(0.85);
+  transform: scale(1.02);
 }
 
-.tourism-hero-badge {
+.tourism-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(13, 148, 136, 0.82) 65%, rgba(15, 118, 110, 0.72) 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.tourism-hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 2.75rem 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.tourism-hero-badge-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.78rem;
+  gap: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--primary, #0f766e);
-  background: rgba(15, 118, 110, 0.08);
-  border: 1px solid rgba(15, 118, 110, 0.18);
-  padding: 0.25rem 0.65rem;
+  letter-spacing: 0.06em;
+  color: #5eead4;
+  background: rgba(13, 148, 136, 0.25);
+  border: 1px solid rgba(94, 234, 212, 0.35);
+  padding: 0.35rem 0.85rem;
   border-radius: 20px;
-  margin-bottom: 0.6rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(8px);
 }
 
-.tourism-hero-dot {
-  opacity: 0.5;
+.hero-badge-sep {
+  opacity: 0.4;
 }
 
-.tourism-hero-title {
-  font-size: 1.5rem;
+.tourism-hero-heading {
+  margin: 0 0 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tourism-hero-title-en {
+  font-size: 2.3rem;
   font-weight: 800;
-  color: var(--text-main, #0f172a);
-  margin: 0 0 0.35rem 0;
-  letter-spacing: -0.02em;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
-.tourism-hero-subtitle {
-  font-size: 0.88rem;
-  color: var(--text-muted, #64748b);
-  margin: 0;
-  line-height: 1.5;
-  max-width: 720px;
+.tourism-hero-title-ta {
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: #99f6e4;
+  letter-spacing: -0.01em;
+  opacity: 0.95;
 }
 
-.btn-official-ttdc {
+.tourism-hero-lead {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+  max-width: 680px;
+  margin: 0 0 1.75rem 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.tourism-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-hero-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.75rem 1.4rem;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-hero-explore:hover {
+  background: #14b8a6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(13, 148, 136, 0.5);
+  color: #ffffff;
+}
+
+.btn-hero-ttdc {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(15, 118, 110, 0.07);
-  border: 1px solid rgba(15, 118, 110, 0.25);
-  color: var(--primary, #0f766e);
-  padding: 0.6rem 1.1rem;
-  border-radius: 10px;
-  font-size: 0.82rem;
-  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
   text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
   transition: all 0.2s ease;
-  white-space: nowrap;
 }
 
-.btn-official-ttdc:hover {
-  background: var(--primary, #0f766e);
+.btn-hero-ttdc:hover {
+  background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  border-color: var(--primary, #0f766e);
   transform: translateY(-1px);
 }
 
-/* Location Detected Strip */
+/* Hero Stats Card */
+.tourism-hero-stats-card {
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  min-width: 220px;
+}
+
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hero-stat-number {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #2dd4bf;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.hero-stat-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hero-stat-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+/* ==========================================================================
+   2. Location Detected Banner (Convenience Highlight)
+   ========================================================================== */
 .tourism-location-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  background: rgba(15, 118, 110, 0.06);
-  border: 1px solid rgba(15, 118, 110, 0.2);
-  border-radius: 12px;
-  margin-bottom: 1.25rem;
-  font-size: 0.85rem;
-  color: var(--primary, #0f766e);
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  background: rgba(15, 118, 110, 0.07);
+  border: 1.5px solid rgba(15, 118, 110, 0.25);
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.04);
 }
 
 .tourism-location-banner.hidden {
@@ -185,36 +302,249 @@
 }
 
 .tourism-location-banner-content {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.6rem;
-  font-weight: 500;
+  gap: 0.85rem;
 }
 
-.tourism-location-banner-content strong {
-  color: var(--text-main, #0f172a);
+.location-beacon-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--primary, #0f766e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.location-banner-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.location-banner-eyebrow {
+  font-size: 0.75rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary, #0f766e);
+}
+
+.location-banner-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.location-banner-main strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+}
+
+.location-banner-count {
+  font-size: 0.82rem;
+  color: var(--text-muted, #64748b);
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  padding: 0.15rem 0.6rem;
+  border-radius: 10px;
 }
 
 .tourism-location-switch-btn {
-  background: var(--bg-surface, #ffffff);
-  border: 1px solid rgba(15, 118, 110, 0.35);
-  color: var(--primary, #0f766e);
-  border-radius: 8px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.78rem;
-  font-weight: 600;
+  background: var(--primary, #0f766e);
+  border: 1px solid var(--primary, #0f766e);
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  transition: all 0.15s ease;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
 }
 
 .tourism-location-switch-btn:hover {
+  background: var(--primary-hover, #0d625b);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+}
+
+/* ==========================================================================
+   3. 38 District Explorer Section
+   ========================================================================== */
+.tourism-explorer-section {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 18px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.tourism-explorer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.4rem;
+}
+
+.tourism-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.01em;
+}
+
+.tourism-section-heading i {
+  color: var(--primary, #0f766e);
+}
+
+.tourism-section-subtitle {
+  font-size: 0.86rem;
+  color: var(--text-muted, #64748b);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.explorer-search-wrap {
+  position: relative;
+  width: 330px;
+  max-width: 100%;
+}
+
+.explorer-search-wrap i {
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.85rem;
+}
+
+.explorer-search-wrap input {
+  width: 100%;
+  padding: 0.65rem 2.2rem 0.65rem 2.5rem;
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  background: var(--bg-app, #f8fafc);
+  color: var(--text-main, #0f172a);
+  border-radius: 10px;
+  font-size: 0.86rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.explorer-search-wrap input:focus {
+  border-color: var(--primary, #0f766e);
+  background: var(--bg-surface, #ffffff);
+  box-shadow: 0 0 0 3.5px rgba(15, 118, 110, 0.12);
+}
+
+.explorer-filter-clear {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+}
+
+.explorer-filter-clear.hidden {
+  display: none !important;
+}
+
+.tourism-districts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 0.75rem;
+  max-height: 330px;
+  overflow-y: auto;
+  padding: 0.35rem;
+  scrollbar-width: thin;
+}
+
+.tourism-district-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--bg-app, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tourism-district-chip:hover {
+  border-color: var(--primary, #0f766e);
+  background: rgba(15, 118, 110, 0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.tourism-district-chip.active {
+  background: rgba(15, 118, 110, 0.12);
+  border-color: var(--primary, #0f766e);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.3);
+}
+
+.chip-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.chip-name-en {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-name-ta {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary, #0f766e);
+  background: rgba(15, 118, 110, 0.1);
+  padding: 0.15rem 0.45rem;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.tourism-district-chip.active .chip-count {
   background: var(--primary, #0f766e);
   color: #ffffff;
-  border-color: var(--primary, #0f766e);
 }
 
 /* Filter Card */
@@ -551,72 +881,176 @@
 /* Tourism Places Grid */
 .tourism-places-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
-/* Card Style (Subtle Elevation Micro-Interaction) */
+/* Image-First Card Style */
 .tourism-card {
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 14px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 1.35rem;
+  overflow: hidden;
+  position: relative;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
               box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
               border-color 0.22s ease;
-  position: relative;
 }
 
 .tourism-card:hover {
-  transform: translateY(-2.5px);
-  border-color: var(--primary-light, var(--primary, #0f766e));
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+  transform: translateY(-4px);
+  border-color: rgba(13, 148, 136, 0.4);
+  box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.1), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
 }
 
-.tourism-card-header {
-  margin-bottom: 0.85rem;
+/* Card Image Container (16:9 Aspect / 195px height) */
+.tourism-card-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 195px;
+  overflow: hidden;
+  background: #0f172a;
+  flex-shrink: 0;
 }
 
-.tourism-badge-row {
+.tourism-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tourism-card:hover .tourism-card-img {
+  transform: scale(1.04);
+}
+
+/* Fallback Vector Banner when No Image Exists */
+.tourism-card-fallback-banner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.fallback-cat-temple {
+  background: linear-gradient(135deg, #7c2d12 0%, #b45309 55%, #ea580c 100%);
+}
+.fallback-cat-hill-station {
+  background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #10b981 100%);
+}
+.fallback-cat-waterfall {
+  background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 55%, #38bdf8 100%);
+}
+.fallback-cat-beach {
+  background: linear-gradient(135deg, #134e4a 0%, #0d9488 55%, #2dd4bf 100%);
+}
+.fallback-cat-wildlife {
+  background: linear-gradient(135deg, #14532d 0%, #15803d 55%, #4ade80 100%);
+}
+.fallback-cat-heritage {
+  background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 55%, #8b5cf6 100%);
+}
+.fallback-cat-dam {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #60a5fa 100%);
+}
+.fallback-cat-museum {
+  background: linear-gradient(135deg, #701a75 0%, #a21caf 55%, #e879f9 100%);
+}
+.fallback-cat-nature {
+  background: linear-gradient(135deg, #164e63 0%, #0891b2 55%, #22d3ee 100%);
+}
+.fallback-cat-default {
+  background: linear-gradient(135deg, #1e293b 0%, #0f766e 100%);
+}
+
+.fallback-cat-icon {
+  font-size: 2.3rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+  opacity: 0.95;
+}
+
+.fallback-cat-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Floating Badges Over Image */
+.tourism-card-overlay-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.65rem;
   gap: 0.5rem;
+  z-index: 2;
+  pointer-events: none;
 }
 
-.tourism-category-tag {
+.card-category-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
+  gap: 0.35rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--primary, #0f766e);
-  background: rgba(15, 118, 110, 0.08);
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.tourism-verified-pill {
+.card-verified-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #059669;
-  background: rgba(5, 150, 105, 0.08);
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: 20px;
+  background: rgba(5, 150, 105, 0.9);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Card Content (Lower Section) */
+.tourism-card-content {
+  padding: 1.25rem 1.25rem 1.35rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+.tourism-card-header {
+  margin-bottom: 0.6rem;
 }
 
 .tourism-card-title {
-  font-size: 1.1rem;
+  font-size: 1.12rem;
   font-weight: 700;
   color: var(--text-main, #0f172a);
   margin: 0 0 0.2rem 0;
@@ -631,7 +1065,7 @@
 
 .tourism-card-body {
   flex-grow: 1;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
 }
 
 .tourism-card-desc {
@@ -640,7 +1074,7 @@
   line-height: 1.5;
   margin: 0 0 0.75rem 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1584,6 +2018,79 @@ html.dark-theme .district-heading-sub {
   color: #94a3b8 !important;
 }
 
+/* 38-District Explorer Dark Mode */
+[data-theme="dark"] .tourism-explorer-section,
+html.dark-theme .tourism-explorer-section,
+html.theme-dark .tourism-explorer-section {
+  background: #0d0d0d !important;
+  border-color: #222222 !important;
+}
+
+[data-theme="dark"] .tourism-section-heading,
+html.dark-theme .tourism-section-heading {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .tourism-section-subtitle,
+html.dark-theme .tourism-section-subtitle {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .explorer-search-wrap input,
+html.dark-theme .explorer-search-wrap input {
+  background: #141414 !important;
+  border-color: #2a2a2a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .explorer-search-wrap input:focus,
+html.dark-theme .explorer-search-wrap input:focus {
+  border-color: #0d9488 !important;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.25) !important;
+}
+
+[data-theme="dark"] .tourism-district-chip,
+html.dark-theme .tourism-district-chip,
+html.theme-dark .tourism-district-chip {
+  background: #141414 !important;
+  border-color: #242424 !important;
+}
+
+[data-theme="dark"] .tourism-district-chip:hover,
+html.dark-theme .tourism-district-chip:hover {
+  background: #1e1e1e !important;
+  border-color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .tourism-district-chip.active,
+html.dark-theme .tourism-district-chip.active {
+  background: rgba(13, 148, 136, 0.22) !important;
+  border-color: #2dd4bf !important;
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.35) !important;
+}
+
+[data-theme="dark"] .chip-name-en,
+html.dark-theme .chip-name-en {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .chip-name-ta,
+html.dark-theme .chip-name-ta {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .chip-count,
+html.dark-theme .chip-count {
+  background: rgba(13, 148, 136, 0.2) !important;
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .tourism-district-chip.active .chip-count,
+html.dark-theme .tourism-district-chip.active .chip-count {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+}
+
 [data-theme="dark"] .tourism-card,
 html.dark-theme .tourism-card,
 html.theme-dark .tourism-card {
@@ -1595,6 +2102,18 @@ html.theme-dark .tourism-card {
 html.dark-theme .tourism-card:hover {
   border-color: rgba(45, 212, 191, 0.4) !important;
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .tourism-card-image-wrap,
+html.dark-theme .tourism-card-image-wrap {
+  background: #080808 !important;
+}
+
+[data-theme="dark"] .card-category-badge,
+html.dark-theme .card-category-badge {
+  background: rgba(0, 0, 0, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f8fafc !important;
 }
 
 [data-theme="dark"] .tourism-card-title,
@@ -1762,12 +2281,59 @@ html.dark-theme .video-official-badge {
   }
 }
 
-@media (max-width: 768px) {
-  .tourism-hero-banner {
-    padding: 1.2rem;
+@media (max-width: 900px) {
+  .tourism-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 2rem 1.5rem;
   }
-  .tourism-hero-title {
-    font-size: 1.3rem;
+  .tourism-hero-stats-card {
+    flex-direction: row;
+    justify-content: space-around;
+    min-width: unset;
+    width: 100%;
+    padding: 1.1rem 1.25rem;
+  }
+  .hero-stat-divider {
+    width: 1px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tourism-hero-immersive {
+    min-height: unset;
+    border-radius: 16px;
+  }
+  .tourism-hero-inner {
+    padding: 1.5rem 1.25rem;
+    gap: 1.25rem;
+  }
+  .tourism-hero-badge-pill {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.75rem;
+    white-space: normal;
+    display: inline-flex;
+    flex-wrap: wrap;
+    line-height: 1.4;
+  }
+  .tourism-hero-title-en {
+    font-size: 1.65rem;
+  }
+  .tourism-hero-title-ta {
+    font-size: 1.15rem;
+  }
+  .tourism-hero-lead {
+    font-size: 0.88rem;
+    margin-bottom: 1.25rem;
+  }
+  .tourism-explorer-section {
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
+  }
+  .tourism-districts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    max-height: 280px;
   }
   .tourism-filter-row {
     grid-template-columns: 1fr;
@@ -1783,7 +2349,23 @@ html.dark-theme .video-official-badge {
 
 @media (max-width: 480px) {
   .tourism-page-container {
-    padding: 1rem;
+    padding: 0.85rem;
+  }
+  .tourism-hero-stats-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    padding: 0.85rem 0.5rem;
+    text-align: center;
+  }
+  .hero-stat-divider {
+    display: none;
+  }
+  .hero-stat-number {
+    font-size: 1.35rem;
+  }
+  .hero-stat-label {
+    font-size: 0.65rem;
   }
   .tourism-card-actions {
     grid-template-columns: 1fr;
@@ -1791,6 +2373,9 @@ html.dark-theme .video-official-badge {
   .tourism-stats-left {
     flex-direction: column;
     gap: 0.25rem;
+  }
+  .tourism-districts-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1854,48 +2439,110 @@ html.dark-theme .video-official-badge {
 
       <div class="app-content-body tourism-page-container">
 
-        <!-- Tourism Hero Banner -->
-        <div class="tourism-hero-banner">
-          <div class="tourism-hero-left">
-            <div class="tourism-hero-badge">
-              <i class="fa-solid fa-map-location-dot"></i>
-              <span data-i18n="nav_public_pulse">Public Pulse</span>
-              <span class="tourism-hero-dot">&bull;</span>
-              <span data-i18n="tourism_verified_source_title">Verified Government of Tamil Nadu Sources</span>
+        <!-- Immersive Tamil Nadu Tourism Hero -->
+        <div class="tourism-hero-immersive" id="tourism-hero">
+          <img src="images/tamilnadu_temple_hero.jpg" alt="Tamil Nadu Heritage" class="tourism-hero-backdrop-img" onerror="this.style.display='none'">
+          <div class="tourism-hero-overlay"></div>
+          <div class="tourism-hero-inner">
+            <div class="tourism-hero-content">
+              <div class="tourism-hero-badge-pill">
+                <i class="fa-solid fa-landmark"></i>
+                <span data-i18n="tourism_hero_badge">Government of Tamil Nadu Tourism</span>
+                <span class="hero-badge-sep">&bull;</span>
+                <span data-i18n="tourism_hero_statewide">Statewide Verified Directory</span>
+              </div>
+              <div class="tourism-hero-heading">
+                <h1 class="tourism-hero-title-en" data-i18n="tourism_hero_title_en">Tamil Nadu Tourism</h1>
+                <span class="tourism-hero-title-ta" data-i18n="tourism_hero_title_ta">தமிழ்நாடு சுற்றுலா வழிகாட்டி</span>
+              </div>
+              <p class="tourism-hero-lead" data-i18n="tourism_hero_lead">
+                Explore majestic temples, mist-covered Western Ghats hill stations, pristine Coromandel coastlines, wildlife reserves, and centuries-old cultural monuments across all 38 districts of Tamil Nadu.
+              </p>
+              <div class="tourism-hero-actions">
+                <a href="#tourism-explorer-section" class="btn-hero-explore">
+                  <i class="fa-solid fa-compass"></i>
+                  <span data-i18n="tourism_btn_explore_38">Explore 38 Districts</span>
+                </a>
+                <a href="https://tamilnadutourism.tn.gov.in" target="_blank" rel="noopener noreferrer" class="btn-hero-ttdc">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <span>TTDC Official Portal</span>
+                </a>
+              </div>
             </div>
-            <h1 class="tourism-hero-title" data-i18n="tourism_page_title">Tamil Nadu Tourism</h1>
-            <p class="tourism-hero-subtitle" data-i18n="tourism_page_subtitle">
-              Authoritative guide to heritage, sanctuaries, hill stations, and cultural destinations across all 38 districts of Tamil Nadu.
-            </p>
-          </div>
-          <div class="tourism-hero-right">
-            <a href="https://tamilnadutourism.tn.gov.in" target="_blank" rel="noopener noreferrer" class="btn-official-ttdc" title="Visit Official Tamil Nadu Tourism Portal">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span>TTDC Official Portal</span>
-            </a>
+            <!-- Dynamic Stats Hero Card -->
+            <div class="tourism-hero-stats-card">
+              <div class="hero-stat-item">
+                <span class="hero-stat-number" id="hero-stat-districts">38</span>
+                <span class="hero-stat-label" data-i18n="tourism_stat_districts">Districts Covered</span>
+              </div>
+              <div class="hero-stat-divider"></div>
+              <div class="hero-stat-item">
+                <span class="hero-stat-number" id="hero-stat-destinations">157</span>
+                <span class="hero-stat-label" data-i18n="tourism_stat_destinations">Verified Destinations</span>
+              </div>
+              <div class="hero-stat-divider"></div>
+              <div class="hero-stat-item">
+                <span class="hero-stat-number" id="hero-stat-categories">8</span>
+                <span class="hero-stat-label" data-i18n="tourism_stat_categories">Themes & Categories</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Auto-Detected Location Indicator -->
+        <!-- Auto-Detected Location Convenience Banner -->
         <div id="tourism-location-banner" class="tourism-location-banner hidden">
           <div class="tourism-location-banner-content">
-            <i class="fa-solid fa-location-crosshairs"></i>
-            <span><span data-i18n="tourism_detected_district">Detected District</span>: <strong id="tourism-detected-district-label">--</strong></span>
+            <div class="location-beacon-icon">
+              <i class="fa-solid fa-location-crosshairs"></i>
+            </div>
+            <div class="location-banner-text-wrap">
+              <span class="location-banner-eyebrow" data-i18n="tourism_location_near_you">Near your current district</span>
+              <div class="location-banner-main">
+                <strong id="tourism-detected-district-label">--</strong>
+                <span class="location-banner-count" id="tourism-detected-district-count">--</span>
+              </div>
+            </div>
           </div>
           <button type="button" class="tourism-location-switch-btn" id="btn-use-detected-district">
-            <i class="fa-solid fa-check"></i>
-            <span>Explore This District</span>
+            <i class="fa-solid fa-arrow-down"></i>
+            <span data-i18n="tourism_explore_detected">Jump to this District</span>
           </button>
         </div>
 
+        <!-- 38-District Interactive Explorer Grid -->
+        <div class="tourism-explorer-section" id="tourism-explorer-section">
+          <div class="tourism-explorer-header">
+            <div>
+              <h2 class="tourism-section-heading">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span data-i18n="tourism_explorer_heading">All 38 Tamil Nadu Districts</span>
+              </h2>
+              <p class="tourism-section-subtitle" data-i18n="tourism_explorer_subtitle">
+                Select any district to discover authoritative government-verified destinations and cultural heritage.
+              </p>
+            </div>
+            <div class="explorer-search-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="tourism-explorer-filter-input" placeholder="Find district (e.g. Madurai, மதுரை)..." autocomplete="off">
+              <button type="button" id="tourism-explorer-clear-btn" class="explorer-filter-clear hidden" title="Clear Filter">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="tourism-districts-grid" id="tourism-districts-grid">
+            <!-- 38 District chips injected dynamically by tourism.js -->
+          </div>
+        </div>
+
         <!-- Filter & Search Controls Strip -->
-        <div class="tourism-filter-card">
+        <div class="tourism-filter-card" id="tourism-discovery-section">
           <div class="tourism-filter-row">
             <!-- Searchable District Selector Dropdown -->
             <div class="tourism-district-select-wrapper">
               <label for="tourism-district-select" class="tourism-filter-label">
                 <i class="fa-solid fa-map-pin"></i>
-                <span data-i18n="tourism_select_district">Select District</span>
+                <span data-i18n="tourism_select_district">Active District</span>
               </label>
               <div class="tourism-custom-dropdown" id="tourism-district-dropdown">
                 <button type="button" class="tourism-dropdown-trigger" id="tourism-district-trigger" aria-haspopup="listbox" aria-expanded="false">
@@ -1940,7 +2587,7 @@ html.dark-theme .video-official-badge {
         <div class="tourism-stats-bar">
           <div class="tourism-stats-left">
             <h2 class="tourism-active-district-heading" id="tourism-active-district-title">Coimbatore</h2>
-            <span class="tourism-places-count-pill" id="tourism-places-count-badge">3 destinations</span>
+            <span class="tourism-places-count-pill" id="tourism-places-count-badge">--</span>
           </div>
           <div class="tourism-stats-right">
             <span class="tourism-govt-verified-tag">
