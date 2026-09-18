@@ -257,7 +257,23 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_marudhamalai_1.jpg",
+                "alt_en": "Marudhamalai Murugan Temple panoramic hill view",
+                "alt_ta": "மருதமலை முருகன் கோவில் மலை அழகு",
+                "source_name": "Wikimedia Commons / CC BY 2.0 / Kamesh kumar",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AMarudhamalai_Murugan_Temple%2C_Coimbatore.jpg"
+          },
+          {
+                "url": "/images/tourism/cbe_marudhamalai_2.jpg",
+                "alt_en": "Marudhamalai Subrahmanya Swamy Temple Gopuram and steps",
+                "alt_ta": "மருதமலை சுப்பிரமணிய சுவாமி திருக்கோயில் ராஜகோபுரம்",
+                "source_name": "Wikimedia Commons / CC BY-SA 4.0 / Sankar 1995",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AMarudhamalai_Subrananya_Swamy_Temple_Gopuram.jpg"
+          }
+    ]
   },
   {
     id: 'cbe-siruvani-waterfalls',
@@ -317,7 +333,32 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_anamalai_1.jpg",
+                "alt_en": "Dense tropical forest canopy at Topslip, Anamalai Tiger Reserve",
+                "alt_ta": "டாப்ஸ்லிப் ஆனைமலை புலிகள் காப்பக அடர்ந்த காடு",
+                "source_name": "Wikimedia Commons / CC BY 3.0 / Jaseem Hamza",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3ATopslip%2C_Anamalai_Tiger_Reserve_-_panoramio.jpg"
+          },
+          {
+                "url": "/images/tourism/cbe_anamalai_2.jpg",
+                "alt_en": "Wildlife habitat in Anamalai Tiger Reserve",
+                "alt_ta": "ஆனைமலை புலிகள் காப்பக வனவிலங்குகள்",
+                "source_name": "Wikimedia Commons / CC BY-SA 4.0 / PJeganathan",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3ABonnet_macaques_with_young_ones_from_Aziyar_Anamalai_Tiger_Reserve_JEG7913_(Cropped).jpg"
+          }
+    ],
+    media_video: {
+          "youtube_id": "14U5IE03lFY",
+          "url": "https://www.youtube.com/watch?v=14U5IE03lFY",
+          "embed_url": "https://www.youtube-nocookie.com/embed/14U5IE03lFY",
+          "title_en": "Anamalai Tiger Reserve - Wildlife & Eco-Tourism Feature",
+          "title_ta": "ஆனைமலை புலிகள் காப்பகம் - அதிகாரப்பூர்வ காணொளி",
+          "source_name": "National Geographic Traveller India & Tamil Nadu Tourism",
+          "source_url": "https://www.youtube.com/watch?v=14U5IE03lFY"
+    }
   },
 
   {
@@ -348,7 +389,32 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_valparai_1.jpg",
+                "alt_en": "Lush green tea plantations of Valparai Hill Station",
+                "alt_ta": "வால்பாறை பசுமை தேயிலைத் தோட்டங்கள்",
+                "source_name": "Wikimedia Commons / CC BY-SA 4.0 / Marishi1234",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AValparai_At_its_peak.jpg"
+          },
+          {
+                "url": "/images/tourism/cbe_valparai_2.jpg",
+                "alt_en": "Scenic hairpin bends in the Anamalai Hills leading to Valparai",
+                "alt_ta": "வால்பாறை மலைப்பாதை கொண்டை ஊசி வளைவு",
+                "source_name": "Wikimedia Commons / CC BY-SA 4.0 / Anusha Narayanan",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AValparai_mountain_bend_veiw.jpg"
+          }
+    ],
+    media_video: {
+          "youtube_id": "ho9kOT1M3gQ",
+          "url": "https://www.youtube.com/watch?v=ho9kOT1M3gQ",
+          "embed_url": "https://www.youtube-nocookie.com/embed/ho9kOT1M3gQ",
+          "title_en": "360° Valparai - Official Experiential Tour",
+          "title_ta": "360° வால்பாறை - தமிழ்நாடு சுற்றுலா அதிகாரப்பூர்வ காணொளி",
+          "source_name": "Tamil Nadu Tourism (@TamilnaduTourismOnline)",
+          "source_url": "https://www.youtube.com/watch?v=ho9kOT1M3gQ"
+    }
   },
   {
     id: 'cbe-monkey-falls',
@@ -378,7 +444,16 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_monkey_falls_1.jpg",
+                "alt_en": "Kavi Aruvi (Monkey Falls) perennial cascade near Pollachi",
+                "alt_ta": "பொள்ளாச்சி அருகே அமைந்துள்ள கவியருவி (குரங்கு அருவி)",
+                "source_name": "Wikimedia Commons / CC BY-SA 2.0 / Marcus Sherman",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AIGWS%26NPUpper_AliyarMonkey_falls.jpg"
+          }
+    ]
   },
   {
     id: 'cbe-aliyar-dam',
@@ -408,7 +483,23 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_aliyar_1.jpg",
+                "alt_en": "Aliyar Dam sunrise with the Anamalai mountain range",
+                "alt_ta": "ஆழியாறு அணை மற்றும் ஆனைமலை மலைத்தொடர் விடியற்காலை",
+                "source_name": "Wikimedia Commons / CC BY-SA 4.0 / Nadinviki",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AAliyar_Dam_Sun_rise.jpg"
+          },
+          {
+                "url": "/images/tourism/cbe_aliyar_2.jpg",
+                "alt_en": "Aliyar Reservoir and landscaped surrounding park",
+                "alt_ta": "ஆழியாறு நீர்த்தேக்கம் மற்றும் பூங்கா",
+                "source_name": "Wikimedia Commons / CC BY 4.0 / Sandhiya Rangasami",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AAliyar_dam_reservoir.jpg"
+          }
+    ]
   },
   {
     id: 'cbe-perur-patteeswarar',
@@ -438,7 +529,23 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_perur_1.jpg",
+                "alt_en": "Ancient stone gopuram of Arulmigu Patteeswarar Swamy Temple, Perur",
+                "alt_ta": "பேரூர் பட்டீஸ்வரர் கோவில் பழமையான ராஜகோபுரம்",
+                "source_name": "Wikimedia Commons / CC BY-SA 3.0 / Balajijagadesh",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3APERUR_PATTEESHWARAR_TEMPLE.jpg"
+          },
+          {
+                "url": "/images/tourism/cbe_perur_2.jpg",
+                "alt_en": "Sculptured pillars of Kanaka Sabha at Perur Temple",
+                "alt_ta": "பேரூர் திருக்கோயில் கனக சபை சிற்பத் தூண்கள்",
+                "source_name": "Wikimedia Commons / CC BY-SA 4.0 / Ssriram mt",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3APerur_Patteeswarar1.jpg"
+          }
+    ]
   },
   {
     id: 'cbe-eachanari-vinayagar',
@@ -498,7 +605,16 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_kovai_kutralam_1.jpg",
+                "alt_en": "Kovai Kutralam waterfalls cascading in the Siruvani hills",
+                "alt_ta": "சிறுவாணி மலைச்சாரலில் அமைந்துள்ள கோவை குற்றாலம் நீர்வீழ்ச்சி",
+                "source_name": "Wikimedia Commons / CC BY-SA 4.0 / Sathishn 10",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3AKovai_Kutralam.jpg"
+          }
+    ]
   },
   {
     id: 'cbe-baralikadu',
@@ -588,7 +704,16 @@ export const TN_TOURISM_PLACES = [
     source_type: 'official_government_portal',
     verified_at: '2026-03-01T00:00:00Z',
     verification_status: 'verified',
-    is_active: true
+    is_active: true,
+    media_images: [
+          {
+                "url": "/images/tourism/cbe_gass_museum_1.jpg",
+                "alt_en": "Natural history and wildlife specimen exhibit at Gass Forest Museum",
+                "alt_ta": "காஸ் வன அருங்காட்சியக வரலாற்று இயற்கை காட்சி",
+                "source_name": "Wikimedia Commons / CC BY-SA 3.0 / Booradleyp1",
+                "source_url": "https://commons.wikimedia.org/wiki/File%3ALeopard_at_Gass_Forest_Museum%2C_Coimbatore%2C_Tamil_Nadu%2C_India.jpg"
+          }
+    ]
   },
   {
     id: 'cbe-sholayar-dam',

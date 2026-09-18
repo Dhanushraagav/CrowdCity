@@ -10704,6 +10704,402 @@ html.theme-dark .step-node.active .step-time-pill {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* 1. Media Image Gallery (Top of Modal) */
+.tourism-modal-gallery-wrap {
+  width: 100%;
+  position: relative;
+  background: #0f172a;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tourism-modal-gallery-wrap.hidden {
+  display: none !important;
+}
+
+.tourism-modal-gallery {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  background: #090d16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tourism-gallery-track {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.tourism-gallery-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-in;
+}
+
+.tourism-gallery-slide.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+}
+
+.tourism-gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.gallery-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  font-size: 0.88rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-nav-btn:hover {
+  background: #0d9488;
+  border-color: #2dd4bf;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.gallery-nav-btn.prev {
+  left: 12px;
+}
+
+.gallery-nav-btn.next {
+  right: 12px;
+}
+
+.gallery-nav-btn.hidden {
+  display: none !important;
+}
+
+.gallery-top-bar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.gallery-counter-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gallery-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gallery-expand-btn:hover {
+  background: #0d9488;
+  border-color: #2dd4bf;
+  color: #ffffff;
+}
+
+.gallery-attribution-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.45rem 1rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+  z-index: 8;
+  display: flex;
+  align-items: center;
+}
+
+.gallery-source-text {
+  font-size: 0.72rem;
+  color: rgba(248, 250, 252, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95%;
+}
+
+.gallery-source-link {
+  color: #2dd4bf;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.gallery-source-link:hover {
+  color: #5eead4;
+}
+
+/* 2. Official Video Section */
+.tourism-modal-video-section {
+  background: var(--bg-app, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.tourism-modal-video-section.hidden {
+  display: none !important;
+}
+
+.video-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.video-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.video-brand-icon {
+  color: #ff0000;
+  font-size: 1.2rem;
+}
+
+.video-section-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+}
+
+.video-official-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--primary, #0f766e);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+}
+
+.video-player-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000000;
+  position: relative;
+}
+
+.video-player-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Video Facade (Lazy Click-to-Play) */
+.video-facade {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  overflow: hidden;
+  background: #090d16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-facade-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.82;
+  transition: opacity 0.25s ease, transform 0.3s ease;
+}
+
+.video-facade:hover .video-facade-thumb {
+  opacity: 0.95;
+  transform: scale(1.03);
+}
+
+.video-facade-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.72) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.video-play-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #0d9488;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.45);
+  transition: transform 0.2s ease, background 0.2s ease;
+  padding-left: 4px;
+}
+
+.video-facade:hover .video-play-btn {
+  transform: scale(1.1);
+  background: #0f766e;
+}
+
+.video-facade-title {
+  color: #f8fafc;
+  font-size: 0.84rem;
+  font-weight: 600;
+  max-width: 90%;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* 3. Lightbox Fullscreen Modal */
+.tourism-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.93);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: lightboxFadeIn 0.2s ease-out;
+}
+
+.tourism-lightbox-backdrop.hidden {
+  display: none !important;
+}
+
+@keyframes lightboxFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tourism-lightbox-content {
+  position: relative;
+  max-width: 92vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.lightbox-close-btn {
+  position: absolute;
+  top: -42px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.lightbox-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.08);
+}
+
+.lightbox-caption-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.lightbox-source-link {
+  color: #2dd4bf;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
 .tourism-modal-header {
   padding: 1.5rem 1.75rem;
   border-bottom: 1px solid var(--border-color, #e2e8f0);
@@ -11177,6 +11573,33 @@ html.dark-theme .source-department-name {
 
 [data-theme="dark"] .source-external-link,
 html.dark-theme .source-external-link {
+  color: #2dd4bf !important;
+}
+
+/* Media Gallery & Video AMOLED Dark Mode */
+[data-theme="dark"] .tourism-modal-gallery-wrap,
+html.dark-theme .tourism-modal-gallery-wrap,
+html.theme-dark .tourism-modal-gallery-wrap {
+  border-color: #222222 !important;
+  background: #000000 !important;
+}
+
+[data-theme="dark"] .tourism-modal-video-section,
+html.dark-theme .tourism-modal-video-section,
+html.theme-dark .tourism-modal-video-section {
+  background: #121212 !important;
+  border-color: #242424 !important;
+}
+
+[data-theme="dark"] .video-section-title,
+html.dark-theme .video-section-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .video-official-badge,
+html.dark-theme .video-official-badge {
+  background: rgba(13, 148, 136, 0.18) !important;
+  border-color: rgba(13, 148, 136, 0.35) !important;
   color: #2dd4bf !important;
 }
 

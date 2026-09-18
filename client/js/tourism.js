@@ -30,7 +30,9 @@
     placesCache: {},
     detectedDistrict: null,
     isLoading: false,
-    activeModalPlace: null
+    activeModalPlace: null,
+    activeImagesList: [],
+    activeImageIndex: 0
   };
 
   // Category Icon Mapping
@@ -169,10 +171,69 @@
       });
     }
 
-    // Modal Escape Key Listener
+    // Gallery Navigation Buttons
+    const prevBtn = document.getElementById('gallery-prev-btn');
+    const nextBtn = document.getElementById('gallery-next-btn');
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        prevGallerySlide();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        nextGallerySlide();
+      });
+    }
+
+    // Touch Swipe for Mobile Gallery
+    const galleryEl = document.getElementById('tourism-modal-gallery');
+    if (galleryEl) {
+      let touchStartX = 0;
+      let touchStartY = 0;
+      galleryEl.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+      galleryEl.addEventListener('touchend', (e) => {
+        if (e.changedTouches && e.changedTouches[0]) {
+          const diffX = e.changedTouches[0].clientX - touchStartX;
+          const diffY = e.changedTouches[0].clientY - touchStartY;
+          // Trigger slide navigation on clear horizontal swipe (> 35px)
+          if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+            if (diffX > 0) {
+              prevGallerySlide();
+            } else {
+              nextGallerySlide();
+            }
+          }
+        }
+      }, { passive: true });
+    }
+
+    // Modal & Lightbox Keyboard Listener (Escape, ArrowLeft, ArrowRight)
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeTourismModal();
+      const lightbox = document.getElementById('tourism-lightbox-backdrop');
+      const isLightboxOpen = lightbox && !lightbox.classList.contains('hidden');
+      const modal = document.getElementById('tourism-modal-backdrop');
+      const isModalOpen = modal && !modal.classList.contains('hidden');
+
+      if (isLightboxOpen) {
+        if (e.key === 'Escape') {
+          closeTourismLightbox();
+        }
+      } else if (isModalOpen) {
+        if (e.key === 'Escape') {
+          closeTourismModal();
+        } else if (e.key === 'ArrowLeft') {
+          prevGallerySlide();
+        } else if (e.key === 'ArrowRight') {
+          nextGallerySlide();
+        }
+      } else if (e.key === 'Escape') {
         closeDistrictDropdown();
       }
     });
@@ -720,15 +781,15 @@
     if (title) title.textContent = primaryName;
     if (subtitle) subtitle.textContent = secondaryName;
     if (desc) desc.textContent = description;
-    if (timingsEl) timingsEl.textContent = timings || 'Contact administration';
-    if (bestTimeEl) bestTimeEl.textContent = bestTime || 'All season';
-    if (feeEl) feeEl.textContent = entryFee || 'Free admission';
+    if (timingsEl) timingsEl.textContent = timings || (lang === 'ta' ? 'நிர்வாகத்தை அணுகவும்' : 'Contact administration');
+    if (bestTimeEl) bestTimeEl.textContent = bestTime || (lang === 'ta' ? 'அனைத்து காலங்களிலும்' : 'All season');
+    if (feeEl) feeEl.textContent = entryFee || (lang === 'ta' ? 'இலவச அனுமதி' : 'Free admission');
     if (addressEl) addressEl.textContent = address;
     if (sourceName) sourceName.textContent = place.source_name;
     if (sourceLink) sourceLink.href = place.source_url;
 
     if (directionsBtn) {
-      const hasCoords = !isNaN(place.latitude) && !isNaN(place.longitude);
+      const hasCoords = !isNaN(place.latitude) && !isNaN(place.longitude) && place.latitude !== null;
       if (hasCoords) {
         directionsBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`;
         directionsBtn.classList.remove('disabled');
@@ -737,10 +798,273 @@
         directionsBtn.classList.add('disabled');
       }
     }
+
+    // 1. Populate Image Gallery (Top of Modal)
+    populateGallery(place.media_images);
+
+    // 2. Populate Official Video Section
+    populateVideo(place.media_video);
   }
 
   /**
-   * Close Place Details Modal
+   * Populate Image Gallery (Top of Modal)
+   */
+  function populateGallery(images) {
+    const wrap = document.getElementById('tourism-modal-gallery-wrap');
+    const track = document.getElementById('tourism-gallery-track');
+    const prevBtn = document.getElementById('gallery-prev-btn');
+    const nextBtn = document.getElementById('gallery-next-btn');
+    if (!wrap || !track) return;
+
+    state.activeImagesList = Array.isArray(images) ? [...images] : [];
+    state.activeImageIndex = 0;
+
+    if (state.activeImagesList.length === 0) {
+      wrap.classList.add('hidden');
+      track.innerHTML = '';
+      return;
+    }
+
+    wrap.classList.remove('hidden');
+    const lang = getCurrentLang();
+
+    if (state.activeImagesList.length <= 1) {
+      if (prevBtn) prevBtn.classList.add('hidden');
+      if (nextBtn) nextBtn.classList.add('hidden');
+    } else {
+      if (prevBtn) prevBtn.classList.remove('hidden');
+      if (nextBtn) nextBtn.classList.remove('hidden');
+    }
+
+    track.innerHTML = state.activeImagesList.map((img, i) => {
+      const alt = lang === 'ta' ? (img.alt_ta || img.alt_en) : (img.alt_en || img.alt_ta);
+      return `
+        <div class="tourism-gallery-slide ${i === 0 ? 'active' : ''}" data-index="${i}" onclick="window.handleSlideClick(${i})">
+          <img src="${img.url}" 
+               alt="${alt || 'Tourist place'}" 
+               class="tourism-gallery-img" 
+               loading="${i === 0 ? 'eager' : 'lazy'}"
+               onerror="window.handleTourismImageError(this, ${i})">
+        </div>
+      `;
+    }).join('');
+
+    updateGalleryUI();
+  }
+
+  /**
+   * Update Gallery State, Active Slide, Counter & Attribution
+   */
+  function updateGalleryUI() {
+    const track = document.getElementById('tourism-gallery-track');
+    const counterPill = document.getElementById('gallery-counter-pill');
+    const sourceLink = document.getElementById('gallery-source-link');
+    const prevBtn = document.getElementById('gallery-prev-btn');
+    const nextBtn = document.getElementById('gallery-next-btn');
+    const wrap = document.getElementById('tourism-modal-gallery-wrap');
+    if (!track) return;
+
+    const total = state.activeImagesList.length;
+    if (total === 0) {
+      if (wrap) wrap.classList.add('hidden');
+      return;
+    }
+
+    if (state.activeImageIndex >= total) state.activeImageIndex = 0;
+    if (state.activeImageIndex < 0) state.activeImageIndex = total - 1;
+
+    const slides = track.querySelectorAll('.tourism-gallery-slide');
+    slides.forEach((s, i) => {
+      s.classList.toggle('active', i === state.activeImageIndex);
+    });
+
+    if (counterPill) {
+      counterPill.textContent = `${state.activeImageIndex + 1} / ${total}`;
+    }
+
+    if (total <= 1) {
+      if (prevBtn) prevBtn.classList.add('hidden');
+      if (nextBtn) nextBtn.classList.add('hidden');
+    } else {
+      if (prevBtn) prevBtn.classList.remove('hidden');
+      if (nextBtn) nextBtn.classList.remove('hidden');
+    }
+
+    const current = state.activeImagesList[state.activeImageIndex];
+    if (sourceLink && current) {
+      sourceLink.textContent = current.source_name || 'Official Source';
+      sourceLink.href = current.source_url || '#';
+    }
+
+    const expandBtn = document.getElementById('gallery-expand-btn');
+    if (expandBtn) {
+      expandBtn.onclick = (e) => {
+        e.stopPropagation();
+        handleSlideClick(state.activeImageIndex);
+      };
+    }
+  }
+
+  /**
+   * Gallery Next Slide Action
+   */
+  function nextGallerySlide() {
+    if (state.activeImagesList.length <= 1) return;
+    state.activeImageIndex = (state.activeImageIndex + 1) % state.activeImagesList.length;
+    updateGalleryUI();
+  }
+  window.nextGallerySlide = nextGallerySlide;
+
+  /**
+   * Gallery Previous Slide Action
+   */
+  function prevGallerySlide() {
+    if (state.activeImagesList.length <= 1) return;
+    state.activeImageIndex = (state.activeImageIndex - 1 + state.activeImagesList.length) % state.activeImagesList.length;
+    updateGalleryUI();
+  }
+  window.prevGallerySlide = prevGallerySlide;
+
+  /**
+   * Click Image to Enlarge in Lightbox
+   */
+  function handleSlideClick(index) {
+    const current = state.activeImagesList[index];
+    if (!current) return;
+    const lang = getCurrentLang();
+    const alt = lang === 'ta' ? (current.alt_ta || current.alt_en) : (current.alt_en || current.alt_ta);
+    openTourismLightbox(current.url, alt, current.source_name, current.source_url);
+  }
+  window.handleSlideClick = handleSlideClick;
+
+  /**
+   * Graceful Broken Image Handling
+   */
+  function handleTourismImageError(imgEl, index) {
+    if (index >= 0 && index < state.activeImagesList.length) {
+      state.activeImagesList.splice(index, 1);
+      if (state.activeImagesList.length === 0) {
+        const wrap = document.getElementById('tourism-modal-gallery-wrap');
+        if (wrap) wrap.classList.add('hidden');
+        const track = document.getElementById('tourism-gallery-track');
+        if (track) track.innerHTML = '';
+      } else {
+        if (state.activeImageIndex >= state.activeImagesList.length) {
+          state.activeImageIndex = state.activeImagesList.length - 1;
+        }
+        populateGallery(state.activeImagesList);
+      }
+    }
+  }
+  window.handleTourismImageError = handleTourismImageError;
+
+  /**
+   * Populate Official Video Section (Lazy Click-to-Play Facade)
+   */
+  function populateVideo(videoData) {
+    const section = document.getElementById('tourism-modal-video-section');
+    const container = document.getElementById('video-player-container');
+    const badge = document.getElementById('video-source-badge');
+    if (!section || !container) return;
+
+    if (!videoData || (!videoData.youtube_id && !videoData.url)) {
+      section.classList.add('hidden');
+      container.innerHTML = '';
+      return;
+    }
+
+    section.classList.remove('hidden');
+    const lang = getCurrentLang();
+    const title = lang === 'ta' ? (videoData.title_ta || videoData.title_en) : (videoData.title_en || videoData.title_ta);
+    const sourceName = videoData.source_name || 'Official Department';
+
+    if (badge) {
+      const span = badge.querySelector('span');
+      if (span) span.textContent = sourceName;
+    }
+
+    const ytid = videoData.youtube_id || (videoData.url && videoData.url.match(/v=([a-zA-Z0-9_-]+)/)?.[1]);
+
+    if (!ytid) {
+      section.classList.add('hidden');
+      container.innerHTML = '';
+      return;
+    }
+
+    const playLabel = lang === 'ta' ? 'காணொளியை இயக்கு' : 'Play Video';
+    container.innerHTML = `
+      <div class="video-facade" id="video-facade-${ytid}" onclick="window.playTourismVideo('${ytid}')" title="${playLabel}">
+        <img src="https://img.youtube.com/vi/${ytid}/hqdefault.jpg" alt="${title}" class="video-facade-thumb" loading="lazy">
+        <div class="video-facade-overlay">
+          <div class="video-play-btn" aria-label="${playLabel}">
+            <i class="fa-solid fa-play"></i>
+          </div>
+          <div class="video-facade-title">${title}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Play Video by Embedding Responsive YouTube Iframe
+   */
+  function playTourismVideo(youtubeId) {
+    const container = document.getElementById('video-player-container');
+    if (!container) return;
+
+    container.innerHTML = `
+      <iframe class="video-player-iframe" 
+              src="https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0" 
+              title="Official Video Player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+      </iframe>
+    `;
+  }
+  window.playTourismVideo = playTourismVideo;
+
+  /**
+   * Open Lightbox Fullscreen Preview
+   */
+  function openTourismLightbox(url, caption, sourceName, sourceUrl) {
+    const backdrop = document.getElementById('tourism-lightbox-backdrop');
+    const img = document.getElementById('lightbox-image');
+    const cap = document.getElementById('lightbox-caption');
+    const link = document.getElementById('lightbox-source-link');
+    if (!backdrop || !img) return;
+
+    img.src = url;
+    img.alt = caption || 'Tourist image full size';
+    if (cap) cap.textContent = caption || '';
+    if (link) {
+      link.href = sourceUrl || '#';
+      link.textContent = 'Source: ' + (sourceName || 'Official Source');
+    }
+
+    backdrop.classList.remove('hidden');
+  }
+  window.openTourismLightbox = openTourismLightbox;
+
+  /**
+   * Close Lightbox
+   */
+  function closeTourismLightbox(event) {
+    if (event && event.target && event.target.id !== 'tourism-lightbox-backdrop' && !event.target.closest('.lightbox-close-btn')) {
+      return;
+    }
+    const backdrop = document.getElementById('tourism-lightbox-backdrop');
+    const img = document.getElementById('lightbox-image');
+    if (backdrop) {
+      backdrop.classList.add('hidden');
+    }
+    if (img) {
+      img.src = '';
+    }
+  }
+  window.closeTourismLightbox = closeTourismLightbox;
+
+  /**
+   * Close Place Details Modal with Complete Lifecycle Cleanup
    */
   function closeTourismModal(event) {
     if (event && event.target && event.target.id !== 'tourism-modal-backdrop') {
@@ -752,6 +1076,19 @@
       document.body.style.overflow = '';
       state.activeModalPlace = null;
     }
+
+    // Stop and dismantle video iframe immediately to halt audio/video playback
+    const videoContainer = document.getElementById('video-player-container');
+    if (videoContainer) {
+      videoContainer.innerHTML = '';
+    }
+
+    // Close lightbox if open
+    closeTourismLightbox();
+
+    // Reset active gallery state
+    state.activeImagesList = [];
+    state.activeImageIndex = 0;
   }
   window.closeTourismModal = closeTourismModal;
 
