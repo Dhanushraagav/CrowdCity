@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Early Theme & Language Synchronous Bootstrap (Prevents any FOUC / flicker) -->
+  <script>
+    (function() {
+      var p = (window.location.pathname || '').toLowerCase().replace(/\\/g, '/');
+      var f = p.split('/').pop().replace(/\.html$/, '');
+      var isAuth = (f === 'auth' || f === 'authority-login' || f === 'reset-password' || f === 'login' || f === 'signup' || f === 'forgot-password');
+      var isAuthority = (f.indexOf('authority-') === 0 || f === 'admin' || f === 'services-admin');
+      
+      var theme = 'light';
+      if (!isAuth) {
+        try {
+          var t = localStorage.getItem('crowdcity_theme') || localStorage.getItem('cc_theme');
+          if (t === 'dark') theme = 'dark';
+        } catch(e) {}
+      }
+      var isDark = (theme === 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark-theme', isDark);
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('light-theme', !isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+
+      var lang = 'en';
+      if (!isAuthority && !isAuth) {
+        try {
+          var l = localStorage.getItem('crowdcity_citizen_language') || localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language');
+          lang = (l === 'en' || l === 'ta') ? l : 'ta';
+        } catch(e) { lang = 'ta'; }
+      } else if (isAuth) {
+        try {
+          var al = sessionStorage.getItem('cc_auth_display_lang');
+          lang = (al === 'ta') ? 'ta' : 'en';
+        } catch(e) { lang = 'en'; }
+      }
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.classList.remove('lang-en', 'lang-ta');
+      document.documentElement.classList.add(lang === 'ta' ? 'lang-ta' : 'lang-en');
+    })();
+  </script>
+
+  <!-- PWA Meta and Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CrowdCity">
+  <script src="js/pwa-helper.js" defer></script>
+
+  <!-- Central Authentication Router & Localization -->
+  <script src="js/auth-router.js?v=8.0.0"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Official Tamil Nadu Tourism guide across all 38 districts with verified Government of Tamil Nadu destinations, temples, heritage sites, and natural attractions.">
+  <title>Tamil Nadu Tourism - Public Pulse - CrowdCity AI</title>
+  
+  <!-- Premium Fonts - Inter & Noto Sans Tamil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.5">
+  <link rel="stylesheet" href="css/components.css?v=8.4.0">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="protected-page">
+
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="citizen-dashboard.html" class="app-sidebar-logo">
+          <div class="brand-emblems-wrap">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" decoding="async">
+            <div class="brand-divider"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="Tamil Nadu" class="brand-emblem" decoding="async">
+          </div>
+          <span class="brand-text">CROWDCITY<small>CITIZEN PORTAL</small></span>
+        </a>
+      </div>
+
+      <nav class="app-sidebar-nav">
+        <a href="citizen-dashboard.html" class="app-sidebar-link" title="Dashboard">
+          <i class="fa-solid fa-table-columns"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a href="report.html" class="app-sidebar-link" title="Report Issue">
+          <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="nav_report_issue">Report Issue</span>
+        </a>
+        <a href="my-complaints.html" class="app-sidebar-link" title="My Complaints">
+          <i class="fa-solid fa-list-check"></i> <span data-i18n="nav_my_complaints">My Complaints</span>
+        </a>
+        <a href="map.html" class="app-sidebar-link" title="Map">
+          <i class="fa-solid fa-location-dot"></i> <span data-i18n="nav_map">Map</span>
+        </a>
+        <a href="transportation.html" class="app-sidebar-link" title="Transportation">
+          <i class="fa-solid fa-bus"></i> <span data-i18n="nav_transportation">Transportation</span>
+        </a>
+        <a href="services.html" class="app-sidebar-link" title="Government Services">
+          <i class="fa-solid fa-building-flag"></i> <span data-i18n="nav_services">Government Services</span>
+        </a>
+        <a href="emergency-services.html" class="app-sidebar-link emergency-sidebar-link" title="Emergency Help Center">
+          <i class="fa-solid fa-shield-halved"></i> <span data-i18n="emergency_help_center">Emergency Help Center</span>
+        </a>
+        <a href="helplines.html" class="app-sidebar-link" title="District Helplines">
+          <i class="fa-solid fa-phone-volume"></i> <span data-i18n="district_helplines">District Helplines</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <header class="app-header-main">
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
+          <div id="auth-nav-container"></div>
+        </div>
+      </header>
+
+      <div class="app-content-body tourism-page-container">
+
+        <!-- Tourism Hero Banner -->
+        <div class="tourism-hero-banner">
+          <div class="tourism-hero-left">
+            <div class="tourism-hero-badge">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span data-i18n="nav_public_pulse">Public Pulse</span>
+              <span class="tourism-hero-dot">&bull;</span>
+              <span data-i18n="tourism_verified_source_title">Verified Government of Tamil Nadu Sources</span>
+            </div>
+            <h1 class="tourism-hero-title" data-i18n="tourism_page_title">Tamil Nadu Tourism</h1>
+            <p class="tourism-hero-subtitle" data-i18n="tourism_page_subtitle">
+              Authoritative guide to heritage, sanctuaries, hill stations, and cultural destinations across all 38 districts of Tamil Nadu.
+            </p>
+          </div>
+          <div class="tourism-hero-right">
+            <a href="https://tamilnadutourism.tn.gov.in" target="_blank" rel="noopener noreferrer" class="btn-official-ttdc" title="Visit Official Tamil Nadu Tourism Portal">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>TTDC Official Portal</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Auto-Detected Location Indicator -->
+        <div id="tourism-location-banner" class="tourism-location-banner hidden">
+          <div class="tourism-location-banner-content">
+            <i class="fa-solid fa-location-crosshairs"></i>
+            <span><span data-i18n="tourism_detected_district">Detected District</span>: <strong id="tourism-detected-district-label">--</strong></span>
+          </div>
+          <button type="button" class="tourism-location-switch-btn" id="btn-use-detected-district">
+            <i class="fa-solid fa-check"></i>
+            <span>Explore This District</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Controls Strip -->
+        <div class="tourism-filter-card">
+          <div class="tourism-filter-row">
+            <!-- Searchable District Selector Dropdown -->
+            <div class="tourism-district-select-wrapper">
+              <label for="tourism-district-select" class="tourism-filter-label">
+                <i class="fa-solid fa-map-pin"></i>
+                <span data-i18n="tourism_select_district">Select District</span>
+              </label>
+              <div class="tourism-custom-dropdown" id="tourism-district-dropdown">
+                <button type="button" class="tourism-dropdown-trigger" id="tourism-district-trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span id="tourism-selected-district-name">Coimbatore</span>
+                  <i class="fa-solid fa-chevron-down dropdown-chevron"></i>
+                </button>
+                <div class="tourism-dropdown-menu hidden" id="tourism-district-menu" role="listbox">
+                  <div class="tourism-dropdown-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="tourism-district-filter-input" placeholder="Search 38 districts..." autocomplete="off">
+                  </div>
+                  <div class="tourism-dropdown-options" id="tourism-district-options-list">
+                    <!-- Injected dynamically via JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- In-District Text Search Bar -->
+            <div class="tourism-search-wrapper">
+              <label for="tourism-search-input" class="tourism-filter-label">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>Search Within District</span>
+              </label>
+              <div class="tourism-search-input-wrap">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="tourism-search-input" placeholder="Search places, heritage sites, waterfalls, temples..." data-i18n-placeholder="tourism_search_placeholder">
+                <button type="button" id="tourism-search-clear-btn" class="tourism-search-clear-btn hidden" title="Clear Search">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Pills Filter Bar -->
+          <div class="tourism-category-bar" id="tourism-category-bar">
+            <!-- Rendered dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Active State & Stats Summary Bar -->
+        <div class="tourism-stats-bar">
+          <div class="tourism-stats-left">
+            <h2 class="tourism-active-district-heading" id="tourism-active-district-title">Coimbatore</h2>
+            <span class="tourism-places-count-pill" id="tourism-places-count-badge">3 destinations</span>
+          </div>
+          <div class="tourism-stats-right">
+            <span class="tourism-govt-verified-tag">
+              <i class="fa-solid fa-circle-check"></i>
+              <span data-i18n="tourism_verified_badge">Government Verified</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Tourism Places Grid -->
+        <div class="tourism-places-grid" id="tourism-places-grid">
+          <!-- Place Cards injected dynamically via JS -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="tourism-empty-state" class="tourism-state-box hidden">
+          <div class="tourism-empty-icon">
+            <i class="fa-solid fa-map-location"></i>
+          </div>
+          <h3 id="tourism-empty-title">Tamil Nadu Tourism</h3>
+          <p id="tourism-empty-message" class="tourism-empty-message" data-i18n="tourism_empty_state_text">
+            Verified tourism information is currently unavailable for this district.
+          </p>
+          <div class="tourism-empty-actions">
+            <button class="btn btn-primary" id="btn-empty-reset" onclick="resetTourismFilters()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span data-i18n="tourism_reset_filters">Reset Filters</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Footnote Attribution -->
+        <div class="tourism-disclaimer-footnote">
+          <span>Sources: Tamil Nadu Tourism Development Corporation (TTDC &bull; <a href="https://tamilnadutourism.tn.gov.in" target="_blank" rel="noopener noreferrer">tamilnadutourism.tn.gov.in</a>) &bull; Archaeological Survey of India &bull; TN Forest Department &bull; HR&CE &bull; District Administration Portals (*.nic.in)</span>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Tourist Place Details Modal / Drawer -->
+  <div class="tourism-modal-backdrop hidden" id="tourism-modal-backdrop" onclick="closeTourismModal(event)">
+    <div class="tourism-modal-dialog" id="tourism-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-place-title">
+      <div class="tourism-modal-header">
+        <div class="tourism-modal-header-text">
+          <span class="tourism-modal-category-pill" id="modal-category-pill">Heritage</span>
+          <h2 class="tourism-modal-title" id="modal-place-title">--</h2>
+          <div class="tourism-modal-subtitle" id="modal-place-subtitle">--</div>
+        </div>
+        <button type="button" class="tourism-modal-close-btn" onclick="closeTourismModal()" aria-label="Close Details">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="tourism-modal-body">
+        <div class="tourism-modal-desc-section">
+          <p class="tourism-modal-description" id="modal-place-description">--</p>
+        </div>
+
+        <!-- Key Information Grid -->
+        <div class="tourism-modal-info-grid">
+          <div class="modal-info-item">
+            <div class="modal-info-icon"><i class="fa-regular fa-clock"></i></div>
+            <div class="modal-info-content">
+              <span class="modal-info-label" data-i18n="tourism_timings">Timings</span>
+              <span class="modal-info-value" id="modal-place-timings">--</span>
+            </div>
+          </div>
+          <div class="modal-info-item">
+            <div class="modal-info-icon"><i class="fa-regular fa-calendar-check"></i></div>
+            <div class="modal-info-content">
+              <span class="modal-info-label" data-i18n="tourism_best_time">Best Time to Visit</span>
+              <span class="modal-info-value" id="modal-place-best-time">--</span>
+            </div>
+          </div>
+          <div class="modal-info-item">
+            <div class="modal-info-icon"><i class="fa-solid fa-ticket"></i></div>
+            <div class="modal-info-content">
+              <span class="modal-info-label" data-i18n="tourism_entry_fee">Entry Fee</span>
+              <span class="modal-info-value" id="modal-place-entry-fee">--</span>
+            </div>
+          </div>
+          <div class="modal-info-item">
+            <div class="modal-info-icon"><i class="fa-solid fa-map-pin"></i></div>
+            <div class="modal-info-content">
+              <span class="modal-info-label" data-i18n="tourism_address">Location & Address</span>
+              <span class="modal-info-value" id="modal-place-address">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Government Source Verification Card -->
+        <div class="tourism-modal-source-card">
+          <div class="source-card-header">
+            <i class="fa-solid fa-building-columns"></i>
+            <span data-i18n="tourism_official_source">Official Source Attribution</span>
+          </div>
+          <div class="source-card-body">
+            <span class="source-department-name" id="modal-place-source-name">Tamil Nadu Tourism Development Corporation</span>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="source-external-link" id="modal-place-source-link">
+              <span>Visit Official Government Portal</span>
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tourism-modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeTourismModal()" data-i18n="tourism_close_modal">Close</button>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-get-directions" id="modal-place-directions-btn">
+          <i class="fa-solid fa-diamond-turn-right"></i>
+          <span data-i18n="tourism_get_directions">Directions</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js?v=8.8.0"></script>
+  <script src="js/user-location.js?v=1.0.0"></script>
+  <script src="js/tourism.js?v=1.0.0"></script>
+
+</body>
+</html>

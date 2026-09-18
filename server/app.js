@@ -22,6 +22,7 @@ import locationRoutes from './routes/locationRoutes.js';
 import powerShutdownRoutes from './routes/powerShutdownRoutes.js';
 import publicPulseWeatherRoutes from './routes/publicPulseWeatherRoutes.js';
 import emergencyRoutes from './routes/emergencyRoutes.js';
+import tourismRoutes from './routes/tourismRoutes.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
 // ES Module dirname workaround
@@ -126,10 +127,17 @@ app.use('/api/public-pulse/weather-alerts', publicPulseWeatherRoutes);
 app.use('/api/public-pulse/weather', publicPulseWeatherRoutes);
 app.use('/api/public-pulse', publicPulseWeatherRoutes);
 app.use('/api/emergency-services', emergencyRoutes);
+app.use('/api/tourism', tourismRoutes);
 
-// Weather Forecast route alias resolving to weather-alerts.html
+// Route aliases resolving to dedicated feature pages
 app.get('/weather-forecast', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/weather-alerts.html'));
+});
+app.get('/tourism', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/tourism.html'));
+});
+app.get('/tn-tourism', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/tourism.html'));
 });
 
 // Static client file server with optimized caching and html extension resolution
