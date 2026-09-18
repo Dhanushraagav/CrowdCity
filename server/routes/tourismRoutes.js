@@ -177,21 +177,25 @@ router.get('/search', (req, res) => {
       searchPool = searchPool.filter(p => p.district_id === targetId);
     }
 
+    const tokens = queryStr.split(/\s+/).filter(Boolean);
+
     const matches = searchPool.filter(place => {
-      return (
-        place.name_en.toLowerCase().includes(queryStr) ||
-        place.name_ta.toLowerCase().includes(queryStr) ||
-        place.description_en.toLowerCase().includes(queryStr) ||
-        place.description_ta.toLowerCase().includes(queryStr) ||
-        place.short_desc_en.toLowerCase().includes(queryStr) ||
-        place.short_desc_ta.toLowerCase().includes(queryStr) ||
-        place.category.toLowerCase().includes(queryStr) ||
-        place.category_ta.toLowerCase().includes(queryStr) ||
-        place.address_en.toLowerCase().includes(queryStr) ||
-        place.address_ta.toLowerCase().includes(queryStr) ||
-        place.district_name_en.toLowerCase().includes(queryStr) ||
-        place.district_name_ta.toLowerCase().includes(queryStr)
-      );
+      const combined = [
+        place.name_en,
+        place.name_ta,
+        place.description_en,
+        place.description_ta,
+        place.short_desc_en,
+        place.short_desc_ta,
+        place.category,
+        place.category_ta,
+        place.address_en,
+        place.address_ta,
+        place.district_name_en,
+        place.district_name_ta
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return tokens.every(token => combined.includes(token));
     });
 
     return res.status(200).json({

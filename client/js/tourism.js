@@ -24,7 +24,8 @@
     categories: [],
     selectedDistrictId: 'coimbatore',
     selectedCategory: 'all',
-    searchQuery: '',
+    districtSearchQuery: '',
+    touristSearchQuery: '',
     places: [],
     placesCache: {},
     detectedDistrict: null,
@@ -96,9 +97,22 @@
       // Filter districts input inside dropdown
       if (filterInput) {
         filterInput.addEventListener('input', (e) => {
+          state.districtSearchQuery = e.target.value;
           filterDistrictOptions(e.target.value);
         });
         filterInput.addEventListener('click', (e) => e.stopPropagation());
+        filterInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            closeDistrictDropdown();
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const firstVisible = menu.querySelector('.tourism-dropdown-option:not([style*="display: none"])');
+            if (firstVisible) {
+              const distId = firstVisible.getAttribute('data-id');
+              if (distId) selectDistrict(distId);
+            }
+          }
+        });
       }
 
       // Close dropdown when clicking outside
@@ -116,24 +130,39 @@
     if (searchInput) {
       let debounceTimer = null;
       searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        state.searchQuery = query;
+        const query = e.target.value;
+        state.touristSearchQuery = query;
 
         if (clearBtn) {
-          clearBtn.classList.toggle('hidden', query.length === 0);
+          clearBtn.classList.toggle('hidden', query.trim().length === 0);
         }
 
+        // If cleared or backspaced empty, render immediately without waiting
+        if (query.trim().length === 0) {
+          clearTimeout(debounceTimer);
+          renderPlaces();
+          return;
+        }
+
+        // Fast 120ms debounce for typing responsiveness
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           renderPlaces();
-        }, 150);
+        }, 120);
+      });
+
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          renderPlaces();
+        }
       });
     }
 
     if (clearBtn && searchInput) {
       clearBtn.addEventListener('click', () => {
         searchInput.value = '';
-        state.searchQuery = '';
+        state.touristSearchQuery = '';
         clearBtn.classList.add('hidden');
         searchInput.focus();
         renderPlaces();
@@ -171,9 +200,9 @@
     trigger.classList.add('active');
 
     if (filterInput) {
-      filterInput.value = '';
-      filterDistrictOptions('');
-      setTimeout(() => filterInput.focus(), 50);
+      filterInput.value = state.districtSearchQuery || '';
+      filterDistrictOptions(state.districtSearchQuery || '');
+      setTimeout(() => filterInput.focus(), 30);
     }
   }
 
@@ -293,8 +322,8 @@
       return `
         <div class="tourism-dropdown-option ${isSelected ? 'selected' : ''}" 
              data-id="${dist.id}" 
-             data-name-en="${dist.name.toLowerCase()}" 
-             data-name-ta="${dist.nameTa}" 
+             data-name-en="${(dist.name || '').toLowerCase()}" 
+             data-name-ta="${(dist.nameTa || '').toLowerCase()}" 
              onclick="window.selectDistrict('${dist.id}')">
           <div class="opt-text-wrap">
             <span class="opt-main-name">${displayName}</span>
@@ -303,7 +332,17 @@
           ${countBadge}
         </div>
       `;
-    }).join('');
+    }).join('') + `
+      <div id="tourism-district-no-results" class="tourism-dropdown-no-results hidden">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>${lang === 'ta' ? 'மாவட்டங்கள் எதுவும் கிடைக்கவில்லை' : 'No matching districts found'}</span>
+      </div>
+    `;
+
+    // Reapply filter if active
+    if (state.districtSearchQuery) {
+      filterDistrictOptions(state.districtSearchQuery);
+    }
   }
 
   /**
@@ -312,13 +351,25 @@
   function filterDistrictOptions(query) {
     const cleanQuery = (query || '').trim().toLowerCase();
     const options = document.querySelectorAll('.tourism-dropdown-option');
+    let visibleCount = 0;
 
     options.forEach(opt => {
       const nameEn = opt.getAttribute('data-name-en') || '';
       const nameTa = opt.getAttribute('data-name-ta') || '';
-      const matches = !cleanQuery || nameEn.includes(cleanQuery) || nameTa.includes(cleanQuery);
+      const distId = opt.getAttribute('data-id') || '';
+      const matches = !cleanQuery || 
+        nameEn.includes(cleanQuery) || 
+        nameTa.includes(cleanQuery) ||
+        distId.includes(cleanQuery);
+
       opt.style.display = matches ? 'flex' : 'none';
+      if (matches) visibleCount++;
     });
+
+    const noResults = document.getElementById('tourism-district-no-results');
+    if (noResults) {
+      noResults.classList.toggle('hidden', visibleCount > 0);
+    }
   }
 
   /**
@@ -327,8 +378,31 @@
   async function selectDistrict(districtId) {
     if (!districtId) return;
     state.selectedDistrictId = districtId;
+
+    // 1. Close district dropdown
     closeDistrictDropdown();
+
+    // 2. Clear district search query and reset dropdown input
+    state.districtSearchQuery = '';
+    const filterInput = document.getElementById('tourism-district-filter-input');
+    if (filterInput) filterInput.value = '';
+    filterDistrictOptions('');
+
+    // 3. Clear in-district tourist search query and reset search input when changing districts
+    state.touristSearchQuery = '';
+    const searchInput = document.getElementById('tourism-search-input');
+    const clearBtn = document.getElementById('tourism-search-clear-btn');
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.classList.add('hidden');
+
+    // 4. Reset category to 'all' so complete district dataset is immediately accessible
+    state.selectedCategory = 'all';
+    renderCategoryBar();
+
+    // 5. Update header & trigger labels
     updateSelectedDistrictTrigger();
+
+    // 6. Fetch complete verified places
     await fetchPlacesForDistrict(districtId);
   }
   window.selectDistrict = selectDistrict;
@@ -460,40 +534,51 @@
     if (!grid || !emptyBox) return;
 
     const lang = getCurrentLang();
-    const query = state.searchQuery.toLowerCase();
-    const cat = state.selectedCategory.toLowerCase();
+    const rawQuery = (state.touristSearchQuery || '').trim().toLowerCase();
+    const tokens = rawQuery.split(/\s+/).filter(Boolean);
+    const cat = (state.selectedCategory || 'all').toLowerCase();
 
     // Filter places by Category and in-district Search query
     const filtered = state.places.filter(place => {
       // Category filter
-      if (cat !== 'all' && place.category.toLowerCase() !== cat) {
+      if (cat !== 'all' && (place.category || '').toLowerCase() !== cat) {
         return false;
       }
 
-      // Query filter
-      if (query) {
-        const matchesQuery = 
-          place.name_en.toLowerCase().includes(query) ||
-          place.name_ta.toLowerCase().includes(query) ||
-          place.description_en.toLowerCase().includes(query) ||
-          place.description_ta.toLowerCase().includes(query) ||
-          place.short_desc_en.toLowerCase().includes(query) ||
-          place.short_desc_ta.toLowerCase().includes(query) ||
-          place.address_en.toLowerCase().includes(query) ||
-          place.address_ta.toLowerCase().includes(query) ||
-          place.category.toLowerCase().includes(query) ||
-          place.category_ta.toLowerCase().includes(query);
+      // Multi-term token query filter
+      if (tokens.length > 0) {
+        const combined = [
+          place.name_en,
+          place.name_ta,
+          place.description_en,
+          place.description_ta,
+          place.short_desc_en,
+          place.short_desc_ta,
+          place.category,
+          place.category_ta,
+          place.address_en,
+          place.address_ta,
+          place.district_name_en,
+          place.district_name_ta
+        ].filter(Boolean).join(' ').toLowerCase();
 
-        if (!matchesQuery) return false;
+        const matchesAll = tokens.every(token => combined.includes(token));
+        if (!matchesAll) return false;
       }
 
       return true;
     });
 
-    // Update count badge
+    // Update count badge dynamically
     if (countBadge) {
-      const label = lang === 'ta' ? 'இடங்கள் உள்ளன' : 'destinations';
-      countBadge.textContent = `${filtered.length} ${label}`;
+      const isFiltered = (cat !== 'all') || (tokens.length > 0);
+      if (isFiltered) {
+        const label = lang === 'ta' ? 'பொருந்தும் இடங்கள்' : 'matching destinations';
+        countBadge.textContent = `${filtered.length} ${label}`;
+      } else {
+        const label = lang === 'ta' ? 'இடங்கள் உள்ளன' : 'destinations';
+        countBadge.textContent = `${filtered.length} ${label}`;
+      }
     }
 
     // Check Empty State
@@ -512,7 +597,7 @@
 
       if (emptyMsg) {
         // Strict specification matching
-        if (state.searchQuery) {
+        if (tokens.length > 0 || cat !== 'all') {
           emptyMsg.textContent = lang === 'ta'
             ? 'உங்கள் தேடலுக்குரிய சுற்றுலா தலங்கள் எதுவும் கிடைக்கவில்லை.'
             : 'No tourist places match your search query.';
@@ -674,7 +759,7 @@
    * Reset All Filters
    */
   function resetTourismFilters() {
-    state.searchQuery = '';
+    state.touristSearchQuery = '';
     state.selectedCategory = 'all';
 
     const searchInput = document.getElementById('tourism-search-input');

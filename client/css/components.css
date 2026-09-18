@@ -10240,6 +10240,20 @@ html.theme-dark .step-node.active .step-time-pill {
   padding: 0.15rem 0.5rem;
 }
 
+.tourism-dropdown-no-results {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.82rem;
+  color: var(--text-muted, #64748b);
+  justify-content: center;
+}
+
+.tourism-dropdown-no-results.hidden {
+  display: none !important;
+}
+
 /* In-District Search Bar */
 .tourism-search-input-wrap {
   position: relative;
