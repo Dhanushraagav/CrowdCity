@@ -21,7 +21,7 @@ router.get('/districts', (req, res) => {
   try {
     const districtsWithStats = TN_DISTRICTS.map(district => {
       const placesInDistrict = TN_TOURISM_PLACES.filter(
-        p => p.district_id === district.id && p.is_active
+        p => p.district_id === district.id && p.is_active && p.verification_status !== 'image_verification_pending'
       );
 
       return {
@@ -31,6 +31,7 @@ router.get('/districts', (req, res) => {
         code: district.code,
         lat: district.lat,
         lng: district.lng,
+        keywords: district.keywords || [],
         placeCount: placesInDistrict.length,
         hasVerifiedData: placesInDistrict.length > 0
       };
@@ -39,7 +40,7 @@ router.get('/districts', (req, res) => {
     return res.status(200).json({
       success: true,
       totalDistricts: districtsWithStats.length,
-      totalPlaces: TN_TOURISM_PLACES.filter(p => p.is_active).length,
+      totalPlaces: TN_TOURISM_PLACES.filter(p => p.is_active && p.verification_status !== 'image_verification_pending').length,
       districts: districtsWithStats
     });
   } catch (err) {
@@ -57,16 +58,19 @@ router.get('/districts', (req, res) => {
  */
 router.get('/categories', (req, res) => {
   try {
+    const verifiedActive = TN_TOURISM_PLACES.filter(
+      p => p.is_active && p.verification_status !== 'image_verification_pending'
+    );
     const categoriesWithCounts = TOURISM_CATEGORIES.map(cat => {
       if (cat.id === 'all') {
         return {
           ...cat,
-          count: TN_TOURISM_PLACES.filter(p => p.is_active).length
+          count: verifiedActive.length
         };
       }
       return {
         ...cat,
-        count: TN_TOURISM_PLACES.filter(p => p.is_active && p.category.toLowerCase() === cat.id.toLowerCase()).length
+        count: verifiedActive.filter(p => p.category.toLowerCase() === cat.id.toLowerCase()).length
       };
     });
 
@@ -116,7 +120,7 @@ router.get('/places', (req, res) => {
     }
 
     let places = TN_TOURISM_PLACES.filter(
-      p => p.district_id === district.id && p.is_active
+      p => p.district_id === district.id && p.is_active && p.verification_status !== 'image_verification_pending'
     );
 
     if (category && category.toLowerCase() !== 'all') {
@@ -164,7 +168,9 @@ router.get('/search', (req, res) => {
       });
     }
 
-    let searchPool = TN_TOURISM_PLACES.filter(p => p.is_active);
+    let searchPool = TN_TOURISM_PLACES.filter(
+      p => p.is_active && p.verification_status !== 'image_verification_pending'
+    );
 
     if (district_id && district_id.toLowerCase() !== 'all') {
       const cleanDistrictId = String(district_id).trim().toLowerCase();

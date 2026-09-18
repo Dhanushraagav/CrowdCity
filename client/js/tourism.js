@@ -210,6 +210,29 @@
       });
     }
 
+    // Hero Quick District Jump Search
+    const heroDistrictSearchInput = document.getElementById('hero-district-search');
+    if (heroDistrictSearchInput) {
+      heroDistrictSearchInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        const explorerInput = document.getElementById('tourism-explorer-filter-input');
+        if (explorerInput) {
+          explorerInput.value = val;
+          state.explorerDistrictQuery = val;
+          filterExplorerDistricts(val);
+        }
+      });
+      heroDistrictSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const target = document.getElementById('tourism-explorer-section');
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    }
+
     // Gallery Navigation Buttons
     const prevBtn = document.getElementById('gallery-prev-btn');
     const nextBtn = document.getElementById('gallery-next-btn');
@@ -355,6 +378,7 @@
     const districtsCountEl = document.getElementById('hero-stat-districts');
     const destinationsCountEl = document.getElementById('hero-stat-destinations');
     const categoriesCountEl = document.getElementById('hero-stat-categories');
+    const coverageEl = document.getElementById('hero-stat-coverage');
 
     if (districtsCountEl && state.districts.length > 0) {
       districtsCountEl.textContent = state.districts.length;
@@ -362,12 +386,16 @@
 
     if (destinationsCountEl && state.districts.length > 0) {
       const totalPlaces = state.districts.reduce((acc, d) => acc + (Number(d.placeCount) || 0), 0);
-      destinationsCountEl.textContent = totalPlaces;
+      destinationsCountEl.textContent = `${totalPlaces}+`;
     }
 
     if (categoriesCountEl && state.categories.length > 0) {
       const activeCats = state.categories.filter(c => c.id !== 'all').length;
       categoriesCountEl.textContent = activeCats || '8';
+    }
+
+    if (coverageEl) {
+      coverageEl.textContent = '100%';
     }
   }
 
@@ -381,6 +409,14 @@
     grid.innerHTML = state.districts.map(dist => {
       const isSelected = dist.id === state.selectedDistrictId;
       const count = dist.placeCount || 0;
+      const kw = [
+        dist.name,
+        dist.nameTa,
+        dist.id,
+        ...(Array.isArray(dist.keywords) ? dist.keywords : []),
+        dist.id === 'kanniyakumari' ? 'kanyakumari' : '',
+        dist.id === 'nilgiris' ? 'ooty udhagamandalam' : ''
+      ].filter(Boolean).join(' ').toLowerCase();
 
       return `
         <button type="button" 
@@ -388,6 +424,7 @@
                 data-id="${dist.id}" 
                 data-name-en="${(dist.name || '').toLowerCase()}" 
                 data-name-ta="${(dist.nameTa || '').toLowerCase()}" 
+                data-keywords="${escapeAttr(kw)}"
                 title="${dist.name} (${dist.nameTa}) - ${count} verified destinations"
                 onclick="window.selectDistrict('${dist.id}', true)">
           <div class="chip-names">
@@ -420,10 +457,12 @@
       const nameEn = chip.getAttribute('data-name-en') || '';
       const nameTa = chip.getAttribute('data-name-ta') || '';
       const distId = chip.getAttribute('data-id') || '';
+      const keywords = chip.getAttribute('data-keywords') || '';
       const matches = !cleanQuery || 
         nameEn.includes(cleanQuery) || 
-        nameTa.includes(cleanQuery) ||
-        distId.includes(cleanQuery);
+        nameTa.includes(cleanQuery) || 
+        distId.includes(cleanQuery) ||
+        keywords.includes(cleanQuery);
 
       chip.style.display = matches ? 'flex' : 'none';
     });
@@ -525,11 +564,21 @@
         ? `<span class="opt-count-pill">${dist.placeCount}</span>`
         : `<span class="opt-count-empty">0</span>`;
 
+      const kw = [
+        dist.name,
+        dist.nameTa,
+        dist.id,
+        ...(Array.isArray(dist.keywords) ? dist.keywords : []),
+        dist.id === 'kanniyakumari' ? 'kanyakumari' : '',
+        dist.id === 'nilgiris' ? 'ooty udhagamandalam' : ''
+      ].filter(Boolean).join(' ').toLowerCase();
+
       return `
         <div class="tourism-dropdown-option ${isSelected ? 'selected' : ''}" 
              data-id="${dist.id}" 
              data-name-en="${(dist.name || '').toLowerCase()}" 
              data-name-ta="${(dist.nameTa || '').toLowerCase()}" 
+             data-keywords="${escapeAttr(kw)}"
              onclick="window.selectDistrict('${dist.id}', false)">
           <div class="opt-text-wrap">
             <span class="opt-main-name">${displayName}</span>
@@ -563,10 +612,12 @@
       const nameEn = opt.getAttribute('data-name-en') || '';
       const nameTa = opt.getAttribute('data-name-ta') || '';
       const distId = opt.getAttribute('data-id') || '';
+      const keywords = opt.getAttribute('data-keywords') || '';
       const matches = !cleanQuery || 
         nameEn.includes(cleanQuery) || 
-        nameTa.includes(cleanQuery) ||
-        distId.includes(cleanQuery);
+        nameTa.includes(cleanQuery) || 
+        distId.includes(cleanQuery) ||
+        keywords.includes(cleanQuery);
 
       opt.style.display = matches ? 'flex' : 'none';
       if (matches) visibleCount++;
@@ -827,7 +878,10 @@
 
     emptyBox.classList.add('hidden');
 
-    grid.innerHTML = filtered.map(place => {
+    // Keep places marked 'image_verification_pending' out of the primary visual destination grid
+    const visiblePlaces = filtered.filter(p => p.verification_status !== 'image_verification_pending');
+
+    grid.innerHTML = visiblePlaces.map(place => {
       const primaryName = lang === 'ta' ? place.name_ta : place.name_en;
       const secondaryName = lang === 'ta' ? place.name_en : place.name_ta;
       const categoryName = lang === 'ta' ? place.category_ta : place.category;
@@ -835,32 +889,57 @@
       const address = lang === 'ta' ? place.address_ta : place.address_en;
       const icon = CATEGORY_ICONS[place.category.toLowerCase()] || 'fa-landmark';
       const catClass = (place.category || '').toLowerCase().replace(/\s+/g, '-');
+      const districtLabel = lang === 'ta' ? (place.district_name_ta || place.district_name_en) : (place.district_name_en || place.district_name_ta);
 
       const hasCoords = !isNaN(place.latitude) && !isNaN(place.longitude) && place.latitude !== null;
       const directionsUrl = hasCoords 
         ? `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`
         : '#';
 
-      // Check if place has verified image
-      const hasImages = Array.isArray(place.images) && place.images.length > 0 && place.images[0].url;
-      const primaryImage = hasImages ? place.images[0] : null;
+      // Check if place has verified representative image
+      const imageUrl = place.image_url || 
+        (Array.isArray(place.images) && place.images.length > 0 && place.images[0].url) ||
+        (Array.isArray(place.media_images) && place.media_images.length > 0 && place.media_images[0].url);
 
-      const imageSection = primaryImage ? `
+      // Determine nuanced source badge
+      let sourceBadgeClass = 'source-gov';
+      let sourceIcon = 'fa-building-columns';
+      let sourceLabel = t('tourism_source_gov', 'Government Source');
+      if (place.source_type === 'Official Tourism Source') {
+        sourceBadgeClass = 'source-tourism';
+        sourceIcon = 'fa-compass';
+        sourceLabel = t('tourism_source_official', 'Official Tourism Source');
+      } else if (place.source_type === 'Verified Public Source') {
+        sourceBadgeClass = 'source-public';
+        sourceIcon = 'fa-shield-check';
+        sourceLabel = t('tourism_source_verified_public', 'Verified Public Source');
+      }
+
+      // Format metadata chips
+      const timings = lang === 'ta' ? (place.timings_ta || place.timings_en) : (place.timings_en || place.timings_ta);
+      const bestTime = lang === 'ta' ? (place.best_time_to_visit_ta || place.best_time_to_visit_en) : (place.best_time_to_visit_en || place.best_time_to_visit_ta);
+      const entryFee = lang === 'ta' ? (place.entry_fee_ta || place.entry_fee_en) : (place.entry_fee_en || place.entry_fee_ta);
+      const station = place.nearest_station || '';
+
+      const imageSection = imageUrl ? `
         <div class="tourism-card-image-wrap">
-          <img src="${escapeAttr(primaryImage.url)}" 
+          <img src="${escapeAttr(imageUrl)}" 
                alt="${escapeAttr(primaryName)}" 
                class="tourism-card-img" 
                loading="lazy" 
+               referrerpolicy="no-referrer"
                onerror="window.handleCardImageError(this, '${escapeAttr(catClass)}', '${escapeAttr(categoryName)}', '${escapeAttr(icon)}')">
           <div class="tourism-card-overlay-top">
-            <span class="card-category-badge">
+            <span class="card-category-badge cat-${escapeAttr(catClass)}">
               <i class="fa-solid ${icon}"></i>
               <span>${categoryName}</span>
             </span>
-            <span class="card-verified-badge" title="${t('tourism_verified_badge', 'Government Verified')}">
-              <i class="fa-solid fa-circle-check"></i>
-              <span>${t('tourism_verified_badge', 'Verified')}</span>
-            </span>
+            ${districtLabel ? `
+              <span class="card-district-badge" title="${districtLabel}">
+                <i class="fa-solid fa-map-pin"></i>
+                <span>${districtLabel}</span>
+              </span>
+            ` : ''}
           </div>
         </div>
       ` : `
@@ -870,14 +949,16 @@
             <span class="fallback-cat-text">${categoryName}</span>
           </div>
           <div class="tourism-card-overlay-top">
-            <span class="card-category-badge">
+            <span class="card-category-badge cat-${escapeAttr(catClass)}">
               <i class="fa-solid ${icon}"></i>
               <span>${categoryName}</span>
             </span>
-            <span class="card-verified-badge" title="${t('tourism_verified_badge', 'Government Verified')}">
-              <i class="fa-solid fa-circle-check"></i>
-              <span>${t('tourism_verified_badge', 'Verified')}</span>
-            </span>
+            ${districtLabel ? `
+              <span class="card-district-badge" title="${districtLabel}">
+                <i class="fa-solid fa-map-pin"></i>
+                <span>${districtLabel}</span>
+              </span>
+            ` : ''}
           </div>
         </div>
       `;
@@ -887,6 +968,10 @@
           ${imageSection}
           <div class="tourism-card-content">
             <div class="tourism-card-header">
+              <span class="card-source-badge ${sourceBadgeClass}">
+                <i class="fa-solid ${sourceIcon}"></i>
+                <span>${sourceLabel}</span>
+              </span>
               <h3 class="tourism-card-title">${primaryName}</h3>
               <div class="tourism-card-subtitle">${secondaryName}</div>
             </div>
@@ -898,6 +983,12 @@
                   <i class="fa-solid fa-location-dot"></i>
                   <span class="tourism-meta-text" title="${address}">${address}</span>
                 </div>
+              </div>
+              <div class="tourism-card-chips">
+                ${bestTime ? `<span class="tourism-chip" title="${t('tourism_best_time', 'Best Time')}"><i class="fa-regular fa-calendar"></i> <span>${bestTime}</span></span>` : ''}
+                ${timings ? `<span class="tourism-chip" title="${t('tourism_timings', 'Timings')}"><i class="fa-regular fa-clock"></i> <span>${timings}</span></span>` : ''}
+                ${entryFee ? `<span class="tourism-chip" title="${t('tourism_entry_fee', 'Entry Fee')}"><i class="fa-solid fa-ticket"></i> <span>${entryFee}</span></span>` : ''}
+                ${station ? `<span class="tourism-chip" title="${t('tourism_nearest_station', 'Nearest Railway')}"><i class="fa-solid fa-train"></i> <span>${station}</span></span>` : ''}
               </div>
             </div>
 
@@ -920,6 +1011,42 @@
         </article>
       `;
     }).join('');
+
+    // Trigger IntersectionObserver to smoothly reveal cards on scroll
+    observeCards();
+  }
+
+  /**
+   * IntersectionObserver scroll-reveal for destination cards
+   */
+  function observeCards() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.tourism-card').forEach(card => card.classList.add('is-visible'));
+      return;
+    }
+    const cards = document.querySelectorAll('.tourism-card:not(.is-visible)');
+    if (!cards.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      cards.forEach(card => card.classList.add('is-visible'));
+      return;
+    }
+
+    const scrollContainer = document.querySelector('.app-main') || null;
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, {
+      root: scrollContainer,
+      rootMargin: '0px 0px 60px 0px',
+      threshold: 0.05
+    });
+
+    cards.forEach(card => observer.observe(card));
   }
 
   /**
@@ -980,8 +1107,11 @@
     const bestTimeEl = document.getElementById('modal-place-best-time');
     const feeEl = document.getElementById('modal-place-entry-fee');
     const addressEl = document.getElementById('modal-place-address');
+    const stationEl = document.getElementById('modal-place-nearest-station');
+    const airportEl = document.getElementById('modal-place-nearest-airport');
     const sourceName = document.getElementById('modal-place-source-name');
     const sourceLink = document.getElementById('modal-place-source-link');
+    const sourceTypeBadge = document.getElementById('modal-place-source-type-badge');
     const directionsBtn = document.getElementById('modal-place-directions-btn');
 
     if (catPill) catPill.textContent = categoryName;
@@ -992,8 +1122,27 @@
     if (bestTimeEl) bestTimeEl.textContent = bestTime || (lang === 'ta' ? 'அனைத்து காலங்களிலும்' : 'All season');
     if (feeEl) feeEl.textContent = entryFee || (lang === 'ta' ? 'இலவச அனுமதி' : 'Free admission');
     if (addressEl) addressEl.textContent = address;
+    if (stationEl) stationEl.textContent = place.nearest_station || '--';
+    if (airportEl) airportEl.textContent = place.nearest_airport || '--';
     if (sourceName) sourceName.textContent = place.source_name;
     if (sourceLink) sourceLink.href = place.source_url;
+
+    if (sourceTypeBadge) {
+      let sourceBadgeClass = 'source-gov';
+      let sourceIcon = 'fa-building-columns';
+      let sourceLabel = t('tourism_source_gov', 'Government Source');
+      if (place.source_type === 'Official Tourism Source') {
+        sourceBadgeClass = 'source-tourism';
+        sourceIcon = 'fa-compass';
+        sourceLabel = t('tourism_source_official', 'Official Tourism Source');
+      } else if (place.source_type === 'Verified Public Source') {
+        sourceBadgeClass = 'source-public';
+        sourceIcon = 'fa-shield-check';
+        sourceLabel = t('tourism_source_verified_public', 'Verified Public Source');
+      }
+      sourceTypeBadge.className = `card-source-badge ${sourceBadgeClass}`;
+      sourceTypeBadge.innerHTML = `<i class="fa-solid ${sourceIcon}"></i> <span>${sourceLabel}</span>`;
+    }
 
     if (directionsBtn) {
       const hasCoords = !isNaN(place.latitude) && !isNaN(place.longitude) && place.latitude !== null;
@@ -1007,7 +1156,12 @@
     }
 
     // 1. Populate Image Gallery (Top of Modal)
-    populateGallery(place.media_images);
+    const galleryList = (Array.isArray(place.media_images) && place.media_images.length > 0)
+      ? place.media_images
+      : (Array.isArray(place.images) && place.images.length > 0
+        ? place.images
+        : (place.image_url ? [{ url: place.image_url, alt_en: place.name_en, alt_ta: place.name_ta, source_name: place.image_source_name, source_url: place.image_source_url }] : []));
+    populateGallery(galleryList);
 
     // 2. Populate Official Video Section
     populateVideo(place.media_video);
@@ -1051,6 +1205,7 @@
                alt="${alt || 'Tourist place'}" 
                class="tourism-gallery-img" 
                loading="${i === 0 ? 'eager' : 'lazy'}"
+               referrerpolicy="no-referrer"
                onerror="window.handleTourismImageError(this, ${i})">
         </div>
       `;
@@ -1240,6 +1395,7 @@
     const link = document.getElementById('lightbox-source-link');
     if (!backdrop || !img) return;
 
+    img.referrerPolicy = 'no-referrer';
     img.src = url;
     img.alt = caption || 'Tourist image full size';
     if (cap) cap.textContent = caption || '';
