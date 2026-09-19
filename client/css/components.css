@@ -10067,6 +10067,8 @@ html.theme-dark .step-node.active .step-time-pill {
 
 /* Filter Card */
 .tourism-filter-card {
+  position: relative;
+  z-index: 200;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 14px;
@@ -10099,6 +10101,7 @@ html.theme-dark .step-node.active .step-time-pill {
 .tourism-custom-dropdown {
   position: relative;
   width: 100%;
+  z-index: 210;
 }
 
 .tourism-dropdown-trigger {
@@ -10139,11 +10142,11 @@ html.theme-dark .step-node.active .step-time-pill {
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: var(--bg-surface, #ffffff);
+  background: #ffffff !important;
   border: 1px solid var(--border-color, #cbd5e1);
   border-radius: 12px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-  z-index: 50;
+  z-index: 99999 !important;
   overflow: hidden;
   animation: tourismDropdownFade 0.18s ease-out;
 }
@@ -10351,6 +10354,8 @@ html.theme-dark .step-node.active .step-time-pill {
 
 /* Stats Summary Bar */
 .tourism-stats-bar {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -10358,12 +10363,16 @@ html.theme-dark .step-node.active .step-time-pill {
 }
 
 .tourism-stats-left {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
 }
 
 .tourism-active-district-heading {
+  position: relative;
+  z-index: 1;
   font-size: 1.35rem;
   font-weight: 800;
   color: var(--text-main, #0f172a);
@@ -11356,9 +11365,10 @@ html.theme-dark .tourism-dropdown-trigger {
 [data-theme="dark"] .tourism-dropdown-menu,
 html.dark-theme .tourism-dropdown-menu,
 html.theme-dark .tourism-dropdown-menu {
-  background: #111111 !important;
-  border-color: #262626 !important;
+  background: #0c1522 !important;
+  border-color: rgba(45, 212, 191, 0.35) !important;
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6) !important;
+  z-index: 99999 !important;
 }
 
 [data-theme="dark"] .tourism-dropdown-search-wrap,

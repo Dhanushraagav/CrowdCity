@@ -69,7 +69,7 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
-  <link rel="stylesheet" href="css/components.css?v=8.5.2">
+  <link rel="stylesheet" href="css/components.css?v=8.5.3">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -646,7 +646,7 @@
 /* Filter Card */
 .tourism-filter-card {
   position: relative;
-  z-index: 30;
+  z-index: 200;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 14px;
@@ -716,7 +716,7 @@
 .tourism-custom-dropdown {
   position: relative;
   width: 100%;
-  z-index: 40;
+  z-index: 210;
 }
 
 .tourism-dropdown-trigger {
@@ -856,11 +856,11 @@
   left: 0;
   width: 420px;
   max-width: min(420px, calc(100vw - 32px));
-  background: #ffffff;
+  background: #ffffff !important;
   border: 1.5px solid rgba(15, 118, 110, 0.3);
   border-radius: 16px;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.28), 0 8px 24px rgba(0, 0, 0, 0.08);
-  z-index: 1000;
+  z-index: 99999 !important;
   overflow: hidden;
   transform-origin: top left;
   animation: tourismDropdownSpringOpen 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1103,9 +1103,10 @@ html.theme-dark .trigger-change-hint {
 
 html.dark-theme .tourism-dropdown-menu,
 html.theme-dark .tourism-dropdown-menu {
-  background: #0c1522;
+  background: #0c1522 !important;
   border-color: rgba(45, 212, 191, 0.35);
   box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.8);
+  z-index: 99999 !important;
 }
 
 html.dark-theme .tourism-dropdown-search-wrap,
@@ -1236,6 +1237,8 @@ html.theme-dark .tourism-dropdown-option.selected {
 
 /* Stats Summary Bar */
 .tourism-stats-bar {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1243,12 +1246,16 @@ html.theme-dark .tourism-dropdown-option.selected {
 }
 
 .tourism-stats-left {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
 }
 
 .tourism-active-district-heading {
+  position: relative;
+  z-index: 1;
   font-size: 1.35rem;
   font-weight: 800;
   color: var(--text-main, #0f172a);
@@ -2494,9 +2501,10 @@ html.theme-dark .tourism-dropdown-trigger {
 [data-theme="dark"] .tourism-dropdown-menu,
 html.dark-theme .tourism-dropdown-menu,
 html.theme-dark .tourism-dropdown-menu {
-  background: #111111 !important;
-  border-color: #262626 !important;
+  background: #0c1522 !important;
+  border-color: rgba(45, 212, 191, 0.35) !important;
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6) !important;
+  z-index: 99999 !important;
 }
 
 [data-theme="dark"] .tourism-dropdown-search-wrap,
@@ -3333,7 +3341,7 @@ html.dark-theme .video-official-badge {
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=8.8.0"></script>
   <script src="js/user-location.js?v=1.0.0"></script>
-  <script src="js/tourism.js?v=1.2.0"></script>
+  <script src="js/tourism.js?v=1.2.1"></script>
 
 </body>
 </html>
