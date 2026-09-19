@@ -129,20 +129,21 @@
   height: 100%;
   background-image: url('images/tamilnadu_temple_hero.jpg');
   background-size: cover;
-  background-position: right 35%;
+  background-position: right 30%;
   object-fit: cover;
-  object-position: right 35%;
-  filter: saturate(1.22) brightness(0.92);
-  transform: scale(1.18);
+  object-position: right 30%;
+  filter: saturate(1.18) contrast(1.06) brightness(0.96);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  transform: scale(1.02);
   transition: transform 1.2s ease-out;
 }
 
 .tourism-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(11, 19, 32, 0.95) 0%, rgba(11, 19, 32, 0.85) 44%, rgba(13, 148, 136, 0.42) 72%, rgba(11, 19, 32, 0.12) 100%);
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
+  background: linear-gradient(90deg, rgba(11, 19, 32, 0.94) 0%, rgba(11, 19, 32, 0.82) 38%, rgba(13, 148, 136, 0.25) 65%, rgba(11, 19, 32, 0) 100%);
+  pointer-events: none;
 }
 
 .tourism-hero-inner {
