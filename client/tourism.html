@@ -110,12 +110,12 @@
 .tourism-hero-immersive {
   position: relative;
   width: 100%;
-  min-height: 380px;
+  min-height: 420px;
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 2rem;
   background-color: #0b1320;
-  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.25);
   display: flex;
   align-items: center;
   opacity: 1;
@@ -129,28 +129,35 @@
   height: 100%;
   background-image: url('images/tamilnadu_temple_hero.jpg');
   background-size: cover;
-  background-position: center 35%;
-  filter: saturate(1.15) brightness(0.85);
-  transform: scale(1.02);
+  background-position: right 35%;
+  object-fit: cover;
+  object-position: right 35%;
+  filter: saturate(1.22) brightness(0.92);
+  transform: scale(1.18);
+  transition: transform 1.2s ease-out;
 }
 
 .tourism-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(13, 148, 136, 0.82) 65%, rgba(15, 118, 110, 0.72) 100%);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: linear-gradient(90deg, rgba(11, 19, 32, 0.95) 0%, rgba(11, 19, 32, 0.85) 44%, rgba(13, 148, 136, 0.42) 72%, rgba(11, 19, 32, 0.12) 100%);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
 }
 
 .tourism-hero-inner {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: 2.75rem 2.5rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2.5rem;
-  align-items: center;
+  padding: 3.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.tourism-hero-content {
+  max-width: 660px;
 }
 
 .tourism-hero-badge-pill {
@@ -646,11 +653,15 @@
 }
 
 .tourism-filter-row {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1.25rem;
-  align-items: end;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
   margin-bottom: 1.1rem;
+}
+
+.tourism-district-select-wrapper {
+  width: 360px;
+  max-width: 100%;
 }
 
 .tourism-filter-label {
@@ -2695,12 +2706,6 @@ html.dark-theme .video-official-badge {
               <p class="tourism-hero-lead" data-i18n="tourism_hero_lead">
                 Explore verified heritage, nature, temples, waterfalls & wildlife across all 38 districts of Tamil Nadu.
               </p>
-              <div class="tourism-hero-quick-search">
-                <div class="hero-quick-search-box">
-                  <i class="fa-solid fa-magnifying-glass"></i>
-                  <input type="text" id="hero-district-search" placeholder="Jump to any district (e.g., Madurai, Nilgiris, Thanjavur)..." autocomplete="off" aria-label="Search district in hero">
-                </div>
-              </div>
               <div class="tourism-hero-actions">
                 <a href="#tourism-explorer-section" class="btn-hero-explore">
                   <i class="fa-solid fa-compass"></i>
@@ -2710,28 +2715,6 @@ html.dark-theme .video-official-badge {
                   <i class="fa-solid fa-arrow-up-right-from-square"></i>
                   <span>TTDC Official Portal</span>
                 </a>
-              </div>
-            </div>
-            <!-- Dynamic Stats Hero Card -->
-            <div class="tourism-hero-stats-card">
-              <div class="hero-stat-item">
-                <span class="hero-stat-number" id="hero-stat-districts">38</span>
-                <span class="hero-stat-label" data-i18n="tourism_stat_districts">Districts Covered</span>
-              </div>
-              <div class="hero-stat-divider"></div>
-              <div class="hero-stat-item">
-                <span class="hero-stat-number" id="hero-stat-destinations">215+</span>
-                <span class="hero-stat-label" data-i18n="tourism_stat_destinations">Verified Destinations</span>
-              </div>
-              <div class="hero-stat-divider"></div>
-              <div class="hero-stat-item">
-                <span class="hero-stat-number" id="hero-stat-categories">8</span>
-                <span class="hero-stat-label" data-i18n="tourism_stat_categories">Themes & Categories</span>
-              </div>
-              <div class="hero-stat-divider"></div>
-              <div class="hero-stat-item">
-                <span class="hero-stat-number" id="hero-stat-coverage">100%</span>
-                <span class="hero-stat-label" data-i18n="tourism_stat_coverage">Visual Coverage</span>
               </div>
             </div>
           </div>
@@ -2806,21 +2789,6 @@ html.dark-theme .video-official-badge {
                     <!-- Injected dynamically via JS -->
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- In-District Text Search Bar -->
-            <div class="tourism-search-wrapper">
-              <label for="tourism-search-input" class="tourism-filter-label">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <span>Search Within District</span>
-              </label>
-              <div class="tourism-search-input-wrap">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" id="tourism-search-input" placeholder="Search places, heritage sites, waterfalls, temples..." data-i18n-placeholder="tourism_search_placeholder">
-                <button type="button" id="tourism-search-clear-btn" class="tourism-search-clear-btn hidden" title="Clear Search">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
               </div>
             </div>
           </div>
