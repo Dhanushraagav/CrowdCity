@@ -109,11 +109,27 @@
       });
 
       // Filter districts input inside dropdown
+      const searchClearBtn = document.getElementById('tourism-district-search-clear');
       if (filterInput) {
         filterInput.addEventListener('input', (e) => {
           state.districtSearchQuery = e.target.value;
+          if (searchClearBtn) {
+            searchClearBtn.classList.toggle('hidden', !e.target.value);
+          }
           filterDistrictOptions(e.target.value);
         });
+
+        if (searchClearBtn) {
+          searchClearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            filterInput.value = '';
+            state.districtSearchQuery = '';
+            searchClearBtn.classList.add('hidden');
+            filterDistrictOptions('');
+            filterInput.focus();
+          });
+        }
+
         filterInput.addEventListener('click', (e) => e.stopPropagation());
         filterInput.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
@@ -316,16 +332,21 @@
     const menu = document.getElementById('tourism-district-menu');
     const trigger = document.getElementById('tourism-district-trigger');
     const filterInput = document.getElementById('tourism-district-filter-input');
+    const clearBtn = document.getElementById('tourism-district-search-clear');
     if (!menu || !trigger) return;
 
+    menu.classList.remove('is-closing');
     menu.classList.remove('hidden');
     trigger.setAttribute('aria-expanded', 'true');
     trigger.classList.add('active');
 
     if (filterInput) {
       filterInput.value = state.districtSearchQuery || '';
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !filterInput.value);
+      }
       filterDistrictOptions(state.districtSearchQuery || '');
-      setTimeout(() => filterInput.focus(), 30);
+      setTimeout(() => filterInput.focus(), 40);
     }
   }
 
@@ -333,10 +354,16 @@
     const menu = document.getElementById('tourism-district-menu');
     const trigger = document.getElementById('tourism-district-trigger');
     if (!menu || !trigger) return;
+    if (menu.classList.contains('hidden') || menu.classList.contains('is-closing')) return;
 
-    menu.classList.add('hidden');
     trigger.setAttribute('aria-expanded', 'false');
     trigger.classList.remove('active');
+    menu.classList.add('is-closing');
+
+    setTimeout(() => {
+      menu.classList.remove('is-closing');
+      menu.classList.add('hidden');
+    }, 150);
   }
 
   /**
@@ -579,12 +606,17 @@
              data-name-en="${(dist.name || '').toLowerCase()}" 
              data-name-ta="${(dist.nameTa || '').toLowerCase()}" 
              data-keywords="${escapeAttr(kw)}"
+             role="option"
+             aria-selected="${isSelected}"
              onclick="window.selectDistrict('${dist.id}', false)">
           <div class="opt-text-wrap">
             <span class="opt-main-name">${displayName}</span>
             <span class="opt-sub-name">${subName}</span>
           </div>
-          ${countBadge}
+          <div class="opt-right-meta">
+            <i class="fa-solid fa-check opt-check-icon"></i>
+            ${countBadge}
+          </div>
         </div>
       `;
     }).join('') + `
@@ -678,17 +710,25 @@
    */
   function updateSelectedDistrictTrigger() {
     const label = document.getElementById('tourism-selected-district-name');
+    const subLabel = document.getElementById('tourism-selected-district-sub');
     const heading = document.getElementById('tourism-active-district-title');
+    const countBadge = document.getElementById('tourism-places-count-badge');
     const district = state.districts.find(d => d.id === state.selectedDistrictId);
     if (!district) return;
 
     const lang = getCurrentLang();
     const primaryName = lang === 'ta' ? district.nameTa : district.name;
     const secondaryName = lang === 'ta' ? district.name : district.nameTa;
+    const placesCount = district.placeCount || (state.places ? state.places.length : 0);
+    const countText = lang === 'ta' ? `${placesCount} தலங்கள்` : `${placesCount} Verified Destinations`;
 
-    if (label) label.textContent = `${primaryName} (${secondaryName})`;
+    if (label) label.textContent = primaryName;
+    if (subLabel) subLabel.innerHTML = `${secondaryName} &bull; ${countText}`;
     if (heading) {
       heading.innerHTML = `${primaryName} <span class="district-heading-sub">(${secondaryName})</span>`;
+    }
+    if (countBadge && placesCount > 0) {
+      countBadge.textContent = `${placesCount} ${lang === 'ta' ? 'இடங்கள்' : 'destinations'}`;
     }
 
     renderDistrictDropdownOptions();
