@@ -107,270 +107,487 @@
   }
 }
 
-.tourism-hero-immersive {
+/* ==========================================================================
+   1. Cinematic Full-Width Hero Destination Carousel
+   ========================================================================== */
+.tourism-hero-carousel {
   position: relative;
   width: 100%;
-  min-height: 420px;
-  border-radius: 20px;
+  height: clamp(560px, 68vh, 680px);
+  min-height: 520px;
+  border-radius: 24px;
   overflow: hidden;
   margin-bottom: 2rem;
-  background-color: #0b1320;
-  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.25);
-  display: flex;
-  align-items: center;
-  opacity: 1;
-  animation: heroEntranceScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  background-color: #080e1a;
+  box-shadow: 0 20px 50px -10px rgba(8, 14, 26, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  user-select: none;
 }
 
-.tourism-hero-backdrop-img {
+.hero-carousel-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-slide {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  background-image: url('images/tamilnadu_temple_hero.jpg');
-  background-size: cover;
-  background-position: right 30%;
-  object-fit: cover;
-  object-position: right 30%;
-  filter: saturate(1.18) contrast(1.06) brightness(0.96);
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: high-quality;
-  transform: scale(1.02);
-  transition: transform 1.2s ease-out;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.85s;
+  z-index: 1;
 }
 
-.tourism-hero-overlay {
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.hero-slide-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(11, 19, 32, 0.94) 0%, rgba(11, 19, 32, 0.82) 38%, rgba(13, 148, 136, 0.25) 65%, rgba(11, 19, 32, 0) 100%);
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center 38%;
+  background-repeat: no-repeat;
+  filter: saturate(1.15) contrast(1.05) brightness(0.92);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  transform: scale(1.04);
+  transition: transform 7s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.hero-slide.active .hero-slide-bg {
+  transform: scale(1);
+}
+
+/* Multi-stop Cinematic Overlay: deep readability gradient on left & bottom, clear showcase on center-right */
+.hero-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(90deg, rgba(8, 14, 26, 0.94) 0%, rgba(8, 14, 26, 0.82) 36%, rgba(8, 14, 26, 0.45) 65%, rgba(8, 14, 26, 0.18) 100%),
+    linear-gradient(0deg, rgba(8, 14, 26, 0.88) 0%, rgba(8, 14, 26, 0.15) 45%, rgba(8, 14, 26, 0.2) 100%);
   pointer-events: none;
 }
 
-.tourism-hero-inner {
+.hero-slide-inner {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: 100%;
-  padding: 3.5rem 3rem;
+  height: 100%;
+  padding: 3.5rem 3.25rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  box-sizing: border-box;
 }
 
-.tourism-hero-content {
-  max-width: 660px;
+.hero-slide-content {
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.tourism-hero-badge-pill {
-  display: inline-flex;
+.hero-slide-badges {
+  display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s, opacity 0.6s ease 0.05s;
+}
+
+.hero-slide.active .hero-slide-badges {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.hero-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #5eead4;
-  background: rgba(13, 148, 136, 0.25);
-  border: 1px solid rgba(94, 234, 212, 0.35);
-  padding: 0.35rem 0.85rem;
+  padding: 0.38rem 0.85rem;
   border-radius: 20px;
-  margin-bottom: 1rem;
-  backdrop-filter: blur(8px);
-  opacity: 1;
-  animation: heroFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+  backdrop-filter: blur(10px);
 }
 
-.hero-badge-sep {
-  opacity: 0.4;
+.hero-badge-pill.cat-badge {
+  color: #5eead4;
+  background: rgba(13, 148, 136, 0.28);
+  border: 1px solid rgba(94, 234, 212, 0.4);
 }
 
-.tourism-hero-heading {
+.hero-badge-pill.dist-badge {
+  color: #fed7aa;
+  background: rgba(234, 88, 12, 0.22);
+  border: 1px solid rgba(251, 146, 60, 0.4);
+}
+
+.hero-slide-heading {
   margin: 0 0 1rem 0;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  opacity: 1;
-  animation: heroFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  transform: translateY(14px);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.12s, opacity 0.6s ease 0.12s;
 }
 
-.tourism-hero-title-en {
-  font-size: 2.4rem;
+.hero-slide.active .hero-slide-heading {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.hero-slide-title-en {
+  font-size: clamp(2rem, 3.6vw, 2.85rem);
   font-weight: 800;
   color: #ffffff;
   letter-spacing: -0.03em;
   line-height: 1.15;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
 }
 
-.tourism-hero-title-ta {
-  font-size: 1.45rem;
+.hero-slide-title-ta {
+  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
   font-weight: 600;
   color: #99f6e4;
   letter-spacing: -0.01em;
-  opacity: 0.95;
+  line-height: 1.3;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
-.tourism-hero-lead {
-  font-size: 1rem;
-  line-height: 1.6;
+.hero-slide-lead {
+  font-size: clamp(0.92rem, 1.3vw, 1.02rem);
+  line-height: 1.65;
   color: #e2e8f0;
-  max-width: 680px;
-  margin: 0 0 1.25rem 0;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  max-width: 640px;
+  margin: 0 0 1.65rem 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  transform: translateY(14px);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.18s, opacity 0.6s ease 0.18s;
+}
+
+.hero-slide.active .hero-slide-lead {
+  transform: translateY(0);
   opacity: 1;
-  animation: heroFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
 }
 
-/* Hero Quick District Jump Search */
-.tourism-hero-quick-search {
-  margin-bottom: 1.35rem;
-  max-width: 520px;
-  opacity: 1;
-  animation: heroFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-}
-
-.hero-quick-search-box {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(94, 234, 212, 0.4);
-  border-radius: 12px;
-  padding: 0.65rem 1rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(10px);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.hero-quick-search-box:focus-within {
-  border-color: #2dd4bf;
-  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.25), 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.hero-quick-search-box i {
-  color: #5eead4;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-}
-
-.hero-quick-search-box input {
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  font-size: 0.92rem;
-  width: 100%;
-  outline: none;
-  font-family: inherit;
-}
-
-.hero-quick-search-box input::placeholder {
-  color: #94a3b8;
-}
-
-.tourism-hero-actions {
+.hero-slide-actions {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  animation: heroFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s backwards;
+  transform: translateY(14px);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.24s, opacity 0.6s ease 0.24s;
+}
+
+.hero-slide.active .hero-slide-actions {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .btn-hero-explore {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  background: #0d9488;
+  gap: 0.65rem;
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
   color: #ffffff;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  padding: 0.75rem 1.4rem;
-  border-radius: 12px;
+  padding: 0.82rem 1.6rem;
+  border-radius: 14px;
+  border: 1px solid rgba(94, 234, 212, 0.4);
+  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-hero-explore:hover {
-  background: #14b8a6;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(13, 148, 136, 0.5);
+  box-shadow: 0 10px 28px rgba(13, 148, 136, 0.55);
+  border-color: #5eead4;
   color: #ffffff;
 }
 
 .btn-hero-ttdc {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
+  gap: 0.55rem;
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  padding: 0.75rem 1.25rem;
-  border-radius: 12px;
-  text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(8px);
+  padding: 0.82rem 1.4rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .btn-hero-ttdc:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
   color: #ffffff;
-  transform: translateY(-1px);
 }
 
-/* Hero Stats Card */
-.tourism-hero-stats-card {
-  background: rgba(15, 23, 42, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  padding: 1.5rem 1.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+/* Glassmorphic Arrows */
+.hero-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(12px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-  min-width: 220px;
-  animation: heroFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s backwards;
-}
-
-.hero-stat-item {
+  color: #ffffff;
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
-.hero-stat-number {
-  font-size: 1.85rem;
-  font-weight: 800;
-  color: #2dd4bf;
-  letter-spacing: -0.02em;
-  line-height: 1;
+.hero-carousel-arrow.prev {
+  left: 1.5rem;
 }
 
-.hero-stat-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+.hero-carousel-arrow.next {
+  right: 1.5rem;
+}
+
+.hero-carousel-arrow:hover {
+  background: rgba(13, 148, 136, 0.85);
+  border-color: #5eead4;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5);
+}
+
+/* Bottom Controls Bar (Pill Dots + Counter + Play/Pause) */
+.hero-carousel-bottom-bar {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: rgba(8, 14, 26, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(14px);
+  padding: 0.45rem 1rem;
+  border-radius: 30px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+  max-width: calc(100% - 2rem);
+}
+
+.hero-carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.hero-dot.active {
+  width: 24px;
+  border-radius: 12px;
+  background: #2dd4bf;
+  box-shadow: 0 0 10px rgba(45, 212, 191, 0.6);
+}
+
+.hero-carousel-counter {
+  font-size: 0.78rem;
+  font-weight: 700;
   color: #cbd5e1;
-  text-transform: uppercase;
   letter-spacing: 0.04em;
+  padding-left: 0.5rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.hero-stat-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+.hero-playpause-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.hero-playpause-btn:hover {
+  color: #2dd4bf;
+}
+
+/* Modal Gallery Thumbnails Strip */
+.modal-gallery-thumbs-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: #0b1320;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(94, 234, 212, 0.3) transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-gallery-thumbs-strip::-webkit-scrollbar {
+  height: 4px;
+}
+.modal-gallery-thumbs-strip::-webkit-scrollbar-thumb {
+  background: rgba(94, 234, 212, 0.3);
+  border-radius: 4px;
+}
+
+.gallery-thumb-item {
+  position: relative;
+  flex: 0 0 64px;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: 0.55;
+  transition: all 0.2s ease;
+}
+
+.gallery-thumb-item:hover {
+  opacity: 0.85;
+}
+
+.gallery-thumb-item.active {
+  opacity: 1;
+  border-color: #2dd4bf;
+  box-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
+  transform: scale(1.05);
+}
+
+.gallery-thumb-item img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .tourism-hero-carousel {
+    height: clamp(480px, 65vh, 560px);
+  }
+  .hero-slide-inner {
+    padding: 2.5rem 2rem;
+  }
+  .hero-carousel-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+  .hero-carousel-arrow.prev { left: 0.75rem; }
+  .hero-carousel-arrow.next { right: 0.75rem; }
+}
+
+@media (max-width: 640px) {
+  .tourism-hero-carousel {
+    height: clamp(520px, 80vh, 600px);
+    min-height: 500px;
+    border-radius: 18px;
+    margin-bottom: 1.5rem;
+  }
+  .hero-slide-inner {
+    padding: 2rem 1.25rem 5rem 1.25rem;
+    justify-content: flex-start;
+  }
+  .hero-slide-lead {
+    margin-bottom: 1.2rem;
+  }
+  .hero-carousel-arrow {
+    display: none; /* Rely on touch gestures and bottom pill dots on small mobile */
+  }
+  .hero-carousel-bottom-bar {
+    bottom: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    gap: 0.6rem;
+  }
+  .hero-dot {
+    width: 6px;
+    height: 6px;
+  }
+  .hero-dot.active {
+    width: 18px;
+  }
+  .hero-carousel-dots {
+    gap: 0.35rem;
+  }
+  .hero-slide-actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .btn-hero-explore, .btn-hero-ttdc {
+    justify-content: center;
+    width: 100%;
+    padding: 0.75rem 1.2rem;
+    font-size: 0.88rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tourism-hero-immersive,
-  .tourism-hero-badge-pill,
-  .tourism-hero-heading,
-  .tourism-hero-lead,
-  .tourism-hero-quick-search,
-  .tourism-hero-actions,
-  .tourism-hero-stats-card {
+  .hero-slide,
+  .hero-slide-bg,
+  .hero-slide-badges,
+  .hero-slide-heading,
+  .hero-slide-lead,
+  .hero-slide-actions {
+    transition: none !important;
     animation: none !important;
     transform: none !important;
   }
@@ -2837,52 +3054,7 @@ html.dark-theme .video-official-badge {
   }
 }
 
-@media (max-width: 900px) {
-  .tourism-hero-inner {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    padding: 2rem 1.5rem;
-  }
-  .tourism-hero-stats-card {
-    flex-direction: row;
-    justify-content: space-around;
-    min-width: unset;
-    width: 100%;
-    padding: 1.1rem 1.25rem;
-  }
-  .hero-stat-divider {
-    width: 1px;
-    height: 40px;
-  }
-}
-
 @media (max-width: 768px) {
-  .tourism-hero-immersive {
-    min-height: unset;
-    border-radius: 16px;
-  }
-  .tourism-hero-inner {
-    padding: 1.5rem 1.25rem;
-    gap: 1.25rem;
-  }
-  .tourism-hero-badge-pill {
-    font-size: 0.72rem;
-    padding: 0.35rem 0.75rem;
-    white-space: normal;
-    display: inline-flex;
-    flex-wrap: wrap;
-    line-height: 1.4;
-  }
-  .tourism-hero-title-en {
-    font-size: 1.65rem;
-  }
-  .tourism-hero-title-ta {
-    font-size: 1.15rem;
-  }
-  .tourism-hero-lead {
-    font-size: 0.88rem;
-    margin-bottom: 1.25rem;
-  }
   .tourism-explorer-section {
     padding: 1.25rem 1rem;
     border-radius: 14px;
@@ -2906,22 +3078,6 @@ html.dark-theme .video-official-badge {
 @media (max-width: 480px) {
   .tourism-page-container {
     padding: 0.85rem;
-  }
-  .tourism-hero-stats-card {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    padding: 0.85rem 0.75rem;
-    text-align: center;
-  }
-  .hero-stat-divider {
-    display: none;
-  }
-  .hero-stat-number {
-    font-size: 1.35rem;
-  }
-  .hero-stat-label {
-    font-size: 0.65rem;
   }
   .tourism-card-actions {
     grid-template-columns: 1fr;
@@ -2995,36 +3151,65 @@ html.dark-theme .video-official-badge {
 
       <div class="app-content-body tourism-page-container">
 
-        <!-- Immersive Tamil Nadu Tourism Hero -->
-        <div class="tourism-hero-immersive" id="tourism-hero">
-          <img src="images/tamilnadu_temple_hero.jpg" alt="Tamil Nadu Heritage" class="tourism-hero-backdrop-img" onerror="this.style.display='none'">
-          <div class="tourism-hero-overlay"></div>
-          <div class="tourism-hero-inner">
-            <div class="tourism-hero-content">
-              <div class="tourism-hero-badge-pill">
-                <i class="fa-solid fa-landmark"></i>
-                <span data-i18n="tourism_hero_badge">Government of Tamil Nadu Tourism</span>
-                <span class="hero-badge-sep">&bull;</span>
-                <span data-i18n="tourism_hero_statewide">Statewide Verified Directory</span>
-              </div>
-              <div class="tourism-hero-heading">
-                <h1 class="tourism-hero-title-en" data-i18n="tourism_hero_title_en">Discover Tamil Nadu</h1>
-                <span class="tourism-hero-title-ta" data-i18n="tourism_hero_title_ta">தமிழ்நாடு சுற்றுலாத் தலங்கள்</span>
-              </div>
-              <p class="tourism-hero-lead" data-i18n="tourism_hero_lead">
-                Explore verified heritage, nature, temples, waterfalls & wildlife across all 38 districts of Tamil Nadu.
-              </p>
-              <div class="tourism-hero-actions">
-                <a href="#tourism-explorer-section" class="btn-hero-explore">
-                  <i class="fa-solid fa-compass"></i>
-                  <span data-i18n="tourism_btn_explore_38">Explore 38 Districts</span>
-                </a>
-                <a href="https://tamilnadutourism.tn.gov.in" target="_blank" rel="noopener noreferrer" class="btn-hero-ttdc">
-                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                  <span>TTDC Official Portal</span>
-                </a>
+        <!-- Cinematic Tamil Nadu Tourism Hero Banner Carousel -->
+        <div class="tourism-hero-carousel" id="tourism-hero-carousel" aria-roledescription="carousel" aria-label="Tamil Nadu Destinations Showcase">
+          <!-- Slide Track -->
+          <div class="hero-carousel-track" id="hero-carousel-track">
+            <!-- Initial Fallback Slide, dynamically populated with 14 high-res destinations by tourism.js -->
+            <div class="hero-slide active" data-slide-index="0">
+              <div class="hero-slide-bg" style="background-image: url('images/tamilnadu_temple_hero.jpg')" role="img" aria-label="Tamil Nadu Heritage"></div>
+              <div class="hero-slide-overlay"></div>
+              <div class="hero-slide-inner">
+                <div class="hero-slide-content">
+                  <div class="hero-slide-badges">
+                    <span class="hero-badge-pill cat-badge">
+                      <i class="fa-solid fa-landmark"></i>
+                      <span data-i18n="tourism_hero_badge">Government of Tamil Nadu Tourism</span>
+                    </span>
+                    <span class="hero-badge-pill dist-badge">
+                      <i class="fa-solid fa-map-pin"></i>
+                      <span data-i18n="tourism_hero_statewide">Statewide Verified Directory</span>
+                    </span>
+                  </div>
+                  <div class="hero-slide-heading">
+                    <h1 class="hero-slide-title-en" data-i18n="tourism_hero_title_en">Discover Tamil Nadu</h1>
+                    <span class="hero-slide-title-ta" data-i18n="tourism_hero_title_ta">தமிழ்நாடு சுற்றுலாத் தலங்கள்</span>
+                  </div>
+                  <p class="hero-slide-lead" data-i18n="tourism_hero_lead">
+                    Explore verified heritage, nature, temples, waterfalls & wildlife across all 38 districts of Tamil Nadu.
+                  </p>
+                  <div class="hero-slide-actions">
+                    <a href="#tourism-explorer-section" class="btn-hero-explore">
+                      <i class="fa-solid fa-compass"></i>
+                      <span data-i18n="tourism_btn_explore_38">Explore 38 Districts</span>
+                    </a>
+                    <a href="https://tamilnadutourism.tn.gov.in" target="_blank" rel="noopener noreferrer" class="btn-hero-ttdc">
+                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                      <span>TTDC Official Portal</span>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+
+          <!-- Carousel Controls: Previous / Next Arrows -->
+          <button type="button" class="hero-carousel-arrow prev" id="hero-arrow-prev" aria-label="Previous Slide">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button type="button" class="hero-carousel-arrow next" id="hero-arrow-next" aria-label="Next Slide">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+
+          <!-- Bottom Bar: Indicators + Counter + Play/Pause -->
+          <div class="hero-carousel-bottom-bar" id="hero-carousel-bottom-bar">
+            <div class="hero-carousel-dots" id="hero-carousel-dots" role="tablist" aria-label="Hero Carousel Dots">
+              <!-- Rendered dynamically -->
+            </div>
+            <span class="hero-carousel-counter" id="hero-carousel-counter">1 / 1</span>
+            <button type="button" class="hero-playpause-btn" id="hero-playpause-btn" aria-label="Pause Autoplay" title="Pause / Play Autoplay">
+              <i class="fa-solid fa-pause"></i>
+            </button>
           </div>
         </div>
 
@@ -3207,6 +3392,11 @@ html.dark-theme .video-official-badge {
             </span>
           </div>
         </div>
+
+        <!-- Dynamic Modal Gallery Thumbnails Strip -->
+        <div class="modal-gallery-thumbs-strip hidden" id="modal-gallery-thumbs-strip">
+          <!-- Thumbnails rendered dynamically -->
+        </div>
       </div>
 
       <!-- 2. Modal Header -->
@@ -3337,7 +3527,7 @@ html.dark-theme .video-official-badge {
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/auth.js?v=8.8.0"></script>
   <script src="js/user-location.js?v=1.0.0"></script>
-  <script src="js/tourism.js?v=1.2.2"></script>
+  <script src="js/tourism.js?v=1.3.0"></script>
 
 </body>
 </html>

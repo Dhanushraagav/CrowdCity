@@ -53,6 +53,111 @@ router.get('/districts', (req, res) => {
 });
 
 /**
+ * GET /api/tourism/hero-banners
+ * Returns a curated, balanced pool of cinematic destination hero banners from across Tamil Nadu.
+ * Supports optional user detected ?district_id=... to prioritize a local landmark as slide #0.
+ */
+router.get('/hero-banners', (req, res) => {
+  try {
+    const { district_id } = req.query;
+
+    function getHighRes(url) {
+      if (!url) return '';
+      if (url.includes('upload.wikimedia.org') || url.includes('thumb.wikimedia.org')) {
+        return url.replace(/\/(\d+)px-/, '/1920px-');
+      }
+      return url;
+    }
+
+    // Curated balanced pool representing diverse regions & landscapes across Tamil Nadu
+    const curatedHeroIds = [
+      'tjr-brihadisvara-big-temple',
+      'mdu-meenakshi-amman-temple',
+      'cbe-valparai-hill-station',
+      'cpt-mahabalipuram-monuments',
+      'nil-botanical-gardens-ooty',
+      'kkm-vivekananda-rock-thiruvalluvar',
+      'dpi-hogenakkal-falls',
+      'dgl-kodaikanal-lake',
+      'chn-marina-beach',
+      'tks-courtallam-waterfalls',
+      'cud-pichavaram-mangrove-forest',
+      'ram-pamban-bridge',
+      'try-rockfort-temple',
+      'ari-gangaikonda-cholapuram'
+    ];
+
+    let bannerPool = curatedHeroIds
+      .map(id => TN_TOURISM_PLACES.find(p => p.id === id && p.is_active))
+      .filter(Boolean);
+
+    // If user's district is detected, prioritize a destination from that district as Slide #0
+    if (district_id && district_id.toLowerCase() !== 'all') {
+      const cleanDistId = String(district_id).trim().toLowerCase();
+      const userDistrictPlaces = TN_TOURISM_PLACES.filter(
+        p => p.district_id === cleanDistId && p.is_active && p.image_url
+      );
+
+      if (userDistrictPlaces.length > 0) {
+        // Find if one is already in the pool
+        const existingIdx = bannerPool.findIndex(p => p.district_id === cleanDistId);
+        if (existingIdx > 0) {
+          // Move to front
+          const [promoted] = bannerPool.splice(existingIdx, 1);
+          bannerPool.unshift(promoted);
+        } else if (existingIdx === -1) {
+          // Add the premier place from user's district to the front
+          bannerPool.unshift(userDistrictPlaces[0]);
+        }
+      }
+    }
+
+    const banners = bannerPool.map(place => ({
+      id: place.id,
+      district_id: place.district_id,
+      district_name_en: place.district_name_en,
+      district_name_ta: place.district_name_ta,
+      name_en: place.name_en,
+      name_ta: place.name_ta,
+      short_description_en: place.short_desc_en || place.description_en,
+      short_description_ta: place.short_desc_ta || place.description_ta,
+      category: place.category,
+      category_ta: place.category_ta,
+      hero_image_url: getHighRes(place.image_url),
+      hero_image_source: place.image_source_name || place.source_name,
+      hero_image_source_url: place.image_source_url || place.source_url,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      source_name: place.source_name,
+      source_url: place.source_url,
+      images: place.images || [],
+      timings_en: place.timings_en,
+      timings_ta: place.timings_ta,
+      entry_fee_en: place.entry_fee_en,
+      entry_fee_ta: place.entry_fee_ta,
+      best_time_to_visit_en: place.best_time_to_visit_en,
+      best_time_to_visit_ta: place.best_time_to_visit_ta,
+      address_en: place.address_en,
+      address_ta: place.address_ta,
+      nearest_station: place.nearest_station,
+      nearest_airport: place.nearest_airport
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: banners.length,
+      banners
+    });
+  } catch (err) {
+    logger.error('[TourismRoutes] Error fetching hero banners: %O', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve hero banners.'
+    });
+  }
+});
+
+/**
  * GET /api/tourism/categories
  * Returns official tourism categories with counts and localization
  */

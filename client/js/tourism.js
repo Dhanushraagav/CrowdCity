@@ -33,7 +33,11 @@
     isLoading: false,
     activeModalPlace: null,
     activeImagesList: [],
-    activeImageIndex: 0
+    activeImageIndex: 0,
+    heroBanners: [],
+    heroActiveIndex: 0,
+    heroAutoplayTimer: null,
+    heroIsPaused: false
   };
 
   // Category Icon Mapping
@@ -86,6 +90,7 @@
     await loadDistrictsAndCategories();
     await detectUserLocation();
     await fetchPlacesForDistrict(state.selectedDistrictId);
+    await initHeroCarousel();
   }
 
   /**
@@ -1235,6 +1240,7 @@
     const track = document.getElementById('tourism-gallery-track');
     const prevBtn = document.getElementById('gallery-prev-btn');
     const nextBtn = document.getElementById('gallery-next-btn');
+    const thumbsStrip = document.getElementById('modal-gallery-thumbs-strip');
     if (!wrap || !track) return;
 
     state.activeImagesList = Array.isArray(images) ? [...images] : [];
@@ -1243,6 +1249,10 @@
     if (state.activeImagesList.length === 0) {
       wrap.classList.add('hidden');
       track.innerHTML = '';
+      if (thumbsStrip) {
+        thumbsStrip.classList.add('hidden');
+        thumbsStrip.innerHTML = '';
+      }
       return;
     }
 
@@ -1271,6 +1281,21 @@
       `;
     }).join('');
 
+    // Render thumbnail strip if more than 1 image
+    if (thumbsStrip) {
+      if (state.activeImagesList.length > 1) {
+        thumbsStrip.classList.remove('hidden');
+        thumbsStrip.innerHTML = state.activeImagesList.map((img, i) => `
+          <div class="gallery-thumb-item ${i === 0 ? 'active' : ''}" data-thumb-index="${i}" onclick="window.selectGallerySlide(${i})">
+            <img src="${img.url}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+        `).join('');
+      } else {
+        thumbsStrip.classList.add('hidden');
+        thumbsStrip.innerHTML = '';
+      }
+    }
+
     updateGalleryUI();
   }
 
@@ -1284,6 +1309,7 @@
     const prevBtn = document.getElementById('gallery-prev-btn');
     const nextBtn = document.getElementById('gallery-next-btn');
     const wrap = document.getElementById('tourism-modal-gallery-wrap');
+    const thumbsStrip = document.getElementById('modal-gallery-thumbs-strip');
     if (!track) return;
 
     const total = state.activeImagesList.length;
@@ -1299,6 +1325,18 @@
     slides.forEach((s, i) => {
       s.classList.toggle('active', i === state.activeImageIndex);
     });
+
+    // Sync thumbnails
+    if (thumbsStrip) {
+      const thumbs = thumbsStrip.querySelectorAll('.gallery-thumb-item');
+      thumbs.forEach((th, i) => {
+        const isAct = i === state.activeImageIndex;
+        th.classList.toggle('active', isAct);
+        if (isAct) {
+          th.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      });
+    }
 
     if (counterPill) {
       counterPill.textContent = `${state.activeImageIndex + 1} / ${total}`;
@@ -1326,6 +1364,17 @@
       };
     }
   }
+
+  /**
+   * Jump directly to slide index from thumbnail
+   */
+  function selectGallerySlide(index) {
+    if (index >= 0 && index < state.activeImagesList.length) {
+      state.activeImageIndex = index;
+      updateGalleryUI();
+    }
+  }
+  window.selectGallerySlide = selectGallerySlide;
 
   /**
    * Gallery Next Slide Action
@@ -1516,6 +1565,319 @@
   window.closeTourismModal = closeTourismModal;
 
   /**
+   * ==========================================================================
+   * Cinematic Hero Banner Carousel Engine
+   * ==========================================================================
+   */
+  async function initHeroCarousel() {
+    try {
+      const preferredDistrict = state.detectedDistrict ? state.detectedDistrict.id : (state.selectedDistrictId || '');
+      const response = await fetch(`/api/tourism/hero-banners?district_id=${encodeURIComponent(preferredDistrict)}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      
+      if (Array.isArray(data.banners) && data.banners.length > 0) {
+        state.heroBanners = data.banners;
+        state.heroActiveIndex = 0;
+        renderHeroCarousel();
+        setupHeroCarouselEvents();
+        startHeroAutoplay();
+      }
+    } catch (err) {
+      console.warn('[Tourism] Failed to load cinematic hero banners, keeping fallback:', err);
+    }
+  }
+
+  function renderHeroCarousel() {
+    const track = document.getElementById('hero-carousel-track');
+    const dotsContainer = document.getElementById('hero-carousel-dots');
+    const counter = document.getElementById('hero-carousel-counter');
+    if (!track || !state.heroBanners.length) return;
+
+    const lang = getCurrentLang();
+    const total = state.heroBanners.length;
+
+    track.innerHTML = state.heroBanners.map((b, i) => {
+      const isActive = i === state.heroActiveIndex;
+      const primaryName = lang === 'ta' ? (b.name_ta || b.name_en) : (b.name_en || b.name_ta);
+      const secondaryName = lang === 'ta' ? b.name_en : b.name_ta;
+      const distName = lang === 'ta' ? (b.district_name_ta || b.district_name_en) : `${b.district_name_en} District`;
+      const category = lang === 'ta' ? (b.category_ta || b.category) : b.category;
+      const shortDesc = lang === 'ta' ? (b.short_description_ta || b.short_description_en) : (b.short_description_en || b.short_description_ta);
+      const catKey = (b.category || '').toLowerCase();
+      const icon = CATEGORY_ICONS[catKey] || 'fa-landmark';
+
+      return `
+        <div class="hero-slide ${isActive ? 'active' : ''}" data-slide-index="${i}" role="group" aria-roledescription="slide" aria-label="${escapeAttr(primaryName)}">
+          <div class="hero-slide-bg" style="background-image: url('${b.hero_image_url}')" role="img" aria-label="${escapeAttr(primaryName)}"></div>
+          <div class="hero-slide-overlay"></div>
+          <div class="hero-slide-inner">
+            <div class="hero-slide-content">
+              <div class="hero-slide-badges">
+                <span class="hero-badge-pill cat-badge">
+                  <i class="fa-solid ${icon}"></i>
+                  <span>${category}</span>
+                </span>
+                <span class="hero-badge-pill dist-badge">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span>${distName}</span>
+                </span>
+              </div>
+              <div class="hero-slide-heading">
+                <h1 class="hero-slide-title-en">${primaryName}</h1>
+                <span class="hero-slide-title-ta">${secondaryName}</span>
+              </div>
+              <p class="hero-slide-lead">${shortDesc}</p>
+              <div class="hero-slide-actions">
+                <button type="button" class="btn-hero-explore" onclick="window.exploreHeroDestination('${b.id}', '${b.district_id}')">
+                  <i class="fa-solid fa-compass"></i>
+                  <span data-i18n="tourism_btn_explore_dest">${lang === 'ta' ? 'இடத்தை அறிக' : 'Explore Destination'}</span>
+                </button>
+                <a href="#tourism-explorer-section" class="btn-hero-ttdc">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                  <span data-i18n="tourism_btn_explore_38">${lang === 'ta' ? '38 மாவட்டங்கள்' : 'Explore 38 Districts'}</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (dotsContainer) {
+      dotsContainer.innerHTML = state.heroBanners.map((_, i) => `
+        <button type="button" class="hero-dot ${i === state.heroActiveIndex ? 'active' : ''}" data-index="${i}" aria-label="Slide ${i + 1}" onclick="window.goToHeroSlide(${i})"></button>
+      `).join('');
+    }
+
+    if (counter) {
+      counter.textContent = `${state.heroActiveIndex + 1} / ${total}`;
+    }
+  }
+
+  function setupHeroCarouselEvents() {
+    const prevBtn = document.getElementById('hero-arrow-prev');
+    const nextBtn = document.getElementById('hero-arrow-next');
+    const playPauseBtn = document.getElementById('hero-playpause-btn');
+    const carouselEl = document.getElementById('tourism-hero-carousel');
+
+    if (prevBtn) {
+      prevBtn.onclick = (e) => {
+        e.preventDefault();
+        prevHeroSlide();
+      };
+    }
+    if (nextBtn) {
+      nextBtn.onclick = (e) => {
+        e.preventDefault();
+        nextHeroSlide();
+      };
+    }
+    if (playPauseBtn) {
+      playPauseBtn.onclick = (e) => {
+        e.preventDefault();
+        toggleHeroPlayPause();
+      };
+    }
+
+    if (carouselEl) {
+      // Pause on hover or focus, resume smoothly on leave
+      carouselEl.addEventListener('mouseenter', () => {
+        if (!state.heroIsPaused) stopHeroAutoplay();
+      });
+      carouselEl.addEventListener('mouseleave', () => {
+        if (!state.heroIsPaused) startHeroAutoplay();
+      });
+      carouselEl.addEventListener('focusin', () => {
+        if (!state.heroIsPaused) stopHeroAutoplay();
+      });
+      carouselEl.addEventListener('focusout', () => {
+        if (!state.heroIsPaused) startHeroAutoplay();
+      });
+
+      // Mobile Touch Swipes
+      let touchStartX = 0;
+      let touchStartY = 0;
+      carouselEl.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      carouselEl.addEventListener('touchend', (e) => {
+        if (e.changedTouches && e.changedTouches[0]) {
+          const diffX = e.changedTouches[0].clientX - touchStartX;
+          const diffY = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+            if (diffX > 0) {
+              prevHeroSlide();
+            } else {
+              nextHeroSlide();
+            }
+          }
+        }
+      }, { passive: true });
+    }
+  }
+
+  function goToHeroSlide(index) {
+    if (!state.heroBanners.length) return;
+    const total = state.heroBanners.length;
+    state.heroActiveIndex = ((index % total) + total) % total;
+
+    const track = document.getElementById('hero-carousel-track');
+    if (track) {
+      const slides = track.querySelectorAll('.hero-slide');
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === state.heroActiveIndex);
+      });
+    }
+
+    const dotsContainer = document.getElementById('hero-carousel-dots');
+    if (dotsContainer) {
+      const dots = dotsContainer.querySelectorAll('.hero-dot');
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === state.heroActiveIndex);
+      });
+    }
+
+    const counter = document.getElementById('hero-carousel-counter');
+    if (counter) {
+      counter.textContent = `${state.heroActiveIndex + 1} / ${total}`;
+    }
+
+    // Reset autoplay timer when user interacts so it doesn't immediately skip
+    if (!state.heroIsPaused) {
+      stopHeroAutoplay();
+      startHeroAutoplay();
+    }
+  }
+  window.goToHeroSlide = goToHeroSlide;
+
+  function nextHeroSlide() {
+    goToHeroSlide(state.heroActiveIndex + 1);
+  }
+  window.nextHeroSlide = nextHeroSlide;
+
+  function prevHeroSlide() {
+    goToHeroSlide(state.heroActiveIndex - 1);
+  }
+  window.prevHeroSlide = prevHeroSlide;
+
+  function startHeroAutoplay() {
+    stopHeroAutoplay();
+    state.heroAutoplayTimer = setInterval(() => {
+      nextHeroSlide();
+    }, 6000);
+  }
+
+  function stopHeroAutoplay() {
+    if (state.heroAutoplayTimer) {
+      clearInterval(state.heroAutoplayTimer);
+      state.heroAutoplayTimer = null;
+    }
+  }
+
+  function toggleHeroPlayPause() {
+    state.heroIsPaused = !state.heroIsPaused;
+    const btn = document.getElementById('hero-playpause-btn');
+    if (state.heroIsPaused) {
+      stopHeroAutoplay();
+      if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        btn.setAttribute('aria-label', 'Play Autoplay');
+      }
+    } else {
+      startHeroAutoplay();
+      if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        btn.setAttribute('aria-label', 'Pause Autoplay');
+      }
+    }
+  }
+  window.toggleHeroPlayPause = toggleHeroPlayPause;
+
+  /**
+   * Explore Destination Action from Hero CTA
+   * Strict Requirement: Stays on /tourism, scrolls to discovery section,
+   * switches district, loads places, and opens modal without page reload.
+   */
+  async function exploreHeroDestination(placeId, districtId) {
+    try {
+      // 1. If different district, select district and smooth scroll to discovery section
+      if (districtId && districtId !== state.selectedDistrictId) {
+        await selectDistrict(districtId, true);
+      } else {
+        // Smooth scroll to discovery section
+        const target = document.getElementById('tourism-discovery-section');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      // 2. Open modal for destination
+      if (placeId) {
+        // Find in currently loaded places
+        let place = state.places.find(p => p.id === placeId);
+        if (!place) {
+          // Check if places need reload
+          await fetchPlacesForDistrict(districtId || state.selectedDistrictId);
+          place = state.places.find(p => p.id === placeId);
+        }
+
+        // If place is in heroBanners, construct place fallback if needed
+        if (!place && state.heroBanners) {
+          const heroPlace = state.heroBanners.find(b => b.id === placeId);
+          if (heroPlace) {
+            place = {
+              id: heroPlace.id,
+              district_id: heroPlace.district_id,
+              name_en: heroPlace.name_en,
+              name_ta: heroPlace.name_ta,
+              category: heroPlace.category,
+              category_ta: heroPlace.category_ta,
+              description_en: heroPlace.short_description_en,
+              description_ta: heroPlace.short_description_ta,
+              timings_en: heroPlace.timings_en,
+              timings_ta: heroPlace.timings_ta,
+              entry_fee_en: heroPlace.entry_fee_en,
+              entry_fee_ta: heroPlace.entry_fee_ta,
+              best_time_to_visit_en: heroPlace.best_time_to_visit_en,
+              best_time_to_visit_ta: heroPlace.best_time_to_visit_ta,
+              address_en: heroPlace.address_en,
+              address_ta: heroPlace.address_ta,
+              nearest_station: heroPlace.nearest_station,
+              nearest_airport: heroPlace.nearest_airport,
+              source_name: heroPlace.source_name,
+              source_url: heroPlace.source_url,
+              source_type: 'Government Source',
+              latitude: heroPlace.latitude,
+              longitude: heroPlace.longitude,
+              images: heroPlace.images || [{ url: heroPlace.hero_image_url, source_name: heroPlace.hero_image_source, source_url: heroPlace.hero_image_source_url }]
+            };
+          }
+        }
+
+        if (place) {
+          setTimeout(() => {
+            state.activeModalPlace = place;
+            populateModalData(place);
+            const backdrop = document.getElementById('tourism-modal-backdrop');
+            if (backdrop) {
+              backdrop.classList.remove('hidden');
+              document.body.style.overflow = 'hidden';
+            }
+          }, 350);
+        }
+      }
+    } catch (err) {
+      console.error('[Tourism] exploreHeroDestination error:', err);
+    }
+  }
+  window.exploreHeroDestination = exploreHeroDestination;
+
+  /**
    * Reset All Filters
    */
   function resetTourismFilters() {
@@ -1539,6 +1901,7 @@
     updateSelectedDistrictTrigger();
     renderDistrictExplorer();
     updateHeroStats();
+    renderHeroCarousel();
 
     if (state.detectedDistrict) {
       const banner = document.getElementById('tourism-location-banner');
