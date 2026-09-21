@@ -2895,80 +2895,274 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   transition: var(--transition-normal);
 }
 
-/* Tamil Nadu Hero section background style specifically for main dashboard header */
-.stitch-hero:has(.stitch-hero-title) {
-  background-color: #ffffff;
+/* Tamil Nadu Heritage Hero Banner specifically matching reference design */
+.stitch-hero.dashboard-heritage-banner,
+.stitch-hero:has(.stitch-hero-title),
+.stitch-hero:has(.dashboard-user-name) {
+  position: relative !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  padding: 1.85rem 2.25rem !important;
+  margin-bottom: 1.5rem !important;
+  background-color: #07182b !important;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.92) 20%, rgba(255, 255, 255, 0.72) 48%, rgba(255, 255, 255, 0.1) 100%), 
-    url('../images/tamilnadu_temple_beach_bridge.jpg');
-  background-repeat: no-repeat;
-  background-position: right center;
-  background-size: cover;
-  color: var(--text-main) !important;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-md);
+    linear-gradient(90deg, 
+      rgba(7, 24, 43, 0.96) 0%, 
+      rgba(7, 24, 43, 0.92) 22%, 
+      rgba(7, 24, 43, 0.70) 42%, 
+      rgba(7, 24, 43, 0.18) 65%, 
+      transparent 100%
+    ), 
+    url('../images/tamilnadu_heritage_banner.jpg') !important;
+  background-repeat: no-repeat !important;
+  background-position: right 45% !important;
+  background-size: cover !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 12px 32px -4px rgba(7, 24, 43, 0.35) !important;
+  min-height: 195px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
 
 @media (max-width: 768px) {
-  .stitch-hero:has(.stitch-hero-title) {
+  .stitch-hero.dashboard-heritage-banner,
+  .stitch-hero:has(.stitch-hero-title),
+  .stitch-hero:has(.dashboard-user-name) {
     background-image: 
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.92) 42%, rgba(255, 255, 255, 0.5) 100%), 
-      url('../images/tamilnadu_temple_beach_bridge.jpg');
-    background-size: cover;
-    background-position: right center;
+      linear-gradient(to bottom, 
+        rgba(7, 24, 43, 0.96) 38%, 
+        rgba(7, 24, 43, 0.75) 75%, 
+        rgba(7, 24, 43, 0.4) 100%
+      ), 
+      url('../images/tamilnadu_heritage_banner.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    padding: 1.35rem 1.15rem !important;
+    min-height: auto !important;
   }
 }
 
-.stitch-hero-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.02em;
-  margin: 0;
+.dashboard-banner-container {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  position: relative !important;
+  z-index: 2 !important;
+  gap: 1.5rem !important;
 }
 
-.stitch-hero:has(.stitch-hero-title) .stitch-hero-title,
+.dashboard-banner-left {
+  flex: 1.2 !important;
+  max-width: 620px !important;
+  z-index: 2 !important;
+}
+
+.dashboard-greeting-lead {
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  color: #94a3b8 !important;
+  margin-bottom: 2px !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.2 !important;
+}
+
+.dashboard-user-name,
 #hero-greeting {
-  font-size: 1.75rem !important;
+  font-size: 2.15rem !important;
   font-weight: 800 !important;
-  color: var(--primary, #0d9488) !important;
-  letter-spacing: -0.02em !important;
-  margin: 0 !important;
-  line-height: 1.25 !important;
-  display: inline-flex !important;
-  flex-wrap: wrap !important;
-  align-items: baseline !important;
-  gap: 0 6px !important;
+  color: #ffffff !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.2 !important;
+  margin: 0 0 0.45rem 0 !important;
+  display: block !important;
 }
 
-.stitch-hero-title .user-greeting-name,
-#hero-greeting .user-greeting-name,
-.user-greeting-name {
+.dashboard-user-name .user-greeting-name,
+#hero-greeting .user-greeting-name {
+  color: #ffffff !important;
+  font-weight: 800 !important;
   font-size: inherit !important;
-  font-weight: inherit !important;
-  color: inherit !important;
-  line-height: inherit !important;
-  display: inline !important;
-  vertical-align: baseline !important;
 }
 
-.stitch-hero-desc {
-  font-size: 1.02rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-  max-width: 700px;
-  margin: 0;
+.dashboard-banner-tagline,
+#hero-desc {
+  font-size: 0.98rem !important;
+  color: #cbd5e1 !important;
+  line-height: 1.45 !important;
+  margin: 0 0 1.25rem 0 !important;
+  font-weight: 400 !important;
+  max-width: 540px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
 }
 
-.stitch-hero:has(.stitch-hero-title) .stitch-hero-desc {
-  color: var(--text-muted) !important;
-  text-shadow: none;
+.dashboard-banner-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.85rem !important;
+  flex-wrap: wrap !important;
 }
 
-.stitch-hero-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+.btn-banner-report {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.68rem 1.4rem !important;
+  background: #0d9488 !important;
+  color: #ffffff !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+.btn-banner-report:hover {
+  background: #0f766e !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.45) !important;
+  color: #ffffff !important;
+}
+
+.btn-banner-complaints {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.68rem 1.4rem !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+.btn-banner-complaints:hover {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Floating Weather & Location Card Widget */
+.dashboard-weather-card {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  padding: 0.65rem 1.15rem !important;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
+  text-decoration: none !important;
+  color: #0f172a !important;
+  align-self: flex-start !important;
+  margin-top: 0.25rem !important;
+  margin-left: auto !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  z-index: 5 !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-weather-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.weather-card-col {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+}
+
+.weather-card-icon {
+  font-size: 1.85rem !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #f59e0b !important;
+}
+
+.weather-card-metrics {
+  display: flex !important;
+  flex-direction: column !important;
+  line-height: 1.15 !important;
+}
+
+.weather-card-temp {
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.02em !important;
+}
+
+.weather-card-cond {
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  white-space: nowrap !important;
+}
+
+.weather-card-divider {
+  width: 1px !important;
+  height: 38px !important;
+  background: #e2e8f0 !important;
+  margin: 0 0.95rem !important;
+}
+
+.weather-card-loc-icon {
+  font-size: 1.25rem !important;
+  color: #2563eb !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.weather-card-loc-info {
+  display: flex !important;
+  flex-direction: column !important;
+  line-height: 1.15 !important;
+}
+
+.weather-card-city {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.01em !important;
+  white-space: nowrap !important;
+}
+
+.weather-card-state {
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  white-space: nowrap !important;
+}
+
+/* Bottom Right Motto */
+.dashboard-banner-motto {
+  position: absolute !important;
+  right: 1.85rem !important;
+  bottom: 1.05rem !important;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
+  font-style: italic !important;
+  font-size: 0.88rem !important;
+  line-height: 1.25 !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  text-align: right !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+  letter-spacing: 0.01em !important;
 }
 
 .stitch-hero-container {
@@ -7649,59 +7843,64 @@ html.dark-theme .stitch-hero {
   color: #ffffff !important;
 }
 
+[data-theme="dark"] .stitch-hero.dashboard-heritage-banner,
+html.dark-theme .stitch-hero.dashboard-heritage-banner,
 [data-theme="dark"] .stitch-hero:has(.stitch-hero-title),
-html.dark-theme .stitch-hero:has(.stitch-hero-title) {
-  background-color: #0a0a0a !important;
+html.dark-theme .stitch-hero:has(.stitch-hero-title),
+[data-theme="dark"] .stitch-hero:has(.dashboard-user-name),
+html.dark-theme .stitch-hero:has(.dashboard-user-name) {
+  background-color: #07182b !important;
   background-image: 
-    linear-gradient(to right, rgba(0, 0, 0, 0.92) 25%, rgba(0, 0, 0, 0.70) 55%, rgba(0, 0, 0, 0.25) 100%), 
-    url('../images/tamilnadu_temple_beach_bridge.jpg') !important;
-  border: 1px solid #1f1f1f !important;
+    linear-gradient(90deg, 
+      rgba(7, 24, 43, 0.96) 0%, 
+      rgba(7, 24, 43, 0.92) 22%, 
+      rgba(7, 24, 43, 0.70) 42%, 
+      rgba(7, 24, 43, 0.18) 65%, 
+      transparent 100%
+    ), 
+    url('../images/tamilnadu_heritage_banner.jpg') !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
 }
 
 @media (max-width: 768px) {
+  [data-theme="dark"] .stitch-hero.dashboard-heritage-banner,
+  html.dark-theme .stitch-hero.dashboard-heritage-banner,
   [data-theme="dark"] .stitch-hero:has(.stitch-hero-title),
-  html.dark-theme .stitch-hero:has(.stitch-hero-title) {
+  html.dark-theme .stitch-hero:has(.stitch-hero-title),
+  [data-theme="dark"] .stitch-hero:has(.dashboard-user-name),
+  html.dark-theme .stitch-hero:has(.dashboard-user-name) {
     background-image: 
-      linear-gradient(to bottom, rgba(0, 0, 0, 0.92) 45%, rgba(0, 0, 0, 0.55) 100%), 
-      url('../images/tamilnadu_temple_beach_bridge.jpg') !important;
+      linear-gradient(to bottom, 
+        rgba(7, 24, 43, 0.96) 38%, 
+        rgba(7, 24, 43, 0.75) 75%, 
+        rgba(7, 24, 43, 0.4) 100%
+      ), 
+      url('../images/tamilnadu_heritage_banner.jpg') !important;
   }
 }
 
 /* Floating Weather Widget in Dark Mode */
-[data-theme="dark"] .floating-weather-widget,
-html.dark-theme .floating-weather-widget {
-  background: rgba(14, 14, 14, 0.9) !important;
-  border: 1px solid #222222 !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.9) !important;
+[data-theme="dark"] .dashboard-weather-card,
+html.dark-theme .dashboard-weather-card {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.5) !important;
 }
 
-[data-theme="dark"] .hero-weather-badge,
-html.dark-theme .hero-weather-badge {
-  background: rgba(14, 14, 14, 0.88) !important;
-  border: 1px solid #262626 !important;
-  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.85) !important;
+[data-theme="dark"] .dashboard-weather-card .weather-card-temp,
+html.dark-theme .dashboard-weather-card .weather-card-temp,
+[data-theme="dark"] .dashboard-weather-card .weather-card-city,
+html.dark-theme .dashboard-weather-card .weather-card-city {
+  color: #0f172a !important;
 }
 
-[data-theme="dark"] .hero-weather-badge:hover,
-html.dark-theme .hero-weather-badge:hover {
-  border-color: #38bdf8 !important;
-  box-shadow: 0 8px 24px -4px rgba(56, 189, 248, 0.25) !important;
-}
-
-[data-theme="dark"] .hero-weather-badge .weather-city,
-html.dark-theme .hero-weather-badge .weather-city {
-  color: #f8fafc !important;
-}
-
-[data-theme="dark"] .hero-weather-badge .weather-temp,
-html.dark-theme .hero-weather-badge .weather-temp {
-  color: #38bdf8 !important;
-}
-
-[data-theme="dark"] .hero-weather-badge.loading .weather-city,
-html.dark-theme .hero-weather-badge.loading .weather-city {
-  color: #94a3b8 !important;
+[data-theme="dark"] .dashboard-weather-card .weather-card-cond,
+html.dark-theme .dashboard-weather-card .weather-card-cond,
+[data-theme="dark"] .dashboard-weather-card .weather-card-state,
+html.dark-theme .dashboard-weather-card .weather-card-state {
+  color: #64748b !important;
 }
 
 /* Ticker Banner */

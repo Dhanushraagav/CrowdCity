@@ -140,14 +140,10 @@ function applyUserStats(userIssues) {
   }
 
   if (heroDesc) {
-    if (total === 0) {
-      heroDesc.textContent = window.i18n ? window.i18n.t('hero_desc_default') : 'Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.';
+    if (window.i18n && typeof window.i18n.t === 'function') {
+      heroDesc.textContent = window.i18n.t('hero_desc_default');
     } else {
-      if (window.i18n) {
-        heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
-      } else {
-        heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
-      }
+      heroDesc.textContent = 'Turn local problems into visible community action.';
     }
   }
 
@@ -269,16 +265,10 @@ async function loadUserStats(isLanguageChange = false) {
       rateEl.textContent = `${rate}% ${tResolutionRate}`;
     }
     if (heroDesc) {
-      if (total > 0) {
-        if (window.i18n) {
-          heroDesc.textContent = window.i18n.t('hero_desc_stats', { total, s: total !== 1 ? 's' : '', resolved });
-        } else {
-          heroDesc.textContent = `You have submitted ${total} report${total !== 1 ? 's' : ''} with ${resolved} resolved. Every report builds a more responsive city for everyone.`;
-        }
+      if (window.i18n && typeof window.i18n.t === 'function') {
+        heroDesc.textContent = window.i18n.t('hero_desc_default');
       } else {
-        if (window.i18n) {
-          heroDesc.textContent = window.i18n.t('hero_desc_default');
-        }
+        heroDesc.textContent = 'Turn local problems into visible community action.';
       }
     }
   }
@@ -1300,6 +1290,8 @@ function updateHeroGreeting() {
   }
 
   const safeName = `<span class="user-greeting-name">${escapeHTML(fullName)}</span>`;
+  const greetingLeadEl = document.getElementById('hero-greeting-lead');
+
   if (isTa) {
     const taGreetings = {
       hero_greeting_morning: 'காலை வணக்கம்',
@@ -1307,24 +1299,28 @@ function updateHeroGreeting() {
       hero_greeting_evening: 'மாலை வணக்கம்'
     };
     const taWord = taGreetings[greetingKey] || 'வணக்கம்';
-    heroGreeting.innerHTML = `${taWord}, ${safeName}`;
+    if (greetingLeadEl) {
+      greetingLeadEl.textContent = `${taWord},`;
+      heroGreeting.innerHTML = safeName;
+    } else {
+      heroGreeting.innerHTML = `${taWord}, ${safeName}`;
+    }
   } else {
-    heroGreeting.innerHTML = `${escapeHTML(greeting)}, ${safeName}`;
+    if (greetingLeadEl) {
+      greetingLeadEl.textContent = `${escapeHTML(greeting)},`;
+      heroGreeting.innerHTML = safeName;
+    } else {
+      heroGreeting.innerHTML = `${escapeHTML(greeting)}, ${safeName}`;
+    }
   }
 
-  // Also set the hero description if available
+  // Set the clean tagline matching reference design exactly
   const heroDesc = document.getElementById('hero-desc');
   if (heroDesc) {
-    const cachedTotal = parseInt(localStorage.getItem('cc_user_stat_total') || '0', 10);
-    const cachedResolved = parseInt(localStorage.getItem('cc_user_stat_resolved') || '0', 10);
-    if (cachedTotal > 0) {
-      if (window.i18n) {
-        heroDesc.textContent = window.i18n.t('hero_desc_stats', { total: cachedTotal, s: cachedTotal !== 1 ? 's' : '', resolved: cachedResolved });
-      }
+    if (window.i18n && typeof window.i18n.t === 'function') {
+      heroDesc.textContent = window.i18n.t('hero_desc_default');
     } else {
-      if (window.i18n) {
-        heroDesc.textContent = window.i18n.t('hero_desc_default');
-      }
+      heroDesc.textContent = "Turn local problems into visible community action.";
     }
   }
 }

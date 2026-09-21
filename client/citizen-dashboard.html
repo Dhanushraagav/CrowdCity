@@ -64,10 +64,10 @@
   <meta name="description" content="CrowdCity AI is an AI-powered civic issue reporting platform helping citizens report potholes, garbage, water leaks, and streetlights.">
   <title>CrowdCity AI - Improve Your City</title>
   
-  <!-- Premium Fonts - Inter & Noto Sans Tamil -->
+  <!-- Premium Fonts - Inter, Noto Sans Tamil & Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
@@ -186,30 +186,66 @@
           <span class="ticker-text-wrapper"><span class="ticker-text" id="civic-intelligence-feed-text">தமிழ்நாடு அரசு மற்றும் நகராட்சி சேவைகள் 38 மாவட்டங்களிலும் செயல்பட்டு வருகின்றன.</span><span class="ticker-cursor"></span></span>
         </div>
 
-        <!-- Stitch Hero card -->
-        <div class="stitch-hero" style="position: relative;">
-          <div class="stitch-hero-container">
-            <div class="stitch-hero-details-wrap">
-              <h1 id="hero-greeting" class="stitch-hero-title"></h1>
-              <p class="stitch-hero-desc" id="hero-desc" data-i18n="hero_desc_default">Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.</p>
-              <div class="stitch-hero-actions">
-                <a href="report.html" class="btn btn-primary" style="padding: 0.65rem 1.35rem; font-size: 0.88rem; font-weight: 700; background-color: var(--primary); color: var(--text-inverse); border: none;">
+        <!-- Citizen Dashboard Panoramic Heritage Hero Banner -->
+        <div class="stitch-hero dashboard-heritage-banner" id="dashboard-hero-banner">
+          <div class="stitch-hero-container dashboard-banner-container">
+            
+            <!-- Left Column: Greeting, User Name, Tagline & Action Buttons -->
+            <div class="stitch-hero-details-wrap dashboard-banner-left">
+              <div class="dashboard-greeting-lead" id="hero-greeting-lead">Good Evening,</div>
+              <h1 class="dashboard-user-name" id="hero-greeting"><span class="user-greeting-name">Dhanushraagav S</span></h1>
+              <p class="dashboard-banner-tagline" id="hero-desc" data-i18n="hero_desc_default">Turn local problems into visible community action.</p>
+              
+              <div class="dashboard-banner-actions">
+                <a href="report.html" class="btn-banner-report" id="hero-btn-report">
                   <i class="fa-solid fa-plus"></i> <span data-i18n="report_issue">Report Issue</span>
                 </a>
-                <a href="my-complaints.html" class="btn btn-secondary" style="padding: 0.65rem 1.35rem; font-size: 0.88rem; font-weight: 700; border: 1px solid var(--border-color); background: transparent; color: var(--text-main);">
-                  <i class="fa-solid fa-list-check"></i> <span data-i18n="view_complaints">View Complaints</span>
+                <a href="my-complaints.html" class="btn-banner-complaints" id="hero-btn-complaints">
+                  <i class="fa-solid fa-table-list"></i> <span data-i18n="view_complaints">View Complaints</span>
                 </a>
               </div>
             </div>
 
-            <!-- Compact Hero Weather & Specific Location Badge -->
-            <a href="weather-alerts.html" class="floating-weather-widget weather-widget hero-weather-badge loading" id="hero-weather-badge" title="View Weather Forecast • Click to view details" aria-label="Current Weather and Location">
-              <div class="weather-icon" id="hero-weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
-              <div class="weather-info">
-                <span class="weather-city" id="hero-weather-city">Detecting...</span>
-                <span class="weather-temp" id="hero-weather-temp">--°C</span>
+            <!-- Right Column: Floating Weather & Location Card Widget (No shutdown details, user's location) -->
+            <a href="weather-alerts.html" class="dashboard-weather-card hero-weather-badge loading" id="hero-weather-badge" title="View Weather Forecast • Click to view details" aria-label="Current Weather and Location">
+              <div class="weather-card-col weather-card-weather">
+                <div class="weather-card-icon" id="hero-weather-icon">
+                  <svg class="weather-icon-svg" width="36" height="36" viewBox="0 0 64 64" fill="none">
+                    <circle cx="28" cy="24" r="14" fill="#f59e0b"/>
+                    <path d="M22 46h28a10 10 0 0 0 0-20 12 12 0 0 0-22-4 9 9 0 0 0-6 24z" fill="#93c5fd" opacity="0.95"/>
+                    <path d="M22 46h28a10 10 0 0 0 0-20 12 12 0 0 0-22-4 9 9 0 0 0-6 24z" fill="url(#cloudShine)" opacity="0.35"/>
+                    <defs>
+                      <linearGradient id="cloudShine" x1="20" y1="20" x2="50" y2="46" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#ffffff"/>
+                        <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div class="weather-card-metrics">
+                  <span class="weather-card-temp" id="hero-weather-temp">27°C</span>
+                  <span class="weather-card-cond" id="hero-weather-cond">Partly Cloudy</span>
+                </div>
+              </div>
+
+              <div class="weather-card-divider"></div>
+
+              <div class="weather-card-col weather-card-location">
+                <div class="weather-card-loc-icon">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="weather-card-loc-info">
+                  <span class="weather-card-city" id="hero-weather-city">Coimbatore</span>
+                  <span class="weather-card-state" id="hero-weather-state">Tamil Nadu</span>
+                </div>
               </div>
             </a>
+
+          </div>
+
+          <!-- Bottom-Right Motto in Elegant Serif Italic -->
+          <div class="dashboard-banner-motto">
+            "Cleaner Cities<br>Happier People"
           </div>
         </div>
 
@@ -441,6 +477,8 @@
     const heroWeatherIconEl = document.getElementById('hero-weather-icon');
     const heroWeatherCityEl = document.getElementById('hero-weather-city');
     const heroWeatherTempEl = document.getElementById('hero-weather-temp');
+    const heroWeatherCondEl = document.getElementById('hero-weather-cond');
+    const heroWeatherStateEl = document.getElementById('hero-weather-state');
 
     if (!heroWeatherBadge) return;
 
@@ -531,6 +569,9 @@
 
       if (heroWeatherCityEl) {
         heroWeatherCityEl.textContent = displayLoc;
+      }
+      if (heroWeatherStateEl) {
+        heroWeatherStateEl.textContent = isTa ? 'தமிழ்நாடு' : 'Tamil Nadu';
       }
 
       if (typeof locInfo.lat === 'number' && typeof locInfo.lng === 'number') {
@@ -661,23 +702,60 @@
       if (!data) {
         if (heroWeatherBadge) heroWeatherBadge.classList.add('loading');
         if (heroWeatherTempEl) heroWeatherTempEl.textContent = '--°C';
-        if (heroWeatherIconEl) heroWeatherIconEl.innerHTML = '<i class="fa-solid fa-cloud"></i>';
+        if (heroWeatherCondEl) heroWeatherCondEl.textContent = getLang() === 'ta' ? 'கணிக்கப்படுகிறது...' : 'Detecting...';
         return;
       }
       const icon = data.icon.startsWith('fa-') ? data.icon : `fa-${data.icon}`;
+      const isTa = getLang() === 'ta';
+      const locName = currentSpecificLoc ? (isTa ? currentSpecificLoc.specificNameTa : currentSpecificLoc.specificName) : formatDistrictDisplay(currentDistrict);
 
       // Update Hero Weather Badge
       if (heroWeatherBadge) {
         heroWeatherBadge.classList.remove('loading');
-        const isTa = getLang() === 'ta';
-        const locName = currentSpecificLoc ? (isTa ? currentSpecificLoc.specificNameTa : currentSpecificLoc.specificName) : formatDistrictDisplay(currentDistrict);
         heroWeatherBadge.title = `${locName} — ${data.temp}°C (${t('view_weather_forecast', 'View Weather Forecast')})`;
       }
       if (heroWeatherTempEl) {
         heroWeatherTempEl.textContent = `${data.temp}°C`;
       }
+      if (heroWeatherCondEl) {
+        heroWeatherCondEl.textContent = data.condition || 'Partly Cloudy';
+      }
+      if (heroWeatherCityEl) {
+        heroWeatherCityEl.textContent = locName || 'Coimbatore';
+      }
+      if (heroWeatherStateEl) {
+        heroWeatherStateEl.textContent = isTa ? 'தமிழ்நாடு' : 'Tamil Nadu';
+      }
       if (heroWeatherIconEl) {
-        heroWeatherIconEl.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+        if (icon.includes('rain')) {
+          heroWeatherIconEl.innerHTML = `
+            <svg class="weather-icon-svg" width="38" height="38" viewBox="0 0 64 64" fill="none">
+              <path d="M20 40h28a10 10 0 0 0 0-20 12 12 0 0 0-22-4 9 9 0 0 0-6 24z" fill="#93c5fd"/>
+              <line x1="24" y1="46" x2="20" y2="54" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="34" y1="46" x2="30" y2="54" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="44" y1="46" x2="40" y2="54" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>`;
+        } else if (icon === 'fa-sun' || icon === 'fa-certificate') {
+          heroWeatherIconEl.innerHTML = `
+            <svg class="weather-icon-svg" width="38" height="38" viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="15" fill="#f59e0b"/>
+              <path d="M32 6v6m0 40v6m20-26h6m-52 0h6m36.7-14.7l-4.2 4.2m-25 25l-4.2 4.2m0-33.4l4.2 4.2m25 25l4.2 4.2" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>`;
+        } else {
+          // Default partly cloudy / overcast illustration matching reference mockup exactly
+          heroWeatherIconEl.innerHTML = `
+            <svg class="weather-icon-svg" width="38" height="38" viewBox="0 0 64 64" fill="none">
+              <circle cx="28" cy="23" r="14" fill="#f59e0b"/>
+              <path d="M20 44h30a10 10 0 0 0 0-19 12 12 0 0 0-23-3 9 9 0 0 0-7 22z" fill="#93c5fd" opacity="0.95"/>
+              <path d="M20 44h30a10 10 0 0 0 0-19 12 12 0 0 0-23-3 9 9 0 0 0-7 22z" fill="url(#cloudShine)" opacity="0.4"/>
+              <defs>
+                <linearGradient id="cloudShine" x1="20" y1="20" x2="50" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#ffffff"/>
+                  <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+            </svg>`;
+        }
       }
     }
 

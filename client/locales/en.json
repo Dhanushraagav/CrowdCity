@@ -194,7 +194,7 @@
   "hero_greeting_morning": "Good Morning, {name}",
   "hero_greeting_afternoon": "Good Afternoon, {name}",
   "hero_greeting_evening": "Good Evening, {name}",
-  "hero_desc_default": "Transforming citizen voices into rapid community action. Report local issues and track live department resolutions.",
+  "hero_desc_default": "Turn local problems into visible community action.",
   "hero_desc_stats": "You have submitted {total} report{s} with {resolved} resolved. Every report builds a more responsive city for everyone.",
   "your_progress": "Your Progress",
   "reports_submitted": "Reports Submitted",
