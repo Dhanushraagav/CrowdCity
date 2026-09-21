@@ -100,8 +100,8 @@
     if (trigger && menu) {
       trigger.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isHidden = menu.classList.contains('hidden');
-        if (isHidden) {
+        const isClosedOrClosing = menu.classList.contains('hidden') || menu.classList.contains('is-closing');
+        if (isClosedOrClosing) {
           openDistrictDropdown();
         } else {
           closeDistrictDropdown();
@@ -328,6 +328,8 @@
     });
   }
 
+  let closeDropdownTimer = null;
+
   function openDistrictDropdown() {
     const menu = document.getElementById('tourism-district-menu');
     const trigger = document.getElementById('tourism-district-trigger');
@@ -335,18 +337,34 @@
     const clearBtn = document.getElementById('tourism-district-search-clear');
     if (!menu || !trigger) return;
 
+    if (closeDropdownTimer) {
+      clearTimeout(closeDropdownTimer);
+      closeDropdownTimer = null;
+    }
+
     menu.classList.remove('is-closing');
     menu.classList.remove('hidden');
     trigger.setAttribute('aria-expanded', 'true');
     trigger.classList.add('active');
 
     if (filterInput) {
-      filterInput.value = state.districtSearchQuery || '';
-      if (clearBtn) {
-        clearBtn.classList.toggle('hidden', !filterInput.value);
+      if (state.districtSearchQuery) {
+        filterInput.value = state.districtSearchQuery;
+        if (clearBtn) clearBtn.classList.remove('hidden');
+        filterDistrictOptions(state.districtSearchQuery);
+      } else {
+        filterInput.value = '';
+        if (clearBtn) clearBtn.classList.add('hidden');
       }
-      filterDistrictOptions(state.districtSearchQuery || '');
-      setTimeout(() => filterInput.focus(), 40);
+
+      // Smooth focus via requestAnimationFrame without blocking layout
+      requestAnimationFrame(() => {
+        try {
+          filterInput.focus({ preventScroll: true });
+        } catch (_) {
+          filterInput.focus();
+        }
+      });
     }
   }
 
@@ -360,10 +378,12 @@
     trigger.classList.remove('active');
     menu.classList.add('is-closing');
 
-    setTimeout(() => {
+    if (closeDropdownTimer) clearTimeout(closeDropdownTimer);
+    closeDropdownTimer = setTimeout(() => {
       menu.classList.remove('is-closing');
       menu.classList.add('hidden');
-    }, 150);
+      closeDropdownTimer = null;
+    }, 110);
   }
 
   /**

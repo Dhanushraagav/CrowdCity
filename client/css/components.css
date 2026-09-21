@@ -10117,8 +10117,8 @@ html.theme-dark .step-node.active .step-time-pill {
   font-weight: 600;
   color: var(--text-main, #0f172a);
   cursor: pointer;
-  transition: all 0.2s ease;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .tourism-dropdown-trigger:hover,
@@ -10130,7 +10130,7 @@ html.theme-dark .step-node.active .step-time-pill {
 .tourism-dropdown-trigger .dropdown-chevron {
   font-size: 0.75rem;
   color: var(--text-muted, #94a3b8);
-  transition: transform 0.2s ease;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
 }
 
 .tourism-dropdown-trigger.active .dropdown-chevron {
@@ -10139,25 +10139,52 @@ html.theme-dark .step-node.active .step-time-pill {
 
 .tourism-dropdown-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
-  right: 0;
+  width: 420px;
+  max-width: min(420px, calc(100vw - 32px));
   background: #ffffff !important;
-  border: 1px solid var(--border-color, #cbd5e1);
-  border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  border: 1.5px solid rgba(15, 118, 110, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.2), 0 4px 12px rgba(0, 0, 0, 0.05);
   z-index: 99999 !important;
   overflow: hidden;
-  animation: tourismDropdownFade 0.18s ease-out;
+  transform-origin: top left;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  animation: tourismDropdownFastOpen 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .tourism-dropdown-menu.hidden {
   display: none !important;
 }
 
-@keyframes tourismDropdownFade {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+.tourism-dropdown-menu.is-closing {
+  animation: tourismDropdownFastClose 0.10s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes tourismDropdownFastOpen {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tourismDropdownFastClose {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
 }
 
 .tourism-dropdown-search-wrap {
@@ -10187,6 +10214,9 @@ html.theme-dark .step-node.active .step-time-pill {
   max-height: 280px;
   overflow-y: auto;
   padding: 0.4rem;
+  scrollbar-width: thin;
+  contain: content;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tourism-dropdown-option {
