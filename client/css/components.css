@@ -9963,7 +9963,7 @@ html.theme-dark .step-node.active .step-time-pill {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.85s;
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.45s;
   z-index: 1;
 }
 
@@ -9982,24 +9982,24 @@ html.theme-dark .step-node.active .step-time-pill {
   background-size: cover;
   background-position: center 38%;
   background-repeat: no-repeat;
-  filter: saturate(1.15) contrast(1.05) brightness(0.92);
+  filter: contrast(1.02) saturate(1.04);
   image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
-  transform: scale(1.04);
-  transition: transform 7s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: transform;
+  transform: none !important;
+  transition: none !important;
 }
 
 .hero-slide.active .hero-slide-bg {
-  transform: scale(1);
+  transform: none !important;
 }
 
+/* Crystal-Clear 4K Overlay: No dark fog behind wordings, natural vibrant photography */
 .hero-slide-overlay {
   position: absolute;
   inset: 0;
   background: 
-    linear-gradient(90deg, rgba(8, 14, 26, 0.94) 0%, rgba(8, 14, 26, 0.82) 36%, rgba(8, 14, 26, 0.45) 65%, rgba(8, 14, 26, 0.18) 100%),
-    linear-gradient(0deg, rgba(8, 14, 26, 0.88) 0%, rgba(8, 14, 26, 0.15) 45%, rgba(8, 14, 26, 0.2) 100%);
+    linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.26) 42%, rgba(0, 0, 0, 0.04) 70%, transparent 100%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, transparent 40%);
   pointer-events: none;
 }
 
@@ -10085,7 +10085,7 @@ html.theme-dark .step-node.active .step-time-pill {
   color: #ffffff;
   letter-spacing: -0.03em;
   line-height: 1.15;
-  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.65), 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
 .hero-slide-title-ta {
@@ -10094,16 +10094,16 @@ html.theme-dark .step-node.active .step-time-pill {
   color: #99f6e4;
   letter-spacing: -0.01em;
   line-height: 1.3;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.6);
 }
 
 .hero-slide-lead {
   font-size: clamp(0.92rem, 1.3vw, 1.02rem);
   line-height: 1.65;
-  color: #e2e8f0;
+  color: #f1f5f9;
   max-width: 640px;
   margin: 0 0 1.65rem 0;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.65);
   transform: translateY(14px);
   opacity: 0;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.18s, opacity 0.6s ease 0.18s;
@@ -10129,40 +10129,9 @@ html.theme-dark .step-node.active .step-time-pill {
   opacity: 1;
 }
 
+/* Arrows disabled as per UX request (clean unobstructed view) */
 .hero-carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(12px);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.hero-carousel-arrow.prev {
-  left: 1.5rem;
-}
-
-.hero-carousel-arrow.next {
-  right: 1.5rem;
-}
-
-.hero-carousel-arrow:hover {
-  background: rgba(13, 148, 136, 0.85);
-  border-color: #5eead4;
-  transform: translateY(-50%) scale(1.08);
-  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5);
+  display: none !important;
 }
 
 .hero-carousel-bottom-bar {
@@ -10288,13 +10257,6 @@ html.theme-dark .step-node.active .step-time-pill {
   .hero-slide-inner {
     padding: 2.5rem 2rem;
   }
-  .hero-carousel-arrow {
-    width: 40px;
-    height: 40px;
-    font-size: 0.95rem;
-  }
-  .hero-carousel-arrow.prev { left: 0.75rem; }
-  .hero-carousel-arrow.next { right: 0.75rem; }
 }
 
 @media (max-width: 640px) {
@@ -10310,9 +10272,6 @@ html.theme-dark .step-node.active .step-time-pill {
   }
   .hero-slide-lead {
     margin-bottom: 1.2rem;
-  }
-  .hero-carousel-arrow {
-    display: none;
   }
   .hero-carousel-bottom-bar {
     bottom: 0.85rem;

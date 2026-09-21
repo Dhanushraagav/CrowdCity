@@ -1327,25 +1327,25 @@ export const TN_TOURISM_PLACES = [
     "entry_fee_ta": "துடுப்பு படகு: ₹200–₹400, மோட்டார் படகு: ₹1200–₹2400 (TTDC கட்டணம்)",
     "nearest_station": "Cuddalore Port Junction (CUPJ) / Chidambaram (CDM)",
     "nearest_airport": "Puducherry Airport (PNY) - 35 km",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Boating_in_Kodaikanal_Lake_with_Mist.jpg/960px-Boating_in_Kodaikanal_Lake_with_Mist.jpg",
-    "image_source_name": "Wikimedia Commons / Tamil Nadu Tourism Archives",
-    "image_source_url": "https://commons.wikimedia.org/",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Inside_Pichavaram_Mangrove_Forest.jpg/960px-Inside_Pichavaram_Mangrove_Forest.jpg",
+    "image_source_name": "Wikimedia Commons / Inside Pichavaram Mangrove Forest",
+    "image_source_url": "https://commons.wikimedia.org/wiki/File:Inside_Pichavaram_Mangrove_Forest.jpg",
     "images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Boating_in_Kodaikanal_Lake_with_Mist.jpg/960px-Boating_in_Kodaikanal_Lake_with_Mist.jpg",
-        "alt_en": "Pichavaram Mangrove Forest & Eco-Tourism representative view",
-        "alt_ta": "பிச்சாவரம் சதுப்புநிலக் காடுகள் & சூழல் சுற்றுலா தோற்றம்",
-        "source_name": "Wikimedia Commons / Tamil Nadu Tourism Archives",
-        "source_url": "https://commons.wikimedia.org/"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Inside_Pichavaram_Mangrove_Forest.jpg/960px-Inside_Pichavaram_Mangrove_Forest.jpg",
+        "alt_en": "Inside Pichavaram Mangrove Forest scenic waterways and canals",
+        "alt_ta": "பிச்சாவரம் சதுப்புநிலக் காடுகள் படகுப் பாதை",
+        "source_name": "Wikimedia Commons / Inside Pichavaram Mangrove Forest",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Inside_Pichavaram_Mangrove_Forest.jpg"
       }
     ],
     "media_images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Boating_in_Kodaikanal_Lake_with_Mist.jpg/960px-Boating_in_Kodaikanal_Lake_with_Mist.jpg",
-        "alt_en": "Pichavaram Mangrove Forest & Eco-Tourism representative view",
-        "alt_ta": "பிச்சாவரம் சதுப்புநிலக் காடுகள் & சூழல் சுற்றுலா தோற்றம்",
-        "source_name": "Wikimedia Commons / Tamil Nadu Tourism Archives",
-        "source_url": "https://commons.wikimedia.org/"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Inside_Pichavaram_Mangrove_Forest.jpg/960px-Inside_Pichavaram_Mangrove_Forest.jpg",
+        "alt_en": "Inside Pichavaram Mangrove Forest scenic waterways and canals",
+        "alt_ta": "பிச்சாவரம் சதுப்புநிலக் காடுகள் படகுப் பாதை",
+        "source_name": "Wikimedia Commons / Inside Pichavaram Mangrove Forest",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Inside_Pichavaram_Mangrove_Forest.jpg"
       }
     ],
     "source_name": "Tamil Nadu Tourism Development Corporation (TTDC) & Forest Dept",
@@ -1433,25 +1433,25 @@ export const TN_TOURISM_PLACES = [
     "entry_fee_ta": "ஏரி நடைபாதை: இலவசம்; படகு சவாரி: ₹150–₹350; பிரையண்ட் பூங்கா: ₹30",
     "nearest_station": "Dindigul Junction (DG) / Kodai Road (KQN)",
     "nearest_airport": "Madurai International Airport (IXM) - 75 km",
-    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Kodaikanal_lake.jpg/960px-Kodaikanal_lake.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-    "image_source_name": "Wikimedia Commons / Kodaikanal Lake",
-    "image_source_url": "https://en.wikipedia.org/wiki/Kodaikanal%20Lake",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Boating_in_Kodaikanal_Lake_with_Mist.jpg/960px-Boating_in_Kodaikanal_Lake_with_Mist.jpg",
+    "image_source_name": "Wikimedia Commons / Kodaikanal Lake Mist",
+    "image_source_url": "https://commons.wikimedia.org/wiki/File:Boating_in_Kodaikanal_Lake_with_Mist.jpg",
     "images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Kodaikanal_lake.jpg/960px-Kodaikanal_lake.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-        "alt_en": "Kodaikanal Lake & Bryant Park",
-        "alt_ta": "கொடைக்கானல் ஏரி மற்றும் பிரையண்ட் பூங்கா",
-        "source_name": "Wikimedia Commons / Kodaikanal Lake",
-        "source_url": "https://en.wikipedia.org/wiki/Kodaikanal%20Lake"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Boating_in_Kodaikanal_Lake_with_Mist.jpg/960px-Boating_in_Kodaikanal_Lake_with_Mist.jpg",
+        "alt_en": "Kodaikanal Lake & Bryant Park with morning mist and boating",
+        "alt_ta": "கொடைக்கானல் ஏரி மற்றும் பிரையண்ட் பூங்கா காலை பனிமூட்டம்",
+        "source_name": "Wikimedia Commons / Kodaikanal Lake Mist",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Boating_in_Kodaikanal_Lake_with_Mist.jpg"
       }
     ],
     "media_images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Kodaikanal_lake.jpg/960px-Kodaikanal_lake.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-        "alt_en": "Kodaikanal Lake & Bryant Park",
-        "alt_ta": "கொடைக்கானல் ஏரி மற்றும் பிரையண்ட் பூங்கா",
-        "source_name": "Wikimedia Commons / Kodaikanal Lake",
-        "source_url": "https://en.wikipedia.org/wiki/Kodaikanal%20Lake"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Boating_in_Kodaikanal_Lake_with_Mist.jpg/960px-Boating_in_Kodaikanal_Lake_with_Mist.jpg",
+        "alt_en": "Kodaikanal Lake & Bryant Park with morning mist and boating",
+        "alt_ta": "கொடைக்கானல் ஏரி மற்றும் பிரையண்ட் பூங்கா காலை பனிமூட்டம்",
+        "source_name": "Wikimedia Commons / Kodaikanal Lake Mist",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Boating_in_Kodaikanal_Lake_with_Mist.jpg"
       }
     ],
     "source_name": "Dindigul District Administration & Horticulture Department",
@@ -3182,12 +3182,12 @@ export const TN_TOURISM_PLACES = [
     "entry_fee_ta": "இலவச அனுமதி (இந்திய தொல்லியல் துறை)",
     "nearest_station": "Thanjavur Junction (TJ)",
     "nearest_airport": "Tiruchirappalli International Airport (TRZ) - 58 km",
-    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg/960px-Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg/960px-Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg",
     "image_source_name": "Wikimedia Commons / Brihadisvara Temple",
     "image_source_url": "https://en.wikipedia.org/wiki/Brihadisvara%20Temple",
     "images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg/960px-Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg/960px-Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg",
         "alt_en": "Brihadisvara Temple (Big Temple / Peruvudaiyar Kovil)",
         "alt_ta": "தஞ்சை பெருவுடையார் கோவில் (பிரகதீஸ்வரர் கோவில் / பெரிய கோவில்)",
         "source_name": "Wikimedia Commons / Brihadisvara Temple",
@@ -3196,7 +3196,7 @@ export const TN_TOURISM_PLACES = [
     ],
     "media_images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg/960px-Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg/960px-Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg",
         "alt_en": "Brihadisvara Temple (Big Temple / Peruvudaiyar Kovil)",
         "alt_ta": "தஞ்சை பெருவுடையார் கோவில் (பிரகதீஸ்வரர் கோவில் / பெரிய கோவில்)",
         "source_name": "Wikimedia Commons / Brihadisvara Temple",

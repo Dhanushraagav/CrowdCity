@@ -1656,23 +1656,9 @@
   }
 
   function setupHeroCarouselEvents() {
-    const prevBtn = document.getElementById('hero-arrow-prev');
-    const nextBtn = document.getElementById('hero-arrow-next');
     const playPauseBtn = document.getElementById('hero-playpause-btn');
     const carouselEl = document.getElementById('tourism-hero-carousel');
 
-    if (prevBtn) {
-      prevBtn.onclick = (e) => {
-        e.preventDefault();
-        prevHeroSlide();
-      };
-    }
-    if (nextBtn) {
-      nextBtn.onclick = (e) => {
-        e.preventDefault();
-        nextHeroSlide();
-      };
-    }
     if (playPauseBtn) {
       playPauseBtn.onclick = (e) => {
         e.preventDefault();
@@ -1767,9 +1753,10 @@
 
   function startHeroAutoplay() {
     stopHeroAutoplay();
+    // 2-second dynamic sliding rotation as requested by user
     state.heroAutoplayTimer = setInterval(() => {
       nextHeroSlide();
-    }, 6000);
+    }, 2000);
   }
 
   function stopHeroAutoplay() {

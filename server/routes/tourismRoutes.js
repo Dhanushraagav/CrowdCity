@@ -63,10 +63,12 @@ router.get('/hero-banners', (req, res) => {
 
     function getHighRes(url) {
       if (!url) return '';
-      if (url.includes('upload.wikimedia.org') || url.includes('thumb.wikimedia.org')) {
-        return url.replace(/\/(\d+)px-/, '/1920px-');
+      let clean = url.replace('https://thumb.wikimedia.org/', 'https://upload.wikimedia.org/');
+      clean = clean.split('?')[0];
+      if (clean.includes('upload.wikimedia.org')) {
+        return clean.replace(/\/(\d+)px-/, '/1920px-');
       }
-      return url;
+      return clean;
     }
 
     // Curated balanced pool representing diverse regions & landscapes across Tamil Nadu
