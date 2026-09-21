@@ -154,7 +154,7 @@
   width: 100%;
   height: 100%;
   background-size: cover;
-  background-position: center 38%;
+  background-position: center 25%;
   background-repeat: no-repeat;
   filter: contrast(1.02) saturate(1.04);
   image-rendering: -webkit-optimize-contrast;
@@ -3112,37 +3112,37 @@ html.dark-theme .video-official-badge {
         <div class="tourism-hero-carousel" id="tourism-hero-carousel" aria-roledescription="carousel" aria-label="Tamil Nadu Destinations Showcase">
           <!-- Slide Track -->
           <div class="hero-carousel-track" id="hero-carousel-track">
-            <!-- Initial Fallback Slide, dynamically populated with 14 high-res destinations by tourism.js -->
-            <div class="hero-slide active" data-slide-index="0">
-              <div class="hero-slide-bg" style="background-image: url('images/tamilnadu_temple_hero.jpg')" role="img" aria-label="Tamil Nadu Heritage"></div>
+            <!-- Initial First Slide (hydrated immediately into 14 destinations by tourism.js) -->
+            <div class="hero-slide active" data-slide-index="0" role="group" aria-roledescription="slide" aria-label="Brihadisvara Temple (Big Temple / Peruvudaiyar Kovil)">
+              <div class="hero-slide-bg" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg/1920px-Brihadisvara_Temple_during_Maha_Shivaratri-WUS03611_%28edit%29.jpg')" role="img" aria-label="Brihadisvara Temple"></div>
               <div class="hero-slide-overlay"></div>
               <div class="hero-slide-inner">
                 <div class="hero-slide-content">
                   <div class="hero-slide-badges">
                     <span class="hero-badge-pill cat-badge">
                       <i class="fa-solid fa-landmark"></i>
-                      <span data-i18n="tourism_hero_badge">Government of Tamil Nadu Tourism</span>
+                      <span>Heritage</span>
                     </span>
                     <span class="hero-badge-pill dist-badge">
-                      <i class="fa-solid fa-map-pin"></i>
-                      <span data-i18n="tourism_hero_statewide">Statewide Verified Directory</span>
+                      <i class="fa-solid fa-location-dot"></i>
+                      <span>Thanjavur District</span>
                     </span>
                   </div>
                   <div class="hero-slide-heading">
-                    <h1 class="hero-slide-title-en" data-i18n="tourism_hero_title_en">Discover Tamil Nadu</h1>
-                    <span class="hero-slide-title-ta" data-i18n="tourism_hero_title_ta">தமிழ்நாடு சுற்றுலாத் தலங்கள்</span>
+                    <h1 class="hero-slide-title-en">Brihadisvara Temple (Big Temple / Peruvudaiyar Kovil)</h1>
+                    <span class="hero-slide-title-ta">தஞ்சை பெருவுடையார் கோவில் (பிரகதீஸ்வரர் கோவில் / பெரிய கோவில்)</span>
                   </div>
-                  <p class="hero-slide-lead" data-i18n="tourism_hero_lead">
-                    Explore verified heritage, nature, temples, waterfalls & wildlife across all 38 districts of Tamil Nadu.
+                  <p class="hero-slide-lead">
+                    UNESCO World Heritage 11th-century Chola granite architectural marvel with a 216-ft Vimana and 80-ton capstone.
                   </p>
                   <div class="hero-slide-actions">
-                    <a href="#tourism-explorer-section" class="btn-hero-explore">
+                    <button type="button" class="btn-hero-explore" onclick="window.exploreHeroDestination('tjr-brihadisvara-big-temple', 'thanjavur')">
                       <i class="fa-solid fa-compass"></i>
+                      <span data-i18n="tourism_btn_explore_dest">Explore Destination</span>
+                    </button>
+                    <a href="#tourism-explorer-section" class="btn-hero-ttdc">
+                      <i class="fa-solid fa-map-location-dot"></i>
                       <span data-i18n="tourism_btn_explore_38">Explore 38 Districts</span>
-                    </a>
-                    <a href="https://tamilnadutourism.tn.gov.in" target="_blank" rel="noopener noreferrer" class="btn-hero-ttdc">
-                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                      <span>TTDC Official Portal</span>
                     </a>
                   </div>
                 </div>
@@ -3153,9 +3153,22 @@ html.dark-theme .video-official-badge {
           <!-- Bottom Bar: Indicators + Counter + Play/Pause -->
           <div class="hero-carousel-bottom-bar" id="hero-carousel-bottom-bar">
             <div class="hero-carousel-dots" id="hero-carousel-dots" role="tablist" aria-label="Hero Carousel Dots">
-              <!-- Rendered dynamically -->
+              <button type="button" class="hero-dot active" data-index="0" aria-label="Slide 1"></button>
+              <button type="button" class="hero-dot" data-index="1" aria-label="Slide 2"></button>
+              <button type="button" class="hero-dot" data-index="2" aria-label="Slide 3"></button>
+              <button type="button" class="hero-dot" data-index="3" aria-label="Slide 4"></button>
+              <button type="button" class="hero-dot" data-index="4" aria-label="Slide 5"></button>
+              <button type="button" class="hero-dot" data-index="5" aria-label="Slide 6"></button>
+              <button type="button" class="hero-dot" data-index="6" aria-label="Slide 7"></button>
+              <button type="button" class="hero-dot" data-index="7" aria-label="Slide 8"></button>
+              <button type="button" class="hero-dot" data-index="8" aria-label="Slide 9"></button>
+              <button type="button" class="hero-dot" data-index="9" aria-label="Slide 10"></button>
+              <button type="button" class="hero-dot" data-index="10" aria-label="Slide 11"></button>
+              <button type="button" class="hero-dot" data-index="11" aria-label="Slide 12"></button>
+              <button type="button" class="hero-dot" data-index="12" aria-label="Slide 13"></button>
+              <button type="button" class="hero-dot" data-index="13" aria-label="Slide 14"></button>
             </div>
-            <span class="hero-carousel-counter" id="hero-carousel-counter">1 / 1</span>
+            <span class="hero-carousel-counter" id="hero-carousel-counter">1 / 14</span>
             <button type="button" class="hero-playpause-btn" id="hero-playpause-btn" aria-label="Pause Autoplay" title="Pause / Play Autoplay">
               <i class="fa-solid fa-pause"></i>
             </button>

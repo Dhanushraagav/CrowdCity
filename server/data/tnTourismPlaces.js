@@ -38,25 +38,25 @@ export const TN_TOURISM_PLACES = [
     "entry_fee_ta": "இலவச அனுமதி (இந்திய தொல்லியல் துறை பாதுகாக்கப்பட்ட தளம்)",
     "nearest_station": "Ariyalur Railway Station (ALU)",
     "nearest_airport": "Tiruchirappalli International Airport (TRZ) - 80 km",
-    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Gangaikondacholapuram_Temple_4.jpg/960px-Gangaikondacholapuram_Temple_4.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-    "image_source_name": "Wikimedia Commons / Brihadisvara Temple, Gangaikonda Cholapuram",
-    "image_source_url": "https://en.wikipedia.org/wiki/Brihadisvara%20Temple%2C%20Gangaikonda%20Cholapuram",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Gangaikonda_Cholapuram_view.jpg/1920px-Gangaikonda_Cholapuram_view.jpg",
+    "image_source_name": "Wikimedia Commons / Gangaikonda Cholapuram panoramic view",
+    "image_source_url": "https://commons.wikimedia.org/wiki/File:Gangaikonda_Cholapuram_view.jpg",
     "images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Gangaikondacholapuram_Temple_4.jpg/960px-Gangaikondacholapuram_Temple_4.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-        "alt_en": "Gangaikonda Cholapuram Temple",
-        "alt_ta": "கங்கைகொண்ட சோழபுரம் பிரகதீஸ்வரர் கோவில்",
-        "source_name": "Wikimedia Commons / Brihadisvara Temple, Gangaikonda Cholapuram",
-        "source_url": "https://en.wikipedia.org/wiki/Brihadisvara%20Temple%2C%20Gangaikonda%20Cholapuram"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Gangaikonda_Cholapuram_view.jpg/1920px-Gangaikonda_Cholapuram_view.jpg",
+        "alt_en": "Gangaikonda Cholapuram Temple majestic Vimana & Gopuram full landscape view",
+        "alt_ta": "கங்கைகொண்ட சோழபுரம் பிரகதீஸ்வரர் கோவில் விமானம் & கோபுரம் முழு தோற்றம்",
+        "source_name": "Wikimedia Commons / Gangaikonda Cholapuram panoramic view",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Gangaikonda_Cholapuram_view.jpg"
       }
     ],
     "media_images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Gangaikondacholapuram_Temple_4.jpg/960px-Gangaikondacholapuram_Temple_4.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-        "alt_en": "Gangaikonda Cholapuram Temple",
-        "alt_ta": "கங்கைகொண்ட சோழபுரம் பிரகதீஸ்வரர் கோவில்",
-        "source_name": "Wikimedia Commons / Brihadisvara Temple, Gangaikonda Cholapuram",
-        "source_url": "https://en.wikipedia.org/wiki/Brihadisvara%20Temple%2C%20Gangaikonda%20Cholapuram"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Gangaikonda_Cholapuram_view.jpg/1920px-Gangaikonda_Cholapuram_view.jpg",
+        "alt_en": "Gangaikonda Cholapuram Temple majestic Vimana & Gopuram full landscape view",
+        "alt_ta": "கங்கைகொண்ட சோழபுரம் பிரகதீஸ்வரர் கோவில் விமானம் & கோபுரம் முழு தோற்றம்",
+        "source_name": "Wikimedia Commons / Gangaikonda Cholapuram panoramic view",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Gangaikonda_Cholapuram_view.jpg"
       }
     ],
     "source_name": "District Administration Ariyalur & Archaeological Survey of India",
@@ -1804,25 +1804,25 @@ export const TN_TOURISM_PLACES = [
     "entry_fee_ta": "படகு கட்டணம்: ₹50, பாறை நுழைவு: ₹20",
     "nearest_station": "Kanniyakumari Railway Station (CAPE) / Nagercoil (NCJ)",
     "nearest_airport": "Trivandrum International Airport (TRV) - 85 km",
-    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Thiruvalluvar_Statue_at_Kanyakumari_02.jpg/960px-Thiruvalluvar_Statue_at_Kanyakumari_02.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-    "image_source_name": "Wikimedia Commons / Thiruvalluvar Statue",
-    "image_source_url": "https://en.wikipedia.org/wiki/Thiruvalluvar%20Statue",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Kanyakumari_%28Vivekananda_Rock_Memorial_%26_Valluvar_Statue%29%29.jpg/960px-Kanyakumari_%28Vivekananda_Rock_Memorial_%26_Valluvar_Statue%29%29.jpg",
+    "image_source_name": "Wikimedia Commons / Kanyakumari Vivekananda Rock & Valluvar Statue Panorama",
+    "image_source_url": "https://commons.wikimedia.org/wiki/File:Kanyakumari_(Vivekananda_Rock_Memorial_%26_Valluvar_Statue)).jpg",
     "images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Thiruvalluvar_Statue_at_Kanyakumari_02.jpg/960px-Thiruvalluvar_Statue_at_Kanyakumari_02.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-        "alt_en": "Vivekananda Rock Memorial & 133-ft Thiruvalluvar Statue",
-        "alt_ta": "விவேகானந்தர் பாறை நினைவு மண்டபம் & 133 அடி திருவள்ளுவர் சிலை",
-        "source_name": "Wikimedia Commons / Thiruvalluvar Statue",
-        "source_url": "https://en.wikipedia.org/wiki/Thiruvalluvar%20Statue"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Kanyakumari_%28Vivekananda_Rock_Memorial_%26_Valluvar_Statue%29%29.jpg/960px-Kanyakumari_%28Vivekananda_Rock_Memorial_%26_Valluvar_Statue%29%29.jpg",
+        "alt_en": "Vivekananda Rock Memorial & 133-ft Thiruvalluvar Statue complete panoramic view",
+        "alt_ta": "விவேகானந்தர் பாறை நினைவு மண்டபம் & 133 அடி திருவள்ளுவர் சிலை முழு தோற்றம்",
+        "source_name": "Wikimedia Commons / Kanyakumari Vivekananda Rock & Valluvar Statue Panorama",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Kanyakumari_(Vivekananda_Rock_Memorial_%26_Valluvar_Statue)).jpg"
       }
     ],
     "media_images": [
       {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Thiruvalluvar_Statue_at_Kanyakumari_02.jpg/960px-Thiruvalluvar_Statue_at_Kanyakumari_02.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
-        "alt_en": "Vivekananda Rock Memorial & 133-ft Thiruvalluvar Statue",
-        "alt_ta": "விவேகானந்தர் பாறை நினைவு மண்டபம் & 133 அடி திருவள்ளுவர் சிலை",
-        "source_name": "Wikimedia Commons / Thiruvalluvar Statue",
-        "source_url": "https://en.wikipedia.org/wiki/Thiruvalluvar%20Statue"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Kanyakumari_%28Vivekananda_Rock_Memorial_%26_Valluvar_Statue%29%29.jpg/960px-Kanyakumari_%28Vivekananda_Rock_Memorial_%26_Valluvar_Statue%29%29.jpg",
+        "alt_en": "Vivekananda Rock Memorial & 133-ft Thiruvalluvar Statue complete panoramic view",
+        "alt_ta": "விவேகானந்தர் பாறை நினைவு மண்டபம் & 133 அடி திருவள்ளுவர் சிலை முழு தோற்றம்",
+        "source_name": "Wikimedia Commons / Kanyakumari Vivekananda Rock & Valluvar Statue Panorama",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Kanyakumari_(Vivekananda_Rock_Memorial_%26_Valluvar_Statue)).jpg"
       }
     ],
     "source_name": "Tamil Nadu Tourism Development Corporation (TTDC) & District Administration",
