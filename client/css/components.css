@@ -6628,9 +6628,9 @@ html.dark-theme .universal-desktop-back-btn i {
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   margin-bottom: 1rem;
-  height: 36px;
-  min-height: 36px;
-  max-height: 36px;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -7224,8 +7224,8 @@ html.dark-theme .universal-desktop-back-btn i {
     align-items: center;
     border-radius: 8px;
     margin-bottom: 0.85rem;
-    min-height: 34px;
-    height: 34px;
+    min-height: 40px;
+    height: 40px;
     box-sizing: border-box;
     overflow: hidden;
     position: relative;
