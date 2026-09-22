@@ -2908,14 +2908,14 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   background-image: 
     linear-gradient(90deg, 
       rgba(5, 17, 32, 0.94) 0%, 
-      rgba(5, 17, 32, 0.88) 22%, 
-      rgba(5, 17, 32, 0.45) 34%, 
-      rgba(5, 17, 32, 0.06) 42%, 
-      transparent 50%
+      rgba(5, 17, 32, 0.86) 20%, 
+      rgba(5, 17, 32, 0.40) 30%, 
+      rgba(5, 17, 32, 0.04) 38%, 
+      transparent 46%
     ), 
     url('../images/tamilnadu_heritage_banner.jpg') !important;
   background-repeat: no-repeat !important;
-  background-position: 48% 12% !important;
+  background-position: 50% 16% !important;
   background-size: cover !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -3059,20 +3059,22 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   align-items: center !important;
   background: #ffffff !important;
   border-radius: 12px !important;
-  padding: 0.52rem 0.95rem !important;
-  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.35), 0 3px 6px -2px rgba(0, 0, 0, 0.12) !important;
+  padding: 0.52rem 1.45rem 0.52rem 1.05rem !important;
+  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.32), 0 3px 6px -2px rgba(0, 0, 0, 0.1) !important;
   text-decoration: none !important;
   color: #0f172a !important;
   align-self: flex-start !important;
   margin-top: 0 !important;
   margin-left: auto !important;
   margin-right: 0.5rem !important;
-  max-width: 380px !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  width: auto !important;
+  max-width: fit-content !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   z-index: 5 !important;
   flex-shrink: 0 !important;
   white-space: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 .dashboard-weather-card:hover {
@@ -3084,6 +3086,11 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   display: flex !important;
   align-items: center !important;
   gap: 0.65rem !important;
+}
+
+.weather-card-col.weather-card-location {
+  gap: 0.55rem !important;
+  padding-right: 0.25rem !important;
 }
 
 .weather-card-icon {
@@ -3137,12 +3144,13 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 .weather-card-city {
-  font-size: 0.86rem !important;
+  font-size: 0.84rem !important;
   font-weight: 700 !important;
   color: #0f172a !important;
   letter-spacing: -0.01em !important;
   white-space: nowrap !important;
   overflow: visible !important;
+  line-height: 1.25 !important;
 }
 
 .weather-card-state {
@@ -3150,6 +3158,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   font-weight: 500 !important;
   color: #64748b !important;
   white-space: nowrap !important;
+  line-height: 1.2 !important;
 }
 
 /* Bottom Right Motto - High Contrast Frosted Glass Badge */
