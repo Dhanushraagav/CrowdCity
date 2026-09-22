@@ -8,6 +8,7 @@ import { generateNextComplaintId, normalizeComplaintRecord } from '../services/c
 import { findDuplicateCandidate } from '../services/duplicateDetectionService.js';
 import { calculateSlaDeadline, resolveIssuePriority } from '../config/slaConfig.js';
 import { computeSlaState, checkAndProcessSlaEscalations, calculateSlaMetrics } from '../services/slaService.js';
+import { calculatePriorityScore, enrichIssueWithPriority, resolveRecurrenceCount } from '../services/civicPriorityService.js';
 import { searchCivicIssues } from '../services/searchService.js';
 import { resolveResponsibleAuthority } from '../services/authorityDirectoryService.js';
 import { buildTimeline } from '../services/timelineService.js';
@@ -20,16 +21,21 @@ export const getAllIssues = async (req, res) => {
 
   logger.info(`[getAllIssues] Filters - Category: "${category}" | Status: "${status}" | Reporter: "${reporter_id}" | AssignedTo: "${assigned_to}"`);
 
-  // Extract user ID from Authorization header if present
+  // Extract user ID and role from Authorization header or req.user if present
   const authHeader = req.headers.authorization;
-  let userId = null;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
+  let userId = req.user?.id || null;
+  let userRole = req.user?.role || null;
+  if (!userId && authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
       const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) userId = user.id;
+      if (user) {
+        userId = user.id;
+        userRole = user.user_metadata?.role || (user.app_metadata && user.app_metadata.role);
+      }
     } catch (err) {}
   }
+  const isAuthorityUser = ['authority', 'admin', 'department_officer'].includes(userRole);
 
   try {
     const activeClient = supabaseAdmin || getSupabaseClient(req);
@@ -60,7 +66,7 @@ export const getAllIssues = async (req, res) => {
           .from('issue_supporting_reports')
           .select('issue_id')
           .eq('citizen_id', reporter_id);
-        if (supData && supData.length > 0) {
+        if (supData) {
           userSupportingIssueIds = supData.map(s => s.issue_id);
         }
       } catch (e) {}
@@ -101,12 +107,16 @@ export const getAllIssues = async (req, res) => {
     const userVotes = votesRes.data;
     const votesError = votesRes.error;
 
-    // Populate user_has_upvoted and normalize complaint_id
+    // Populate user_has_upvoted, normalize complaint_id, compute SLA, and enrich Priority Score
     if (data && data.length > 0) {
       const votedIssueIds = (userId && !votesError && userVotes) ? new Set(userVotes.map(v => v.issue_id)) : new Set();
       data.forEach(issue => {
         normalizeComplaintRecord(issue);
         computeSlaState(issue);
+        enrichIssueWithPriority(issue);
+        if (!isAuthorityUser) {
+          delete issue.priority_factors;
+        }
         issue.user_has_upvoted = votedIssueIds.has(issue.id);
         if (userSupportingIssueIds.includes(issue.id) && issue.reporter_id !== reporter_id) {
           issue.is_supporting_report = true;
@@ -155,16 +165,21 @@ export const searchIssues = async (req, res) => {
 export const getIssueById = async (req, res) => {
   const { id } = req.params;
 
-  // Extract user ID from Authorization header if present
+  // Extract user ID and role from Authorization header or req.user if present
   const authHeader = req.headers.authorization;
-  let userId = null;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
+  let userId = req.user?.id || null;
+  let userRole = req.user?.role || null;
+  if (!userId && authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
       const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) userId = user.id;
+      if (user) {
+        userId = user.id;
+        userRole = user.user_metadata?.role || (user.app_metadata && user.app_metadata.role);
+      }
     } catch (err) {}
   }
+  const isAuthorityUser = ['authority', 'admin', 'department_officer'].includes(userRole);
 
   try {
     const activeClient = getSupabaseClient(req);
@@ -208,6 +223,10 @@ export const getIssueById = async (req, res) => {
 
     normalizeComplaintRecord(issue);
     computeSlaState(issue);
+    enrichIssueWithPriority(issue);
+    if (!isAuthorityUser) {
+      delete issue.priority_factors;
+    }
 
     // Fetch supporting community reports
     let supportingReports = [];
@@ -510,6 +529,25 @@ export const createIssue = async (req, res) => {
     const resolvedPriority = (is_emergency === 'true' || is_emergency === true) ? 'critical' : (aiResult.priority ? aiResult.priority.toLowerCase() : 'medium');
     const calculatedSlaDeadline = calculateSlaDeadline(new Date(), resolvedPriority, is_emergency);
 
+    // Calculate authoritative Priority Score server-side (do NOT trust client fields)
+    const recurrenceCount = await resolveRecurrenceCount({
+      complaint: { latitude: lat, longitude: lng, category },
+      client: activeClient
+    });
+
+    const priorityEvaluation = calculatePriorityScore({
+      complaint: {
+        severity: resolvedPriority,
+        citizen_count: 1,
+        created_at: new Date(),
+        status: 'pending',
+        sla_deadline: calculatedSlaDeadline.toISOString(),
+        is_emergency: (is_emergency === 'true' || is_emergency === true),
+        location_importance: req.body.location_importance || req.body.place_type || null
+      },
+      recurrenceCount
+    });
+
     const newIssue = {
       reporter_id,
       complaint_id: generatedComplaintId,
@@ -531,6 +569,13 @@ export const createIssue = async (req, res) => {
       sla_deadline: calculatedSlaDeadline.toISOString(),
       sla_status: 'within_sla',
       escalation_level: 0,
+
+      // Authoritative Priority Score fields (calculated server-side)
+      priority_score: priorityEvaluation.priority_score,
+      priority_level: priorityEvaluation.priority_level,
+      priority_factors: priorityEvaluation.priority_factors,
+      priority_calculated_at: priorityEvaluation.priority_calculated_at,
+      priority_model_version: priorityEvaluation.priority_model_version,
       
       // Store AI results
       ai_summary: aiResult.summary,
@@ -554,7 +599,7 @@ export const createIssue = async (req, res) => {
         .select()
         .single();
 
-      // Gracefully handle unmigrated location columns without stripping complaint_id or SLA tracking
+      // Gracefully handle unmigrated location or priority columns without stripping complaint_id or SLA tracking
       if (error && isSchemaMissingColumnError(error)) {
         logger.warn('Extended columns not found in Supabase schema, retrying with core schema columns:', error.message);
         delete newIssue.taluk;
@@ -565,6 +610,11 @@ export const createIssue = async (req, res) => {
         delete newIssue.authority_phone;
         delete newIssue.authority_email;
         delete newIssue.higher_authority_name;
+        delete newIssue.priority_score;
+        delete newIssue.priority_level;
+        delete newIssue.priority_factors;
+        delete newIssue.priority_calculated_at;
+        delete newIssue.priority_model_version;
 
         const retry = await activeClient.from('issues').insert(newIssue).select().single();
         data = retry.data;
@@ -621,6 +671,7 @@ export const createIssue = async (req, res) => {
 
     normalizeComplaintRecord(issue);
     computeSlaState(issue);
+    enrichIssueWithPriority(issue);
 
     issue.district = finalDistrict;
     issue.taluk = finalTaluk;
@@ -875,7 +926,22 @@ export const updateIssueStatus = async (req, res) => {
       updates.completion_notes = notes || official_remarks || 'Complaint resolved successfully.';
     }
 
-    // 1. Update status (with schema fallback if SLA columns pending migration)
+    // Recalculate priority score on status change
+    const statusPriority = calculatePriorityScore({
+      complaint: {
+        ...originalIssue,
+        status: targetStatus,
+        sla_deadline: originalIssue.sla_deadline,
+        responded_at: updates.responded_at || originalIssue.responded_at
+      }
+    });
+    updates.priority_score = statusPriority.priority_score;
+    updates.priority_level = statusPriority.priority_level;
+    updates.priority_factors = statusPriority.priority_factors;
+    updates.priority_calculated_at = statusPriority.priority_calculated_at;
+    updates.priority_model_version = statusPriority.priority_model_version;
+
+    // 1. Update status (with schema fallback if SLA/priority columns pending migration)
     let issue = null;
     let { data: updatedData, error: issueError } = await activeClient
       .from('issues')
@@ -887,6 +953,11 @@ export const updateIssueStatus = async (req, res) => {
     if (isSchemaMissingColumnError(issueError)) {
       delete updates.responded_at;
       delete updates.sla_status;
+      delete updates.priority_score;
+      delete updates.priority_level;
+      delete updates.priority_factors;
+      delete updates.priority_calculated_at;
+      delete updates.priority_model_version;
       const retry = await activeClient.from('issues').update(updates).eq('id', id).select().single();
       if (retry.error) throw retry.error;
       issue = retry.data;
@@ -895,6 +966,8 @@ export const updateIssueStatus = async (req, res) => {
     } else {
       issue = updatedData;
     }
+
+    enrichIssueWithPriority(issue);
 
     // 2. Insert timeline tracking entry using request-scoped client
     const prevStatus = (originalIssue.status || 'pending').toLowerCase();
@@ -2812,13 +2885,33 @@ export const supportExistingIssue = async (req, res) => {
 
     let newCount = (masterIssue.citizen_count || 1) + 1;
 
+    // Recalculate authoritative Priority Score for consolidated master issue
+    const masterPriority = calculatePriorityScore({
+      complaint: {
+        ...masterIssue,
+        citizen_count: newCount
+      }
+    });
+
+    const masterUpdates = {
+      citizen_count: newCount,
+      priority_score: masterPriority.priority_score,
+      priority_level: masterPriority.priority_level,
+      priority_factors: masterPriority.priority_factors,
+      priority_calculated_at: masterPriority.priority_calculated_at,
+      priority_model_version: masterPriority.priority_model_version
+    };
+
     try {
       const insRes = await activeClient.from('issue_supporting_reports').insert(supportingRecord);
       if (insRes && insRes.error) {
         logger.warn('issue_supporting_reports insert notice: %s', insRes.error.message);
       }
-      // Explicitly update citizen_count on master issue
-      await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id);
+      // Explicitly update citizen_count and priority score on master issue
+      const upRes = await activeClient.from('issues').update(masterUpdates).eq('id', masterIssue.id);
+      if (upRes && isSchemaMissingColumnError(upRes.error)) {
+        await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id);
+      }
     } catch (insertErr) {
       logger.warn('issue_supporting_reports fallback note: %s', insertErr.message);
       if (supportingImageUrl) {
@@ -2832,11 +2925,17 @@ export const supportExistingIssue = async (req, res) => {
         } catch (attErr) {}
       }
       try {
-        await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id);
+        const upRes = await activeClient.from('issues').update(masterUpdates).eq('id', masterIssue.id);
+        if (upRes && isSchemaMissingColumnError(upRes.error)) {
+          await activeClient.from('issues').update({ citizen_count: newCount }).eq('id', masterIssue.id);
+        }
       } catch (upErr) {}
     }
 
     masterIssue.citizen_count = newCount;
+    masterIssue.priority_score = masterPriority.priority_score;
+    masterIssue.priority_level = masterPriority.priority_level;
+    masterIssue.priority_factors = masterPriority.priority_factors;
 
     // 6. Add status history timeline event
     try {

@@ -2,6 +2,7 @@ import { supabase, supabaseAdmin } from '../config/supabase.js';
 import { TN_DISTRICTS, resolveDistrict, getDistrictById } from '../config/districtsConfig.js';
 import { normalizeComplaintRecord } from './complaintIdService.js';
 import { computeSlaState } from './slaService.js';
+import { enrichIssueWithPriority } from './civicPriorityService.js';
 import logger from '../config/logger.js';
 
 // Common synonyms and keyword mappings for intuitive searching
@@ -269,6 +270,7 @@ export async function searchCivicIssues(params = {}, user = null) {
   for (const issue of rawIssues) {
     normalizeComplaintRecord(issue);
     computeSlaState(issue);
+    enrichIssueWithPriority(issue);
 
     const resolvedDistrict = resolveDistrict(issue);
     issue.resolved_district = resolvedDistrict;
@@ -353,6 +355,8 @@ export async function searchCivicIssues(params = {}, user = null) {
       category: issue.category,
       status: issue.status,
       priority: issue.ai_priority || issue.priority || 'medium',
+      priority_score: issue.priority_score,
+      priority_level: issue.priority_level,
       department: issue.ai_department || issue.department || 'General Civic Administration',
       address: issue.address,
       district: resolvedDistrict ? {

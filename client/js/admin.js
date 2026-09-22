@@ -813,9 +813,16 @@
         }
 
         if (priorityFilter) {
-          if (priorityFilter === 'emergency' && !c.is_emergency && c.priority !== 'emergency') return false;
-          if (priorityFilter === 'high' && c.priority !== 'high' && !c.is_emergency) return false;
-          if (priorityFilter === 'normal' && (c.is_emergency || c.priority === 'emergency')) return false;
+          const pLvl = (c.priority_level || '').toLowerCase();
+          if (priorityFilter === 'critical' || priorityFilter === 'emergency') {
+            if (pLvl !== 'critical' && !c.is_emergency && c.priority !== 'emergency') return false;
+          } else if (priorityFilter === 'high') {
+            if (pLvl !== 'high' && c.priority !== 'high') return false;
+          } else if (priorityFilter === 'moderate' || priorityFilter === 'normal') {
+            if (pLvl !== 'moderate' && c.priority !== 'normal' && c.priority !== 'medium') return false;
+          } else if (priorityFilter === 'low') {
+            if (pLvl !== 'low' && c.priority !== 'low') return false;
+          }
         }
 
         if (assignmentFilter) {
@@ -860,6 +867,12 @@
         const isEmerg = c.is_emergency || c.priority === 'emergency';
         const assignedUser = currentAuthorities.find(a => a.id === c.assigned_to);
 
+        const priorityLvl = (c.priority_level || (isEmerg ? 'CRITICAL' : 'MODERATE')).toUpperCase();
+        const priorityScore = (c.priority_score !== undefined && c.priority_score !== null)
+          ? Number(c.priority_score).toFixed(1)
+          : (isEmerg ? '100.0' : '50.0');
+        const pBadgeClass = priorityLvl === 'CRITICAL' ? 'status-emergency' : (priorityLvl === 'HIGH' ? 'status-overdue' : (priorityLvl === 'MODERATE' ? 'status-assigned' : 'status-pending'));
+
         return `
           <tr>
             <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
@@ -868,7 +881,10 @@
               <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(c.description)}</div>
             </td>
             <td>${formatCategory(c.category)}</td>
-            <td>${isEmerg ? `<span class="status-badge status-emergency">EMERGENCY</span>` : 'Normal'}</td>
+            <td>
+              <span class="status-badge ${pBadgeClass}">${priorityLvl}</span>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-top: 0.2rem; font-family: monospace;">Score: ${priorityScore}</div>
+            </td>
             <td>
               <span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span>
               ${c.time_remaining_label ? `<div style="font-size: 0.72rem; color: ${c.is_escalated ? '#7f1d1d' : (c.is_overdue ? '#dc2626' : (c.sla_status === 'met' ? '#059669' : '#d97706'))}; font-weight: 700; margin-top: 0.25rem;">${escapeHTML(c.time_remaining_label)}</div>` : ''}
@@ -1264,6 +1280,42 @@
 
       // Presence Badge Update
       this.updatePresenceStatus(issue.reporter ? issue.reporter.id : null);
+
+      // Populate Civic Priority Score & Contributing Factors Breakdown
+      const priorityScore = (issue.priority_score !== undefined && issue.priority_score !== null)
+        ? Number(issue.priority_score).toFixed(1)
+        : (issue.is_emergency ? '100.0' : '50.0');
+      const priorityLvl = (issue.priority_level || (issue.is_emergency ? 'CRITICAL' : 'MODERATE')).toUpperCase();
+      const factors = issue.priority_factors || {
+        severity: issue.is_emergency ? 100 : 50,
+        affected: Math.min(100, (issue.citizen_count || 1) * 4),
+        recurrence: 0,
+        duration: 50,
+        public_importance: 50
+      };
+
+      const scoreEl = document.getElementById('detail-priority-score-val');
+      if (scoreEl) scoreEl.textContent = priorityScore;
+
+      const lvlBadge = document.getElementById('detail-priority-level-badge');
+      if (lvlBadge) {
+        lvlBadge.textContent = priorityLvl;
+        const pBadgeClass = priorityLvl === 'CRITICAL' ? 'status-emergency' : (priorityLvl === 'HIGH' ? 'status-overdue' : (priorityLvl === 'MODERATE' ? 'status-assigned' : 'status-pending'));
+        lvlBadge.className = `status-badge ${pBadgeClass}`;
+      }
+
+      const verEl = document.getElementById('detail-priority-model-ver');
+      if (verEl) verEl.textContent = issue.priority_model_version || 'v1';
+
+      const setFactorVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val !== undefined && val !== null ? String(val) : '--';
+      };
+      setFactorVal('factor-severity-val', factors.severity);
+      setFactorVal('factor-affected-val', factors.affected);
+      setFactorVal('factor-recurrence-val', factors.recurrence);
+      setFactorVal('factor-duration-val', factors.duration);
+      setFactorVal('factor-importance-val', factors.public_importance);
 
       // AI Triage
       document.getElementById('detail-ai-category').textContent = formatCategory(issue.ai_category || issue.category);

@@ -453,6 +453,45 @@
                 </div>
               </div>
 
+              <!-- Mathematical Civic Issue Priority Card -->
+              <div class="content-card" style="border-left: 3px solid var(--primary);">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span><i class="fa-solid fa-gauge-high"></i> Civic Issue Priority Score</span>
+                  <span id="detail-priority-level-badge" class="status-badge" style="background: rgba(13,148,136,0.15); color: var(--primary); font-weight: 700;">MODERATE</span>
+                </div>
+                
+                <div style="margin-top: 0.5rem;">
+                  <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.75rem;">
+                    <span style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); font-family: monospace;" id="detail-priority-score-val">--</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">/ 100 (Deterministic Model <span id="detail-priority-model-ver">v1</span>)</span>
+                  </div>
+
+                  <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem;">Contributing Factors Breakdown:</div>
+                  <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.82rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>Severity (30%)</span>
+                      <strong id="factor-severity-val" style="font-family: monospace;">--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>Affected Citizens (25%)</span>
+                      <strong id="factor-affected-val" style="font-family: monospace;">--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>Recurrence (20%)</span>
+                      <strong id="factor-recurrence-val" style="font-family: monospace;">--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>Duration (15%)</span>
+                      <strong id="factor-duration-val" style="font-family: monospace;">--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>Public Location Importance (10%)</span>
+                      <strong id="factor-importance-val" style="font-family: monospace;">--</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- AI Auto-Triage Box -->
               <div class="content-card">
                 <div class="card-title">Automated AI Triage Analysis</div>

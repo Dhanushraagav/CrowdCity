@@ -172,9 +172,10 @@
 
             <select id="filter-priority-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
               <option value="">All Priorities</option>
-              <option value="emergency" data-i18n="emergency_priority">Emergency Priority</option>
-              <option value="high" data-i18n="priority_high">High Priority</option>
-              <option value="normal" data-i18n="priority_normal">Normal Priority</option>
+              <option value="critical">Critical Priority (75-100)</option>
+              <option value="high">High Priority (50-74.9)</option>
+              <option value="moderate">Moderate Priority (25-49.9)</option>
+              <option value="low">Low Priority (0-24.9)</option>
             </select>
 
             <select id="filter-assignment-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
