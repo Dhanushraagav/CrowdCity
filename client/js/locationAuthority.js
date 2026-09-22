@@ -1579,7 +1579,27 @@
           this.updateStep3Preview(resObj);
           this.updateMapJurisdictionCircle(resObj, payload.latitude, payload.longitude);
           this.syncJurisdictionToState(resObj);
-          this.updateLocationHeaderLabel();
+
+          // Build label from resolved jurisdiction data to avoid race condition
+          // where manual-override mode tries to read from unpopulated dropdowns
+          const jur = resObj.jurisdiction || {};
+          const village = (jur.villageOrTown || '').trim();
+          const taluk = (jur.taluk || '').trim();
+          const district = (jur.district || '').trim();
+          const labelParts = [];
+          if (village && district && village.toLowerCase() !== district.toLowerCase()) {
+            labelParts.push(village);
+          } else if (taluk && district && taluk.toLowerCase() !== district.toLowerCase()) {
+            labelParts.push(taluk);
+          }
+          if (district) labelParts.push(district);
+          const resolvedLabel = labelParts.length > 0 ? labelParts.join(', ') : '';
+
+          if (resolvedLabel) {
+            this.updateLocationHeaderLabel(resolvedLabel);
+          } else {
+            this.updateLocationHeaderLabel();
+          }
         }
       } catch (err) {
         console.warn('[LocationAuthority] Error resolving authority:', err);

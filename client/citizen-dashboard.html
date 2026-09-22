@@ -668,7 +668,9 @@
 
     async function fetchWeatherStatus(district, lat = null, lon = null) {
       try {
-        let url = `/api/public-pulse/weather?district=${encodeURIComponent(district || '')}`;
+        // Sanitize: 'Tamil Nadu' is a state, not a valid district. Omit it so API returns all districts.
+        const safeDistrict = (district && district.toLowerCase() !== 'tamil nadu') ? district : '';
+        let url = `/api/public-pulse/weather?district=${encodeURIComponent(safeDistrict)}`;
         if (typeof lat === 'number' && typeof lon === 'number' && !isNaN(lat) && !isNaN(lon)) {
           url += `&lat=${lat}&lon=${lon}`;
         }
@@ -687,6 +689,22 @@
             };
             renderWeather(cachedWeatherData);
             return;
+          }
+
+          // Fallback: API returned success:false (e.g. "Tamil Nadu" is not a valid district)
+          // but districts_forecast may still have cached weather data for all districts
+          if (data && Array.isArray(data.districts_forecast) && data.districts_forecast.length > 0) {
+            const fallbackDistrict = data.districts_forecast[0];
+            const fbCurrent = fallbackDistrict && fallbackDistrict.current;
+            if (fbCurrent && typeof fbCurrent.temperature_c === 'number') {
+              cachedWeatherData = {
+                temp: Math.round(fbCurrent.temperature_c),
+                condition: fbCurrent.condition || 'Clear sky',
+                icon: fbCurrent.icon_class || 'fa-cloud-sun'
+              };
+              renderWeather(cachedWeatherData);
+              return;
+            }
           }
         }
         throw new Error('API weather unavailable');
