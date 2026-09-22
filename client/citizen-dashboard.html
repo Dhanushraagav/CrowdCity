@@ -562,15 +562,58 @@
       if (!locInfo) return;
       currentSpecificLoc = locInfo;
       const isTa = getLang() === 'ta';
-      const specNameEn = locInfo.specificName || locInfo.locality || locInfo.district || 'Tamil Nadu';
-      const specNameTa = locInfo.specificNameTa || (window.CrowdCityLocation && typeof window.CrowdCityLocation.translateLocalityName === 'function' ? window.CrowdCityLocation.translateLocalityName(specNameEn, 'ta') : specNameEn);
-      const displayLoc = isTa ? specNameTa : specNameEn;
+      const targetLang = isTa ? 'ta' : 'en';
+
+      let line1 = '';
+      let line2 = '';
+
+      const rawDist = locInfo.district || currentDistrict || 'Tamil Nadu';
+      const dist = (window.CrowdCityLocation && typeof window.CrowdCityLocation.translateLocalityName === 'function')
+        ? window.CrowdCityLocation.translateLocalityName(rawDist, targetLang)
+        : formatDistrictDisplay(rawDist);
+
+      if (locInfo.parentArea || locInfo.parentAreaTa) {
+        line1 = isTa ? (locInfo.specificNameTa || locInfo.specificName) : (locInfo.specificName || locInfo.specificNameTa);
+        line2 = isTa ? (locInfo.parentAreaTa || locInfo.parentArea) : (locInfo.parentArea || locInfo.parentAreaTa);
+      } else {
+        const rawName = isTa
+          ? (locInfo.specificNameTa || locInfo.specificName || locInfo.locality || rawDist)
+          : (locInfo.specificName || locInfo.locality || rawDist);
+
+        const translated = (window.CrowdCityLocation && typeof window.CrowdCityLocation.translateLocalityName === 'function')
+          ? window.CrowdCityLocation.translateLocalityName(rawName, targetLang)
+          : rawName;
+
+        if (translated.includes(',')) {
+          const parts = translated.split(',').map(s => s.trim()).filter(Boolean);
+          line1 = parts[0];
+          const sub = parts.slice(1).join(', ');
+          if (sub.toLowerCase().includes(dist.toLowerCase())) {
+            line2 = sub;
+          } else if (dist && dist !== 'Tamil Nadu' && dist !== 'தமிழ்நாடு') {
+            line2 = `${sub}, ${dist}`;
+          } else {
+            line2 = sub;
+          }
+        } else {
+          line1 = translated;
+          line2 = (dist && dist.toLowerCase() !== line1.toLowerCase()) ? dist : (isTa ? 'தமிழ்நாடு' : 'Tamil Nadu');
+        }
+      }
+
+      // Guarantee strict language adherence (no Tamil in English, no English in Tamil)
+      if (window.CrowdCityLocation && typeof window.CrowdCityLocation.translateLocalityName === 'function') {
+        line1 = window.CrowdCityLocation.translateLocalityName(line1, targetLang);
+        line2 = window.CrowdCityLocation.translateLocalityName(line2, targetLang);
+      }
 
       if (heroWeatherCityEl) {
-        heroWeatherCityEl.textContent = displayLoc;
+        heroWeatherCityEl.textContent = line1;
+        heroWeatherCityEl.title = `${line1} • ${line2}`;
       }
       if (heroWeatherStateEl) {
-        heroWeatherStateEl.textContent = isTa ? 'தமிழ்நாடு' : 'Tamil Nadu';
+        heroWeatherStateEl.textContent = line2;
+        heroWeatherStateEl.title = line2;
       }
 
       if (typeof locInfo.lat === 'number' && typeof locInfo.lng === 'number') {
@@ -704,26 +747,31 @@
         if (heroWeatherCondEl) heroWeatherCondEl.textContent = getLang() === 'ta' ? 'கணிக்கப்படுகிறது...' : 'Detecting...';
         return;
       }
-      const icon = data.icon.startsWith('fa-') ? data.icon : `fa-${data.icon}`;
       const isTa = getLang() === 'ta';
-      const locName = currentSpecificLoc ? (isTa ? currentSpecificLoc.specificNameTa : currentSpecificLoc.specificName) : formatDistrictDisplay(currentDistrict);
+      if (currentSpecificLoc) {
+        updateLocationDisplay(currentSpecificLoc);
+      } else {
+        const distName = formatDistrictDisplay(currentDistrict);
+        if (heroWeatherCityEl) {
+          heroWeatherCityEl.textContent = distName || (isTa ? 'கோயம்புத்தூர்' : 'Coimbatore');
+        }
+        if (heroWeatherStateEl) {
+          heroWeatherStateEl.textContent = isTa ? 'தமிழ்நாடு' : 'Tamil Nadu';
+        }
+      }
+
+      const activeCity = (heroWeatherCityEl && heroWeatherCityEl.textContent) ? heroWeatherCityEl.textContent : (isTa ? 'கோயம்புத்தூர்' : 'Coimbatore');
 
       // Update Hero Weather Badge
       if (heroWeatherBadge) {
         heroWeatherBadge.classList.remove('loading');
-        heroWeatherBadge.title = `${locName} — ${data.temp}°C (${t('view_weather_forecast', 'View Weather Forecast')})`;
+        heroWeatherBadge.title = `${activeCity} — ${data.temp}°C (${t('view_weather_forecast', 'View Weather Forecast')})`;
       }
       if (heroWeatherTempEl) {
         heroWeatherTempEl.textContent = `${data.temp}°C`;
       }
       if (heroWeatherCondEl) {
         heroWeatherCondEl.textContent = data.condition || 'Partly Cloudy';
-      }
-      if (heroWeatherCityEl) {
-        heroWeatherCityEl.textContent = locName || 'Coimbatore';
-      }
-      if (heroWeatherStateEl) {
-        heroWeatherStateEl.textContent = isTa ? 'தமிழ்நாடு' : 'Tamil Nadu';
       }
       if (heroWeatherIconEl) {
         if (icon.includes('rain')) {
@@ -777,7 +825,9 @@
       if (currentSpecificLoc) {
         updateLocationDisplay(currentSpecificLoc);
       } else {
+        const isTa = getLang() === 'ta';
         if (heroWeatherCityEl) heroWeatherCityEl.textContent = formatDistrictDisplay(currentDistrict);
+        if (heroWeatherStateEl) heroWeatherStateEl.textContent = isTa ? 'தமிழ்நாடு' : 'Tamil Nadu';
       }
       if (cachedWeatherData) renderWeather(cachedWeatherData);
     });

@@ -1041,6 +1041,18 @@ html.dark-theme .la-contact-na {
   background: var(--bg-surface-hover, #f1f5f9);
   border: 1px solid var(--border-color, #e2e8f0);
   font-size: 0.76rem;
+  transition: all 0.2s ease;
+}
+
+.citizen-current-location-status.location-resolved {
+  background: rgba(13, 148, 136, 0.1) !important;
+  border-color: rgba(13, 148, 136, 0.35) !important;
+  color: var(--primary, #0d9488) !important;
+  font-weight: 700 !important;
+}
+
+.citizen-current-location-status.location-resolved i {
+  color: var(--primary, #0d9488) !important;
 }
 
 .citizen-primary-actions {

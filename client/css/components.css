@@ -3143,24 +3143,32 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 .weather-card-loc-info {
   display: flex !important;
   flex-direction: column !important;
-  line-height: 1.15 !important;
+  line-height: 1.2 !important;
+  max-width: 165px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
 }
 
 .weather-card-city {
-  font-size: 0.84rem !important;
-  font-weight: 700 !important;
+  font-size: 0.80rem !important;
+  font-weight: 650 !important;
   color: #0f172a !important;
   letter-spacing: -0.01em !important;
   white-space: nowrap !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 165px !important;
   line-height: 1.25 !important;
 }
 
 .weather-card-state {
-  font-size: 0.72rem !important;
+  font-size: 0.70rem !important;
   font-weight: 500 !important;
   color: #64748b !important;
   white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 165px !important;
   line-height: 1.2 !important;
 }
 

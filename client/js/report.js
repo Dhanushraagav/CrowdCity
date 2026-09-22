@@ -91,6 +91,34 @@ window.proceedToWizardStep3 = async function() {
 
   const category = categoryInput.value;
 
+  // Validate Photo Evidence (Mandatory)
+  const uploadZone = document.getElementById('image-upload-zone');
+  const photoErrorEl = document.getElementById('photo-evidence-error');
+  if (!selectedFiles || selectedFiles.length === 0) {
+    if (uploadZone) {
+      uploadZone.classList.add('error-border');
+      uploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    if (photoErrorEl) {
+      photoErrorEl.classList.remove('hidden');
+    }
+    const msg = window.i18n ? window.i18n.t('photo_evidence_required_error') || 'Please upload at least one photo as evidence for your report.' : 'Please upload at least one photo as evidence for your report.';
+    if (alertBanner) {
+      alertBanner.textContent = msg;
+      alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+      alertBanner.style.color = '#ef4444';
+      alertBanner.classList.remove('hidden');
+      alertBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    if (window.showToast) {
+      window.showToast(msg, 'warning');
+    }
+    return;
+  } else {
+    if (uploadZone) uploadZone.classList.remove('error-border');
+    if (photoErrorEl) photoErrorEl.classList.add('hidden');
+  }
+
   if (alertBanner) alertBanner.classList.add('hidden');
 
   currentStep = 3;
@@ -1401,6 +1429,9 @@ function setupImageUpload() {
     }
 
     previewContainer.classList.remove('hidden');
+    uploadZone.classList.remove('error-border');
+    const photoErrorEl = document.getElementById('photo-evidence-error');
+    if (photoErrorEl) photoErrorEl.classList.add('hidden');
     if (selectedFiles.length >= 5) {
       uploadZone.classList.add('hidden');
     } else {
@@ -1667,11 +1698,22 @@ function setupFormSubmit() {
       }
     }
 
-    if (selectedFiles.length) {
-      selectedFiles.forEach(file => {
-        formData.append('image', file);
-      });
+    if (!selectedFiles || selectedFiles.length === 0) {
+      window.showToast("At least one photo evidence is required to submit a report.", "error");
+      window.goToWizardStep2();
+      const uploadZone = document.getElementById('image-upload-zone');
+      const photoErrorEl = document.getElementById('photo-evidence-error');
+      if (uploadZone) {
+        uploadZone.classList.add('error-border');
+        uploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      if (photoErrorEl) photoErrorEl.classList.remove('hidden');
+      return;
     }
+
+    selectedFiles.forEach(file => {
+      formData.append('image', file);
+    });
 
     // --- AI LOADING OVERLAY & DUPLICATE DETECTION STAGE ---
     const overlay = document.getElementById('ai-modal-overlay');

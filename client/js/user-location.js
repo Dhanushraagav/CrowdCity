@@ -773,6 +773,8 @@
 
   // Bilingual translation dictionary for specific localities, towns, and taluks across Tamil Nadu
   const LOCALITY_NAMES_TA = {
+    'pappampatti pirivu': 'பாப்பம்பட்டி பிரிவு',
+    'pappampatti': 'பாப்பம்பட்டி',
     'sulur': 'சூலூர்',
     'kannampalayam': 'கண்ணம்பாளையம்',
     'irugur': 'இருகூர்',
@@ -936,22 +938,207 @@
     'sholinghur': 'சோளிங்கர்'
   };
 
+  // English reverse mapping dictionary for specific localities, towns, and districts
+  const LOCALITY_NAMES_EN = {
+    'பாப்பம்பட்டி பிரிவு': 'Pappampatti Pirivu',
+    'பாப்பம்பட்டி': 'Pappampatti',
+    'பப்பம்பட்டி பிரிவு': 'Pappampatti Pirivu',
+    'பப்பம்பட்டி': 'Pappampatti',
+    'பிரிவு': 'Pirivu',
+    'சூலூர்': 'Sulur',
+    'கண்ணம்பாளையம்': 'Kannampalayam',
+    'இருகூர்': 'Irugur',
+    'பீளமேடு': 'Peelamedu',
+    'சரவணம்பட்டி': 'Saravanampatti',
+    'காந்திபுரம்': 'Gandhipuram',
+    'சிங்கநல்லூர்': 'Singanallur',
+    'ஒண்டிப்புதூர்': 'Ondipudur',
+    'குனியமுத்தூர்': 'Kuniyamuthur',
+    'ஆர்.எஸ்.புரம்': 'RS Puram',
+    'துடியலூர்': 'Thudiyalur',
+    'வடவள்ளி': 'Vadavalli',
+    'குறிச்சி': 'Kurichi',
+    'வெள்ளலூர்': 'Vellalore',
+    'பொள்ளாச்சி': 'Pollachi',
+    'மேட்டுப்பாளையம்': 'Mettupalayam',
+    'வால்பாறை': 'Valparai',
+    'கிணத்துக்கடவு': 'Kinathukadavu',
+    'மதுக்கரை': 'Madukkarai',
+    'பேரூர்': 'Perur',
+    'அன்னூர்': 'Annur',
+    'ஆனைமலை': 'Anaimalai',
+    'கோயம்புத்தூர்': 'Coimbatore',
+    'கோவை': 'Coimbatore',
+    'சென்னை': 'Chennai',
+    'மதுரை': 'Madurai',
+    'திருச்சிராப்பள்ளி': 'Tiruchirappalli',
+    'திருச்சி': 'Tiruchirappalli',
+    'சேலம்': 'Salem',
+    'ஈரோடு': 'Erode',
+    'திருப்பூர்': 'Tiruppur',
+    'திண்டுக்கல்': 'Dindigul',
+    'திருநெல்வேலி': 'Tirunelveli',
+    'தூத்துக்குடி': 'Thoothukudi',
+    'வேலூர்': 'Vellore',
+    'தஞ்சாவூர்': 'Thanjavur',
+    'கன்னியாகுமரி': 'Kanniyakumari',
+    'நாகர்கோவில்': 'Nagercoil',
+    'காஞ்சிபுரம்': 'Kancheepuram',
+    'செங்கல்பட்டு': 'Chengalpattu',
+    'திருவள்ளூர்': 'Tiruvallur',
+    'விழுப்புரம்': 'Viluppuram',
+    'கள்ளக்குறிச்சி': 'Kallakurichi',
+    'கடலூர்': 'Cuddalore',
+    'திருவண்ணாமலை': 'Tiruvannamalai',
+    'திருப்பத்தூர்': 'Tirupathur',
+    'ராணிப்பேட்டை': 'Ranipet',
+    'கிருஷ்ணகிரி': 'Krishnagiri',
+    'தர்மபுரி': 'Dharmapuri',
+    'நாமக்கல்': 'Namakkal',
+    'கரூர்': 'Karur',
+    'பெரம்பலூர்': 'Perambalur',
+    'அரியலூர்': 'Ariyalur',
+    'புதுக்கோட்டை': 'Pudukkottai',
+    'சிவகங்கை': 'Sivaganga',
+    'இராமநாதபுரம்': 'Ramanathapuram',
+    'விருதுநகர்': 'Virudhunagar',
+    'தென்காசி': 'Tenkasi',
+    'தேனி': 'Theni',
+    'நீலகிரி': 'Nilgiris',
+    'உதகமண்டலம்': 'Udhagamandalam',
+    'ஊட்டி': 'Ooty',
+    'மயிலாடுதுறை': 'Mayiladuthurai',
+    'நாகப்பட்டினம்': 'Nagapattinam',
+    'திருவாரூர்': 'Tiruvarur',
+    'தமிழ்நாடு': 'Tamil Nadu',
+    'தமிழ் நாடு': 'Tamil Nadu'
+  };
+
+  // Automatically invert LOCALITY_NAMES_TA into LOCALITY_NAMES_EN for any missing entries
+  for (const [enKey, taVal] of Object.entries(LOCALITY_NAMES_TA)) {
+    if (taVal && !LOCALITY_NAMES_EN[taVal]) {
+      const formattedEn = enKey
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      LOCALITY_NAMES_EN[taVal] = formattedEn;
+    }
+  }
+
   /**
-   * Translate a locality name to Tamil if language is 'ta'.
+   * Phonetic transliteration fallback for Tamil text when not in exact dictionary.
+   */
+  function transliterateTamilToEnglish(tamilText) {
+    if (!tamilText || typeof tamilText !== 'string') return '';
+    if (!/[\u0B80-\u0BFF]/.test(tamilText)) return tamilText;
+
+    const VOWELS = {
+      '\u0B85': 'a', '\u0B86': 'aa', '\u0B87': 'i', '\u0B88': 'ee',
+      '\u0B89': 'u', '\u0B8A': 'oo', '\u0B8E': 'e', '\u0B8F': 'e',
+      '\u0B90': 'ai', '\u0B92': 'o', '\u0B93': 'o', '\u0B94': 'au'
+    };
+    const CONSONANTS = {
+      '\u0B95': 'k', '\u0B99': 'ng', '\u0B9A': 's', '\u0B9E': 'nj',
+      '\u0B9F': 't', '\u0BA3': 'n', '\u0BA4': 'th', '\u0BA8': 'n',
+      '\u0BAA': 'p', '\u0BAE': 'm', '\u0BAF': 'y', '\u0BB0': 'r',
+      '\u0BB2': 'l', '\u0BB5': 'v', '\u0BB4': 'zh', '\u0BB3': 'l',
+      '\u0BB1': 'r', '\u0BA9': 'n', '\u0B9C': 'j', '\u0BB6': 'sh',
+      '\u0BB7': 'sh', '\u0BB8': 's', '\u0BB9': 'h'
+    };
+    const VOWEL_SIGNS = {
+      '\u0BBE': 'a', '\u0BBF': 'i', '\u0BC0': 'ee', '\u0BC1': 'u',
+      '\u0BC2': 'oo', '\u0BC6': 'e', '\u0BC7': 'e', '\u0BC8': 'ai',
+      '\u0BCA': 'o', '\u0BCB': 'o', '\u0BCC': 'au'
+    };
+    const VIRAMA = '\u0BCD';
+
+    let out = '';
+    const len = tamilText.length;
+    for (let i = 0; i < len; i++) {
+      const ch = tamilText[i];
+      if (VOWELS[ch]) {
+        out += VOWELS[ch];
+      } else if (CONSONANTS[ch]) {
+        const next = (i + 1 < len) ? tamilText[i + 1] : null;
+        if (next === VIRAMA) {
+          out += CONSONANTS[ch];
+          i++;
+        } else if (next && VOWEL_SIGNS[next]) {
+          out += CONSONANTS[ch] + VOWEL_SIGNS[next];
+          i++;
+        } else {
+          out += CONSONANTS[ch] + 'a';
+        }
+      } else {
+        out += ch;
+      }
+    }
+    return out.replace(/\b[a-z]/g, c => c.toUpperCase()).trim();
+  }
+
+  /**
+   * Bilingual locality translation:
+   * When lang === 'en', converts any Tamil place name to English.
+   * When lang === 'ta', converts any English place name to Tamil.
    */
   function translateLocalityName(name, lang = 'en') {
     if (!name || typeof name !== 'string') return '';
-    if (lang !== 'ta') return name.trim();
-    const lower = name.toLowerCase().trim();
+    const trimmed = name.trim();
+    if (!trimmed) return '';
+
+    // Handle compound strings separated by comma
+    if (trimmed.includes(',')) {
+      return trimmed
+        .split(',')
+        .map(part => translateLocalityName(part.trim(), lang))
+        .filter(Boolean)
+        .join(', ');
+    }
+
+    const hasTamil = /[\u0B80-\u0BFF]/.test(trimmed);
+
+    // TARGET: ENGLISH
+    if (lang !== 'ta') {
+      if (!hasTamil) return trimmed;
+      if (LOCALITY_NAMES_EN[trimmed]) return LOCALITY_NAMES_EN[trimmed];
+      
+      for (const [taKey, enVal] of Object.entries(LOCALITY_NAMES_EN)) {
+        if (taKey === trimmed || trimmed.includes(taKey) || taKey.includes(trimmed)) {
+          return enVal;
+        }
+      }
+
+      // Word-by-word translation fallback
+      const words = trimmed.split(/\s+/);
+      const translatedWords = words.map(w => {
+        if (LOCALITY_NAMES_EN[w]) return LOCALITY_NAMES_EN[w];
+        for (const [k, v] of Object.entries(LOCALITY_NAMES_EN)) {
+          if (k === w) return v;
+        }
+        return transliterateTamilToEnglish(w);
+      });
+      return translatedWords.join(' ');
+    }
+
+    // TARGET: TAMIL
+    if (hasTamil) return trimmed;
+    const lower = trimmed.toLowerCase();
+
     if (LOCALITY_NAMES_TA[lower]) return LOCALITY_NAMES_TA[lower];
-    
-    // Check if name contains any known locality
+
     for (const [key, val] of Object.entries(LOCALITY_NAMES_TA)) {
       if (lower.includes(key) || key.includes(lower)) {
         return val;
       }
     }
-    return name.trim();
+
+    for (const d of TN_DISTRICTS_CENTROIDS) {
+      if (d.name.toLowerCase() === lower || d.id === lower) {
+        return LOCALITY_NAMES_TA[d.id] || LOCALITY_NAMES_TA[d.name.toLowerCase()] || trimmed;
+      }
+    }
+
+    return trimmed;
   }
 
   /**
@@ -1250,77 +1437,80 @@
       ''
     );
 
-    const locality = neighbourhood || village;
+    const rawLocality = neighbourhood || village;
+    const rawTown = cleanField(addressObj.town || addressObj.municipality || addressObj.city_district || '');
+    const rawTaluk = cleanField(addressObj.subdistrict || addressObj.county || addressObj.taluk || '');
+    const rawDistrict = cleanField(addressObj.state_district || addressObj.district || addressObj.city || '');
 
-    const town = cleanField(
-      addressObj.town ||
-      addressObj.municipality ||
-      addressObj.city_district ||
-      ''
-    );
+    // Normalize and translate each piece into both pure English and pure Tamil
+    const localityEn = rawLocality ? translateLocalityName(rawLocality, 'en') : '';
+    const localityTa = rawLocality ? translateLocalityName(rawLocality, 'ta') : '';
 
-    const taluk = cleanField(
-      addressObj.subdistrict ||
-      addressObj.county ||
-      addressObj.taluk ||
-      ''
-    );
+    const townEn = rawTown ? translateLocalityName(rawTown, 'en') : '';
+    const townTa = rawTown ? translateLocalityName(rawTown, 'ta') : '';
 
-    const district = cleanField(
-      addressObj.state_district ||
-      addressObj.district ||
-      addressObj.city ||
-      ''
-    );
+    const talukEn = rawTaluk ? translateLocalityName(rawTaluk, 'en') : '';
+    const talukTa = rawTaluk ? translateLocalityName(rawTaluk, 'ta') : '';
+
+    const districtEn = rawDistrict ? translateLocalityName(rawDistrict, 'en') : '';
+    const districtTa = rawDistrict ? translateLocalityName(rawDistrict, 'ta') : '';
+
+    // Determine parent district
+    let parentDistrict = normalizeDistrictName(districtEn) ||
+                         normalizeDistrictName(talukEn) ||
+                         normalizeDistrictName(townEn) ||
+                         normalizeDistrictName(localityEn) ||
+                         'Coimbatore';
+
+    const parentDistEn = parentDistrict || districtEn || 'Tamil Nadu';
+    const parentDistTa = translateLocalityName(parentDistEn, 'ta');
 
     let specificEn = '';
     let specificTa = '';
+    let parentAreaEn = '';
+    let parentAreaTa = '';
 
-    // Hierarchy decision
-    if (locality && town && locality.toLowerCase() !== town.toLowerCase()) {
-      // e.g. "Kannampalayam, Sulur"
-      specificEn = `${locality}, ${town}`;
-      const locTa = translateLocalityName(locality, 'ta');
-      const townTa = translateLocalityName(town, 'ta');
-      specificTa = `${locTa}, ${townTa}`;
-    } else if (locality && taluk && locality.toLowerCase() !== taluk.toLowerCase()) {
-      // e.g. "Kannampalayam, Sulur"
-      specificEn = `${locality}, ${taluk}`;
-      const locTa = translateLocalityName(locality, 'ta');
-      const talukTa = translateLocalityName(taluk, 'ta');
-      specificTa = `${locTa}, ${talukTa}`;
-    } else if (locality) {
-      // e.g. "Mylapore"
-      specificEn = locality;
-      specificTa = translateLocalityName(locality, 'ta');
-    } else if (town) {
-      // e.g. "Sulur" or "Kovilpatti"
-      specificEn = town;
-      specificTa = translateLocalityName(town, 'ta');
-    } else if (taluk) {
-      // e.g. "Sulur"
-      specificEn = taluk;
-      specificTa = translateLocalityName(taluk, 'ta');
-    } else if (district) {
-      specificEn = district;
-      specificTa = translateLocalityName(district, 'ta');
+    if (localityEn && (townEn || talukEn)) {
+      const subEn = townEn || talukEn;
+      const subTa = townTa || talukTa;
+      specificEn = localityEn;
+      specificTa = localityTa;
+      parentAreaEn = (parentDistEn && parentDistEn.toLowerCase() !== subEn.toLowerCase()) ? `${subEn}, ${parentDistEn}` : subEn;
+      parentAreaTa = (parentDistTa && parentDistTa !== subTa) ? `${subTa}, ${parentDistTa}` : subTa;
+    } else if (localityEn) {
+      specificEn = localityEn;
+      specificTa = localityTa;
+      parentAreaEn = parentDistEn;
+      parentAreaTa = parentDistTa;
+    } else if (townEn || talukEn) {
+      const mainEn = townEn || talukEn;
+      const mainTa = townTa || talukTa;
+      specificEn = mainEn;
+      specificTa = mainTa;
+      parentAreaEn = (parentDistEn && parentDistEn.toLowerCase() !== mainEn.toLowerCase()) ? parentDistEn : 'Tamil Nadu';
+      parentAreaTa = (parentDistTa && parentDistTa !== mainTa) ? parentDistTa : 'தமிழ்நாடு';
+    } else if (parentDistEn) {
+      specificEn = parentDistEn;
+      specificTa = parentDistTa;
+      parentAreaEn = 'Tamil Nadu';
+      parentAreaTa = 'தமிழ்நாடு';
     }
 
     if (!specificEn) return null;
 
-    // Determine parent district
-    let parentDistrict = normalizeDistrictName(district) ||
-                         normalizeDistrictName(taluk) ||
-                         normalizeDistrictName(town) ||
-                         normalizeDistrictName(locality);
-
     return {
       specificName: specificEn,
       specificNameTa: specificTa || specificEn,
-      locality: locality || town || taluk,
-      town: town || taluk,
-      taluk: taluk,
-      district: parentDistrict || district || 'Tamil Nadu',
+      parentArea: parentAreaEn,
+      parentAreaTa: parentAreaTa,
+      locality: localityEn,
+      localityTa: localityTa,
+      town: townEn,
+      townTa: townTa,
+      taluk: talukEn,
+      talukTa: talukTa,
+      district: parentDistEn,
+      districtTa: parentDistTa,
       displayName: lang === 'ta' ? (specificTa || specificEn) : specificEn
     };
   }
@@ -1362,15 +1552,31 @@
    */
   function getSavedSpecificLocation(lang = 'en') {
     try {
+      const isTa = lang === 'ta';
+
       // 1. Check if specific location object is cached
       const specificCached = localStorage.getItem('cc_specific_location');
       if (specificCached) {
         try {
           const obj = JSON.parse(specificCached);
           if (obj && (obj.specificName || obj.locality || obj.district)) {
-            const displayName = (lang === 'ta' && obj.specificNameTa) ? obj.specificNameTa : (obj.specificName || obj.locality || obj.district);
+            const rawSpec = obj.specificName || obj.locality || obj.district;
+            const specEn = translateLocalityName(rawSpec, 'en');
+            const specTa = translateLocalityName(obj.specificNameTa || rawSpec, 'ta');
+            const rawParent = obj.parentArea || obj.district || 'Tamil Nadu';
+            const parentEn = translateLocalityName(rawParent, 'en');
+            const parentTa = translateLocalityName(obj.parentAreaTa || rawParent, 'ta');
+            const distEn = normalizeDistrictName(obj.district) || translateLocalityName(obj.district || 'Tamil Nadu', 'en');
+            const distTa = translateLocalityName(distEn, 'ta');
+            const displayName = isTa ? (specTa || specEn) : (specEn || specTa);
             return {
               ...obj,
+              specificName: specEn,
+              specificNameTa: specTa,
+              parentArea: parentEn,
+              parentAreaTa: parentTa,
+              district: distEn,
+              districtTa: distTa,
               displayName
             };
           }
@@ -1378,7 +1584,7 @@
       }
 
       // 2. Check weather cache for town / district
-      const weatherCacheStr = localStorage.getItem(lang === 'ta' ? 'cc_weather_cache_ta' : 'cc_weather_cache_en') ||
+      const weatherCacheStr = localStorage.getItem(isTa ? 'cc_weather_cache_ta' : 'cc_weather_cache_en') ||
                               localStorage.getItem('cc_weather_cache_en') ||
                               localStorage.getItem('cc_weather_cache_ta');
       if (weatherCacheStr) {
@@ -1386,13 +1592,18 @@
           const c = JSON.parse(weatherCacheStr);
           if (c && (c.locality || c.town || c.district)) {
             const rawPlace = c.locality || c.town || c.district;
-            const disp = (lang === 'ta') ? translateLocalityName(rawPlace, 'ta') : rawPlace;
+            const specEn = translateLocalityName(rawPlace, 'en');
+            const specTa = translateLocalityName(rawPlace, 'ta');
             const dist = normalizeDistrictName(rawPlace) || 'Tamil Nadu';
+            const distTa = translateLocalityName(dist, 'ta');
             return {
-              specificName: rawPlace,
-              specificNameTa: translateLocalityName(rawPlace, 'ta'),
+              specificName: specEn,
+              specificNameTa: specTa,
+              parentArea: dist,
+              parentAreaTa: distTa,
               district: dist,
-              displayName: disp
+              districtTa: distTa,
+              displayName: isTa ? specTa : specEn
             };
           }
         } catch (e) {}
@@ -1401,12 +1612,18 @@
       // 3. Check saved user_district in localStorage
       const direct = localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district');
       if (direct && direct !== 'all' && direct !== 'Tamil Nadu') {
-        const disp = (lang === 'ta') ? translateLocalityName(direct, 'ta') : direct;
+        const specEn = translateLocalityName(direct, 'en');
+        const specTa = translateLocalityName(direct, 'ta');
+        const normDist = normalizeDistrictName(direct) || specEn;
+        const normDistTa = translateLocalityName(normDist, 'ta');
         return {
-          specificName: direct,
-          specificNameTa: translateLocalityName(direct, 'ta'),
-          district: normalizeDistrictName(direct) || direct,
-          displayName: disp
+          specificName: specEn,
+          specificNameTa: specTa,
+          parentArea: isTa ? 'தமிழ்நாடு' : 'Tamil Nadu',
+          parentAreaTa: 'தமிழ்நாடு',
+          district: normDist,
+          districtTa: normDistTa,
+          displayName: isTa ? specTa : specEn
         };
       }
     } catch (err) {
@@ -1416,7 +1633,10 @@
     return {
       specificName: 'Tamil Nadu',
       specificNameTa: 'தமிழ்நாடு',
+      parentArea: 'Tamil Nadu',
+      parentAreaTa: 'தமிழ்நாடு',
       district: 'Tamil Nadu',
+      districtTa: 'தமிழ்நாடு',
       displayName: lang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu'
     };
   }
@@ -1488,12 +1708,15 @@
           const nearestDist = findNearestDistrictByCoords(coords.lat, coords.lng);
           if (nearestDist) {
             const locObj = {
-              specificName: nearestDist,
+              specificName: translateLocalityName(nearestDist, 'en'),
               specificNameTa: translateLocalityName(nearestDist, 'ta'),
+              parentArea: 'Tamil Nadu',
+              parentAreaTa: 'தமிழ்நாடு',
               district: nearestDist,
+              districtTa: translateLocalityName(nearestDist, 'ta'),
               lat: coords.lat,
               lng: coords.lng,
-              displayName: lang === 'ta' ? translateLocalityName(nearestDist, 'ta') : nearestDist
+              displayName: lang === 'ta' ? translateLocalityName(nearestDist, 'ta') : translateLocalityName(nearestDist, 'en')
             };
             localStorage.setItem('cc_specific_location', JSON.stringify(locObj));
             localStorage.setItem('user_district', nearestDist);

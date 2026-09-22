@@ -1436,7 +1436,10 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "error_update_failed": "Unable to update complaint. Please try again.",
   "error_resolution_proof_required": "Resolution proof image is strictly required to resolve a complaint.",
   "error_rejection_remarks_required": "Official remarks/reasons are strictly required to reject a complaint.",
-  "retry_action": "Retry"
+  "retry_action": "Retry",
+  "photo_evidence_required_msg": "At least one photo evidence is required to submit a report.",
+  "photo_evidence_required_error": "Please upload at least one photo as evidence for your report.",
+  "required": "Required"
 },
   ta: {
   "back_action": "பின்னே",
@@ -2758,7 +2761,10 @@ const INLINE_EMBEDDED_TRANSLATIONS = {
   "error_update_failed": "புகாரைப் புதுப்பிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
   "error_resolution_proof_required": "புகாரைத் தீர்ப்பதற்கு தீர்வுக்கான ஆதாரப் படம் கட்டாயமாகும்.",
   "error_rejection_remarks_required": "புகாரை நிராகரிப்பதற்கு அதிகாரப்பூர்வ காரணங்கள் கட்டாயமாகும்.",
-  "retry_action": "மீண்டும் முயற்சி"
+  "retry_action": "மீண்டும் முயற்சி",
+  "photo_evidence_required_msg": "புகாரைச் சமர்ப்பிக்க குறைந்தது ஒரு புகைப்பட ஆதாரம் தேவை.",
+  "photo_evidence_required_error": "உங்கள் புகாருக்கு ஆதாரமாக குறைந்தபட்சம் ஒரு புகைப்படத்தைப் பதிவேற்றவும்.",
+  "required": "தேவை"
 }
 };
 

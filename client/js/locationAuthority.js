@@ -688,7 +688,7 @@
 
         // Backward compatibility sync with legacy selectors
         LocationAuthority.syncLegacyElements(item);
-        LocationAuthority.updateLocationHeaderLabel();
+        LocationAuthority.updateLocationHeaderLabel(fullAddr);
         await LocationAuthority.triggerResolution();
 
         // Position map pin if geocoder available
@@ -1579,6 +1579,7 @@
           this.updateStep3Preview(resObj);
           this.updateMapJurisdictionCircle(resObj, payload.latitude, payload.longitude);
           this.syncJurisdictionToState(resObj);
+          this.updateLocationHeaderLabel();
         }
       } catch (err) {
         console.warn('[LocationAuthority] Error resolving authority:', err);
@@ -1886,10 +1887,20 @@
     updateLocationHeaderLabel: function(customText) {
       const labelEl = document.getElementById('la-current-mode-label');
       if (!labelEl) return;
+      const statusWrap = labelEl.closest('.citizen-current-location-status') || labelEl.parentElement;
 
       if (customText && typeof customText === 'string') {
-        labelEl.textContent = customText;
-        labelEl.title = customText;
+        const isDetecting = customText.toLowerCase().includes('detecting') || customText.toLowerCase().includes('resolving');
+        if (isDetecting) {
+          labelEl.setAttribute('data-i18n', 'detecting_location');
+          labelEl.textContent = window.i18n ? window.i18n.t('detecting_location') || customText : customText;
+          if (statusWrap) statusWrap.classList.remove('location-resolved');
+        } else {
+          labelEl.removeAttribute('data-i18n');
+          labelEl.textContent = customText;
+          labelEl.title = customText;
+          if (statusWrap) statusWrap.classList.add('location-resolved');
+        }
         return;
       }
 
@@ -1956,8 +1967,10 @@
         if (distName) parts.push(distName);
 
         const text = parts.length > 0 ? parts.join(', ') : 'Select Location';
+        labelEl.removeAttribute('data-i18n');
         labelEl.textContent = text;
         labelEl.title = text;
+        if (statusWrap) statusWrap.classList.add('location-resolved');
       } else {
         // Auto mode: build from current resolution or address
         if (currentResolution && currentResolution.jurisdiction) {
@@ -1975,20 +1988,26 @@
           if (district) parts.push(district);
 
           const text = parts.length > 0 ? parts.join(', ') : (j.district || 'Tamil Nadu');
+          labelEl.removeAttribute('data-i18n');
           labelEl.textContent = text;
           labelEl.title = text;
+          if (statusWrap) statusWrap.classList.add('location-resolved');
         } else if (this.state.address) {
           const addrTokens = this.state.address.split(',').map(s => s.trim()).filter(Boolean);
+          let text = '';
           if (addrTokens.length >= 2) {
-            const text = `${addrTokens[0]}, ${addrTokens[1]}`;
-            labelEl.textContent = text;
-            labelEl.title = this.state.address;
+            text = `${addrTokens[0]}, ${addrTokens[1]}`;
           } else {
-            labelEl.textContent = addrTokens[0] || 'Tamil Nadu';
-            labelEl.title = this.state.address;
+            text = addrTokens[0] || 'Tamil Nadu';
           }
+          labelEl.removeAttribute('data-i18n');
+          labelEl.textContent = text;
+          labelEl.title = this.state.address;
+          if (statusWrap) statusWrap.classList.add('location-resolved');
         } else {
-          labelEl.textContent = 'Detecting location...';
+          labelEl.setAttribute('data-i18n', 'detecting_location');
+          labelEl.textContent = window.i18n ? window.i18n.t('detecting_location') || 'Detecting location...' : 'Detecting location...';
+          if (statusWrap) statusWrap.classList.remove('location-resolved');
         }
       }
     },

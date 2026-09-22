@@ -166,6 +166,21 @@
       margin-bottom: 0.65rem;
     }
 
+    .upload-zone.error-border {
+      border-color: #ef4444 !important;
+      background-color: rgba(239, 68, 68, 0.04) !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+      animation: upload-shake 0.35s ease-in-out;
+    }
+
+    @keyframes upload-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+
     /* Stepper Wizard Styling */
     .stepper-type-card:hover {
       border-color: var(--primary, #0d9488) !important;
@@ -1261,14 +1276,22 @@
 
             </div>
 
-            <!-- Photo Evidence -->
+            <!-- Photo Evidence (Required) -->
             <div>
-              <label class="field-label" data-i18n="photo_evidence">Photo Evidence</label>
+              <label class="field-label" style="display: flex; align-items: center; gap: 0.35rem;">
+                <span data-i18n="photo_evidence">Photo Evidence</span>
+                <span class="required-indicator" style="color: #ef4444; font-weight: 800; font-size: 0.95rem;">*</span>
+                <span class="field-badge-required" style="font-size: 0.68rem; font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.1rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="required">Required</span>
+              </label>
               <div class="upload-zone" id="image-upload-zone">
                 <i class="fa-solid fa-cloud-arrow-up upload-zone-icon"></i>
                 <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); display: block;" data-i18n="drag_drop_images">Drag & drop images</span>
                 <span style="font-size: 0.73rem; color: var(--text-muted); margin-top: 0.2rem; display: block;" data-i18n="supported_formats">Supported formats: JPG, PNG, max 10MB (Max 5 images)</span>
-                <input type="file" id="report-image-input" class="hidden" accept="image/*" multiple>
+                <input type="file" id="report-image-input" class="hidden" accept="image/*" multiple required>
+              </div>
+              <div id="photo-evidence-error" class="hidden" style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span data-i18n="photo_evidence_required_msg">At least one photo evidence is required to submit a report.</span>
               </div>
               <div id="image-preview-container" class="hidden" style="margin-top: 0.75rem;">
                 <div id="image-previews-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem;"></div>
