@@ -752,8 +752,11 @@
         }
 
         if (!fallbackDone) {
-          cachedWeatherData = null;
-          renderWeather(null);
+          // Only show "Detecting..." if we have NO prior successful weather data
+          if (!cachedWeatherData) {
+            renderWeather(null);
+          }
+          // else: keep displaying the previously cached weather
         }
       }
     }
