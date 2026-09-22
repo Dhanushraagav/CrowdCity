@@ -2577,7 +2577,7 @@ function updateAuthUI() {
     // If sidebar is already rendered (e.g. pre-rendered in HTML), just update active link classes without wiping DOM
     const existingNav = sidebar.querySelector('.app-sidebar-nav');
     if (existingNav) {
-      existingNav.querySelectorAll('a[href*="analytics"], a[href*="civic-intelligence"], a[href*="power-updates"], a[href*="weather-alerts"], a[href*="weather-forecast"], a[href*="tamilnadu-updates"], .sidebar-nav-heading, .sidebar-section-divider').forEach(el => el.remove());
+      existingNav.querySelectorAll('a[href*="analytics"], a[href*="civic-intelligence"], a[href*="power-updates"], a[href*="weather-alerts"], a[href*="weather-forecast"], a[href*="tamilnadu-updates"], a[href*="transportation"], .sidebar-nav-heading, .sidebar-section-divider').forEach(el => el.remove());
 
       // Upgrade any legacy icons to the new professional icons
       const iconMap = {
@@ -2607,7 +2607,6 @@ function updateAuthUI() {
         else if (href.includes('report.html') && isReport) active = true;
         else if (href.includes('my-complaints.html') && isComplaints) active = true;
         else if (href.includes('map.html') && isMap) active = true;
-        else if (href.includes('transportation.html') && isTransportation) active = true;
         else if (href.includes('services.html') && isServices) active = true;
         else if (href.includes('emergency-services.html') && isEmergency) active = true;
         else if (href.includes('helplines.html') && isHelplines) active = true;
@@ -2649,9 +2648,6 @@ function updateAuthUI() {
         </a>
         <a href="map.html" class="app-sidebar-link ${isMap ? 'active' : ''}" title="Map">
           <i class="fa-solid fa-location-dot"></i> <span data-i18n="nav_map">Map</span>
-        </a>
-        <a href="transportation.html" class="app-sidebar-link ${isTransportation ? 'active' : ''}" title="Transportation">
-          <i class="fa-solid fa-bus"></i> <span data-i18n="nav_transportation">Transportation</span>
         </a>
 
         <a href="services.html" class="app-sidebar-link ${isServices ? 'active' : ''}" title="Government Services">
