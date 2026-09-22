@@ -2904,23 +2904,23 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   overflow: hidden !important;
   padding: 2.35rem 2.65rem 2rem !important;
   margin-bottom: 1.5rem !important;
-  background-color: #07182b !important;
+  background-color: #051120 !important;
   background-image: 
     linear-gradient(90deg, 
-      rgba(7, 24, 43, 0.94) 0%, 
-      rgba(7, 24, 43, 0.88) 22%, 
-      rgba(7, 24, 43, 0.45) 34%, 
-      rgba(7, 24, 43, 0.08) 44%, 
-      transparent 52%
+      rgba(5, 17, 32, 0.94) 0%, 
+      rgba(5, 17, 32, 0.88) 22%, 
+      rgba(5, 17, 32, 0.45) 34%, 
+      rgba(5, 17, 32, 0.06) 42%, 
+      transparent 50%
     ), 
     url('../images/tamilnadu_heritage_banner.jpg') !important;
   background-repeat: no-repeat !important;
-  background-position: 52% 28% !important;
+  background-position: 48% 12% !important;
   background-size: cover !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 12px 32px -4px rgba(7, 24, 43, 0.35) !important;
-  min-height: 310px !important;
+  box-shadow: 0 12px 32px -4px rgba(5, 17, 32, 0.35) !important;
+  min-height: 320px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -2932,14 +2932,14 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   .stitch-hero:has(.dashboard-user-name) {
     background-image: 
       linear-gradient(to bottom, 
-        rgba(7, 24, 43, 0.92) 35%, 
-        rgba(7, 24, 43, 0.70) 70%, 
-        rgba(7, 24, 43, 0.35) 100%
+        rgba(5, 17, 32, 0.92) 35%, 
+        rgba(5, 17, 32, 0.65) 70%, 
+        rgba(5, 17, 32, 0.35) 100%
       ), 
       url('../images/tamilnadu_heritage_banner.jpg') !important;
     background-size: cover !important;
-    background-position: center 25% !important;
-    padding: 1.5rem 1.25rem !important;
+    background-position: 50% 10% !important;
+    padding: 1.6rem 1.25rem !important;
     min-height: auto !important;
   }
 }
@@ -3059,17 +3059,19 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
   align-items: center !important;
   background: #ffffff !important;
   border-radius: 12px !important;
-  padding: 0.55rem 1.05rem !important;
-  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
+  padding: 0.52rem 0.95rem !important;
+  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.35), 0 3px 6px -2px rgba(0, 0, 0, 0.12) !important;
   text-decoration: none !important;
   color: #0f172a !important;
   align-self: flex-start !important;
   margin-top: 0 !important;
   margin-left: auto !important;
-  max-width: 365px !important;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  margin-right: 0.5rem !important;
+  max-width: 380px !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   z-index: 5 !important;
+  flex-shrink: 0 !important;
   white-space: nowrap !important;
 }
 
@@ -3135,38 +3137,46 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
 }
 
 .weather-card-city {
-  font-size: 0.95rem !important;
+  font-size: 0.86rem !important;
   font-weight: 700 !important;
   color: #0f172a !important;
   letter-spacing: -0.01em !important;
-  max-width: 215px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
   white-space: nowrap !important;
+  overflow: visible !important;
 }
 
 .weather-card-state {
-  font-size: 0.74rem !important;
+  font-size: 0.72rem !important;
   font-weight: 500 !important;
   color: #64748b !important;
   white-space: nowrap !important;
 }
 
-/* Bottom Right Motto */
+/* Bottom Right Motto - High Contrast Frosted Glass Badge */
 .dashboard-banner-motto {
   position: absolute !important;
   right: 2rem !important;
-  bottom: 1.25rem !important;
+  bottom: 1.15rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.4rem 0.95rem !important;
+  background: rgba(5, 17, 32, 0.78) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 24px !important;
   font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
   font-style: italic !important;
   font-size: 0.88rem !important;
+  font-weight: 600 !important;
   line-height: 1.25 !important;
-  color: rgba(255, 255, 255, 0.92) !important;
+  color: #ffffff !important;
   text-align: right !important;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
   pointer-events: none !important;
-  z-index: 2 !important;
-  letter-spacing: 0.01em !important;
+  z-index: 4 !important;
+  letter-spacing: 0.02em !important;
 }
 
 .stitch-hero-container {
@@ -7840,17 +7850,17 @@ html.dark-theme .stitch-hero.dashboard-heritage-banner,
 html.dark-theme .stitch-hero:has(.stitch-hero-title),
 [data-theme="dark"] .stitch-hero:has(.dashboard-user-name),
 html.dark-theme .stitch-hero:has(.dashboard-user-name) {
-  background-color: #07182b !important;
+  background-color: #051120 !important;
   background-image: 
     linear-gradient(90deg, 
-      rgba(7, 24, 43, 0.94) 0%, 
-      rgba(7, 24, 43, 0.88) 22%, 
-      rgba(7, 24, 43, 0.45) 34%, 
-      rgba(7, 24, 43, 0.08) 44%, 
-      transparent 52%
+      rgba(5, 17, 32, 0.94) 0%, 
+      rgba(5, 17, 32, 0.88) 22%, 
+      rgba(5, 17, 32, 0.45) 34%, 
+      rgba(5, 17, 32, 0.06) 42%, 
+      transparent 50%
     ), 
     url('../images/tamilnadu_heritage_banner.jpg') !important;
-  background-position: 52% 28% !important;
+  background-position: 48% 12% !important;
   background-size: cover !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
@@ -7865,12 +7875,12 @@ html.dark-theme .stitch-hero:has(.dashboard-user-name) {
   html.dark-theme .stitch-hero:has(.dashboard-user-name) {
     background-image: 
       linear-gradient(to bottom, 
-        rgba(7, 24, 43, 0.92) 35%, 
-        rgba(7, 24, 43, 0.70) 70%, 
-        rgba(7, 24, 43, 0.35) 100%
+        rgba(5, 17, 32, 0.92) 35%, 
+        rgba(5, 17, 32, 0.65) 70%, 
+        rgba(5, 17, 32, 0.35) 100%
       ), 
       url('../images/tamilnadu_heritage_banner.jpg') !important;
-    background-position: center 25% !important;
+    background-position: 50% 10% !important;
   }
 }
 
