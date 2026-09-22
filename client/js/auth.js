@@ -2240,7 +2240,6 @@ function updateAuthUI() {
         logo.innerHTML = `
           <div class="brand-emblems-wrap">
             <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" />
           </div>
           <div class="brand-text-container">
             <span class="brand-title">CROWDCITY</span>
@@ -2263,22 +2262,11 @@ function updateAuthUI() {
       const role = getUserRole();
       const subtitleText = role === 'admin' ? 'Admin Control' : 'TN Initiative';
       
-      const tnEmblem = document.createElement('img');
-      tnEmblem.src = "https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg";
-      tnEmblem.alt = "Govt. of Tamil Nadu";
-      tnEmblem.style.cssText = "width: 32px; height: 32px; flex-shrink: 0; object-fit: contain;";
-      
-      const divider = document.createElement('div');
-      divider.style.cssText = "width: 1px; height: 22px; background: var(--border-color); margin: 0 0.1rem;";
-      
       const ccEmblem = container.querySelector('.brand-emblem');
       if (ccEmblem) {
-        ccEmblem.style.width = "26px";
-        ccEmblem.style.height = "26px";
+        ccEmblem.style.width = "28px";
+        ccEmblem.style.height = "28px";
       }
-      
-      container.insertBefore(divider, container.firstChild);
-      container.insertBefore(tnEmblem, container.firstChild);
       
       const brandText = container.querySelector('.brand-text-container');
       if (brandText) {
@@ -2639,7 +2627,6 @@ function updateAuthUI() {
         <a href="citizen-dashboard.html" class="app-sidebar-logo">
           <div class="brand-emblems-wrap">
             <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Emblem_of_Tamil_Nadu.svg" alt="TN Emblem" class="brand-emblem-tn" />
           </div>
           <div class="brand-text-container">
             <span class="brand-title">CROWDCITY</span>

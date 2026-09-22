@@ -2444,7 +2444,10 @@ body:not(.admin-portal-body) .app-sidebar {
   flex-shrink: 0;
 }
 
-.brand-emblem-tn,
+.brand-emblem-tn {
+  display: none !important;
+}
+
 .app-sidebar-logo .brand-emblem {
   height: 28px !important;
   width: 28px !important;
