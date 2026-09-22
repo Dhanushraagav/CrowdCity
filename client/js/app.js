@@ -439,9 +439,10 @@ function renderFeedList(issues) {
       ? window.i18n.t(statusKey)
       : (issue.status || 'open').replace('_', ' ');
 
+    const catSlug = (issue.category || 'other').toLowerCase().replace(/\s+/g, '_');
     return `
-      <div class="stitch-item-card ${isEmergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='issue-details.html?id=${issue.id}'">
-        <div class="stitch-item-icon">
+      <div class="stitch-item-card cat-${catSlug} ${isEmergency ? 'emergency-card-glow' : ''}" onclick="window.location.href='issue-details.html?id=${issue.id}'">
+        <div class="stitch-item-icon icon-${catSlug}">
           <i class="fa-solid ${categoryIcon}"></i>
         </div>
         <div class="stitch-item-details">
@@ -519,13 +520,11 @@ function syncFilterUI() {
     feedContainer.querySelectorAll('.feed-tab').forEach(btn => {
       if (btn.dataset.feed === activeFeedTab) {
         btn.classList.add('active');
-        btn.style.background = 'var(--primary-light-alpha)';
-        btn.style.color = 'var(--primary)';
       } else {
         btn.classList.remove('active');
-        btn.style.background = 'transparent';
-        btn.style.color = 'var(--text-muted)';
       }
+      btn.style.background = '';
+      btn.style.color = '';
     });
   }
 
