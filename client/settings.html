@@ -393,12 +393,14 @@
         
         let fullName = user.user_metadata?.full_name || 'Citizen';
         
-        const profileStr = localStorage.getItem('cc_user_profile');
+        const profileStr = localStorage.getItem(`cc_user_profile_${user.id}`) || localStorage.getItem('cc_user_profile');
         if (profileStr) {
           try {
             const profile = JSON.parse(profileStr);
-            if (profile && profile.full_name) {
+            if (profile && (profile.id === user.id || profile.sub === user.id) && profile.full_name) {
               fullName = profile.full_name;
+            } else if (profile && profile.id && profile.id !== user.id) {
+              localStorage.removeItem('cc_user_profile');
             }
           } catch(e) {}
         }

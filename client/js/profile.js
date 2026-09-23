@@ -63,12 +63,12 @@ async function loadUserProfile(user) {
   let role = 'citizen';
   let createdDate = '';
 
-  // 1. Render from cached profile data immediately to prevent flickering
-  const cachedProfileStr = localStorage.getItem('cc_user_profile');
+  // 1. Render from cached profile data immediately to prevent flickering (with user ID verification)
+  const cachedProfileStr = localStorage.getItem(`cc_user_profile_${user.id}`) || localStorage.getItem('cc_user_profile');
   if (cachedProfileStr) {
     try {
       const cachedProfile = JSON.parse(cachedProfileStr);
-      if (cachedProfile) {
+      if (cachedProfile && (cachedProfile.id === user.id || cachedProfile.sub === user.id)) {
         lastUserProfileData = cachedProfile;
         role = cachedProfile.role || 'citizen';
         if (cachedProfile.created_at) {
@@ -77,9 +77,13 @@ async function loadUserProfile(user) {
           createdDate = joined.toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-US', { month: 'long', year: 'numeric' });
         }
         renderProfileFields(displayName, email, avatarUrl, role, createdDate);
+      } else {
+        localStorage.removeItem('cc_user_profile');
+        renderProfileFields(displayName, email, avatarUrl, role, createdDate);
       }
     } catch (e) {
       console.warn("Failed to parse cached profile:", e);
+      renderProfileFields(displayName, email, avatarUrl, role, createdDate);
     }
   } else {
     // Render defaults if no cache yet
@@ -107,6 +111,7 @@ async function loadUserProfile(user) {
         // Cache profile
         profile.avatar_url = freshAvatar;
         localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+        localStorage.setItem(`cc_user_profile_${user.id}`, JSON.stringify(profile));
         if (typeof renderAuthUI === 'function') renderAuthUI();
         if (typeof initMobileTopnav === 'function') initMobileTopnav();
       }

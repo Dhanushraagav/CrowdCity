@@ -124,6 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
               logDebug(`User profile role resolved: ${resolvedUserRole}`);
               localStorage.setItem('cc_user_role', resolvedUserRole);
               localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+              if (session.user && session.user.id) {
+                localStorage.setItem(`cc_user_profile_${session.user.id}`, JSON.stringify(profile));
+              }
 
               // Update back button link dynamically if authority user
               const backLink = document.getElementById('back-to-login-link');

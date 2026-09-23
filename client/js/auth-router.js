@@ -16,18 +16,28 @@
     'cc_unread_notifications_count',
     'cc_user_stat_total',
     'cc_user_stat_resolved',
-    'cc_user_stat_active'
+    'cc_user_stat_active',
+    'cc_my_complaints',
+    'cc_notifications_cache'
   ];
 
+  function isAuthKey(key) {
+    if (!key || typeof key !== 'string') return false;
+    return authKeys.includes(key) || 
+           key.startsWith('cc_user_profile_') || 
+           key.startsWith('cc_user_stat_') ||
+           key.startsWith('cc_my_complaints_');
+  }
+
   localStorage.getItem = function(key) {
-    if (authKeys.includes(key)) {
+    if (isAuthKey(key)) {
       return sessionStorage.getItem(key);
     }
     return originalGet.call(localStorage, key);
   };
 
   localStorage.setItem = function(key, value) {
-    if (authKeys.includes(key)) {
+    if (isAuthKey(key)) {
       sessionStorage.setItem(key, value);
       return;
     }
@@ -35,7 +45,7 @@
   };
 
   localStorage.removeItem = function(key) {
-    if (authKeys.includes(key)) {
+    if (isAuthKey(key)) {
       sessionStorage.removeItem(key);
       return;
     }
@@ -213,6 +223,16 @@ window.authRouter = {
           localStorage.removeItem('cc_user_stat_total');
           localStorage.removeItem('cc_user_stat_resolved');
           localStorage.removeItem('cc_user_stat_active');
+          localStorage.removeItem('cc_my_complaints');
+          localStorage.removeItem('cc_notifications_cache');
+          try {
+            for (let i = sessionStorage.length - 1; i >= 0; i--) {
+              const k = sessionStorage.key(i);
+              if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_'))) {
+                sessionStorage.removeItem(k);
+              }
+            }
+          } catch (e) {}
           sessionActive = false;
           role = null;
         } else {

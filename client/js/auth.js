@@ -586,14 +586,45 @@ function _attachAuthStateListener() {
     const isRecoveryActive = localStorage.getItem('cc_password_recovery_active') === 'true';
 
     if (session) {
+      // Check if active user changed compared to stored session
+      const prevSessionStr = localStorage.getItem('cc_session');
+      let prevUserId = null;
+      if (prevSessionStr) {
+        try {
+          const parsed = JSON.parse(prevSessionStr);
+          if (parsed && parsed.user) prevUserId = parsed.user.id || parsed.user.sub;
+        } catch (e) {}
+      }
+      const newUserId = session.user ? (session.user.id || session.user.sub) : null;
+      if (prevUserId && newUserId && prevUserId !== newUserId) {
+        console.log('[Auth] User account switched from', prevUserId, 'to', newUserId, '- invalidating stale caches.');
+        localStorage.removeItem('cc_user_profile');
+        localStorage.removeItem(`cc_user_profile_${prevUserId}`);
+        localStorage.removeItem('cc_my_complaints');
+        localStorage.removeItem('cc_user_stat_total');
+        localStorage.removeItem('cc_user_stat_resolved');
+        localStorage.removeItem('cc_user_stat_active');
+        localStorage.removeItem('cc_notifications_cache');
+        localStorage.removeItem('cc_unread_notifications_count');
+      }
+
       localStorage.setItem('cc_session', JSON.stringify(session));
 
-      // Reconcile cloud account preferences on authentication event
+      // Reconcile cloud account preferences on authentication event with strict ID check
       let cachedProf = null;
-      try {
-        const rawProf = localStorage.getItem('cc_user_profile');
-        if (rawProf) cachedProf = JSON.parse(rawProf);
-      } catch (e) {}
+      if (newUserId) {
+        try {
+          const rawProf = localStorage.getItem(`cc_user_profile_${newUserId}`) || localStorage.getItem('cc_user_profile');
+          if (rawProf) {
+            const parsed = JSON.parse(rawProf);
+            if (parsed && (parsed.id === newUserId || parsed.sub === newUserId)) {
+              cachedProf = parsed;
+            } else {
+              localStorage.removeItem('cc_user_profile');
+            }
+          }
+        } catch (e) {}
+      }
       syncAccountPreferences(session.user, cachedProf);
 
       const path = window.location.pathname;
@@ -626,6 +657,20 @@ function _attachAuthStateListener() {
       localStorage.removeItem('cc_session');
       localStorage.removeItem('cc_user_role');
       localStorage.removeItem('cc_user_profile');
+      localStorage.removeItem('cc_unread_notifications_count');
+      localStorage.removeItem('cc_user_stat_total');
+      localStorage.removeItem('cc_user_stat_resolved');
+      localStorage.removeItem('cc_user_stat_active');
+      localStorage.removeItem('cc_my_complaints');
+      localStorage.removeItem('cc_notifications_cache');
+      try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_'))) {
+            localStorage.removeItem(k);
+          }
+        }
+      } catch (e) {}
 
       const path = window.location.pathname;
       const normalizedPath = path.replace(/\.html$/, '');
@@ -769,7 +814,9 @@ async function fetchAndCacheRole(token) {
           if (profile.role) {
             localStorage.setItem('cc_user_role', profile.role);
             localStorage.setItem('cc_user_profile', JSON.stringify(profile));
+            localStorage.setItem(`cc_user_profile_${user.id}`, JSON.stringify(profile));
             verifyRoleForCurrentPage(profile.role);
+            if (typeof updateHeroGreeting === 'function') updateHeroGreeting();
             return;
           }
         } else {
@@ -796,8 +843,10 @@ async function syncUserProfileBackground() {
           if (freshProfile.role) {
             localStorage.setItem('cc_user_role', freshProfile.role);
             localStorage.setItem('cc_user_profile', JSON.stringify(freshProfile));
+            localStorage.setItem(`cc_user_profile_${user.id}`, JSON.stringify(freshProfile));
             verifyRoleForCurrentPage(freshProfile.role);
             updateAuthUI();
+            if (typeof updateHeroGreeting === 'function') updateHeroGreeting();
           }
         } else {
           syncAccountPreferences(user, null);
@@ -1243,16 +1292,22 @@ async function saveAccountPreference(key, value) {
     }
   } catch (e) {}
 
-  // Synchronously update cc_user_profile in cache
+  // Synchronously update cc_user_profile in cache with user identity validation
   try {
-    const cachedProfileStr = localStorage.getItem('cc_user_profile');
+    const activeUser = getCurrentUser();
+    const cachedProfileStr = (activeUser && activeUser.id) ? (localStorage.getItem(`cc_user_profile_${activeUser.id}`) || localStorage.getItem('cc_user_profile')) : localStorage.getItem('cc_user_profile');
     if (cachedProfileStr) {
       const p = JSON.parse(cachedProfileStr);
-      p[key] = value;
-      if (key === 'theme') {
-        p.theme_updated_at = now;
+      if (!activeUser || !p.id || p.id === activeUser.id || p.sub === activeUser.id) {
+        p[key] = value;
+        if (key === 'theme') {
+          p.theme_updated_at = now;
+        }
+        localStorage.setItem('cc_user_profile', JSON.stringify(p));
+        if (activeUser && activeUser.id) {
+          localStorage.setItem(`cc_user_profile_${activeUser.id}`, JSON.stringify(p));
+        }
       }
-      localStorage.setItem('cc_user_profile', JSON.stringify(p));
     }
   } catch (e) {}
 
@@ -1431,6 +1486,14 @@ async function clearSessionSilent() {
   localStorage.removeItem('cc_user_stat_total');
   localStorage.removeItem('cc_user_stat_resolved');
   localStorage.removeItem('cc_user_stat_active');
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_'))) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch (e) {}
 
   if (supabaseClient) {
     try {
@@ -1722,7 +1785,7 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       localStorage.setItem('cc_theme', resolvedTheme);
       localStorage.setItem('cc_theme_explicit', resolvedTheme);
     }
-    localStorage.setItem('cc_user_profile', JSON.stringify({
+    const profilePayload = {
       id: user.id,
       email: user.email,
       role: role,
@@ -1730,7 +1793,9 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       theme: resolvedTheme,
       full_name: (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || profile.full_name || 'User',
       avatar_url: (user.user_metadata && (user.user_metadata.avatar_url || user.user_metadata.picture)) || profile.avatar_url || ''
-    }));
+    };
+    localStorage.setItem('cc_user_profile', JSON.stringify(profilePayload));
+    localStorage.setItem(`cc_user_profile_${user.id}`, JSON.stringify(profilePayload));
   } catch (e) {}
 
   window.cc_routing_in_progress = false;
@@ -2014,6 +2079,24 @@ async function logoutUser() {
     try { localStorage.removeItem(k); } catch (e) {}
     try { sessionStorage.removeItem(k); } catch (e) {}
   });
+
+  // Purge any user-scoped keys
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_'))) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch (e) {}
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i);
+      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_'))) {
+        sessionStorage.removeItem(k);
+      }
+    }
+  } catch (e) {}
 
   // Reset local theme cache to default 'light' to enforce Account Isolation
   // This guarantees auth pages display in Light Mode and prevents previous user's theme from leaking to another account.
@@ -2809,12 +2892,17 @@ function updateAuthUI() {
     const rawRole = getUserRole();
     const role = (rawRole && rawRole !== 'null' && rawRole !== 'undefined') ? rawRole : 'citizen';
     
-    // Retrieve cached profile data
+    // Retrieve cached profile data with strict ID validation
     let cachedProfile = null;
     try {
-      const profileStr = localStorage.getItem('cc_user_profile');
+      const profileStr = localStorage.getItem(`cc_user_profile_${user.id}`) || localStorage.getItem('cc_user_profile');
       if (profileStr) {
-        cachedProfile = JSON.parse(profileStr);
+        const parsed = JSON.parse(profileStr);
+        if (parsed && (parsed.id === user.id || parsed.sub === user.id)) {
+          cachedProfile = parsed;
+        } else {
+          localStorage.removeItem('cc_user_profile');
+        }
       }
     } catch (e) {
       console.warn("Failed to parse cached user profile", e);
@@ -3505,8 +3593,15 @@ function initResponsiveSidebar() {
     if (user) {
       let cachedProfile = null;
       try {
-        const profileStr = localStorage.getItem('cc_user_profile');
-        if (profileStr) cachedProfile = JSON.parse(profileStr);
+        const profileStr = localStorage.getItem(`cc_user_profile_${user.id}`) || localStorage.getItem('cc_user_profile');
+        if (profileStr) {
+          const parsed = JSON.parse(profileStr);
+          if (parsed && (parsed.id === user.id || parsed.sub === user.id)) {
+            cachedProfile = parsed;
+          } else {
+            localStorage.removeItem('cc_user_profile');
+          }
+        }
       } catch (e) {}
       fullName = cachedProfile?.full_name || user.user_metadata?.full_name || (role === 'admin' ? 'Admin' : (role === 'authority' ? 'Inspector' : 'User'));
       userEmail = user.email || '';

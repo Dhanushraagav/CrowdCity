@@ -45,21 +45,34 @@ function initSupportCallButton() {
  */
 function prefillUserInfo() {
   try {
-    const profileStr = localStorage.getItem('cc_user_profile');
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (!user || !user.id) return;
+
+    let fullName = user.user_metadata?.full_name || '';
+    let email = user.email || '';
+
+    const profileStr = localStorage.getItem(`cc_user_profile_${user.id}`) || localStorage.getItem('cc_user_profile');
     if (profileStr) {
       const profile = JSON.parse(profileStr);
-      const nameInput = document.getElementById('contact-name');
-      const emailInput = document.getElementById('contact-email');
-
-      if (nameInput && !nameInput.value && profile.full_name) {
-        nameInput.value = profile.full_name;
-      }
-      if (emailInput && !emailInput.value && profile.email) {
-        emailInput.value = profile.email;
+      if (profile && (profile.id === user.id || profile.sub === user.id)) {
+        if (profile.full_name) fullName = profile.full_name;
+        if (profile.email) email = profile.email;
+      } else {
+        localStorage.removeItem('cc_user_profile');
       }
     }
+
+    const nameInput = document.getElementById('contact-name');
+    const emailInput = document.getElementById('contact-email');
+
+    if (nameInput && !nameInput.value && fullName) {
+      nameInput.value = fullName;
+    }
+    if (emailInput && !emailInput.value && email) {
+      emailInput.value = email;
+    }
   } catch (e) {
-    console.warn('Could not read cached user profile:', e);
+    console.warn('Could not read user profile for prefill:', e);
   }
 }
 

@@ -71,7 +71,16 @@
 
     let userProfile = {};
     try {
-      userProfile = JSON.parse(localStorage.getItem('cc_user_profile') || '{}');
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (user && user.id) {
+        const raw = localStorage.getItem(`cc_user_profile_${user.id}`) || localStorage.getItem('cc_user_profile');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.id === user.id || parsed.sub === user.id)) {
+            userProfile = parsed;
+          }
+        }
+      }
     } catch (e) {}
 
     const formDef = schemeFormsMap[currentSchemeId] || schemeFormsMap['tn-kmut'];

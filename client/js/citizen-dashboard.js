@@ -182,9 +182,20 @@
       if (!myActiveListEl) return;
       const isTa = window.i18n ? window.i18n.getLanguage() === 'ta' : false;
 
+      // If user is not yet authenticated, do not leak general complaints
+      if (!user || !user.id) {
+        myActiveListEl.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+            <i class="fa-solid fa-clipboard-check" style="font-size: 2rem; margin-bottom: 0.5rem; color: #cbd5e1;"></i>
+            <p style="margin: 0; font-size: 0.88rem; font-weight: 600;">${isTa ? 'செயலில் உள்ள புகார்கள் எதுவும் இல்லை.' : 'No active complaints submitted yet.'}</p>
+          </div>
+        `;
+        return;
+      }
+
       const myIssues = issues.filter(item => {
         if (!item) return false;
-        const isMyIssue = user ? (item.reporter_id === user.id || item.user_email === user.email || item.is_supporting_report) : true;
+        const isMyIssue = (item.reporter_id === user.id) || (user.email && item.user_email === user.email);
         const isActive = item.status !== 'RESOLVED' && item.status !== 'CLOSED' && item.status !== 'verified';
         return isMyIssue && isActive;
       });

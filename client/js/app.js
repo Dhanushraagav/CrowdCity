@@ -189,15 +189,6 @@ async function loadUserStats(isLanguageChange = false) {
       }
     } catch (e) {}
   }
-  if (!userId) {
-    try {
-      const profileStr = localStorage.getItem('cc_user_profile');
-      if (profileStr) {
-        const parsed = JSON.parse(profileStr);
-        if (parsed && (parsed.id || parsed.sub)) userId = parsed.id || parsed.sub;
-      }
-    } catch (e) {}
-  }
 
   // 1. If language changed and we have cached user issues, recalculate text strings
   if (isLanguageChange && lastUserIssues && lastUserIssues.length > 0) {
@@ -1270,47 +1261,82 @@ function updateHeroGreeting() {
 
   const isTa = window.i18n && window.i18n.getLanguage() === 'ta';
   const defaultCitizen = isTa ? 'குடிமகன்' : 'Citizen';
-  let fullName = defaultCitizen;
-  const profileStr = localStorage.getItem('cc_user_profile');
-  if (profileStr) {
-    try {
-      const profile = JSON.parse(profileStr);
-      if (profile && profile.full_name) {
-        fullName = profile.full_name;
-      }
-    } catch (e) {
-      console.warn("Failed to parse cached profile for greeting:", e);
-    }
-  } else {
-    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (user && user.user_metadata && user.user_metadata.full_name) {
-      fullName = user.user_metadata.full_name;
-    }
-  }
-
-  const safeName = `<span class="user-greeting-name">${escapeHTML(fullName)}</span>`;
   const greetingLeadEl = document.getElementById('hero-greeting-lead');
 
+  // Greeting lead word
+  let greetingWord = greeting;
   if (isTa) {
     const taGreetings = {
       hero_greeting_morning: 'காலை வணக்கம்',
       hero_greeting_afternoon: 'மதிய வணக்கம்',
       hero_greeting_evening: 'மாலை வணக்கம்'
     };
-    const taWord = taGreetings[greetingKey] || 'வணக்கம்';
+    greetingWord = taGreetings[greetingKey] || 'வணக்கம்';
+  }
+
+  // 1. Authoritative Identity Resolution
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  const currentUserId = currentUser ? (currentUser.id || currentUser.sub) : null;
+
+  // If user session is not yet loaded/confirmed:
+  // Render/maintain the accessible skeleton shimmer placeholder.
+  // NEVER render any citizen name or flash stale data before auth is resolved!
+  if (!currentUser || !currentUserId) {
+    const skeletonHtml = `<span class="user-greeting-name" id="hero-greeting-name" aria-busy="true"><span class="skeleton-shimmer" style="display: inline-block; width: 160px; height: 1.1em; border-radius: 6px; background: rgba(255,255,255,0.22); vertical-align: middle;"></span></span>`;
     if (greetingLeadEl) {
-      greetingLeadEl.textContent = `${taWord},`;
-      heroGreeting.innerHTML = safeName;
+      greetingLeadEl.textContent = `${greetingWord},`;
+      heroGreeting.innerHTML = skeletonHtml;
     } else {
-      heroGreeting.innerHTML = `${taWord}, ${safeName}`;
+      heroGreeting.innerHTML = `${greetingWord}, ${skeletonHtml}`;
     }
+    return;
+  }
+
+  // 2. Resolve User Profile with Strict ID Validation
+  let fullName = null;
+  let cachedProfile = null;
+
+  // Try user-scoped profile first
+  try {
+    const scopedProfileStr = localStorage.getItem(`cc_user_profile_${currentUserId}`);
+    if (scopedProfileStr) {
+      const parsed = JSON.parse(scopedProfileStr);
+      if (parsed && (parsed.id === currentUserId || parsed.sub === currentUserId)) {
+        cachedProfile = parsed;
+      }
+    }
+  } catch (e) {}
+
+  // Fallback to cc_user_profile with strict ID validation
+  if (!cachedProfile) {
+    try {
+      const genericProfileStr = localStorage.getItem('cc_user_profile');
+      if (genericProfileStr) {
+        const parsed = JSON.parse(genericProfileStr);
+        if (parsed && (parsed.id === currentUserId || parsed.sub === currentUserId)) {
+          cachedProfile = parsed;
+        } else {
+          // Cross-user or stale profile detected in generic key! Purge immediately.
+          localStorage.removeItem('cc_user_profile');
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (cachedProfile && cachedProfile.full_name) {
+    fullName = cachedProfile.full_name;
+  } else if (currentUser.user_metadata && (currentUser.user_metadata.full_name || currentUser.user_metadata.name)) {
+    fullName = currentUser.user_metadata.full_name || currentUser.user_metadata.name;
   } else {
-    if (greetingLeadEl) {
-      greetingLeadEl.textContent = `${escapeHTML(greeting)},`;
-      heroGreeting.innerHTML = safeName;
-    } else {
-      heroGreeting.innerHTML = `${escapeHTML(greeting)}, ${safeName}`;
-    }
+    fullName = defaultCitizen;
+  }
+
+  const safeName = `<span class="user-greeting-name" id="hero-greeting-name">${escapeHTML(fullName)}</span>`;
+  if (greetingLeadEl) {
+    greetingLeadEl.textContent = `${greetingWord},`;
+    heroGreeting.innerHTML = safeName;
+  } else {
+    heroGreeting.innerHTML = `${greetingWord}, ${safeName}`;
   }
 
   // Set the clean tagline matching reference design exactly

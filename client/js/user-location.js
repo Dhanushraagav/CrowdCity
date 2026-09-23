@@ -1276,17 +1276,22 @@
       }
 
       // 4. PRIORITY 4: Citizen profile object ('cc_user_profile')
-      const profileStr = localStorage.getItem('cc_user_profile');
+      const activeUser = (typeof window.getCurrentUser === 'function') ? window.getCurrentUser() : null;
+      const profileStr = (activeUser && activeUser.id) ? (localStorage.getItem(`cc_user_profile_${activeUser.id}`) || localStorage.getItem('cc_user_profile')) : localStorage.getItem('cc_user_profile');
       if (profileStr) {
         try {
           const p = JSON.parse(profileStr);
-          const candidate = p.district || p.city || p.location || p.state_district;
-          if (candidate) {
-            const norm = normalizeDistrictName(candidate);
-            if (norm) {
-              localStorage.setItem('user_district', norm);
-              return norm;
+          if (!activeUser || !p.id || p.id === activeUser.id || p.sub === activeUser.id) {
+            const candidate = p.district || p.city || p.location || p.state_district;
+            if (candidate) {
+              const norm = normalizeDistrictName(candidate);
+              if (norm) {
+                localStorage.setItem('user_district', norm);
+                return norm;
+              }
             }
+          } else {
+            localStorage.removeItem('cc_user_profile');
           }
         } catch (e) {}
       }

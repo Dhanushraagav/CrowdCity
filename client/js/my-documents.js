@@ -941,8 +941,18 @@
 
   async function getUserEmail() {
     try {
-      const profile = JSON.parse(localStorage.getItem('cc_user_profile') || '{}');
-      if (profile && profile.email) return profile.email;
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (user && user.email) return user.email;
+
+      if (user && user.id) {
+        const raw = localStorage.getItem(`cc_user_profile_${user.id}`) || localStorage.getItem('cc_user_profile');
+        if (raw) {
+          const profile = JSON.parse(raw);
+          if (profile && (profile.id === user.id || profile.sub === user.id) && profile.email) {
+            return profile.email;
+          }
+        }
+      }
 
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();

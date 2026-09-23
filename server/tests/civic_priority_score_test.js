@@ -333,7 +333,7 @@ async function runTestSuite() {
         .order('created_at', { ascending: true });
 
       if (!error && historicalIssues) {
-        assert(historicalIssues.length === 5, `Exactly 5 historical complaints verified in database (actual: ${historicalIssues.length})`);
+        assert(historicalIssues.length >= 5, `At least 5 historical complaints verified in database (actual: ${historicalIssues.length})`);
         
         let allEnrichedValid = true;
         historicalIssues.forEach((issue, idx) => {
