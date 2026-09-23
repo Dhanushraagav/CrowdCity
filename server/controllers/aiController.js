@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, analyzeComplaintImage, getGroqModel } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, getGroqModel } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
+import { analyzeCivicImage } from '../services/vision/visionService.js';
 import Groq from 'groq-sdk';
 dotenv.config();
 
@@ -360,23 +361,38 @@ export const translateVoiceController = async (req, res) => {
 
 /**
  * POST /api/ai/analyze-image
- * Dedicated endpoint for Groq Vision AI camera image complaint detection.
+ * Dedicated endpoint for Open-Source Vision AI (Qwen/Qwen3-VL-2B-Instruct) camera and photo analysis.
+ * Provides structured civic issue suggestions with human-in-the-loop review and graceful fallback.
  */
 export const analyzeImageController = async (req, res) => {
   const { image } = req.body;
 
   if (!image) {
-    return res.status(400).json({ error: 'Image data is required for visual AI detection.' });
+    return res.status(400).json({
+      success: false,
+      error: 'Image data is required for visual AI detection.',
+      canProceedManually: true
+    });
   }
 
   try {
-    const data = await analyzeComplaintImage(image);
-    return res.status(200).json(data);
+    const result = await analyzeCivicImage(image);
+
+    if (result.statusCode === 400) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
   } catch (err) {
     logger.error('analyzeImageController Error: %O', err);
-    return res.status(500).json({ error: 'Server error analyzing image with AI' });
+    return res.status(200).json({
+      success: false,
+      error: 'Image analysis is temporarily unavailable. You can continue submitting your complaint manually.',
+      canProceedManually: true
+    });
   }
 };
+
 
 
 

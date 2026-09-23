@@ -348,7 +348,16 @@ window.submitFinalReport = async function() {
   }
   const form = document.getElementById('report-form');
   if (form) {
-    form.requestSubmit();
+    try {
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+      } else {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    } catch (err) {
+      console.warn("requestSubmit error, falling back to dispatchEvent:", err);
+      form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }
   }
 };
 
@@ -474,70 +483,126 @@ function resizeImageForAi(file) {
 function initAiCameraDetection() {
   const cameraBtn = document.getElementById('btn-ai-camera-trigger');
   const uploadBtn = document.getElementById('btn-ai-upload-trigger');
-  const modal = document.getElementById('ai-upcoming-feature-modal');
-  const closeBtn = document.getElementById('btn-close-upcoming-modal');
-  const closeBtnX = document.getElementById('btn-close-upcoming-modal-x');
-  let isUpcomingModalClosing = false;
+  const cameraInput = document.getElementById('ai-camera-file-input');
+  const uploadInput = document.getElementById('ai-upload-file-input');
+  const statusContainer = document.getElementById('ai-camera-status');
+  const statusText = document.getElementById('ai-camera-status-text');
+  const suggestionCard = document.getElementById('ai-vision-suggestion-card');
+  const suggestionTitle = document.getElementById('ai-suggestion-title');
+  const suggestionCategoryBadge = document.getElementById('ai-suggestion-category-badge');
+  const suggestionEvidenceList = document.getElementById('ai-suggestion-evidence-list');
+  const applyBtn = document.getElementById('btn-apply-ai-suggestion');
+  const dismissBtn = document.getElementById('btn-dismiss-ai-suggestion');
 
-  function openUpcomingModal(e) {
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
-    if (!modal) return;
+  let currentAiSuggestion = null;
 
-    // Reset closing state
-    isUpcomingModalClosing = false;
-    modal.classList.remove('is-closing');
-
-    // Make visible in DOM
-    modal.style.display = 'flex';
-
-    // Force layout reflow so smooth CSS transition triggers reliably
-    void modal.offsetWidth;
-
-    // Add open class to execute spring deceleration animation
-    modal.classList.add('is-open');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeUpcomingModal(e) {
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
-    if (!modal || isUpcomingModalClosing || !modal.classList.contains('is-open')) return;
-
-    isUpcomingModalClosing = true;
-    modal.classList.remove('is-open');
-    modal.classList.add('is-closing');
-    modal.setAttribute('aria-hidden', 'true');
-
-    // Allow graceful exit transition (180ms) to complete before removal
-    setTimeout(() => {
-      if (isUpcomingModalClosing) {
-        modal.classList.remove('is-closing');
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-        isUpcomingModalClosing = false;
-      }
-    }, 200);
-  }
-
-  if (cameraBtn) cameraBtn.addEventListener('click', openUpcomingModal);
-  if (uploadBtn) uploadBtn.addEventListener('click', openUpcomingModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeUpcomingModal);
-  if (closeBtnX) closeBtnX.addEventListener('click', closeUpcomingModal);
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      // Close only if citizen clicks directly on the frosted backdrop container
-      if (e.target === modal) closeUpcomingModal();
+  // Trigger file selection directly on click
+  if (cameraBtn && cameraInput) {
+    cameraBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      cameraInput.click();
     });
   }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
-      closeUpcomingModal();
+
+  if (uploadBtn && uploadInput) {
+    uploadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      uploadInput.click();
+    });
+  }
+
+  // Handle selected file from camera or upload input
+  if (cameraInput) {
+    cameraInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) handleAiImageFile(file, cameraInput);
+    });
+  }
+
+  if (uploadInput) {
+    uploadInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) handleAiImageFile(file, uploadInput);
+    });
+  }
+
+  // Dismiss suggestion card
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (suggestionCard) suggestionCard.classList.add('hidden');
+    });
+  }
+
+  // Apply suggestion to complaint form
+  if (applyBtn) {
+    applyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!currentAiSuggestion) return;
+      applyAiSuggestion(currentAiSuggestion);
+      if (suggestionCard) suggestionCard.classList.add('hidden');
+      if (typeof window.showToast === 'function') {
+        window.showToast("Applied AI suggestion to your complaint report.", "success");
+      }
+    });
+  }
+
+  function applyAiSuggestion(data) {
+    // 1. Populate Category
+    const categorySelect = document.getElementById('report-category');
+    if (categorySelect && (data.category_code || data.suggested_category)) {
+      const targetCode = (data.category_code || '').toLowerCase().trim();
+      const targetName = (data.suggested_category || '').toLowerCase().trim();
+      
+      const matchOption = Array.from(categorySelect.options).find(opt => {
+        const val = opt.value.toLowerCase();
+        const text = opt.textContent.toLowerCase();
+        return val === targetCode || val === targetName || text.includes(targetName) || targetName.includes(val);
+      });
+
+      if (matchOption) {
+        categorySelect.value = matchOption.value;
+        categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     }
-  });
+
+    // 2. Populate Description with objective details
+    const descTextarea = document.getElementById('report-description');
+    if (descTextarea && data.description) {
+      const title = data.detected_issue || 'Civic Infrastructure Hazard';
+      descTextarea.value = `${title}: ${data.description}`;
+      descTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+      descTextarea.focus();
+    }
+  }
 
   async function handleAiImageFile(file, inputElem) {
     if (!file) return;
 
+    // Validate client-side file type
+    if (!file.type || !file.type.startsWith('image/')) {
+      if (typeof window.showToast === 'function') {
+        window.showToast("Please select a valid image file (JPEG, PNG, WEBP).", "warning");
+      }
+      if (inputElem) inputElem.value = '';
+      return;
+    }
+
+    // Attach photo evidence to selectedFiles immediately so evidence requirement is met
+    if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+      if (selectedFiles.length < 5) {
+        selectedFiles.push(file);
+        if (typeof window.renderFilePreviews === 'function') {
+          window.renderFilePreviews();
+        }
+      }
+    }
+
+    // Show loading state
+    if (statusContainer) {
+      statusContainer.classList.remove('hidden');
+      if (statusText) statusText.textContent = "Analyzing photo with Open-Source Vision AI...";
+    }
     if (typeof window.showToast === 'function') {
       window.showToast("Analyzing photo with AI...", "info");
     }
@@ -547,70 +612,69 @@ function initAiCameraDetection() {
 
       if (resizedBase64 && window.API && typeof window.API.analyzeImageWithAi === 'function') {
         const { data, error } = await window.API.analyzeImageWithAi(resizedBase64);
-        
-        if (data && data.isValidCivicIssue === false) {
-          // Toast popup warning for invalid/unrelated photo (e.g. selfie, shirt, document, indoor room)
-          const errorMsg = data.error || "Unrecognized Photo: Please upload or capture a photo showing a valid civic issue (pothole, streetlight, signal, garbage, etc.).";
+
+        // Check for non-civic / invalid photo
+        if (data && data.is_valid_civic_issue === false) {
+          const warningMsg = data.description || data.error || "Unrecognized Photo: Please upload a photo showing a valid municipal issue (pothole, streetlight, garbage, etc.).";
           if (typeof window.showToast === 'function') {
-            window.showToast(errorMsg, "warning");
-          } else {
-            alert(errorMsg);
+            window.showToast(warningMsg, "warning");
           }
-          if (inputElem) inputElem.value = '';
+          if (suggestionCard) suggestionCard.classList.add('hidden');
           return;
         }
 
-        if (data && !error) {
-          // Attach photo evidence to selectedFiles array and trigger preview render
-          if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-            selectedFiles.push(file);
-            if (typeof window.renderFilePreviews === 'function') {
-              window.renderFilePreviews();
-            }
-          }
-
-          // Auto-fill category
-          if (typeof setCategoryProgrammatically === 'function' && data.category) {
-            setCategoryProgrammatically(data.category);
-          } else {
-            const categorySelect = document.getElementById('report-category');
-            if (categorySelect && data.category) {
-              const targetVal = data.category.toLowerCase().replace(/\s+/g, '_');
-              let matchOption = Array.from(categorySelect.options).find(o => o.value.toLowerCase() === targetVal || o.value.toLowerCase() === data.category.toLowerCase());
-              if (matchOption) {
-                categorySelect.value = matchOption.value;
-              }
-            }
-          }
-
-          // Auto-fill description with detailed object recognition summary
-          const descTextarea = document.getElementById('report-description');
-          if (descTextarea && data.description) {
-            const heading = data.detectedObject || data.title || 'Civic Infrastructure Hazard';
-            descTextarea.value = `${heading}: ${data.description}`;
-          }
-
-          // Success toast popup with detected object recognition name
-          const detectedLabel = data.detectedObject || data.title || 'Civic Issue';
+        // Check for provider offline / rate limited / graceful fallback
+        if (error || (data && data.success === false)) {
+          const fallbackMsg = (data && data.error) || "Image analysis is temporarily unavailable. You can continue submitting your complaint manually.";
           if (typeof window.showToast === 'function') {
-            window.showToast(`AI Identified: ${detectedLabel}. Photo evidence attached!`, "success");
+            window.showToast(fallbackMsg, "info");
+          }
+          if (suggestionCard) suggestionCard.classList.add('hidden');
+          return;
+        }
+
+        // Valid civic hazard suggestion received
+        if (data && (data.detected_issue || data.suggested_category)) {
+          currentAiSuggestion = data;
+
+          if (suggestionTitle) {
+            suggestionTitle.textContent = data.detected_issue || 'Civic Infrastructure Hazard';
+          }
+          if (suggestionCategoryBadge) {
+            suggestionCategoryBadge.textContent = data.suggested_category || 'General';
+          }
+          if (suggestionEvidenceList) {
+            suggestionEvidenceList.innerHTML = '';
+            const evidence = Array.isArray(data.evidence_observed) && data.evidence_observed.length > 0
+              ? data.evidence_observed
+              : ['Visual infrastructure damage observed'];
+            evidence.forEach(item => {
+              const li = document.createElement('li');
+              li.textContent = item;
+              suggestionEvidenceList.appendChild(li);
+            });
+          }
+
+          if (suggestionCard) {
+            suggestionCard.classList.remove('hidden');
+            suggestionCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+
+          if (typeof window.showToast === 'function') {
+            window.showToast(`AI Identified: ${data.detected_issue || 'Hazard'}. Review suggestion above!`, "success");
           }
           return;
         }
       }
     } catch (err) {
-      console.warn("AI camera vision detection error:", err);
-    }
-
-    // Fallback if AI offline
-    if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-      selectedFiles.push(file);
-      if (typeof window.renderFilePreviews === 'function') {
-        window.renderFilePreviews();
+      console.warn("AI vision analysis exception:", err);
+      if (typeof window.showToast === 'function') {
+        window.showToast("Image analysis is temporarily unavailable. You can continue submitting your complaint manually.", "info");
       }
-    }
-    if (typeof window.showToast === 'function') {
-      window.showToast("Photo attached. Please review complaint details below.", "success");
+      if (suggestionCard) suggestionCard.classList.add('hidden');
+    } finally {
+      if (statusContainer) statusContainer.classList.add('hidden');
+      if (inputElem) inputElem.value = '';
     }
   }
 }
@@ -1587,8 +1651,22 @@ function setupFormSubmit() {
     const descSnippet = description.substring(0, 60).trim();
     const title = `${categoryFormatted}: ${descSnippet}${description.length > 60 ? '...' : ''}`;
 
+    function resetSubmitButtons() {
+      const submitBtn = document.getElementById('btn-submit-report');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+      }
+      const finalSubmitBtn = document.getElementById('btn-final-submit');
+      if (finalSubmitBtn) {
+        finalSubmitBtn.disabled = false;
+        finalSubmitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report & Dispatch';
+      }
+    }
+
     // Frontend Validations
     if (description.length < 10 || description.length > 1000) {
+      resetSubmitButtons();
       alertBanner.textContent = 'Description must be between 10 and 1000 characters.';
       alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
       alertBanner.style.color = '#ef4444';
@@ -1597,6 +1675,7 @@ function setupFormSubmit() {
     }
 
     if (!category) {
+      resetSubmitButtons();
       alertBanner.textContent = 'Please select an issue category.';
       alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
       alertBanner.style.color = '#ef4444';
@@ -1605,6 +1684,7 @@ function setupFormSubmit() {
     }
 
     if (!latitude || !longitude) {
+      resetSubmitButtons();
       alertBanner.textContent = 'Please pin the location of the issue on the map or click "Use GPS".';
       alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
       alertBanner.style.color = '#ef4444';
@@ -1613,8 +1693,10 @@ function setupFormSubmit() {
     }
 
     const submitBtn = document.getElementById('btn-submit-report');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying location...';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying location...';
+    }
 
     let finalLat = parseFloat(latitude);
     let finalLng = parseFloat(longitude);
@@ -1623,8 +1705,7 @@ function setupFormSubmit() {
     if (isAddressManuallyEntered) {
       const addressValidation = await window.ServiceArea.validateAddressText(address);
       if (!addressValidation.isValid) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+        resetSubmitButtons();
         let errMsg = addressValidation.errorMsg || 'Currently, CrowdCity AI supports reporting only within Tamil Nadu. We are expanding to other states soon.';
         if (errMsg.includes('supports reporting only within Tamil Nadu')) {
           errMsg = window.i18n ? window.i18n.t('outside_service_area_error') : errMsg;
@@ -1656,8 +1737,7 @@ function setupFormSubmit() {
     } else {
       const coordValidation = await window.ServiceArea.validateCoordinates(finalLat, finalLng);
       if (!coordValidation.isValid) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+        resetSubmitButtons();
         alertBanner.textContent = window.i18n ? window.i18n.t('outside_service_area_error') : 'Currently, CrowdCity AI supports reporting only within Tamil Nadu. We are expanding to other states soon.';
         alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
         alertBanner.style.color = '#ef4444';
@@ -1667,8 +1747,10 @@ function setupFormSubmit() {
       }
     }
 
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
+    }
 
     // Construct FormData object to package both text and file payloads
     const formData = new FormData();
@@ -1699,6 +1781,7 @@ function setupFormSubmit() {
     }
 
     if (!selectedFiles || selectedFiles.length === 0) {
+      resetSubmitButtons();
       window.showToast("At least one photo evidence is required to submit a report.", "error");
       window.goToWizardStep2();
       const uploadZone = document.getElementById('image-upload-zone');

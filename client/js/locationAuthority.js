@@ -2245,7 +2245,7 @@
 
       const locEl = document.getElementById('step3-ai-jurisdiction');
       if (locEl) {
-        locEl.textContent = `${j.district || 'Coimbatore'} &bull; ${j.taluk || 'Sulur'} &bull; ${j.localBodyType || 'Village Panchayat'}`;
+        locEl.textContent = `${j.district || 'Coimbatore'} • ${j.taluk || 'Sulur'} • ${j.localBodyType || 'Village Panchayat'}`;
       }
     },
 
