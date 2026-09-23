@@ -94,50 +94,119 @@ function initDashboard() {
   initRealtimeDashboard();
 }
 
+/**
+ * Calculates the start of the current week (Monday 00:00:00.000 IST)
+ * strictly using the application's Tamil Nadu timezone (Asia/Kolkata).
+ * ISO 8601 standard: Monday is day 1, Sunday is day 7.
+ * @param {Date|number|string} refDate - Reference date (defaults to now)
+ * @returns {Date} Date object representing Monday 00:00:00.000 IST
+ */
+function getStartOfWeekIST(refDate = new Date()) {
+  const d = new Date(refDate);
+  const validDate = isNaN(d.getTime()) ? new Date() : d;
+
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour12: false
+  }).formatToParts(validDate);
+
+  const map = {};
+  for (const p of parts) map[p.type] = p.value;
+
+  const year = parseInt(map.year, 10);
+  const month = parseInt(map.month, 10) - 1; // 0-indexed
+  const day = parseInt(map.day, 10);
+
+  // Day of week in IST
+  const istDate = new Date(Date.UTC(year, month, day));
+  const dayOfWeek = istDate.getUTCDay(); // 0 is Sunday, 1 is Monday...
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+
+  // Monday at 00:00:00.000 in IST (Asia/Kolkata is UTC+05:30)
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  return new Date(Date.UTC(year, month, day - daysSinceMonday, 0, 0, 0, 0) - IST_OFFSET_MS);
+}
+
 // Render user statistics given an array of the user's authentic complaints
 function applyUserStats(userIssues) {
   if (!Array.isArray(userIssues)) return;
-  lastUserIssues = userIssues;
 
-  const totalEl = document.getElementById('stat-total-reports');
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  const currentUserId = currentUser ? (currentUser.id || currentUser.sub) : null;
+
+  // Strict user isolation filter: ensure only complaints belonging to current user are counted
+  const filteredIssues = currentUserId
+    ? userIssues.filter(i => {
+        if (!i) return false;
+        return (i.reporter_id === currentUserId) || 
+               (currentUser.email && i.user_email === currentUser.email) ||
+               (i.is_supporting_report === true && i.supporter_id === currentUserId);
+      })
+    : userIssues;
+
+  lastUserIssues = filteredIssues;
+
+  const totalEl = document.getElementById('stat-total-reports'); // Card 1: REPORTS SUBMITTED (recent/weekly)
   const weeklyEl = document.getElementById('stat-total-reports-change');
-  const resolvedEl = document.getElementById('stat-resolved-issues');
+  const resolvedEl = document.getElementById('stat-resolved-issues'); // Card 2: RESOLVED REPORTS (all-time)
   const rateEl = document.getElementById('stat-resolved-rate');
-  const inprogressEl = document.getElementById('stat-inprogress-reports');
+  const inprogressEl = document.getElementById('stat-inprogress-reports'); // Card 3: IN PROGRESS (active)
   const inprogressSubEl = document.getElementById('stat-inprogress-sub');
-  const cityTotalEl = document.getElementById('stat-city-total-reports');
+  const cityTotalEl = document.getElementById('stat-city-total-reports'); // Card 4: TOTAL REPORTS (all-time)
   const cityTotalSubEl = document.getElementById('stat-city-total-sub');
   const heroDesc = document.getElementById('hero-desc');
 
-  const total = userIssues.length;
-  const now = Date.now();
-  const weeklyCount = userIssues.filter(i => (now - new Date(i.created_at || i.createdAt).getTime()) <= 7 * 86400000).length;
-  const resolved = userIssues.filter(i => {
+  // 1. All-time total reports for current authenticated user
+  const totalAllTime = filteredIssues.length;
+
+  // 2. Weekly reports submitted in Asia/Kolkata (Tamil Nadu) week boundary
+  const startOfWeekIST = getStartOfWeekIST();
+  const weeklyCount = filteredIssues.filter(i => {
+    const rawDate = i.created_at || i.createdAt;
+    if (!rawDate) return false;
+    const issueDate = new Date(rawDate);
+    return !isNaN(issueDate.getTime()) && issueDate.getTime() >= startOfWeekIST.getTime();
+  }).length;
+
+  // 3. Resolved reports (all-time)
+  const resolved = filteredIssues.filter(i => {
     const s = (i.status || '').toLowerCase();
     return s === 'resolved' || s === 'verified' || s === 'closed';
   }).length;
-  const active = userIssues.filter(i => {
+
+  // 4. In progress / active reports
+  const active = filteredIssues.filter(i => {
     const s = (i.status || '').toLowerCase();
-    return s === 'pending' || s === 'assigned' || s === 'in_progress' || s === 'in progress';
+    return s !== 'resolved' && s !== 'verified' && s !== 'closed';
   }).length;
 
-  const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
-  const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
-  const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-  const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
+  const isTa = window.i18n && window.i18n.getLanguage() === 'ta';
+  const tThisWeek = window.i18n ? (window.i18n.t('stat_this_week') || (isTa ? 'இந்த வாரம்' : 'this week')) : (isTa ? 'இந்த வாரம்' : 'this week');
+  const tResolutionRate = window.i18n ? (window.i18n.t('stat_resolution_rate') || (isTa ? 'தீர்வு விகிதம்' : 'Resolution Rate')) : (isTa ? 'தீர்வு விகிதம்' : 'Resolution Rate');
+  const tActiveReports = window.i18n ? (window.i18n.t('stat_active_reports') || (isTa ? 'செயலில் உள்ள புகார்கள்' : 'Active reports')) : (isTa ? 'செயலில் உள்ள புகார்கள்' : 'Active reports');
+  const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time') || (isTa ? 'எல்லாக் காலமும்' : 'All time')) : (isTa ? 'எல்லாக் காலமும்' : 'All time');
 
-  if (totalEl) totalEl.textContent = total.toString();
+  // Card 1: REPORTS SUBMITTED (this week)
+  if (totalEl) totalEl.textContent = weeklyCount.toString();
   if (weeklyEl) weeklyEl.textContent = `+${weeklyCount} ${tThisWeek}`;
-  if (resolvedEl) resolvedEl.textContent = resolved.toString();
-  if (inprogressEl) inprogressEl.textContent = active.toString();
-  if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-  if (cityTotalEl) cityTotalEl.textContent = total.toString();
-  if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
+  // Card 2: RESOLVED REPORTS (all-time resolved)
+  if (resolvedEl) resolvedEl.textContent = resolved.toString();
   if (rateEl) {
-    const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+    const rate = totalAllTime > 0 ? Math.round((resolved / totalAllTime) * 100) : 0;
     rateEl.textContent = `${rate}% ${tResolutionRate}`;
   }
+
+  // Card 3: IN PROGRESS (active reports)
+  if (inprogressEl) inprogressEl.textContent = active.toString();
+  if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
+
+  // Card 4: TOTAL REPORTS (all-time user reports)
+  if (cityTotalEl) cityTotalEl.textContent = totalAllTime.toString();
+  if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
   if (heroDesc) {
     if (window.i18n && typeof window.i18n.t === 'function') {
@@ -147,14 +216,23 @@ function applyUserStats(userIssues) {
     }
   }
 
-  localStorage.setItem('cc_user_stat_total', total.toString());
+  // Persist user-scoped caches
+  if (currentUserId) {
+    localStorage.setItem(`cc_user_stat_submitted_${currentUserId}`, weeklyCount.toString());
+    localStorage.setItem(`cc_user_stat_weekly_${currentUserId}`, weeklyCount.toString());
+    localStorage.setItem(`cc_user_stat_resolved_${currentUserId}`, resolved.toString());
+    localStorage.setItem(`cc_user_stat_active_${currentUserId}`, active.toString());
+    localStorage.setItem(`cc_user_stat_total_${currentUserId}`, totalAllTime.toString());
+  }
+  localStorage.setItem('cc_user_stat_submitted', weeklyCount.toString());
   localStorage.setItem('cc_user_stat_weekly', weeklyCount.toString());
   localStorage.setItem('cc_user_stat_resolved', resolved.toString());
   localStorage.setItem('cc_user_stat_active', active.toString());
-  localStorage.setItem('cc_city_stat_total', total.toString());
+  localStorage.setItem('cc_user_stat_total', totalAllTime.toString());
+  localStorage.setItem('cc_city_stat_total', totalAllTime.toString());
 
   try {
-    renderRecentComplaints(userIssues);
+    renderRecentComplaints(filteredIssues);
   } catch (e) {}
 }
 
@@ -164,11 +242,12 @@ async function fetchAuthoritativeUserStats(userId) {
   try {
     const res = await window.API.getIssues({ reporter_id: userId });
     const userIssues = (res && Array.isArray(res.data)) ? res.data : [];
-    if (userIssues.length > 0) {
-      localStorage.setItem('cc_my_complaints_civic', JSON.stringify(userIssues));
-      applyUserStats(userIssues);
-      return userIssues;
-    }
+    // User-scoped cache
+    localStorage.setItem(`cc_my_complaints_civic_${userId}`, JSON.stringify(userIssues));
+    localStorage.setItem('cc_my_complaints_civic', JSON.stringify(userIssues));
+    // Always apply stats, even for 0 complaints, to accurately clear out any previous user data
+    applyUserStats(userIssues);
+    return userIssues;
   } catch (err) {
     console.warn("[app.js] Failed to fetch authoritative user issues:", err);
   }
@@ -190,6 +269,42 @@ async function loadUserStats(isLanguageChange = false) {
     } catch (e) {}
   }
 
+  // Account switch check: if user changed, clear in-memory user issues
+  if (lastLoadedUserIdApp && userId && lastLoadedUserIdApp !== userId) {
+    lastUserIssues = [];
+  }
+  lastLoadedUserIdApp = userId;
+
+  const totalEl = document.getElementById('stat-total-reports'); // Card 1: REPORTS SUBMITTED (recent/weekly)
+  const weeklyEl = document.getElementById('stat-total-reports-change');
+  const resolvedEl = document.getElementById('stat-resolved-issues'); // Card 2: RESOLVED REPORTS (all-time)
+  const rateEl = document.getElementById('stat-resolved-rate');
+  const inprogressEl = document.getElementById('stat-inprogress-reports'); // Card 3: IN PROGRESS (active)
+  const inprogressSubEl = document.getElementById('stat-inprogress-sub');
+  const cityTotalEl = document.getElementById('stat-city-total-reports'); // Card 4: TOTAL REPORTS (all-time)
+  const cityTotalSubEl = document.getElementById('stat-city-total-sub');
+  const heroDesc = document.getElementById('hero-desc');
+
+  const isTa = window.i18n && window.i18n.getLanguage() === 'ta';
+  const tThisWeek = window.i18n ? (window.i18n.t('stat_this_week') || (isTa ? 'இந்த வாரம்' : 'this week')) : (isTa ? 'இந்த வாரம்' : 'this week');
+  const tResolutionRate = window.i18n ? (window.i18n.t('stat_resolution_rate') || (isTa ? 'தீர்வு விகிதம்' : 'Resolution Rate')) : (isTa ? 'தீர்வு விகிதம்' : 'Resolution Rate');
+  const tActiveReports = window.i18n ? (window.i18n.t('stat_active_reports') || (isTa ? 'செயலில் உள்ள புகார்கள்' : 'Active reports')) : (isTa ? 'செயலில் உள்ள புகார்கள்' : 'Active reports');
+  const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time') || (isTa ? 'எல்லாக் காலமும்' : 'All time')) : (isTa ? 'எல்லாக் காலமும்' : 'All time');
+
+  // If no authenticated user is present, reset all stat cards to 0 to prevent any cross-user leaks
+  if (!userId) {
+    lastUserIssues = [];
+    if (totalEl) totalEl.textContent = '0';
+    if (weeklyEl) weeklyEl.textContent = `+0 ${tThisWeek}`;
+    if (resolvedEl) resolvedEl.textContent = '0';
+    if (rateEl) rateEl.textContent = `0% ${tResolutionRate}`;
+    if (inprogressEl) inprogressEl.textContent = '0';
+    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
+    if (cityTotalEl) cityTotalEl.textContent = '0';
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
+    return;
+  }
+
   // 1. If language changed and we have cached user issues, recalculate text strings
   if (isLanguageChange && lastUserIssues && lastUserIssues.length > 0) {
     applyUserStats(lastUserIssues);
@@ -203,64 +318,54 @@ async function loadUserStats(isLanguageChange = false) {
     return;
   }
 
-  // 3. Instant 0ms Cache-First Pre-fill from localStorage (cc_my_complaints_civic)
-  if (userId) {
-    try {
-      const cachedCivicStr = localStorage.getItem('cc_my_complaints_civic');
-      if (cachedCivicStr) {
-        const cachedIssues = JSON.parse(cachedCivicStr);
-        if (Array.isArray(cachedIssues) && cachedIssues.length > 0) {
-          applyUserStats(cachedIssues);
-          fetchAuthoritativeUserStats(userId);
-          return;
-        }
+  // 3. Instant 0ms Cache-First Pre-fill from user-scoped localStorage
+  try {
+    const cachedCivicStr = localStorage.getItem(`cc_my_complaints_civic_${userId}`);
+    if (cachedCivicStr) {
+      const cachedIssues = JSON.parse(cachedCivicStr);
+      if (Array.isArray(cachedIssues)) {
+        applyUserStats(cachedIssues);
+        fetchAuthoritativeUserStats(userId);
+        return;
       }
-    } catch (e) {}
+    }
+  } catch (e) {}
+
+  // 4. Otherwise, load last known cached numerical stats for this specific user
+  const cachedWeekly = localStorage.getItem(`cc_user_stat_submitted_${userId}`) || localStorage.getItem(`cc_user_stat_weekly_${userId}`) || localStorage.getItem('cc_user_stat_submitted') || localStorage.getItem('cc_user_stat_weekly');
+  const cachedTotal = localStorage.getItem(`cc_user_stat_total_${userId}`) || localStorage.getItem('cc_user_stat_total');
+  const cachedResolved = localStorage.getItem(`cc_user_stat_resolved_${userId}`) || localStorage.getItem('cc_user_stat_resolved');
+  const cachedActive = localStorage.getItem(`cc_user_stat_active_${userId}`) || localStorage.getItem('cc_user_stat_active');
+
+  const weeklyNum = cachedWeekly !== null ? (parseInt(cachedWeekly, 10) || 0) : 0;
+  const totalNum = cachedTotal !== null ? (parseInt(cachedTotal, 10) || 0) : 0;
+  const resolvedNum = cachedResolved !== null ? (parseInt(cachedResolved, 10) || 0) : 0;
+  const activeNum = cachedActive !== null ? (parseInt(cachedActive, 10) || 0) : 0;
+
+  // Card 1: REPORTS SUBMITTED (recent/weekly)
+  if (totalEl) totalEl.textContent = weeklyNum.toString();
+  if (weeklyEl) weeklyEl.textContent = `+${weeklyNum} ${tThisWeek}`;
+
+  // Card 2: RESOLVED REPORTS (all-time resolved)
+  if (resolvedEl) resolvedEl.textContent = resolvedNum.toString();
+  if (rateEl) {
+    const rate = totalNum > 0 ? Math.round((resolvedNum / totalNum) * 100) : 0;
+    rateEl.textContent = `${rate}% ${tResolutionRate}`;
   }
 
-  // 4. Otherwise, load last known cached numerical stats
-  const totalEl = document.getElementById('stat-total-reports');
-  const weeklyEl = document.getElementById('stat-total-reports-change');
-  const resolvedEl = document.getElementById('stat-resolved-issues');
-  const rateEl = document.getElementById('stat-resolved-rate');
-  const inprogressEl = document.getElementById('stat-inprogress-reports');
-  const inprogressSubEl = document.getElementById('stat-inprogress-sub');
-  const cityTotalEl = document.getElementById('stat-city-total-reports');
-  const cityTotalSubEl = document.getElementById('stat-city-total-sub');
-  const heroDesc = document.getElementById('hero-desc');
-
-  const cachedTotal = localStorage.getItem('cc_user_stat_total');
-  const cachedWeekly = localStorage.getItem('cc_user_stat_weekly');
-  const cachedResolved = localStorage.getItem('cc_user_stat_resolved');
-  const cachedActive = localStorage.getItem('cc_user_stat_active');
-  const cachedCityTotal = localStorage.getItem('cc_city_stat_total');
-
-  const tThisWeek = window.i18n ? window.i18n.t('stat_this_week') : 'this week';
-  const tResolutionRate = window.i18n ? window.i18n.t('stat_resolution_rate') : 'Resolution Rate';
-  const tActiveReports = window.i18n ? window.i18n.t('stat_active_reports') : 'Active reports';
-  const tAllTime = window.i18n ? (window.i18n.t('all_time') || window.i18n.t('stat_all_time')) : 'All time';
-
-  if (totalEl && cachedTotal !== null) totalEl.textContent = cachedTotal;
-  if (weeklyEl && cachedWeekly !== null) weeklyEl.textContent = `+${parseInt(cachedWeekly, 10) || 0} ${tThisWeek}`;
-  if (resolvedEl && cachedResolved !== null) resolvedEl.textContent = cachedResolved;
-  if (inprogressEl && cachedActive !== null) inprogressEl.textContent = cachedActive;
+  // Card 3: IN PROGRESS (active reports)
+  if (inprogressEl) inprogressEl.textContent = activeNum.toString();
   if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-  if (cityTotalEl && cachedCityTotal !== null) cityTotalEl.textContent = cachedCityTotal;
+
+  // Card 4: TOTAL REPORTS (all-time user reports)
+  if (cityTotalEl) cityTotalEl.textContent = totalNum.toString();
   if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
-  if (cachedTotal !== null && cachedResolved !== null) {
-    const total = parseInt(cachedTotal, 10) || 0;
-    const resolved = parseInt(cachedResolved, 10) || 0;
-    if (rateEl) {
-      const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-      rateEl.textContent = `${rate}% ${tResolutionRate}`;
-    }
-    if (heroDesc) {
-      if (window.i18n && typeof window.i18n.t === 'function') {
-        heroDesc.textContent = window.i18n.t('hero_desc_default');
-      } else {
-        heroDesc.textContent = 'Turn local problems into visible community action.';
-      }
+  if (heroDesc) {
+    if (window.i18n && typeof window.i18n.t === 'function') {
+      heroDesc.textContent = window.i18n.t('hero_desc_default');
+    } else {
+      heroDesc.textContent = 'Turn local problems into visible community action.';
     }
   }
 

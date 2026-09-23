@@ -14,10 +14,15 @@
     'cc_user_profile',
     'cc_password_recovery_active',
     'cc_unread_notifications_count',
+    'cc_user_stat_submitted',
+    'cc_user_stat_weekly',
     'cc_user_stat_total',
     'cc_user_stat_resolved',
     'cc_user_stat_active',
+    'cc_city_stat_total',
     'cc_my_complaints',
+    'cc_my_complaints_civic',
+    'cc_my_complaints_trans',
     'cc_notifications_cache'
   ];
 
@@ -26,7 +31,8 @@
     return authKeys.includes(key) || 
            key.startsWith('cc_user_profile_') || 
            key.startsWith('cc_user_stat_') ||
-           key.startsWith('cc_my_complaints_');
+           key.startsWith('cc_my_complaints_') ||
+           key.startsWith('cc_city_stat_');
   }
 
   localStorage.getItem = function(key) {
@@ -220,15 +226,20 @@ window.authRouter = {
           localStorage.removeItem('cc_user_role');
           localStorage.removeItem('cc_user_profile');
           localStorage.removeItem('cc_unread_notifications_count');
+          localStorage.removeItem('cc_user_stat_submitted');
+          localStorage.removeItem('cc_user_stat_weekly');
           localStorage.removeItem('cc_user_stat_total');
           localStorage.removeItem('cc_user_stat_resolved');
           localStorage.removeItem('cc_user_stat_active');
+          localStorage.removeItem('cc_city_stat_total');
           localStorage.removeItem('cc_my_complaints');
+          localStorage.removeItem('cc_my_complaints_civic');
+          localStorage.removeItem('cc_my_complaints_trans');
           localStorage.removeItem('cc_notifications_cache');
           try {
             for (let i = sessionStorage.length - 1; i >= 0; i--) {
               const k = sessionStorage.key(i);
-              if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_'))) {
+              if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_'))) {
                 sessionStorage.removeItem(k);
               }
             }
