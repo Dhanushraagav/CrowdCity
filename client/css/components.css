@@ -2916,7 +2916,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     ), 
     url('../images/tamilnadu_heritage_banner.jpg') !important;
   background-repeat: no-repeat !important;
-  background-position: center 36% !important;
+  background-position: center 15% !important;
   background-size: cover !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -2939,7 +2939,7 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
       ), 
       url('../images/tamilnadu_heritage_banner.jpg') !important;
     background-size: cover !important;
-    background-position: center 30% !important;
+    background-position: center 12% !important;
     padding: 1.6rem 1.25rem !important;
     min-height: auto !important;
   }
@@ -8549,7 +8549,7 @@ html.dark-theme .stitch-hero:has(.dashboard-user-name) {
       transparent 65%
     ), 
     url('../images/tamilnadu_heritage_banner.jpg') !important;
-  background-position: center 36% !important;
+  background-position: center 15% !important;
   background-size: cover !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
@@ -8569,7 +8569,7 @@ html.dark-theme .stitch-hero:has(.dashboard-user-name) {
         transparent 100%
       ), 
       url('../images/tamilnadu_heritage_banner.jpg') !important;
-    background-position: center 30% !important;
+    background-position: center 12% !important;
   }
 }
 
