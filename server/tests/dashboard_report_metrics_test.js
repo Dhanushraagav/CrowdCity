@@ -100,9 +100,17 @@ function computeDashboardMetrics(userIssues, currentUser = null, refDate = new D
   const filteredIssues = currentUserId
     ? userIssues.filter(i => {
         if (!i) return false;
-        return (i.reporter_id === currentUserId) || 
-               (currentUser.email && i.user_email === currentUser.email) ||
-               (i.is_supporting_report === true && i.supporter_id === currentUserId);
+        return (
+          i.reporter_id === currentUserId ||
+          (currentUser.email && i.user_email === currentUser.email) ||
+          (
+            i.is_supporting_report === true &&
+            (
+              !i.supporter_id ||
+              i.supporter_id === currentUserId
+            )
+          )
+        );
       })
     : [];
 
@@ -309,6 +317,68 @@ const authRouterProxiesCityStat = authRouterJs.includes("key.startsWith('cc_city
 
 assert(authJsCleansSubmitted && authJsCleansCityTotal, 'TEST 10.1: auth.js explicitly invalidates cc_user_stat_submitted and cc_city_stat_total');
 assert(authRouterCleansSubmitted && authRouterProxiesCityStat, 'TEST 10.2: auth-router.js proxies and purges cc_city_stat_* and user stats');
+
+// -----------------------------------------------------------------------------
+// TEST 11: Co-Reported Dashboard Statistics Regression Suite (Cases 1 - 6)
+// -----------------------------------------------------------------------------
+const citizenUser = { id: 'usr-citizen-dhanush', email: 'dhanush@test.com' };
+
+// CASE 1: 3 direct + 2 co-reported (matches authenticated citizen profile)
+const case1Issues = [
+  // 3 direct complaints
+  { id: 'cc1', complaint_id: 'CC-2026-000001', reporter_id: 'usr-citizen-dhanush', status: 'verified', created_at: '2026-08-30T14:59:29.000Z' },
+  { id: 'cc2', complaint_id: 'CC-2026-000002', reporter_id: 'usr-citizen-dhanush', status: 'verified', created_at: '2026-09-01T04:06:22.000Z' },
+  { id: 'cc3', complaint_id: 'CC-2026-000003', reporter_id: 'usr-citizen-dhanush', status: 'assigned', created_at: '2026-09-02T15:56:26.000Z' },
+  // 2 co-reported complaints (primary author is another user)
+  { id: 'cc4', complaint_id: 'CC-2026-000004', reporter_id: 'usr-other-1', is_supporting_report: true, supporter_id: 'usr-citizen-dhanush', status: 'assigned', created_at: '2026-09-03T08:23:49.000Z' },
+  { id: 'cc5', complaint_id: 'CC-2026-000005', reporter_id: 'usr-other-2', is_supporting_report: true, supporter_id: 'usr-citizen-dhanush', status: 'verified', created_at: '2026-09-03T08:51:44.000Z' },
+];
+
+const case1Metrics = computeDashboardMetrics(case1Issues, citizenUser, refDateNow);
+assert(case1Metrics.totalAllTime === 5, 'TEST 11.1: Case 1 - Total reports is exactly 5 (3 direct + 2 co-reported)');
+assert(case1Metrics.resolvedAllTime === 3, 'TEST 11.2: Case 1 - Resolved reports is 3 (CC1, CC2, CC5)');
+assert(case1Metrics.activeReports === 2, 'TEST 11.3: Case 1 - In Progress reports is 2 (CC3, CC4)');
+assert(case1Metrics.resolutionRate === 60, 'TEST 11.4: Case 1 - Resolution Rate is 60% (3/5)');
+assert(case1Metrics.submittedThisWeek === 0, 'TEST 11.5: Case 1 - Reports Submitted this week is 0');
+
+// CASE 2: User with only direct reports
+const case2Issues = [
+  { id: 'd1', reporter_id: 'usr-citizen-dhanush', status: 'resolved', created_at: '2026-09-01T00:00:00.000Z' },
+  { id: 'd2', reporter_id: 'usr-citizen-dhanush', status: 'assigned', created_at: '2026-09-02T00:00:00.000Z' },
+];
+const case2Metrics = computeDashboardMetrics(case2Issues, citizenUser, refDateNow);
+assert(case2Metrics.totalAllTime === 2, 'TEST 11.6: Case 2 - Direct-only user has Total = 2');
+assert(case2Metrics.resolvedAllTime === 1 && case2Metrics.activeReports === 1, 'TEST 11.7: Case 2 - Direct-only status aggregation is accurate');
+
+// CASE 3: User with only co-reported reports
+const case3Issues = [
+  { id: 'c1', reporter_id: 'usr-other-1', is_supporting_report: true, supporter_id: 'usr-citizen-dhanush', status: 'resolved', created_at: '2026-09-01T00:00:00.000Z' },
+  { id: 'c2', reporter_id: 'usr-other-2', is_supporting_report: true, supporter_id: 'usr-citizen-dhanush', status: 'open', created_at: '2026-09-02T00:00:00.000Z' },
+];
+const case3Metrics = computeDashboardMetrics(case3Issues, citizenUser, refDateNow);
+assert(case3Metrics.totalAllTime === 2, 'TEST 11.8: Case 3 - Co-report-only user has Total = 2');
+assert(case3Metrics.resolvedAllTime === 1 && case3Metrics.activeReports === 1, 'TEST 11.9: Case 3 - Co-report-only status aggregation is accurate');
+
+// CASE 4: Two users co-reporting the same civic issue (isolation)
+const sharedIssue = { id: 'shared-issue-1', reporter_id: 'usr-creator-3', status: 'open', created_at: '2026-09-01T00:00:00.000Z' };
+const user1Issues = [{ ...sharedIssue, is_supporting_report: true, supporter_id: 'usr-citizen-1' }];
+const user2Issues = [{ ...sharedIssue, is_supporting_report: false, supporter_id: null }];
+
+const mUser1 = computeDashboardMetrics(user1Issues, { id: 'usr-citizen-1' }, refDateNow);
+const mUser2 = computeDashboardMetrics(user2Issues, { id: 'usr-citizen-2' }, refDateNow);
+assert(mUser1.totalAllTime === 1, 'TEST 11.10: Case 4 - Shared issue counts for User 1 who co-reported it');
+assert(mUser2.totalAllTime === 0, 'TEST 11.11: Case 4 - Shared issue does NOT count for User 2 who did not co-report it');
+
+// CASE 5: Unauthenticated user (no fallback to all issues)
+const mUnauth = computeDashboardMetrics(case1Issues, null, refDateNow);
+assert(mUnauth.totalAllTime === 0, 'TEST 11.12: Case 5 - Unauthenticated user results in 0 total (no fallback to all issues)');
+assert(mUnauth.resolvedAllTime === 0 && mUnauth.activeReports === 0, 'TEST 11.13: Case 5 - Unauthenticated user has 0 resolved and 0 active');
+
+// CASE 6: Controller attaches supporter_id metadata
+const controllerJsPath = path.join(rootDir, 'server', 'controllers', 'issueController.js');
+const controllerJs = fs.readFileSync(controllerJsPath, 'utf8');
+const controllerAttachesSupporterId = controllerJs.includes('issue.supporter_id = reporter_id;');
+assert(controllerAttachesSupporterId, 'TEST 11.14: Case 6 - issueController.js explicitly attaches supporter_id = reporter_id to co-reported response metadata');
 
 // -----------------------------------------------------------------------------
 // Summary

@@ -120,6 +120,7 @@ export const getAllIssues = async (req, res) => {
         issue.user_has_upvoted = votedIssueIds.has(issue.id);
         if (userSupportingIssueIds.includes(issue.id) && issue.reporter_id !== reporter_id) {
           issue.is_supporting_report = true;
+          issue.supporter_id = reporter_id;
         }
       });
     }

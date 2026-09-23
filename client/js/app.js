@@ -141,11 +141,19 @@ function applyUserStats(userIssues) {
   const filteredIssues = currentUserId
     ? userIssues.filter(i => {
         if (!i) return false;
-        return (i.reporter_id === currentUserId) || 
-               (currentUser.email && i.user_email === currentUser.email) ||
-               (i.is_supporting_report === true && i.supporter_id === currentUserId);
+        return (
+          i.reporter_id === currentUserId ||
+          (currentUser.email && i.user_email === currentUser.email) ||
+          (
+            i.is_supporting_report === true &&
+            (
+              !i.supporter_id ||
+              i.supporter_id === currentUserId
+            )
+          )
+        );
       })
-    : userIssues;
+    : [];
 
   lastUserIssues = filteredIssues;
 
