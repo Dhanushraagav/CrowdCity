@@ -108,6 +108,14 @@
         
         <!-- Top-Right Header Navigation Controls -->
         <div class="header-user-info">
+          <!-- Manual Refresh Button -->
+          <button type="button" id="header-refresh-btn" class="btn-refresh" style="padding: 0.4rem 0.75rem; font-size: 0.82rem;" onclick="window.ComplaintService.handleManualRefresh()" aria-label="Refresh casework data">
+            <svg class="refresh-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            <span data-i18n="refresh_queue">Refresh</span>
+          </button>
+
           <!-- Notifications Bell Button with Dynamic Unread Badge -->
           <button type="button" id="header-notif-btn" class="btn-secondary" style="position: relative; padding: 0.4rem 0.75rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem;" onclick="event.stopPropagation(); window.location.href='authority-notifications.html'">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

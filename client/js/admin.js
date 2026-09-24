@@ -1,14 +1,64 @@
 // CrowdCity AI Municipal Authority Operations Platform Controller v2.7.0
 (function() {
   'use strict';
+  const win = typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : {});
 
   let currentComplaints = [];
+  let filteredComplaints = [];
   let currentAuthorities = [];
   let currentNotifications = [];
   let activeDetailIssueId = null;
   let activeProofPhotoUrl = null;
   let isMutating = false;
   let activeCaseChannel = null;
+  let queueRealtimeChannel = null;
+  let isRealtimeConnected = false;
+  let lastRefreshedAt = new Date();
+  let currentPage = 1;
+  const pageSize = 15;
+  let searchDebounceTimer = null;
+
+  // 38 Districts of Tamil Nadu
+  const TN_DISTRICTS_LIST = [
+    { id: 'ariyalur', name: 'Ariyalur' },
+    { id: 'chengalpattu', name: 'Chengalpattu' },
+    { id: 'chennai', name: 'Chennai' },
+    { id: 'coimbatore', name: 'Coimbatore' },
+    { id: 'cuddalore', name: 'Cuddalore' },
+    { id: 'dharmapuri', name: 'Dharmapuri' },
+    { id: 'dindigul', name: 'Dindigul' },
+    { id: 'erode', name: 'Erode' },
+    { id: 'kallakurichi', name: 'Kallakurichi' },
+    { id: 'kancheepuram', name: 'Kancheepuram' },
+    { id: 'karur', name: 'Karur' },
+    { id: 'krishnagiri', name: 'Krishnagiri' },
+    { id: 'madurai', name: 'Madurai' },
+    { id: 'mayiladuthurai', name: 'Mayiladuthurai' },
+    { id: 'nagapattinam', name: 'Nagapattinam' },
+    { id: 'kanniyakumari', name: 'Kanniyakumari' },
+    { id: 'namakkal', name: 'Namakkal' },
+    { id: 'perambalur', name: 'Perambalur' },
+    { id: 'pudukkottai', name: 'Pudukkottai' },
+    { id: 'ramanathapuram', name: 'Ramanathapuram' },
+    { id: 'ranipet', name: 'Ranipet' },
+    { id: 'salem', name: 'Salem' },
+    { id: 'sivagangai', name: 'Sivagangai' },
+    { id: 'tenkasi', name: 'Tenkasi' },
+    { id: 'thanjavur', name: 'Thanjavur' },
+    { id: 'theni', name: 'Theni' },
+    { id: 'thoothukudi', name: 'Thoothukudi' },
+    { id: 'tiruchirappalli', name: 'Tiruchirappalli' },
+    { id: 'tirunelveli', name: 'Tirunelveli' },
+    { id: 'tirupathur', name: 'Tirupathur' },
+    { id: 'tiruppur', name: 'Tiruppur' },
+    { id: 'tiruvallur', name: 'Tiruvallur' },
+    { id: 'tiruvannamalai', name: 'Tiruvannamalai' },
+    { id: 'tiruvarur', name: 'Tiruvarur' },
+    { id: 'vellore', name: 'Vellore' },
+    { id: 'viluppuram', name: 'Viluppuram' },
+    { id: 'virudhunagar', name: 'Virudhunagar' },
+    { id: 'nilgiris', name: 'Nilgiris' }
+  ];
 
   // ----------------------------------------------------
   // HELPER: Floating Popup Toast Notification
@@ -56,7 +106,7 @@
   }
 
   function t(key, fallback) {
-    if (window.i18n && typeof window.i18n.t === 'function') {
+    if (typeof window !== 'undefined' && window.i18n && typeof window.i18n.t === 'function') {
       const val = window.i18n.t(key);
       if (val && val !== key) return val;
     }
@@ -100,6 +150,160 @@
     return names[cat.toLowerCase()] || cat.replace('_', ' ');
   }
 
+  // Helper to detect/normalize district from complaint record or address
+  function getComplaintDistrict(c) {
+    if (!c) return '';
+    if (c.district) {
+      const dLower = String(c.district).toLowerCase().trim();
+      const found = TN_DISTRICTS_LIST.find(d => d.id === dLower || d.name.toLowerCase() === dLower);
+      if (found) return found.name;
+      return String(c.district);
+    }
+    if (c.address) {
+      const addr = String(c.address).toLowerCase();
+      const found = TN_DISTRICTS_LIST.find(d => addr.includes(d.id) || addr.includes(d.name.toLowerCase()));
+      if (found) return found.name;
+    }
+    return '';
+  }
+
+  // Compute authoritative SLA Urgency Tier, Label, Badge, Countdown, and Row Class
+  function computeSlaUrgencyMeta(c, nowMs = Date.now()) {
+    if (!c) {
+      return {
+        tier: 4,
+        urgencyKey: 'within_sla',
+        badgeClass: 'sla-badge-normal',
+        badgeLabel: 'Within SLA',
+        countdownText: '',
+        deadlineFormatted: '',
+        rowHighlightClass: '',
+        diffMs: 0
+      };
+    }
+
+    const normStatus = String(c.status || 'pending').toLowerCase().trim();
+    const isResolvedOrClosed = ['resolved', 'verified', 'closed', 'rejected', 'declined', 'completed'].includes(normStatus);
+    const isAuthorityActionTaken = Boolean(c.responded_at || c.assigned_to || ['assigned', 'in_progress', 'resolved', 'verified', 'rejected', 'completed'].includes(normStatus));
+
+    // Normalized priority
+    const priorityLvl = String(c.priority_level || c.priority || '').toLowerCase();
+    const isEmerg = Boolean(c.is_emergency || priorityLvl === 'critical' || priorityLvl === 'emergency');
+    let normPriority = 'moderate';
+    if (isEmerg) normPriority = 'critical';
+    else if (priorityLvl === 'high') normPriority = 'high';
+    else if (priorityLvl === 'low') normPriority = 'low';
+
+    const durationHoursMap = { critical: 4, high: 24, moderate: 72, medium: 72, low: 168 };
+    const escalationHoursMap = { critical: 2, high: 12, moderate: 24, medium: 24, low: 48 };
+
+    const totalSlaHours = durationHoursMap[normPriority] || 72;
+    const escalationDelayHours = escalationHoursMap[normPriority] || 24;
+
+    let deadlineMs = null;
+    if (c.sla_deadline) {
+      const d = new Date(c.sla_deadline).getTime();
+      if (!isNaN(d)) deadlineMs = d;
+    }
+    if (!deadlineMs) {
+      const createdMs = c.created_at ? new Date(c.created_at).getTime() : nowMs;
+      deadlineMs = createdMs + (totalSlaHours * 3600000);
+    }
+
+    const diffMs = deadlineMs - nowMs;
+    const escalationThresholdMs = deadlineMs + (escalationDelayHours * 3600000);
+
+    let tier = 4; // 1: Escalated, 2: Overdue, 3: Due Soon, 4: Within SLA, 5: Resolved / Met
+    let urgencyKey = 'within_sla';
+    let badgeClass = 'sla-badge-normal';
+    let badgeLabel = t('within_sla', 'Within SLA');
+    let countdownText = '';
+
+    const formatRemaining = (ms) => {
+      if (ms <= 0) return '0m';
+      const totalMins = Math.floor(ms / 60000);
+      const days = Math.floor(totalMins / 1440);
+      const hours = Math.floor((totalMins % 1440) / 60);
+      const mins = totalMins % 60;
+      if (days > 0) return `${days}d ${hours}h`;
+      if (hours > 0) return `${hours}h ${mins}m`;
+      return `${mins}m`;
+    };
+
+    if (isResolvedOrClosed) {
+      tier = 5;
+      urgencyKey = 'met';
+      badgeClass = 'sla-badge-normal';
+      badgeLabel = (normStatus === 'resolved' || normStatus === 'verified') ? 'Met SLA' : formatStatusName(normStatus);
+      countdownText = c.sla_deadline_formatted || (c.sla_deadline ? new Date(c.sla_deadline).toLocaleDateString() : 'Completed');
+    } else if (c.is_escalated || c.sla_status === 'escalated' || normStatus === 'escalated' || (!isAuthorityActionTaken && nowMs >= escalationThresholdMs)) {
+      tier = 1;
+      urgencyKey = 'escalated';
+      badgeClass = 'sla-badge-escalated';
+      badgeLabel = t('escalated', 'Escalated');
+      countdownText = 'Senior Escalation Active';
+    } else if (nowMs > deadlineMs && !isAuthorityActionTaken) {
+      tier = 2;
+      urgencyKey = 'overdue';
+      badgeClass = 'sla-badge-overdue';
+      badgeLabel = t('overdue', 'Overdue');
+      countdownText = `Overdue by ${formatRemaining(nowMs - deadlineMs)}`;
+    } else if (!isAuthorityActionTaken && (diffMs <= totalSlaHours * 0.25 * 3600000 || (isEmerg && diffMs <= 2 * 3600000) || diffMs <= 4 * 3600000)) {
+      tier = 3;
+      urgencyKey = 'due_soon';
+      badgeClass = 'sla-badge-duesoon';
+      badgeLabel = t('due_soon', 'Due Soon');
+      countdownText = `${formatRemaining(diffMs)} left`;
+    } else {
+      tier = 4;
+      urgencyKey = 'within_sla';
+      badgeClass = 'sla-badge-normal';
+      badgeLabel = t('within_sla', 'Within SLA');
+      countdownText = isAuthorityActionTaken ? 'Action In Progress' : `${formatRemaining(diffMs)} remaining`;
+    }
+
+    let rowHighlightClass = '';
+    if (tier === 1) rowHighlightClass = 'row-escalated';
+    else if (tier === 2) rowHighlightClass = 'row-overdue';
+    else if (tier === 3) rowHighlightClass = 'row-duesoon';
+
+    return {
+      tier,
+      urgencyKey,
+      badgeClass,
+      badgeLabel,
+      countdownText,
+      deadlineFormatted: c.sla_deadline_formatted || new Date(deadlineMs).toLocaleDateString(),
+      rowHighlightClass,
+      diffMs
+    };
+  }
+
+  // Operational sorting: 1. SLA Urgency Tier -> 2. Civic Priority Score (desc) -> 3. Complaint Age (asc)
+  function sortOperationalComplaints(list, nowMs = Date.now()) {
+    return [...list].sort((a, b) => {
+      const metaA = computeSlaUrgencyMeta(a, nowMs);
+      const metaB = computeSlaUrgencyMeta(b, nowMs);
+
+      // 1. SLA Urgency Tier
+      if (metaA.tier !== metaB.tier) {
+        return metaA.tier - metaB.tier;
+      }
+
+      // 2. Civic Priority Score descending
+      const scoreA = Number(a.priority_score !== undefined && a.priority_score !== null ? a.priority_score : (a.is_emergency ? 100 : 50));
+      const scoreB = Number(b.priority_score !== undefined && b.priority_score !== null ? b.priority_score : (b.is_emergency ? 100 : 50));
+      if (Math.abs(scoreB - scoreA) >= 0.01) {
+        return scoreB - scoreA;
+      }
+
+      // 3. Complaint age / submission time: older complaints first
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateA - dateB;
+    });
+  }
+
   // Check Authorization Access
   function checkAccess() {
     const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
@@ -123,11 +327,16 @@
   }
 
   // Service Controller
-  window.ComplaintService = {
+  win.ComplaintService = {
     _initialized: false,
     _isLoadingData: false,
+    _isRefreshing: false,
     _hashRoutingBound: false,
     _inspectDelegated: false,
+    computeSlaUrgencyMeta: computeSlaUrgencyMeta,
+    sortOperationalComplaints: sortOperationalComplaints,
+    getComplaintDistrict: getComplaintDistrict,
+    TN_DISTRICTS_LIST: TN_DISTRICTS_LIST,
 
     init: async function() {
       if (this._initialized) return;
@@ -137,8 +346,11 @@
       
       this.bindHashRouting();
       this.bindInspectDelegation();
+      this.populateDistrictDropdown();
       this.handleInitialHash();
       await this.loadAllData();
+      this.subscribeQueueRealtime();
+      this.updateLastUpdatedTimestamp();
     },
 
     bindHashRouting: function() {
@@ -403,6 +615,7 @@
         this.renderDashboard();
       }
       if (document.getElementById('pane-complaints') || document.getElementById('complaints-queue-table-body')) {
+        this.populateDistrictDropdown();
         // Do not overwrite complaints table if user just clicked an inspect button and navigation is occurring
         if (!document.querySelector('#complaints-queue-table-body button.btn-inspect-case.is-loading')) {
           this.renderComplaintsQueue();
@@ -780,90 +993,339 @@
       el.innerHTML = `<div style="width: 100%;">${items}</div>`;
     },
 
-    applyFilters: function() {
+    populateDistrictDropdown: function() {
+      const select = document.getElementById('filter-district-select');
+      if (!select) return;
+      if (select.options.length > 1) return;
+
+      TN_DISTRICTS_LIST.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.name;
+        select.appendChild(opt);
+      });
+    },
+
+    updateLastUpdatedTimestamp: function(date = new Date()) {
+      lastRefreshedAt = date;
+      const el = document.getElementById('queue-last-updated');
+      if (!el) return;
+      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      el.textContent = `${t('last_updated_at', 'Last updated')}: ${timeStr}`;
+    },
+
+    handleManualRefresh: async function() {
+      if (this._isRefreshing) return;
+      this._isRefreshing = true;
+
+      const refreshButtons = document.querySelectorAll('.btn-refresh, #btn-manual-refresh');
+      refreshButtons.forEach(btn => {
+        btn.classList.add('is-refreshing');
+        btn.setAttribute('aria-busy', 'true');
+      });
+
+      try {
+        await this.loadAllData();
+        this.updateLastUpdatedTimestamp(new Date());
+        showToast(t('refresh_queue', 'Complaint queue refreshed.'), 'success');
+      } catch (err) {
+        console.error("Manual refresh error:", err);
+        showToast("Failed to refresh queue.", "error");
+      } finally {
+        refreshButtons.forEach(btn => {
+          btn.classList.remove('is-refreshing');
+          btn.setAttribute('aria-busy', 'false');
+        });
+        this._isRefreshing = false;
+      }
+    },
+
+    subscribeQueueRealtime: function() {
+      if (queueRealtimeChannel) {
+        try {
+          const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+          if (client && typeof client.removeChannel === 'function') {
+            client.removeChannel(queueRealtimeChannel);
+          }
+        } catch (e) {}
+        queueRealtimeChannel = null;
+      }
+
+      if (!window.API || typeof window.API.subscribeRealtime !== 'function') {
+        this.updateLiveIndicator(false);
+        return;
+      }
+
+      queueRealtimeChannel = window.API.subscribeRealtime({
+        channelName: 'public:authority_complaints_queue',
+        events: [
+          { event: 'INSERT', table: 'issues' },
+          { event: 'UPDATE', table: 'issues' },
+          { event: 'DELETE', table: 'issues' }
+        ],
+        onStatusChange: (status) => {
+          const isSubscribed = (status === 'SUBSCRIBED');
+          this.updateLiveIndicator(isSubscribed);
+        },
+        onEvent: (event, payload) => {
+          this.handleRealtimeIssueEvent(event, payload);
+        }
+      });
+    },
+
+    updateLiveIndicator: function(isConnected) {
+      isRealtimeConnected = Boolean(isConnected);
+      const pill = document.getElementById('live-status-indicator');
+      const textEl = document.getElementById('live-status-text');
+      if (!pill) return;
+      if (isRealtimeConnected) {
+        pill.classList.remove('disconnected');
+        pill.title = 'Supabase Realtime live sync active';
+        if (textEl) textEl.textContent = t('live_updates_active', 'Live');
+      } else {
+        pill.classList.add('disconnected');
+        pill.title = 'Live sync reconnecting / polling fallback active';
+        if (textEl) textEl.textContent = 'Syncing';
+      }
+    },
+
+    handleRealtimeIssueEvent: function(event, payload) {
+      if (!payload || isMutating) return;
+
+      const record = payload.new || payload.old;
+      if (!record || !record.id) return;
+
+      if (event === 'INSERT') {
+        const idx = currentComplaints.findIndex(c => c.id === record.id || (record.complaint_id && c.complaint_id === record.complaint_id));
+        if (idx === -1) {
+          currentComplaints.unshift(record);
+        } else {
+          currentComplaints[idx] = { ...currentComplaints[idx], ...record };
+        }
+      } else if (event === 'UPDATE') {
+        const idx = currentComplaints.findIndex(c => c.id === record.id || (record.complaint_id && c.complaint_id === record.complaint_id));
+        if (idx !== -1) {
+          currentComplaints[idx] = { ...currentComplaints[idx], ...record };
+        } else {
+          currentComplaints.unshift(record);
+        }
+      } else if (event === 'DELETE') {
+        currentComplaints = currentComplaints.filter(c => c.id !== record.id);
+      }
+
+      this.saveCachedData();
+      this.updateLastUpdatedTimestamp(new Date());
+
+      // Re-apply filters without forcing page reset to 1
+      this.applyFilters(false);
+
+      if (document.getElementById('pane-dashboard') || document.getElementById('kpi-total')) {
+        this.renderDashboard();
+      }
+    },
+
+    handleSearchInput: function(event) {
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+      }
+      searchDebounceTimer = setTimeout(() => {
+        this.applyFilters(true);
+      }, 300);
+    },
+
+    applyFilters: function(resetPage = true) {
       const getVal = id => {
         const el = document.getElementById(id);
         return el ? (el.value || '').toLowerCase().trim() : '';
       };
 
       const search = getVal('filter-search-input');
-      const statusFilter = getVal('filter-status-select');
+      const statusEl = document.getElementById('filter-status-select');
+      const statusFilter = statusEl ? (statusEl.value || 'active').toLowerCase().trim() : 'active';
       const categoryFilter = getVal('filter-category-select');
       const priorityFilter = getVal('filter-priority-select');
+      const slaFilter = getVal('filter-sla-select');
       const assignmentFilter = getVal('filter-assignment-select');
+      const districtFilter = getVal('filter-district-select');
+
+      const nowMs = Date.now();
 
       const filtered = currentComplaints.filter(c => {
+        const slaMeta = computeSlaUrgencyMeta(c, nowMs);
+
+        // Search filter (ID, Title, Description, Address, District, Category, Reporter)
         if (search) {
           const matchId = (c.complaint_id || '').toLowerCase().includes(search) || (c.id || '').toLowerCase().includes(search);
           const matchTitle = (c.title || '').toLowerCase().includes(search);
           const matchDesc = (c.description || '').toLowerCase().includes(search);
           const matchAddr = (c.address || '').toLowerCase().includes(search);
+          const matchDist = (c.district || '').toLowerCase().includes(search) || (getComplaintDistrict(c) || '').toLowerCase().includes(search);
+          const matchCat = (c.category || '').toLowerCase().includes(search) || formatCategory(c.category).toLowerCase().includes(search);
           const matchReporter = c.reporter ? (c.reporter.full_name || '').toLowerCase().includes(search) : false;
-          if (!matchId && !matchTitle && !matchDesc && !matchAddr && !matchReporter) return false;
+          if (!matchId && !matchTitle && !matchDesc && !matchAddr && !matchDist && !matchCat && !matchReporter) return false;
         }
 
-        if (statusFilter) {
-          const cStatus = (c.status || 'pending').toLowerCase();
+        // Status filter (Default: 'active')
+        const cStatus = (c.status || 'pending').toLowerCase();
+        if (statusFilter === 'active') {
+          const excluded = ['resolved', 'verified', 'closed', 'rejected', 'declined', 'completed'];
+          if (excluded.includes(cStatus)) return false;
+        } else if (statusFilter === 'pending') {
+          if (!['pending', 'submitted', 'open'].includes(cStatus)) return false;
+        } else if (statusFilter === 'assigned') {
+          if (cStatus !== 'assigned') return false;
+        } else if (statusFilter === 'in_progress') {
+          if (!['in_progress', 'investigating'].includes(cStatus)) return false;
+        } else if (statusFilter === 'resolved') {
+          if (!['resolved', 'completed'].includes(cStatus)) return false;
+        } else if (statusFilter === 'verified') {
+          if (cStatus !== 'verified') return false;
+        } else if (statusFilter === 'closed') {
+          if (cStatus !== 'closed') return false;
+        } else if (statusFilter === 'rejected') {
+          if (!['rejected', 'declined'].includes(cStatus)) return false;
+        } else if (statusFilter && statusFilter !== 'all') {
           if (cStatus !== statusFilter) return false;
         }
 
-        if (categoryFilter) {
-          const cCat = (c.category || '').toLowerCase();
-          if (!cCat.includes(categoryFilter)) return false;
-        }
-
+        // Priority filter
         if (priorityFilter) {
+          const score = Number(c.priority_score !== undefined && c.priority_score !== null ? c.priority_score : (c.is_emergency ? 100 : 50));
           const pLvl = (c.priority_level || '').toLowerCase();
-          if (priorityFilter === 'critical' || priorityFilter === 'emergency') {
-            if (pLvl !== 'critical' && !c.is_emergency && c.priority !== 'emergency') return false;
+          const isEmerg = c.is_emergency || c.priority === 'emergency';
+
+          if (priorityFilter === 'critical') {
+            if (pLvl !== 'critical' && !isEmerg && score < 75) return false;
           } else if (priorityFilter === 'high') {
-            if (pLvl !== 'high' && c.priority !== 'high') return false;
+            if (isEmerg || (pLvl !== 'high' && c.priority !== 'high' && (score < 50 || score >= 75))) return false;
           } else if (priorityFilter === 'moderate' || priorityFilter === 'normal') {
-            if (pLvl !== 'moderate' && c.priority !== 'normal' && c.priority !== 'medium') return false;
+            if (isEmerg || pLvl === 'high' || (pLvl !== 'moderate' && c.priority !== 'normal' && c.priority !== 'medium' && (score < 25 || score >= 50))) return false;
           } else if (priorityFilter === 'low') {
-            if (pLvl !== 'low' && c.priority !== 'low') return false;
+            if (isEmerg || pLvl === 'high' || pLvl === 'moderate' || (pLvl !== 'low' && c.priority !== 'low' && score >= 25)) return false;
           }
         }
 
+        // SLA Urgency filter
+        if (slaFilter && slaFilter !== 'all') {
+          if (slaMeta.urgencyKey !== slaFilter) return false;
+        }
+
+        // Category filter
+        if (categoryFilter) {
+          const cCat = (c.category || '').toLowerCase();
+          const catFormatted = formatCategory(c.category).toLowerCase();
+          if (!cCat.includes(categoryFilter) && !catFormatted.includes(categoryFilter)) return false;
+        }
+
+        // Assignment filter
         if (assignmentFilter) {
           if (assignmentFilter === 'assigned' && !c.assigned_to) return false;
           if (assignmentFilter === 'unassigned' && c.assigned_to) return false;
         }
 
+        // District filter
+        if (districtFilter && districtFilter !== 'all') {
+          const targetDist = districtFilter.toLowerCase();
+          const cDist = (c.district || '').toLowerCase();
+          const cAddr = (c.address || '').toLowerCase();
+          const detectedDist = (getComplaintDistrict(c) || '').toLowerCase();
+          if (!cDist.includes(targetDist) && !cAddr.includes(targetDist) && !detectedDist.includes(targetDist)) return false;
+        }
+
         return true;
       });
 
-      this.renderComplaintsTable(filtered);
+      filteredComplaints = sortOperationalComplaints(filtered, nowMs);
+      if (resetPage) {
+        currentPage = 1;
+      }
+      this.renderComplaintsTable();
     },
 
     resetFilters: function() {
-      const resetVal = id => {
+      const resetVal = (id, val) => {
         const el = document.getElementById(id);
-        if (el) el.value = '';
+        if (el) el.value = val;
       };
-      resetVal('filter-search-input');
-      resetVal('filter-status-select');
-      resetVal('filter-category-select');
-      resetVal('filter-priority-select');
-      resetVal('filter-assignment-select');
-      this.renderComplaintsTable(currentComplaints);
+      resetVal('filter-search-input', '');
+      resetVal('filter-status-select', 'active');
+      resetVal('filter-category-select', '');
+      resetVal('filter-priority-select', '');
+      resetVal('filter-sla-select', '');
+      resetVal('filter-assignment-select', '');
+      resetVal('filter-district-select', '');
+      this.applyFilters(true);
     },
 
     renderComplaintsQueue: function() {
-      this.applyFilters();
+      this.applyFilters(false);
     },
 
-    renderComplaintsTable: function(list) {
+    goToPage: function(p) {
+      const totalPages = Math.max(1, Math.ceil(filteredComplaints.length / pageSize));
+      if (p < 1 || p > totalPages) return;
+      currentPage = p;
+      this.renderComplaintsTable();
+    },
+
+    nextPage: function() {
+      this.goToPage(currentPage + 1);
+    },
+
+    prevPage: function() {
+      this.goToPage(currentPage - 1);
+    },
+
+    renderComplaintsTable: function(explicitList) {
       const tbody = document.getElementById('complaints-queue-table-body');
       if (!tbody) return;
 
-      if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">No complaints match the filter criteria.</td></tr>`;
+      const list = explicitList || filteredComplaints;
+      const totalCount = list.length;
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * pageSize;
+      const pagedList = list.slice(startIndex, startIndex + pageSize);
+
+      // Update pagination bar controls
+      const infoEl = document.getElementById('pagination-info-text');
+      const pageIndicator = document.getElementById('pagination-page-indicator');
+      const prevBtn = document.getElementById('pagination-prev-btn');
+      const nextBtn = document.getElementById('pagination-next-btn');
+
+      if (infoEl) {
+        if (totalCount === 0) {
+          infoEl.textContent = t('no_complaints_match_filter', 'Showing 0 of 0 complaints');
+        } else {
+          infoEl.textContent = `Showing ${startIndex + 1}–${Math.min(startIndex + pageSize, totalCount)} of ${totalCount} complaints`;
+        }
+      }
+
+      if (pageIndicator) {
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+      }
+
+      if (prevBtn) {
+        prevBtn.disabled = (currentPage <= 1);
+      }
+      if (nextBtn) {
+        nextBtn.disabled = (currentPage >= totalPages);
+      }
+
+      if (pagedList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+          <div style="font-weight: 600; font-size: 1rem; margin-bottom: 0.35rem;">No complaints match the selected filter criteria.</div>
+          <div style="font-size: 0.82rem; color: var(--text-light);">Try selecting "All Statuses" or clearing your search term.</div>
+        </td></tr>`;
         return;
       }
 
-      tbody.innerHTML = list.map(c => {
-        const statusClass = `status-${(c.status || 'pending').toLowerCase()}`;
+      const nowMs = Date.now();
+      tbody.innerHTML = pagedList.map(c => {
+        const normStatus = (c.status || 'pending').toLowerCase();
+        const statusClass = `status-${normStatus}`;
         const isEmerg = c.is_emergency || c.priority === 'emergency';
         const assignedUser = currentAuthorities.find(a => a.id === c.assigned_to);
 
@@ -873,25 +1335,38 @@
           : (isEmerg ? '100.0' : '50.0');
         const pBadgeClass = priorityLvl === 'CRITICAL' ? 'status-emergency' : (priorityLvl === 'HIGH' ? 'status-overdue' : (priorityLvl === 'MODERATE' ? 'status-assigned' : 'status-pending'));
 
+        const slaMeta = computeSlaUrgencyMeta(c, nowMs);
+        const districtName = getComplaintDistrict(c);
+        const locationDisplay = districtName
+          ? `<div style="color: var(--text-main); font-weight: 500;">${escapeHTML(c.address || districtName)}</div><div style="font-size: 0.72rem; color: var(--primary); font-weight: 700; margin-top: 0.15rem;">${escapeHTML(districtName)}</div>`
+          : `<div style="color: var(--text-main); font-weight: 500;">${escapeHTML(c.address || 'Coordinates recorded')}</div>`;
+
         return `
-          <tr>
+          <tr class="${slaMeta.rowHighlightClass}">
             <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
             <td>
               <div style="font-weight: 700; color: var(--text-main);">${escapeHTML(c.title)}</div>
-              <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(c.description)}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(c.description || '')}</div>
             </td>
             <td>${formatCategory(c.category)}</td>
             <td>
-              <span class="status-badge ${pBadgeClass}">${priorityLvl}</span>
-              <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-top: 0.2rem; font-family: monospace;">Score: ${priorityScore}</div>
+              <div class="priority-score-wrap">
+                <span class="status-badge ${pBadgeClass}">${priorityLvl}</span>
+                <span class="priority-score-pill"><span class="score-val">${priorityScore}</span>/100</span>
+              </div>
             </td>
             <td>
               <span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span>
-              ${c.time_remaining_label ? `<div style="font-size: 0.72rem; color: ${c.is_escalated ? '#7f1d1d' : (c.is_overdue ? '#dc2626' : (c.sla_status === 'met' ? '#059669' : '#d97706'))}; font-weight: 700; margin-top: 0.25rem;">${escapeHTML(c.time_remaining_label)}</div>` : ''}
             </td>
-            <td>${escapeHTML(c.address || 'Location recorded')}</td>
-            <td>${assignedUser ? escapeHTML(assignedUser.full_name) : 'Unassigned'}</td>
-            <td>${new Date(c.created_at).toLocaleDateString()}</td>
+            <td>
+              <div class="sla-urgency-cell">
+                <span class="sla-urgency-badge ${slaMeta.badgeClass}">${escapeHTML(slaMeta.badgeLabel)}</span>
+                <span class="sla-countdown-text">${escapeHTML(slaMeta.countdownText)}</span>
+                <span class="sla-deadline-sub" title="SLA Deadline">${escapeHTML(slaMeta.deadlineFormatted)}</span>
+              </div>
+            </td>
+            <td>${locationDisplay}</td>
+            <td>${assignedUser ? escapeHTML(assignedUser.full_name) : '<span style="color: var(--text-light); font-style: italic;">Unassigned</span>'}</td>
             <td>
               <button type="button" class="btn-action btn-inspect-case" data-action="inspect-case" data-complaint-id="${escapeHTML(c.complaint_id || c.id)}" data-issue-id="${escapeHTML(c.id)}" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" onclick="window.ComplaintService.handleInspectCase(event, this)">Inspect Case</button>
             </td>
@@ -910,26 +1385,40 @@
         return;
       }
 
-      const assignedList = currentComplaints.filter(c => c.assigned_to === currentUser.id);
+      const assignedList = sortOperationalComplaints(currentComplaints.filter(c => c.assigned_to === currentUser.id));
 
       if (assignedList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">No casework currently assigned to your officer account.</td></tr>`;
         return;
       }
 
+      const nowMs = Date.now();
       tbody.innerHTML = assignedList.map(c => {
         const statusClass = `status-${(c.status || 'pending').toLowerCase()}`;
         const isEmerg = c.is_emergency || c.priority === 'emergency';
+        const slaMeta = computeSlaUrgencyMeta(c, nowMs);
+        const priorityLvl = (c.priority_level || (isEmerg ? 'CRITICAL' : 'MODERATE')).toUpperCase();
+        const priorityScore = (c.priority_score !== undefined && c.priority_score !== null)
+          ? Number(c.priority_score).toFixed(1)
+          : (isEmerg ? '100.0' : '50.0');
+        const pBadgeClass = priorityLvl === 'CRITICAL' ? 'status-emergency' : (priorityLvl === 'HIGH' ? 'status-overdue' : (priorityLvl === 'MODERATE' ? 'status-assigned' : 'status-pending'));
 
         return `
-          <tr>
+          <tr class="${slaMeta.rowHighlightClass}">
             <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
-            <td><strong>${escapeHTML(c.title)}</strong></td>
+            <td>
+              <div style="font-weight: 700; color: var(--text-main);">${escapeHTML(c.title)}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(c.description || '')}</div>
+            </td>
             <td>${formatCategory(c.category)}</td>
-            <td>${isEmerg ? `<span class="status-badge status-emergency">EMERGENCY</span>` : 'Normal'}</td>
+            <td>
+              <div class="priority-score-wrap">
+                <span class="status-badge ${pBadgeClass}">${priorityLvl}</span>
+                <span class="priority-score-pill"><span class="score-val">${priorityScore}</span>/100</span>
+              </div>
+            </td>
             <td>
               <span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span>
-              ${c.time_remaining_label ? `<div style="font-size: 0.72rem; color: ${c.is_escalated ? '#7f1d1d' : (c.is_overdue ? '#dc2626' : (c.sla_status === 'met' ? '#059669' : '#d97706'))}; font-weight: 700; margin-top: 0.25rem;">${escapeHTML(c.time_remaining_label)}</div>` : ''}
             </td>
             <td>${escapeHTML(c.address || 'Location recorded')}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
@@ -2047,21 +2536,52 @@
     }
   };
 
-  // Reset button loading state on back/forward cache navigation
-  window.addEventListener('pageshow', () => {
-    document.querySelectorAll('button.btn-inspect-case.is-loading').forEach(btn => {
-      btn.disabled = false;
-      btn.classList.remove('is-loading');
-      btn.removeAttribute('aria-busy');
-      btn.innerHTML = 'Inspect Case';
-    });
-  });
+  if (typeof window !== 'undefined') {
+    window.ComplaintService = win.ComplaintService;
+  }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      window.ComplaintService.init();
+  // Reset button loading state on back/forward cache navigation
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('pageshow', () => {
+      document.querySelectorAll('button.btn-inspect-case.is-loading').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+        btn.removeAttribute('aria-busy');
+        btn.innerHTML = 'Inspect Case';
+      });
     });
-  } else {
-    window.ComplaintService.init();
+  }
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        if (win.ComplaintService && typeof win.ComplaintService.init === 'function') {
+          win.ComplaintService.init();
+        }
+      });
+    } else {
+      if (win.ComplaintService && typeof win.ComplaintService.init === 'function') {
+        win.ComplaintService.init();
+      }
+    }
+  }
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      ComplaintService: win.ComplaintService,
+      computeSlaUrgencyMeta,
+      sortOperationalComplaints,
+      getComplaintDistrict,
+      TN_DISTRICTS_LIST
+    };
+  }
+  if (typeof globalThis !== 'undefined') {
+    globalThis.__AdminComplaintModule = {
+      ComplaintService: win.ComplaintService,
+      computeSlaUrgencyMeta,
+      sortOperationalComplaints,
+      getComplaintDistrict,
+      TN_DISTRICTS_LIST
+    };
   }
 })();

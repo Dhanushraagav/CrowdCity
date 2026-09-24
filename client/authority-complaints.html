@@ -142,19 +142,59 @@
 
         <!-- COMPLAINTS QUEUE PANE -->
         <section id="pane-complaints" class="tab-pane active-pane">
+          <!-- Queue Header Operational Toolbar with Refresh & Live Indicator -->
+          <div class="queue-toolbar">
+            <div class="queue-toolbar-left">
+              <span class="queue-title" data-i18n="operational_work_queue">Operational Work Queue</span>
+              <span id="live-status-indicator" class="live-indicator-pill" title="Supabase Realtime live sync status">
+                <span class="live-dot"></span>
+                <span id="live-status-text" data-i18n="live_updates_active">Live</span>
+              </span>
+              <span id="queue-last-updated" class="refresh-timestamp" data-i18n="last_updated_just_now">Last updated: Just now</span>
+            </div>
+            <div class="queue-toolbar-right">
+              <button type="button" id="btn-manual-refresh" class="btn-refresh" onclick="window.ComplaintService.handleManualRefresh()" aria-label="Refresh complaint queue">
+                <svg class="refresh-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                <span id="refresh-btn-text" data-i18n="refresh_queue">Refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Comprehensive Operational Filters & Search Bar -->
           <div class="filter-bar">
-            <input type="text" id="filter-search-input" class="form-input" data-i18n-placeholder="search_complaints_queue_placeholder" placeholder="Search title, description, address..." style="flex: 1; min-width: 180px;" oninput="window.ComplaintService.applyFilters()" />
+            <input type="text" id="filter-search-input" class="form-input" data-i18n-placeholder="search_complaints_queue_placeholder" placeholder="Search by Ticket ID, Title, Description, Address, District..." style="flex: 2; min-width: 220px;" oninput="window.ComplaintService.handleSearchInput(event)" aria-label="Search complaints" />
             
-            <select id="filter-status-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
-              <option value="">All Statuses</option>
+            <select id="filter-status-select" class="form-select" onchange="window.ComplaintService.applyFilters()" aria-label="Filter by Status">
+              <option value="active" selected data-i18n="all_active_complaints">All Active Complaints</option>
               <option value="pending" data-i18n="pending">Pending</option>
               <option value="assigned" data-i18n="assigned">Assigned</option>
               <option value="in_progress" data-i18n="in_progress">In Progress</option>
               <option value="resolved" data-i18n="resolved">Resolved</option>
+              <option value="verified" data-i18n="verified">Verified</option>
+              <option value="closed" data-i18n="closed">Closed</option>
               <option value="rejected" data-i18n="rejected">Rejected</option>
+              <option value="all" data-i18n="all_statuses">All Statuses</option>
             </select>
 
-            <select id="filter-category-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
+            <select id="filter-priority-select" class="form-select" onchange="window.ComplaintService.applyFilters()" aria-label="Filter by Priority">
+              <option value="">All Priorities</option>
+              <option value="critical">Critical (75-100)</option>
+              <option value="high">High (50-74.9)</option>
+              <option value="moderate">Moderate (25-49.9)</option>
+              <option value="low">Low (0-24.9)</option>
+            </select>
+
+            <select id="filter-sla-select" class="form-select" onchange="window.ComplaintService.applyFilters()" aria-label="Filter by SLA Urgency">
+              <option value="" data-i18n="all_sla_states">All SLA States</option>
+              <option value="escalated" data-i18n="escalated">Escalated</option>
+              <option value="overdue" data-i18n="overdue">Overdue</option>
+              <option value="due_soon" data-i18n="due_soon">Due Soon</option>
+              <option value="within_sla" data-i18n="within_sla">Within SLA</option>
+            </select>
+
+            <select id="filter-category-select" class="form-select" onchange="window.ComplaintService.applyFilters()" aria-label="Filter by Category">
               <option value="">All Categories</option>
               <option value="roads" data-i18n="cat_roads">Roads</option>
               <option value="water_supply" data-i18n="cat_water_supply">Water Supply</option>
@@ -170,23 +210,20 @@
               <option value="other" data-i18n="cat_other">Other</option>
             </select>
 
-            <select id="filter-priority-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
-              <option value="">All Priorities</option>
-              <option value="critical">Critical Priority (75-100)</option>
-              <option value="high">High Priority (50-74.9)</option>
-              <option value="moderate">Moderate Priority (25-49.9)</option>
-              <option value="low">Low Priority (0-24.9)</option>
-            </select>
-
-            <select id="filter-assignment-select" class="form-select" onchange="window.ComplaintService.applyFilters()">
+            <select id="filter-assignment-select" class="form-select" onchange="window.ComplaintService.applyFilters()" aria-label="Filter by Assignment">
               <option value="">All Assignments</option>
-              <option value="assigned" data-i18n="assigned_cases_only">Assigned Cases Only</option>
-              <option value="unassigned" data-i18n="unassigned_cases_only">Unassigned Cases Only</option>
+              <option value="unassigned" data-i18n="unassigned_cases_only">Unassigned Only</option>
+              <option value="assigned" data-i18n="assigned_cases_only">Assigned Only</option>
             </select>
 
-            <button class="btn-secondary" onclick="window.ComplaintService.resetFilters()" data-i18n="reset_filters">Reset Filters</button>
+            <select id="filter-district-select" class="form-select" onchange="window.ComplaintService.applyFilters()" aria-label="Filter by District">
+              <option value="" data-i18n="all_districts">All Districts</option>
+            </select>
+
+            <button type="button" class="btn-secondary" onclick="window.ComplaintService.resetFilters()" data-i18n="reset_filters">Reset Filters</button>
           </div>
 
+          <!-- Operational Table Card -->
           <div class="content-card" style="padding: 0; overflow: hidden;">
             <div class="table-container">
               <table class="data-table">
@@ -195,23 +232,34 @@
                     <th data-i18n="ticket_id">Ticket ID</th>
                     <th data-i18n="th_title_desc">Title & Description</th>
                     <th data-i18n="th_category">Category</th>
-                    <th data-i18n="th_priority">Priority</th>
+                    <th data-i18n="th_priority">Civic Priority</th>
                     <th data-i18n="th_status">Status</th>
-                    <th data-i18n="th_location_address">Location / Address</th>
+                    <th data-i18n="th_sla_urgency">SLA Urgency & Deadline</th>
+                    <th data-i18n="th_location_address">Location / District</th>
                     <th data-i18n="th_assigned_official">Assigned Official</th>
-                    <th data-i18n="th_date">Date</th>
                     <th data-i18n="th_action">Action</th>
                   </tr>
                 </thead>
                 <tbody id="complaints-queue-table-body">
                   <tr>
-                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;"><span data-i18n="loading_complaints_queue">Loading complaints queue...</span></td>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;"><span data-i18n="loading_complaints_queue">Loading operational work queue...</span></td>
                   </tr>
                 </tbody>
               </table>
             </div>
+
+            <!-- Client-Side Pagination Controls -->
+            <div class="pagination-bar" id="complaints-pagination-bar">
+              <div class="pagination-info" id="pagination-info-text">Showing 0 of 0 complaints</div>
+              <div class="pagination-controls">
+                <button type="button" id="pagination-prev-btn" class="pagination-btn" onclick="window.ComplaintService.prevPage()" disabled data-i18n="page_prev">Previous</button>
+                <span class="pagination-current-page" id="pagination-page-indicator">Page 1 of 1</span>
+                <button type="button" id="pagination-next-btn" class="pagination-btn" onclick="window.ComplaintService.nextPage()" disabled data-i18n="page_next">Next</button>
+              </div>
+            </div>
           </div>
         </section>
+
 
       </div>
     </main>
