@@ -9,16 +9,25 @@
   function getUserProfile() {
     try {
       const stored = sessionStorage.getItem('cc_scheme_checker_profile');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed._schemaVersion >= 3) {
+          return parsed;
+        }
+      }
     } catch (e) {}
 
     return {
       age: null,
-      gender: 'all',
-      income: 0,
-      occupation: 'other',
-      isStudent: false,
-      isFarmer: false
+      gender: '',
+      income: null,
+      occupation: '',
+      district: '',
+      isStudent: undefined,
+      isFarmer: undefined,
+      isDisability: undefined,
+      isWidow: undefined,
+      govSchoolStudied: undefined
     };
   }
 
@@ -46,64 +55,76 @@
     return [
       {
         id: 'tn-kmut',
+        scheme_code: 'TN-KMUT-2023',
         scheme_name: 'Kalaignar Magalir Urimai Thittam',
         department_name: 'Social Welfare & Women Empowerment Dept, Govt of TN',
         state_or_central: 'state',
+        data_source: 'tn.gov.in',
         short_description: 'Monthly financial rights assistance of ₹1,000 for female heads of households in Tamil Nadu to promote financial independence.',
         benefits_summary: '₹1,000 monthly direct bank transfer into the account of the female head of the family.',
         required_documents: ["Smart Family Card (Ration Card)", "Aadhaar Card", "Active Bank Passbook", "Electricity Bill"],
         official_portal_url: 'https://kmut.tn.gov.in/',
-        eligibility_criteria: { min_age: 21, max_age: 60, gender: 'female', max_annual_income: 250000 }
+        eligibility_criteria: { min_age: 21, max_age: 60, gender: 'female', max_annual_income: 250000, native_state: 'Tamil Nadu' }
       },
       {
         id: 'tn-pudhumai',
+        scheme_code: 'TN-PP-2022',
         scheme_name: 'Pudhumai Penn Scheme (Higher Education Assurance)',
         department_name: 'Social Welfare & Women Empowerment Dept, Govt of TN',
         state_or_central: 'state',
+        data_source: 'tn.gov.in',
         short_description: 'Financial assistance of ₹1,000 per month for female students pursuing higher education who studied in TN Govt schools.',
         benefits_summary: '₹1,000 monthly financial aid until graduation or completion of diploma course.',
         required_documents: ["Govt School Transfer Certificate (6th-12th)", "Aadhaar Card", "College Admission ID", "Bank Passbook"],
         official_portal_url: 'https://penkalvi.tn.gov.in/',
-        eligibility_criteria: { min_age: 17, max_age: 25, gender: 'female', is_student: true }
+        eligibility_criteria: { min_age: 17, max_age: 25, gender: 'female', is_student: true, student_required: true, gov_school_required: true, native_state: 'Tamil Nadu' }
       },
       {
         id: 'tn-naanmudhalvan',
+        scheme_code: 'TN-NM-2022',
         scheme_name: 'Naan Mudhalvan Skill Development Scheme',
         department_name: 'Tamil Nadu Skill Development Corporation (TNSDC)',
         state_or_central: 'state',
+        data_source: 'tn.gov.in',
         short_description: 'Statewide skill enhancement, technical certifications, AI learning modules, and direct campus placement drives.',
         benefits_summary: 'Free high-value industry certification courses, mentorship, AI skill modules, and direct employment drives.',
         required_documents: ["College ID / Graduation Marksheet", "Aadhaar Card", "Community Certificate"],
         official_portal_url: 'https://www.naanmudhalvan.tn.gov.in/',
-        eligibility_criteria: { min_age: 18, max_age: 35 }
+        eligibility_criteria: { min_age: 18, max_age: 35, native_state: 'Tamil Nadu' }
       },
       {
         id: 'tn-cmchis',
+        scheme_code: 'TN-CMCHIS-2012',
         scheme_name: 'Chief Minister Comprehensive Health Insurance Scheme (CMCHIS)',
         department_name: 'Health & Family Welfare Department, Govt of TN',
         state_or_central: 'state',
+        data_source: 'tn.gov.in',
         short_description: 'Cashless medical and surgical treatment coverage up to ₹5,00,000 per family per year in empanelled government & private hospitals.',
         benefits_summary: 'Cashless hospital treatment up to ₹5 Lakhs annually per enrolled family across accredited hospitals.',
         required_documents: ["Income Certificate from VAO / Tahsildar", "Smart Family Card", "Aadhaar Card"],
         official_portal_url: 'https://cmchistn.com/',
-        eligibility_criteria: { max_annual_income: 120000 }
+        eligibility_criteria: { max_annual_income: 120000, native_state: 'Tamil Nadu' }
       },
       {
         id: 'central-pmkisan',
+        scheme_code: 'CENTRAL-PMKISAN',
         scheme_name: 'PM Kisan Samman Nidhi (PM-KISAN)',
         department_name: 'Ministry of Agriculture & Farmers Welfare, Govt of India',
         state_or_central: 'central',
+        data_source: 'myscheme.gov.in',
         short_description: 'Annual direct income support of ₹6,000 for landholding farmer families paid in 3 equal installments.',
         benefits_summary: '₹6,000 per year paid in 3 installments of ₹2,000 every 4 months via Direct Benefit Transfer.',
         required_documents: ["Aadhaar Card", "Land Ownership Certificate (Patta/RoR)", "Aadhaar-linked Bank Account"],
         official_portal_url: 'https://pmkisan.gov.in/',
-        eligibility_criteria: { is_farmer: true }
+        eligibility_criteria: { is_farmer: true, farmer_required: true }
       },
       {
         id: 'central-pmjay',
+        scheme_code: 'CENTRAL-PMJAY',
         scheme_name: 'Ayushman Bharat PM-JAY',
         department_name: 'National Health Authority (NHA), Govt of India',
         state_or_central: 'central',
+        data_source: 'myscheme.gov.in',
         short_description: 'National health insurance coverage of ₹5 Lakhs per family for secondary & tertiary hospital care.',
         benefits_summary: '₹5,00,000 annual cashless treatment for over 1,900 medical procedures across network hospitals.',
         required_documents: ["Aadhaar Card", "Ration Card", "Ayushman Golden Card"],
@@ -113,250 +134,170 @@
     ];
   }
 
-  // Redesigned database eligibility evaluator mapping criteria fields individually
   function evaluateEligibility(scheme, profile) {
+    if (window.CrowdCitySchemeEngine && typeof window.CrowdCitySchemeEngine.evaluateEligibility === 'function') {
+      return window.CrowdCitySchemeEngine.evaluateEligibility(scheme, profile);
+    }
+
     const criteria = scheme.eligibility_criteria || {};
     const passed = [];
     const failed = [];
     const missing = [];
-    
+    const verificationNotes = [];
+
     const verifiedDocs = [];
     const expiredDocs = [];
     const renewingDocs = [];
     const missingDocsList = [];
 
-    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
+    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'en'));
     const isTamil = (currentLang === 'ta');
 
-    // 1. Age check
-    if ((criteria.min_age !== undefined && criteria.min_age !== null) || (criteria.max_age !== undefined && criteria.max_age !== null)) {
-      const min = criteria.min_age || 18;
-      const max = criteria.max_age || 120;
-      if (!profile.age) {
-        missing.push(isTamil ? `? வயது விவரம் தேவை (வயது ${min}–${max}க்குள் இருக்க வேண்டும்)` : `? Age information still required (Must be between ${min}–${max})`);
-      } else if (profile.age < min || profile.age > max) {
-        failed.push(isTamil 
-          ? `✗ வயது வரம்பு ${min}–${max}க்குள் இருக்க வேண்டும் (தற்போதைய வயது: ${profile.age})` 
-          : `✗ Age must be between ${min}–${max} (Current: ${profile.age})`);
+    // 1. Age check (preserving min_age: 0)
+    const hasMinAge = criteria.min_age !== undefined && criteria.min_age !== null;
+    const hasMaxAge = criteria.max_age !== undefined && criteria.max_age !== null;
+    if (hasMinAge || hasMaxAge) {
+      const min = hasMinAge ? Number(criteria.min_age) : 0;
+      const max = hasMaxAge ? Number(criteria.max_age) : 120;
+      const hasUserAge = profile && profile.age !== undefined && profile.age !== null && profile.age !== '' && !Number.isNaN(Number(profile.age));
+      if (!hasUserAge) {
+        missing.push(isTamil ? `? வயது விவரம் தேவை (வயது ${min}–${max}க்குள் இருக்க வேண்டும்)` : `? Age information required (Must be between ${min}–${max})`);
       } else {
-        passed.push(isTamil 
-          ? `✓ வயது ${min}–${max}க்குள் உள்ளது` 
-          : `✓ Age between ${min}–${max}`);
+        const userAge = Number(profile.age);
+        if (userAge < min || userAge > max) {
+          failed.push(isTamil ? `✗ வயது வரம்பு ${min}–${max}க்குள் இருக்க வேண்டும் (தற்போதைய வயது: ${userAge})` : `✗ Age must be between ${min}–${max} (Current: ${userAge})`);
+        } else {
+          passed.push(isTamil ? `✓ வயது ${min}–${max}க்குள் உள்ளது` : `✓ Age between ${min}–${max}`);
+        }
       }
     }
 
     // 2. Gender check
     if (criteria.gender && criteria.gender !== 'all') {
-      if (!profile.gender || profile.gender === 'all') {
-        missing.push(isTamil ? "? பாலினம் விவரம் தேவை" : "? Gender information still required");
-      } else if (profile.gender !== criteria.gender) {
-        const expected = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (isTamil ? 'ஆண்' : 'Male');
-        failed.push(isTamil 
-          ? `✗ பாலினம் ${expected} ஆக இருக்க வேண்டும்` 
-          : `✗ Gender must be ${expected}`);
+      const normalizedGender = (profile && typeof profile.gender === 'string') ? profile.gender.trim().toLowerCase() : '';
+      const validGenders = ['female', 'male', 'transgender'];
+      if (!normalizedGender || !validGenders.includes(normalizedGender)) {
+        missing.push(isTamil ? "? பாலினம் விவரம் தேவை" : "? Gender information required");
+      } else if (normalizedGender !== String(criteria.gender).toLowerCase()) {
+        const expected = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (criteria.gender === 'male' ? (isTamil ? 'ஆண்' : 'Male') : 'Transgender');
+        failed.push(isTamil ? `✗ பாலினம் ${expected} ஆக இருக்க வேண்டும்` : `✗ Gender must be ${expected}`);
       } else {
-        const genderVal = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (isTamil ? 'ஆண்' : 'Male');
-        passed.push(isTamil 
-          ? `✓ பாலினம்: ${genderVal}` 
-          : `✓ Gender is ${genderVal}`);
+        const genderVal = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (criteria.gender === 'male' ? (isTamil ? 'ஆண்' : 'Male') : 'Transgender');
+        passed.push(isTamil ? `✓ பாலினம்: ${genderVal}` : `✓ Gender is ${genderVal}`);
       }
     }
 
-    // 3. Income check
+    // 3. Income check (₹0 is valid; null/undefined/"" is missing)
     if (criteria.max_annual_income !== undefined && criteria.max_annual_income !== null) {
-      if (profile.income === undefined || profile.income === null || profile.income === 0) {
-        missing.push(isTamil 
-          ? `? ஆண்டு வருமானம் விவரம் தேவை (₹${criteria.max_annual_income.toLocaleString('en-IN')}க்குள் இருக்க வேண்டும்)` 
-          : `? Family income information still required (Must be under ₹${criteria.max_annual_income.toLocaleString('en-IN')})`);
-      } else if (profile.income > criteria.max_annual_income) {
-        failed.push(isTamil 
-          ? `✗ ஆண்டு குடும்ப வருமானம் ₹${criteria.max_annual_income.toLocaleString('en-IN')}க்கு மேல் உள்ளது (தற்போதைய வருமானம்: ₹${profile.income.toLocaleString('en-IN')})` 
-          : `✗ Family income exceeds ₹${criteria.max_annual_income.toLocaleString('en-IN')} (Current: ₹${profile.income.toLocaleString('en-IN')})`);
+      const maxInc = Number(criteria.max_annual_income);
+      const hasIncome = profile && profile.income !== undefined && profile.income !== null && profile.income !== '' && !Number.isNaN(Number(profile.income));
+      if (!hasIncome) {
+        missing.push(isTamil ? `? ஆண்டு வருமானம் விவரம் தேவை (₹${maxInc.toLocaleString('en-IN')}க்குள் இருக்க வேண்டும்)` : `? Annual family income required (Must be under ₹${maxInc.toLocaleString('en-IN')})`);
       } else {
-        passed.push(isTamil 
-          ? `✓ குடும்ப வருமானம் ₹${criteria.max_annual_income.toLocaleString('en-IN')}க்குள் உள்ளது` 
-          : `✓ Family income is under ₹${criteria.max_annual_income.toLocaleString('en-IN')}`);
+        const userInc = Number(profile.income);
+        if (userInc > maxInc) {
+          failed.push(isTamil ? `✗ ஆண்டு குடும்ப வருமானம் ₹${maxInc.toLocaleString('en-IN')}க்கு மேல் உள்ளது (தற்போதைய வருமானம்: ₹${userInc.toLocaleString('en-IN')})` : `✗ Family income exceeds ₹${maxInc.toLocaleString('en-IN')} (Current: ₹${userInc.toLocaleString('en-IN')})`);
+        } else {
+          passed.push(isTamil ? `✓ குடும்ப வருமானம் ₹${maxInc.toLocaleString('en-IN')}க்குள் உள்ளது` : `✓ Family income is within ₹${maxInc.toLocaleString('en-IN')}`);
+        }
       }
     }
 
     // 4. Student status
-    if (criteria.student_required) {
-      if (!profile.isStudent && profile.occupation !== 'student') {
+    const requiresStudent = Boolean(criteria.student_required || criteria.is_student);
+    if (requiresStudent) {
+      const studentExplicitTrue = (profile && (profile.isStudent === true || profile.occupation === 'student'));
+      const studentExplicitFalse = (profile && profile.isStudent === false && profile.occupation && profile.occupation !== 'student');
+      if (studentExplicitTrue) {
+        passed.push(isTamil ? "✓ மாணவர் நிலை சரிபார்க்கப்பட்டது" : "✓ Enrolled Student status verified");
+      } else if (studentExplicitFalse) {
         failed.push(isTamil ? "✗ மாணவர் நிலை தேவை" : "✗ Enrolled Student status required");
       } else {
-        passed.push(isTamil ? "✓ மாணவர் நிலை சரிபார்க்கப்பட்டது" : "✓ Enrolled Student status verified");
+        missing.push(isTamil ? "? மாணவர் நிலை விவரம் தேவை" : "? Student enrollment status required");
       }
     }
 
-    // 5. Gov School studied
+    // 5. Gov School
     if (criteria.gov_school_required) {
-      if (profile.govSchoolStudied === undefined || profile.govSchoolStudied === null) {
-        missing.push(isTamil ? "? அரசு பள்ளி கல்வி விவரம் தேவை" : "? Government school schooling information still required");
-      } else if (!profile.govSchoolStudied) {
-        failed.push(isTamil ? "✗ அரசு பள்ளியில் படித்திருக்க வேண்டும்" : "✗ Government School schooling required");
+      if (!profile || profile.govSchoolStudied === undefined || profile.govSchoolStudied === null || profile.govSchoolStudied === '') {
+        missing.push(isTamil ? "? அரசு பள்ளி கல்வி விவரம் தேவை" : "? Government school schooling information (Classes 6–12) required");
+      } else if (profile.govSchoolStudied === false) {
+        failed.push(isTamil ? "✗ அரசு பள்ளியில் படித்திருக்க வேண்டும்" : "✗ Government School schooling (Classes 6–12) required");
       } else {
         passed.push(isTamil ? "✓ அரசு பள்ளியில் படித்தது சரிபார்க்கப்பட்டது" : "✓ Studied in Government School");
       }
     }
 
-    // 6. Gov College studied
-    if (criteria.gov_college_required) {
-      if (profile.govCollegeStudied === undefined || profile.govCollegeStudied === null) {
-        missing.push(isTamil ? "? அரசு கல்லூரி கல்வி விவரம் தேவை" : "? Government college enrollment information still required");
-      } else if (!profile.govCollegeStudied) {
-        failed.push(isTamil ? "✗ அரசு கல்லூரியில் படித்திருக்க வேண்டும்" : "✗ Government College enrollment required");
-      } else {
-        passed.push(isTamil ? "✓ அரசு கல்லூரியில் படித்தது சரிபார்க்கப்பட்டது" : "✓ Enrolled in Government College");
-      }
-    }
-
-    // 7. Disability status
-    if (criteria.disability_required) {
-      if (!profile.isDisability) {
+    // 6. Disability
+    const requiresDisability = Boolean(criteria.disability_required || criteria.is_disabled);
+    if (requiresDisability) {
+      if (!profile || profile.isDisability === undefined || profile.isDisability === null || profile.isDisability === '') {
+        missing.push(isTamil ? "? மாற்றுத்திறனாளி தகுதி விவரம் தேவை" : "? Differently-abled / disability status information required");
+      } else if (profile.isDisability === false) {
         failed.push(isTamil ? "✗ மாற்றுத்திறனாளி தகுதி தேவை" : "✗ Differently-abled status required");
       } else {
         passed.push(isTamil ? "✓ மாற்றுத்திறனாளி தகுதி சரிபார்க்கப்பட்டது" : "✓ Differently-abled status satisfied");
       }
     }
 
-    // 8. Widow / Single Parent status
-    if (criteria.widow_required) {
-      if (!profile.isWidow) {
+    // 7. Widow / Single Parent
+    const requiresWidow = Boolean(criteria.widow_required || criteria.is_widow);
+    if (requiresWidow) {
+      if (!profile || profile.isWidow === undefined || profile.isWidow === null || profile.isWidow === '') {
+        missing.push(isTamil ? "? விதவை அல்லது ஒற்றை பெற்றோர் விவரம் தேவை" : "? Widow / Single Parent status information required");
+      } else if (profile.isWidow === false) {
         failed.push(isTamil ? "✗ விதவை அல்லது ஒற்றை பெற்றோர் தகுதி தேவை" : "✗ Widow / Single Parent status required");
       } else {
         passed.push(isTamil ? "✓ விதவை / ஒற்றை பெற்றோர் தகுதி சரிபார்க்கப்பட்டது" : "✓ Widow / Single Parent status satisfied");
       }
     }
 
-    // 9. Farmer family status
-    if (criteria.farmer_required) {
-      if (!profile.isFarmer && profile.occupation !== 'farmer') {
+    // 8. Farmer status
+    const requiresFarmer = Boolean(criteria.farmer_required || criteria.is_farmer);
+    if (requiresFarmer) {
+      const farmerExplicitTrue = (profile && (profile.isFarmer === true || profile.occupation === 'farmer'));
+      const farmerExplicitFalse = (profile && profile.isFarmer === false && profile.occupation && profile.occupation !== 'farmer');
+      if (farmerExplicitTrue) {
+        passed.push(isTamil ? "✓ விவசாயி தகுதி சரிபார்க்கப்பட்டது" : "✓ Farmer / Landholder family status verified");
+      } else if (farmerExplicitFalse) {
         failed.push(isTamil ? "✗ விவசாயி தகுதி தேவை" : "✗ Farmer / Landholder family status required");
       } else {
-        passed.push(isTamil ? "✓ விவசாயி தகுதி சரிபார்க்கப்பட்டது" : "✓ Farmer / Landholder family status verified");
+        missing.push(isTamil ? "? விவசாயி / நில உரிமையாளர் விவரம் தேவை" : "? Farmer / landholding status information required");
       }
     }
 
-    // 10. Residency state check
+    // 9. Residency
     if (criteria.native_state) {
-      if (!profile.district) {
-        missing.push(isTamil ? "? இருப்பிட/மாவட்ட விவரங்கள் தேவை" : "? Residency district information still required");
+      if (!profile || !profile.district || String(profile.district).trim() === '') {
+        missing.push(isTamil ? "? இருப்பிட/மாவட்ட விவரங்கள் தேவை" : "? Residency district information required");
       } else {
-        passed.push(isTamil 
-          ? `✓ தமிழக இருப்பிட தகுதி (${profile.district} மாவட்டம்)` 
-          : `✓ resident of ${criteria.native_state} (${profile.district} District)`);
+        passed.push(isTamil ? `✓ தமிழக இருப்பிட தகுதி (${profile.district} மாவட்டம்)` : `✓ Resident of ${criteria.native_state} (${profile.district} District)`);
       }
     }
 
-    // 11. Cross-check documents & renewals
-    const reqCerts = criteria.required_certificates || [];
-    let uploadedDocs = [];
-    try {
-      const stored = localStorage.getItem('cc_user_uploaded_docs');
-      if (stored) uploadedDocs = JSON.parse(stored);
-    } catch (e) {}
-
-    const now = new Date();
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-    reqCerts.forEach(cert => {
-      const matchingUploaded = uploadedDocs.find(d => {
-        const t = (d.doc_type || "").toLowerCase();
-        const c = cert.toLowerCase();
-        return t.includes(c) || c.includes(t);
-      });
-
-      if (!matchingUploaded) {
-        missingDocsList.push(cert);
-        missing.push(isTamil ? `? ${cert} ஆவணம் சமர்ப்பிக்கப்படவில்லை` : `? ${cert} not provided in document wallet`);
-      } else {
-        let isExpired = false;
-        let isRenewalSoon = false;
-        let expiryDateStr = "";
-
-        if (matchingUploaded.expiry_date) {
-          const exp = new Date(matchingUploaded.expiry_date);
-          expiryDateStr = exp.toLocaleDateString(isTamil ? 'ta-IN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-          if (exp < now) {
-            isExpired = true;
-          } else if (exp <= thirtyDaysFromNow) {
-            isRenewalSoon = true;
-          }
-        }
-
-        if (isExpired) {
-          expiredDocs.push({ name: cert, expiry: expiryDateStr });
-          failed.push(isTamil ? `✗ ${cert} காலாவதியாகிவிட்டது (முடிந்த தேதி: ${expiryDateStr})` : `✗ ${cert} is expired (Expired on ${expiryDateStr})`);
-        } else if (isRenewalSoon) {
-          renewingDocs.push({ name: cert, expiry: expiryDateStr });
-          passed.push(isTamil ? `✓ ${cert} சரிபார்க்கப்பட்டது (ஆனால் புதுப்பிக்க வேண்டும்: ${expiryDateStr})` : `✓ ${cert} verified (But needs renewal soon: ${expiryDateStr})`);
-        } else {
-          verifiedDocs.push({ name: cert, expiry: expiryDateStr });
-          passed.push(isTamil ? `✓ ${cert} ஆவணம் சரிபார்க்கப்பட்டது` : `✓ ${cert} provided and verified`);
-        }
-      }
-    });
-
-    // 12. Calculate Eligibility Status
+    let statusCode = "ELIGIBLE";
     let status = "Eligible";
     if (failed.length > 0) {
+      statusCode = "NOT_ELIGIBLE";
       status = "Not Eligible";
     } else if (missing.length > 0) {
+      statusCode = "INSUFFICIENT_INFORMATION";
       status = "Additional Information Required";
-    } else if (missingDocsList.length > 0) {
-      status = "Additional Documents Required";
-    } else {
-      status = "Eligible";
-    }
-
-    // 13. Calculate Confidence Score / Rating
-    let confidence = "High Confidence";
-    const confidenceReasons = [];
-
-    if (failed.length > 0) {
-      confidence = "Needs Verification";
-      confidenceReasons.push(isTamil ? "திட்ட தகுதி விதிகள் பொருந்தவில்லை" : "Eligibility criteria failed");
-    } else if (missing.some(m => !m.includes("not provided") && !m.includes("சமர்ப்பிக்கப்படவில்லை"))) {
-      confidence = "Needs Verification";
-      confidenceReasons.push(isTamil ? "சுயவிவர தகவல் விடுபட்டுள்ளது" : "Missing profile information");
-    } else if (expiredDocs.length > 0) {
-      confidence = "Needs Verification";
-      confidenceReasons.push(isTamil ? "காலாவதியான ஆவணங்கள் உள்ளன" : "Expired documents");
-    }
-
-    if (confidence !== "Needs Verification") {
-      if (missingDocsList.length > 0) {
-        confidence = "Medium Confidence";
-        confidenceReasons.push(isTamil ? "கூடுதல் ஆவணங்கள் தேவை" : "Incomplete document verification");
-      }
-      if (renewingDocs.length > 0) {
-        confidence = "Medium Confidence";
-        confidenceReasons.push(isTamil ? "ஆவணங்கள் விரைவில் புதுப்பிக்கப்பட வேண்டும்" : "Documents needing renewal soon");
-      }
-      
-      // Check if rules updated recently (within 7 days)
-      if (scheme.updated_at) {
-        const updateDate = new Date(scheme.updated_at);
-        const diffTime = Math.abs(now - updateDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays <= 7) {
-          confidence = "Medium Confidence";
-          confidenceReasons.push(isTamil ? "திட்ட விதிகள் சமீபத்தில் புதுப்பிக்கப்பட்டன" : "Scheme rules recently updated");
-        }
-      }
     }
 
     return {
       status,
+      statusCode,
       passed,
       failed,
       missing,
+      verificationNotes,
       verifiedDocs,
       expiredDocs,
       renewingDocs,
       missingDocsList,
-      confidence,
-      confidenceReasons
+      confidence: statusCode === "ELIGIBLE" ? "High Confidence" : "Needs Verification",
+      confidenceReasons: []
     };
   }
 

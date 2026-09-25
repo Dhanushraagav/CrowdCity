@@ -34,14 +34,16 @@
     return fetchedSchemesCache;
   }
 
-  // Fallback initial dataset matching seed SQL
+  // Fallback initial dataset aligned with supabase/v2_government_schemes_seed.sql and v2_eligibility_engine_schema.sql
   function getFallbackSeedSchemes() {
     return [
       {
         id: 'tn-kmut',
+        scheme_code: 'TN-KMUT-001',
         scheme_name: 'Kalaignar Magalir Urimai Thittam',
         department_name: 'Social Welfare & Women Empowerment Department, Govt of Tamil Nadu',
         state_or_central: 'state',
+        data_source: 'Tamil Nadu Government Portal (kmut.tn.gov.in)',
         short_description: 'Monthly financial rights assistance of ₹1,000 for women heads of households in Tamil Nadu.',
         benefits_summary: '₹1,000 monthly direct bank transfer into the account of the female head of the family.',
         required_documents: ["Smart Family Card (Ration Card)", "Aadhaar Card", "Active Bank Passbook", "Electricity Bill"],
@@ -50,15 +52,19 @@
           min_age: 21,
           max_age: 60,
           gender: 'female',
-          max_annual_income: 250000
+          max_annual_income: 250000,
+          native_state: 'Tamil Nadu',
+          electricity_consumption_max_units_per_year: 3600
         }
       },
       {
         id: 'tn-pudhumai',
+        scheme_code: 'TN-PUDHUMAI-002',
         scheme_name: 'Pudhumai Penn Scheme (Higher Education Assurance)',
         department_name: 'Social Welfare & Women Empowerment Department, Govt of Tamil Nadu',
         state_or_central: 'state',
-        short_description: 'Monthly financial support of ₹1,000 for girl students pursuing degree/diploma education.',
+        data_source: 'Tamil Nadu e-Governance / Penkalvi Portal',
+        short_description: 'Monthly financial support of ₹1,000 for girl students pursuing degree/diploma education who studied in TN Govt schools (Classes 6–12).',
         benefits_summary: '₹1,000 monthly financial aid until graduation or completion of diploma course.',
         required_documents: ["Govt School Transfer Certificate (6th-12th)", "Aadhaar Card", "College Admission ID", "Bank Passbook"],
         official_portal_url: 'https://penkalvi.tn.gov.in/',
@@ -66,261 +72,495 @@
           min_age: 17,
           max_age: 25,
           gender: 'female',
-          is_student: true
+          student_required: true,
+          is_student: true,
+          gov_school_required: true,
+          native_state: 'Tamil Nadu'
         }
       },
       {
         id: 'tn-naanmudhalvan',
+        scheme_code: 'TN-NM-003',
         scheme_name: 'Naan Mudhalvan Skill Development Scheme',
         department_name: 'Tamil Nadu Skill Development Corporation (TNSDC), Govt of Tamil Nadu',
         state_or_central: 'state',
+        data_source: 'TNSDC Official Portal (naanmudhalvan.tn.gov.in)',
         short_description: 'Statewide skill enhancement and career placement platform for college students & youth.',
         benefits_summary: 'Free high-value industry certification courses, mentorship, AI skill modules, and direct employment drives.',
         required_documents: ["College ID / Graduation Marksheet", "Aadhaar Card", "Community Certificate"],
         official_portal_url: 'https://www.naanmudhalvan.tn.gov.in/',
         eligibility_criteria: {
           min_age: 18,
-          max_age: 35
+          max_age: 35,
+          gender: 'all',
+          native_state: 'Tamil Nadu'
         }
       },
       {
         id: 'tn-cmchis',
+        scheme_code: 'TN-CMCHIS-004',
         scheme_name: 'Chief Minister Comprehensive Health Insurance Scheme (CMCHIS)',
         department_name: 'Health & Family Welfare Department, Govt of Tamil Nadu',
         state_or_central: 'state',
+        data_source: 'CMCHIS Tamil Nadu Official Portal',
         short_description: 'Cashless medical and surgical treatment cover up to ₹5,00,000 per family per year.',
         benefits_summary: 'Cashless hospital treatment up to ₹5 Lakhs annually per enrolled family across accredited hospitals.',
         required_documents: ["Income Certificate from VAO / Tahsildar", "Smart Family Card", "Aadhaar Card"],
         official_portal_url: 'https://cmchistn.com/',
         eligibility_criteria: {
-          max_annual_income: 120000
+          gender: 'all',
+          max_annual_income: 120000,
+          native_state: 'Tamil Nadu'
         }
       },
       {
         id: 'tn-kanavuillam',
+        scheme_code: 'TN-KKI-005',
         scheme_name: 'Kalaignar Kanavu Illam Housing Scheme',
         department_name: 'Rural Development & Panchayat Raj Department, Govt of Tamil Nadu',
         state_or_central: 'state',
+        data_source: 'TN Rural Development Portal (tnrd.tn.gov.in)',
         short_description: 'Financial subsidy of ₹3.5 Lakhs for converting rural hutments into permanent concrete houses.',
         benefits_summary: '₹3,50,000 direct construction assistance disbursed in stage-wise installments.',
         required_documents: ["Land Patta Document", "Aadhaar Card", "Ration Card", "Bank Passbook"],
         official_portal_url: 'https://tnrd.tn.gov.in/',
         eligibility_criteria: {
-          max_annual_income: 150000
+          gender: 'all',
+          max_annual_income: 150000,
+          native_state: 'Tamil Nadu',
+          residence_type: 'Kutcha House / Hutment Owner in Rural Area',
+          own_land_patta: true
         }
       },
       {
         id: 'tn-uzhavar',
+        scheme_code: 'TN-UZHAVAR-006',
         scheme_name: 'TN Uzhavar Protection Scheme',
         department_name: 'Revenue & Disaster Management Department, Govt of Tamil Nadu',
         state_or_central: 'state',
+        data_source: 'Tamil Nadu Revenue Department',
         short_description: 'Social security, pension, and accidental insurance for agricultural landholders & laborers.',
         benefits_summary: 'Monthly ₹1,000 old age pension, ₹1,00,000 accidental death cover, and higher education scholarships.',
         required_documents: ["Uzhavar Card / Land Patta Document", "Aadhaar Card", "Ration Card", "Bank Passbook"],
         official_portal_url: 'https://eblock.tn.gov.in/',
         eligibility_criteria: {
-          is_farmer: true
+          min_age: 18,
+          gender: 'all',
+          farmer_required: true,
+          is_farmer: true,
+          native_state: 'Tamil Nadu'
         }
       },
       {
         id: 'central-pmkisan',
+        scheme_code: 'CENTRAL-PMKISAN-007',
         scheme_name: 'PM Kisan Samman Nidhi (PM-KISAN)',
         department_name: 'Ministry of Agriculture & Farmers Welfare, Govt of India',
         state_or_central: 'central',
+        data_source: 'PM-KISAN Official Portal (pmkisan.gov.in)',
         short_description: 'Annual direct income support of ₹6,000 for landholding farmer families across India.',
         benefits_summary: '₹6,000 per year paid in 3 installments of ₹2,000 every 4 months via Direct Benefit Transfer.',
         required_documents: ["Aadhaar Card", "Land Ownership Certificate (Patta/RoR)", "Aadhaar-linked Bank Account"],
         official_portal_url: 'https://pmkisan.gov.in/',
         eligibility_criteria: {
-          is_farmer: true
+          min_age: 18,
+          gender: 'all',
+          farmer_required: true,
+          is_farmer: true,
+          landholding: 'Cultivable landholder'
         }
       },
       {
         id: 'central-pmjay',
+        scheme_code: 'CENTRAL-PMJAY-008',
         scheme_name: 'Ayushman Bharat PM-JAY',
         department_name: 'National Health Authority (NHA), Ministry of Health, Govt of India',
         state_or_central: 'central',
+        data_source: 'National Health Authority (pmjay.gov.in)',
         short_description: 'National health insurance cover of ₹5 Lakhs per family for secondary & tertiary hospital care.',
         benefits_summary: '₹5,00,000 annual cashless treatment for over 1,900 medical procedures across network hospitals.',
         required_documents: ["Aadhaar Card", "Ration Card", "Ayushman Golden Card"],
         official_portal_url: 'https://pmjay.gov.in/',
         eligibility_criteria: {
-          max_annual_income: 200000
+          gender: 'all',
+          max_annual_income: 200000,
+          secc_criteria: 'Identified deprived family under SECC 2011 / eligible ration card'
         }
       },
       {
         id: 'central-pmmy',
+        scheme_code: 'CENTRAL-PMMY-009',
         scheme_name: 'Pradhan Mantri Mudra Yojana (PMMY)',
         department_name: 'Department of Financial Services, Ministry of Finance, Govt of India',
         state_or_central: 'central',
+        data_source: 'MUDRA Portal (mudra.org.in)',
         short_description: 'Collateral-free business loans up to ₹10 Lakhs for micro and small enterprise owners.',
         benefits_summary: 'Collateral-free enterprise credit up to ₹10,00,000 at competitive bank interest rates.',
         required_documents: ["Aadhaar Card", "PAN Card", "Udyam MSME Registration", "Bank Statement"],
         official_portal_url: 'https://www.mudra.org.in/',
         eligibility_criteria: {
           min_age: 18,
-          max_age: 65
+          max_age: 65,
+          gender: 'all'
         }
       },
       {
         id: 'central-ssy',
+        scheme_code: 'CENTRAL-SSY-010',
         scheme_name: 'Sukanya Samriddhi Yojana (Girl Child Savings)',
         department_name: 'Department of Posts, Govt of India',
         state_or_central: 'central',
+        data_source: 'India Post / Ministry of Women & Child Development',
         short_description: 'High-interest government savings scheme for girl children with 80C tax exemption.',
         benefits_summary: 'High interest rate (8.2% p.a.), complete tax exemption, and partial withdrawal allowed at age 18.',
         required_documents: ["Girl Child Birth Certificate", "Parent Aadhaar & PAN", "Photos"],
         official_portal_url: 'https://www.indiapost.gov.in/',
         eligibility_criteria: {
+          min_age: 0,
           max_age: 10,
           gender: 'female'
+        }
+      },
+      {
+        id: 'central-pmay',
+        scheme_code: 'CENTRAL-PMAY-011',
+        scheme_name: 'Pradhan Mantri Awas Yojana (PMAY)',
+        department_name: 'Ministry of Housing & Urban Affairs / Ministry of Rural Development, Govt of India',
+        state_or_central: 'central',
+        data_source: 'PMAY Portal (pmaymis.gov.in)',
+        short_description: 'Interest subsidy and construction assistance for affordable housing for EWS/LIG citizens.',
+        benefits_summary: 'Up to ₹2.67 Lakhs interest subsidy on home loan or ₹1.5 Lakhs direct construction grant.',
+        required_documents: ["Aadhaar Card", "Income Certificate / Salary Slip", "Affidavit for not owning a pucca house", "Bank Passbook"],
+        official_portal_url: 'https://pmaymis.gov.in/',
+        eligibility_criteria: {
+          min_age: 18,
+          gender: 'all',
+          max_annual_income: 600000,
+          pucca_house_owned: false
+        }
+      },
+      {
+        id: 'central-vidyalakshmi',
+        scheme_code: 'CENTRAL-VIDYALAKSHMI-012',
+        scheme_name: 'PM Vidya Lakshmi Education Loan Scheme',
+        department_name: 'Department of Higher Education, Ministry of Education, Govt of India',
+        state_or_central: 'central',
+        data_source: 'Vidya Lakshmi Portal (vidyalakshmi.co.in)',
+        short_description: 'Single-window portal to apply for education loans & central interest subsidy for higher studies.',
+        benefits_summary: 'Access to educational loans up to ₹15 Lakhs without collateral for listed institutions.',
+        required_documents: ["10th & 12th Marksheet", "College Admission Offer Letter & Fee Structure", "Parent Income Certificate", "Aadhaar Card"],
+        official_portal_url: 'https://www.vidyalakshmi.co.in/',
+        eligibility_criteria: {
+          min_age: 16,
+          gender: 'all',
+          student_required: true,
+          is_student: true
         }
       }
     ];
   }
 
-  // Redesigned database eligibility evaluator mapping criteria fields individually
-  function evaluateEligibility(scheme, profile) {
-    const criteria = scheme.eligibility_criteria || {};
+  /**
+   * Strictly Scheme-Specific Eligibility Evaluator
+   * Evaluates a single scheme against the citizen's supplied profile without universal formulas or silent defaults.
+   * Returns one of three distinct conceptual states:
+   * - "Eligible" (statusCode: "ELIGIBLE") -> All mandatory criteria for this scheme are satisfied.
+   * - "Not Eligible" (statusCode: "NOT_ELIGIBLE") -> At least one mandatory criterion for this scheme is violated.
+   * - "Additional Information Required" (statusCode: "INSUFFICIENT_INFORMATION") -> Required information is missing.
+   */
+  function evaluateEligibility(scheme, profileInput) {
+    const profile = profileInput || {};
+    const criteria = (scheme && typeof scheme.eligibility_criteria === 'object' && scheme.eligibility_criteria)
+      ? scheme.eligibility_criteria
+      : {};
+
     const passed = [];
     const failed = [];
     const missing = [];
-    
+    const verificationNotes = [];
+
     const verifiedDocs = [];
     const expiredDocs = [];
     const renewingDocs = [];
     const missingDocsList = [];
 
-    const currentLang = (window.i18n ? window.i18n.getLanguage() : (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'ta'));
+    const currentLang = (typeof window !== 'undefined' && window.i18n && typeof window.i18n.getLanguage === 'function')
+      ? window.i18n.getLanguage()
+      : (typeof localStorage !== 'undefined' ? (localStorage.getItem('crowdcity_language') || localStorage.getItem('cc_lang') || localStorage.getItem('preferred_language') || 'en') : 'en');
     const isTamil = (currentLang === 'ta');
 
-    // 1. Age check
-    if ((criteria.min_age !== undefined && criteria.min_age !== null) || (criteria.max_age !== undefined && criteria.max_age !== null)) {
-      const min = criteria.min_age || 18;
-      const max = criteria.max_age || 120;
-      const userAge = parseInt(profile.age, 10);
-      if (!profile.age || isNaN(userAge) || userAge <= 0) {
-        missing.push(isTamil ? `? வயது விவரம் தேவை (வயது ${min}–${max}க்குள் இருக்க வேண்டும்)` : `? Age information required (Must be between ${min}–${max})`);
-      } else if (userAge < min || userAge > max) {
-        failed.push(isTamil 
-          ? `✗ வயது வரம்பு ${min}–${max}க்குள் இருக்க வேண்டும் (தற்போதைய வயது: ${userAge})` 
-          : `✗ Age must be between ${min}–${max} (Current: ${userAge})`);
+    const formatGenderLabel = (g) => {
+      const norm = String(g || '').toLowerCase();
+      if (norm === 'female') return isTamil ? 'பெண்' : 'Female';
+      if (norm === 'male') return isTamil ? 'ஆண்' : 'Male';
+      if (norm === 'transgender') return isTamil ? 'திருநங்கை / திருநம்பி' : 'Transgender';
+      return g;
+    };
+
+    // Guard: If scheme has zero structured criteria (or only vague free-text), do not fabricate rules or auto-approve
+    const criteriaKeys = Object.keys(criteria);
+    if (criteriaKeys.length === 0) {
+      missing.push(isTamil
+        ? '? இந்த திட்டத்திற்கான கட்டமைக்கப்பட்ட தகுதி விவரங்கள் இல்லை; கூடுதல் சரிபார்ப்பு தேவை'
+        : '? Structured eligibility criteria unavailable; additional information required to determine eligibility');
+    }
+
+    // 1. Age Check (supports min_age === 0 for child schemes like Sukanya Samriddhi Yojana)
+    const hasMinAge = (criteria.min_age !== undefined && criteria.min_age !== null && criteria.min_age !== '');
+    const hasMaxAge = (criteria.max_age !== undefined && criteria.max_age !== null && criteria.max_age !== '');
+    if (hasMinAge || hasMaxAge) {
+      const min = hasMinAge ? Number(criteria.min_age) : null;
+      const max = hasMaxAge ? Number(criteria.max_age) : null;
+      const rangeDesc = (hasMinAge && hasMaxAge)
+        ? `${min}–${max}`
+        : (hasMinAge ? `${min}+` : `up to ${max}`);
+
+      const hasValidUserAge = (profile.age !== undefined && profile.age !== null && profile.age !== '' && !Number.isNaN(Number(profile.age)) && Number(profile.age) >= 0);
+      if (!hasValidUserAge) {
+        missing.push(isTamil
+          ? `? வயது விவரம் தேவை (தேவை: ${rangeDesc} வயது)`
+          : `? Age information required (Required: ${rangeDesc} years)`);
       } else {
-        passed.push(isTamil 
-          ? `✓ வயது ${min}–${max}க்குள் உள்ளது` 
-          : `✓ Age between ${min}–${max}`);
+        const userAge = Number(profile.age);
+        if ((hasMinAge && userAge < min) || (hasMaxAge && userAge > max)) {
+          failed.push(isTamil
+            ? `✗ வயது தகுதி பூர்த்தி செய்யப்படவில்லை (தேவை: ${rangeDesc}, தற்போதைய வயது: ${userAge})`
+            : `✗ Age requirement not satisfied (Required: ${rangeDesc} years, Provided: ${userAge})`);
+        } else {
+          passed.push(isTamil
+            ? `✓ வயது தகுதி பூர்த்தி செய்யப்பட்டது (${userAge} வயது; வரம்பு: ${rangeDesc})`
+            : `✓ Age requirement satisfied (${userAge} years within ${rangeDesc})`);
+        }
       }
     }
 
-    // 2. Gender check
-    if (criteria.gender && criteria.gender !== 'all') {
-      if (!profile.gender || profile.gender === 'all') {
-        missing.push(isTamil ? "? பாலினம் விவரம் தேவை" : "? Gender information still required");
-      } else if (profile.gender !== criteria.gender) {
-        const expected = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (isTamil ? 'ஆண்' : 'Male');
-        failed.push(isTamil 
-          ? `✗ பாலினம் ${expected} ஆக இருக்க வேண்டும்` 
-          : `✗ Gender must be ${expected}`);
+    // 2. Gender Check (never assumes a default gender; supports female, male, transgender, or array)
+    const schemeGender = criteria.gender;
+    const isGenderRestricted = Boolean(
+      schemeGender &&
+      schemeGender !== 'all' &&
+      schemeGender !== 'any' &&
+      (!Array.isArray(schemeGender) || schemeGender.length > 0)
+    );
+
+    const userGenderRaw = (profile.gender !== undefined && profile.gender !== null)
+      ? String(profile.gender).trim().toLowerCase()
+      : '';
+    const isUserGenderProvided = Boolean(
+      userGenderRaw &&
+      userGenderRaw !== 'all' &&
+      userGenderRaw !== 'prefer_not_to_say' &&
+      userGenderRaw !== 'select'
+    );
+
+    if (isGenderRestricted) {
+      const allowedGenders = Array.isArray(schemeGender)
+        ? schemeGender.map(g => String(g).trim().toLowerCase())
+        : [String(schemeGender).trim().toLowerCase()];
+      const expectedLabel = allowedGenders.map(formatGenderLabel).join(' / ');
+
+      if (!isUserGenderProvided) {
+        missing.push(isTamil
+          ? `? பாலினம் விவரம் தேவை (தேவை: ${expectedLabel})`
+          : `? Gender information required (Scheme restricted to: ${expectedLabel})`);
+      } else if (!allowedGenders.includes(userGenderRaw)) {
+        failed.push(isTamil
+          ? `✗ பாலின தகுதி பூர்த்தி செய்யப்படவில்லை (தேவை: ${expectedLabel})`
+          : `✗ Gender requirement not satisfied (Requires: ${expectedLabel})`);
       } else {
-        const genderVal = criteria.gender === 'female' ? (isTamil ? 'பெண்' : 'Female') : (isTamil ? 'ஆண்' : 'Male');
-        passed.push(isTamil 
-          ? `✓ பாலினம்: ${genderVal}` 
-          : `✓ Gender is ${genderVal}`);
+        passed.push(isTamil
+          ? `✓ பாலின தகுதி பூர்த்தி செய்யப்பட்டது (${formatGenderLabel(userGenderRaw)})`
+          : `✓ Gender requirement satisfied (${formatGenderLabel(userGenderRaw)})`);
+      }
+    } else if (schemeGender === 'all' || schemeGender === 'any') {
+      // Gender-neutral scheme: never excludes male, female, or transgender users
+      if (isUserGenderProvided) {
+        passed.push(isTamil
+          ? `✓ பாலின தகுதி பூர்த்தி செய்யப்பட்டது (அனைத்து பாலினத்தவருக்கும் பொருந்தும்)`
+          : `✓ Gender requirement satisfied (Open to all genders)`);
       }
     }
 
-    // 3. Income check
-    if (criteria.max_annual_income !== undefined && criteria.max_annual_income !== null) {
-      if (profile.income === undefined || profile.income === null || profile.income === 0) {
-        missing.push(isTamil 
-          ? `? ஆண்டு வருமானம் விவரம் தேவை (₹${criteria.max_annual_income.toLocaleString('en-IN')}க்குள் இருக்க வேண்டும்)` 
-          : `? Family income information still required (Must be under ₹${criteria.max_annual_income.toLocaleString('en-IN')})`);
-      } else if (profile.income > criteria.max_annual_income) {
-        failed.push(isTamil 
-          ? `✗ ஆண்டு குடும்ப வருமானம் ₹${criteria.max_annual_income.toLocaleString('en-IN')}க்கு மேல் உள்ளது (தற்போதைய வருமானம்: ₹${profile.income.toLocaleString('en-IN')})` 
-          : `✗ Family income exceeds ₹${criteria.max_annual_income.toLocaleString('en-IN')} (Current: ₹${profile.income.toLocaleString('en-IN')})`);
+    // 3. Income Check (distinguishes missing null/undefined income from explicit ₹0 income)
+    const hasMaxIncome = (criteria.max_annual_income !== undefined && criteria.max_annual_income !== null && criteria.max_annual_income !== '');
+    if (hasMaxIncome) {
+      const maxIncome = Number(criteria.max_annual_income);
+      const hasValidIncome = (
+        profile.income !== undefined &&
+        profile.income !== null &&
+        profile.income !== '' &&
+        !Number.isNaN(Number(profile.income)) &&
+        Number(profile.income) >= 0
+      );
+
+      if (!hasValidIncome) {
+        missing.push(isTamil
+          ? `? ஆண்டு குடும்ப வருமான விவரம் தேவை (வரம்பு: ₹${maxIncome.toLocaleString('en-IN')})`
+          : `? Income information required (Annual limit: ₹${maxIncome.toLocaleString('en-IN')})`);
       } else {
-        passed.push(isTamil 
-          ? `✓ குடும்ப வருமானம் ₹${criteria.max_annual_income.toLocaleString('en-IN')}க்குள் உள்ளது` 
-          : `✓ Family income is under ₹${criteria.max_annual_income.toLocaleString('en-IN')}`);
+        const userIncome = Number(profile.income);
+        if (userIncome > maxIncome) {
+          failed.push(isTamil
+            ? `✗ வருமான தகுதி பூர்த்தி செய்யப்படவில்லை (வரம்பு: ₹${maxIncome.toLocaleString('en-IN')}, தற்போதைய வருமானம்: ₹${userIncome.toLocaleString('en-IN')})`
+            : `✗ Income requirement not satisfied (Exceeds ₹${maxIncome.toLocaleString('en-IN')} limit; Provided: ₹${userIncome.toLocaleString('en-IN')})`);
+        } else {
+          passed.push(isTamil
+            ? `✓ வருமான தகுதி பூர்த்தி செய்யப்பட்டது (₹${userIncome.toLocaleString('en-IN')} ≤ ₹${maxIncome.toLocaleString('en-IN')})`
+            : `✓ Income requirement satisfied (₹${userIncome.toLocaleString('en-IN')} within ₹${maxIncome.toLocaleString('en-IN')} limit)`);
+        }
       }
     }
 
-    // 4. Student status
-    if (criteria.student_required) {
-      if (!profile.isStudent && profile.occupation !== 'student') {
-        failed.push(isTamil ? "✗ மாணவர் நிலை தேவை" : "✗ Enrolled Student status required");
+    // 4. Student Status Check (supports both student_required and is_student keys)
+    const requiresStudent = (criteria.student_required === true || criteria.is_student === true);
+    if (requiresStudent) {
+      const studentExplicitlyKnown = (profile.isStudent !== undefined && profile.isStudent !== null) ||
+        (profile.occupation !== undefined && profile.occupation !== null && profile.occupation !== '');
+
+      if (!studentExplicitlyKnown) {
+        missing.push(isTamil ? '? மாணவர் நிலை விவரம் தேவை' : '? Student status information required');
+      } else if (profile.isStudent === true || String(profile.occupation || '').toLowerCase() === 'student') {
+        passed.push(isTamil ? '✓ மாணவர் தகுதி பூர்த்தி செய்யப்பட்டது' : '✓ Student requirement satisfied');
       } else {
-        passed.push(isTamil ? "✓ மாணவர் நிலை சரிபார்க்கப்பட்டது" : "✓ Enrolled Student status verified");
+        failed.push(isTamil ? '✗ மாணவர் நிலை தகுதி பூர்த்தி செய்யப்படவில்லை' : '✗ Student requirement not satisfied (Enrolled Student required)');
       }
     }
 
-    // 5. Gov School studied
-    if (criteria.gov_school_required) {
-      if (profile.govSchoolStudied === undefined || profile.govSchoolStudied === null) {
-        missing.push(isTamil ? "? அரசு பள்ளி கல்வி விவரம் தேவை" : "? Government school schooling information still required");
-      } else if (!profile.govSchoolStudied) {
-        failed.push(isTamil ? "✗ அரசு பள்ளியில் படித்திருக்க வேண்டும்" : "✗ Government School schooling required");
+    // 5. TN Government School (Classes 6–12) Check
+    const requiresGovSchool = (criteria.gov_school_required === true || Boolean(criteria.govt_school_studied_classes));
+    if (requiresGovSchool) {
+      if (profile.govSchoolStudied === undefined || profile.govSchoolStudied === null || profile.govSchoolStudied === '') {
+        missing.push(isTamil
+          ? '? அரசு பள்ளி கல்வி விவரம் தேவை (6 முதல் 12 ஆம் வகுப்பு வரை)'
+          : '? TN Government School (Classes 6–12) schooling information required');
+      } else if (profile.govSchoolStudied === true || profile.govSchoolStudied === 'true') {
+        passed.push(isTamil
+          ? '✓ அரசு பள்ளி கல்வி தகுதி பூர்த்தி செய்யப்பட்டது'
+          : '✓ TN Government School (Classes 6–12) requirement satisfied');
       } else {
-        passed.push(isTamil ? "✓ அரசு பள்ளியில் படித்தது சரிபார்க்கப்பட்டது" : "✓ Studied in Government School");
+        failed.push(isTamil
+          ? '✗ அரசு பள்ளி கல்வி தகுதி பூர்த்தி செய்யப்படவில்லை'
+          : '✗ TN Government School (Classes 6–12) requirement not satisfied');
       }
     }
 
-    // 6. Gov College studied
-    if (criteria.gov_college_required) {
-      if (profile.govCollegeStudied === undefined || profile.govCollegeStudied === null) {
-        missing.push(isTamil ? "? அரசு கல்லூரி கல்வி விவரம் தேவை" : "? Government college enrollment information still required");
-      } else if (!profile.govCollegeStudied) {
-        failed.push(isTamil ? "✗ அரசு கல்லூரியில் படித்திருக்க வேண்டும்" : "✗ Government College enrollment required");
+    // 6. Government College Check
+    if (criteria.gov_college_required === true) {
+      const inst = profile.institutionType;
+      const govCollegeFlag = profile.govCollegeStudied;
+      if ((govCollegeFlag === undefined || govCollegeFlag === null) && (!inst || inst === 'none')) {
+        missing.push(isTamil ? '? அரசு கல்லூரி கல்வி விவரம் தேவை' : '? Government college enrollment information required');
+      } else if (govCollegeFlag === true || inst === 'Government') {
+        passed.push(isTamil ? '✓ அரசு கல்லூரி தகுதி பூர்த்தி செய்யப்பட்டது' : '✓ Government college enrollment requirement satisfied');
       } else {
-        passed.push(isTamil ? "✓ அரசு கல்லூரியில் படித்தது சரிபார்க்கப்பட்டது" : "✓ Enrolled in Government College");
+        failed.push(isTamil ? '✗ அரசு கல்லூரியில் படித்திருக்க வேண்டும்' : '✗ Government college enrollment requirement not satisfied');
       }
     }
 
-    // 7. Disability status
-    if (criteria.disability_required) {
-      if (!profile.isDisability) {
-        failed.push(isTamil ? "✗ மாற்றுத்திறனாளி தகுதி தேவை" : "✗ Differently-abled status required");
+    // 7. Disability Condition Check (distinguishes missing undefined/null from false)
+    const requiresDisability = (criteria.disability_required === true || criteria.is_disabled === true);
+    if (requiresDisability) {
+      if (profile.isDisability === undefined || profile.isDisability === null) {
+        missing.push(isTamil ? '? மாற்றுத்திறனாளி நிலை குறித்த விவரம் தேவை' : '? Disability condition information required');
+      } else if (profile.isDisability === true) {
+        passed.push(isTamil ? '✓ மாற்றுத்திறனாளி தகுதி பூர்த்தி செய்யப்பட்டது' : '✓ Disability condition requirement satisfied');
       } else {
-        passed.push(isTamil ? "✓ மாற்றுத்திறனாளி தகுதி சரிபார்க்கப்பட்டது" : "✓ Differently-abled status satisfied");
+        failed.push(isTamil ? '✗ மாற்றுத்திறனாளி தகுதி பூர்த்தி செய்யப்படவில்லை' : '✗ Disability condition requirement not satisfied');
       }
     }
 
-    // 8. Widow / Single Parent status
-    if (criteria.widow_required) {
-      if (!profile.isWidow) {
-        failed.push(isTamil ? "✗ விதவை அல்லது ஒற்றை பெற்றோர் தகுதி தேவை" : "✗ Widow / Single Parent status required");
+    // 8. Widow / Single Parent Condition Check
+    const requiresWidow = (criteria.widow_required === true || criteria.single_parent_required === true || criteria.is_widow === true);
+    if (requiresWidow) {
+      if (profile.isWidow === undefined || profile.isWidow === null) {
+        missing.push(isTamil ? '? விதவை / ஒற்றை பெற்றோர் நிலை விவரம் தேவை' : '? Widow / Single Parent status information required');
+      } else if (profile.isWidow === true) {
+        passed.push(isTamil ? '✓ விதவை / ஒற்றை பெற்றோர் தகுதி பூர்த்தி செய்யப்பட்டது' : '✓ Widow / Single Parent requirement satisfied');
       } else {
-        passed.push(isTamil ? "✓ விதவை / ஒற்றை பெற்றோர் தகுதி சரிபார்க்கப்பட்டது" : "✓ Widow / Single Parent status satisfied");
+        failed.push(isTamil ? '✗ விதவை / ஒற்றை பெற்றோர் தகுதி பூர்த்தி செய்யப்படவில்லை' : '✗ Widow / Single Parent requirement not satisfied');
       }
     }
 
-    // 9. Farmer family status
-    if (criteria.farmer_required) {
-      if (!profile.isFarmer && profile.occupation !== 'farmer') {
-        failed.push(isTamil ? "✗ விவசாயி தகுதி தேவை" : "✗ Farmer / Landholder family status required");
+    // 9. Farmer / Agricultural Status Check (supports both farmer_required and is_farmer)
+    const requiresFarmer = (criteria.farmer_required === true || criteria.is_farmer === true);
+    if (requiresFarmer) {
+      const farmerExplicitlyKnown = (profile.isFarmer !== undefined && profile.isFarmer !== null) ||
+        (profile.occupation !== undefined && profile.occupation !== null && profile.occupation !== '');
+
+      if (!farmerExplicitlyKnown) {
+        missing.push(isTamil ? '? விவசாயி நிலை குறித்த விவரம் தேவை' : '? Farmer / agricultural status information required');
+      } else if (profile.isFarmer === true || String(profile.occupation || '').toLowerCase() === 'farmer') {
+        passed.push(isTamil ? '✓ விவசாயி தகுதி பூர்த்தி செய்யப்பட்டது' : '✓ Farmer / agricultural family requirement satisfied');
       } else {
-        passed.push(isTamil ? "✓ விவசாயி தகுதி சரிபார்க்கப்பட்டது" : "✓ Farmer / Landholder family status verified");
+        failed.push(isTamil ? '✗ விவசாயி தகுதி பூர்த்தி செய்யப்படவில்லை' : '✗ Farmer / agricultural family requirement not satisfied');
       }
     }
 
-    // 10. Residency state check
-    if (criteria.native_state) {
-      if (!profile.district) {
-        missing.push(isTamil ? "? இருப்பிட/மாவட்ட விவரங்கள் தேவை" : "? Residency district information still required");
+    // 10. Community / Social Category Check
+    const allowedCategories = Array.isArray(criteria.social_categories) ? criteria.social_categories : null;
+    if (allowedCategories && allowedCategories.length > 0) {
+      if (!profile.socialCategory || profile.socialCategory === '' || profile.socialCategory === 'all') {
+        missing.push(isTamil ? '? சமூகப் பிரிவு விவரம் தேவை' : `? Community / social category information required (${allowedCategories.join(', ')})`);
+      } else if (!allowedCategories.map(c => String(c).toUpperCase()).includes(String(profile.socialCategory).toUpperCase())) {
+        failed.push(isTamil ? '✗ சமூகப் பிரிவு தகுதி பூர்த்தி செய்யப்படவில்லை' : `✗ Community / social category requirement not satisfied (Requires: ${allowedCategories.join(', ')})`);
       } else {
-        passed.push(isTamil 
-          ? `✓ தமிழக இருப்பிட தகுதி (${profile.district} மாவட்டம்)` 
-          : `✓ resident of ${criteria.native_state} (${profile.district} District)`);
+        passed.push(isTamil ? `✓ சமூகப் பிரிவு தகுதி பூர்த்தி செய்யப்பட்டது (${profile.socialCategory})` : `✓ Community / social category requirement satisfied (${profile.socialCategory})`);
       }
     }
 
-    // 11. Cross-check documents & renewals
-    const reqCerts = criteria.required_certificates || [];
+    // 11. District / Residency State Check
+    const reqState = criteria.native_state || (criteria.state && criteria.state !== 'All States / UTs' ? criteria.state : null);
+    if (reqState) {
+      if (!profile.district || !String(profile.district).trim()) {
+        missing.push(isTamil ? '? மாவட்டம் / இருப்பிட விவரம் தேவை' : `? District / residence information required (${reqState})`);
+      } else if (Array.isArray(criteria.allowed_districts) && criteria.allowed_districts.length > 0 && !criteria.allowed_districts.includes(profile.district)) {
+        failed.push(isTamil ? `✗ மாவட்ட தகுதி பூர்த்தி செய்யப்படவில்லை` : `✗ District requirement not satisfied`);
+      } else {
+        passed.push(isTamil
+          ? `✓ இருப்பிட தகுதி பூர்த்தி செய்யப்பட்டது (${profile.district}, ${reqState})`
+          : `✓ District/residence requirement satisfied (${profile.district}, ${reqState})`);
+      }
+    }
+
+    // 12. Additional Departmental Conditions Not Directly Collected in Basic Wizard
+    if (criteria.own_land_patta !== undefined || criteria.residence_type) {
+      verificationNotes.push(isTamil
+        ? 'கிராமப்புற குடிசை வீடு மற்றும் சொந்த வீட்டு மனை பட்டா சரிபார்ப்புக்கு உட்பட்டது.'
+        : 'Requires rural hutment ownership and valid Land Patta document verification.');
+    }
+    if (criteria.pucca_house_owned === false) {
+      verificationNotes.push(isTamil
+        ? 'விண்ணப்பதாரர் குடும்பத்திற்கு சொந்தமாக கான்கிரீட் (பக்கா) வீடு இருக்கக்கூடாது.'
+        : 'Applicant family must not already own a pucca (permanent concrete) house.');
+    }
+    if (criteria.secc_criteria) {
+      verificationNotes.push(isTamil
+        ? 'SECC 2011 பட்டியல் அல்லது தகுதியான குடும்ப அட்டை சரிபார்ப்புக்கு உட்பட்டது.'
+        : `Requires departmental verification: ${criteria.secc_criteria}.`);
+      // If a scheme has ONLY secc_criteria without any numeric income/age/gender criteria, mark as needing additional info
+      if (passed.length === 0 && failed.length === 0) {
+        missing.push(`? ${criteria.secc_criteria} verification required`);
+      }
+    }
+    if (criteria.electricity_consumption_max_units_per_year) {
+      verificationNotes.push(isTamil
+        ? `ஆண்டு குடும்ப மின் பயன்பாடு ${criteria.electricity_consumption_max_units_per_year} யூனிட்டுகளுக்குள் இருக்க வேண்டும்.`
+        : `Household annual electricity consumption must be under ${criteria.electricity_consumption_max_units_per_year} units.`);
+    }
+    if (criteria.landholding) {
+      verificationNotes.push(isTamil
+        ? 'வேளாண் நில உடமை சான்று (பட்டா/சிட்டா) சரிபார்ப்பு தேவை.'
+        : `Requires agricultural landholding verification (${criteria.landholding}).`);
+    }
+
+    // 13. Document Wallet Cross-Check (tracked separately from profile eligibility criteria)
+    const reqCerts = criteria.required_certificates || scheme.required_documents || [];
     let uploadedDocs = [];
     try {
-      const stored = localStorage.getItem('cc_user_uploaded_docs');
-      if (stored) uploadedDocs = JSON.parse(stored);
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem('cc_user_uploaded_docs');
+        if (stored) uploadedDocs = JSON.parse(stored);
+      }
     } catch (e) {}
 
     const now = new Date();
@@ -328,96 +568,77 @@
 
     reqCerts.forEach(cert => {
       const matchingUploaded = uploadedDocs.find(d => {
-        const t = (d.doc_type || "").toLowerCase();
-        const c = cert.toLowerCase();
-        return t.includes(c) || c.includes(t);
+        const t = (d.doc_type || '').toLowerCase();
+        const c = String(cert).toLowerCase();
+        return t && (t.includes(c) || c.includes(t));
       });
 
       if (!matchingUploaded) {
         missingDocsList.push(cert);
-        missing.push(isTamil ? `? ${cert} ஆவணம் சமர்ப்பிக்கப்படவில்லை` : `? ${cert} not provided in document wallet`);
       } else {
         let isExpired = false;
         let isRenewalSoon = false;
-        let expiryDateStr = "";
+        let expiryDateStr = '';
 
         if (matchingUploaded.expiry_date) {
           const exp = new Date(matchingUploaded.expiry_date);
           expiryDateStr = exp.toLocaleDateString(isTamil ? 'ta-IN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-          if (exp < now) {
-            isExpired = true;
-          } else if (exp <= thirtyDaysFromNow) {
-            isRenewalSoon = true;
-          }
+          if (exp < now) isExpired = true;
+          else if (exp <= thirtyDaysFromNow) isRenewalSoon = true;
         }
 
         if (isExpired) {
           expiredDocs.push({ name: cert, expiry: expiryDateStr });
-          failed.push(isTamil ? `✗ ${cert} காலாவதியாகிவிட்டது (முடிந்த தேதி: ${expiryDateStr})` : `✗ ${cert} is expired (Expired on ${expiryDateStr})`);
         } else if (isRenewalSoon) {
           renewingDocs.push({ name: cert, expiry: expiryDateStr });
-          passed.push(isTamil ? `✓ ${cert} சரிபார்க்கப்பட்டது (ஆனால் புதுப்பிக்க வேண்டும்: ${expiryDateStr})` : `✓ ${cert} verified (But needs renewal soon: ${expiryDateStr})`);
         } else {
           verifiedDocs.push({ name: cert, expiry: expiryDateStr });
-          passed.push(isTamil ? `✓ ${cert} ஆவணம் சரிபார்க்கப்பட்டது` : `✓ ${cert} provided and verified`);
         }
       }
     });
 
-    // 12. Calculate Eligibility Status
-    let status = "Eligible";
+    // 14. Determine Three-State Eligibility Status
+    // - NOT_ELIGIBLE ("Not Eligible"): At least one mandatory criterion failed
+    // - INSUFFICIENT_INFORMATION ("Additional Information Required"): No criterion failed, but required criteria are missing
+    // - ELIGIBLE ("Eligible"): All mandatory criteria evaluated and satisfied
+    let status = 'Eligible';
+    let statusCode = 'ELIGIBLE';
+
     if (failed.length > 0) {
-      status = "Not Eligible";
-    } else if (missing.length > 0) {
-      status = "Additional Information Required";
-    } else if (missingDocsList.length > 0) {
-      status = "Additional Documents Required";
+      status = 'Not Eligible';
+      statusCode = 'NOT_ELIGIBLE';
+    } else if (missing.length > 0 || passed.length === 0) {
+      status = 'Additional Information Required';
+      statusCode = 'INSUFFICIENT_INFORMATION';
     } else {
-      status = "Eligible";
+      status = 'Eligible';
+      statusCode = 'ELIGIBLE';
     }
 
-    // 13. Calculate Confidence Score / Rating
-    let confidence = "High Confidence";
+    // 15. Confidence Rating
+    let confidence = 'High Confidence';
     const confidenceReasons = [];
 
-    if (failed.length > 0) {
-      confidence = "Needs Verification";
-      confidenceReasons.push(isTamil ? "திட்ட தகுதி விதிகள் பொருந்தவில்லை" : "Eligibility criteria failed");
-    } else if (missing.some(m => !m.includes("not provided") && !m.includes("சமர்ப்பிக்கப்படவில்லை"))) {
-      confidence = "Needs Verification";
-      confidenceReasons.push(isTamil ? "சுயவிவர தகவல் விடுபட்டுள்ளது" : "Missing profile information");
-    } else if (expiredDocs.length > 0) {
-      confidence = "Needs Verification";
-      confidenceReasons.push(isTamil ? "காலாவதியான ஆவணங்கள் உள்ளன" : "Expired documents");
-    }
-
-    if (confidence !== "Needs Verification") {
-      if (missingDocsList.length > 0) {
-        confidence = "Medium Confidence";
-        confidenceReasons.push(isTamil ? "கூடுதல் ஆவணங்கள் தேவை" : "Incomplete document verification");
-      }
-      if (renewingDocs.length > 0) {
-        confidence = "Medium Confidence";
-        confidenceReasons.push(isTamil ? "ஆவணங்கள் விரைவில் புதுப்பிக்கப்பட வேண்டும்" : "Documents needing renewal soon");
-      }
-      
-      // Check if rules updated recently (within 7 days)
-      if (scheme.updated_at) {
-        const updateDate = new Date(scheme.updated_at);
-        const diffTime = Math.abs(now - updateDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays <= 7) {
-          confidence = "Medium Confidence";
-          confidenceReasons.push(isTamil ? "திட்ட விதிகள் சமீபத்தில் புதுப்பிக்கப்பட்டன" : "Scheme rules recently updated");
-        }
+    if (statusCode === 'NOT_ELIGIBLE') {
+      confidence = 'Needs Verification';
+      confidenceReasons.push(isTamil ? 'திட்ட தகுதி விதிகள் பொருந்தவில்லை' : 'Mandatory eligibility criteria not satisfied');
+    } else if (statusCode === 'INSUFFICIENT_INFORMATION') {
+      confidence = 'Needs Verification';
+      confidenceReasons.push(isTamil ? 'கூடுதல் விவரங்கள் தேவை' : 'Additional information required to determine eligibility');
+    } else if (verificationNotes.length > 0 || missingDocsList.length > 0) {
+      confidence = 'Medium Confidence';
+      if (verificationNotes.length > 0) {
+        confidenceReasons.push(isTamil ? 'துறை சார்ந்த கூடுதல் நிபந்தனைகள் உள்ளன' : 'Subject to departmental field/document verification');
       }
     }
 
     return {
       status,
+      statusCode,
       passed,
       failed,
       missing,
+      verificationNotes,
       verifiedDocs,
       expiredDocs,
       renewingDocs,
@@ -446,28 +667,45 @@
       } else {
         formCard.classList.remove('step-results-active');
       }
-      formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (typeof formCard.scrollIntoView === 'function') {
+        formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
   function getFormData() {
     const ageRaw = document.getElementById('check-age')?.value?.trim();
-    const age = (ageRaw && /^\d+$/.test(ageRaw)) ? parseInt(ageRaw, 10) : null;
-    const gender = document.getElementById('check-gender')?.value || 'all';
-    const district = document.getElementById('check-district')?.value || '';
-    const occupation = document.getElementById('check-occupation')?.value || 'other';
-    const income = parseFloat(document.getElementById('check-income')?.value) || 0;
-    const isStudent = document.getElementById('check-student')?.checked || false;
-    const isFarmer = document.getElementById('check-farmer')?.checked || false;
-    const isSenior = document.getElementById('check-senior')?.checked || (age !== null && age >= 60);
-    const isDisability = document.getElementById('check-disability')?.checked || false;
-    const isWidow = document.getElementById('check-widow')?.checked || false;
+    const age = (ageRaw !== undefined && ageRaw !== '' && /^\d+$/.test(ageRaw)) ? parseInt(ageRaw, 10) : null;
+
+    // Never silently default gender to 'female' or 'male'
+    const genderRaw = document.getElementById('check-gender')?.value?.trim() || '';
+    const gender = genderRaw || null;
+
+    const district = document.getElementById('check-district')?.value?.trim() || '';
+    const occupation = document.getElementById('check-occupation')?.value?.trim() || '';
+
+    // Distinguish empty/missing income (null) from explicit 0 income (0)
+    const incomeRaw = document.getElementById('check-income')?.value?.trim();
+    const income = (incomeRaw !== undefined && incomeRaw !== null && incomeRaw !== '' && !Number.isNaN(parseFloat(incomeRaw)))
+      ? parseFloat(incomeRaw)
+      : null;
+
+    const isStudent = Boolean(document.getElementById('check-student')?.checked) || occupation === 'student';
+    const isFarmer = Boolean(document.getElementById('check-farmer')?.checked) || occupation === 'farmer';
+    const isSenior = Boolean(document.getElementById('check-senior')?.checked) || (age !== null && age >= 60);
+    const isDisability = Boolean(document.getElementById('check-disability')?.checked);
+    const isWidow = Boolean(document.getElementById('check-widow')?.checked);
     const socialCategory = document.getElementById('check-social-category')?.value || 'all';
-    const govSchoolStudied = document.getElementById('check-gov-school')?.value === 'true';
+
+    const govSchoolVal = document.getElementById('check-gov-school')?.value;
+    const govSchoolStudied = govSchoolVal === 'true' ? true : (govSchoolVal === 'false' ? false : null);
+
     const institutionType = document.getElementById('check-institution-type')?.value || 'none';
     const degree = document.getElementById('check-degree')?.value || 'none';
 
     return {
+      schemaVersion: 'v3',
+      explicitlySelectedGender: Boolean(genderRaw),
       age,
       gender,
       district,
@@ -488,24 +726,34 @@
   function validateStep(step) {
     if (step === 1) {
       const ageRaw = document.getElementById('check-age')?.value?.trim();
-      if (!ageRaw || !/^\d+$/.test(ageRaw)) {
+      if (ageRaw === undefined || ageRaw === '' || !/^\d+$/.test(ageRaw)) {
         if (window.showToast) window.showToast("Please enter a valid whole number for your age.", "error");
         return false;
       }
       const age = parseInt(ageRaw, 10);
-      if (isNaN(age) || age < 1 || age > 120) {
-        if (window.showToast) window.showToast("Please enter a valid age between 1 and 120 years.", "error");
+      if (isNaN(age) || age < 0 || age > 120) {
+        if (window.showToast) window.showToast("Please enter a valid age between 0 and 120 years.", "error");
         return false;
       }
-      const district = document.getElementById('check-district')?.value;
+      const gender = document.getElementById('check-gender')?.value?.trim();
+      if (!gender) {
+        if (window.showToast) window.showToast("Please select your gender.", "error");
+        return false;
+      }
+      const district = document.getElementById('check-district')?.value?.trim();
       if (!district) {
         if (window.showToast) window.showToast("Please select your district.", "error");
         return false;
       }
     } else if (step === 2) {
-      const incomeInput = document.getElementById('check-income')?.value;
-      if (incomeInput === '' || isNaN(incomeInput) || incomeInput < 0) {
-        if (window.showToast) window.showToast("Please enter your estimated annual family income.", "error");
+      const occupation = document.getElementById('check-occupation')?.value?.trim();
+      if (!occupation) {
+        if (window.showToast) window.showToast("Please select your primary occupation.", "error");
+        return false;
+      }
+      const incomeInput = document.getElementById('check-income')?.value?.trim();
+      if (incomeInput === undefined || incomeInput === '' || isNaN(parseFloat(incomeInput)) || parseFloat(incomeInput) < 0) {
+        if (window.showToast) window.showToast("Please enter your annual family income.", "error");
         return false;
       }
     }
@@ -635,10 +883,17 @@
   function renderResultsUI(schemes, userProfile) {
     const resultsContainer = document.getElementById('checker-results-list');
     const matchedCountElem = document.getElementById('matched-count-number');
+    const summarySubtext = document.getElementById('checker-results-summary-subtext');
     
-    // Only count schemes that are not explicitly "Not Eligible"
-    const matchedSchemes = schemes.filter(s => s.evaluation.status !== "Not Eligible");
-    if (matchedCountElem) matchedCountElem.textContent = matchedSchemes.length;
+    // Count ONLY schemes where all mandatory criteria are satisfied ("Eligible") — NO FALSE ELIGIBILITY
+    const eligibleSchemes = schemes.filter(s => s.evaluation.status === "Eligible");
+    const infoRequiredSchemes = schemes.filter(s => s.evaluation.status === "Additional Information Required" || s.evaluation.status === "Additional Documents Required");
+    const notEligibleSchemes = schemes.filter(s => s.evaluation.status === "Not Eligible");
+
+    if (matchedCountElem) matchedCountElem.textContent = eligibleSchemes.length;
+    if (summarySubtext) {
+      summarySubtext.textContent = `${eligibleSchemes.length} Eligible • ${infoRequiredSchemes.length} Require Additional Information • ${notEligibleSchemes.length} Not Eligible (Final decision rests with the respective government department).`;
+    }
 
     if (!resultsContainer) return;
 
@@ -671,7 +926,7 @@
       } else if (evalData.status === "Additional Information Required") {
         badgeColor = "#f59e0b"; // Yellow/Orange
         badgeBg = "rgba(245, 158, 11, 0.12)";
-        statusText = isTamil ? "கூடுதல் தகவல் தேவை" : "Info Required";
+        statusText = isTamil ? "கூடுதல் தகவல் தேவை" : "Additional Info Required";
       } else if (evalData.status === "Additional Documents Required") {
         badgeColor = "#3b82f6"; // Blue
         badgeBg = "rgba(59, 130, 246, 0.12)";
@@ -716,9 +971,15 @@
             </span>
           </div>
 
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.75rem 0;">
             <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> ${scheme.department_name || scheme.department}
           </p>
+
+          ${scheme.benefits_summary ? `
+          <div style="background: rgba(13, 148, 136, 0.06); border-left: 3px solid var(--primary, #0d9488); padding: 0.65rem 0.9rem; border-radius: 6px; margin-bottom: 1.15rem; font-size: 0.84rem; color: var(--text-main);">
+            <strong style="color: var(--primary, #0d9488);">${isTamil ? 'திட்டப் பயன்:' : 'Benefit:'}</strong> ${scheme.benefits_summary}
+          </div>
+          ` : ''}
 
           <!-- Collapsible Explanation Panel -->
           <div class="ai-explanation-box" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(99, 102, 241, 0.05)); border: 1px solid rgba(13, 148, 136, 0.3); border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem;">
@@ -726,16 +987,16 @@
             <!-- Metadata & Sources Trust Section -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; background: var(--bg-app); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.78rem;">
               <div>
-                <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'தரவு மூலம்' : 'Data Source'}</span>
-                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-server" style="color: var(--primary); margin-right: 0.25rem;"></i>${scheme.data_source || 'Government Portal'}</span>
+                <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'அதிகாரப்பூர்வ மூலம்' : 'Official Source'}</span>
+                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-server" style="color: var(--primary); margin-right: 0.25rem;"></i>${scheme.data_source || 'Official Government Portal'}</span>
               </div>
               <div>
                 <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'கடைசியாக சரிபார்க்கப்பட்டது' : 'Last Verified'}</span>
-                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 0.25rem;"></i>${scheme.last_verified_date ? new Date(scheme.last_verified_date).toLocaleDateString(isTamil ? 'ta-IN' : 'en-US', {year: 'numeric', month: 'short', day: 'numeric'}) : 'Recently'}</span>
+                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 0.25rem;"></i>${scheme.last_verified_date ? new Date(scheme.last_verified_date).toLocaleDateString(isTamil ? 'ta-IN' : 'en-US', {year: 'numeric', month: 'short', day: 'numeric'}) : 'Official Seed Rules'}</span>
               </div>
               <div>
-                <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'அரசாணை எண்' : 'Notification No.'}</span>
-                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-file-contract" style="color: #6366f1; margin-right: 0.25rem;"></i>${scheme.official_notification_number || 'N/A'}</span>
+                <span style="color: var(--text-muted); display: block; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">${isTamil ? 'திட்டக் குறியீடு' : 'Scheme Code'}</span>
+                <span style="color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-file-contract" style="color: #6366f1; margin-right: 0.25rem;"></i>${scheme.scheme_code || scheme.official_notification_number || scheme.id}</span>
               </div>
             </div>
 
@@ -756,7 +1017,7 @@
             <!-- Rule-by-rule Checklist Explanation -->
             <div style="margin-bottom: 1rem;">
               <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
-                ${isTamil ? 'தகுதி நிபந்தனைகள் விவரம்' : 'Rule-by-Rule Evaluation'}
+                ${isTamil ? 'இந்த திட்டம் ஏன் பொருந்தியது / தகுதி நிபந்தனைகள்' : 'Why This Scheme Matched (Scheme-Specific Criteria)'}
               </div>
               
               <ul style="font-size: 0.85rem; color: var(--text-main); line-height: 1.5; margin: 0; padding: 0; list-style: none;">
@@ -783,13 +1044,21 @@
                     <span>${m.replace('? ', '')}</span>
                   </li>
                 `).join('')}
+
+                <!-- Departmental Verification Notes -->
+                ${(evalData.verificationNotes || []).map(note => `
+                  <li style="margin-bottom: 0.4rem; display: flex; align-items: flex-start; gap: 0.4rem; color: #475569;">
+                    <i class="fa-solid fa-circle-info" style="margin-top: 0.2rem; flex-shrink: 0; color: #3b82f6;"></i>
+                    <span>${note}</span>
+                  </li>
+                `).join('')}
               </ul>
             </div>
 
             <!-- Detailed Document Verification Checklist -->
             <div style="border-top: 1px dashed rgba(13, 148, 136, 0.15); padding-top: 0.85rem;">
               <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem;">
-                ${isTamil ? 'சான்றிதழ் சரிபார்ப்பு நிலை' : 'Document Wallet Verification'}
+                ${isTamil ? 'தேவையான ஆவணங்கள் / சான்றிதழ் சரிபார்ப்பு' : 'Required Documents & Wallet Status'}
               </div>
               <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
                 <!-- Verified Docs -->
@@ -813,10 +1082,10 @@
                   </span>
                 `).join('')}
 
-                <!-- Missing Docs -->
+                <!-- Required / Unuploaded Docs -->
                 ${evalData.missingDocsList.map(name => `
                   <span style="font-size: 0.72rem; background: rgba(107, 114, 128, 0.08); border: 1px solid #9ca3af; padding: 0.2rem 0.5rem; border-radius: 6px; color: #4b5563; display: inline-flex; align-items: center; gap: 0.25rem;">
-                    <i class="fa-solid fa-circle-question"></i> ${name} (${isTamil ? 'இல்லை' : 'Missing'})
+                    <i class="fa-solid fa-file-lines"></i> ${name} (${isTamil ? 'விண்ணப்பிக்கும்போது தேவை' : 'Required at Application'})
                   </span>
                 `).join('')}
               </div>
@@ -828,8 +1097,8 @@
           <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.75rem; color: var(--text-muted); line-height: 1.45;">
             <i class="fa-solid fa-shield-halved" style="color: var(--primary); margin-right: 0.4rem; font-size: 0.85rem;"></i>
             <span>${isTamil 
-              ? 'இந்த தகுதி மதிப்பீடு CrowdCity AI-ல் உள்ள தற்போதைய விதிகளின் அடிப்படையில் உருவாக்கப்பட்டது. இறுதி ஒப்புதல் சம்பந்தப்பட்ட அரசுத் துறையின் சரிபார்ப்புக்கு உட்பட்டது.' 
-              : 'This eligibility assessment is generated using the latest rules available in CrowdCity AI. Final approval is subject to verification by the concerned Government Department.'}</span>
+              ? 'வழங்கப்பட்ட தகவல்களின் அடிப்படையில் இந்த திட்டம் பொருத்தமானதாகத் தோன்றுகிறது. இறுதி தகுதி மற்றும் ஒப்புதல் சம்பந்தப்பட்ட அரசுத் துறையின் அதிகாரப்பூர்வ சரிபார்ப்புக்கு உட்பட்டது.' 
+              : 'Based on the information provided, this scheme assessment reflects official scheme rules. CrowdCity AI is an informational portal; final eligibility decision rests with the concerned Government Authority.'}</span>
           </div>
 
           <!-- Card Actions -->
@@ -860,7 +1129,7 @@
 
     // Attach bookmark handlers
     document.querySelectorAll('.btn-save-scheme').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+      btn.addEventListener('click', async () => {
         const schemeId = btn.dataset.schemeId;
         await handleSaveScheme(schemeId, btn);
       });
@@ -914,29 +1183,58 @@
 
   function restoreSessionProfile() {
     try {
+      // Ensure gender always starts at the placeholder ("Select your gender") unless explicitly selected in a v3 session
+      const genderSelect = document.getElementById('check-gender');
+      if (genderSelect) {
+        genderSelect.value = '';
+      }
+
       const stored = sessionStorage.getItem('cc_scheme_checker_profile');
-      if (stored) {
-        const profile = JSON.parse(stored);
-        const ageInput = document.getElementById('check-age');
-        if (ageInput && profile.age !== undefined && profile.age !== null && profile.age !== '') {
-          ageInput.value = profile.age;
-        }
-        if (profile.gender) {
-          const genderSelect = document.getElementById('check-gender');
-          if (genderSelect) genderSelect.value = profile.gender;
-        }
-        if (profile.district) {
-          const districtSelect = document.getElementById('check-district');
-          if (districtSelect) districtSelect.value = profile.district;
-        }
+      if (!stored) return;
+
+      const profile = JSON.parse(stored);
+      // Purge legacy session data that may have silently auto-defaulted gender to 'female'
+      if (!profile || profile.schemaVersion !== 'v3') {
+        sessionStorage.removeItem('cc_scheme_checker_profile');
+        return;
+      }
+
+      const ageInput = document.getElementById('check-age');
+      if (ageInput && profile.age !== undefined && profile.age !== null && profile.age !== '') {
+        ageInput.value = profile.age;
+      }
+      if (profile.explicitlySelectedGender && profile.gender && genderSelect) {
+        genderSelect.value = profile.gender;
+      }
+      if (profile.district) {
+        const districtSelect = document.getElementById('check-district');
+        if (districtSelect) districtSelect.value = profile.district;
+      }
+      if (profile.occupation) {
+        const occupationSelect = document.getElementById('check-occupation');
+        if (occupationSelect) occupationSelect.value = profile.occupation;
+      }
+      if (profile.income !== undefined && profile.income !== null && profile.income !== '') {
+        const incomeInput = document.getElementById('check-income');
+        if (incomeInput) incomeInput.value = profile.income;
       }
     } catch (e) {
       console.warn("Could not restore session profile:", e);
     }
   }
 
+  // Expose engine for testing and cross-page consistency
+  if (typeof window !== 'undefined') {
+    window.CrowdCitySchemeEngine = {
+      evaluateEligibility,
+      getFallbackSeedSchemes,
+      getFormData,
+      validateStep
+    };
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    // Restrict age input to positive whole integers (reject decimals, letters, negatives, exponents)
+    // Restrict age input to non-negative whole integers (0 to 120)
     const ageInput = document.getElementById('check-age');
     if (ageInput) {
       ageInput.addEventListener('keydown', (e) => {
@@ -955,7 +1253,7 @@
       });
     }
 
-    // Restore active session entered profile values
+    // Restore active v3 session entered profile values (never auto-selects Female)
     restoreSessionProfile();
 
     document.querySelectorAll('.btn-next-step').forEach(btn => {
@@ -991,6 +1289,14 @@
           sessionStorage.removeItem('cc_scheme_checker_profile');
         } catch (e) {}
         if (ageInput) ageInput.value = '';
+        const genderSelect = document.getElementById('check-gender');
+        if (genderSelect) genderSelect.value = '';
+        const districtSelect = document.getElementById('check-district');
+        if (districtSelect) districtSelect.value = '';
+        const occupationSelect = document.getElementById('check-occupation');
+        if (occupationSelect) occupationSelect.value = '';
+        const govSchoolSelect = document.getElementById('check-gov-school');
+        if (govSchoolSelect) govSchoolSelect.value = '';
         currentStep = 1;
         updateStepUI();
         if (window.showToast) window.showToast("Form reset successfully.", "info");

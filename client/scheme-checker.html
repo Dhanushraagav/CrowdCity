@@ -442,16 +442,17 @@
 
               <div class="form-group-custom">
                 <label class="form-label-custom" for="check-age">Age (Years) <span style="color: #ef4444;">*</span></label>
-                <input type="number" id="check-age" class="form-input-custom" placeholder="e.g. 25" min="1" max="120" step="1" inputmode="numeric" required>
+                <input type="number" id="check-age" class="form-input-custom" placeholder="e.g. 25" min="0" max="120" step="1" inputmode="numeric" required>
               </div>
 
               <div class="form-group-custom">
                 <label class="form-label-custom" for="check-gender">Gender <span style="color: #ef4444;">*</span></label>
-                <select id="check-gender" class="form-select-custom">
+                <select id="check-gender" class="form-select-custom" required>
+                  <option value="" disabled selected>Select your gender</option>
                   <option value="female" data-i18n="gender_female">Female</option>
                   <option value="male" data-i18n="gender_male">Male</option>
                   <option value="transgender" data-i18n="gender_transgender">Transgender</option>
-                  <option value="all">Prefer not to say</option>
+                  <option value="prefer_not_to_say">Prefer not to say</option>
                 </select>
               </div>
 
@@ -514,8 +515,9 @@
               </h3>
 
               <div class="form-group-custom">
-                <label class="form-label-custom" for="check-occupation">Primary Occupation</label>
-                <select id="check-occupation" class="form-select-custom">
+                <label class="form-label-custom" for="check-occupation">Primary Occupation <span style="color: #ef4444;">*</span></label>
+                <select id="check-occupation" class="form-select-custom" required>
+                  <option value="" disabled selected>Select your occupation</option>
                   <option value="unemployed">Unemployed / Job Seeker</option>
                   <option value="student">Student</option>
                   <option value="farmer">Farmer / Agricultural Laborer</option>
@@ -595,6 +597,7 @@
               <div class="form-group-custom" id="group-check-gov-school">
                 <label class="form-label-custom" for="check-gov-school">Did you study in a TN Government School (from Classes 6th to 12th)?</label>
                 <select id="check-gov-school" class="form-select-custom">
+                  <option value="" selected>Select schooling type</option>
                   <option value="false">No / Private Schooling</option>
                   <option value="true">Yes, Government School</option>
                 </select>
@@ -636,10 +639,10 @@
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                 <div>
                   <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; font-family: var(--font-heading, system-ui);">
-                    You qualify for <span id="matched-count-number" style="color: var(--primary, #0d9488);">0</span> Government Schemes!
+                    Based on the information provided, <span id="matched-count-number" style="color: var(--primary, #0d9488);">0</span> Government Schemes appear relevant
                   </h3>
-                  <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
-                    Based on your age, income, and demographic criteria.
+                  <p id="checker-results-summary-subtext" style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                    Each scheme is evaluated independently against its official eligibility rules. Final eligibility is determined by the respective government authority.
                   </p>
                 </div>
 
