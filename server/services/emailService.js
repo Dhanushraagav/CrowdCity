@@ -519,15 +519,6 @@ export const sendContactInquiryEmail = async ({ name, email, category, subject, 
     });
   }
 
-  // Send to official inbox crowdcityai@gmail.com
-  await sendResendEmail({
-    to: 'crowdcityai@gmail.com',
-    subject: adminSubject,
-    html: adminHtml,
-    text: adminText,
-    attachments: emailAttachments
-  });
-
   // Automated confirmation receipt to sender
   const userSubject = `We have received your message - CrowdCity`;
   const userContentHtml = `
@@ -551,10 +542,22 @@ export const sendContactInquiryEmail = async ({ name, email, category, subject, 
   const userHtml = getEmailHtmlWrapper('Inquiry Received', userContentHtml);
   const userText = `Hello ${name},\n\nWe have received your inquiry regarding "${subject}" (${category}). Our team will review your message and get back to you.\n\nOfficial Email: crowdcityai@gmail.com\n\nTeam CrowdCity`;
 
-  return sendResendEmail({
-    to: email,
-    subject: userSubject,
-    html: userHtml,
-    text: userText
-  });
+  // Dispatch official inbox delivery and citizen receipt concurrently to cut external email latency in half
+  const [adminResult] = await Promise.allSettled([
+    sendResendEmail({
+      to: 'crowdcityai@gmail.com',
+      subject: adminSubject,
+      html: adminHtml,
+      text: adminText,
+      attachments: emailAttachments
+    }),
+    sendResendEmail({
+      to: email,
+      subject: userSubject,
+      html: userHtml,
+      text: userText
+    })
+  ]);
+
+  return adminResult.status === 'fulfilled' ? adminResult.value : false;
 };

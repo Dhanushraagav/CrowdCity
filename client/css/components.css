@@ -2581,6 +2581,19 @@ body:not(.admin-portal-body) .app-sidebar {
   box-shadow: none !important;
 }
 
+.app-sidebar-link i svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
 [data-theme="dark"] .app-sidebar-link i {
   color: #2dd4bf;
 }
