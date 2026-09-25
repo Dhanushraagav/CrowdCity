@@ -448,68 +448,292 @@ function generateAssistantFallbackResponse(messages, knowledgeBase) {
 }
 
 /**
- * AI Document Quality & Readiness Verification using Groq LLM.
- * Isolated service function for CrowdCity AI v2.0 Document Verifier.
+ * Content-based document type classifier (NEVER relies on filename).
+ * Classifies extracted OCR text into document categories based on genuine textual signatures.
  */
-export const verifyDocumentReadiness = async (docMeta = {}, extractedText = '', scheme = {}) => {
-  const systemPrompt = `You are the CrowdCity AI Document Preparation Assistant.
-Analyze the provided document metadata and extracted text to generate a document quality and application readiness analysis.
+export function detectActualDocumentType(extractedText = '') {
+  const raw = typeof extractedText === 'string' ? extractedText.trim() : '';
+  if (raw.length < 15) return 'unreadable_or_empty';
 
-IMPORTANT SECURITY & DISCLAIMER RULES:
-1) You perform document clarity, readability, and completeness guidance ONLY.
-2) You NEVER issue official government verification, legal approvals, or guarantee government acceptance.
-3) Provide objective, friendly advice regarding image clarity, resolution, cropping, and missing scheme requirements.
+  const lower = raw.toLowerCase();
 
-Return ONLY a valid JSON object with the following structure:
-{
-  "isReadable": true/false,
-  "clarityScore": number (0 to 100),
-  "qualityStatus": "Good" / "Needs Attention" / "Blurry or Dark",
-  "recommendations": ["Recommendation 1", "Recommendation 2"],
-  "extractedSummary": "Brief 1-2 sentence overview of document text content.",
-  "disclaimer": "Guidance and document quality check only. Does not constitute official government verification."
-}`;
+  // 1. Check Aadhaar content markers (12-digit UID pattern or UIDAI official markers)
+  const hasAadhaarNumber = /\b[2-9]\d{3}[\s-]?\d{4}[\s-]?\d{4}\b/.test(raw) ||
+                           /\b[xX*]{4}[\s-]?[xX*]{4}[\s-]?\d{4}\b/.test(raw);
+  const aadhaarKeywordHits = [
+    'unique identification authority',
+    'uidai',
+    'government of india',
+    'aadhaar',
+    'ஆதார்',
+    'मेरा आधार',
+    'year of birth',
+    'enrolment no',
+    'vid :'
+  ].filter(k => lower.includes(k)).length;
 
-  const groq = getGroqClient();
-  if (!groq) {
-    logger.info('Groq SDK unconfigured, using fallback document verification analysis.');
-    return generateFallbackDocVerification(docMeta, scheme);
+  if (hasAadhaarNumber && (aadhaarKeywordHits >= 1 || /\b(dob|male|female|address|s\/o|d\/o|w\/o)\b/i.test(raw))) {
+    return 'aadhaar';
+  }
+  if (aadhaarKeywordHits >= 2) {
+    return 'aadhaar';
   }
 
-  try {
-    const response = await groq.chat.completions.create({
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Document Type: ${docMeta.doc_type || 'Unknown'}\nDocument Name: ${docMeta.doc_name || 'Uploaded Document'}\nFile Size: ${docMeta.file_size || 0} bytes\nExtracted Text: ${extractedText.substring(0, 1000)}\nTarget Scheme: ${scheme.scheme_name || scheme.name || 'General Welfare Scheme'}` }
-      ],
-      model: getGroqModel(),
-      temperature: 0.2,
-      response_format: { type: 'json_object' }
-    });
-
-    const content = response.choices[0]?.message?.content;
-    return JSON.parse(content);
-  } catch (err) {
-    logger.error('verifyDocumentReadiness error:', err);
-    return generateFallbackDocVerification(docMeta, scheme);
+  // 2. Check Resume / CV content markers
+  const resumeMarkers = [
+    'curriculum vitae',
+    'work experience',
+    'professional experience',
+    'professional summary',
+    'career objective',
+    'technical skills',
+    'academic projects',
+    'education',
+    'certifications',
+    'internship',
+    'linkedin.com',
+    'github.com',
+    'b.tech',
+    'b.e.',
+    'cgpa',
+    'achievements'
+  ];
+  const hasResumeWord = /\bresume\b/i.test(raw);
+  const resumeHitCount = resumeMarkers.filter(m => lower.includes(m)).length + (hasResumeWord ? 2 : 0);
+  if (resumeHitCount >= 3) {
+    return 'resume';
   }
+
+  // 3. Check PAN Card markers
+  if (/\b[A-Z]{5}[0-9]{4}[A-Z]\b/.test(raw) || (lower.includes('income tax department') && lower.includes('permanent account number'))) {
+    return 'pan_card';
+  }
+
+  // 4. Check Smart Family Ration Card markers
+  if (['family card', 'smart card', 'civil supplies', 'public distribution', 'குடும்ப அட்டை', 'tnepds', 'fps code'].filter(k => lower.includes(k)).length >= 2) {
+    return 'ration_card';
+  }
+
+  // 5. Check Income Certificate markers
+  if (lower.includes('income certificate') || lower.includes('வருமானச் சான்றிதழ்') || (lower.includes('annual income') && lower.includes('tahsildar'))) {
+    return 'income_cert';
+  }
+
+  // 6. Check Community Certificate markers
+  if (lower.includes('community certificate') || lower.includes('சாதிச் சான்றிதழ்') || (lower.includes('community') && lower.includes('backward class'))) {
+    return 'community_cert';
+  }
+
+  // 7. Check Bank Passbook markers
+  if (['ifsc', 'account number', 'account no', 'passbook', 'savings bank', 'micr'].filter(k => lower.includes(k)).length >= 2) {
+    return 'bank_passbook';
+  }
+
+  // 8. Check Student ID / Bonafide markers
+  if (['bonafide certificate', 'student id', 'roll no', 'register number', 'semester', 'institution'].filter(k => lower.includes(k)).length >= 2) {
+    return 'student_id';
+  }
+
+  // 9. Check Farmer / Patta markers
+  if (['patta', 'chitta', 'adangal', 'survey no', 'uzhavar', 'பட்டா'].filter(k => lower.includes(k)).length >= 2) {
+    return 'farmer_cert';
+  }
+
+  // 10. Check Disability Certificate / UDID markers
+  if (['disability certificate', 'differently abled', 'udid', 'percentage of disability', 'மாற்றுத்திறனாளி'].filter(k => lower.includes(k)).length >= 1) {
+    return 'disability_cert';
+  }
+
+  // 11. Check Driving Licence markers
+  if (['driving licence', 'driving license', 'dl no', 'mcwg', 'lmv'].filter(k => lower.includes(k)).length >= 2) {
+    return 'driving_licence';
+  }
+
+  return 'general_document';
+}
+
+const DOC_TYPE_LABELS = {
+  aadhaar: 'Aadhaar',
+  resume: 'resume PDF',
+  pan_card: 'PAN Card',
+  ration_card: 'Smart Family Ration Card',
+  income_cert: 'Income Certificate',
+  community_cert: 'Community Certificate',
+  bank_passbook: 'Bank Account Passbook',
+  student_id: 'Student ID / Study Certificate',
+  farmer_cert: 'Farmer Ownership Certificate (Patta)',
+  disability_cert: 'Disability Certificate',
+  passport_photo: 'Passport Size Photograph',
+  driving_licence: 'Driving Licence',
+  other: 'Document',
+  general_document: 'unrecognized document'
 };
 
-function generateFallbackDocVerification(docMeta, scheme) {
-  const isReadable = (docMeta.file_size || 0) > 1024;
+/**
+ * Deterministic, reproducible Document Quality & Readiness evaluator.
+ * Same document + same processing conditions = identical clarityScore, qualityStatus, and evidence-based recommendations.
+ */
+export function computeDeterministicDocumentAnalysis(docMeta = {}, extractedText = '', metrics = {}) {
+  const cleanText = typeof extractedText === 'string' ? extractedText.trim() : '';
+  const words = cleanText ? cleanText.split(/\s+/).filter(w => /[a-zA-Z0-9\u0B80-\u0BFF]{2,}/.test(w)) : [];
+  const wordCount = words.length;
+  const expectedType = String(docMeta.doc_type || 'other').toLowerCase().trim();
+  const expectedLabel = DOC_TYPE_LABELS[expectedType] || docMeta.doc_type || 'Document';
+
+  // 1. Content-based document type detection (NEVER uses doc_name/filename)
+  const detectedType = detectActualDocumentType(cleanText);
+  const isPhotoSlot = expectedType === 'passport_photo';
+
+  let documentTypeMismatch = false;
+  if (!isPhotoSlot && expectedType !== 'other' && wordCount >= 3) {
+    if (detectedType === 'resume' && expectedType !== 'resume') {
+      documentTypeMismatch = true;
+    } else if (detectedType !== 'general_document' && detectedType !== 'unreadable_or_empty' && detectedType !== expectedType) {
+      documentTypeMismatch = true;
+    } else if (expectedType === 'aadhaar' && detectedType !== 'aadhaar') {
+      documentTypeMismatch = true;
+    }
+  }
+
+  // 2. Measured OCR Confidence (0-100)
+  const sourceType = metrics.sourceType || (String(docMeta.doc_name || '').toLowerCase().endsWith('.pdf') ? 'digital_pdf' : 'image');
+  let ocrConfidence = 0;
+  if (typeof metrics.ocrConfidence === 'number' && !Number.isNaN(metrics.ocrConfidence)) {
+    ocrConfidence = Math.max(0, Math.min(100, Math.round(metrics.ocrConfidence)));
+  } else if (wordCount >= 3) {
+    ocrConfidence = sourceType === 'digital_pdf' ? 90 : 85;
+  }
+
+  // 3. Measured Resolution / Pixel Dimensions
+  const pixelWidth = Number(metrics.pixelWidth) || 0;
+  const pixelHeight = Number(metrics.pixelHeight) || 0;
+  const measuredDpi = Number(metrics.measuredDpi) || null;
+  let resolutionScore = 20;
+  let isLowResolution = false;
+
+  if (sourceType !== 'digital_pdf' && pixelWidth > 0 && pixelHeight > 0) {
+    const minSide = Math.min(pixelWidth, pixelHeight);
+    const maxSide = Math.max(pixelWidth, pixelHeight);
+    if (minSide >= 900 && maxSide >= 1200) {
+      resolutionScore = 20;
+      isLowResolution = false;
+    } else if (minSide >= 600 && maxSide >= 800) {
+      resolutionScore = 16;
+      isLowResolution = false;
+    } else if (minSide >= 400) {
+      resolutionScore = 9;
+      isLowResolution = true;
+    } else {
+      resolutionScore = 4;
+      isLowResolution = true;
+    }
+  } else if (measuredDpi && measuredDpi < 150) {
+    resolutionScore = 8;
+    isLowResolution = true;
+  }
+
+  // 4. Measured Edge / Border Cropping
+  const croppedEdges = Array.isArray(metrics.croppedEdges) ? metrics.croppedEdges.filter(Boolean) : [];
+  const hasEdgeCropping = croppedEdges.length > 0;
+
+  // 5. Deterministic Clarity & Readiness Score Calculation
+  const isReadable = isPhotoSlot ? (pixelWidth >= 200 || (docMeta.file_size || 0) > 2048) : (wordCount >= 3 && ocrConfidence >= 40);
+  let clarityScore = 0;
+
+  if (!isReadable) {
+    clarityScore = wordCount > 0 ? 38 : 25;
+  } else if (isPhotoSlot) {
+    clarityScore = isLowResolution ? 62 : 92;
+  } else {
+    const ocrComponent = Math.round((ocrConfidence / 100) * 60); // max 60
+    const textComponent = wordCount >= 15 ? 20 : (wordCount >= 8 ? 15 : 8); // max 20
+    const rawScore = ocrComponent + textComponent + resolutionScore; // max 100
+    const mismatchPenalty = documentTypeMismatch ? 22 : 0; // e.g., 94 - 22 = 72% for digital PDF resume uploaded as Aadhaar
+    const cropPenalty = hasEdgeCropping ? 8 : 0;
+    clarityScore = Math.max(15, Math.min(100, rawScore - mismatchPenalty - cropPenalty));
+  }
+
+  // 6. Deterministic Quality Status Thresholds
+  let qualityStatus = 'Good';
+  if (!isReadable || clarityScore < 50) {
+    qualityStatus = 'Poor Quality';
+  } else if (documentTypeMismatch || clarityScore < 80 || isLowResolution || hasEdgeCropping) {
+    qualityStatus = 'Needs Attention';
+  } else {
+    qualityStatus = 'Good';
+  }
+
+  // 7. Evidence-Based Recommendations (ONLY emitted when the condition is actually detected)
+  const recommendations = [];
+
+  if (documentTypeMismatch) {
+    if (expectedType === 'aadhaar' && detectedType === 'resume') {
+      recommendations.push('Upload the correct Aadhaar document instead of a resume PDF.');
+    } else {
+      const detectedLabel = DOC_TYPE_LABELS[detectedType] || 'a different document';
+      recommendations.push(`Upload the correct ${expectedLabel} document instead of ${detectedLabel}.`);
+    }
+    recommendations.push(`Ensure the replacement ${expectedLabel} scan has clearly legible printed text and complete document details.`);
+  }
+
+  if (!isReadable && !isPhotoSlot) {
+    recommendations.push('No readable printed text could be extracted from this file. Upload a clear image or searchable PDF with legible text.');
+  } else if (ocrConfidence > 0 && ocrConfidence < 70) {
+    recommendations.push(`Measured OCR legibility is low (${ocrConfidence}% confidence). Re-capture the document in bright, even lighting without motion blur.`);
+  }
+
+  if (isLowResolution && pixelWidth > 0 && pixelHeight > 0) {
+    recommendations.push(`Measured image dimensions are low (${pixelWidth}×${pixelHeight} px). Upload a higher-resolution scan (at least 800×600 px) so text remains sharp.`);
+  } else if (measuredDpi && measuredDpi < 200) {
+    recommendations.push(`Measured scan density is ${measuredDpi} DPI. Use a higher-resolution scan so small characters remain legible.`);
+  }
+
+  if (hasEdgeCropping) {
+    recommendations.push(`Document content appears clipped near the ${croppedEdges.join(' and ')} edge(s). Include a visible margin around all four sides.`);
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push(`Document text extraction succeeded (${wordCount} legible words, ${ocrConfidence}% OCR confidence) and matches expected ${expectedLabel} content.`);
+    recommendations.push(`Verify that your printed name, date of birth, and reference numbers match your scheme application details.`);
+  }
+
+  const readinessSubtitle = qualityStatus === 'Good'
+    ? 'Automated Readability & Readiness Check Completed'
+    : 'Document Quality & Readiness Check — Action Needed';
+
   return {
-    isReadable: isReadable,
-    clarityScore: isReadable ? 88 : 60,
-    qualityStatus: isReadable ? "Good" : "Needs Attention",
-    recommendations: [
-      isReadable ? "This document appears clear and readable." : "File size is small. Ensure the text is not blurry.",
-      "Ensure all four corners of the certificate are visible and uncropped.",
-      "Verify that your name and Aadhaar/Passbook number match your application details."
-    ],
-    extractedSummary: `Uploaded ${docMeta.doc_name || 'Government Certificate'} verified for readability.`,
-    disclaimer: "Guidance and document quality check only. Does not constitute official government verification."
+    isReadable,
+    clarityScore,
+    qualityStatus,
+    readinessSubtitle,
+    documentTypeMismatch,
+    expectedDocumentType: expectedType,
+    detectedDocumentType: detectedType,
+    measuredMetrics: {
+      ocrConfidence,
+      wordCount,
+      charCount: cleanText.length,
+      pixelWidth: pixelWidth || null,
+      pixelHeight: pixelHeight || null,
+      measuredDpi,
+      sourceType,
+      croppedEdges,
+      hasEdgeCropping,
+      isLowResolution
+    },
+    recommendations,
+    extractedSummary: cleanText || 'No printed text detected in document.',
+    disclaimer: 'Automated document quality and readiness check only. Does not constitute official government verification.'
   };
 }
+
+/**
+ * Document Quality & Readiness Verification Service.
+ * Uses deterministic measurement for score, status, mismatch, resolution, and border checks.
+ */
+export const verifyDocumentReadiness = async (docMeta = {}, extractedText = '', scheme = {}, metrics = {}) => {
+  return computeDeterministicDocumentAnalysis(docMeta, extractedText, metrics);
+};
 
 /**
  * AI Form Field Guidance Generator using Groq LLM.

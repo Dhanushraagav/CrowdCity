@@ -188,31 +188,6 @@
     _docFetchInFlight = (async () => {
       console.log('[DATA] Document Wallet FETCH START');
 
-      // Pre-load local cached documents immediately for fast 0ms paint
-      if (userDocuments.length === 0) {
-        try {
-          const local = localStorage.getItem('cc_user_uploaded_docs');
-          if (local) {
-            const parsed = JSON.parse(local);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              userDocuments = parsed;
-              renderDocumentsList();
-            }
-          }
-        } catch (e) {}
-      }
-
-      // Show skeleton / loader only if we have zero documents in memory
-      const container = document.getElementById('documents-grid-container');
-      if (container && userDocuments.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 4rem 1rem; grid-column: 1 / -1;">
-            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
-            <p style="font-size: 0.95rem; color: var(--text-muted);">Loading your secure document wallet...</p>
-          </div>
-        `;
-      }
-
       // Get authenticated user ID synchronously without extra network calls
       let userId = null;
       if (typeof getCurrentUser === 'function') {
@@ -233,11 +208,38 @@
         } catch (e) {}
       }
 
+      // Pre-load local cached documents ONLY if owned by the current authenticated userId
+      if (userDocuments.length === 0 && userId) {
+        try {
+          const local = localStorage.getItem('cc_user_uploaded_docs');
+          if (local) {
+            const parsed = JSON.parse(local);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const ownedDocs = parsed.filter(d => d && d.user_id === userId);
+              if (ownedDocs.length > 0) {
+                userDocuments = ownedDocs;
+                renderDocumentsList();
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      // Show skeleton / loader only if we have zero documents in memory
+      const container = document.getElementById('documents-grid-container');
+      if (container && userDocuments.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 4rem 1rem; grid-column: 1 / -1;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <p style="font-size: 0.95rem; color: var(--text-muted);">Loading your secure document wallet...</p>
+          </div>
+        `;
+      }
+
       if (!userId) {
         console.log('[DATA] Document Wallet FETCH ERROR: No authenticated user');
-        if (userDocuments.length === 0) {
-          renderEmptyState("Please sign in to access your secure document wallet.");
-        }
+        userDocuments = [];
+        renderEmptyState("Please sign in to access your secure document wallet.");
         return;
       }
 
@@ -262,9 +264,9 @@
               // Mark cloud documents as synced
               const cloudDocs = data.map(d => ({ ...d, sync_status: 'synced' }));
 
-              // Retain any local-only pending documents that haven't synced yet
+              // Retain any local-only pending documents owned by this user that haven't synced yet
               const pendingDocs = userDocuments.filter(localDoc => 
-                localDoc.sync_status === 'pending_sync' && !cloudDocs.some(cd => cd.id === localDoc.id)
+                localDoc.user_id === userId && localDoc.sync_status === 'pending_sync' && !cloudDocs.some(cd => cd.id === localDoc.id)
               );
 
               userDocuments = [...pendingDocs, ...cloudDocs];
@@ -287,22 +289,26 @@
 
       _lastDocFetchAt = Date.now();
 
-      // If temporary network failure occurs, retain existing valid documents
+      // If temporary network failure occurs, retain existing valid documents owned by userId
+      userDocuments = userDocuments.filter(d => d && d.user_id === userId);
       if (userDocuments.length > 0) {
         console.log('[DATA] Retaining existing in-memory/cached documents:', userDocuments.length);
         renderDocumentsList();
         return;
       }
 
-      // Check local storage fallback
+      // Check local storage fallback strictly scoped to userId
       try {
         const local = localStorage.getItem('cc_user_uploaded_docs');
         if (local) {
           const parsed = JSON.parse(local);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            userDocuments = parsed;
-            renderDocumentsList();
-            return;
+            const ownedDocs = parsed.filter(d => d && d.user_id === userId);
+            if (ownedDocs.length > 0) {
+              userDocuments = ownedDocs;
+              renderDocumentsList();
+              return;
+            }
           }
         }
       } catch (e) {}

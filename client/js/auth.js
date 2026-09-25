@@ -1503,10 +1503,17 @@ async function clearSessionSilent() {
   localStorage.removeItem('cc_my_complaints');
   localStorage.removeItem('cc_my_complaints_civic');
   localStorage.removeItem('cc_my_complaints_trans');
+  localStorage.removeItem('cc_user_uploaded_docs');
+  try { sessionStorage.removeItem('cc_scheme_checker_profile'); } catch (e) {}
+  try {
+    if (typeof indexedDB !== 'undefined') {
+      indexedDB.deleteDatabase('CrowdCityDocWalletDB');
+    }
+  } catch (e) {}
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
-      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_'))) {
+      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_') || k.startsWith('cc_user_uploaded_docs_'))) {
         localStorage.removeItem(k);
       }
     }
@@ -2095,18 +2102,25 @@ async function logoutUser() {
     'cc_my_complaints_civic',
     'cc_my_complaints_trans',
     'cc_notifications_cache',
-    'cc_password_recovery_active'
+    'cc_password_recovery_active',
+    'cc_user_uploaded_docs',
+    'cc_scheme_checker_profile'
   ];
   authKeys.forEach(k => {
     try { localStorage.removeItem(k); } catch (e) {}
     try { sessionStorage.removeItem(k); } catch (e) {}
   });
+  try {
+    if (typeof indexedDB !== 'undefined') {
+      indexedDB.deleteDatabase('CrowdCityDocWalletDB');
+    }
+  } catch (e) {}
 
   // Purge any user-scoped keys
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
-      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_'))) {
+      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_') || k.startsWith('cc_user_uploaded_docs_'))) {
         localStorage.removeItem(k);
       }
     }

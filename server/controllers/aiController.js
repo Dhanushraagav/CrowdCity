@@ -288,17 +288,17 @@ export const assistantChatController = async (req, res) => {
  * Dedicated endpoint for Document Quality & Readiness Assistant.
  */
 export const verifyDocumentController = async (req, res) => {
-  const { docMeta, extractedText, scheme } = req.body;
+  const { docMeta, extractedText, scheme, metrics } = req.body;
 
-  if (!docMeta) {
+  if (!docMeta || typeof docMeta !== 'object') {
     return res.status(400).json({ error: 'Document metadata is required for verification' });
   }
 
   try {
-    const report = await verifyDocumentReadiness(docMeta, extractedText || '', scheme || {});
+    const report = await verifyDocumentReadiness(docMeta, typeof extractedText === 'string' ? extractedText : '', scheme || {}, metrics || {});
     return res.status(200).json({ success: true, report });
   } catch (err) {
-    logger.error('verifyDocumentController Error: %O', err);
+    logger.error('verifyDocumentController Error: %s', err?.message || 'Document verification failed');
     return res.status(500).json({ error: 'Server error analyzing document quality' });
   }
 };
