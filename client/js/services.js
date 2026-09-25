@@ -1,7 +1,7 @@
 /**
  * CrowdCity AI v2.0 - Government Services Portal JavaScript
- * Manages scheme directory search, category filtering, scheme bookmarking,
- * live KPI metrics, and dedicated Floating AI Scheme Advisor Chatbot.
+ * Manages scheme directory search, category filtering, scheme bookmarking, and dedicated Floating AI Scheme Advisor Chatbot.
+ * STRICT POLICY: NO ICONS, NO EMOJIS, ZERO BUGS.
  */
 
 (function () {
@@ -109,58 +109,13 @@
   document.addEventListener('DOMContentLoaded', () => {
     initSchemeDirectory();
     initFloatingChatbot();
-    updateServicesKPIs();
   });
-
-  // KPI Metrics Calculation & Display
-  function updateServicesKPIs() {
-    const verifiedEl = document.getElementById('kpi-stat-schemes');
-    const sectorsEl = document.getElementById('kpi-stat-sectors');
-    const toolsEl = document.getElementById('kpi-stat-tools');
-    const savedEl = document.getElementById('kpi-stat-saved');
-
-    if (verifiedEl) verifiedEl.textContent = GOVERNMENT_SCHEMES.length;
-
-    // Count unique welfare sectors
-    const uniqueCategories = new Set(GOVERNMENT_SCHEMES.map(s => s.category));
-    if (sectorsEl) sectorsEl.textContent = uniqueCategories.size;
-
-    // 8 digital citizen modules
-    if (toolsEl) toolsEl.textContent = '8';
-
-    // Count saved/bookmarked schemes from localStorage
-    try {
-      const saved = JSON.parse(localStorage.getItem('cc_saved_user_schemes') || '[]');
-      if (savedEl) savedEl.textContent = saved.length;
-    } catch (e) {
-      if (savedEl) savedEl.textContent = '0';
-    }
-  }
-
-  // Scheme Category Filter by programmatic click
-  window.filterSchemesByCategory = function (category) {
-    currentCategory = category || 'all';
-    const categoryTabs = document.querySelectorAll('#scheme-tabs-container .feed-tab, .services-pill');
-    categoryTabs.forEach(tab => {
-      if ((tab.dataset.category || 'all') === currentCategory) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
-      }
-    });
-
-    renderSchemes();
-
-    const el = document.getElementById('scheme-tabs-container');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
 
   // Render Schemes Directory
   function initSchemeDirectory() {
+    const container = document.getElementById('schemes-container');
     const searchInput = document.getElementById('scheme-search-input');
-    const categoryTabs = document.querySelectorAll('#scheme-tabs-container .feed-tab, .services-pill');
+    const categoryPills = document.querySelectorAll('.services-pill');
 
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
@@ -169,34 +124,24 @@
       });
     }
 
-    categoryTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        categoryTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentCategory = tab.dataset.category || 'all';
+    categoryPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        categoryPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentCategory = pill.dataset.category || 'all';
         renderSchemes();
       });
     });
 
     window.addEventListener('language-change', () => {
       renderSchemes();
-      updateServicesKPIs();
     });
 
     renderSchemes();
   }
 
-  function getSavedSchemeIds() {
-    try {
-      return JSON.parse(localStorage.getItem('cc_saved_user_schemes') || '[]');
-    } catch (e) {
-      return [];
-    }
-  }
-
   function renderSchemes() {
     const container = document.getElementById('schemes-container');
-    const countBadge = document.getElementById('schemes-count-badge');
     if (!container) return;
 
     const tCheck = window.i18n ? window.i18n.t('services_btn_check_eligibility') : 'Check Eligibility';
@@ -208,8 +153,6 @@
     const tNoSchemes = window.i18n ? window.i18n.t('services_no_schemes_found') : 'No Government Schemes Found';
     const tNoSchemesDesc = window.i18n ? window.i18n.t('services_no_schemes_desc') : "Try searching for a different keyword or selecting 'All Schemes'.";
 
-    const savedIds = getSavedSchemeIds();
-
     const filtered = GOVERNMENT_SCHEMES.filter(sch => {
       const matchCat = currentCategory === 'all' || sch.category === currentCategory;
       const text = `${sch.name} ${sch.code} ${sch.dept} ${sch.benefits} ${sch.documents.join(' ')}`.toLowerCase();
@@ -217,133 +160,74 @@
       return matchCat && matchSearch;
     });
 
-    if (countBadge) {
-      countBadge.textContent = `${filtered.length} ${filtered.length === 1 ? 'Scheme' : 'Schemes'}`;
-    }
-
     if (filtered.length === 0) {
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; padding: 3rem 1.5rem; text-align: center; background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 18px;">
-          <div style="font-size: 2.25rem; color: var(--text-muted, #64748b); margin-bottom: 0.75rem;">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main, #0f172a); margin: 0 0 0.5rem 0;">${tNoSchemes}</h3>
-          <p style="font-size: 0.88rem; color: var(--text-muted, #64748b); margin: 0 0 1.25rem 0;">${tNoSchemesDesc}</p>
-          <button type="button" class="btn btn-primary" onclick="window.filterSchemesByCategory('all')" style="padding: 0.5rem 1.25rem; border-radius: 10px; font-weight: 700;">
-            Show All Schemes
-          </button>
+        <div style="grid-column: 1 / -1; padding: 2.5rem 1rem; text-align: center; background: var(--srv-bg-surface); border: 1px solid var(--srv-border); border-radius: 16px;">
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--srv-text-main); margin: 0 0 0.5rem 0;">${tNoSchemes}</h3>
+          <p style="font-size: 0.85rem; color: var(--srv-text-muted); margin: 0;">${tNoSchemesDesc}</p>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = filtered.map(sch => {
-      const isSaved = savedIds.includes(sch.id);
-      const isTN = sch.govtType.includes('Tamil Nadu');
-      const badgeClass = isTN ? 'badge-tn' : 'badge-central';
-      const badgeIcon = isTN ? 'fa-landmark' : 'fa-flag';
-
-      return `
-        <div class="scheme-card" id="card-${sch.id}">
-          <div>
-            <div class="scheme-card-header">
-              <span class="scheme-badge ${badgeClass}">
-                <i class="fa-solid ${badgeIcon}"></i> ${sch.govtType}
-              </span>
-              <div class="scheme-header-right">
-                <span class="scheme-code-pill">${sch.code}</span>
-                <button type="button" class="scheme-bookmark-btn ${isSaved ? 'bookmarked' : ''}" onclick="bookmarkScheme('${sch.id}', '${sch.name}')" title="${isSaved ? 'Remove from Saved Schemes' : 'Save Scheme'}" aria-label="Bookmark Scheme">
-                  <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
-                </button>
-              </div>
-            </div>
-
-            <h3 class="scheme-title">${sch.name}</h3>
-            <div class="scheme-dept">
-              <i class="fa-solid fa-building-columns"></i> <span>${sch.dept}</span>
-            </div>
-
-            <div class="scheme-benefits">
-              <div class="scheme-benefits-label">
-                <i class="fa-solid fa-hand-holding-dollar"></i> <span>${tBenefits}</span>
-              </div>
-              <div class="scheme-benefits-text">
-                ${sch.benefits}
-              </div>
-            </div>
-
-            <div class="scheme-meta-list">
-              <div class="scheme-meta-row">
-                <i class="fa-solid fa-user-check"></i>
-                <div><strong>${tEligibility}:</strong> ${sch.ageLimit} • ${sch.incomeLimit}</div>
-              </div>
-              <div class="scheme-meta-row">
-                <i class="fa-solid fa-file-invoice"></i>
-                <div><strong>${tDocuments}:</strong> ${sch.documents.join(', ')}</div>
-              </div>
-            </div>
+    container.innerHTML = filtered.map(sch => `
+      <div class="scheme-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <span class="scheme-badge">${sch.govtType}</span>
+            <span style="font-size: 0.72rem; font-weight: 700; color: var(--srv-text-muted);">${sch.code}</span>
           </div>
 
-          <div class="scheme-actions">
-            <a href="scheme-checker.html?scheme=${sch.id}" class="btn-scheme-action btn-scheme-primary">
-              <i class="fa-solid fa-clipboard-check"></i> <span>${tCheck}</span>
-            </a>
-            <button type="button" class="btn-scheme-action btn-scheme-advisor" onclick="window.openSchemeChatWindow('Tell me about eligibility criteria and documents required for ${sch.name}')">
-              <i class="fa-solid fa-robot"></i> <span>Advisor</span>
-            </button>
-            <a href="${sch.portal}" target="_blank" rel="noopener noreferrer" class="btn-scheme-action btn-scheme-secondary" title="Visit official government scheme portal">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>${tPortal}</span>
-            </a>
+          <h3 class="scheme-title">${sch.name}</h3>
+          <div class="scheme-dept">${sch.dept}</div>
+
+          <div class="scheme-benefits">
+            <strong style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--srv-primary); margin-bottom: 0.25rem;">${tBenefits}</strong>
+            ${sch.benefits}
+          </div>
+
+          <div class="scheme-details-list">
+            <div><strong>${tEligibility}:</strong> ${sch.ageLimit} | ${sch.incomeLimit}</div>
+            <div style="margin-top: 0.35rem;"><strong>${tDocuments}:</strong> ${sch.documents.join(', ')}</div>
           </div>
         </div>
-      `;
-    }).join('');
+
+        <div class="scheme-actions">
+          <a href="scheme-checker.html?scheme=${sch.id}" class="btn-srv btn-srv-primary">
+            ${tCheck}
+          </a>
+          <button type="button" class="btn-srv btn-srv-outline" onclick="bookmarkScheme('${sch.id}', '${sch.name}')">
+            ${tSave}
+          </button>
+          <a href="${sch.portal}" target="_blank" rel="noopener noreferrer" class="btn-srv btn-srv-outline">
+            ${tPortal}
+          </a>
+        </div>
+      </div>
+    `).join('');
   }
 
-  // Save / Bookmark Scheme (Toggle Support)
+  // Save / Bookmark Scheme
   window.bookmarkScheme = function (schemeId, schemeName) {
     try {
       let saved = JSON.parse(localStorage.getItem('cc_saved_user_schemes') || '[]');
-      const index = saved.indexOf(schemeId);
-      
-      if (index === -1) {
+      if (!saved.includes(schemeId)) {
         saved.push(schemeId);
         localStorage.setItem('cc_saved_user_schemes', JSON.stringify(saved));
         if (typeof window.showToast === 'function') {
-          window.showToast(`Saved "${schemeName}" to your saved schemes.`, 'success');
+          window.showToast(`Saved ${schemeName} to your saved schemes.`, 'success');
         } else {
-          alert(`Saved "${schemeName}" to your saved schemes.`);
+          alert(`Saved ${schemeName} to your saved schemes.`);
         }
       } else {
-        saved.splice(index, 1);
-        localStorage.setItem('cc_saved_user_schemes', JSON.stringify(saved));
         if (typeof window.showToast === 'function') {
-          window.showToast(`Removed "${schemeName}" from saved schemes.`, 'info');
+          window.showToast(`${schemeName} is already saved.`, 'info');
         } else {
-          alert(`Removed "${schemeName}" from saved schemes.`);
+          alert(`${schemeName} is already saved.`);
         }
       }
-
-      updateServicesKPIs();
-      renderSchemes();
     } catch (e) {
       console.warn('Bookmark error:', e);
-    }
-  };
-
-  // Open Chatbot from anywhere on page
-  window.openSchemeChatWindow = function (initialQuery) {
-    const chatWindow = document.getElementById('scheme-ai-chat-window');
-    const chatInput = document.getElementById('scheme-chat-input');
-    if (!chatWindow) return;
-
-    chatWindow.classList.remove('hidden');
-
-    if (initialQuery) {
-      if (chatInput) chatInput.value = initialQuery;
-      handleSendUserMessage();
-    } else if (chatInput) {
-      chatInput.focus();
     }
   };
 
@@ -355,16 +239,16 @@
     const sendBtn = document.getElementById('scheme-chat-send-btn');
     const chatInput = document.getElementById('scheme-chat-input');
 
-    if (triggerBtn && chatWindow) {
-      triggerBtn.addEventListener('click', () => {
-        chatWindow.classList.toggle('hidden');
-        if (!chatWindow.classList.contains('hidden') && chatInput) {
-          chatInput.focus();
-        }
-      });
-    }
+    if (!triggerBtn || !chatWindow) return;
 
-    if (closeBtn && chatWindow) {
+    triggerBtn.addEventListener('click', () => {
+      chatWindow.classList.toggle('hidden');
+      if (!chatWindow.classList.contains('hidden') && chatInput) {
+        chatInput.focus();
+      }
+    });
+
+    if (closeBtn) {
       closeBtn.addEventListener('click', () => {
         chatWindow.classList.add('hidden');
       });
@@ -396,7 +280,7 @@
     const text = chatInput.value.trim();
     if (!text) return;
 
-    // Render User Message
+    // Render User Message (NO ICONS, NO EMOJIS)
     appendChatMessage('user', text);
     chatInput.value = '';
 
@@ -472,8 +356,6 @@
       return "Chief Minister Comprehensive Health Insurance Scheme (CMCHIS) provides cashless hospital cover up to Rs 5,00,000 per family per year in empanelled government and private hospitals. Required documents: Ration Card and Income Certificate. Official Portal: https://cmchistn.com/";
     } else if (q.includes('kisan') || q.includes('farmer') || q.includes('agriculture')) {
       return "PM Kisan Samman Nidhi is a Central Government scheme providing Rs 6,000 per year direct income support in 3 equal installments of Rs 2,000 to landholding farmers across India. Official Portal: https://pmkisan.gov.in/";
-    } else if (q.includes('naan mudhalvan') || q.includes('skill')) {
-      return "Naan Mudhalvan Skill Scheme offers free technical skill training, AI & coding courses, language proficiency, and campus placement drives for college students and youth in Tamil Nadu. Official Portal: https://www.naanmudhalvan.tn.gov.in/";
     }
     return "I am your AI Scheme Advisor. You can ask me about Tamil Nadu State and Central Government welfare schemes, eligibility rules, required documents, or application steps.";
   }

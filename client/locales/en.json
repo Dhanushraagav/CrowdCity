@@ -1338,20 +1338,6 @@
   "showing_complaints_count": "Showing {start}–{end} of {total} complaints",
   "page_prev": "Previous",
   "page_next": "Next",
-  "page_indicator": "Page {current} of {total}",
-  "verified_schemes": "VERIFIED SCHEMES",
-  "state_and_central": "State & Central",
-  "welfare_sectors": "WELFARE SECTORS",
-  "key_domains": "Social, Edu, Health",
-  "digital_tools": "DIGITAL TOOLS",
-  "online_services": "Checker, Wallet, Verifier",
-  "saved_schemes": "SAVED SCHEMES",
-  "bookmarked_by_you": "Bookmarked by you",
-  "services_ticker_badge": "TN e-GOVERNANCE",
-  "services_ticker_text": "Tamil Nadu e-Governance Portal • Access verified welfare schemes, eligibility calculator, certificate verification, and digital tools.",
-  "services_digital_modules_title": "Citizen Digital Services",
-  "services_digital_modules_sub": "8 Self-Service Modules",
-  "ask_ai_advisor": "Ask AI Advisor",
-  "tn_welfare_portal": "Tamil Nadu E-Governance & Welfare"
+  "page_indicator": "Page {current} of {total}"
 }
 
