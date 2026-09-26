@@ -81,16 +81,24 @@
       },
       {
         id: 'tn-naanmudhalvan',
-        scheme_code: 'TN-NM-2022',
+        scheme_code: 'TN-NM-003',
         scheme_name: 'Naan Mudhalvan Skill Development Scheme',
-        department_name: 'Tamil Nadu Skill Development Corporation (TNSDC)',
+        department_name: 'Tamil Nadu Skill Development Corporation (TNSDC), Govt of Tamil Nadu',
         state_or_central: 'state',
-        data_source: 'tn.gov.in',
+        data_source: 'Tamil Nadu Skill Development Corporation (TNSDC) Official Portal (naanmudhalvan.tn.gov.in)',
+        last_verified_date: '2026-09-26',
         short_description: 'Statewide skill enhancement, technical certifications, AI learning modules, and direct campus placement drives.',
         benefits_summary: 'Free high-value industry certification courses, mentorship, AI skill modules, and direct employment drives.',
         required_documents: ["College ID / Graduation Marksheet", "Aadhaar Card", "Community Certificate"],
         official_portal_url: 'https://www.naanmudhalvan.tn.gov.in/',
-        eligibility_criteria: { min_age: 18, max_age: 35, native_state: 'Tamil Nadu' }
+        eligibility_criteria: {
+          min_age: 18,
+          max_age: 35,
+          gender: 'all',
+          native_state: 'Tamil Nadu',
+          programme_level: 'umbrella',
+          requires_course_selection: true
+        }
       },
       {
         id: 'tn-cmchis',
@@ -275,6 +283,21 @@
       }
     }
 
+    // 10. Distinguish Umbrella Programme (e.g. Naan Mudhalvan)
+    const isUmbrellaProgramme = Boolean(
+      criteria.programme_level === 'umbrella' ||
+      criteria.requires_course_selection === true ||
+      scheme.is_umbrella_programme === true ||
+      scheme.scheme_code === 'TN-NM-003' ||
+      scheme.id === 'tn-naanmudhalvan'
+    );
+
+    if (isUmbrellaProgramme) {
+      verificationNotes.push(isTamil
+        ? 'வழங்கப்பட்ட தகவலின் அடிப்படையில் பொது திட்ட தகுதி பொருந்துகிறது. குறிப்பிட்ட பாடப்பிரிவு அல்லது பயிற்சிக்கு (கல்லூரி சேர்க்கை, குறிப்பிட்ட பட்டப்படிப்பு அல்லது நுழைவுத் தேர்வு) கூடுதல் நிபந்தனைகள் பொருந்தக்கூடும்.'
+        : 'Matches the currently verified general programme criteria based on the information provided. Additional programme-specific or course-level prerequisites (such as specific degree, college affiliation, or entrance qualification) may apply.');
+    }
+
     let statusCode = "ELIGIBLE";
     let status = "Eligible";
     if (failed.length > 0) {
@@ -283,6 +306,19 @@
     } else if (missing.length > 0) {
       statusCode = "INSUFFICIENT_INFORMATION";
       status = "Additional Information Required";
+    } else if (isUmbrellaProgramme) {
+      statusCode = "POTENTIALLY_RELEVANT";
+      status = "Potentially Relevant";
+    }
+
+    let confidence = "High Confidence";
+    const confidenceReasons = [];
+    if (statusCode === "NOT_ELIGIBLE" || statusCode === "INSUFFICIENT_INFORMATION") {
+      confidence = "Needs Verification";
+      confidenceReasons.push(statusCode === "NOT_ELIGIBLE" ? "Eligibility criteria not satisfied" : "Additional information required");
+    } else if (statusCode === "POTENTIALLY_RELEVANT") {
+      confidence = "Medium Confidence";
+      confidenceReasons.push(isTamil ? "பொது திட்ட தகுதி பொருந்தியது; குறிப்பிட்ட பாடப்பிரிவு நிபந்தனைகள் சரிபார்க்கப்பட வேண்டும்" : "Broad programme criteria matched; course-specific prerequisites apply");
     }
 
     return {
@@ -296,8 +332,8 @@
       expiredDocs,
       renewingDocs,
       missingDocsList,
-      confidence: statusCode === "ELIGIBLE" ? "High Confidence" : "Needs Verification",
-      confidenceReasons: []
+      confidence,
+      confidenceReasons
     };
   }
 
@@ -312,17 +348,23 @@
     });
 
     // Exclude schemes where user is explicitly Not Eligible
-    const eligibleList = evaluated.filter(s => s.evaluation.status !== "Not Eligible");
+    const eligibleList = evaluated.filter(s => s.evaluation.statusCode !== "NOT_ELIGIBLE" && s.evaluation.status !== "Not Eligible");
 
-    // Sort by status priority: Eligible first, then Likely, then Docs, then Info
+    // Sort by status priority: Eligible first, then Potentially Relevant, then Docs, then Info
     return eligibleList.sort((a, b) => {
       const statusOrder = {
+        "ELIGIBLE": 1,
         "Eligible": 1,
+        "POTENTIALLY_RELEVANT": 2,
+        "Potentially Relevant": 2,
         "Likely Eligible": 2,
         "Additional Documents Required": 3,
+        "INSUFFICIENT_INFORMATION": 4,
         "Additional Information Required": 4
       };
-      return statusOrder[a.evaluation.status] - statusOrder[b.evaluation.status];
+      const orderA = statusOrder[a.evaluation.statusCode] || statusOrder[a.evaluation.status] || 99;
+      const orderB = statusOrder[b.evaluation.statusCode] || statusOrder[b.evaluation.status] || 99;
+      return orderA - orderB;
     });
   }
 
@@ -353,13 +395,21 @@
 
     container.innerHTML = filtered.map(scheme => {
       const isState = (scheme.state_or_central === 'state');
-      const evalData = scheme.evaluation || { status: 'Eligible', passed: [], failed: [], missing: [], verifiedDocs: [], expiredDocs: [], renewingDocs: [], missingDocsList: [], confidence: 'High Confidence', confidenceReasons: [] };
+      const evalData = scheme.evaluation || { status: 'Eligible', statusCode: 'ELIGIBLE', passed: [], failed: [], missing: [], verifiedDocs: [], expiredDocs: [], renewingDocs: [], missingDocsList: [], confidence: 'High Confidence', confidenceReasons: [] };
       
       let badgeColor = "#10b981"; // Green
       let badgeBg = "rgba(16, 185, 129, 0.12)";
       let statusText = isTamil ? "தகுதி உள்ளது" : "Eligible";
 
-      if (evalData.status === "Additional Information Required") {
+      if (evalData.statusCode === "NOT_ELIGIBLE" || evalData.status === "Not Eligible") {
+        badgeColor = "#ef4444"; // Red
+        badgeBg = "rgba(239, 68, 68, 0.12)";
+        statusText = isTamil ? "தகுதி இல்லை" : "Not Eligible";
+      } else if (evalData.statusCode === "POTENTIALLY_RELEVANT" || evalData.status === "Potentially Relevant" || evalData.status === "Likely Eligible") {
+        badgeColor = "#0d9488"; // Teal
+        badgeBg = "rgba(13, 148, 136, 0.12)";
+        statusText = isTamil ? "பொருத்தமாக இருக்கக்கூடும்" : "Potentially Relevant";
+      } else if (evalData.statusCode === "INSUFFICIENT_INFORMATION" || evalData.status === "Additional Information Required") {
         badgeColor = "#f59e0b"; // Yellow/Orange
         badgeBg = "rgba(245, 158, 11, 0.12)";
         statusText = isTamil ? "கூடுதல் தகவல் தேவை" : "Info Required";
@@ -367,10 +417,6 @@
         badgeColor = "#3b82f6"; // Blue
         badgeBg = "rgba(59, 130, 246, 0.12)";
         statusText = isTamil ? "கூடுதல் ஆவணம் தேவை" : "Docs Required";
-      } else if (evalData.status === "Likely Eligible") {
-        badgeColor = "#0d9488"; // Teal
-        badgeBg = "rgba(13, 148, 136, 0.12)";
-        statusText = isTamil ? "தகுதி இருக்கக்கூடும்" : "Likely Eligible";
       }
 
       // Confidence badge color
@@ -546,10 +592,17 @@
               <span>${isTamil ? 'விவரங்கள் பார்' : 'View Details'}</span>
             </a>
 
-            <button class="btn-save-bookmark" data-id="${scheme.id}" style="padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 0.4rem; background: transparent; cursor: pointer;">
-              <i class="fa-regular fa-bookmark"></i>
-              <span>${isTamil ? 'சேமிக்கவும்' : 'Save Scheme'}</span>
-            </button>
+            ${(() => {
+              const saved = isResultsSchemeSaved(scheme);
+              const tSave = isTamil ? 'சேமிக்கவும்' : 'Save Scheme';
+              const tSaved = isTamil ? 'சேமிக்கப்பட்டது' : 'Saved';
+              return `
+                <button type="button" class="btn-save-bookmark ${saved ? 'is-saved' : ''}" data-id="${scheme.id}" data-scheme-code="${scheme.scheme_code || ''}" style="padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid ${saved ? '#10b981' : 'var(--border-color)'}; color: ${saved ? '#10b981' : 'var(--text-main)'}; background: ${saved ? 'rgba(16, 185, 129, 0.1)' : 'transparent'}; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                  <i class="${saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
+                  <span>${saved ? tSaved : tSave}</span>
+                </button>
+              `;
+            })()}
 
             <!-- Official Source Button -->
             <a href="${scheme.official_portal_url || '#'}" target="_blank" rel="noopener noreferrer" class="btn" style="padding: 0.6rem 1rem; font-size: 0.82rem; font-weight: 700; text-decoration: none; border: 1px solid var(--primary); color: var(--primary); background: transparent; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
@@ -574,37 +627,237 @@
     }).join('');
 
     // Attach bookmark handlers
-    document.querySelectorAll('.btn-save-bookmark').forEach(btn => {
+    document.querySelectorAll('.btn-save-bookmark[data-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const schemeId = btn.dataset.id;
+        const schemeId = btn.dataset.id || btn.dataset.schemeCode;
         await saveSchemeBookmark(schemeId, btn);
       });
     });
   }
 
-  async function saveSchemeBookmark(schemeId, buttonElem) {
+  // Scheme Code to UUID mapping for results bookmark resolution
+  const RESULTS_SCHEME_CODE_TO_UUID = {
+    'TN-KMUT-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'TN-PUDHUMAI-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'TN-NM-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'TN-CMCHIS-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'TN-KKI-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'TN-UZHAVAR-006': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'CENTRAL-PMKISAN-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'CENTRAL-PMJAY-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'CENTRAL-PMMY-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'CENTRAL-SSY-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'CENTRAL-PMAY-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'CENTRAL-VIDYALAKSHMI-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  const RESULTS_LEGACY_SLUG_TO_UUID = {
+    'tn-kmut': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-kmut-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-pudhumai': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-pudhumai-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-nm-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-naanmudhalvan': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-cmchis': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-cmchis-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-kki': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-mra-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-uzhavar': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'central-pmkisan': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmkisan-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmjay': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmjay-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmmy': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-pmmy-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-ssy': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-ssy-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-pmay': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-pmay-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-vidyalakshmi': '8c887239-49c4-48de-8fee-5c305098b97d',
+    'central-vidyalakshmi-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  function resolveResultsSchemeUuid(identifier) {
+    if (!identifier) return null;
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier)) return identifier;
+    const upper = String(identifier).toUpperCase();
+    if (RESULTS_SCHEME_CODE_TO_UUID[upper]) return RESULTS_SCHEME_CODE_TO_UUID[upper];
+    const lower = String(identifier).toLowerCase();
+    if (RESULTS_LEGACY_SLUG_TO_UUID[lower]) return RESULTS_LEGACY_SLUG_TO_UUID[lower];
+    return null;
+  }
+
+  let resultsUserSavedIds = new Set();
+  const inFlightResultsBookmarks = new Set();
+
+  async function loadResultsSavedIds() {
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
           const session = await client.auth.getSession();
           const userId = session?.data?.session?.user?.id;
-          if (!userId) {
-            if (window.showToast) window.showToast("Please sign in to bookmark schemes.", "info");
-            return;
-          }
+          if (userId) {
+            try {
+              const cached = localStorage.getItem(`cc_saved_schemes_${userId}`);
+              if (cached) {
+                const arr = JSON.parse(cached);
+                if (Array.isArray(arr) && arr.length > 0) resultsUserSavedIds = new Set(arr);
+              }
+            } catch (e) {}
 
-          const { error } = await client.from('saved_schemes').insert({ user_id: userId, scheme_id: schemeId });
-          if (!error || error.code === '23505') {
-            if (window.showToast) window.showToast("Scheme saved to your bookmarks!", "success");
+            const { data } = await client
+              .from('saved_schemes')
+              .select('id, scheme_id, government_schemes(id, scheme_code)')
+              .eq('user_id', userId);
+
+            if (data) {
+              const freshSet = new Set();
+              data.forEach(r => {
+                if (r.scheme_id) freshSet.add(r.scheme_id);
+                if (r.government_schemes?.id) freshSet.add(r.government_schemes.id);
+                if (r.government_schemes?.scheme_code) {
+                  freshSet.add(r.government_schemes.scheme_code);
+                  freshSet.add(r.government_schemes.scheme_code.toLowerCase());
+                }
+              });
+              resultsUserSavedIds = freshSet;
+              try {
+                localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...resultsUserSavedIds]));
+              } catch (e) {}
+            }
           }
         }
       }
     } catch (e) {}
+    return resultsUserSavedIds;
+  }
 
-    buttonElem.classList.add('is-saved');
-    buttonElem.querySelector('i').className = 'fa-solid fa-bookmark';
-    buttonElem.querySelector('span').textContent = 'Saved';
+  function isResultsSchemeSaved(scheme) {
+    if (!scheme) return false;
+    if (scheme.id && resultsUserSavedIds.has(scheme.id)) return true;
+    if (scheme.scheme_code && resultsUserSavedIds.has(scheme.scheme_code)) return true;
+    if (scheme.scheme_code && resultsUserSavedIds.has(scheme.scheme_code.toLowerCase())) return true;
+    const resolved = resolveResultsSchemeUuid(scheme.id || scheme.scheme_code);
+    if (resolved && resultsUserSavedIds.has(resolved)) return true;
+    return false;
+  }
+
+  async function saveSchemeBookmark(schemeId, buttonElem) {
+    const targetUuid = resolveResultsSchemeUuid(schemeId);
+    if (!targetUuid) {
+      if (window.showToast) window.showToast("Could not bookmark scheme. Invalid scheme reference.", "error");
+      return;
+    }
+
+    if (inFlightResultsBookmarks.has(targetUuid)) return;
+    inFlightResultsBookmarks.add(targetUuid);
+
+    const isTamil = (window.i18n && window.i18n.getCurrentLanguage && window.i18n.getCurrentLanguage() === 'ta');
+    const tSave = isTamil ? 'சேமிக்கவும்' : 'Save Scheme';
+    const tSaved = isTamil ? 'சேமிக்கப்பட்டது' : 'Saved';
+
+    try {
+      if (typeof window.getOrInitSupabaseClient !== 'function') {
+        if (window.showToast) window.showToast("Please sign in to bookmark schemes.", "info");
+        return;
+      }
+
+      const client = await window.getOrInitSupabaseClient();
+      if (!client) {
+        if (window.showToast) window.showToast("Please sign in to bookmark schemes.", "info");
+        return;
+      }
+
+      const session = await client.auth.getSession();
+      const userId = session?.data?.session?.user?.id;
+      if (!userId) {
+        if (window.showToast) window.showToast("Please sign in to bookmark schemes.", "info");
+        return;
+      }
+
+      const isCurrentlySaved = resultsUserSavedIds.has(targetUuid) || (buttonElem && buttonElem.classList.contains('is-saved'));
+
+      if (isCurrentlySaved) {
+        // Toggle Remove
+        const { error: delErr } = await client
+          .from('saved_schemes')
+          .delete()
+          .eq('user_id', userId)
+          .eq('scheme_id', targetUuid);
+
+        if (!delErr) {
+          resultsUserSavedIds.delete(targetUuid);
+          const found = (allEligibleSchemes || []).find(s => s.id === targetUuid || resolveResultsSchemeUuid(s.id) === targetUuid);
+          if (found?.scheme_code) {
+            resultsUserSavedIds.delete(found.scheme_code);
+            resultsUserSavedIds.delete(found.scheme_code.toLowerCase());
+          }
+          try {
+            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...resultsUserSavedIds]));
+          } catch (e) {}
+
+          if (buttonElem) {
+            buttonElem.classList.remove('is-saved');
+            buttonElem.style.borderColor = 'var(--border-color)';
+            buttonElem.style.color = 'var(--text-main)';
+            buttonElem.style.background = 'transparent';
+            buttonElem.innerHTML = `<i class="fa-regular fa-bookmark"></i> <span>${tSave}</span>`;
+          }
+          if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
+        } else {
+          if (window.showToast) window.showToast("Failed to remove bookmark.", "error");
+        }
+      } else {
+        // Toggle Save
+        const { error: insErr } = await client
+          .from('saved_schemes')
+          .insert({ user_id: userId, scheme_id: targetUuid });
+
+        if (!insErr) {
+          resultsUserSavedIds.add(targetUuid);
+          const found = (allEligibleSchemes || []).find(s => s.id === targetUuid || resolveResultsSchemeUuid(s.id) === targetUuid);
+          if (found?.scheme_code) {
+            resultsUserSavedIds.add(found.scheme_code);
+            resultsUserSavedIds.add(found.scheme_code.toLowerCase());
+          }
+          try {
+            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...resultsUserSavedIds]));
+          } catch (e) {}
+
+          if (buttonElem) {
+            buttonElem.classList.add('is-saved');
+            buttonElem.style.borderColor = '#10b981';
+            buttonElem.style.color = '#10b981';
+            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
+            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
+          }
+          if (window.showToast) window.showToast("Scheme saved to your bookmarks!", "success");
+        } else if (insErr.code === '23505') {
+          // Already saved: guarantee UI matches database
+          resultsUserSavedIds.add(targetUuid);
+          try {
+            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...resultsUserSavedIds]));
+          } catch (e) {}
+
+          if (buttonElem) {
+            buttonElem.classList.add('is-saved');
+            buttonElem.style.borderColor = '#10b981';
+            buttonElem.style.color = '#10b981';
+            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
+            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
+          }
+          if (window.showToast) window.showToast("Scheme is already saved in your bookmarks!", "info");
+        } else {
+          if (window.showToast) window.showToast("Failed to save scheme.", "error");
+        }
+      }
+    } catch (err) {
+      console.warn("Save bookmark error:", err);
+      if (window.showToast) window.showToast("Could not update bookmark.", "error");
+    } finally {
+      inFlightResultsBookmarks.delete(targetUuid);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -622,6 +875,9 @@
 
     const tabCountAll = document.getElementById('tab-count-all');
     if (tabCountAll) tabCountAll.textContent = allEligibleSchemes.length;
+
+    // Load current user's saved scheme bookmarks before rendering
+    await loadResultsSavedIds();
 
     renderSchemes();
 

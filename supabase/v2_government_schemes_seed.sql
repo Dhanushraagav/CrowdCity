@@ -101,7 +101,10 @@ VALUES
       "max_age": 35,
       "gender": "all",
       "occupation": "Student / Graduate / Job Seeker",
-      "state": "Tamil Nadu"
+      "state": "Tamil Nadu",
+      "native_state": "Tamil Nadu",
+      "programme_level": "umbrella",
+      "requires_course_selection": true
     }'::jsonb,
     'Free high-value industry certification courses, mentorship, AI skill modules, and direct employment drives.',
     '["College ID / Graduation Marksheet", "Aadhaar Card", "Community Certificate", "Resume / Bio-data"]'::jsonb,

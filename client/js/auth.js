@@ -2104,7 +2104,10 @@ async function logoutUser() {
     'cc_notifications_cache',
     'cc_password_recovery_active',
     'cc_user_uploaded_docs',
-    'cc_scheme_checker_profile'
+    'cc_scheme_checker_profile',
+    'cc_user_reminders',
+    'cc_saved_user_schemes',
+    'cc_saved_schemes'
   ];
   authKeys.forEach(k => {
     try { localStorage.removeItem(k); } catch (e) {}
@@ -2120,7 +2123,7 @@ async function logoutUser() {
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
-      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_') || k.startsWith('cc_user_uploaded_docs_'))) {
+      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_') || k.startsWith('cc_user_uploaded_docs_') || k.startsWith('cc_user_reminders_') || k.startsWith('cc_saved_schemes_'))) {
         localStorage.removeItem(k);
       }
     }
@@ -2128,7 +2131,7 @@ async function logoutUser() {
   try {
     for (let i = sessionStorage.length - 1; i >= 0; i--) {
       const k = sessionStorage.key(i);
-      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_'))) {
+      if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_') || k.startsWith('cc_user_reminders_') || k.startsWith('cc_saved_schemes_'))) {
         sessionStorage.removeItem(k);
       }
     }

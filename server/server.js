@@ -3,6 +3,7 @@ dotenv.config();
 
 import app from './app.js';
 import { startSlaBackgroundWorker } from './services/slaService.js';
+import { startReminderBackgroundWorker } from './services/reminderService.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -15,6 +16,9 @@ const server = app.listen(PORT, () => {
   
   // Start automatic SLA breach & escalation background processor
   startSlaBackgroundWorker();
+
+  // Start automatic due-reminder email delivery background processor (Asia/Kolkata IST)
+  startReminderBackgroundWorker();
 });
 
 // Handle graceful shutdowns & unhandled rejections

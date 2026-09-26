@@ -23,6 +23,7 @@ import powerShutdownRoutes from './routes/powerShutdownRoutes.js';
 import publicPulseWeatherRoutes from './routes/publicPulseWeatherRoutes.js';
 import emergencyRoutes from './routes/emergencyRoutes.js';
 import tourismRoutes from './routes/tourismRoutes.js';
+import reminderRoutes from './routes/reminderRoutes.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
 // ES Module dirname workaround
@@ -128,6 +129,7 @@ app.use('/api/public-pulse/weather', publicPulseWeatherRoutes);
 app.use('/api/public-pulse', publicPulseWeatherRoutes);
 app.use('/api/emergency-services', emergencyRoutes);
 app.use('/api/tourism', tourismRoutes);
+app.use('/api/reminders', reminderRoutes);
 
 // Route aliases resolving to dedicated feature pages
 app.get('/weather-forecast', (req, res) => {

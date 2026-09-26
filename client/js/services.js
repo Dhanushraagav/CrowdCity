@@ -7,10 +7,75 @@
 (function () {
   'use strict';
 
-  // Government Welfare Schemes Database
+  // Comprehensive Scheme Code to UUID mapping for database integrity
+  const SCHEME_CODE_TO_UUID = {
+    'TN-KMUT-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'TN-PUDHUMAI-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'TN-NM-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'TN-CMCHIS-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'TN-KKI-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'TN-UZHAVAR-006': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'CENTRAL-PMKISAN-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'CENTRAL-PMJAY-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'CENTRAL-PMMY-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'CENTRAL-SSY-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'CENTRAL-PMAY-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'CENTRAL-VIDYALAKSHMI-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  const LEGACY_SLUG_TO_UUID = {
+    'tn-kmut': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-kmut-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-pudhumai': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-pudhumai-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-nm-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-naanmudhalvan': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-cmchis': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-cmchis-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-kki': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-mra-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-uzhavar': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'central-pmkisan': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmkisan-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmjay': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmjay-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmmy': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-pmmy-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-ssy': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-ssy-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-pmay': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-pmay-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-vidyalakshmi': '8c887239-49c4-48de-8fee-5c305098b97d',
+    'central-vidyalakshmi-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  function resolveSchemeUuid(identifier) {
+    if (!identifier) return null;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+    if (isUuid) return identifier;
+
+    const upper = String(identifier).toUpperCase();
+    if (SCHEME_CODE_TO_UUID[upper]) return SCHEME_CODE_TO_UUID[upper];
+
+    const lower = String(identifier).toLowerCase();
+    if (LEGACY_SLUG_TO_UUID[lower]) return LEGACY_SLUG_TO_UUID[lower];
+
+    const found = activeSchemesList.find(s => 
+      s.id === identifier || 
+      s.code === upper || 
+      s.code === identifier || 
+      (s.scheme_code && s.scheme_code === upper)
+    );
+    if (found && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(found.id)) {
+      return found.id;
+    }
+    return null;
+  }
+
+  // Government Welfare Schemes Database (Aligned with database UUIDs)
   const GOVERNMENT_SCHEMES = [
     {
-      id: 'tn-kmut-001',
+      id: '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
       code: 'TN-KMUT-001',
       name: 'Kalaignar Magalir Urimai Thittam',
       dept: 'Social Welfare & Women Empowerment Dept, TN',
@@ -23,7 +88,7 @@
       portal: 'https://kmut.tn.gov.in/'
     },
     {
-      id: 'tn-pudhumai-002',
+      id: '6edf49dc-795f-4369-b5ab-f72c24eddef8',
       code: 'TN-PUDHUMAI-002',
       name: 'Pudhumai Penn Scheme',
       dept: 'Higher Education Department, TN',
@@ -36,7 +101,7 @@
       portal: 'https://penkalvi.tn.gov.in/'
     },
     {
-      id: 'tn-nm-003',
+      id: 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
       code: 'TN-NM-003',
       name: 'Naan Mudhalvan Skill Scheme',
       dept: 'Tamil Nadu Skill Development Corporation (TNSDC)',
@@ -49,7 +114,7 @@
       portal: 'https://www.naanmudhalvan.tn.gov.in/'
     },
     {
-      id: 'tn-cmchis-004',
+      id: '43e8ff6a-d3f3-4277-88f2-98c46491584e',
       code: 'TN-CMCHIS-004',
       name: 'Chief Minister Comprehensive Health Insurance (CMCHIS)',
       dept: 'Health & Family Welfare Department, TN',
@@ -62,33 +127,33 @@
       portal: 'https://cmchistn.com/'
     },
     {
-      id: 'tn-mra-005',
-      code: 'TN-MRA-005',
-      name: 'Moovalur Ramamirtham Ammaiyar Marriage Assistance',
+      id: '43c6f25f-384b-4410-98ac-e747f0edeef7',
+      code: 'TN-KKI-005',
+      name: 'Kalaignar Kanavu Illam Housing Scheme',
       dept: 'Social Welfare & Women Empowerment Dept, TN',
       category: 'social',
       govtType: 'Tamil Nadu State Govt',
-      benefits: 'Financial assistance and 8 grams gold coin for brides completing 10th/12th/Degree education.',
-      ageLimit: 'Bride minimum age 18 years',
-      incomeLimit: 'Annual family income up to Rs 72,000',
-      documents: ['Educational Marksheets (10th/12th/Degree)', 'Income Certificate', 'Community Certificate', 'Ration Card'],
-      portal: 'https://www.tn.gov.in/scheme/data_view/44053'
+      benefits: 'Financial assistance and support for safe housing and rural empowerment.',
+      ageLimit: 'Adult heads of households',
+      incomeLimit: 'Eligible rural families',
+      documents: ['House Site Patta', 'Aadhaar Card', 'Income Certificate', 'Ration Card'],
+      portal: 'https://tnrd.tn.gov.in/'
     },
     {
-      id: 'central-pmkisan-007',
+      id: 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
       code: 'CENTRAL-PMKISAN-007',
       name: 'PM Kisan Samman Nidhi (PM-KISAN)',
       dept: 'Ministry of Agriculture & Farmers Welfare',
       category: 'agriculture',
       govtType: 'Central Govt',
-      benefits: 'Rs 6,000 per year direct income support paid in 3 equal installments of Rs 2,000 to landholding farmers.',
+      benefits: 'Rs 6,00,000 per year direct income support paid in 3 equal installments of Rs 2,000 to landholding farmers.',
       ageLimit: 'Adult landholding farmers',
       incomeLimit: 'Cultivable landholding in farmer name',
       documents: ['Land Patta / Ownership Record', 'Aadhaar Card', 'Aadhaar-linked Bank Account'],
       portal: 'https://pmkisan.gov.in/'
     },
     {
-      id: 'central-pmjay-008',
+      id: 'd22faa80-2446-454f-8532-17429dcef2e6',
       code: 'CENTRAL-PMJAY-008',
       name: 'Ayushman Bharat PM-JAY',
       dept: 'National Health Authority (NHA)',
@@ -102,6 +167,10 @@
     }
   ];
 
+  let activeSchemesList = GOVERNMENT_SCHEMES;
+  let userSavedSchemeIds = new Set();
+  let currentUserId = null;
+  const inFlightBookmarks = new Set();
   let currentCategory = 'all';
   let searchQuery = '';
   let conversationHistory = [];
@@ -111,9 +180,21 @@
     initFloatingChatbot();
   });
 
+  // Check whether a scheme is saved using stable ID / scheme code (Never display name)
+  function isSchemeSaved(scheme) {
+    if (!scheme) return false;
+    if (scheme.id && userSavedSchemeIds.has(scheme.id)) return true;
+    if (scheme.code && userSavedSchemeIds.has(scheme.code)) return true;
+    if (scheme.code && userSavedSchemeIds.has(scheme.code.toLowerCase())) return true;
+    if (scheme.scheme_code && userSavedSchemeIds.has(scheme.scheme_code)) return true;
+    if (scheme.scheme_code && userSavedSchemeIds.has(scheme.scheme_code.toLowerCase())) return true;
+    const resolved = resolveSchemeUuid(scheme.id || scheme.code || scheme.scheme_code);
+    if (resolved && userSavedSchemeIds.has(resolved)) return true;
+    return false;
+  }
+
   // Render Schemes Directory
-  function initSchemeDirectory() {
-    const container = document.getElementById('schemes-container');
+  async function initSchemeDirectory() {
     const searchInput = document.getElementById('scheme-search-input');
     const categoryPills = document.querySelectorAll('.services-pill');
 
@@ -137,15 +218,94 @@
       renderSchemes();
     });
 
+    // 1. Initial immediate render
     renderSchemes();
+
+    // 2. Hydrate bookmarks and schemes from database
+    await hydrateSchemesAndBookmarks();
+  }
+
+  // Hydrate schemes and current user's saved bookmarks from Supabase
+  async function hydrateSchemesAndBookmarks() {
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const client = await window.getOrInitSupabaseClient();
+        if (client) {
+          const session = await client.auth.getSession();
+          const userId = session?.data?.session?.user?.id;
+          currentUserId = userId || null;
+
+          if (userId) {
+            // First hydrate instantly from user-scoped local cache
+            try {
+              const cached = localStorage.getItem(`cc_saved_schemes_${userId}`);
+              if (cached) {
+                const arr = JSON.parse(cached);
+                if (Array.isArray(arr) && arr.length > 0) {
+                  arr.forEach(id => userSavedSchemeIds.add(id));
+                  renderSchemes();
+                }
+              }
+            } catch (e) {}
+
+            // Query authoritative bookmarks for current user from database
+            const { data: savedRows, error: saveErr } = await client
+              .from('saved_schemes')
+              .select('id, scheme_id, government_schemes(id, scheme_code)')
+              .eq('user_id', userId);
+
+            if (!saveErr && savedRows) {
+              const freshSet = new Set();
+              savedRows.forEach(r => {
+                if (r.scheme_id) freshSet.add(r.scheme_id);
+                if (r.government_schemes?.id) freshSet.add(r.government_schemes.id);
+                if (r.government_schemes?.scheme_code) {
+                  freshSet.add(r.government_schemes.scheme_code);
+                  freshSet.add(r.government_schemes.scheme_code.toLowerCase());
+                }
+              });
+              userSavedSchemeIds = freshSet;
+              try {
+                localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
+              } catch (e) {}
+              renderSchemes();
+            }
+          } else {
+            userSavedSchemeIds = new Set();
+            renderSchemes();
+          }
+
+          // Also fetch active schemes from DB if available
+          const { data: dbSchemes, error: schErr } = await client
+            .from('government_schemes')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: true });
+
+          if (!schErr && dbSchemes && dbSchemes.length > 0) {
+            // Register all DB scheme codes to UUIDs dynamically
+            dbSchemes.forEach(s => {
+              if (s.scheme_code && s.id) {
+                SCHEME_CODE_TO_UUID[s.scheme_code.toUpperCase()] = s.id;
+              }
+            });
+            renderSchemes();
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Hydrate schemes & bookmarks notice:", err);
+    }
   }
 
   function renderSchemes() {
     const container = document.getElementById('schemes-container');
     if (!container) return;
 
+    const isTamil = (window.i18n && window.i18n.getCurrentLanguage && window.i18n.getCurrentLanguage() === 'ta');
     const tCheck = window.i18n ? window.i18n.t('services_btn_check_eligibility') : 'Check Eligibility';
     const tSave = window.i18n ? window.i18n.t('services_btn_save_scheme') : 'Save Scheme';
+    const tSaved = isTamil ? 'சேமிக்கப்பட்டது' : 'Saved';
     const tPortal = window.i18n ? window.i18n.t('services_btn_official_portal') : 'Official Portal';
     const tBenefits = window.i18n ? window.i18n.t('services_lbl_key_benefits') : 'Key Benefits';
     const tEligibility = window.i18n ? window.i18n.t('services_lbl_eligibility_criteria') : 'Eligibility Criteria';
@@ -153,7 +313,7 @@
     const tNoSchemes = window.i18n ? window.i18n.t('services_no_schemes_found') : 'No Government Schemes Found';
     const tNoSchemesDesc = window.i18n ? window.i18n.t('services_no_schemes_desc') : "Try searching for a different keyword or selecting 'All Schemes'.";
 
-    const filtered = GOVERNMENT_SCHEMES.filter(sch => {
+    const filtered = activeSchemesList.filter(sch => {
       const matchCat = currentCategory === 'all' || sch.category === currentCategory;
       const text = `${sch.name} ${sch.code} ${sch.dept} ${sch.benefits} ${sch.documents.join(' ')}`.toLowerCase();
       const matchSearch = !searchQuery || text.includes(searchQuery);
@@ -170,8 +330,11 @@
       return;
     }
 
-    container.innerHTML = filtered.map(sch => `
-      <div class="scheme-card">
+    container.innerHTML = filtered.map(sch => {
+      const saved = isSchemeSaved(sch);
+      const safeName = String(sch.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      return `
+      <div class="scheme-card" data-scheme-id="${sch.id}" data-scheme-code="${sch.code}">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
             <span class="scheme-badge">${sch.govtType}</span>
@@ -193,42 +356,154 @@
         </div>
 
         <div class="scheme-actions">
-          <a href="scheme-checker.html?scheme=${sch.id}" class="btn-srv btn-srv-primary">
+          <a href="scheme-checker.html?scheme=${sch.code || sch.id}" class="btn-srv btn-srv-primary">
             ${tCheck}
           </a>
-          <button type="button" class="btn-srv btn-srv-outline" onclick="bookmarkScheme('${sch.id}', '${sch.name}')">
-            ${tSave}
+          <button type="button" class="btn-srv btn-srv-outline ${saved ? 'is-saved' : ''}" data-scheme-id="${sch.id}" data-scheme-code="${sch.code}" onclick="toggleBookmarkScheme('${sch.id}', '${safeName}', this)" ${saved ? 'style="border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1);"' : ''}>
+            <i class="${saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
+            <span>${saved ? tSaved : tSave}</span>
           </button>
           <a href="${sch.portal}" target="_blank" rel="noopener noreferrer" class="btn-srv btn-srv-outline">
             ${tPortal}
           </a>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
-  // Save / Bookmark Scheme
-  window.bookmarkScheme = function (schemeId, schemeName) {
+  // Toggle Save / Unsave Scheme with Supabase Database Persistence
+  window.toggleBookmarkScheme = async function (schemeId, schemeName, buttonElem) {
+    const targetUuid = resolveSchemeUuid(schemeId);
+    if (!targetUuid) {
+      console.warn("Could not resolve scheme UUID for bookmark:", schemeId);
+      if (window.showToast) window.showToast("Could not save scheme. Invalid scheme reference.", "error");
+      return;
+    }
+
+    if (inFlightBookmarks.has(targetUuid)) return;
+    inFlightBookmarks.add(targetUuid);
+
+    const isTamil = (window.i18n && window.i18n.getCurrentLanguage && window.i18n.getCurrentLanguage() === 'ta');
+    const tSave = window.i18n ? window.i18n.t('services_btn_save_scheme') : 'Save Scheme';
+    const tSaved = isTamil ? 'சேமிக்கப்பட்டது' : 'Saved';
+
     try {
-      let saved = JSON.parse(localStorage.getItem('cc_saved_user_schemes') || '[]');
-      if (!saved.includes(schemeId)) {
-        saved.push(schemeId);
-        localStorage.setItem('cc_saved_user_schemes', JSON.stringify(saved));
-        if (typeof window.showToast === 'function') {
-          window.showToast(`Saved ${schemeName} to your saved schemes.`, 'success');
+      if (typeof window.getOrInitSupabaseClient !== 'function') {
+        if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
+        return;
+      }
+
+      const client = await window.getOrInitSupabaseClient();
+      if (!client) {
+        if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
+        return;
+      }
+
+      const session = await client.auth.getSession();
+      const userId = session?.data?.session?.user?.id;
+      if (!userId) {
+        if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
+        return;
+      }
+      currentUserId = userId;
+
+      const isCurrentlySaved = userSavedSchemeIds.has(targetUuid) || (buttonElem && buttonElem.classList.contains('is-saved'));
+
+      if (isCurrentlySaved) {
+        // REMOVE / UNSAVE
+        const { error: delError } = await client
+          .from('saved_schemes')
+          .delete()
+          .eq('user_id', userId)
+          .eq('scheme_id', targetUuid);
+
+        if (!delError) {
+          userSavedSchemeIds.delete(targetUuid);
+          const found = activeSchemesList.find(s => s.id === targetUuid || resolveSchemeUuid(s.id) === targetUuid);
+          if (found?.code) {
+            userSavedSchemeIds.delete(found.code);
+            userSavedSchemeIds.delete(found.code.toLowerCase());
+          }
+          try {
+            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
+          } catch (e) {}
+
+          if (buttonElem) {
+            buttonElem.classList.remove('is-saved');
+            buttonElem.style.borderColor = '';
+            buttonElem.style.color = '';
+            buttonElem.style.background = '';
+            buttonElem.innerHTML = `<i class="fa-regular fa-bookmark"></i> <span>${tSave}</span>`;
+          }
+          if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
         } else {
-          alert(`Saved ${schemeName} to your saved schemes.`);
+          console.warn("Error removing bookmark:", delError);
+          if (window.showToast) window.showToast("Failed to remove bookmark. Please try again.", "error");
         }
       } else {
-        if (typeof window.showToast === 'function') {
-          window.showToast(`${schemeName} is already saved.`, 'info');
+        // SAVE SCHEME
+        const { error: insError } = await client
+          .from('saved_schemes')
+          .insert({ user_id: userId, scheme_id: targetUuid });
+
+        if (!insError) {
+          userSavedSchemeIds.add(targetUuid);
+          const found = activeSchemesList.find(s => s.id === targetUuid || resolveSchemeUuid(s.id) === targetUuid);
+          if (found?.code) {
+            userSavedSchemeIds.add(found.code);
+            userSavedSchemeIds.add(found.code.toLowerCase());
+          }
+          try {
+            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
+          } catch (e) {}
+
+          if (buttonElem) {
+            buttonElem.classList.add('is-saved');
+            buttonElem.style.borderColor = '#10b981';
+            buttonElem.style.color = '#10b981';
+            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
+            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
+          }
+          if (window.showToast) window.showToast(`Saved ${schemeName} to your saved schemes.`, "success");
+        } else if (insError.code === '23505') {
+          // Already saved in database: guarantee UI matches database state
+          userSavedSchemeIds.add(targetUuid);
+          const found = activeSchemesList.find(s => s.id === targetUuid || resolveSchemeUuid(s.id) === targetUuid);
+          if (found?.code) {
+            userSavedSchemeIds.add(found.code);
+            userSavedSchemeIds.add(found.code.toLowerCase());
+          }
+          try {
+            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
+          } catch (e) {}
+
+          if (buttonElem) {
+            buttonElem.classList.add('is-saved');
+            buttonElem.style.borderColor = '#10b981';
+            buttonElem.style.color = '#10b981';
+            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
+            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
+          }
+          if (window.showToast) window.showToast(`${schemeName} is already saved.`, "info");
         } else {
-          alert(`${schemeName} is already saved.`);
+          console.warn("Error saving scheme bookmark:", insError);
+          if (window.showToast) window.showToast("Failed to save scheme. Please try again.", "error");
         }
       }
-    } catch (e) {
-      console.warn('Bookmark error:', e);
+    } catch (err) {
+      console.warn("Bookmark toggle exception:", err);
+      if (window.showToast) window.showToast("Unable to update bookmark right now.", "error");
+    } finally {
+      inFlightBookmarks.delete(targetUuid);
     }
+  };
+
+  // Backward compatibility alias
+  window.bookmarkScheme = function (schemeId, schemeName) {
+    const btn = document.querySelector(`button[data-scheme-id="${schemeId}"]`) || 
+                (typeof event !== 'undefined' && event?.target?.closest('button'));
+    return window.toggleBookmarkScheme(schemeId, schemeName, btn);
   };
 
   // Floating AI Scheme Advisor Chatbot Logic

@@ -15,15 +15,24 @@ CREATE TABLE IF NOT EXISTS public.user_reminders (
   reminder_time TIME DEFAULT '09:00:00',
   repeat_frequency VARCHAR(50) DEFAULT 'None',
   priority VARCHAR(20) DEFAULT 'Medium',
-  status VARCHAR(20) DEFAULT 'Upcoming',
+  status VARCHAR(20) DEFAULT 'Scheduled',
   notes TEXT,
+  email_sent BOOLEAN NOT NULL DEFAULT FALSE,
+  sent_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure delivery tracking columns exist on upgraded deployments
+ALTER TABLE public.user_reminders ADD COLUMN IF NOT EXISTS email_sent BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE public.user_reminders ADD COLUMN IF NOT EXISTS sent_at TIMESTAMPTZ;
+ALTER TABLE public.user_reminders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
 -- 2. Indexes for fast query lookup
 CREATE INDEX IF NOT EXISTS idx_user_reminders_user_id ON public.user_reminders(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_reminders_date ON public.user_reminders(reminder_date);
 CREATE INDEX IF NOT EXISTS idx_user_reminders_status ON public.user_reminders(status);
+CREATE INDEX IF NOT EXISTS idx_user_reminders_due_lookup ON public.user_reminders(status, reminder_date, reminder_time);
 
 -- 3. Enable Row Level Security (RLS)
 ALTER TABLE public.user_reminders ENABLE ROW LEVEL SECURITY;

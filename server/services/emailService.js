@@ -2,19 +2,16 @@ import logger from '../config/logger.js';
 import { supabaseAdmin } from '../config/supabase.js';
 
 /**
- * Shared helper to send emails via Resend API
+ * Shared helper to send emails via Resend API with detailed delivery result
  */
-async function sendResendEmail({ to, subject, html, text, attachments }) {
+export async function sendResendEmailWithResult({ to, subject, html, text, attachments }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || apiKey.includes('placeholder') || apiKey === '') {
-    logger.warn(`[Email Service] Resend API key is not configured. Logging email contents instead:
-    TO: ${to}
-    SUBJECT: ${subject}
-    BODY: ${text}`);
-    return false;
+    logger.warn(`[Email Service] Resend API key is not configured. Email not sent to ${to}.`);
+    return { success: false, statusCode: 0, error: 'RESEND_API_KEY_UNCONFIGURED' };
   }
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'CrowdCity AI <onboarding@resend.dev>';
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'CrowdCity Support <noreply@crowdcity.co.in>';
 
   try {
     const payload = {
@@ -41,16 +38,24 @@ async function sendResendEmail({ to, subject, html, text, attachments }) {
     if (response.ok) {
       const result = await response.json();
       logger.info(`[Email Service] Email successfully delivered to ${to}. Subject: "${subject}". Resend ID: ${result.id}`);
-      return true;
+      return { success: true, messageId: result.id, statusCode: response.status };
     } else {
       const errorText = await response.text();
-      logger.error(`[Email Service] Failed to deliver email to ${to}. Resend HTTP Status: ${response.status}. Error: ${errorText}`);
-      return false;
+      logger.error(`[Email Service] Failed to deliver email to ${to}. Resend HTTP Status: ${response.status}.`);
+      return { success: false, statusCode: response.status, error: `HTTP_${response.status}` };
     }
   } catch (err) {
-    logger.error(`[Email Service] Unexpected exception during email delivery to ${to}: %O`, err);
-    return false;
+    logger.error(`[Email Service] Unexpected exception during email delivery to ${to}: %s`, err?.message || 'Unknown error');
+    return { success: false, statusCode: 0, error: err?.message || 'NETWORK_ERROR' };
   }
+}
+
+/**
+ * Shared helper to send emails via Resend API (returns boolean for backward compatibility)
+ */
+async function sendResendEmail(options) {
+  const res = await sendResendEmailWithResult(options);
+  return res.success;
 }
 
 /**
@@ -561,3 +566,75 @@ export const sendContactInquiryEmail = async ({ name, email, category, subject, 
 
   return adminResult.status === 'fulfilled' ? adminResult.value : false;
 };
+
+/**
+ * Sends a scheduled reminder notification email to the reminder's owner.
+ * Returns { success, messageId, statusCode, error }
+ */
+export const sendScheduledReminderEmail = async ({ to, userName, reminder }) => {
+  const safeName = (userName || '').trim() || 'Citizen';
+  const title = (reminder?.title || 'Scheduled Reminder').trim();
+  const category = (reminder?.category || 'Application Follow-up').trim();
+  const priority = (reminder?.priority || 'Medium').trim();
+  const relatedScheme = (reminder?.related_scheme || '').trim() || 'None';
+  const scheduledDate = (reminder?.reminder_date || '').trim();
+  const scheduledTime = String(reminder?.reminder_time || '').trim().slice(0, 5);
+  const notes = (reminder?.notes || '').trim() || 'No additional notes';
+
+  const subject = `CrowdCity Reminder: ${title}`;
+
+  const text = [
+    `Hello ${safeName},`,
+    ``,
+    `This is your scheduled reminder from CrowdCity.`,
+    ``,
+    `Reminder Title: ${title}`,
+    `Category: ${category}`,
+    `Priority: ${priority}`,
+    `Related Scheme: ${relatedScheme}`,
+    `Scheduled Date: ${scheduledDate}`,
+    `Scheduled Time: ${scheduledTime}`,
+    `Notes: ${notes}`,
+    ``,
+    `You can view or manage your reminders in your CrowdCity account.`,
+    ``,
+    `— CrowdCity AI`
+  ].join('\n');
+
+  const priorityBadgeColor = priority === 'High' ? '#ef4444' : priority === 'Low' ? '#38bdf8' : '#f59e0b';
+
+  const contentHtml = `
+    <div style="text-align: left; margin-bottom: 16px;">
+      <span style="display: inline-block; background-color: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border-radius: 4px;">
+        Scheduled Reminder
+      </span>
+      <span style="display: inline-block; margin-left: 8px; background-color: rgba(255, 255, 255, 0.05); border: 1px solid ${priorityBadgeColor}; color: ${priorityBadgeColor}; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border-radius: 4px;">
+        ${priority} Priority
+      </span>
+    </div>
+    <h1 style="margin: 0 0 14px 0; font-size: 20px; font-weight: 700; color: #ffffff; text-align: left;">
+      ${title}
+    </h1>
+    <p style="margin: 0 0 16px 0; font-size: 14px; color: #cbd5e1; line-height: 1.6;">
+      Hello <strong>${safeName}</strong>,<br><br>
+      This is your scheduled reminder from CrowdCity.
+    </p>
+    <div style="background-color: #080B10; border: 1px solid #202731; border-radius: 8px; padding: 16px; margin-bottom: 18px; font-size: 13px; color: #cbd5e1; line-height: 1.7;">
+      <p style="margin: 0 0 6px 0;"><strong style="color: #94a3b8;">Reminder Title:</strong> ${title}</p>
+      <p style="margin: 0 0 6px 0;"><strong style="color: #94a3b8;">Category:</strong> ${category}</p>
+      <p style="margin: 0 0 6px 0;"><strong style="color: #94a3b8;">Priority:</strong> ${priority}</p>
+      <p style="margin: 0 0 6px 0;"><strong style="color: #94a3b8;">Related Scheme:</strong> ${relatedScheme}</p>
+      <p style="margin: 0 0 6px 0;"><strong style="color: #94a3b8;">Scheduled Date:</strong> ${scheduledDate}</p>
+      <p style="margin: 0 0 6px 0;"><strong style="color: #94a3b8;">Scheduled Time:</strong> ${scheduledTime} (IST)</p>
+      <p style="margin: 0;"><strong style="color: #94a3b8;">Notes:</strong> ${notes}</p>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.6;">
+      You can view or manage your reminders in your CrowdCity account.<br>
+      <strong style="color: #cbd5e1;">— CrowdCity AI</strong>
+    </p>
+  `;
+
+  const html = getEmailHtmlWrapper(subject, contentHtml);
+  return await sendResendEmailWithResult({ to, subject, html, text });
+};
+

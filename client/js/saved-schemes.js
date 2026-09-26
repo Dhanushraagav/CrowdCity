@@ -43,6 +43,13 @@
               ...item.government_schemes
             })).filter(item => item.scheme_name || item.name);
 
+            // Sync user-scoped cache for instant cross-page responsiveness
+            try {
+              const savedIds = savedSchemesData.map(s => s.id).filter(Boolean);
+              const savedCodes = savedSchemesData.map(s => s.scheme_code || s.code).filter(Boolean);
+              localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...savedIds, ...savedCodes]));
+            } catch (e) {}
+
             renderSavedSchemes(savedSchemesData);
             return;
           }
@@ -187,6 +194,15 @@
       setTimeout(() => {
         card.remove();
         savedSchemesData = savedSchemesData.filter(s => s.bookmarkId !== bookmarkId && s.id !== schemeId);
+        try {
+          const session = window.supabaseClient?.auth?.getSession?.();
+          const userId = session?.data?.session?.user?.id;
+          if (userId) {
+            const remainingUuids = savedSchemesData.map(s => s.id).filter(Boolean);
+            const remainingCodes = savedSchemesData.map(s => s.scheme_code || s.code).filter(Boolean);
+            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...remainingUuids, ...remainingCodes]));
+          }
+        } catch (e) {}
         renderSavedSchemes(savedSchemesData);
       }, 300);
     }

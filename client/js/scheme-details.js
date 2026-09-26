@@ -83,7 +83,9 @@
         required_documents: ["College Student ID / Graduation Marksheet", "Aadhaar Card", "Community Certificate", "Resume"],
         official_portal_url: 'https://www.naanmudhalvan.tn.gov.in/',
         application_fee: 0.00,
-        eligibility_criteria: { min_age: 18, max_age: 35, state: 'Tamil Nadu' }
+        data_source: 'Tamil Nadu Skill Development Corporation (TNSDC) Official Portal (naanmudhalvan.tn.gov.in)',
+        last_verified_date: '2026-09-26',
+        eligibility_criteria: { min_age: 18, max_age: 35, state: 'Tamil Nadu', native_state: 'Tamil Nadu', programme_level: 'umbrella', requires_course_selection: true }
       },
       {
         id: 'tn-cmchis',
@@ -132,7 +134,61 @@
     return fallbackList.find(s => s.id === schemeId || s.scheme_code === schemeId) || fallbackList[0];
   }
 
+  // Scheme Code to UUID mapping for details bookmark resolution
+  const DETAILS_SCHEME_CODE_TO_UUID = {
+    'TN-KMUT-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'TN-PUDHUMAI-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'TN-NM-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'TN-CMCHIS-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'TN-KKI-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'TN-UZHAVAR-006': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'CENTRAL-PMKISAN-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'CENTRAL-PMJAY-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'CENTRAL-PMMY-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'CENTRAL-SSY-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'CENTRAL-PMAY-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'CENTRAL-VIDYALAKSHMI-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  const DETAILS_LEGACY_SLUG_TO_UUID = {
+    'tn-kmut': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-kmut-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-pudhumai': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-pudhumai-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-nm-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-naanmudhalvan': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-cmchis': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-cmchis-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-kki': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-mra-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-uzhavar': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'central-pmkisan': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmkisan-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmjay': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmjay-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmmy': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-pmmy-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-ssy': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-ssy-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-pmay': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-pmay-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-vidyalakshmi': '8c887239-49c4-48de-8fee-5c305098b97d',
+    'central-vidyalakshmi-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  function resolveDetailsSchemeUuid(identifier) {
+    if (!identifier) return null;
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier)) return identifier;
+    const upper = String(identifier).toUpperCase();
+    if (DETAILS_SCHEME_CODE_TO_UUID[upper]) return DETAILS_SCHEME_CODE_TO_UUID[upper];
+    const lower = String(identifier).toLowerCase();
+    if (DETAILS_LEGACY_SLUG_TO_UUID[lower]) return DETAILS_LEGACY_SLUG_TO_UUID[lower];
+    return null;
+  }
+
   async function checkBookmarkStatus(schemeId) {
+    const targetUuid = resolveDetailsSchemeUuid(schemeId);
+    if (!targetUuid) return false;
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
@@ -144,7 +200,7 @@
               .from('saved_schemes')
               .select('id')
               .eq('user_id', userId)
-              .eq('scheme_id', schemeId)
+              .eq('scheme_id', targetUuid)
               .maybeSingle();
 
             return !!data;
@@ -159,6 +215,9 @@
     const btn = document.getElementById('btn-details-save');
     if (!btn || !currentScheme) return;
 
+    const targetUuid = resolveDetailsSchemeUuid(currentScheme.id || currentScheme.scheme_code);
+    if (!targetUuid) return;
+
     try {
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
@@ -172,15 +231,33 @@
           }
 
           if (isSaved) {
-            await client.from('saved_schemes').delete().eq('user_id', userId).eq('scheme_id', currentScheme.id);
+            await client.from('saved_schemes').delete().eq('user_id', userId).eq('scheme_id', targetUuid);
             isSaved = false;
             updateBookmarkButtonUI(false);
+            try {
+              const cached = localStorage.getItem(`cc_saved_schemes_${userId}`);
+              if (cached) {
+                let arr = JSON.parse(cached);
+                arr = arr.filter(id => id !== targetUuid && id !== currentScheme.scheme_code);
+                localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify(arr));
+              }
+            } catch (e) {}
             if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
           } else {
-            await client.from('saved_schemes').insert({ user_id: userId, scheme_id: currentScheme.id });
-            isSaved = true;
-            updateBookmarkButtonUI(true);
-            if (window.showToast) window.showToast("Scheme saved to your bookmarks!", "success");
+            const { error: insErr } = await client.from('saved_schemes').insert({ user_id: userId, scheme_id: targetUuid });
+            if (!insErr || insErr.code === '23505') {
+              isSaved = true;
+              updateBookmarkButtonUI(true);
+              try {
+                let arr = [];
+                const cached = localStorage.getItem(`cc_saved_schemes_${userId}`);
+                if (cached) arr = JSON.parse(cached);
+                arr.push(targetUuid);
+                if (currentScheme.scheme_code) arr.push(currentScheme.scheme_code);
+                localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...new Set(arr)]));
+              } catch (e) {}
+              if (window.showToast) window.showToast(insErr?.code === '23505' ? "Scheme is already saved in your bookmarks!" : "Scheme saved to your bookmarks!", "success");
+            }
           }
           return;
         }
@@ -370,6 +447,11 @@
       }
       if (criteria.native_state) {
         criteriaItems.push(isTamil ? `இருப்பிடம்: ${criteria.native_state}` : `Residency: Native of ${criteria.native_state}`);
+      }
+      if (criteria.programme_level === 'umbrella' || criteria.requires_course_selection) {
+        criteriaItems.push(isTamil
+          ? `பாடப்பிரிவு தகுதி: அரசு/தனியார் பள்ளி மற்றும் கல்லூரி மாணவர்களுக்கும் இளைஞர்களுக்கும் பொருந்தும்; குறிப்பிட்ட பாடப்பிரிவுகளுக்கு தனித்தனி கல்வித் தகுதிகள் பொருந்தும்.`
+          : `Course Prerequisites: Open to both Govt & Private institution students/youth; individual certification or competitive coaching tracks have specific prerequisites.`);
       }
 
       if (criteriaItems.length === 0) criteriaItems.push(isTamil ? "பொது மக்கள் நலத்திட்ட தகுதி பொருந்தும்." : "General public welfare eligibility applies.");
