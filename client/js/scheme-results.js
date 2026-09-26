@@ -592,6 +592,12 @@
               <span>${isTamil ? 'விவரங்கள் பார்' : 'View Details'}</span>
             </a>
 
+            <!-- Form Assistant / Prepare Application Button -->
+            <a href="form-assistant.html?scheme=${scheme.scheme_code || scheme.id}" class="btn" style="text-decoration: none; padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid var(--primary); color: var(--primary); background: rgba(13, 148, 136, 0.08); display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.82rem;">
+              <i class="fa-solid fa-file-signature"></i>
+              <span>${isTamil ? 'விண்ணப்ப வழிகாட்டி' : 'Prepare Application'}</span>
+            </a>
+
             ${(() => {
               const saved = isResultsSchemeSaved(scheme);
               const tSave = isTamil ? 'சேமிக்கவும்' : 'Save Scheme';

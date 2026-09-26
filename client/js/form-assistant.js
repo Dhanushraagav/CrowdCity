@@ -754,19 +754,22 @@
 
   // Canonical Code / Slug Lookup
   function resolveSchemeMeta(identifier) {
-    if (!identifier) return SCHEMES_REGISTRY['tn-kmut'];
+    if (!identifier) return null;
     const clean = String(identifier).trim().toLowerCase();
 
     // 1. Direct key match
     if (SCHEMES_REGISTRY[clean]) return SCHEMES_REGISTRY[clean];
 
-    // 2. Code match (e.g. CENTRAL-PMKISAN-007)
+    // 2. Code match (e.g. CENTRAL-PMKISAN-007, TN-NM-003, TN-KMUT-001)
     for (const key of Object.keys(SCHEMES_REGISTRY)) {
       const sch = SCHEMES_REGISTRY[key];
       if (sch.code.toLowerCase() === clean || sch.code === identifier) {
         return sch;
       }
-      if (sch.uuid.toLowerCase() === clean) {
+      if (sch.code.toLowerCase().replace(/[^a-z0-9]/g, '') === clean.replace(/[^a-z0-9]/g, '')) {
+        return sch;
+      }
+      if (sch.uuid && sch.uuid.toLowerCase() === clean) {
         return sch;
       }
     }
@@ -774,18 +777,30 @@
     // 3. Normalized slug matching
     const slugMap = {
       'kmut': 'tn-kmut',
+      'magalir': 'tn-kmut',
+      'urimai': 'tn-kmut',
       'pudhumai': 'tn-pudhumai',
+      'penkalvi': 'tn-pudhumai',
+      'penn': 'tn-pudhumai',
       'naanmudhalvan': 'tn-nm',
       'naan-mudhalvan': 'tn-nm',
+      'mudhalvan': 'tn-nm',
       'cmchis': 'tn-cmchis',
+      'health': 'tn-cmchis',
       'pmkisan': 'central-pmkisan',
       'pm-kisan': 'central-pmkisan',
+      'kisan': 'central-pmkisan',
       'pmjay': 'central-pmjay',
+      'ayushman': 'central-pmjay',
       'mudra': 'central-mudra',
       'ssy': 'central-ssy',
+      'sukanya': 'central-ssy',
       'pmay': 'central-pmay',
+      'awas': 'central-pmay',
       'vidyalakshmi': 'central-vidyalakshmi',
+      'vidya-lakshmi': 'central-vidyalakshmi',
       'kanavuillam': 'tn-kanavuillam',
+      'kanavu-illam': 'tn-kanavuillam',
       'uzhavar': 'tn-uzhavar'
     };
 
@@ -795,13 +810,13 @@
       }
     }
 
-    return SCHEMES_REGISTRY['tn-kmut'];
+    return null;
   }
 
   // ---------------------------------------------------------------------------
   // 2. STATE ENGINE
   // ---------------------------------------------------------------------------
-  let currentScheme = SCHEMES_REGISTRY['tn-kmut'];
+  let currentScheme = null;
   let currentStep = 1;
   let formValues = {};
   let userWalletDocs = [];
@@ -1145,8 +1160,17 @@
   }
 
   function getSchemeIdFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('scheme') || params.get('id') || params.get('code') || 'tn-kmut';
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const val = params.get('scheme') || 
+                  params.get('scheme_id') || 
+                  params.get('schemeId') || 
+                  params.get('schemeCode') || 
+                  params.get('code') || 
+                  params.get('id');
+      if (val && val.trim()) return val.trim();
+    } catch (e) {}
+    return null;
   }
 
   // Load uploaded documents from Supabase / localStorage for wallet matching
@@ -1163,10 +1187,13 @@
       }
     } catch (e) {}
 
-    // 2. Query Supabase user_document_wallet if available
+    // 2. Query Supabase user_document_wallet in background if available
     try {
       if (typeof window.getOrInitSupabaseClient === 'function' && currentUserId) {
-        const client = await window.getOrInitSupabaseClient();
+        const clientPromise = window.getOrInitSupabaseClient();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500));
+        const client = await Promise.race([clientPromise, timeoutPromise]).catch(() => null);
+
         if (client) {
           const { data, error } = await client
             .from('user_document_wallet')
@@ -1182,12 +1209,16 @@
         }
       }
     } catch (e) {
-      console.warn('[FormAssistant] Wallet load notice:', e);
+      console.warn('[FormAssistant] Wallet load notice:', e.message || e);
     }
   }
 
   // Check connected eligibility assessment
   function checkConnectedEligibility() {
+    if (!currentScheme) {
+      eligibilityStatus = 'not_checked';
+      return;
+    }
     try {
       // 1. Check scheme checker results in session
       const storedResults = sessionStorage.getItem('cc_scheme_results_data');
@@ -1195,12 +1226,13 @@
         const results = JSON.parse(storedResults);
         if (Array.isArray(results)) {
           const found = results.find(r => 
-            r.id === currentScheme.id || 
-            r.scheme_code === currentScheme.code || 
-            r.id === currentScheme.code
+            (r.id && r.id === currentScheme.id) || 
+            (r.scheme_code && r.scheme_code === currentScheme.code) || 
+            (r.id && r.id === currentScheme.code) ||
+            (r.id && currentScheme.uuid && r.id === currentScheme.uuid)
           );
           if (found) {
-            if (currentScheme.id === 'tn-naanmudhalvan' || currentScheme.code === 'TN-NM-003') {
+            if (currentScheme.id === 'tn-nm' || currentScheme.id === 'tn-naanmudhalvan' || currentScheme.code === 'TN-NM-003') {
               eligibilityStatus = 'potentially_relevant';
               return;
             }
@@ -1213,7 +1245,7 @@
       // 2. Check profile in session
       const profile = sessionStorage.getItem('cc_scheme_checker_profile');
       if (profile) {
-        if (currentScheme.id === 'tn-naanmudhalvan' || currentScheme.code === 'TN-NM-003') {
+        if (currentScheme.id === 'tn-nm' || currentScheme.id === 'tn-naanmudhalvan' || currentScheme.code === 'TN-NM-003') {
           eligibilityStatus = 'potentially_relevant';
           return;
         }
@@ -1393,30 +1425,51 @@
   // ---------------------------------------------------------------------------
   // 6. SCHEME SWITCHER & URL SYNC
   // ---------------------------------------------------------------------------
-  function populateSchemeSwitcher() {
+  function populateSchemeSwitcher(selectedSchemeId = null) {
     const switcher = document.getElementById('scheme-switcher');
     if (!switcher) return;
 
-    switcher.innerHTML = Object.values(SCHEMES_REGISTRY).map(sch => {
-      const selected = sch.id === currentScheme.id ? 'selected' : '';
+    const currentVal = selectedSchemeId || currentScheme?.id || '';
+
+    let html = `<option value="" ${!currentVal ? 'selected' : ''}>-- Choose a Government Scheme --</option>`;
+    html += Object.values(SCHEMES_REGISTRY).map(sch => {
+      const selected = (currentVal && sch.id === currentVal) ? 'selected' : '';
       return `<option value="${sch.id}" ${selected}>${sch.code} — ${sch.name}</option>`;
     }).join('');
 
-    switcher.addEventListener('change', (e) => {
-      selectScheme(e.target.value);
-    });
+    switcher.innerHTML = html;
+
+    switcher.onchange = (e) => {
+      const chosen = e.target.value;
+      if (chosen) {
+        selectScheme(chosen);
+      } else {
+        renderSchemeSelectionState();
+      }
+    };
   }
 
-  function selectScheme(schemeIdentifier) {
+  function selectScheme(schemeIdentifier, updateHistory = true) {
     const newScheme = resolveSchemeMeta(schemeIdentifier);
-    if (!newScheme) return;
+    if (!newScheme) {
+      renderSchemeLoadError(schemeIdentifier);
+      return;
+    }
 
     currentScheme = newScheme;
 
     // Update URL query parameter without page reload
-    const url = new URL(window.location.href);
-    url.searchParams.set('scheme', currentScheme.id);
-    window.history.replaceState({}, '', url.toString());
+    if (updateHistory) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('scheme', currentScheme.id);
+        window.history.pushState({ schemeId: currentScheme.id }, '', url.toString());
+      } catch (e) {}
+    }
+
+    // Sync dropdown value
+    const switcher = document.getElementById('scheme-switcher');
+    if (switcher) switcher.value = currentScheme.id;
 
     // Update Header
     updateHeaderUI();
@@ -1438,7 +1491,6 @@
         if (descElem) descElem.textContent = `You have an in-progress draft saved on ${formattedDate} (${fieldsCount} fields prepared).`;
         resumeAlert.style.display = 'flex';
       }
-      // By default load draft
       loadDraft(currentScheme.id);
     } else {
       if (resumeAlert) resumeAlert.style.display = 'none';
@@ -1447,12 +1499,158 @@
     }
 
     checkConnectedEligibility();
-    renderStepper();
+    renderStepper(false);
     renderActiveStep();
     updateReadinessDashboard();
   }
 
+  function renderSchemeSelectionState() {
+    currentScheme = null;
+    formValues = {};
+    currentStep = 1;
+
+    // Clean URL query param
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('scheme');
+      url.searchParams.delete('id');
+      url.searchParams.delete('code');
+      url.searchParams.delete('scheme_id');
+      url.searchParams.delete('schemeCode');
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+    } catch (e) {}
+
+    // Header UI
+    const nameElem = document.getElementById('current-scheme-name');
+    const deptElem = document.getElementById('current-scheme-dept');
+    const typeElem = document.getElementById('current-scheme-type');
+    const portalBtn = document.getElementById('btn-portal-submit');
+
+    if (nameElem) {
+      nameElem.textContent = 'Select a government scheme to begin';
+      nameElem.style.color = '';
+    }
+    if (deptElem) deptElem.innerHTML = `<i class="fa-solid fa-landmark"></i> Tamil Nadu & Central Welfare Schemes`;
+    if (typeElem) typeElem.textContent = 'Citizen Assistant';
+    if (portalBtn) {
+      portalBtn.href = '#';
+      portalBtn.style.pointerEvents = 'none';
+      portalBtn.style.opacity = '0.5';
+      portalBtn.innerHTML = `<span>Select Scheme to Continue</span> <i class="fa-solid fa-arrow-right"></i>`;
+    }
+
+    // Hide draft alert
+    const resumeAlert = document.getElementById('resume-draft-alert');
+    if (resumeAlert) resumeAlert.style.display = 'none';
+
+    // Update switcher dropdown selection to empty
+    const switcher = document.getElementById('scheme-switcher');
+    if (switcher) switcher.value = '';
+
+    // Render stepper in inactive state
+    renderStepper(true);
+
+    // Render scheme cards grid in #active-step-content
+    const container = document.getElementById('active-step-content');
+    if (container) {
+      container.innerHTML = `
+        <div style="text-align: center; max-width: 650px; margin: 0 auto 2rem auto;">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, rgba(13, 148, 136, 0.15), rgba(99, 102, 241, 0.15)); display: inline-flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--primary); margin-bottom: 1rem;">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+          <h2 style="font-size: 1.45rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
+            Select a Government Scheme to Begin
+          </h2>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+            CrowdCity AI assists you in preparing and validating your welfare application details, checking required documents from your Document Wallet, and offering intelligent field-by-field guidance.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+          ${Object.values(SCHEMES_REGISTRY).map(sch => `
+            <div class="scheme-select-card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: pointer;" onclick="CrowdCityFormAssistant.selectScheme('${sch.id}')">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; gap: 0.5rem;">
+                  <span style="font-size: 0.7rem; font-weight: 800; color: var(--primary); background: rgba(13, 148, 136, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">
+                    ${sch.code}
+                  </span>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                    ${sch.type === 'state' ? 'Tamil Nadu' : 'Central'}
+                  </span>
+                </div>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.4rem 0; line-height: 1.35;">
+                  ${sch.name}
+                </h4>
+                <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.65rem; line-height: 1.4;">
+                  <i class="fa-solid fa-landmark" style="font-size: 0.7rem;"></i> ${sch.dept}
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-main); opacity: 0.85; margin: 0 0 1rem 0; line-height: 1.45;">
+                  ${sch.short_desc}
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" style="width: 100%; padding: 0.55rem; font-size: 0.82rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;" onclick="event.stopPropagation(); CrowdCityFormAssistant.selectScheme('${sch.id}')">
+                <span>Start Application</span> <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    updateReadinessDashboard(true);
+  }
+
+  function renderSchemeLoadError(identifier) {
+    currentScheme = null;
+    formValues = {};
+
+    const nameElem = document.getElementById('current-scheme-name');
+    const deptElem = document.getElementById('current-scheme-dept');
+    const typeElem = document.getElementById('current-scheme-type');
+    const portalBtn = document.getElementById('btn-portal-submit');
+
+    if (nameElem) {
+      nameElem.textContent = 'Unable to Load Scheme';
+      nameElem.style.color = '#ef4444';
+    }
+    if (deptElem) deptElem.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Scheme "${identifier || 'Unknown'}" not found`;
+    if (typeElem) typeElem.textContent = 'Error';
+    if (portalBtn) {
+      portalBtn.href = '#';
+      portalBtn.style.pointerEvents = 'none';
+      portalBtn.style.opacity = '0.5';
+    }
+
+    const container = document.getElementById('active-step-content');
+    if (container) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 3rem 1.5rem; max-width: 500px; margin: 0 auto;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; color: #ef4444; margin-bottom: 1.25rem;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+          </div>
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
+            Unable to Load Selected Scheme
+          </h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1.75rem 0;">
+            The requested scheme identifier <code>${identifier || ''}</code> was not found or is currently unavailable. Please pick a scheme from the directory.
+          </p>
+          <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" style="padding: 0.65rem 1.35rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="CrowdCityFormAssistant.resetToSchemeSelector()">
+              <i class="fa-solid fa-list"></i> Choose Another Scheme
+            </button>
+            <button type="button" class="btn btn-secondary" style="padding: 0.65rem 1.2rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="location.reload()">
+              <i class="fa-solid fa-rotate-right"></i> Retry
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    updateReadinessDashboard(true);
+  }
+
   function updateHeaderUI() {
+    if (!currentScheme) return;
     const nameElem = document.getElementById('current-scheme-name');
     const deptElem = document.getElementById('current-scheme-dept');
     const typeElem = document.getElementById('current-scheme-type');
@@ -1460,7 +1658,10 @@
 
     const isTamil = (window.i18n && window.i18n.getLanguage && window.i18n.getLanguage() === 'ta');
 
-    if (nameElem) nameElem.textContent = isTamil ? (currentScheme.name_ta || currentScheme.name) : currentScheme.name;
+    if (nameElem) {
+      nameElem.textContent = isTamil ? (currentScheme.name_ta || currentScheme.name) : currentScheme.name;
+      nameElem.style.color = '';
+    }
     if (deptElem) {
       deptElem.innerHTML = `<i class="fa-solid fa-landmark"></i> ${isTamil ? (currentScheme.dept_ta || currentScheme.dept) : currentScheme.dept}`;
     }
@@ -1469,6 +1670,9 @@
     }
     if (portalBtn) {
       portalBtn.href = currentScheme.portal;
+      portalBtn.style.pointerEvents = 'auto';
+      portalBtn.style.opacity = '1';
+      portalBtn.innerHTML = `<span>Continue on Official Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>`;
     }
   }
 
@@ -1484,13 +1688,13 @@
     { num: 6, title: 'Readiness', sub: 'Review & Apply', icon: 'fa-clipboard-check' }
   ];
 
-  function renderStepper() {
+  function renderStepper(isInactive = false) {
     const stepperContainer = document.getElementById('assistant-stepper');
     if (!stepperContainer) return;
 
     stepperContainer.innerHTML = STEPS_CONFIG.map((step, idx) => {
-      const isCompleted = step.num < currentStep;
-      const isActive = step.num === currentStep;
+      const isCompleted = !isInactive && step.num < currentStep;
+      const isActive = !isInactive && step.num === currentStep;
       const stateClass = isActive ? 'active' : (isCompleted ? 'completed' : '');
 
       let circleContent = step.num;
@@ -1501,7 +1705,7 @@
         : '';
 
       return `
-        <div class="step-item ${stateClass}" data-step="${step.num}">
+        <div class="step-item ${stateClass}" data-step="${step.num}" style="${isInactive ? 'cursor: default; opacity: 0.65;' : ''}">
           <div class="step-num-circle">${circleContent}</div>
           <div class="step-text-wrap">
             <span class="step-title-text">${step.title}</span>
@@ -1512,19 +1716,21 @@
       `;
     }).join('');
 
-    // Attach step item click navigation
-    stepperContainer.querySelectorAll('.step-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const targetStep = parseInt(item.dataset.step, 10);
-        goToStep(targetStep);
+    if (!isInactive) {
+      stepperContainer.querySelectorAll('.step-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const targetStep = parseInt(item.dataset.step, 10);
+          goToStep(targetStep);
+        });
       });
-    });
+    }
   }
 
   function goToStep(stepNum) {
+    if (!currentScheme) return;
     if (stepNum < 1 || stepNum > 6) return;
     currentStep = stepNum;
-    renderStepper();
+    renderStepper(false);
     renderActiveStep();
     saveDraft(false);
 
@@ -1541,7 +1747,7 @@
   function getActiveFieldsForCurrentStep() {
     if (currentStep === 1) return STANDARD_STEP_FIELDS.step1;
     if (currentStep === 2) return STANDARD_STEP_FIELDS.step2;
-    if (currentStep === 3) return currentScheme.specific_fields || [];
+    if (currentStep === 3) return currentScheme?.specific_fields || [];
     if (currentStep === 4) return STANDARD_STEP_FIELDS.step4;
     return [];
   }
@@ -1550,6 +1756,16 @@
     const container = document.getElementById('active-step-content');
     if (!container) return;
 
+    if (!currentScheme) {
+      renderSchemeSelectionState();
+      return;
+    }
+
+    if (currentScheme.isGeneric || (!currentScheme.specific_fields && currentScheme.required_documents?.length === 0)) {
+      renderGenericSchemeHandoff(container);
+      return;
+    }
+
     if (currentStep >= 1 && currentStep <= 4) {
       renderStandardStepFields(container);
     } else if (currentStep === 5) {
@@ -1557,6 +1773,30 @@
     } else if (currentStep === 6) {
       renderReviewStep(container);
     }
+  }
+
+  function renderGenericSchemeHandoff(container) {
+    container.innerHTML = `
+      <div style="padding: 2.5rem 1.5rem; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(99, 102, 241, 0.15); display: inline-flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #6366f1; margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-file-invoice"></i>
+        </div>
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
+          ${currentScheme.name}
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; max-width: 550px; margin: 0 auto 1.5rem auto;">
+          This scheme does not yet have a customized preparation form. You can still review the scheme requirements and continue directly to the official government portal.
+        </p>
+        <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+          <a href="${currentScheme.portal}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.75rem 1.6rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+            <span>Continue on Official Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <button type="button" class="btn btn-secondary" style="padding: 0.75rem 1.4rem; font-weight: 700; border-radius: 10px;" onclick="CrowdCityFormAssistant.resetToSchemeSelector()">
+            Choose Another Scheme
+          </button>
+        </div>
+      </div>
+    `;
   }
 
   function renderStandardStepFields(container) {
@@ -2000,6 +2240,19 @@
   // 11. READINESS DASHBOARD & MISSING INFORMATION CALCULATION
   // ---------------------------------------------------------------------------
   function calculateReadinessScore() {
+    if (!currentScheme) {
+      return {
+        score: 0,
+        label: 'Select Scheme',
+        filledFieldsCount: 0,
+        totalFieldsCount: 0,
+        availableDocsCount: 0,
+        totalDocsCount: 0,
+        missingCount: 0,
+        missingItems: []
+      };
+    }
+
     // 1. Gather all required fields across all 4 steps
     const allReqFields = [
       ...STANDARD_STEP_FIELDS.step1.filter(f => f.required),
@@ -2083,19 +2336,49 @@
   function getStepNumberForField(fieldId) {
     if (STANDARD_STEP_FIELDS.step1.some(f => f.id === fieldId)) return 1;
     if (STANDARD_STEP_FIELDS.step2.some(f => f.id === fieldId)) return 2;
-    if ((currentScheme.specific_fields || []).some(f => f.id === fieldId)) return 3;
+    if ((currentScheme?.specific_fields || []).some(f => f.id === fieldId)) return 3;
     if (STANDARD_STEP_FIELDS.step4.some(f => f.id === fieldId)) return 4;
     return 1;
   }
 
-  function updateReadinessDashboard() {
-    const metrics = calculateReadinessScore();
-
-    // 1. Score display
+  function updateReadinessDashboard(isEmpty = false) {
     const scoreNum = document.getElementById('readiness-score-number');
     const scoreBar = document.getElementById('readiness-score-bar');
     const badgePill = document.getElementById('readiness-badge-pill');
+    const fieldsCountElem = document.getElementById('metric-fields-count');
+    const docsCountElem = document.getElementById('metric-docs-count');
+    const eligTextElem = document.getElementById('metric-eligibility-text');
+    const missingBadge = document.getElementById('missing-count-badge');
+    const missingList = document.getElementById('missing-items-list');
 
+    if (isEmpty || !currentScheme) {
+      if (scoreNum) scoreNum.textContent = '0%';
+      if (scoreBar) {
+        scoreBar.style.width = '0%';
+        scoreBar.style.background = 'var(--primary)';
+      }
+      if (badgePill) {
+        badgePill.textContent = 'Select Scheme';
+        badgePill.style.background = 'rgba(13, 148, 136, 0.1)';
+        badgePill.style.color = 'var(--primary)';
+      }
+      if (fieldsCountElem) fieldsCountElem.textContent = '0 / 0';
+      if (docsCountElem) docsCountElem.textContent = '0 / 0';
+      if (eligTextElem) eligTextElem.innerHTML = `<span style="color:var(--text-muted);">Select a scheme</span>`;
+      if (missingBadge) missingBadge.textContent = '0 items';
+      if (missingList) {
+        missingList.innerHTML = `
+          <li style="font-size:0.78rem; color:var(--text-muted); padding:0.4rem 0;">
+            Please select a government scheme to begin application preparation.
+          </li>
+        `;
+      }
+      return;
+    }
+
+    const metrics = calculateReadinessScore();
+
+    // 1. Score display
     if (scoreNum) scoreNum.textContent = `${metrics.score}%`;
     if (scoreBar) {
       scoreBar.style.width = `${metrics.score}%`;
@@ -2115,13 +2398,16 @@
     }
 
     // 2. Metrics counts
-    const fieldsCountElem = document.getElementById('metric-fields-count');
-    const docsCountElem = document.getElementById('metric-docs-count');
     if (fieldsCountElem) fieldsCountElem.textContent = `${metrics.filledFieldsCount} / ${metrics.totalFieldsCount}`;
-    if (docsCountElem) docsCountElem.textContent = `${metrics.availableDocsCount} / ${metrics.totalDocsCount}`;
+    if (docsCountElem) {
+      if (metrics.totalDocsCount === 0) {
+        docsCountElem.textContent = 'Documents Not Required';
+      } else {
+        docsCountElem.textContent = `${metrics.availableDocsCount} / ${metrics.totalDocsCount}`;
+      }
+    }
 
     // 3. Eligibility text
-    const eligTextElem = document.getElementById('metric-eligibility-text');
     if (eligTextElem) {
       if (eligibilityStatus === 'eligible') {
         eligTextElem.innerHTML = `<span style="color:#10b981;"><i class="fa-solid fa-circle-check"></i> Eligible</span>`;
@@ -2135,9 +2421,6 @@
     }
 
     // 4. Missing items list
-    const missingBadge = document.getElementById('missing-count-badge');
-    const missingList = document.getElementById('missing-items-list');
-
     if (missingBadge) missingBadge.textContent = `${metrics.missingCount} item${metrics.missingCount === 1 ? '' : 's'}`;
     if (missingList) {
       if (metrics.missingItems.length === 0) {
@@ -2162,13 +2445,15 @@
             goToStep(stepNum);
             setTimeout(() => {
               if (targetFieldId) {
-                const targetInput = document.getElementById(`field_${targetFieldId}`);
+                const targetInput = document.getElementById(`field-${targetFieldId}`);
                 if (targetInput) {
                   targetInput.focus();
-                  targetInput.closest('.form-field-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  targetInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  targetInput.style.outline = '2px solid #6366f1';
+                  setTimeout(() => { targetInput.style.outline = ''; }, 1600);
                 }
               }
-            }, 200);
+            }, 120);
           });
         });
       }
@@ -2344,58 +2629,131 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 14. LIFECYCLE & EVENT LISTENERS
+  // 14. SECONDARY ASYNC DATA (NON-BLOCKING)
   // ---------------------------------------------------------------------------
-  document.addEventListener('DOMContentLoaded', async () => {
-    currentUserId = getActiveUserId();
-    const initialSchemeId = getSchemeIdFromUrl();
+  async function loadSecondaryAsyncData() {
+    // 1. Sync wallet docs from localStorage first
+    try {
+      const local = localStorage.getItem('cc_user_uploaded_docs');
+      if (local) {
+        const arr = JSON.parse(local);
+        if (Array.isArray(arr)) userWalletDocs = arr;
+      }
+    } catch (e) {}
 
-    // 1. Load user documents from wallet asynchronously
-    await loadUserWalletDocs();
+    // 2. Sync eligibility check from session storage
+    checkConnectedEligibility();
 
-    // 2. Select initial scheme
-    selectScheme(initialSchemeId);
+    // 3. Immediate readiness update if scheme is selected
+    if (currentScheme) {
+      updateReadinessDashboard();
+    }
 
-    // 3. Populate scheme switcher dropdown
-    populateSchemeSwitcher();
+    // 4. Background query to Supabase user_document_wallet with timeout race
+    if (currentUserId && typeof window.getOrInitSupabaseClient === 'function') {
+      try {
+        const clientPromise = window.getOrInitSupabaseClient();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500));
+        const client = await Promise.race([clientPromise, timeoutPromise]).catch(() => null);
 
-    // 4. Global Action Handlers
+        if (client) {
+          const { data, error } = await client
+            .from('user_document_wallet')
+            .select('id, user_id, doc_type, doc_name, file_size, file_format, created_at')
+            .eq('user_id', currentUserId);
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            userWalletDocs = data;
+            try {
+              localStorage.setItem('cc_user_uploaded_docs', JSON.stringify(data));
+            } catch (e) {}
+            if (currentScheme) {
+              updateReadinessDashboard();
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[FormAssistant] Background wallet sync notice:', err.message || err);
+      }
+    }
+
+    // 5. Background query to Supabase government_schemes to sync official titles/metadata
+    try {
+      if (typeof window.getOrInitSupabaseClient === 'function') {
+        const clientPromise = window.getOrInitSupabaseClient();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500));
+        const client = await Promise.race([clientPromise, timeoutPromise]).catch(() => null);
+
+        if (client) {
+          const { data, error } = await client
+            .from('government_schemes')
+            .select('*')
+            .eq('is_active', true);
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            data.forEach(dbSch => {
+              if (dbSch.scheme_code) {
+                const existing = resolveSchemeMeta(dbSch.scheme_code);
+                if (existing) {
+                  if (dbSch.id) existing.uuid = dbSch.id;
+                  if (dbSch.official_portal_url) existing.portal = dbSch.official_portal_url;
+                  if (dbSch.scheme_name) existing.name = dbSch.scheme_name;
+                  if (dbSch.department_name) existing.dept = dbSch.department_name;
+                }
+              }
+            });
+            // Re-populate switcher with any synced updates
+            populateSchemeSwitcher(currentScheme?.id);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[FormAssistant] Background schemes sync notice:', e.message || e);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 15. ATTACH GLOBAL LISTENERS
+  // ---------------------------------------------------------------------------
+  function attachGlobalListeners() {
     const prefillBtn = document.getElementById('btn-auto-prefill');
-    if (prefillBtn) prefillBtn.addEventListener('click', prefillFromUserProfile);
+    if (prefillBtn) prefillBtn.onclick = prefillFromUserProfile;
 
     const saveDraftBtn = document.getElementById('btn-save-draft');
-    if (saveDraftBtn) saveDraftBtn.addEventListener('click', () => saveDraft(true));
+    if (saveDraftBtn) saveDraftBtn.onclick = () => saveDraft(true);
 
     const checkReadinessBtn = document.getElementById('btn-check-readiness');
-    if (checkReadinessBtn) checkReadinessBtn.addEventListener('click', openReadinessAssessmentModal);
+    if (checkReadinessBtn) checkReadinessBtn.onclick = openReadinessAssessmentModal;
 
     // Resume banner actions
     const resumeBtn = document.getElementById('btn-resume-draft-action');
     if (resumeBtn) {
-      resumeBtn.addEventListener('click', () => {
+      resumeBtn.onclick = () => {
+        if (!currentScheme) return;
         loadDraft(currentScheme.id);
         const resumeAlert = document.getElementById('resume-draft-alert');
         if (resumeAlert) resumeAlert.style.display = 'none';
         renderActiveStep();
         updateReadinessDashboard();
         if (window.showToast) window.showToast("Application draft resumed!", "success");
-      });
+      };
     }
 
     const discardBtn = document.getElementById('btn-discard-draft-action');
     if (discardBtn) {
-      discardBtn.addEventListener('click', () => {
+      discardBtn.onclick = () => {
+        if (!currentScheme) return;
         discardDraft(currentScheme.id);
         const resumeAlert = document.getElementById('resume-draft-alert');
         if (resumeAlert) resumeAlert.style.display = 'none';
         renderActiveStep();
         updateReadinessDashboard();
         if (window.showToast) window.showToast("Draft cleared. Starting fresh application.", "info");
-      });
+      };
     }
 
     // Modal background click closing
-    window.addEventListener('click', (e) => {
+    window.onclick = (e) => {
       const guidanceModal = document.getElementById('ai-guidance-modal');
       if (e.target === guidanceModal) guidanceModal.style.display = 'none';
 
@@ -2404,16 +2762,72 @@
 
       const readinessModal = document.getElementById('readiness-assessment-modal');
       if (e.target === readinessModal) readinessModal.style.display = 'none';
-    });
+    };
 
     // Language change listener
     window.addEventListener('language-change', () => {
       updateHeaderUI();
-      renderStepper();
+      renderStepper(!currentScheme);
       renderActiveStep();
       updateReadinessDashboard();
     });
-  });
+
+    // Browser back/forward navigation support
+    window.addEventListener('popstate', () => {
+      const schemeId = getSchemeIdFromUrl();
+      if (schemeId) {
+        const meta = resolveSchemeMeta(schemeId);
+        if (meta && (!currentScheme || currentScheme.id !== meta.id)) {
+          selectScheme(meta.id, false);
+        }
+      } else {
+        if (currentScheme) {
+          renderSchemeSelectionState();
+        }
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 16. SYNCHRONOUS 0MS INITIALIZATION
+  // ---------------------------------------------------------------------------
+  function initFormAssistant() {
+    try {
+      currentUserId = getActiveUserId();
+      const initialSchemeId = getSchemeIdFromUrl();
+
+      // 1. Populate switcher dropdown synchronously (0ms)
+      populateSchemeSwitcher(initialSchemeId);
+
+      // 2. Select initial scheme or show selection state synchronously (0ms)
+      if (initialSchemeId) {
+        const meta = resolveSchemeMeta(initialSchemeId);
+        if (meta) {
+          selectScheme(meta.id, false);
+        } else {
+          renderSchemeLoadError(initialSchemeId);
+        }
+      } else {
+        renderSchemeSelectionState();
+      }
+
+      // 3. Attach all global button handlers
+      attachGlobalListeners();
+
+      // 4. Secondary async operations in background (non-blocking!)
+      loadSecondaryAsyncData();
+    } catch (err) {
+      console.error('[FormAssistant] Initialization error:', err);
+      renderSchemeLoadError('init-error');
+    }
+  }
+
+  // Safe DOM ready execution (supports already-loaded DOM and DOMContentLoaded)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFormAssistant);
+  } else {
+    initFormAssistant();
+  }
 
   // Export module globally for testing and integrations
   window.CrowdCityFormAssistant = {
@@ -2429,7 +2843,9 @@
     hasSavedDraft,
     discardDraft,
     goToStep,
-    selectScheme
+    selectScheme,
+    resetToSchemeSelector: renderSchemeSelectionState,
+    init: initFormAssistant
   };
 
 })();

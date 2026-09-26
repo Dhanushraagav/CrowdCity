@@ -569,6 +569,14 @@
       sourceBtn.innerHTML = `<i class="fa-solid fa-building-columns"></i> <span>${isTamil ? 'அதிகாரப்பூர்வ மூலம்' : 'Official Source'}</span>`;
       actionContainer.appendChild(sourceBtn);
 
+      // Add Form Assistant / Prepare Application button
+      const assistantBtn = document.createElement('a');
+      assistantBtn.href = `form-assistant.html?scheme=${scheme.scheme_code || scheme.id}`;
+      assistantBtn.className = 'btn btn-secondary btn-details-action-dynamic';
+      assistantBtn.style = 'padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; border-color: var(--primary); color: var(--primary);';
+      assistantBtn.innerHTML = `<i class="fa-solid fa-file-signature"></i> <span>${isTamil ? 'விண்ணப்ப வழிகாட்டி' : 'Prepare Application'}</span>`;
+      actionContainer.appendChild(assistantBtn);
+
       // Add guidelines PDF button if exists
       if (scheme.official_pdf_link) {
         const guideBtn = document.createElement('a');

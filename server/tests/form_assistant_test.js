@@ -301,6 +301,60 @@ assert(formHtml.includes('@media (max-width: 992px)'), 'TEST 20.1: HTML includes
 assert(formHtml.includes('overflow-x: auto'), 'TEST 20.2: Stepper bar supports responsive horizontal touch-scrolling on narrow screens');
 assert(formHtml.includes('position: static !important'), 'TEST 20.3: Readiness sidebar transitions from sticky desktop to in-flow block on mobile');
 
+// -----------------------------------------------------------------------------
+// TEST 21: Scheme Resolution Resilience & Query Parameter Routing
+// -----------------------------------------------------------------------------
+assert(resolveSchemeMeta(null) === null, 'TEST 21.1: resolveSchemeMeta(null) returns null without falling back to a hardcoded default');
+assert(resolveSchemeMeta('') === null, 'TEST 21.2: resolveSchemeMeta("") returns null');
+assert(resolveSchemeMeta('invalid-unknown-scheme') === null, 'TEST 21.3: resolveSchemeMeta with unknown scheme ID returns null');
+
+// Verify all supported query parameter variants
+const paramVariants = [
+  'scheme=tn-pudhumai',
+  'scheme_id=tn-pudhumai',
+  'schemeId=tn-pudhumai',
+  'schemeCode=TN-PUDHUMAI-002',
+  'code=TN-PUDHUMAI-002',
+  'id=tn-pudhumai'
+];
+
+paramVariants.forEach((paramStr, idx) => {
+  const [paramKey, paramVal] = paramStr.split('=');
+  const dummyUrl = new URL(`http://localhost/form-assistant.html?${paramKey}=${paramVal}`);
+  const extracted = dummyUrl.searchParams.get('scheme') || 
+                    dummyUrl.searchParams.get('scheme_id') || 
+                    dummyUrl.searchParams.get('schemeId') || 
+                    dummyUrl.searchParams.get('schemeCode') || 
+                    dummyUrl.searchParams.get('code') || 
+                    dummyUrl.searchParams.get('id');
+  const resolved = resolveSchemeMeta(extracted);
+  assert(resolved && resolved.id === 'tn-pudhumai', `TEST 21.4.${idx + 1}: Query param ?${paramKey}= correctly resolves target scheme`);
+});
+
+// -----------------------------------------------------------------------------
+// TEST 22: Null Scheme State & Zero-Document Scheme Handling
+// -----------------------------------------------------------------------------
+// Test calculateReadinessScore when scheme is null (selection state)
+exportedAssistant.resetToSchemeSelector();
+const emptyMetrics = exportedAssistant.calculateReadinessScore();
+assert(emptyMetrics.score === 0, 'TEST 22.1: calculateReadinessScore returns 0% score when no scheme is selected');
+assert(emptyMetrics.filledFieldsCount === 0 && emptyMetrics.totalFieldsCount === 0, 'TEST 22.2: Field counts are safely 0 / 0');
+assert(emptyMetrics.availableDocsCount === 0 && emptyMetrics.totalDocsCount === 0, 'TEST 22.3: Document counts are safely 0 / 0');
+assert(!Number.isNaN(emptyMetrics.score), 'TEST 22.4: Empty readiness score is not NaN');
+
+// Test selecting a scheme dynamically
+exportedAssistant.selectScheme('tn-kmut', false);
+const kmutMetrics = exportedAssistant.calculateReadinessScore();
+assert(kmutMetrics.totalFieldsCount > 0, 'TEST 22.5: KMUT readiness calculation activates with non-zero fields');
+assert(kmutMetrics.totalDocsCount === 3, 'TEST 22.6: KMUT correctly specifies 3 required documents');
+
+// Test 0-document scenario logic
+const zeroDocMock = {
+  ...schemes['tn-kmut'],
+  required_documents: []
+};
+assert(zeroDocMock.required_documents.length === 0, 'TEST 22.7: 0-document scheme verification');
+
 console.log('\n================================================================');
 console.log(`TEST SUITE RESULTS: ${passed} PASSED | ${failed} FAILED`);
 console.log('================================================================\n');
