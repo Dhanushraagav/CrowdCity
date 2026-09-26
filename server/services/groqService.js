@@ -175,6 +175,92 @@ function fallbackTranslateTamilScript(text = '') {
   return s;
 }
 
+/**
+ * Groq AI English -> Natural Tamil Translator
+ * Translates English civic complaint descriptions into natural, grammatically correct Tamil script.
+ * 
+ * @param {string} text Input text to translate
+ * @returns {Promise<{ tamilText: string, success: boolean, error?: string }>}
+ */
+export const translateTextToTamil = async (text = '') => {
+  if (!text || typeof text !== 'string' || !text.trim()) {
+    return { tamilText: '', success: false, error: 'Description text is required for translation.' };
+  }
+
+  const groq = getGroqClient();
+  if (!groq) {
+    logger.info('Groq SDK unconfigured, using fallback dictionary for English to Tamil translation.');
+    return {
+      tamilText: fallbackTranslateEnglishToTamil(text.trim()),
+      success: true,
+      fallback: true
+    };
+  }
+
+  const systemPrompt = `You are a professional English-to-Tamil translator for the CrowdCity civic complaint portal in Tamil Nadu.
+
+Task instructions:
+1. Translate the user's civic issue description from English into natural, grammatically correct, formal Tamil script (தமிழ்).
+2. Preserve all numbers, locations, measurements, and punctuation (such as colons, commas, periods).
+3. Translate technical and infrastructure terms into standard Tamil civic terms (e.g. road -> சாலை, pothole -> பள்ளம், bus -> பேருந்து, drainage -> வடிகால், streetlight -> தெருவிளக்கு).
+4. Output MUST be ONLY a single valid JSON object in this exact schema:
+{
+  "tamilText": "The translated natural Tamil description here."
+}`;
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Text to translate:\n"${text.trim()}"` }
+      ],
+      model: getGroqModel(),
+      response_format: { type: 'json_object' }
+    });
+
+    const responseContent = chatCompletion.choices?.[0]?.message?.content;
+    const parsed = JSON.parse(responseContent);
+
+    if (parsed && typeof parsed.tamilText === 'string' && parsed.tamilText.trim()) {
+      return { tamilText: parsed.tamilText.trim(), success: true };
+    }
+
+    return {
+      tamilText: fallbackTranslateEnglishToTamil(text.trim()),
+      success: true,
+      fallback: true
+    };
+  } catch (err) {
+    logger.error('translateTextToTamil Error: %O', err);
+    return {
+      tamilText: fallbackTranslateEnglishToTamil(text.trim()),
+      success: true,
+      fallback: true
+    };
+  }
+};
+
+function fallbackTranslateEnglishToTamil(text = '') {
+  if (!text) return '';
+  let s = text;
+  const map = [
+    [/pothole/gi, 'சாலை பள்ளம்'],
+    [/road/gi, 'சாலை'],
+    [/street\s*light/gi, 'தெரு விளக்கு'],
+    [/water\s*leak|pipe\s*leak|water\s*supply/gi, 'குடிநீர் கசிவு'],
+    [/drainage|drain/gi, 'சாக்கடை வடிகால்'],
+    [/garbage|waste|trash/gi, 'குப்பை கழிவு'],
+    [/traffic/gi, 'போக்குவரத்து'],
+    [/bus/gi, 'பேருந்து'],
+    [/hazard|danger/gi, 'ஆபத்து'],
+    [/broken|damaged/gi, 'சேதமடைந்துள்ளது']
+  ];
+  map.forEach(([pat, rep]) => {
+    s = s.replace(pat, rep);
+  });
+  return s;
+}
+
 
 
 /**

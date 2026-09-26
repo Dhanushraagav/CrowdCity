@@ -326,6 +326,15 @@ const API = {
     });
   },
 
+  // Translate description to Tamil
+  translateToTamil: async (text) => {
+    return request('/ai/translate-to-tamil', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+      auth: false
+    });
+  },
+
   // Analyze image with AI
   analyzeImageWithAi: async (imageBase64, options = {}) => {
     const { lang, ...restOptions } = options;

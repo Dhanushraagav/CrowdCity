@@ -565,20 +565,38 @@ function initAiCameraDetection() {
   }
 
   function applyAiSuggestion(data) {
-    // 1. Populate Category
+    if (!data) return;
+
+    // 1. Populate Category with canonical CrowdCity options
     const categorySelect = document.getElementById('report-category');
     if (categorySelect && (data.category_code || data.suggested_category)) {
       const targetCode = (data.category_code || '').toLowerCase().trim();
       const targetName = (data.suggested_category || '').toLowerCase().trim();
       
-      const matchOption = Array.from(categorySelect.options).find(opt => {
-        const val = opt.value.toLowerCase();
-        const text = opt.textContent.toLowerCase();
-        return val === targetCode || val === targetName || text.includes(targetName) || targetName.includes(val);
-      });
+      // Exclude placeholder/disabled options (e.g. value="")
+      const validOptions = Array.from(categorySelect.options).filter(opt => opt.value && !opt.disabled);
+
+      // 1. Exact value/code match (e.g. "roads")
+      let matchOption = validOptions.find(opt => opt.value.toLowerCase() === targetCode);
+
+      // 2. Exact label match (e.g. "Roads")
+      if (!matchOption) {
+        matchOption = validOptions.find(opt => opt.textContent.trim().toLowerCase() === targetName);
+      }
+
+      // 3. Substring/alias match on non-empty values
+      if (!matchOption) {
+        matchOption = validOptions.find(opt => {
+          const val = opt.value.toLowerCase();
+          const text = opt.textContent.trim().toLowerCase();
+          return (targetCode && val.includes(targetCode)) ||
+                 (targetName && (text.includes(targetName) || targetName.includes(text)));
+        });
+      }
 
       if (matchOption) {
         categorySelect.value = matchOption.value;
+        matchOption.selected = true;
         categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
       }
     }
@@ -587,9 +605,24 @@ function initAiCameraDetection() {
     const descTextarea = document.getElementById('report-description');
     if (descTextarea && data.description) {
       const title = data.detected_issue || 'Civic Infrastructure Hazard';
-      descTextarea.value = `${title}: ${data.description}`;
-      descTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-      descTextarea.focus();
+      const newDesc = `${title}: ${data.description}`;
+      const existingDesc = descTextarea.value.trim();
+
+      // If citizen already entered text, confirm before replacing
+      if (existingDesc && existingDesc !== newDesc) {
+        const shouldReplace = window.confirm(
+          "You already have a description written. Would you like to replace it with the AI-suggested description?"
+        );
+        if (shouldReplace) {
+          descTextarea.value = newDesc;
+          descTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+          descTextarea.focus();
+        }
+      } else {
+        descTextarea.value = newDesc;
+        descTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        descTextarea.focus();
+      }
     }
   }
 
@@ -1002,6 +1035,76 @@ function isMeaningfulCivicDescription(text) {
   return true;
 }
 
+/**
+ * Translation Controller for Detailed Description
+ * Translates current English description to natural Tamil script on citizen request.
+ */
+function initTamilTranslation() {
+  const translateBtn = document.getElementById('btn-translate-tamil');
+  const descField = document.getElementById('report-description');
+  if (!translateBtn || !descField) return;
+
+  let isTranslating = false;
+  const originalBtnHtml = translateBtn.innerHTML;
+
+  translateBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    if (isTranslating) return;
+
+    const currentText = descField.value.trim();
+    if (!currentText) {
+      if (typeof window.showToast === 'function') {
+        window.showToast("Please enter a description in English first before translating.", "warning");
+      }
+      descField.focus();
+      return;
+    }
+
+    // Set loading state
+    isTranslating = true;
+    translateBtn.disabled = true;
+    translateBtn.setAttribute('aria-busy', 'true');
+    translateBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>தமிழில் மாற்றுகிறது...</span>`;
+
+    try {
+      if (window.API && typeof window.API.translateToTamil === 'function') {
+        const res = await window.API.translateToTamil(currentText);
+        const data = res?.data || res;
+        const tamilText = data?.tamilText;
+
+        if (tamilText && typeof tamilText === 'string' && data.success !== false) {
+          descField.value = tamilText;
+          descField.dispatchEvent(new Event('input', { bubbles: true }));
+          if (typeof window.showToast === 'function') {
+            window.showToast("Description translated to Tamil (தமிழில் மாற்றப்பட்டது).", "success");
+          }
+          return;
+        }
+
+        const errMsg = data?.error || res?.error || "Unable to translate text to Tamil. Please try again.";
+        if (typeof window.showToast === 'function') {
+          window.showToast(errMsg, "error");
+        }
+      } else {
+        if (typeof window.showToast === 'function') {
+          window.showToast("Translation service unavailable.", "error");
+        }
+      }
+    } catch (err) {
+      console.error("Tamil translation failed:", err);
+      if (typeof window.showToast === 'function') {
+        window.showToast("Translation service encountered an error. Your original description is preserved.", "error");
+      }
+    } finally {
+      isTranslating = false;
+      translateBtn.disabled = false;
+      translateBtn.removeAttribute('aria-busy');
+      translateBtn.innerHTML = originalBtnHtml;
+    }
+  });
+}
+
 // Initialize Report Page
 function initReportPage() {
   if (typeof getCurrentUser === 'function' && !getCurrentUser()) {
@@ -1025,6 +1128,7 @@ function initReportPage() {
   setupAiAssistant();
   initAiCameraDetection();
   initVoiceRecognition();
+  initTamilTranslation();
   setupFormSubmit();
   setupGPSButton();
   setupSearchButton();

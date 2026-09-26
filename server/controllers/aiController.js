@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, getGroqModel } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, translateTextToTamil, getGroqModel } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import { analyzeCivicImage } from '../services/vision/visionService.js';
 import Groq from 'groq-sdk';
@@ -356,6 +356,32 @@ export const translateVoiceController = async (req, res) => {
   } catch (err) {
     logger.error('translateVoiceController Error: %O', err);
     return res.status(500).json({ error: 'Server error translating voice text' });
+  }
+};
+
+/**
+ * POST /api/ai/translate-to-tamil
+ * Dedicated endpoint for translating English civic complaint descriptions into natural Tamil script.
+ */
+export const translateToTamilController = async (req, res) => {
+  const { text } = req.body;
+
+  if (!text || typeof text !== 'string' || !text.trim()) {
+    return res.status(400).json({
+      success: false,
+      error: 'Description text is required for translation.'
+    });
+  }
+
+  try {
+    const result = await translateTextToTamil(text);
+    return res.status(200).json(result);
+  } catch (err) {
+    logger.error('translateToTamilController Error: %O', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error translating description to Tamil.'
+    });
   }
 };
 
