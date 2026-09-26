@@ -86,12 +86,17 @@
     }
     .locator-filter-bar {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr auto;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      grid-template-columns: 2fr 1.1fr 1.1fr 1.1fr auto;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
       align-items: center;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
+      .locator-filter-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 640px) {
       .locator-filter-bar {
         grid-template-columns: 1fr;
       }
@@ -202,24 +207,75 @@
 
           <select id="select-office-type" class="form-control" style="padding: 0.7rem 1rem; font-size: 0.88rem; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
             <option value="all">All Office Types</option>
+            <option value="collectorate">District Collectorates</option>
             <option value="esevai">E-Sevai Centers</option>
-            <option value="taluk">Taluk Offices</option>
+            <option value="taluk">Taluk Revenue Offices</option>
             <option value="vao">VAO Offices</option>
-            <option value="collectorate">Collectorates</option>
+            <option value="corporation">Municipal Corporations</option>
           </select>
 
           <select id="select-office-district" class="form-control" style="padding: 0.7rem 1rem; font-size: 0.88rem; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
-            <option value="all">All Districts</option>
+            <option value="all">All Districts (38)</option>
+            <option value="Ariyalur">Ariyalur</option>
+            <option value="Chengalpattu">Chengalpattu</option>
             <option value="Chennai">Chennai</option>
             <option value="Coimbatore">Coimbatore</option>
+            <option value="Cuddalore">Cuddalore</option>
+            <option value="Dharmapuri">Dharmapuri</option>
+            <option value="Dindigul">Dindigul</option>
+            <option value="Erode">Erode</option>
+            <option value="Kallakurichi">Kallakurichi</option>
+            <option value="Kancheepuram">Kancheepuram</option>
+            <option value="Karur">Karur</option>
+            <option value="Krishnagiri">Krishnagiri</option>
             <option value="Madurai">Madurai</option>
-            <option value="Tiruchirappalli">Tiruchirappalli</option>
+            <option value="Mayiladuthurai">Mayiladuthurai</option>
+            <option value="Nagapattinam">Nagapattinam</option>
+            <option value="Namakkal">Namakkal</option>
+            <option value="Nilgiris">Nilgiris</option>
+            <option value="Perambalur">Perambalur</option>
+            <option value="Pudukkottai">Pudukkottai</option>
+            <option value="Ramanathapuram">Ramanathapuram</option>
+            <option value="Ranipet">Ranipet</option>
             <option value="Salem">Salem</option>
+            <option value="Sivaganga">Sivaganga</option>
+            <option value="Tenkasi">Tenkasi</option>
+            <option value="Thanjavur">Thanjavur</option>
+            <option value="Theni">Theni</option>
+            <option value="Thoothukudi">Thoothukudi</option>
+            <option value="Tiruchirappalli">Tiruchirappalli</option>
+            <option value="Tirunelveli">Tirunelveli</option>
+            <option value="Tirupathur">Tirupathur</option>
+            <option value="Tiruppur">Tiruppur</option>
+            <option value="Tiruvallur">Tiruvallur</option>
+            <option value="Tiruvannamalai">Tiruvannamalai</option>
+            <option value="Tiruvarur">Tiruvarur</option>
+            <option value="Vellore">Vellore</option>
+            <option value="Viluppuram">Viluppuram</option>
+            <option value="Virudhunagar">Virudhunagar</option>
+            <option value="Kanniyakumari">Kanniyakumari</option>
+          </select>
+
+          <select id="select-office-taluk" class="form-control" style="padding: 0.7rem 1rem; font-size: 0.88rem; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main);">
+            <option value="all">All Taluks</option>
           </select>
 
           <button id="btn-use-location" type="button" class="btn btn-secondary" style="padding: 0.7rem 1.1rem; font-size: 0.85rem; font-weight: 700; border-radius: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="fa-solid fa-location-crosshairs"></i> <span>Use My Location</span>
           </button>
+        </div>
+
+        <!-- Authoritative Source Notice & TNeGA Direct Portal Link -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; padding: 0.75rem 1.25rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.84rem; color: var(--text-muted);">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1rem;"></i>
+            <span>Authoritative state registries: <strong>All 38 Districts</strong> Collectorates, Taluk Offices, and State E-Sevai Hubs.</span>
+          </div>
+          <div>
+            <a href="https://tnesevai.tn.gov.in/" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <span>Official TNeGA E-Sevai Portal</span> <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75rem;"></i>
+            </a>
+          </div>
         </div>
 
         <!-- Interactive Independent Map View -->

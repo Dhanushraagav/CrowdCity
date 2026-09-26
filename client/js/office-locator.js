@@ -1,344 +1,553 @@
-// CrowdCity AI v2.0 - Government Office Locator JavaScript
-// Features location search, district filters, Leaflet map integration, and Google Maps directions.
+// CrowdCity AI v3.0 - Government Office & E-Sevai Locator
+// Connects to /api/offices with statewide coverage across all 38 districts of Tamil Nadu.
+// Features proximity sorting, debounced search, Leaflet map sync, and verified data provenance.
 
 (function() {
   'use strict';
 
   let mapInstance = null;
   let mapMarkers = [];
+  let userMarker = null;
   let userCoords = null;
-  let allOffices = [];
-  let filteredOffices = [];
+  let activeOffices = [];
+  let searchDebounceTimer = null;
+  let districtsMetadata = [];
 
-  // Seed Dataset for Government Offices in Tamil Nadu
-  const seedGovernmentOffices = [
-    {
-      id: 'off-esevai-chn',
-      name: 'TNeGA Integrated E-Sevai Center',
-      department: 'Tamil Nadu e-Governance Agency (TNeGA)',
-      type: 'esevai',
-      district: 'Chennai',
-      address: 'No. 100, Anna Salai, Guindy, Chennai, Tamil Nadu 600032',
-      landmark: 'Opposite Guindy Metro Station',
-      contact: '044-22500123',
-      hours: 'Mon - Sat: 9:00 AM - 5:00 PM',
-      pincode: '600032',
-      services: ['Kalaignar Magalir Urimai Application', 'Pudhumai Penn Registration', 'Community Certificate', 'Income Certificate'],
-      lat: 13.0067,
-      lng: 80.2020
-    },
-    {
-      id: 'off-taluk-guindy',
-      name: 'Guindy Taluk Revenue Office',
-      department: 'Revenue & Disaster Management Dept, Govt of TN',
-      type: 'taluk',
-      district: 'Chennai',
-      address: 'Taluk Office Complex, Velachery Main Road, Guindy, Chennai, Tamil Nadu 600032',
-      landmark: 'Near Guindy Bus Terminus',
-      contact: '044-22351234',
-      hours: 'Mon - Fri: 10:00 AM - 5:45 PM',
-      pincode: '600032',
-      services: ['Patta Transfer', 'Income & Native Certificates', 'Ration Card Verification', 'Land Records'],
-      lat: 13.0090,
-      lng: 80.2130
-    },
-    {
-      id: 'off-collector-chn',
-      name: 'Chennai District Collectorate',
-      department: 'Department of Revenue Administration',
-      type: 'collectorate',
-      district: 'Chennai',
-      address: 'Singaravelar Maaligai, 62, Rajaji Salai, George Town, Chennai, Tamil Nadu 600001',
-      landmark: 'Near Beach Railway Station',
-      contact: '044-25268000',
-      hours: 'Mon - Fri: 10:00 AM - 5:45 PM',
-      pincode: '600001',
-      services: ['Public Grievances', 'Chief Minister Special Cell Applications', 'Disability Cards', 'Social Welfare Approvals'],
-      lat: 13.0882,
-      lng: 80.2885
-    },
-    {
-      id: 'off-vao-adyar',
-      name: 'Adyar Village Administrative Officer (VAO) Office',
-      department: 'Revenue & Disaster Management Dept, Govt of TN',
-      type: 'vao',
-      district: 'Chennai',
-      address: 'LB Road, Adyar, Chennai, Tamil Nadu 600020',
-      landmark: 'Near Adyar Depot',
-      contact: '044-24410987',
-      hours: 'Mon - Fri: 9:30 AM - 5:00 PM',
-      pincode: '600020',
-      services: ['VAO Income Verification', 'Heirship Certificates', 'Land Ownership Verification'],
-      lat: 13.0012,
-      lng: 80.2565
-    },
-    {
-      id: 'off-esevai-cbe',
-      name: 'Coimbatore District E-Sevai Main Center',
-      department: 'Tamil Nadu e-Governance Agency (TNeGA)',
-      type: 'esevai',
-      district: 'Coimbatore',
-      address: 'Collectorate Campus, State Bank Road, Gopalapuram, Coimbatore, Tamil Nadu 641018',
-      landmark: 'Inside Collectorate Premises',
-      contact: '0422-2301111',
-      hours: 'Mon - Sat: 9:00 AM - 5:00 PM',
-      pincode: '641018',
-      services: ['Govt Scheme Registration', 'Smart Card Corrections', 'CMCHIS Enrollment'],
-      lat: 11.0016,
-      lng: 76.9629
-    },
-    {
-      id: 'off-taluk-mdu',
-      name: 'Madurai North Taluk Office',
-      department: 'Revenue & Disaster Management Dept, Govt of TN',
-      type: 'taluk',
-      district: 'Madurai',
-      address: 'Collectorate Complex, KK Nagar, Madurai, Tamil Nadu 625020',
-      landmark: 'Near KK Nagar Arch',
-      contact: '0452-2530400',
-      hours: 'Mon - Fri: 10:00 AM - 5:45 PM',
-      pincode: '625020',
-      services: ['Social Welfare Pensions', 'Patta Extraction', 'Legal Heir Certificate'],
-      lat: 9.9252,
-      lng: 78.1198
+  // DOM Elements
+  let searchInput = null;
+  let typeSelect = null;
+  let districtSelect = null;
+  let talukSelect = null;
+  let locBtn = null;
+  let cardsContainer = null;
+  let countBadge = null;
+
+  /**
+   * Format type name into friendly label
+   */
+  function formatOfficeType(type) {
+    switch ((type || '').toLowerCase()) {
+      case 'collectorate': return 'District Collectorate';
+      case 'esevai': return 'E-Sevai Center';
+      case 'taluk': return 'Taluk Revenue Office';
+      case 'vao': return 'VAO Office';
+      case 'corporation': return 'Municipal Corporation';
+      default: return 'Government Office';
     }
-  ];
-
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return (R * c).toFixed(1);
   }
 
+  /**
+   * Initialize Leaflet Map
+   */
   function initOfficeMap() {
     const mapContainer = document.getElementById('office-locator-map');
     if (!mapContainer || typeof L === 'undefined') return;
 
     if (!mapInstance) {
+      // Default center: Tamil Nadu Geographic Centroid
       mapInstance = L.map('office-locator-map', {
-        center: [13.0827, 80.2707], // Default Chennai Center
-        zoom: 11,
+        center: [11.1271, 78.6569],
+        zoom: 7,
         zoomControl: true
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; OpenStreetMap contributors | Govt of Tamil Nadu'
       }).addTo(mapInstance);
     }
-
-    renderMapMarkers();
   }
 
+  /**
+   * Fetch district metadata and populate taluk options
+   */
+  async function loadDistrictsMetadata() {
+    try {
+      const res = await fetch('/api/offices/districts');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.districts)) {
+          districtsMetadata = json.districts;
+          updateTalukDropdown();
+        }
+      }
+    } catch (err) {
+      console.warn('[OfficeLocator] Districts metadata notice:', err.message);
+    }
+  }
+
+  /**
+   * Update Taluk dropdown based on selected District
+   */
+  function updateTalukDropdown() {
+    if (!talukSelect) return;
+    const selectedDist = districtSelect ? districtSelect.value : 'all';
+
+    const currentVal = talukSelect.value;
+    talukSelect.innerHTML = '<option value="all">All Taluks</option>';
+
+    if (selectedDist === 'all') {
+      // Collect all taluks from all districts
+      const allTaluks = new Set();
+      districtsMetadata.forEach(d => {
+        if (Array.isArray(d.taluks)) {
+          d.taluks.forEach(t => allTaluks.add(t));
+        }
+      });
+      Array.from(allTaluks).sort().forEach(taluk => {
+        const opt = document.createElement('option');
+        opt.value = taluk;
+        opt.textContent = taluk;
+        talukSelect.appendChild(opt);
+      });
+    } else {
+      // Find matching district
+      const matched = districtsMetadata.find(d => d.name.toLowerCase() === selectedDist.toLowerCase() || d.id === selectedDist.toLowerCase());
+      if (matched && Array.isArray(matched.taluks) && matched.taluks.length > 0) {
+        matched.taluks.forEach(taluk => {
+          const opt = document.createElement('option');
+          opt.value = taluk;
+          opt.textContent = taluk;
+          talukSelect.appendChild(opt);
+        });
+      }
+    }
+
+    if (currentVal && Array.from(talukSelect.options).some(o => o.value === currentVal)) {
+      talukSelect.value = currentVal;
+    } else {
+      talukSelect.value = 'all';
+    }
+  }
+
+  /**
+   * Query backend API with active filter parameters
+   */
+  async function fetchOffices() {
+    if (!cardsContainer) return;
+
+    // Show loading skeleton
+    cardsContainer.innerHTML = `
+      <div style="text-align: center; padding: 3.5rem 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px;">
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.4rem 0;">Searching Tamil Nadu Government Offices...</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Querying verified departmental registries across 38 districts.</p>
+      </div>
+    `;
+
+    const params = new URLSearchParams();
+
+    const searchVal = searchInput ? searchInput.value.trim() : '';
+    const typeVal = typeSelect ? typeSelect.value : 'all';
+    const districtVal = districtSelect ? districtSelect.value : 'all';
+    const talukVal = talukSelect ? talukSelect.value : 'all';
+
+    if (searchVal) params.set('search', searchVal);
+    if (typeVal && typeVal !== 'all') params.set('type', typeVal);
+    if (districtVal && districtVal !== 'all') params.set('district', districtVal);
+    if (talukVal && talukVal !== 'all') params.set('taluk', talukVal);
+
+    if (userCoords && userCoords.lat && userCoords.lng) {
+      params.set('lat', userCoords.lat);
+      params.set('lng', userCoords.lng);
+    }
+
+    try {
+      const response = await fetch(`/api/offices?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+      const result = await response.json();
+
+      if (result.success && Array.isArray(result.data)) {
+        activeOffices = result.data;
+        renderOfficeCards();
+        renderMapMarkers();
+      } else {
+        throw new Error(result.error || 'Invalid API response format');
+      }
+    } catch (error) {
+      console.error('[OfficeLocator] Fetch error:', error);
+      cardsContainer.innerHTML = `
+        <div style="text-align: center; padding: 3rem 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px;">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; color: #ef4444; margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">Unable to Load Offices</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">${error.message || 'Please check your connection and try again.'}</p>
+          <button type="button" class="btn btn-secondary" onclick="window.fetchOfficesRetry()" style="padding: 0.6rem 1.2rem; font-weight: 700; border-radius: 10px;">
+            <i class="fa-solid fa-rotate-right"></i> Try Again
+          </button>
+        </div>
+      `;
+      if (countBadge) countBadge.textContent = '0';
+    }
+  }
+
+  // Global retry hook for error button
+  window.fetchOfficesRetry = function() {
+    fetchOffices();
+  };
+
+  /**
+   * Render Leaflet map markers
+   */
   function renderMapMarkers() {
     if (!mapInstance) return;
 
-    // Clear existing markers
+    // Clear existing office markers
     mapMarkers.forEach(m => mapInstance.removeLayer(m));
     mapMarkers = [];
 
-    if (filteredOffices.length === 0) return;
+    if (activeOffices.length === 0) {
+      if (userMarker) {
+        mapInstance.setView([userCoords.lat, userCoords.lng], 13);
+      }
+      return;
+    }
 
     const bounds = L.latLngBounds();
 
-    filteredOffices.forEach(off => {
-      if (off.lat && off.lng) {
-        const marker = L.marker([off.lat, off.lng]).addTo(mapInstance);
-        
+    activeOffices.forEach((off, idx) => {
+      const lat = off.latitude || off.lat;
+      const lng = off.longitude || off.lng;
+
+      if (lat && lng) {
+        const marker = L.marker([lat, lng], {
+          title: off.name
+        }).addTo(mapInstance);
+
+        const directionsUrl = off.directions_url || `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        const formattedType = formatOfficeType(off.office_type || off.type);
+        const distBadge = off.distance_formatted ? `<span style="font-size: 0.72rem; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 0.15rem 0.45rem; border-radius: 999px;">${off.distance_formatted} away</span>` : '';
+
         const popupContent = `
-          <div style="font-family: system-ui; max-width: 220px;">
-            <div style="font-size: 0.65rem; font-weight: 800; color: var(--primary); text-transform: uppercase;">${off.type.toUpperCase()} OFFICE</div>
-            <h4 style="font-size: 0.95rem; font-weight: 800; margin: 0.2rem 0; color: var(--text-main);">${off.name}</h4>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.5rem 0;">${off.address}</p>
-            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(off.name + ' ' + off.address)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.78rem; font-weight: 700; color: #10b981; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">
-              <span>Get Directions</span> →
-            </a>
+          <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 250px; padding: 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem;">
+              <span style="font-size: 0.65rem; font-weight: 800; color: var(--primary, #0d9488); text-transform: uppercase; letter-spacing: 0.05em;">${formattedType}</span>
+              ${distBadge}
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 800; margin: 0 0 0.35rem 0; color: #0f172a; line-height: 1.25;">${off.name}</h4>
+            ${off.name_ta ? `<div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.35rem;">${off.name_ta}</div>` : ''}
+            <p style="font-size: 0.78rem; color: #475569; margin: 0 0 0.6rem 0; line-height: 1.35;">${off.address}</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;">
+              ${off.phone ? `<a href="tel:${off.phone}" style="font-size: 0.76rem; font-weight: 700; color: #0d9488; text-decoration: none;">📞 ${off.phone}</a>` : '<span></span>'}
+              <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 0.76rem; font-weight: 800; color: #10b981; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+                <span>Directions</span> →
+              </a>
+            </div>
           </div>
         `;
 
         marker.bindPopup(popupContent);
+        marker.officeId = off.id;
         mapMarkers.push(marker);
-        bounds.extend([off.lat, off.lng]);
+        bounds.extend([lat, lng]);
       }
     });
 
+    if (userMarker && userCoords) {
+      bounds.extend([userCoords.lat, userCoords.lng]);
+    }
+
     if (mapMarkers.length > 0) {
-      mapInstance.fitBounds(bounds, { padding: [40, 40] });
+      mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
     }
   }
 
+  /**
+   * Pan and open popup for a specific office marker
+   */
+  function focusOfficeOnMap(officeId) {
+    const marker = mapMarkers.find(m => m.officeId === officeId);
+    if (marker && mapInstance) {
+      mapInstance.setView(marker.getLatLng(), 15, { animate: true });
+      marker.openPopup();
+      const mapContainer = document.getElementById('office-locator-map');
+      if (mapContainer) {
+        mapContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }
+
+  /**
+   * Render Office Cards in the UI
+   */
   function renderOfficeCards() {
-    const container = document.getElementById('office-cards-container');
-    const countElem = document.getElementById('office-count-badge');
+    if (!cardsContainer) return;
+    if (countBadge) countBadge.textContent = activeOffices.length;
 
-    if (countElem) countElem.textContent = filteredOffices.length;
-
-    if (!container) return;
-
-    if (filteredOffices.length === 0) {
-      container.innerHTML = `
+    if (activeOffices.length === 0) {
+      cardsContainer.innerHTML = `
         <div style="text-align: center; padding: 4rem 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px;">
-          <i class="fa-solid fa-building-circle-xmark" style="font-size: 2.8rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">No Government Offices Found</h3>
-          <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">Try adjusting your district filter, office category, or search term.</p>
+          <i class="fa-solid fa-building-circle-xmark" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">No Government Offices Match Your Criteria</h3>
+          <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0 0 1.5rem 0; max-width: 500px; margin-inline: auto;">
+            Try clearing search keywords or selecting "All Office Types" and "All Districts" to broaden your view.
+          </p>
+          <div style="display: inline-flex; gap: 0.75rem;">
+            <button type="button" class="btn btn-secondary" onclick="window.resetOfficeFilters()" style="padding: 0.6rem 1.25rem; font-weight: 700; border-radius: 10px;">
+              <i class="fa-solid fa-arrow-rotate-left"></i> Reset Filters
+            </button>
+            <a href="https://tnesevai.tn.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+              <span>Official TNeGA Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = filteredOffices.map(off => {
-      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(off.name + ' ' + off.address)}`;
-      const distStr = userCoords ? calculateDistance(userCoords.lat, userCoords.lng, off.lat, off.lng) + ' km away' : null;
+    cardsContainer.innerHTML = activeOffices.map(off => {
+      const lat = off.latitude || off.lat;
+      const lng = off.longitude || off.lng;
+      const phone = off.phone || off.contact || '';
+      const email = off.email || '';
+      const services = Array.isArray(off.services) ? off.services : [];
+      const directionsUrl = off.directions_url || (lat && lng ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(off.name + ' ' + off.address)}`);
+      const formattedType = formatOfficeType(off.office_type || off.type);
 
       return `
-        <div class="office-card-v2" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.75rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.04);">
+        <div class="office-card-v2" data-office-id="${off.id}" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.75rem; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.04);">
           
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem;">
+          <!-- Top Row: Type, District, Distance, Verified Badge -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
             <div>
-              <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(13, 148, 136, 0.12); color: var(--primary); display: inline-block; margin-bottom: 0.35rem;">
-                ${off.type.toUpperCase()} OFFICE • ${off.district}
-              </span>
-              <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.3;">${off.name}</h3>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.45rem;">
+                <span style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(13, 148, 136, 0.12); color: var(--primary);">
+                  ${formattedType} • ${off.district}
+                </span>
+                ${off.taluk ? `<span style="font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 999px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-muted);">${off.taluk} Taluk</span>` : ''}
+                <span style="font-size: 0.68rem; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.2rem 0.55rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.25rem;">
+                  <i class="fa-solid fa-shield-halved"></i> State Verified
+                </span>
+              </div>
+              <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.2rem 0; line-height: 1.3;">${off.name}</h3>
+              ${off.name_ta ? `<div style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">${off.name_ta}</div>` : ''}
             </div>
 
-            ${distStr ? `
-              <span style="font-size: 0.78rem; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 0.3rem 0.75rem; border-radius: 999px; white-space: nowrap;">
-                <i class="fa-solid fa-location-arrow"></i> ${distStr}
+            ${off.distance_formatted ? `
+              <span style="font-size: 0.8rem; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); padding: 0.35rem 0.85rem; border-radius: 999px; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem;">
+                <i class="fa-solid fa-location-arrow"></i> ${off.distance_formatted} away
               </span>
             ` : ''}
           </div>
 
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem 0;">
-            <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> ${off.department}
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.4rem;">
+            <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i> <span>${off.department}</span>
           </p>
 
+          <!-- Address, Hours, Contact Details -->
           <div style="display: grid; grid-template-columns: 1fr; gap: 0.6rem; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
             <div style="font-size: 0.88rem; color: var(--text-main); line-height: 1.5;">
-              <strong style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 0.15rem;">Address:</strong>
-              ${off.address}
+              <strong style="color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.15rem;">Address:</strong>
+              ${off.address} ${off.pincode ? `<span style="font-weight: 600; color: var(--text-muted);">(PIN: ${off.pincode})</span>` : ''}
             </div>
-
-            ${off.landmark ? `
-              <div style="font-size: 0.85rem; color: var(--text-main);">
-                <strong style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 0.15rem;">Landmark:</strong>
-                ${off.landmark}
-              </div>
-            ` : ''}
 
             <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.25rem;">
               <div style="font-size: 0.85rem; color: var(--text-main);">
-                <i class="fa-regular fa-clock" style="color: var(--primary);"></i> <strong>Hours:</strong> ${off.hours}
+                <i class="fa-regular fa-clock" style="color: var(--primary);"></i> <strong>Hours:</strong> ${off.hours || 'Mon - Fri: 10:00 AM - 5:45 PM'}
               </div>
-              <div style="font-size: 0.85rem; color: var(--text-main);">
-                <i class="fa-solid fa-phone" style="color: var(--primary);"></i> <strong>Contact:</strong> <a href="tel:${off.contact}" style="color: var(--primary); font-weight: 700; text-decoration: none;">${off.contact}</a>
-              </div>
+              ${phone ? `
+                <div style="font-size: 0.85rem; color: var(--text-main);">
+                  <i class="fa-solid fa-phone" style="color: var(--primary);"></i> <strong>Contact:</strong> <a href="tel:${phone}" style="color: var(--primary); font-weight: 700; text-decoration: none;">${phone}</a>
+                </div>
+              ` : ''}
+              ${email ? `
+                <div style="font-size: 0.85rem; color: var(--text-main);">
+                  <i class="fa-solid fa-envelope" style="color: var(--primary);"></i> <strong>Email:</strong> <a href="mailto:${email}" style="color: var(--primary); font-weight: 600; text-decoration: none;">${email}</a>
+                </div>
+              ` : ''}
             </div>
           </div>
 
           <!-- Services Available Badges -->
-          <div style="margin-bottom: 1.25rem;">
-            <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">
-              Services Available Here
+          ${services.length > 0 ? `
+            <div style="margin-bottom: 1.25rem;">
+              <div style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">
+                Key Services Available Here
+              </div>
+              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                ${services.map(svc => `<span style="font-size: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.25rem 0.65rem; border-radius: 6px; color: var(--text-main); font-weight: 600;">${svc}</span>`).join('')}
+              </div>
             </div>
-            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-              ${off.services.map(svc => `<span style="font-size: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 0.25rem 0.65rem; border-radius: 6px; color: var(--text-main); font-weight: 600;">${svc}</span>`).join('')}
-            </div>
+          ` : ''}
+
+          <!-- Source Provenance Note -->
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="fa-solid fa-circle-info" style="color: var(--text-muted);"></i>
+            <span>Verified Source: <strong>${off.source_name || 'Official District Portal'}</strong></span>
           </div>
 
           <!-- Card Actions -->
-          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.85rem; border-top: 1px dashed var(--border-color); padding-top: 1.25rem; flex-wrap: wrap;">
-            <a href="tel:${off.contact}" class="btn btn-secondary" style="padding: 0.65rem 1.2rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-              <i class="fa-solid fa-phone"></i> <span>Call Office</span>
-            </a>
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; border-top: 1px dashed var(--border-color); padding-top: 1.25rem; flex-wrap: wrap;">
+            ${(lat && lng) ? `
+              <button type="button" class="btn btn-secondary btn-focus-map" data-id="${off.id}" style="padding: 0.65rem 1.1rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-map-pin"></i> <span>View on Map</span>
+              </button>
+            ` : ''}
 
-            <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.65rem 1.4rem; font-size: 0.85rem; font-weight: 800; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
-              <span>Open in Google Maps</span> <i class="fa-solid fa-map-location-dot"></i>
+            ${phone ? `
+              <a href="tel:${phone}" class="btn btn-secondary" style="padding: 0.65rem 1.15rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-phone"></i> <span>Call Office</span>
+              </a>
+            ` : ''}
+
+            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.65rem 1.35rem; font-size: 0.85rem; font-weight: 800; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
+              <span>Open in Google Maps</span> <i class="fa-solid fa-location-arrow"></i>
             </a>
           </div>
 
         </div>
       `;
     }).join('');
-  }
 
-  function applyFilters() {
-    const searchVal = (document.getElementById('input-office-search')?.value || '').toLowerCase().trim();
-    const typeVal = document.getElementById('select-office-type')?.value || 'all';
-    const districtVal = document.getElementById('select-office-district')?.value || 'all';
-
-    filteredOffices = allOffices.filter(off => {
-      if (typeVal !== 'all' && off.type !== typeVal) return false;
-      if (districtVal !== 'all' && off.district.toLowerCase() !== districtVal.toLowerCase()) return false;
-
-      if (searchVal) {
-        const matchesName = off.name.toLowerCase().includes(searchVal);
-        const matchesDept = off.department.toLowerCase().includes(searchVal);
-        const matchesAddr = off.address.toLowerCase().includes(searchVal);
-        const matchesSvc = off.services.some(s => s.toLowerCase().includes(searchVal));
-        if (!matchesName && !matchesDept && !matchesAddr && !matchesSvc) return false;
-      }
-
-      return true;
+    // Attach click listeners to "View on Map" buttons
+    cardsContainer.querySelectorAll('.btn-focus-map').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (id) focusOfficeOnMap(id);
+      });
     });
-
-    renderOfficeCards();
-    renderMapMarkers();
   }
 
+  /**
+   * Reset all filters to default
+   */
+  window.resetOfficeFilters = function() {
+    if (searchInput) searchInput.value = '';
+    if (typeSelect) typeSelect.value = 'all';
+    if (districtSelect) districtSelect.value = 'all';
+    updateTalukDropdown();
+    fetchOffices();
+  };
+
+  /**
+   * Browser Geolocation Handler
+   */
   function getUserGeolocation() {
-    if (navigator.geolocation) {
-      const btn = document.getElementById('btn-use-location');
-      if (btn) btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Locating...`;
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          if (btn) {
-            btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Location Active`;
-            btn.style.background = 'rgba(16, 185, 129, 0.12)';
-            btn.style.color = '#10b981';
-            btn.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-          }
-          if (mapInstance) {
-            mapInstance.setView([userCoords.lat, userCoords.lng], 13);
-            L.marker([userCoords.lat, userCoords.lng], {
-              title: "Your Location"
-            }).addTo(mapInstance).bindPopup("<b>Your Current Location</b>").openPopup();
-          }
-          applyFilters();
-        },
-        (err) => {
-          console.warn("Geolocation permission denied or error:", err);
-          if (btn) btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Use My Location`;
-          if (window.showToast) window.showToast("Could not access device location. You can select your district manually.", "info");
-        }
-      );
+    if (!navigator.geolocation) {
+      if (window.showToast) window.showToast('Geolocation is not supported by your browser.', 'warning');
+      return;
     }
+
+    if (locBtn) {
+      locBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Locating...`;
+      locBtn.disabled = true;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userCoords = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        };
+
+        if (locBtn) {
+          locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Location Active`;
+          locBtn.disabled = false;
+          locBtn.style.background = 'rgba(16, 185, 129, 0.12)';
+          locBtn.style.color = '#10b981';
+          locBtn.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+        }
+
+        if (mapInstance) {
+          if (userMarker) {
+            mapInstance.removeLayer(userMarker);
+          }
+
+          // Blue pulsating marker for user location
+          const userIcon = L.divIcon({
+            className: 'cc-user-location-pin',
+            html: `
+              <div style="position: relative; width: 22px; height: 22px;">
+                <div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: #3b82f6; opacity: 0.4; animation: pulse 1.8s infinite;"></div>
+                <div style="position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 2.5px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
+              </div>
+            `,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
+
+          userMarker = L.marker([userCoords.lat, userCoords.lng], { icon: userIcon })
+            .addTo(mapInstance)
+            .bindPopup('<b>Your Current Location</b>')
+            .openPopup();
+
+          mapInstance.setView([userCoords.lat, userCoords.lng], 12);
+        }
+
+        // Re-query offices with user coordinates to get exact distances
+        fetchOffices();
+      },
+      (err) => {
+        console.warn('[OfficeLocator] Geolocation error or denied:', err);
+        if (locBtn) {
+          locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> <span>Use My Location</span>`;
+          locBtn.disabled = false;
+        }
+        if (window.showToast) {
+          window.showToast('Could not access device location. You can select your district from the dropdown.', 'info');
+        }
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
   }
 
+  /**
+   * DOM Content Loaded Initialization
+   */
   document.addEventListener('DOMContentLoaded', () => {
-    allOffices = [...seedGovernmentOffices];
-    filteredOffices = [...allOffices];
+    searchInput = document.getElementById('input-office-search');
+    typeSelect = document.getElementById('select-office-type');
+    districtSelect = document.getElementById('select-office-district');
+    talukSelect = document.getElementById('select-office-taluk');
+    locBtn = document.getElementById('btn-use-location');
+    cardsContainer = document.getElementById('office-cards-container');
+    countBadge = document.getElementById('office-count-badge');
 
+    // 1. Initialize Leaflet Map
     initOfficeMap();
-    renderOfficeCards();
 
-    // Event Listeners
-    const searchInput = document.getElementById('input-office-search');
-    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    // 2. Fetch District & Taluk metadata
+    loadDistrictsMetadata();
 
-    const typeSelect = document.getElementById('select-office-type');
-    if (typeSelect) typeSelect.addEventListener('change', applyFilters);
+    // 3. Initial load of offices across Tamil Nadu
+    fetchOffices();
 
-    const districtSelect = document.getElementById('select-office-district');
-    if (districtSelect) districtSelect.addEventListener('change', applyFilters);
+    // 4. Debounced Search Handler
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+          fetchOffices();
+        }, 300);
+      });
+    }
 
-    const locBtn = document.getElementById('btn-use-location');
-    if (locBtn) locBtn.addEventListener('click', getUserGeolocation);
+    // 5. Office Type Filter Handler
+    if (typeSelect) {
+      typeSelect.addEventListener('change', () => {
+        fetchOffices();
+      });
+    }
+
+    // 6. District Filter Handler
+    if (districtSelect) {
+      districtSelect.addEventListener('change', () => {
+        updateTalukDropdown();
+        fetchOffices();
+      });
+    }
+
+    // 7. Taluk Filter Handler
+    if (talukSelect) {
+      talukSelect.addEventListener('change', () => {
+        fetchOffices();
+      });
+    }
+
+    // 8. Location Button Handler
+    if (locBtn) {
+      locBtn.addEventListener('click', getUserGeolocation);
+    }
   });
 
 })();
