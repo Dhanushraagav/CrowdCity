@@ -176,38 +176,77 @@ export async function analyzeCivicImage(imageBase64, options = {}) {
   try {
     const rawResult = await provider.analyze({
       imageBase64: validation.cleanBase64,
-      mimeType: validation.mimeType
+      mimeType: validation.mimeType,
+      lang: options.lang || 'en'
     });
 
     if (!rawResult || typeof rawResult !== 'object') {
       throw new Error('Invalid response structure from vision model');
     }
 
+    // Defensive check: Detect Chinese/Hanzi character contamination (e.g. "Bus陷入路面坑洼")
+    const containsChinese = (str) => typeof str === 'string' && /[\u4E00-\u9FFF\u3400-\u4DBF]/.test(str);
+
     // 4. Handle Non-Civic / Invalid Image
     if (rawResult.is_valid_civic_issue === false) {
+      let nonCivicTitle = (rawResult.detected_issue || 'Non-Civic Photo Detected').trim();
+      let nonCivicDesc = (rawResult.description || '').trim();
+      if (containsChinese(nonCivicTitle)) nonCivicTitle = 'Non-Civic Photo Detected';
+      if (containsChinese(nonCivicDesc) || !nonCivicDesc) {
+        nonCivicDesc = 'The uploaded photo does not appear to show a municipal infrastructure issue. Please upload or take a clear photo of the civic hazard (pothole, streetlight, garbage, etc.).';
+      }
+
       return {
         success: true,
         is_valid_civic_issue: false,
-        detected_issue: rawResult.detected_issue || 'Non-Civic Photo Detected',
-        description: rawResult.description || 'The uploaded photo does not appear to show a municipal infrastructure issue. Please upload or take a clear photo of the civic hazard (pothole, streetlight, garbage, etc.).',
-        evidence_observed: Array.isArray(rawResult.evidence_observed) ? rawResult.evidence_observed : [],
+        detected_issue: nonCivicTitle,
+        description: nonCivicDesc,
+        evidence_observed: Array.isArray(rawResult.evidence_observed)
+          ? rawResult.evidence_observed.filter(e => typeof e === 'string' && !containsChinese(e))
+          : [],
         needs_user_confirmation: true
       };
     }
 
     // 5. Structure & Normalize Valid Civic Hazard
     const normalizedCat = normalizeCategory(rawResult.suggested_category);
-    const evidenceList = Array.isArray(rawResult.evidence_observed) && rawResult.evidence_observed.length > 0
-      ? rawResult.evidence_observed.filter(e => typeof e === 'string' && e.trim().length > 0)
-      : ['Visual infrastructure damage observed'];
+
+    // Defensive issue title sanitization (never let Chinese leak to citizen UI)
+    let cleanDetectedIssue = (rawResult.detected_issue || '').trim();
+    if (containsChinese(cleanDetectedIssue)) {
+      const englishTokens = cleanDetectedIssue.replace(/[\u4E00-\u9FFF\u3400-\u4DBF]+/g, ' ').replace(/\s+/g, ' ').trim();
+      cleanDetectedIssue = englishTokens.length >= 3
+        ? `${englishTokens} (${normalizedCat.name} Issue)`
+        : `${normalizedCat.name} Hazard Detected`;
+    }
+    if (!cleanDetectedIssue) {
+      cleanDetectedIssue = `${normalizedCat.name} Infrastructure Hazard`;
+    }
+
+    // Defensive description sanitization
+    let cleanDescription = (rawResult.description || '').trim();
+    if (containsChinese(cleanDescription) || !cleanDescription) {
+      cleanDescription = `Visual analysis identified a ${normalizedCat.name.toLowerCase()} infrastructure issue requiring municipal attention.`;
+    }
+
+    // Defensive evidence list sanitization
+    let evidenceList = Array.isArray(rawResult.evidence_observed) && rawResult.evidence_observed.length > 0
+      ? rawResult.evidence_observed
+          .filter(e => typeof e === 'string' && e.trim().length > 0 && !containsChinese(e))
+          .map(e => e.trim())
+      : [];
+
+    if (evidenceList.length === 0) {
+      evidenceList = [`Visual ${normalizedCat.name.toLowerCase()} damage observed`];
+    }
 
     return {
       success: true,
       is_valid_civic_issue: true,
-      detected_issue: (rawResult.detected_issue || 'Civic Infrastructure Hazard').trim(),
+      detected_issue: cleanDetectedIssue,
       suggested_category: normalizedCat.name,
       category_code: normalizedCat.code,
-      description: (rawResult.description || 'Visual analysis identified an infrastructure hazard requiring municipal attention.').trim(),
+      description: cleanDescription,
       evidence_observed: evidenceList,
       priority_hint: rawResult.priority_hint || 'Medium',
       confidence: typeof rawResult.confidence === 'number' ? Math.min(Math.max(rawResult.confidence, 0), 1) : 0.90,

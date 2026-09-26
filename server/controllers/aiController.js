@@ -365,7 +365,7 @@ export const translateVoiceController = async (req, res) => {
  * Provides structured civic issue suggestions with human-in-the-loop review and graceful fallback.
  */
 export const analyzeImageController = async (req, res) => {
-  const { image } = req.body;
+  const { image, lang } = req.body;
 
   if (!image) {
     return res.status(400).json({
@@ -376,7 +376,7 @@ export const analyzeImageController = async (req, res) => {
   }
 
   try {
-    const result = await analyzeCivicImage(image);
+    const result = await analyzeCivicImage(image, { lang });
 
     if (result.statusCode === 400) {
       return res.status(400).json(result);

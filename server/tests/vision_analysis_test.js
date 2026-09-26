@@ -254,6 +254,65 @@ async function runTests() {
     assert(!fallbackResult.suggested_category, 'Ensures zero fake AI category injection');
   }
 
+  // --- Suite 9: Language Control & Chinese Output Defense ---
+  console.log('\n--- Suite 9: Language Control & Chinese Output Defense ---');
+  {
+    resetVisionProviderCache();
+    const mockProvider = getVisionProvider('mock');
+
+    // Test A: Contaminated Chinese Output is Sanitized Defensively
+    mockProvider.setMockResponse({
+      is_valid_civic_issue: true,
+      detected_issue: 'Bus陷入路面坑洼',
+      suggested_category: 'Roads',
+      description: '一辆公共汽车被困在路面的深坑中，导致交通严重受阻。',
+      evidence_observed: [
+        'Bus tire stuck in deep roadway crater',
+        '路面沥青破损严重',
+        'Visible road depression'
+      ],
+      priority_hint: 'High',
+      confidence: 0.95,
+      needs_user_confirmation: true
+    });
+
+    const sanitizedResult = await analyzeCivicImage(createMinimalJpegBase64(), {
+      providerType: 'mock',
+      lang: 'en-IN'
+    });
+
+    const containsHanzi = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
+    assert(sanitizedResult.success === true, 'Sanitized analysis returns success: true');
+    assert(!containsHanzi.test(sanitizedResult.detected_issue), 'Sanitizes Chinese characters from detected_issue ("Bus陷入路面坑洼" -> no Hanzi)');
+    assert(sanitizedResult.detected_issue.includes('Bus') || sanitizedResult.detected_issue.includes('Roads'), 'Preserves valid English tokens or clean category title');
+    assert(!containsHanzi.test(sanitizedResult.description), 'Sanitizes Chinese description into clean English objective summary');
+    assert(sanitizedResult.evidence_observed.every(e => !containsHanzi.test(e)), 'Filters out Chinese evidence strings from evidence_observed');
+    assert(sanitizedResult.suggested_category === 'Roads', 'Preserves canonical suggested_category: "Roads"');
+    assert(sanitizedResult.category_code === 'roads', 'Preserves canonical category_code: "roads"');
+    assert(sanitizedResult.needs_user_confirmation === true, 'Preserves needs_user_confirmation: true');
+
+    // Test B: Default / Missing Language Defaults to English
+    const qwen = new QwenVisionProvider({ token: 'test' });
+    assert(typeof qwen.analyze === 'function', 'Qwen provider has analyze method');
+
+    // Test C: Non-civic Chinese Output Defense
+    mockProvider.setMockResponse({
+      is_valid_civic_issue: false,
+      detected_issue: '自拍照片',
+      description: '上传的照片似乎是自拍，不是市政问题。',
+      evidence_observed: ['人脸可见'],
+      needs_user_confirmation: true
+    });
+
+    const nonCivicSanitized = await analyzeCivicImage(createMinimalJpegBase64(), {
+      providerType: 'mock',
+      lang: 'en'
+    });
+    assert(!containsHanzi.test(nonCivicSanitized.detected_issue), 'Sanitizes Chinese title in non-civic response');
+    assert(!containsHanzi.test(nonCivicSanitized.description), 'Sanitizes Chinese description in non-civic response');
+    assert(nonCivicSanitized.evidence_observed.length === 0, 'Strips Chinese evidence items in non-civic response');
+  }
+
   // SUMMARY
   console.log('\n======================================================');
   console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);

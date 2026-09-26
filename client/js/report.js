@@ -662,7 +662,11 @@ function initAiCameraDetection() {
       if (activeAnalysisController.signal.aborted) return;
 
       if (resizedBase64 && window.API && typeof window.API.analyzeImageWithAi === 'function') {
+        const voiceLangSelect = document.getElementById('voice-lang-select');
+        const selectedLang = (voiceLangSelect && voiceLangSelect.value) ? voiceLangSelect.value : (document.documentElement.lang === 'ta' ? 'ta-IN' : 'en-IN');
+
         const { data, error } = await window.API.analyzeImageWithAi(resizedBase64, {
+          lang: selectedLang,
           signal: activeAnalysisController.signal
         });
 

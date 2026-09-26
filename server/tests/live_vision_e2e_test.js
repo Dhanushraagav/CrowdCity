@@ -73,7 +73,7 @@ async function runLiveTests() {
     const resPothole = await fetch(`http://127.0.0.1:${port}/api/ai/analyze-image`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: potholeDataUri })
+      body: JSON.stringify({ image: potholeDataUri, lang: 'en-IN' })
     });
 
     assert(resPothole.status === 200, 'POST /api/ai/analyze-image returns HTTP 200');
@@ -83,6 +83,8 @@ async function runLiveTests() {
     assert(potholeJson.suggested_category === 'Roads', `Suggested category matches "Roads" (got: "${potholeJson.suggested_category}")`);
     assert(potholeJson.category_code === 'roads', 'Category code matches "roads"');
     assert(typeof potholeJson.detected_issue === 'string' && potholeJson.detected_issue.length > 0, `Detected issue: "${potholeJson.detected_issue}"`);
+    assert(!/[\u4E00-\u9FFF]/.test(potholeJson.detected_issue), 'Pothole detected_issue contains zero Chinese characters');
+    assert(!/[\u4E00-\u9FFF]/.test(potholeJson.description), 'Pothole description contains zero Chinese characters');
     assert(Array.isArray(potholeJson.evidence_observed) && potholeJson.evidence_observed.length > 0, 'Evidence observed array is populated');
     assert(potholeJson.needs_user_confirmation === true, 'needs_user_confirmation is true');
 
@@ -106,6 +108,8 @@ async function runLiveTests() {
     assert(garbageJson.suggested_category === 'Garbage', `Suggested category matches "Garbage" (got: "${garbageJson.suggested_category}")`);
     assert(garbageJson.category_code === 'garbage', 'Category code matches "garbage"');
     assert(typeof garbageJson.detected_issue === 'string' && garbageJson.detected_issue.length > 0, `Detected issue: "${garbageJson.detected_issue}"`);
+    assert(!/[\u4E00-\u9FFF]/.test(garbageJson.detected_issue), 'Garbage detected_issue contains zero Chinese characters');
+    assert(!/[\u4E00-\u9FFF]/.test(garbageJson.description), 'Garbage description contains zero Chinese characters');
 
     // -------------------------------------------------------------------------
     // TEST 3: Waterlogging (Valid Civic Image)
@@ -118,7 +122,7 @@ async function runLiveTests() {
     const resWaterlog = await fetch(`http://127.0.0.1:${port}/api/ai/analyze-image`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: waterlogDataUri })
+      body: JSON.stringify({ image: waterlogDataUri, lang: 'en' })
     });
 
     assert(resWaterlog.status === 200, 'POST /api/ai/analyze-image for waterlogging returns HTTP 200');
@@ -127,6 +131,8 @@ async function runLiveTests() {
     assert(waterlogJson.is_valid_civic_issue === true, 'Waterlogging identified as valid civic issue');
     assert(waterlogJson.suggested_category === 'Drainage' || waterlogJson.suggested_category === 'Roads', `Suggested category matches Drainage or Roads (got: "${waterlogJson.suggested_category}")`);
     assert(typeof waterlogJson.detected_issue === 'string' && waterlogJson.detected_issue.length > 0, `Detected issue: "${waterlogJson.detected_issue}"`);
+    assert(!/[\u4E00-\u9FFF]/.test(waterlogJson.detected_issue), 'Waterlogging detected_issue contains zero Chinese characters');
+    assert(!/[\u4E00-\u9FFF]/.test(waterlogJson.description), 'Waterlogging description contains zero Chinese characters');
 
     // -------------------------------------------------------------------------
     // TEST 4: Valid WEBP Payload Handling

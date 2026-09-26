@@ -308,11 +308,15 @@ const API = {
 
   // Analyze image with AI
   analyzeImageWithAi: async (imageBase64, options = {}) => {
+    const { lang, ...restOptions } = options;
     return request('/ai/analyze-image', {
       method: 'POST',
-      body: JSON.stringify({ image: imageBase64 }),
+      body: JSON.stringify({
+        image: imageBase64,
+        lang: lang || 'en'
+      }),
       auth: false,
-      ...options
+      ...restOptions
     });
   },
 

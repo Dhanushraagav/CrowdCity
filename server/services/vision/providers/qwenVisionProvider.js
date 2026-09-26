@@ -30,16 +30,32 @@ export class QwenVisionProvider {
    * 
    * @param {Object} params
    * @param {string} params.imageBase64 Formatted data URI or raw base64
-   * @param {string} params.mimeType 'image/jpeg' | 'image/png' | 'image/webp'
+   * @param {string} [params.mimeType] 'image/jpeg' | 'image/png' | 'image/webp'
+   * @param {string} [params.lang] 'en' | 'en-IN' | 'ta' | 'ta-IN'
    * @returns {Promise<Object>} Raw structured output from model
    */
-  async analyze({ imageBase64, mimeType = 'image/jpeg' }) {
+  async analyze({ imageBase64, mimeType = 'image/jpeg', lang = 'en' }) {
     const formattedUrl = imageBase64.startsWith('data:')
       ? imageBase64
       : `data:${mimeType};base64,${imageBase64}`;
 
+    const isTamil = (lang === 'ta' || lang === 'ta-IN' || lang === 'tanglish');
+
+    const languageDirective = isTamil
+      ? `LANGUAGE & SCRIPT MANDATE:
+- All generated user-facing text ("detected_issue", "description", "evidence_observed") MUST be written in clear TAMIL or TANGLISH (Tamil written using Latin script).
+- STRICT PROHIBITION: NEVER output Chinese characters (中文/汉字), Hanzi, or any East Asian scripts under any circumstance.
+- "suggested_category" and all JSON property keys MUST strictly remain in canonical ENGLISH.`
+      : `LANGUAGE & SCRIPT MANDATE:
+- All generated user-facing text ("detected_issue", "description", "evidence_observed") MUST be 100% EXCLUSIVELY in natural, professional ENGLISH using the Latin alphabet.
+- STRICT PROHIBITION: NEVER output Chinese characters (中文/汉字), Hanzi, or any East Asian scripts under any circumstance.
+- Example: Output "Bus trapped in road pothole", NEVER "Bus陷入路面坑洼".
+- "suggested_category" MUST strictly remain one of the canonical English taxonomy names.`;
+
     const systemPrompt = `You are an expert municipal visual inspector for CrowdCity AI (Tamil Nadu Municipal Governance).
 Analyze the citizen's photo to perform visual hazard detection and object recognition.
+
+${languageDirective}
 
 TAXONOMY & CATEGORIES:
 - "Roads": Potholes, road craters, cracked asphalt, missing manhole covers, damaged footpaths/sidewalks.
@@ -94,7 +110,9 @@ OUTPUT SCHEMA (Return strictly ONE JSON object with no markdown wrappers):
             },
             {
               type: 'text',
-              text: 'Inspect this photo for civic hazards. Output structured JSON.'
+              text: isTamil
+                ? 'Inspect this photo for civic hazards. Output structured JSON strictly in Tamil or Tanglish (Latin script). Never output Chinese characters.'
+                : 'Inspect this photo for civic hazards. Output structured JSON strictly in English (Latin alphabet). Never output Chinese characters.'
             }
           ]
         }
@@ -187,6 +205,22 @@ OUTPUT SCHEMA (Return strictly ONE JSON object with no markdown wrappers):
       }
 
       const parsed = JSON.parse(cleaned);
+
+      // Defensive sanitization: ensure no Chinese characters reach callers
+      const containsHanzi = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
+      if (parsed && typeof parsed === 'object') {
+        if (typeof parsed.detected_issue === 'string' && containsHanzi.test(parsed.detected_issue)) {
+          const stripped = parsed.detected_issue.replace(/[\u4E00-\u9FFF\u3400-\u4DBF]+/g, ' ').replace(/\s+/g, ' ').trim();
+          parsed.detected_issue = stripped.length >= 3 ? stripped : 'Civic Infrastructure Hazard';
+        }
+        if (typeof parsed.description === 'string' && containsHanzi.test(parsed.description)) {
+          parsed.description = 'Visual analysis identified an infrastructure hazard requiring municipal attention.';
+        }
+        if (Array.isArray(parsed.evidence_observed)) {
+          parsed.evidence_observed = parsed.evidence_observed.filter(e => typeof e === 'string' && !containsHanzi.test(e));
+        }
+      }
+
       return parsed;
     } catch (err) {
       if (err.name === 'AbortError') {
