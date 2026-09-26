@@ -5307,12 +5307,6 @@ body:not(.admin-portal-body) .app-sidebar.collapsed .app-sidebar-link.active::be
     order: 2 !important;
   }
 
-  /* Hide Auto-Categorize with AI card on mobile Report Issue page */
-  .description-group #btn-ai-assist,
-  #btn-ai-assist {
-    display: none !important;
-  }
-
 
   /* Location Section Mobile Layout: Clean full-width vertical stack */
   .location-group {

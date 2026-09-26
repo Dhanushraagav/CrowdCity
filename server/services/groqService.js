@@ -176,43 +176,78 @@ function fallbackTranslateTamilScript(text = '') {
 }
 
 /**
- * Groq AI English -> Natural Tamil Translator
- * Translates English civic complaint descriptions into natural, grammatically correct Tamil script.
+ * Groq AI Bidirectional Civic Description Translator (English <-> Tamil)
+ * Translates civic complaint descriptions while strictly preserving locations, road names, and severity.
  * 
  * @param {string} text Input text to translate
- * @returns {Promise<{ tamilText: string, success: boolean, error?: string }>}
+ * @param {string} sourceLang 'en' | 'ta'
+ * @param {string} targetLang 'en' | 'ta'
+ * @returns {Promise<{ translatedText: string, tamilText: string, sourceLang: string, targetLang: string, success: boolean, error?: string }>}
  */
-export const translateTextToTamil = async (text = '') => {
+export const translateCivicText = async (text = '', sourceLang = 'en', targetLang = 'ta') => {
   if (!text || typeof text !== 'string' || !text.trim()) {
-    return { tamilText: '', success: false, error: 'Description text is required for translation.' };
+    return {
+      translatedText: '',
+      tamilText: '',
+      sourceLang,
+      targetLang,
+      success: false,
+      error: 'Description text is required for translation.'
+    };
   }
+
+  const cleanText = text.trim();
+  const normalizedTarget = (targetLang || 'ta').toLowerCase().startsWith('ta') ? 'ta' : 'en';
+  const normalizedSource = (sourceLang || (normalizedTarget === 'ta' ? 'en' : 'ta')).toLowerCase().startsWith('ta') ? 'ta' : 'en';
 
   const groq = getGroqClient();
   if (!groq) {
-    logger.info('Groq SDK unconfigured, using fallback dictionary for English to Tamil translation.');
+    logger.info('Groq SDK unconfigured, using fallback dictionary for bidirectional translation.');
+    const fallbackText = normalizedTarget === 'ta'
+      ? fallbackTranslateEnglishToTamil(cleanText)
+      : fallbackTranslateTamilScript(cleanText);
     return {
-      tamilText: fallbackTranslateEnglishToTamil(text.trim()),
+      translatedText: fallbackText,
+      tamilText: fallbackText,
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
       success: true,
       fallback: true
     };
   }
 
-  const systemPrompt = `You are a professional English-to-Tamil translator for the CrowdCity civic complaint portal in Tamil Nadu.
+  const isTargetTamil = normalizedTarget === 'ta';
+
+  const systemPrompt = isTargetTamil
+    ? `You are a professional English-to-Tamil translator for the CrowdCity civic complaint portal in Tamil Nadu.
 
 Task instructions:
 1. Translate the user's civic issue description from English into natural, grammatically correct, formal Tamil script (தமிழ்).
-2. Preserve all numbers, locations, measurements, and punctuation (such as colons, commas, periods).
-3. Translate technical and infrastructure terms into standard Tamil civic terms (e.g. road -> சாலை, pothole -> பள்ளம், bus -> பேருந்து, drainage -> வடிகால், streetlight -> தெருவிளக்கு).
-4. Output MUST be ONLY a single valid JSON object in this exact schema:
+2. Preserve all numbers, locations, road/street names, landmarks, measurements, and punctuation (such as colons, commas, periods).
+3. Do NOT translate proper nouns, specific road names, or area names unnecessarily.
+4. Translate municipal infrastructure terms accurately (e.g. road -> சாலை, pothole -> பள்ளம், bus -> பேருந்து, drainage -> வடிகால், streetlight -> தெருவிளக்கு).
+5. Output MUST be ONLY a single valid JSON object in this exact schema:
 {
-  "tamilText": "The translated natural Tamil description here."
+  "translatedText": "The translated natural Tamil description here."
+}`
+    : `You are a professional Tamil-to-English translator for the CrowdCity civic complaint portal in Tamil Nadu.
+
+Task instructions:
+1. Translate the user's civic issue description from Tamil script or Tanglish into clear, natural, grammatically flawless, professional ENGLISH.
+2. Preserve the exact meaning, technical details, and severity of the civic issue reported.
+3. Preserve all numbers, measurements, road/street names, landmarks, area names, and authorities without alterations.
+4. Do NOT hallucinate or invent details that were not in the original text.
+5. The output MUST be 100% in English, containing zero Tamil script or Chinese characters.
+6. Output MUST be ONLY a single valid JSON object in this exact schema:
+{
+  "translatedText": "The translated clear English description here."
 }`;
 
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Text to translate:\n"${text.trim()}"` }
+        { role: 'user', content: `Text to translate:\n"""${cleanText}"""` }
       ],
       model: getGroqModel(),
       response_format: { type: 'json_object' }
@@ -221,23 +256,57 @@ Task instructions:
     const responseContent = chatCompletion.choices?.[0]?.message?.content;
     const parsed = JSON.parse(responseContent);
 
-    if (parsed && typeof parsed.tamilText === 'string' && parsed.tamilText.trim()) {
-      return { tamilText: parsed.tamilText.trim(), success: true };
+    if (parsed && typeof parsed.translatedText === 'string' && parsed.translatedText.trim()) {
+      const resText = parsed.translatedText.trim();
+      return {
+        translatedText: resText,
+        tamilText: resText,
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        success: true
+      };
     }
 
+    const fallbackResult = isTargetTamil
+      ? fallbackTranslateEnglishToTamil(cleanText)
+      : fallbackTranslateTamilScript(cleanText);
+
     return {
-      tamilText: fallbackTranslateEnglishToTamil(text.trim()),
+      translatedText: fallbackResult,
+      tamilText: fallbackResult,
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
       success: true,
       fallback: true
     };
   } catch (err) {
-    logger.error('translateTextToTamil Error: %O', err);
+    logger.error('translateCivicText Error: %O', err);
+    const fallbackResult = isTargetTamil
+      ? fallbackTranslateEnglishToTamil(cleanText)
+      : fallbackTranslateTamilScript(cleanText);
+
     return {
-      tamilText: fallbackTranslateEnglishToTamil(text.trim()),
+      translatedText: fallbackResult,
+      tamilText: fallbackResult,
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
       success: true,
       fallback: true
     };
   }
+};
+
+/**
+ * Backward-compatible English -> Tamil translation helper
+ */
+export const translateTextToTamil = async (text = '') => {
+  const result = await translateCivicText(text, 'en', 'ta');
+  return {
+    tamilText: result.translatedText || result.tamilText,
+    success: result.success,
+    error: result.error,
+    fallback: result.fallback
+  };
 };
 
 function fallbackTranslateEnglishToTamil(text = '') {

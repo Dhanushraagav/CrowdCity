@@ -616,11 +616,19 @@ function initAiCameraDetection() {
         if (shouldReplace) {
           descTextarea.value = newDesc;
           descTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+          currentDescriptionLanguage = 'en';
+          if (typeof updateTranslationButtonUI === 'function') {
+            updateTranslationButtonUI(false);
+          }
           descTextarea.focus();
         }
       } else {
         descTextarea.value = newDesc;
         descTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        currentDescriptionLanguage = 'en';
+        if (typeof updateTranslationButtonUI === 'function') {
+          updateTranslationButtonUI(false);
+        }
         descTextarea.focus();
       }
     }
@@ -960,12 +968,6 @@ function initVoiceRecognition() {
                 voiceStatus.style.display = 'none';
               }
             }, 4000);
-          }
-          // Auto-trigger AI categorizer to set category & department if text describes a real civic issue!
-          if (isMeaningfulCivicDescription(englishText)) {
-            const aiBtn = document.getElementById('btn-ai-assist');
-            if (aiBtn) aiBtn.click();
-          }
           return;
         }
       }
@@ -1035,9 +1037,40 @@ function isMeaningfulCivicDescription(text) {
   return true;
 }
 
+let currentDescriptionLanguage = 'en'; // Tracks current description language: 'en' | 'ta'
+
 /**
- * Translation Controller for Detailed Description
- * Translates current English description to natural Tamil script on citizen request.
+ * Updates the translation toggle button label, icon, title, and loading state.
+ * When description is in English, button offers "தமிழ் Translate".
+ * When description is in Tamil, button offers "Translate to English".
+ */
+function updateTranslationButtonUI(isBusy = false, targetLang = null) {
+  const translateBtn = document.getElementById('btn-translate-tamil');
+  if (!translateBtn) return;
+
+  if (isBusy) {
+    translateBtn.disabled = true;
+    translateBtn.setAttribute('aria-busy', 'true');
+    const spinnerText = targetLang === 'ta' ? 'தமிழில் மாற்றுகிறது...' : 'Translating to English...';
+    translateBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${spinnerText}</span>`;
+    return;
+  }
+
+  translateBtn.disabled = false;
+  translateBtn.removeAttribute('aria-busy');
+
+  if (currentDescriptionLanguage === 'ta') {
+    translateBtn.innerHTML = `<i class="fa-solid fa-language"></i> <span id="btn-translate-tamil-text">Translate to English</span>`;
+    translateBtn.title = 'Translate description back to English';
+  } else {
+    translateBtn.innerHTML = `<i class="fa-solid fa-language"></i> <span id="btn-translate-tamil-text">தமிழ் Translate</span>`;
+    translateBtn.title = 'Translate description to Tamil';
+  }
+}
+
+/**
+ * Bidirectional Translation Controller for Detailed Description
+ * Toggles between English <-> Tamil descriptions on citizen request.
  */
 function initTamilTranslation() {
   const translateBtn = document.getElementById('btn-translate-tamil');
@@ -1045,7 +1078,18 @@ function initTamilTranslation() {
   if (!translateBtn || !descField) return;
 
   let isTranslating = false;
-  const originalBtnHtml = translateBtn.innerHTML;
+
+  // Initialize button in its default state
+  updateTranslationButtonUI(false);
+
+  // If citizen clears the description, reset language tracking to default 'en'
+  descField.addEventListener('input', () => {
+    const val = descField.value.trim();
+    if (!val && currentDescriptionLanguage !== 'en') {
+      currentDescriptionLanguage = 'en';
+      updateTranslationButtonUI(false);
+    }
+  });
 
   translateBtn.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -1055,34 +1099,65 @@ function initTamilTranslation() {
     const currentText = descField.value.trim();
     if (!currentText) {
       if (typeof window.showToast === 'function') {
-        window.showToast("Please enter a description in English first before translating.", "warning");
+        const emptyMsg = currentDescriptionLanguage === 'ta'
+          ? "Please enter a description before translating."
+          : "Please enter a description in English first before translating.";
+        window.showToast(emptyMsg, "warning");
       }
       descField.focus();
       return;
     }
 
-    // Set loading state
+    // Language Detection Safety Helper:
+    // Check if the current description contains Tamil Unicode characters ([\u0B80-\u0BFF])
+    const hasTamilCharacters = /[\u0B80-\u0BFF]/.test(currentText);
+
+    let sourceLang = currentDescriptionLanguage;
+    let targetLang = currentDescriptionLanguage === 'en' ? 'ta' : 'en';
+
+    // Safety adjustment:
+    // If state is 'ta' but the text contains zero Tamil characters and has Latin words,
+    // citizen typed English, so target should be Tamil ('ta').
+    if (currentDescriptionLanguage === 'ta' && !hasTamilCharacters) {
+      currentDescriptionLanguage = 'en';
+      sourceLang = 'en';
+      targetLang = 'ta';
+    } else if (currentDescriptionLanguage === 'en' && hasTamilCharacters && !/[a-zA-Z]{4,}/.test(currentText)) {
+      // If state is 'en' but text contains exclusively Tamil script,
+      // citizen typed Tamil, so target should be English ('en').
+      currentDescriptionLanguage = 'ta';
+      sourceLang = 'ta';
+      targetLang = 'en';
+    }
+
+    // Set loading state with spinner
     isTranslating = true;
-    translateBtn.disabled = true;
-    translateBtn.setAttribute('aria-busy', 'true');
-    translateBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>தமிழில் மாற்றுகிறது...</span>`;
+    updateTranslationButtonUI(true, targetLang);
 
     try {
-      if (window.API && typeof window.API.translateToTamil === 'function') {
-        const res = await window.API.translateToTamil(currentText);
+      if (window.API && typeof window.API.translateText === 'function') {
+        const res = await window.API.translateText(currentText, { sourceLang, targetLang });
         const data = res?.data || res;
-        const tamilText = data?.tamilText;
+        const translated = data?.translatedText || data?.tamilText;
 
-        if (tamilText && typeof tamilText === 'string' && data.success !== false) {
-          descField.value = tamilText;
+        if (translated && typeof translated === 'string' && data.success !== false) {
+          descField.value = translated;
           descField.dispatchEvent(new Event('input', { bubbles: true }));
+
+          // Update active language state to target language
+          currentDescriptionLanguage = targetLang;
+          updateTranslationButtonUI(false);
+
           if (typeof window.showToast === 'function') {
-            window.showToast("Description translated to Tamil (தமிழில் மாற்றப்பட்டது).", "success");
+            const successMsg = targetLang === 'ta'
+              ? "Description translated to Tamil (தமிழில் மாற்றப்பட்டது)."
+              : "Description translated to English.";
+            window.showToast(successMsg, "success");
           }
           return;
         }
 
-        const errMsg = data?.error || res?.error || "Unable to translate text to Tamil. Please try again.";
+        const errMsg = data?.error || res?.error || "Unable to translate text. Please try again.";
         if (typeof window.showToast === 'function') {
           window.showToast(errMsg, "error");
         }
@@ -1092,15 +1167,13 @@ function initTamilTranslation() {
         }
       }
     } catch (err) {
-      console.error("Tamil translation failed:", err);
+      console.error("Bidirectional translation failed:", err);
       if (typeof window.showToast === 'function') {
         window.showToast("Translation service encountered an error. Your original description is preserved.", "error");
       }
     } finally {
       isTranslating = false;
-      translateBtn.disabled = false;
-      translateBtn.removeAttribute('aria-busy');
-      translateBtn.innerHTML = originalBtnHtml;
+      updateTranslationButtonUI(false);
     }
   });
 }
@@ -1125,7 +1198,6 @@ function initReportPage() {
   initReportMap();
   setupCategorySelector();
   setupImageUpload();
-  setupAiAssistant();
   initAiCameraDetection();
   initVoiceRecognition();
   initTamilTranslation();
@@ -1777,69 +1849,9 @@ function setupImageUpload() {
   window.renderFilePreviews = renderPreviews;
 }
 
-// AI Assistant Action triggers real Groq AI backend analysis API
+// Feature decommissioned: "Auto-Categorize with AI" has been removed in favor of direct Vision AI analysis.
 function setupAiAssistant() {
-  const aiBtn = document.getElementById('btn-ai-assist');
-  const alertBanner = document.getElementById('report-alert');
-
-  if (!aiBtn) return;
-
-  aiBtn.addEventListener('click', async () => {
-    const description = document.getElementById('report-description').value.trim();
-
-    if (!description || !isMeaningfulCivicDescription(description)) {
-      alertBanner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Please describe a specific civic issue in the Detailed Description (e.g. pothole on road, streetlights damaged, garbage overflow, water supply issue).';
-      alertBanner.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
-      alertBanner.style.color = '#d97706';
-      alertBanner.classList.remove('hidden');
-      alertBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      return;
-    }
-
-    aiBtn.disabled = true;
-    aiBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> AI Analyzing...';
-    alertBanner.classList.add('hidden');
-
-    const { data, error } = await window.API.analyzeWithAi("Civic Issue", description);
-
-    aiBtn.disabled = false;
-    aiBtn.innerHTML = '<i class="fa-solid fa-brain"></i> Auto-Categorize with AI';
-
-    if (error) {
-      alertBanner.textContent = `AI analysis failed: ${error}`;
-      alertBanner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-      alertBanner.style.color = '#ef4444';
-      alertBanner.classList.remove('hidden');
-      return;
-    }
-
-    if (data && data.suggestedCategory) {
-      const isOtherCategory = (data.suggestedCategory.toLowerCase() === 'other');
-      
-      if (isOtherCategory && !isMeaningfulCivicDescription(description)) {
-        alertBanner.innerHTML = `
-          <i class="fa-solid fa-triangle-exclamation"></i> 
-          AI could not identify a specific civic category from the text. Please describe the problem in detail or select your category manually.
-        `;
-        alertBanner.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
-        alertBanner.style.color = '#d97706';
-        alertBanner.classList.remove('hidden');
-        return;
-      }
-
-      setCategoryProgrammatically(data.suggestedCategory);
-      
-      alertBanner.innerHTML = `
-        <i class="fa-solid fa-square-check"></i> 
-        <strong>AI Suggestion Applied:</strong> Categorized as <strong>${data.suggestedCategory.toUpperCase()}</strong> 
-        (Severity: <strong>${data.severity.toUpperCase()}</strong>, Confidence: <strong>${(data.confidenceScore * 100).toFixed(0)}%</strong>).
-      `;
-      alertBanner.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
-      alertBanner.style.color = '#10b981';
-      alertBanner.classList.remove('hidden');
-      alertBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  });
+  // Safe no-op stub for backward compatibility
 }
 
 // Format a raw category value into a human-readable name

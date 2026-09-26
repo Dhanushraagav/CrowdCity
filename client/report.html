@@ -68,7 +68,7 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css?v=1.0.5">
-  <link rel="stylesheet" href="css/components.css?v=3.1.1">
+  <link rel="stylesheet" href="css/components.css?v=3.1.2">
   <link rel="stylesheet" href="css/location-authority.css?v=8.7.0">
 
   <!-- Leaflet Map CSS -->
@@ -630,29 +630,6 @@
       margin-bottom: 0.45rem;
     }
 
-    .btn-ai {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.3rem 0.7rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
-
-    .btn-ai:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .btn-ai .ai-icon {
-      color: var(--primary);
-    }
 
     /* ============================
        Lat/lng row
@@ -823,13 +800,6 @@
         box-sizing: border-box !important;
       }
 
-      /* Issue 1: Remove/hide Auto-Categorize with AI Card ONLY on mobile */
-      .description-group #btn-ai-assist,
-      .desc-header #btn-ai-assist,
-      button#btn-ai-assist.btn-ai,
-      #btn-ai-assist {
-        display: none !important;
-      }
 
       /* Compact Translate to Tamil Button on Mobile */
       #btn-translate-tamil {
@@ -1479,14 +1449,6 @@
                   <button type="button" id="btn-translate-tamil" class="btn-translate-tamil" title="Translate description to Tamil" style="height: 32px; padding: 0 0.75rem; font-size: 0.74rem; font-weight: 700; border-radius: 8px; background: rgba(2, 132, 199, 0.08); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.25); cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease; white-space: nowrap;">
                     <i class="fa-solid fa-language"></i> <span id="btn-translate-tamil-text">தமிழ் Translate</span>
                   </button>
-                  <button type="button" id="btn-ai-assist" class="btn-ai">
-                    <i class="fa-solid fa-brain ai-icon"></i>
-                    <div class="ai-btn-content">
-                      <span class="ai-btn-title" data-i18n="auto_categorize_ai">Auto-Categorize with AI</span>
-                      <span class="ai-btn-subtitle mobile-only">AI will analyze text to set category and department</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-right ai-btn-arrow mobile-only"></i>
-                  </button>
                 </div>
               </div>
               <div id="voice-status-text" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-top: 0.35rem; margin-bottom: 0.4rem; display: none;"></div>
@@ -1999,10 +1961,10 @@
 
   <!-- Client Script files -->
   <script src="js/auth.js?v=6.5.0"></script>
-  <script src="js/api.js?v=4.0.4"></script>
+  <script src="js/api.js?v=4.0.5"></script>
   <script src="js/notifications.js?v=4.0.1"></script>
   <script src="js/locationAuthority.js?v=8.8.0"></script>
-  <script src="js/report.js?v=4.0.4"></script>
+  <script src="js/report.js?v=4.0.6"></script>
   <script src="js/chat-widget.js?v=4.0.1"></script>
 
   <!-- Mobile Hamburger Toggle -->

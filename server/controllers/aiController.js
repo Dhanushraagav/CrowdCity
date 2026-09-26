@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import logger from '../config/logger.js';
-import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, translateTextToTamil, getGroqModel } from '../services/groqService.js';
+import { analyzeComplaint, explainSchemeEligibility, chatWithGovernmentAssistant, verifyDocumentReadiness, getFormFieldGuidance, translateAndCleanVoiceText, translateTextToTamil, translateCivicText, getGroqModel } from '../services/groqService.js';
 import { generatePersonalizedRecommendations } from '../services/recommendationService.js';
 import { analyzeCivicImage } from '../services/vision/visionService.js';
 import Groq from 'groq-sdk';
@@ -356,6 +356,35 @@ export const translateVoiceController = async (req, res) => {
   } catch (err) {
     logger.error('translateVoiceController Error: %O', err);
     return res.status(500).json({ error: 'Server error translating voice text' });
+  }
+};
+
+/**
+ * POST /api/ai/translate
+ * Bidirectional translation endpoint for civic complaint descriptions (en <-> ta).
+ */
+export const translateController = async (req, res) => {
+  const { text, sourceLang, targetLang } = req.body;
+
+  if (!text || typeof text !== 'string' || !text.trim()) {
+    return res.status(400).json({
+      success: false,
+      error: 'Description text is required for translation.'
+    });
+  }
+
+  const desiredTarget = (targetLang || 'ta').toLowerCase().startsWith('ta') ? 'ta' : 'en';
+  const desiredSource = (sourceLang || (desiredTarget === 'ta' ? 'en' : 'ta')).toLowerCase().startsWith('ta') ? 'ta' : 'en';
+
+  try {
+    const result = await translateCivicText(text, desiredSource, desiredTarget);
+    return res.status(200).json(result);
+  } catch (err) {
+    logger.error('translateController Error: %O', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error translating description.'
+    });
   }
 };
 

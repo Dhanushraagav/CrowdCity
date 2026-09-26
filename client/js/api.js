@@ -326,7 +326,21 @@ const API = {
     });
   },
 
-  // Translate description to Tamil
+  // Translate description text (bidirectional: en <-> ta)
+  translateText: async (text, options = {}) => {
+    return request('/ai/translate', {
+      method: 'POST',
+      body: JSON.stringify({
+        text,
+        sourceLang: options.sourceLang || 'en',
+        targetLang: options.targetLang || 'ta'
+      }),
+      auth: false,
+      ...options
+    });
+  },
+
+  // Translate description to Tamil (backward compatible)
   translateToTamil: async (text) => {
     return request('/ai/translate-to-tamil', {
       method: 'POST',
