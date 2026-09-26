@@ -2181,7 +2181,7 @@ async function logoutUser() {
 
 // Update Header Navigation UI depending on active state
 // Globally accessible toast notification function
-window.showToast = function(message, type = 'info') {
+window.showToast = function(message, type = 'info', options = {}) {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -2190,8 +2190,24 @@ window.showToast = function(message, type = 'info') {
     document.body.appendChild(container);
   }
 
+  // Support numeric duration shorthand: window.showToast('msg', 'info', 3000)
+  const duration = typeof options === 'number' ? options : (options && typeof options.duration === 'number' ? options.duration : 4000);
+  const tag = (options && typeof options === 'object' && options.tag) ? options.tag : null;
+
+  // If a tag is specified (e.g. 'ai-vision-status'), dismiss any existing toast with the same tag immediately
+  if (tag) {
+    const existing = container.querySelectorAll(`[data-toast-tag="${tag}"]`);
+    existing.forEach(el => {
+      if (typeof el._dismiss === 'function') el._dismiss(true);
+      else el.remove();
+    });
+  }
+
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
+  if (tag) {
+    toast.setAttribute('data-toast-tag', tag);
+  }
   
   let icon = '<i class="fa-solid fa-circle-info"></i>';
   if (type === 'success') icon = '<i class="fa-solid fa-circle-check"></i>';
@@ -2201,23 +2217,102 @@ window.showToast = function(message, type = 'info') {
   toast.innerHTML = `
     <div class="toast-icon">${icon}</div>
     <div class="toast-content">${message}</div>
-    <button class="toast-close" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+    <button class="toast-close" type="button" aria-label="Close notification"><i class="fa-solid fa-xmark"></i></button>
   `;
+
+  let dismissed = false;
+  let autoDismissTimer = null;
+
+  const dismiss = function(immediate = false) {
+    if (dismissed) return;
+    dismissed = true;
+    if (autoDismissTimer) {
+      clearTimeout(autoDismissTimer);
+      autoDismissTimer = null;
+    }
+    if (immediate) {
+      try { toast.remove(); } catch (e) {}
+      return;
+    }
+    toast.classList.remove('show');
+    setTimeout(() => {
+      try { toast.remove(); } catch (e) {}
+    }, 300);
+  };
+
+  toast._dismiss = dismiss;
+
+  const closeBtn = toast.querySelector('.toast-close');
+  if (closeBtn) {
+    closeBtn.onclick = () => dismiss(false);
+  }
 
   container.appendChild(toast);
   
   // Trigger animation after adding to DOM
   setTimeout(() => {
-    toast.classList.add('show');
+    if (!dismissed) toast.classList.add('show');
   }, 10);
 
-  // Auto-remove after 4 seconds
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
-  }, 4000);
+  // Auto-remove after duration if duration > 0
+  if (duration > 0 && duration !== Infinity) {
+    autoDismissTimer = setTimeout(() => {
+      dismiss(false);
+    }, duration);
+  }
+
+  const handle = {
+    element: toast,
+    dismiss: dismiss,
+    update: function(newMessage, newType) {
+      if (dismissed) return;
+      const contentEl = toast.querySelector('.toast-content');
+      if (contentEl) contentEl.textContent = newMessage;
+      if (newType) {
+        toast.className = `toast ${newType} show`;
+        const iconEl = toast.querySelector('.toast-icon');
+        if (iconEl) {
+          let newIcon = '<i class="fa-solid fa-circle-info"></i>';
+          if (newType === 'success') newIcon = '<i class="fa-solid fa-circle-check"></i>';
+          else if (newType === 'error') newIcon = '<i class="fa-solid fa-circle-exclamation"></i>';
+          else if (newType === 'warning') newIcon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+          iconEl.innerHTML = newIcon;
+        }
+      }
+    }
+  };
+
+  return handle;
+};
+
+// Global dismiss helper for explicit dismissals
+window.dismissToast = function(target, immediate = false) {
+  if (!target) return;
+  if (typeof target.dismiss === 'function') {
+    target.dismiss(immediate);
+  } else if (target instanceof HTMLElement) {
+    if (typeof target._dismiss === 'function') {
+      target._dismiss(immediate);
+    } else {
+      target.classList.remove('show');
+      setTimeout(() => {
+        try { target.remove(); } catch (e) {}
+      }, immediate ? 0 : 300);
+    }
+  }
+};
+
+// Global helper to clear all active toasts
+window.clearAllToasts = function(immediate = false) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toasts = container.querySelectorAll('.toast');
+  toasts.forEach(t => {
+    if (typeof t._dismiss === 'function') t._dismiss(immediate);
+    else {
+      try { t.remove(); } catch (e) {}
+    }
+  });
 };
 
 // Build Public Pulse Dropdown HTML

@@ -104,6 +104,15 @@ OUTPUT SCHEMA (Return strictly ONE JSON object with no markdown wrappers):
       response_format: { type: 'json_object' }
     };
 
+    // Pre-flight check: Hugging Face Router requires bearer token
+    if (this.endpointUrl.includes('router.huggingface.co') && (!this.token || !this.token.trim())) {
+      logger.warn('Qwen Vision Provider: HF_TOKEN is not configured for Hugging Face Router endpoint. Failing fast without unauthenticated network roundtrip.');
+      const err = new Error('Hugging Face Router requires HF_TOKEN to be configured');
+      err.status = 401;
+      err.code = 'CONFIG_MISSING';
+      throw err;
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 

@@ -493,13 +493,23 @@ function initAiCameraDetection() {
   const suggestionEvidenceList = document.getElementById('ai-suggestion-evidence-list');
   const applyBtn = document.getElementById('btn-apply-ai-suggestion');
   const dismissBtn = document.getElementById('btn-dismiss-ai-suggestion');
+  const detectionCard = document.getElementById('ai-camera-detection-card');
 
   let currentAiSuggestion = null;
+  let activeLoadingToast = null;
+  let activeAnalysisController = null;
+  let isAnalyzingImage = false;
 
-  // Trigger file selection directly on click
+  // Trigger file selection directly on click (prevent duplicate trigger if busy)
   if (cameraBtn && cameraInput) {
     cameraBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      if (isAnalyzingImage) {
+        if (typeof window.showToast === 'function') {
+          window.showToast("Analysis in progress, please wait...", "info", { tag: 'ai-vision-status', duration: 2500 });
+        }
+        return;
+      }
       cameraInput.click();
     });
   }
@@ -507,6 +517,12 @@ function initAiCameraDetection() {
   if (uploadBtn && uploadInput) {
     uploadBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      if (isAnalyzingImage) {
+        if (typeof window.showToast === 'function') {
+          window.showToast("Analysis in progress, please wait...", "info", { tag: 'ai-vision-status', duration: 2500 });
+        }
+        return;
+      }
       uploadInput.click();
     });
   }
@@ -576,6 +592,18 @@ function initAiCameraDetection() {
     }
   }
 
+  // Helper to ensure any active loading toast is cleanly dismissed
+  function cleanupActiveLoadingToast() {
+    if (activeLoadingToast) {
+      if (typeof activeLoadingToast.dismiss === 'function') {
+        activeLoadingToast.dismiss(true);
+      } else if (typeof window.dismissToast === 'function') {
+        window.dismissToast(activeLoadingToast, true);
+      }
+      activeLoadingToast = null;
+    }
+  }
+
   async function handleAiImageFile(file, inputElem) {
     if (!file) return;
 
@@ -588,6 +616,13 @@ function initAiCameraDetection() {
       return;
     }
 
+    // Abort previous in-flight analysis if a new image was chosen
+    if (isAnalyzingImage && activeAnalysisController) {
+      activeAnalysisController.abort();
+      activeAnalysisController = null;
+    }
+    cleanupActiveLoadingToast();
+
     // Attach photo evidence to selectedFiles immediately so evidence requirement is met
     if (Array.isArray(selectedFiles) && !selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
       if (selectedFiles.length < 5) {
@@ -598,20 +633,44 @@ function initAiCameraDetection() {
       }
     }
 
-    // Show loading state
+    // Initialize state & abort controller
+    isAnalyzingImage = true;
+    activeAnalysisController = new AbortController();
+
+    // Show loading state in DOM
+    if (detectionCard) detectionCard.setAttribute('aria-busy', 'true');
     if (statusContainer) {
       statusContainer.classList.remove('hidden');
+      statusContainer.setAttribute('aria-busy', 'true');
       if (statusText) statusText.textContent = "Analyzing photo with Open-Source Vision AI...";
     }
+    if (cameraBtn) cameraBtn.setAttribute('aria-disabled', 'true');
+    if (uploadBtn) uploadBtn.setAttribute('aria-disabled', 'true');
+
+    // Show single loading toast with tag tracking (duration 0 for manual control)
     if (typeof window.showToast === 'function') {
-      window.showToast("Analyzing photo with AI...", "info");
+      activeLoadingToast = window.showToast("Analyzing photo with AI...", "info", {
+        tag: 'ai-vision-status',
+        duration: 0
+      });
     }
 
     try {
       const resizedBase64 = await resizeImageForAi(file);
 
+      // Check if superseded or aborted
+      if (activeAnalysisController.signal.aborted) return;
+
       if (resizedBase64 && window.API && typeof window.API.analyzeImageWithAi === 'function') {
-        const { data, error } = await window.API.analyzeImageWithAi(resizedBase64);
+        const { data, error } = await window.API.analyzeImageWithAi(resizedBase64, {
+          signal: activeAnalysisController.signal
+        });
+
+        // Check if superseded or aborted
+        if (activeAnalysisController.signal.aborted) return;
+
+        // CRITICAL: Dismiss analyzing toast BEFORE rendering outcome toast
+        cleanupActiveLoadingToast();
 
         // Check for non-civic / invalid photo
         if (data && data.is_valid_civic_issue === false) {
@@ -625,7 +684,7 @@ function initAiCameraDetection() {
 
         // Check for provider offline / rate limited / graceful fallback
         if (error || (data && data.success === false)) {
-          const fallbackMsg = (data && data.error) || "Image analysis is temporarily unavailable. You can continue submitting your complaint manually.";
+          const fallbackMsg = (data && data.error) || error || "Image analysis is temporarily unavailable. You can continue submitting your complaint manually.";
           if (typeof window.showToast === 'function') {
             window.showToast(fallbackMsg, "info");
           }
@@ -667,13 +726,34 @@ function initAiCameraDetection() {
         }
       }
     } catch (err) {
+      if (err.name === 'AbortError' || activeAnalysisController?.signal?.aborted) {
+        // Request cancelled or superseded; exit quietly
+        return;
+      }
+
       console.warn("AI vision analysis exception:", err);
+
+      // CRITICAL: Dismiss analyzing toast BEFORE rendering error toast
+      cleanupActiveLoadingToast();
+
       if (typeof window.showToast === 'function') {
         window.showToast("Image analysis is temporarily unavailable. You can continue submitting your complaint manually.", "info");
       }
       if (suggestionCard) suggestionCard.classList.add('hidden');
     } finally {
-      if (statusContainer) statusContainer.classList.add('hidden');
+      // Ensure loading toast is 100% destroyed on any exit path
+      cleanupActiveLoadingToast();
+
+      isAnalyzingImage = false;
+      activeAnalysisController = null;
+
+      if (statusContainer) {
+        statusContainer.classList.add('hidden');
+        statusContainer.removeAttribute('aria-busy');
+      }
+      if (detectionCard) detectionCard.removeAttribute('aria-busy');
+      if (cameraBtn) cameraBtn.removeAttribute('aria-disabled');
+      if (uploadBtn) uploadBtn.removeAttribute('aria-disabled');
       if (inputElem) inputElem.value = '';
     }
   }

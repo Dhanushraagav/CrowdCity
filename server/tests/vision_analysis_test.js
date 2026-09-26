@@ -215,6 +215,45 @@ async function runTests() {
     assert(mockInst instanceof MockVisionProvider, 'Factory instantiates MockVisionProvider for mock type');
   }
 
+  // TEST SUITE 8: Qwen Provider Pre-flight & Graceful Fallback
+  console.log('\n--- Suite 8: Qwen Provider Pre-flight & Graceful Fallback ---');
+  {
+    // Instantiating Qwen provider with empty token for Hugging Face Router
+    const unauthenticatedQwen = new QwenVisionProvider({
+      endpointUrl: 'https://router.huggingface.co/hf-inference/v1/chat/completions',
+      token: ''
+    });
+
+    let preflightErrorCaught = false;
+    let errorCode = null;
+    try {
+      await unauthenticatedQwen.analyze({
+        imageBase64: createMinimalJpegBase64(),
+        mimeType: 'image/jpeg'
+      });
+    } catch (err) {
+      preflightErrorCaught = true;
+      errorCode = err.code;
+    }
+
+    assert(preflightErrorCaught === true, 'Fails fast when HF_TOKEN is missing for Hugging Face router');
+    assert(errorCode === 'CONFIG_MISSING', 'Throws CONFIG_MISSING error without network call');
+
+    // End-to-end analyzeCivicImage with unauthenticated HF provider returns graceful fallback
+    const fallbackResult = await analyzeCivicImage(createMinimalJpegBase64(), {
+      providerType: 'huggingface',
+      providerConfig: {
+        token: ''
+      }
+    });
+
+    assert(fallbackResult.success === false, 'analyzeCivicImage returns success: false on missing provider token');
+    assert(fallbackResult.canProceedManually === true, 'Sets canProceedManually: true allowing citizen manual complaint submission');
+    assert(typeof fallbackResult.error === 'string' && fallbackResult.error.includes('temporarily unavailable'), 'Provides clean, citizen-facing non-blocking error message');
+    assert(!fallbackResult.detected_issue, 'Ensures zero fake AI issue injection');
+    assert(!fallbackResult.suggested_category, 'Ensures zero fake AI category injection');
+  }
+
   // SUMMARY
   console.log('\n======================================================');
   console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);

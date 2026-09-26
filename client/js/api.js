@@ -307,11 +307,12 @@ const API = {
   },
 
   // Analyze image with AI
-  analyzeImageWithAi: async (imageBase64) => {
+  analyzeImageWithAi: async (imageBase64, options = {}) => {
     return request('/ai/analyze-image', {
       method: 'POST',
       body: JSON.stringify({ image: imageBase64 }),
-      auth: false
+      auth: false,
+      ...options
     });
   },
 
