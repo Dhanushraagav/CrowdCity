@@ -1284,7 +1284,7 @@
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
             <!-- Civic Issue Card -->
-            <div class="stepper-type-card" onclick="goToWizardStep2('civic')" style="background: var(--bg-surface-hover, #f8fafc); border: 2px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.75rem 1.5rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;">
+            <div id="card-issue-civic" class="stepper-type-card" onclick="goToWizardStep2('civic')" style="background: var(--bg-surface-hover, #f8fafc); border: 2px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.75rem 1.5rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;">
               <div>
                 <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 0.75rem;">
                   <span class="badge-stepper-type badge-type-civic" data-i18n="civic_issue_badge">CIVIC ISSUE</span>
@@ -1303,7 +1303,7 @@
             </div>
 
             <!-- Transportation Issue Card -->
-            <div class="stepper-type-card" onclick="goToWizardStep2('transportation')" style="background: var(--bg-surface-hover, #f8fafc); border: 2px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.75rem 1.5rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;">
+            <div id="card-issue-transportation" class="stepper-type-card" onclick="goToWizardStep2('transportation')" style="background: var(--bg-surface-hover, #f8fafc); border: 2px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.75rem 1.5rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;">
               <div>
                 <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 0.75rem;">
                   <span class="badge-stepper-type badge-type-transportation" data-i18n="transportation_issue_badge">TRANSPORTATION ISSUE</span>
@@ -1336,7 +1336,7 @@
                 <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-main); display: flex; align-items: center; gap: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                   <span><span data-i18n="issue_type_label">Issue Type:</span> <strong id="mode-badge-name" style="color: var(--primary);" data-i18n="civic_issue">Civic Issue</strong></span>
                 </div>
-                <button type="button" onclick="goToWizardStep1()" class="btn btn-outline" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 6px; white-space: nowrap; flex-shrink: 0; margin-left: 0.5rem; height: 28px; display: inline-flex; align-items: center; gap: 0.25rem;">
+                <button type="button" id="btn-change-issue-type" onclick="goToWizardStep1()" class="btn btn-outline" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 6px; white-space: nowrap; flex-shrink: 0; margin-left: 0.5rem; height: 28px; display: inline-flex; align-items: center; gap: 0.25rem;">
                   <i class="fa-solid fa-rotate-left" style="font-size: 0.68rem;"></i> <span data-i18n="change_btn">Change</span>
                 </button>
               </div>
@@ -1964,7 +1964,7 @@
   <script src="js/api.js?v=4.0.5"></script>
   <script src="js/notifications.js?v=4.0.1"></script>
   <script src="js/locationAuthority.js?v=8.8.0"></script>
-  <script src="js/report.js?v=4.0.6"></script>
+  <script src="js/report.js?v=4.0.7"></script>
   <script src="js/chat-widget.js?v=4.0.1"></script>
 
   <!-- Mobile Hamburger Toggle -->

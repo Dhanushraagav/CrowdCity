@@ -45,12 +45,13 @@ const civicCategories = [
 
 let currentStep = 1;
 
-window.goToWizardStep1 = function() {
+function goToWizardStep1() {
   currentStep = 1;
   updateStepperUI();
-};
+}
+window.goToWizardStep1 = goToWizardStep1;
 
-window.goToWizardStep2 = function(mode) {
+function goToWizardStep2(mode) {
   if (mode) {
     currentReportMode = mode;
     updateFormModeUI();
@@ -60,7 +61,8 @@ window.goToWizardStep2 = function(mode) {
   setTimeout(() => {
     if (reportMap) reportMap.invalidateSize();
   }, 300);
-};
+}
+window.goToWizardStep2 = goToWizardStep2;
 
 window.proceedToWizardStep3 = async function() {
   const categoryInput = document.getElementById('report-category');
@@ -968,6 +970,7 @@ function initVoiceRecognition() {
                 voiceStatus.style.display = 'none';
               }
             }, 4000);
+          }
           return;
         }
       }
@@ -1178,6 +1181,46 @@ function initTamilTranslation() {
   });
 }
 
+// Setup Issue Type selection cards and Change buttons
+function setupWizardStepper() {
+  const civicCard = document.getElementById('card-issue-civic');
+  const transCard = document.getElementById('card-issue-transportation');
+  const changeBtn = document.getElementById('btn-change-issue-type');
+
+  if (civicCard) {
+    civicCard.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToWizardStep2('civic');
+    });
+    civicCard.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        goToWizardStep2('civic');
+      }
+    });
+  }
+
+  if (transCard) {
+    transCard.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToWizardStep2('transportation');
+    });
+    transCard.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        goToWizardStep2('transportation');
+      }
+    });
+  }
+
+  if (changeBtn) {
+    changeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToWizardStep1();
+    });
+  }
+}
+
 // Initialize Report Page
 function initReportPage() {
   if (typeof getCurrentUser === 'function' && !getCurrentUser()) {
@@ -1185,6 +1228,8 @@ function initReportPage() {
     window.authRouter.redirectToLogin('citizen');
     return;
   }
+
+  setupWizardStepper();
 
   // Check URL type parameter
   const urlParams = new URLSearchParams(window.location.search);
