@@ -601,6 +601,24 @@ const API = {
     });
   },
 
+  // 38B. Government Welfare Schemes Directory API
+  getSchemes: async (options = {}) => {
+    return request('/schemes', {
+      method: 'GET',
+      auth: false,
+      cacheTtlMs: 300000,
+      ...options
+    });
+  },
+
+  getSchemeById: async (id, options = {}) => {
+    return request(`/schemes/${encodeURIComponent(id)}`, {
+      method: 'GET',
+      auth: false,
+      ...options
+    });
+  },
+
   // 39. Tamil Nadu 38-District Civic Intelligence Analytics
   getCivicIntelligence: async (filters = {}) => {
     const params = new URLSearchParams();

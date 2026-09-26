@@ -27,6 +27,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import app from '../app.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,9 +53,11 @@ console.log('================================================================\n'
 // 1. Read source files
 const formHtmlPath = path.join(rootDir, 'client', 'form-assistant.html');
 const formJsPath = path.join(rootDir, 'client', 'js', 'form-assistant.js');
+const apiJsPath = path.join(rootDir, 'client', 'js', 'api.js');
 
 const formHtml = fs.readFileSync(formHtmlPath, 'utf8');
 const formJs = fs.readFileSync(formJsPath, 'utf8');
+const apiJs = fs.readFileSync(apiJsPath, 'utf8');
 
 // Mock localStorage & DOM
 class MockStorage {
@@ -354,6 +357,164 @@ const zeroDocMock = {
   required_documents: []
 };
 assert(zeroDocMock.required_documents.length === 0, 'TEST 22.7: 0-document scheme verification');
+
+// -----------------------------------------------------------------------------
+// TEST 23: Express HTTP Server & /api/schemes Endpoint
+// -----------------------------------------------------------------------------
+console.log('\n--- Starting HTTP Server for Integration Tests ---');
+const server = app.listen(0);
+await new Promise(resolve => server.once('listening', resolve));
+const port = server.address().port;
+console.log(`Express testing server listening on http://127.0.0.1:${port}`);
+
+try {
+  // 23.1: GET /api/schemes
+  const resSchemes = await fetch(`http://127.0.0.1:${port}/api/schemes`);
+  assert(resSchemes.status === 200, 'TEST 23.1: GET /api/schemes returns HTTP 200');
+  const jsonSchemes = await resSchemes.json();
+  assert(jsonSchemes.success === true, 'TEST 23.2: /api/schemes returns success: true');
+  assert(jsonSchemes.count === 12, `TEST 23.3: /api/schemes returns 12 active schemes (got ${jsonSchemes.count})`);
+  assert(Array.isArray(jsonSchemes.schemes) && jsonSchemes.schemes.length === 12, 'TEST 23.4: json.schemes contains 12 scheme objects');
+  assert(Array.isArray(jsonSchemes.data) && jsonSchemes.data.length === 12, 'TEST 23.5: json.data contains 12 scheme objects (dual compatibility)');
+
+  // Verify all 12 codes are present in the response
+  const expectedCodes = [
+    'TN-KMUT-001', 'TN-PUDHUMAI-002', 'TN-NM-003', 'TN-CMCHIS-004',
+    'TN-KKI-005', 'TN-UZHAVAR-006', 'CENTRAL-PMKISAN-007', 'CENTRAL-PMJAY-008',
+    'CENTRAL-PMMY-009', 'CENTRAL-SSY-010', 'CENTRAL-PMAY-011', 'CENTRAL-VIDYALAKSHMI-012'
+  ];
+  const returnedCodes = jsonSchemes.schemes.map(s => s.scheme_code);
+  const allCodesFound = expectedCodes.every(c => returnedCodes.includes(c));
+  assert(allCodesFound, 'TEST 23.6: All 12 canonical scheme codes are returned in /api/schemes');
+
+  // 23.2: GET /api/schemes/:id (Single Scheme Lookup)
+  const resSingleNM = await fetch(`http://127.0.0.1:${port}/api/schemes/TN-NM-003`);
+  assert(resSingleNM.status === 200, 'TEST 23.7: GET /api/schemes/TN-NM-003 returns HTTP 200');
+  const jsonSingleNM = await resSingleNM.json();
+  assert(jsonSingleNM.success === true && jsonSingleNM.data.scheme_code === 'TN-NM-003', 'TEST 23.8: Successfully fetched Naan Mudhalvan by code');
+  assert(jsonSingleNM.data.scheme_name.includes('Naan Mudhalvan'), 'TEST 23.9: Naan Mudhalvan name matches');
+
+  const resSingleKisan = await fetch(`http://127.0.0.1:${port}/api/schemes/CENTRAL-PMKISAN-007`);
+  assert(resSingleKisan.status === 200, 'TEST 23.10: GET /api/schemes/CENTRAL-PMKISAN-007 returns HTTP 200');
+  const jsonSingleKisan = await resSingleKisan.json();
+  assert(jsonSingleKisan.data.scheme_code === 'CENTRAL-PMKISAN-007', 'TEST 23.11: Successfully fetched PM-KISAN by code');
+
+  // 23.3: GET /api/government-schemes (Alias route)
+  const resAlias = await fetch(`http://127.0.0.1:${port}/api/government-schemes`);
+  assert(resAlias.status === 200, 'TEST 23.12: GET /api/government-schemes alias returns HTTP 200');
+
+  // 23.4: GET /form-assistant (Page Route Alias)
+  const resPage = await fetch(`http://127.0.0.1:${port}/form-assistant`);
+  assert(resPage.status === 200, 'TEST 23.13: GET /form-assistant alias returns HTTP 200');
+  const pageHtml = await resPage.text();
+  assert(pageHtml.includes('Government Application Assistant'), 'TEST 23.14: /form-assistant serves valid application assistant page');
+} finally {
+  server.close();
+}
+
+// -----------------------------------------------------------------------------
+// TEST 24: HTML Static Verification: Dropdown Pre-population & Error Banner
+// -----------------------------------------------------------------------------
+assert(formHtml.includes('<select id="scheme-switcher"'), 'TEST 24.1: HTML contains #scheme-switcher select element');
+assert(formHtml.includes('value="TN-KMUT-001"'), 'TEST 24.2: HTML dropdown pre-populates TN-KMUT-001 option');
+assert(formHtml.includes('value="TN-PUDHUMAI-002"'), 'TEST 24.3: HTML dropdown pre-populates TN-PUDHUMAI-002 option');
+assert(formHtml.includes('value="TN-NM-003"'), 'TEST 24.4: HTML dropdown pre-populates TN-NM-003 option');
+assert(formHtml.includes('value="TN-CMCHIS-004"'), 'TEST 24.5: HTML dropdown pre-populates TN-CMCHIS-004 option');
+assert(formHtml.includes('value="CENTRAL-PMKISAN-007"'), 'TEST 24.6: HTML dropdown pre-populates CENTRAL-PMKISAN-007 option');
+assert(formHtml.includes('value="CENTRAL-VIDYALAKSHMI-012"'), 'TEST 24.7: HTML dropdown pre-populates CENTRAL-VIDYALAKSHMI-012 option');
+
+// Error Banner and Retry UI
+assert(formHtml.includes('id="scheme-load-error-banner"'), 'TEST 24.8: HTML contains #scheme-load-error-banner element');
+assert(formHtml.includes('id="btn-retry-schemes"'), 'TEST 24.9: HTML contains #btn-retry-schemes button');
+
+// Cache Buster Script Verification
+assert(formHtml.includes('js/api.js?v=3.2.0'), 'TEST 24.10: HTML loads js/api.js with cache buster ?v=3.2.0');
+assert(formHtml.includes('js/auth.js?v=3.2.0'), 'TEST 24.11: HTML loads js/auth.js with cache buster ?v=3.2.0');
+assert(formHtml.includes('js/form-assistant.js?v=3.2.0'), 'TEST 24.12: HTML loads js/form-assistant.js with cache buster ?v=3.2.0');
+
+// Initial Static Readiness Default Texts
+assert(formHtml.includes('Select a scheme to check eligibility.'), 'TEST 24.13: HTML initial state displays "Select a scheme to check eligibility."');
+assert(formHtml.includes('Select a scheme to begin.'), 'TEST 24.14: HTML initial state displays "Select a scheme to begin."');
+
+// -----------------------------------------------------------------------------
+// TEST 25: API Client Helper Verification (client/js/api.js)
+// -----------------------------------------------------------------------------
+assert(apiJs.includes('getSchemes: async'), 'TEST 25.1: window.API.getSchemes is defined in client/js/api.js');
+assert(apiJs.includes('getSchemeById: async'), 'TEST 25.2: window.API.getSchemeById is defined in client/js/api.js');
+assert(apiJs.includes("request('/schemes'"), 'TEST 25.3: API.getSchemes queries /schemes endpoint');
+
+// -----------------------------------------------------------------------------
+// TEST 26: Scheme Dropdown Population & Dynamic Multi-Scheme Switching
+// -----------------------------------------------------------------------------
+// 1. Select Kalaignar Magalir Urimai Thittam
+exportedAssistant.selectScheme('TN-KMUT-001', false);
+let activeScheme = exportedAssistant.getCurrentScheme();
+assert(activeScheme && activeScheme.code === 'TN-KMUT-001', 'TEST 26.1: Active scheme switches to TN-KMUT-001');
+assert(activeScheme.specific_fields.some(f => f.id === 'smart_card_no'), 'TEST 26.2: KMUT contains smart_card_no');
+assert(activeScheme.specific_fields.some(f => f.id === 'annual_income'), 'TEST 26.3: KMUT contains annual_income');
+assert(activeScheme.specific_fields.some(f => f.id === 'eb_consumer_no'), 'TEST 26.4: KMUT contains eb_consumer_no');
+assert(activeScheme.specific_fields.some(f => f.id === 'owns_car'), 'TEST 26.5: KMUT contains owns_car');
+let metrics = exportedAssistant.calculateReadinessScore();
+assert(metrics.totalFieldsCount > 0, 'TEST 26.6: KMUT total fields is > 0');
+assert(metrics.totalDocsCount === 3, 'TEST 26.7: KMUT requires 3 documents');
+
+// 2. Switch to Pudhumai Penn Scheme
+exportedAssistant.selectScheme('TN-PUDHUMAI-002', false);
+activeScheme = exportedAssistant.getCurrentScheme();
+assert(activeScheme && activeScheme.code === 'TN-PUDHUMAI-002', 'TEST 26.8: Active scheme switches to TN-PUDHUMAI-002');
+assert(activeScheme.specific_fields.some(f => f.id === 'school_emis_id'), 'TEST 26.9: Pudhumai Penn contains school_emis_id');
+assert(activeScheme.specific_fields.some(f => f.id === 'college_name'), 'TEST 26.10: Pudhumai Penn contains college_name');
+assert(activeScheme.specific_fields.some(f => f.id === 'study_year'), 'TEST 26.11: Pudhumai Penn contains study_year');
+assert(!activeScheme.specific_fields.some(f => f.id === 'eb_consumer_no'), 'TEST 26.12: Pudhumai Penn does not leak KMUT eb_consumer_no');
+
+// 3. Switch to Naan Mudhalvan Scheme
+exportedAssistant.selectScheme('TN-NM-003', false);
+activeScheme = exportedAssistant.getCurrentScheme();
+assert(activeScheme && activeScheme.code === 'TN-NM-003', 'TEST 26.13: Active scheme switches to TN-NM-003');
+assert(activeScheme.specific_fields.some(f => f.id === 'edu_qualification'), 'TEST 26.14: Naan Mudhalvan contains edu_qualification');
+assert(activeScheme.specific_fields.some(f => f.id === 'preferred_skill_domain'), 'TEST 26.15: Naan Mudhalvan contains preferred_skill_domain');
+assert(activeScheme.specific_fields.some(f => f.id === 'institution_district'), 'TEST 26.16: Naan Mudhalvan contains institution_district');
+
+// 4. Switch to CMCHIS
+exportedAssistant.selectScheme('TN-CMCHIS-004', false);
+activeScheme = exportedAssistant.getCurrentScheme();
+assert(activeScheme && activeScheme.code === 'TN-CMCHIS-004', 'TEST 26.17: Active scheme switches to TN-CMCHIS-004');
+assert(activeScheme.specific_fields.some(f => f.id === 'smart_card_no'), 'TEST 26.18: CMCHIS contains smart_card_no');
+assert(activeScheme.specific_fields.some(f => f.id === 'income_cert_no'), 'TEST 26.19: CMCHIS contains income_cert_no');
+assert(activeScheme.specific_fields.some(f => f.id === 'family_members_count'), 'TEST 26.20: CMCHIS contains family_members_count');
+
+// 5. Switch to PM-KISAN
+exportedAssistant.selectScheme('CENTRAL-PMKISAN-007', false);
+activeScheme = exportedAssistant.getCurrentScheme();
+assert(activeScheme && activeScheme.code === 'CENTRAL-PMKISAN-007', 'TEST 26.21: Active scheme switches to CENTRAL-PMKISAN-007');
+assert(activeScheme.specific_fields.some(f => f.id === 'patta_no'), 'TEST 26.22: PM-KISAN contains patta_no');
+assert(activeScheme.specific_fields.some(f => f.id === 'survey_no'), 'TEST 26.23: PM-KISAN contains survey_no');
+assert(activeScheme.specific_fields.some(f => f.id === 'farmer_category'), 'TEST 26.24: PM-KISAN contains farmer_category');
+assert(!activeScheme.specific_fields.some(f => f.id === 'school_emis_id'), 'TEST 26.25: PM-KISAN does not leak student fields');
+
+// -----------------------------------------------------------------------------
+// TEST 27: Error Handling for Non-Existent Scheme
+// -----------------------------------------------------------------------------
+exportedAssistant.selectScheme('NON_EXISTENT_SCHEME_XYZ', false);
+assert(exportedAssistant.getCurrentScheme() === null, 'TEST 27.1: Invalid scheme gracefully resets currentScheme to null without throwing');
+
+// Reset to selector state
+exportedAssistant.resetToSchemeSelector();
+assert(exportedAssistant.getCurrentScheme() === null, 'TEST 27.2: resetToSchemeSelector sets currentScheme to null');
+const resetMetrics = exportedAssistant.calculateReadinessScore();
+assert(resetMetrics.score === 0, 'TEST 27.3: resetToSchemeSelector resets readiness score to 0%');
+assert(resetMetrics.filledFieldsCount === 0 && resetMetrics.totalFieldsCount === 0, 'TEST 27.4: Fields count is safely 0 / 0');
+assert(resetMetrics.availableDocsCount === 0 && resetMetrics.totalDocsCount === 0, 'TEST 27.5: Documents count is safely 0 / 0');
+
+// -----------------------------------------------------------------------------
+// TEST 28: Zero Duplication & Canonical Dataset Alignment
+// -----------------------------------------------------------------------------
+assert(Object.keys(schemes).length === 12, `TEST 28.1: Form Assistant contains exactly 12 canonical schemes (got ${Object.keys(schemes).length})`);
+Object.values(schemes).forEach((sch, i) => {
+  assert(!!sch.code, `TEST 28.2.${i + 1}: Scheme ${sch.id} has valid code (${sch.code})`);
+  assert(!!sch.name, `TEST 28.3.${i + 1}: Scheme ${sch.code} has valid name`);
+  assert(!!sch.portal && sch.portal.startsWith('https://'), `TEST 28.4.${i + 1}: Scheme ${sch.code} has HTTPS portal (${sch.portal})`);
+});
 
 console.log('\n================================================================');
 console.log(`TEST SUITE RESULTS: ${passed} PASSED | ${failed} FAILED`);

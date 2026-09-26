@@ -22,7 +22,7 @@ export class QwenVisionProvider {
     this.model = config.model || process.env.VISION_MODEL || 'Qwen/Qwen3-VL-2B-Instruct';
     this.endpointUrl = config.endpointUrl || process.env.VISION_INFERENCE_URL || 'https://router.huggingface.co/hf-inference/v1/chat/completions';
     this.token = config.token !== undefined ? config.token : (process.env.HF_TOKEN || '');
-    this.timeoutMs = config.timeoutMs || 20000; // 20s timeout
+    this.timeoutMs = config.timeoutMs || parseInt(process.env.VISION_TIMEOUT_MS, 10) || 60000; // 60s timeout for multimodal vision inference
   }
 
   /**
@@ -117,13 +117,50 @@ OUTPUT SCHEMA (Return strictly ONE JSON object with no markdown wrappers):
     const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
-      logger.info(`Sending image analysis request to Qwen provider at ${this.endpointUrl} (model: ${this.model})`);
-      const response = await fetch(this.endpointUrl, {
+      let activeEndpoint = this.endpointUrl;
+      let activeModel = this.model;
+
+      // Hugging Face router normalization: map hf-inference path and 2B model alias directly to active serverless VL endpoint
+      if (activeEndpoint.includes('router.huggingface.co')) {
+        if (activeEndpoint.includes('/hf-inference/v1/')) {
+          activeEndpoint = activeEndpoint.replace('/hf-inference/v1/', '/v1/');
+        }
+        if (activeModel === 'Qwen/Qwen3-VL-2B-Instruct') {
+          activeModel = 'Qwen/Qwen3-VL-30B-A3B-Instruct';
+        }
+        payload.model = activeModel;
+      }
+
+      logger.info(`Sending image analysis request to Qwen provider at ${activeEndpoint} (model: ${activeModel})`);
+      let response = await fetch(activeEndpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
         signal: controller.signal
       });
+
+      // Handle Hugging Face router cluster routing fallback for Qwen3-VL if needed
+      if (!response.ok && response.status === 400 && activeEndpoint.includes('router.huggingface.co')) {
+        const firstErrorText = await response.text().catch(() => '');
+        if (firstErrorText.includes('Model not supported by provider hf-inference') || firstErrorText.includes('model_not_supported')) {
+          activeEndpoint = 'https://router.huggingface.co/v1/chat/completions';
+          activeModel = 'Qwen/Qwen3-VL-30B-A3B-Instruct';
+          payload.model = activeModel;
+          logger.info(`Retrying Hugging Face Router with active Qwen3-VL endpoint: ${activeEndpoint} (model: ${activeModel})`);
+          response = await fetch(activeEndpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+        } else {
+          logger.warn(`Qwen Vision Provider returned HTTP ${response.status}: ${firstErrorText.slice(0, 300)}`);
+          const error = new Error(`Vision provider returned HTTP ${response.status}`);
+          error.status = response.status;
+          error.details = firstErrorText;
+          throw error;
+        }
+      }
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => '');

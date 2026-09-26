@@ -741,6 +741,18 @@
               </label>
               <select id="scheme-switcher" class="scheme-select-dropdown" aria-label="Select Target Government Scheme">
                 <option value="">-- Choose a Government Scheme --</option>
+                <option value="TN-KMUT-001">TN-KMUT-001 — Kalaignar Magalir Urimai Thittam</option>
+                <option value="TN-PUDHUMAI-002">TN-PUDHUMAI-002 — Pudhumai Penn Scheme (Higher Education Assurance)</option>
+                <option value="TN-NM-003">TN-NM-003 — Naan Mudhalvan Skill Development Scheme</option>
+                <option value="TN-CMCHIS-004">TN-CMCHIS-004 — Chief Minister Comprehensive Health Insurance Scheme (CMCHIS)</option>
+                <option value="TN-KKI-005">TN-KKI-005 — Kalaignar Kanavu Illam Housing Scheme</option>
+                <option value="TN-UZHAVAR-006">TN-UZHAVAR-006 — TN Uzhavar Protection Scheme</option>
+                <option value="CENTRAL-PMKISAN-007">CENTRAL-PMKISAN-007 — PM Kisan Samman Nidhi (PM-KISAN)</option>
+                <option value="CENTRAL-PMJAY-008">CENTRAL-PMJAY-008 — Ayushman Bharat PM-JAY</option>
+                <option value="CENTRAL-PMMY-009">CENTRAL-PMMY-009 — Pradhan Mantri Mudra Yojana (PMMY)</option>
+                <option value="CENTRAL-SSY-010">CENTRAL-SSY-010 — Sukanya Samriddhi Yojana (Girl Child Savings)</option>
+                <option value="CENTRAL-PMAY-011">CENTRAL-PMAY-011 — Pradhan Mantri Awas Yojana (PMAY Housing)</option>
+                <option value="CENTRAL-VIDYALAKSHMI-012">CENTRAL-VIDYALAKSHMI-012 — PM Vidya Lakshmi Education Loan Scheme</option>
               </select>
             </div>
           </div>
@@ -783,6 +795,17 @@
           
           <!-- Left Column: Step Content -->
           <div class="form-steps-container">
+            <!-- Scheme Load Error Banner (Hidden by default, shown if loading fails with retry action) -->
+            <div id="scheme-load-error-banner" style="display: none; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 12px; padding: 0.85rem 1.15rem; margin-bottom: 1rem; align-items: center; justify-content: space-between; gap: 0.75rem;" role="alert">
+              <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #b91c1c; font-weight: 600;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="scheme-load-error-message">Unable to load government schemes.</span>
+              </div>
+              <button type="button" id="btn-retry-schemes" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 700; border-radius: 8px;">
+                <i class="fa-solid fa-rotate-right"></i> Retry
+              </button>
+            </div>
+
             <div id="active-step-content" class="step-card-box">
               <!-- Dynamically populated for current step -->
             </div>
@@ -792,7 +815,7 @@
           <div class="readiness-dashboard-sidebar">
             <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 1rem 0; display: flex; align-items: center; justify-content: space-between;">
               <span><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Application Readiness</span>
-              <span id="readiness-badge-pill" class="readiness-status-badge" style="background: rgba(13, 148, 136, 0.1); color: var(--primary);">In Progress</span>
+              <span id="readiness-badge-pill" class="readiness-status-badge" style="background: rgba(13, 148, 136, 0.1); color: var(--primary);">Select Scheme</span>
             </h3>
 
             <!-- Score Display -->
@@ -819,7 +842,7 @@
               <div class="metric-stat-item" style="grid-column: span 2;">
                 <div class="metric-stat-title">Eligibility Status</div>
                 <div id="metric-eligibility-status" class="metric-stat-value" style="font-size: 0.82rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; justify-content: space-between;">
-                  <span id="metric-eligibility-text">Checking assessment...</span>
+                  <span id="metric-eligibility-text">Select a scheme to check eligibility.</span>
                   <a href="scheme-checker.html" id="link-check-eligibility" style="font-size: 0.72rem; text-decoration: underline; color: var(--text-muted);">Check</a>
                 </div>
               </div>
@@ -832,7 +855,7 @@
                 <span id="missing-count-badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.7rem;">0 items</span>
               </div>
               <ul id="missing-items-list" class="missing-items-list">
-                <!-- Dynamically populated missing items -->
+                <li style="font-size:0.78rem; color:var(--text-muted); padding:0.4rem 0;">Select a scheme to begin.</li>
               </ul>
             </div>
 
@@ -918,7 +941,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Application Logic -->
-  <script src="js/auth.js?v=3.1.0"></script>
-  <script src="js/form-assistant.js"></script>
+  <script src="js/api.js?v=3.2.0"></script>
+  <script src="js/auth.js?v=3.2.0"></script>
+  <script src="js/form-assistant.js?v=3.2.0"></script>
 </body>
 </html>

@@ -1429,12 +1429,28 @@
     const switcher = document.getElementById('scheme-switcher');
     if (!switcher) return;
 
-    const currentVal = selectedSchemeId || currentScheme?.id || '';
+    const currentVal = selectedSchemeId || currentScheme?.code || currentScheme?.id || '';
+    const resolvedCurrent = currentVal ? resolveSchemeMeta(currentVal) : null;
 
-    let html = `<option value="" ${!currentVal ? 'selected' : ''}>-- Choose a Government Scheme --</option>`;
-    html += Object.values(SCHEMES_REGISTRY).map(sch => {
-      const selected = (currentVal && sch.id === currentVal) ? 'selected' : '';
-      return `<option value="${sch.id}" ${selected}>${sch.code} — ${sch.name}</option>`;
+    let html = `<option value="" ${!resolvedCurrent ? 'selected' : ''}>-- Choose a Government Scheme --</option>`;
+
+    // Map unique schemes by code to avoid duplicate entries
+    const uniqueSchemes = [];
+    const seenCodes = new Set();
+    Object.values(SCHEMES_REGISTRY).forEach(sch => {
+      if (sch && sch.code && !seenCodes.has(sch.code)) {
+        seenCodes.add(sch.code);
+        uniqueSchemes.push(sch);
+      }
+    });
+
+    html += uniqueSchemes.map(sch => {
+      const isSelected = resolvedCurrent && (
+        resolvedCurrent.code === sch.code || 
+        resolvedCurrent.id === sch.id ||
+        resolvedCurrent.uuid === sch.uuid
+      );
+      return `<option value="${sch.code}" ${isSelected ? 'selected' : ''}>${sch.code} — ${sch.name}</option>`;
     }).join('');
 
     switcher.innerHTML = html;
@@ -1462,20 +1478,30 @@
     if (updateHistory) {
       try {
         const url = new URL(window.location.href);
-        url.searchParams.set('scheme', currentScheme.id);
-        window.history.pushState({ schemeId: currentScheme.id }, '', url.toString());
+        url.searchParams.set('scheme', currentScheme.code);
+        window.history.pushState({ schemeId: currentScheme.code }, '', url.toString());
       } catch (e) {}
     }
 
-    // Sync dropdown value
+    // Sync dropdown value (robust match by code, id, or uuid)
     const switcher = document.getElementById('scheme-switcher');
-    if (switcher) switcher.value = currentScheme.id;
+    if (switcher) {
+      const match = Array.from(switcher.options).find(opt => 
+        opt.value === currentScheme.code || 
+        opt.value === currentScheme.id || 
+        opt.value === currentScheme.uuid ||
+        (opt.value && opt.value.toLowerCase() === currentScheme.code.toLowerCase())
+      );
+      if (match) {
+        switcher.value = match.value;
+      }
+    }
 
     // Update Header
     updateHeaderUI();
 
     // Check if saved draft exists for this scheme
-    const existingDraft = hasSavedDraft(currentScheme.id);
+    const existingDraft = hasSavedDraft(currentScheme.id) || hasSavedDraft(currentScheme.code);
     const resumeAlert = document.getElementById('resume-draft-alert');
 
     if (existingDraft) {
@@ -1610,11 +1636,11 @@
     const portalBtn = document.getElementById('btn-portal-submit');
 
     if (nameElem) {
-      nameElem.textContent = 'Unable to Load Scheme';
+      nameElem.textContent = 'Selected government scheme could not be found.';
       nameElem.style.color = '#ef4444';
     }
     if (deptElem) deptElem.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Scheme "${identifier || 'Unknown'}" not found`;
-    if (typeElem) typeElem.textContent = 'Error';
+    if (typeElem) typeElem.textContent = 'Not Found';
     if (portalBtn) {
       portalBtn.href = '#';
       portalBtn.style.pointerEvents = 'none';
@@ -1629,7 +1655,7 @@
             <i class="fa-solid fa-circle-exclamation"></i>
           </div>
           <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">
-            Unable to Load Selected Scheme
+            Selected government scheme could not be found.
           </h3>
           <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1.75rem 0;">
             The requested scheme identifier <code>${identifier || ''}</code> was not found or is currently unavailable. Please pick a scheme from the directory.
@@ -2364,12 +2390,12 @@
       }
       if (fieldsCountElem) fieldsCountElem.textContent = '0 / 0';
       if (docsCountElem) docsCountElem.textContent = '0 / 0';
-      if (eligTextElem) eligTextElem.innerHTML = `<span style="color:var(--text-muted);">Select a scheme</span>`;
+      if (eligTextElem) eligTextElem.innerHTML = `<span style="color:var(--text-muted);">Select a scheme to check eligibility.</span>`;
       if (missingBadge) missingBadge.textContent = '0 items';
       if (missingList) {
         missingList.innerHTML = `
           <li style="font-size:0.78rem; color:var(--text-muted); padding:0.4rem 0;">
-            Please select a government scheme to begin application preparation.
+            Select a scheme to begin.
           </li>
         `;
       }
@@ -2677,38 +2703,88 @@
       }
     }
 
-    // 5. Background query to Supabase government_schemes to sync official titles/metadata
+    // 5. Query authoritative government schemes via unified API and Supabase
+    await fetchAuthoritativeSchemes();
+  }
+
+  // ---------------------------------------------------------------------------
+  // 14B. AUTHORITATIVE SCHEMES SYNC & RETRY
+  // ---------------------------------------------------------------------------
+  async function fetchAuthoritativeSchemes() {
+    let fetched = null;
+    let fetchError = null;
+
+    // 1. Try unified window.API.getSchemes()
     try {
-      if (typeof window.getOrInitSupabaseClient === 'function') {
+      if (window.API && typeof window.API.getSchemes === 'function') {
+        const res = await window.API.getSchemes();
+        if (res) {
+          if (Array.isArray(res.schemes) && res.schemes.length > 0) fetched = res.schemes;
+          else if (Array.isArray(res.data) && res.data.length > 0) fetched = res.data;
+          else if (Array.isArray(res) && res.length > 0) fetched = res;
+          else if (res.error) fetchError = res.error;
+        }
+      }
+    } catch (e) {
+      fetchError = e.message || String(e);
+      console.warn('[FormAssistant] API getSchemes notice:', e.message || e);
+    }
+
+    // 2. Try Supabase direct client if not yet fetched
+    if (!fetched && typeof window.getOrInitSupabaseClient === 'function') {
+      try {
         const clientPromise = window.getOrInitSupabaseClient();
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
         const client = await Promise.race([clientPromise, timeoutPromise]).catch(() => null);
 
         if (client) {
           const { data, error } = await client
             .from('government_schemes')
             .select('*')
-            .eq('is_active', true);
+            .eq('is_active', true)
+            .order('created_at', { ascending: true });
 
           if (!error && Array.isArray(data) && data.length > 0) {
-            data.forEach(dbSch => {
-              if (dbSch.scheme_code) {
-                const existing = resolveSchemeMeta(dbSch.scheme_code);
-                if (existing) {
-                  if (dbSch.id) existing.uuid = dbSch.id;
-                  if (dbSch.official_portal_url) existing.portal = dbSch.official_portal_url;
-                  if (dbSch.scheme_name) existing.name = dbSch.scheme_name;
-                  if (dbSch.department_name) existing.dept = dbSch.department_name;
-                }
-              }
-            });
-            // Re-populate switcher with any synced updates
-            populateSchemeSwitcher(currentScheme?.id);
+            fetched = data;
+          } else if (error) {
+            fetchError = error.message || String(error);
           }
         }
+      } catch (e) {
+        fetchError = e.message || String(e);
+        console.warn('[FormAssistant] Supabase schemes fetch notice:', e.message || e);
       }
-    } catch (e) {
-      console.warn('[FormAssistant] Background schemes sync notice:', e.message || e);
+    }
+
+    // 3. Sync fetched records into SCHEMES_REGISTRY
+    if (Array.isArray(fetched) && fetched.length > 0) {
+      fetched.forEach(dbSch => {
+        const code = dbSch.scheme_code || dbSch.id;
+        if (code) {
+          const existing = resolveSchemeMeta(code);
+          if (existing) {
+            if (dbSch.id) existing.uuid = dbSch.id;
+            if (dbSch.official_portal_url) existing.portal = dbSch.official_portal_url;
+            if (dbSch.scheme_name) existing.name = dbSch.scheme_name;
+            if (dbSch.department_name) existing.dept = dbSch.department_name;
+          }
+        }
+      });
+
+      // Hide error banner on success
+      const errBanner = document.getElementById('scheme-load-error-banner');
+      if (errBanner) errBanner.style.display = 'none';
+
+      // Re-populate switcher with any synced updates without losing active selection
+      populateSchemeSwitcher(currentScheme?.code || currentScheme?.id);
+    } else if (fetchError && Object.keys(SCHEMES_REGISTRY).length === 0) {
+      // If no schemes exist at all and fetch failed, show visible error banner with retry
+      const errBanner = document.getElementById('scheme-load-error-banner');
+      const errMsg = document.getElementById('scheme-load-error-message');
+      if (errBanner) {
+        if (errMsg) errMsg.textContent = 'Unable to load government schemes. Please check your connection and retry.';
+        errBanner.style.display = 'flex';
+      }
     }
   }
 
@@ -2721,6 +2797,9 @@
 
     const saveDraftBtn = document.getElementById('btn-save-draft');
     if (saveDraftBtn) saveDraftBtn.onclick = () => saveDraft(true);
+
+    const retrySchemesBtn = document.getElementById('btn-retry-schemes');
+    if (retrySchemesBtn) retrySchemesBtn.onclick = () => fetchAuthoritativeSchemes();
 
     const checkReadinessBtn = document.getElementById('btn-check-readiness');
     if (checkReadinessBtn) checkReadinessBtn.onclick = openReadinessAssessmentModal;

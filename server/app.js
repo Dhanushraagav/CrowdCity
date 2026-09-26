@@ -26,6 +26,7 @@ import tourismRoutes from './routes/tourismRoutes.js';
 import reminderRoutes from './routes/reminderRoutes.js';
 import officeRoutes from './routes/officeRoutes.js';
 import applicationRoutes from './routes/applicationRoutes.js';
+import schemeRoutes from './routes/schemeRoutes.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
 // ES Module dirname workaround
@@ -136,8 +137,13 @@ app.use('/api/offices', officeRoutes);
 app.use('/api/government-offices', officeRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/app-tracker', applicationRoutes);
+app.use('/api/schemes', schemeRoutes);
+app.use('/api/government-schemes', schemeRoutes);
 
 // Route aliases resolving to dedicated feature pages
+app.get('/form-assistant', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/form-assistant.html'));
+});
 app.get('/app-tracker', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/app-tracker.html'));
 });
