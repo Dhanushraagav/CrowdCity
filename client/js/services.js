@@ -335,7 +335,7 @@
       const safeName = String(sch.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
       return `
       <div class="scheme-card" data-scheme-id="${sch.id}" data-scheme-code="${sch.code}">
-        <div>
+        <div class="scheme-card-content">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
             <span class="scheme-badge">${sch.govtType}</span>
             <span style="font-size: 0.72rem; font-weight: 700; color: var(--srv-text-muted);">${sch.code}</span>
@@ -356,14 +356,16 @@
         </div>
 
         <div class="scheme-actions">
-          <a href="scheme-checker.html?scheme=${sch.code || sch.id}" class="btn-srv btn-srv-primary">
-            ${tCheck}
-          </a>
-          <button type="button" class="btn-srv btn-srv-outline ${saved ? 'is-saved' : ''}" data-scheme-id="${sch.id}" data-scheme-code="${sch.code}" onclick="toggleBookmarkScheme('${sch.id}', '${safeName}', this)" ${saved ? 'style="border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1);"' : ''}>
-            <i class="${saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
-            <span>${saved ? tSaved : tSave}</span>
-          </button>
-          <a href="${sch.portal}" target="_blank" rel="noopener noreferrer" class="btn-srv btn-srv-outline">
+          <div class="scheme-actions-row">
+            <a href="scheme-checker.html?scheme=${sch.code || sch.id}" class="btn-srv btn-srv-primary">
+              ${tCheck}
+            </a>
+            <button type="button" class="btn-srv btn-srv-outline ${saved ? 'is-saved' : ''}" data-scheme-id="${sch.id}" data-scheme-code="${sch.code}" onclick="toggleBookmarkScheme('${sch.id}', '${safeName}', this)" ${saved ? 'style="border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1);"' : ''}>
+              <i class="${saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
+              <span>${saved ? tSaved : tSave}</span>
+            </button>
+          </div>
+          <a href="${sch.portal}" target="_blank" rel="noopener noreferrer" class="btn-srv btn-srv-outline btn-srv-portal">
             ${tPortal}
           </a>
         </div>
