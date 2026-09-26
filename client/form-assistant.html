@@ -57,8 +57,8 @@
   <script src="js/theme.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI Form Filling Assistant - Step-by-step guidance, auto-prefill, and official portal application launcher.">
-  <title>AI Form Filling Assistant - CrowdCity AI</title>
+  <meta name="description" content="Government Application Assistant - Dynamic form preparation, profile prefill, document readiness, and official portal handoff for Central and Tamil Nadu government schemes.">
+  <title>Government Application Assistant - CrowdCity AI</title>
   
   <!-- Premium Fonts - Inter & Noto Sans Tamil -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,27 +73,577 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
+    :root {
+      --fa-primary: #0D9488;
+      --fa-primary-hover: #0F766E;
+      --fa-accent: #6366F1;
+      --fa-success: #10B981;
+      --fa-warning: #F59E0B;
+      --fa-danger: #EF4444;
+      --fa-surface: #FFFFFF;
+      --fa-card-bg: #F8FAFC;
+      --fa-border: #E2E8F0;
+    }
+
+    [data-theme="dark"], html.dark-theme, html.theme-dark {
+      --fa-surface: #1E293B;
+      --fa-card-bg: #0F172A;
+      --fa-border: #334155;
+    }
+
+    /* Hero Banner */
     .form-hero-card {
-      background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
       border: 1px solid var(--border-color);
       border-radius: 20px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+      position: relative;
+      overflow: hidden;
     }
+
+    .form-hero-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+
+    .form-hero-titles {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .form-badge-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(13, 148, 136, 0.15);
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .form-main-heading {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0 0 0.4rem 0;
+      line-height: 1.25;
+      font-family: var(--font-heading, system-ui);
+    }
+
+    .form-subheading-prep {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0 0 0.85rem 0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .form-scheme-highlight {
+      color: var(--primary);
+      font-weight: 700;
+      background: rgba(13, 148, 136, 0.08);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid rgba(13, 148, 136, 0.2);
+    }
+
+    .form-hero-selector-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 0.85rem 1.15rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      min-width: 280px;
+      max-width: 360px;
+    }
+
+    .scheme-select-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    .scheme-select-dropdown {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Resume Draft Banner */
+    .resume-draft-alert {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(13, 148, 136, 0.08));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Stepper Bar */
+    .assistant-stepper-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .assistant-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 640px;
+      gap: 0.5rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      background: transparent;
+      border: 1px solid transparent;
+    }
+
+    .step-item:hover {
+      background: var(--bg-app);
+    }
+
+    .step-item.active {
+      background: rgba(13, 148, 136, 0.1);
+      border-color: rgba(13, 148, 136, 0.3);
+    }
+
+    .step-num-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 800;
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .step-item.active .step-num-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+    }
+
+    .step-item.completed .step-num-circle {
+      background: var(--fa-success);
+      border-color: var(--fa-success);
+      color: #ffffff;
+    }
+
+    .step-text-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .step-title-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .step-sub-text {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .step-connector-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border-color);
+      min-width: 15px;
+    }
+
+    .step-connector-line.completed {
+      background: var(--fa-success);
+    }
+
+    /* Main Grid */
     .form-main-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1fr 360px;
       gap: 1.75rem;
+      align-items: start;
     }
-    @media (max-width: 768px) {
+
+    @media (max-width: 992px) {
       .form-main-grid {
         grid-template-columns: 1fr;
       }
+      .readiness-dashboard-sidebar {
+        position: static !important;
+        margin-top: 1.5rem;
+      }
+    }
+
+    /* Form Fields & Cards */
+    .step-card-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      margin-bottom: 1.5rem;
+    }
+
+    .step-header-intro {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .step-heading-main {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-field-card {
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1.15rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-field-card:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+
+    .form-field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+
+    .form-field-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-field-ai-help {
+      background: rgba(13, 148, 136, 0.1);
+      border: 1px solid rgba(13, 148, 136, 0.25);
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-field-ai-help:hover {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .form-field-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 0 0 0.75rem 0;
+      line-height: 1.4;
+    }
+
+    .input-wrap-with-action {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .field-input-item {
+      padding: 0.7rem 0.9rem;
+      font-size: 0.88rem;
+      border-radius: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .field-input-item:focus {
+      border-color: var(--primary);
+    }
+
+    .field-input-item.has-error {
+      border-color: var(--fa-danger);
+      background: rgba(239, 68, 68, 0.02);
+    }
+
+    .field-input-toggle-btn {
+      position: absolute;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.25rem;
+    }
+
+    .field-inline-error {
+      font-size: 0.75rem;
+      color: var(--fa-danger);
+      font-weight: 600;
+      margin-top: 0.4rem;
+      display: none;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Stepper Navigation Buttons */
+    .step-actions-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.25rem;
+      border-top: 1px dashed var(--border-color);
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    /* Readiness Dashboard Sidebar */
+    .readiness-dashboard-sidebar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.5rem;
+      position: sticky;
+      top: 80px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.03);
+    }
+
+    .readiness-score-box {
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(99, 102, 241, 0.08));
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.25rem;
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .readiness-percentage-num {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 0.35rem;
+      font-family: var(--font-heading, system-ui);
+    }
+
+    .readiness-meter-bar-bg {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--border-color);
+      overflow: hidden;
+      margin-top: 0.65rem;
+    }
+
+    .readiness-meter-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: var(--primary);
+      transition: width 0.4s ease, background-color 0.4s ease;
+    }
+
+    .readiness-status-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 0.4rem;
+    }
+
+    .metrics-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .metric-stat-item {
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .metric-stat-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    .metric-stat-value {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    /* Missing items list */
+    .missing-panel-wrap {
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .missing-panel-header {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .missing-items-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .missing-item-row {
+      font-size: 0.78rem;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-bottom: 0.2rem;
+    }
+
+    .missing-item-row:hover {
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+    }
+
+    /* Document card */
+    .doc-check-card {
+      background: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.15rem;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .doc-check-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .doc-check-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .doc-check-icon.available {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+    }
+
+    .doc-check-icon.missing {
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
+    }
+
+    /* Auto-save status */
+    .autosave-status-text {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 0.5rem;
+      min-height: 1.1rem;
     }
   </style>
 
-  </head>
+</head>
 <body class="protected-page">
 
   <div class="app-layout">
@@ -101,7 +651,7 @@
       <div class="sidebar-header">
         <a href="citizen-dashboard.html" class="app-sidebar-logo">
           <div class="brand-emblems-wrap">
-            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" / decoding="async">
+            <img src="images/crowdcity_icon_transparent.png" alt="CrowdCity" class="brand-emblem" decoding="async">
           </div>
           <div class="brand-text-container">
             <span class="brand-title">CROWDCITY</span>
@@ -140,20 +690,19 @@
     <!-- Main Content Area -->
     <main class="app-main">
       <header class="app-header-main">
-
         <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
           <i class="fa-solid fa-bars"></i>
         </button>
 
         <div style="display: flex; align-items: center; gap: 0.75rem;">
           <a href="services.html" class="gov-back-btn" title="Back to Government Services">
-            <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+            <i class="fa-solid fa-arrow-left"></i> <span data-i18n="common_back">Back</span>
           </a>
         </div>
 
         <div class="app-header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 0.75rem;">
-          <button id="btn-auto-prefill" type="button" class="btn btn-primary" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Auto-Prefill</span>
+          <button id="btn-auto-prefill" type="button" class="btn btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> <span>Auto-Prefill Profile</span>
           </button>
           <div id="auth-nav-container"></div>
         </div>
@@ -161,56 +710,158 @@
 
       <div class="app-content-body" style="padding: 1.5rem; width: 100%; max-width: 100%; box-sizing: border-box;">
         
-        <!-- Hero Header -->
+        <!-- Reusable Generic Form Assistant Hero Header -->
         <div class="form-hero-card">
-          <span style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 999px; background: rgba(13, 148, 136, 0.15); color: var(--primary); display: inline-block; margin-bottom: 0.5rem;">
-            Application Form Preparation
-          </span>
-          <h1 id="form-title" style="font-size: 1.7rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0; font-family: var(--font-heading, system-ui);">
-            Loading Form Assistant...
-          </h1>
-          <p id="form-dept" style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">
-            Department of Welfare
-          </p>
+          <div class="form-hero-header-row">
+            <div class="form-hero-titles">
+              <span class="form-badge-tag">
+                <i class="fa-solid fa-file-signature"></i> FORM ASSISTANT
+              </span>
+              <h1 class="form-main-heading">
+                Government Application Assistant
+              </h1>
+              <div class="form-subheading-prep">
+                <span>Preparing Application For:</span>
+                <span id="current-scheme-name" class="form-scheme-highlight">Loading scheme...</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                <span id="current-scheme-dept" style="font-size: 0.82rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <i class="fa-solid fa-landmark"></i> Department of Welfare
+                </span>
+                <span id="current-scheme-type" style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 6px; background: rgba(13, 148, 136, 0.1); color: var(--primary);">
+                  State Scheme
+                </span>
+              </div>
+            </div>
+
+            <!-- Dynamic Scheme Switcher -->
+            <div class="form-hero-selector-wrap">
+              <label for="scheme-switcher" class="scheme-select-label">
+                <i class="fa-solid fa-repeat"></i> Change Target Scheme
+              </label>
+              <select id="scheme-switcher" class="scheme-select-dropdown" aria-label="Select Target Government Scheme">
+                <!-- Populated dynamically with all 12 schemes -->
+              </select>
+            </div>
+          </div>
         </div>
 
-        <!-- 2 Column Layout -->
+        <!-- Resume Application Draft Alert (Appears dynamically if saved draft exists) -->
+        <div id="resume-draft-alert" class="resume-draft-alert" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: var(--fa-accent); font-size: 1.1rem;">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div>
+              <strong style="font-size: 0.9rem; color: var(--text-main); display: block;" id="resume-alert-title">
+                Saved Application Draft Available
+              </strong>
+              <span style="font-size: 0.78rem; color: var(--text-muted);" id="resume-alert-desc">
+                You have an in-progress draft for this scheme. Would you like to resume?
+              </span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button type="button" id="btn-resume-draft-action" class="btn btn-primary" style="padding: 0.45rem 0.9rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px;">
+              <i class="fa-solid fa-play"></i> Resume Draft
+            </button>
+            <button type="button" id="btn-discard-draft-action" class="btn btn-secondary" style="padding: 0.45rem 0.9rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px;">
+              Start Over
+            </button>
+          </div>
+        </div>
+
+        <!-- Step Navigation Bar -->
+        <div class="assistant-stepper-wrap">
+          <div class="assistant-stepper" id="assistant-stepper">
+            <!-- Dynamically populated 6 steps -->
+          </div>
+        </div>
+
+        <!-- 2 Column Layout (Form Steps + Readiness Sidebar) -->
         <div class="form-main-grid">
           
-          <!-- Left Column: Fields -->
-          <div>
-            <div id="form-fields-container">
-              <!-- Dynamically populated -->
+          <!-- Left Column: Step Content -->
+          <div class="form-steps-container">
+            <div id="active-step-content" class="step-card-box">
+              <!-- Dynamically populated for current step -->
             </div>
           </div>
 
-          <!-- Right Column: Review & Submission -->
-          <div>
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; padding: 1.5rem; position: sticky; top: 80px; box-shadow: 0 6px 20px rgba(0,0,0,0.03);">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.75rem 0;">
-                <i class="fa-solid fa-clipboard-check" style="color: var(--primary);"></i> Form Preparation Review
-              </h3>
+          <!-- Right Column: Application Readiness Dashboard (Responsive & Sticky) -->
+          <div class="readiness-dashboard-sidebar">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 1rem 0; display: flex; align-items: center; justify-content: space-between;">
+              <span><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Application Readiness</span>
+              <span id="readiness-badge-pill" class="readiness-status-badge" style="background: rgba(13, 148, 136, 0.1); color: var(--primary);">In Progress</span>
+            </h3>
 
-              <div style="font-size: 0.88rem; font-weight: 700; color: #10b981; margin-bottom: 1rem;" id="review-ready-count">
-                0 Fields Prepared
+            <!-- Score Display -->
+            <div class="readiness-score-box">
+              <div id="readiness-score-number" class="readiness-percentage-num">0%</div>
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                Application Preparedness
               </div>
-
-              <!-- Mandatory Disclaimer -->
-              <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px; padding: 0.85rem; font-size: 0.78rem; color: var(--text-main); line-height: 1.5; margin-bottom: 1.25rem;">
-                <i class="fa-solid fa-shield-halved" style="color: #d97706;"></i>
-                CrowdCity AI is an assistance platform only. Final submission must be completed on official government portals.
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <button id="btn-save-draft" type="button" class="btn btn-secondary" style="width: 100%; padding: 0.7rem; font-weight: 700; border-radius: 10px;">
-                  <i class="fa-regular fa-floppy-disk"></i> Save Draft Progress
-                </button>
-
-                <a id="btn-portal-submit" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 800; border-radius: 10px; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
-                  <span>Continue on Official Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>
+              <div class="readiness-meter-bar-bg">
+                <div id="readiness-score-bar" class="readiness-meter-bar-fill"></div>
               </div>
             </div>
+
+            <!-- Readiness Metrics Grid -->
+            <div class="metrics-stats-grid">
+              <div class="metric-stat-item">
+                <div class="metric-stat-title">Fields Prepared</div>
+                <div id="metric-fields-count" class="metric-stat-value">0 / 0</div>
+              </div>
+              <div class="metric-stat-item">
+                <div class="metric-stat-title">Documents Available</div>
+                <div id="metric-docs-count" class="metric-stat-value">0 / 0</div>
+              </div>
+              <div class="metric-stat-item" style="grid-column: span 2;">
+                <div class="metric-stat-title">Eligibility Status</div>
+                <div id="metric-eligibility-status" class="metric-stat-value" style="font-size: 0.82rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; justify-content: space-between;">
+                  <span id="metric-eligibility-text">Checking assessment...</span>
+                  <a href="scheme-checker.html" id="link-check-eligibility" style="font-size: 0.72rem; text-decoration: underline; color: var(--text-muted);">Check</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Smart Missing Information Panel -->
+            <div class="missing-panel-wrap">
+              <div class="missing-panel-header">
+                <span><i class="fa-solid fa-list-check" style="color: var(--fa-warning);"></i> What's Left to Complete</span>
+                <span id="missing-count-badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.7rem;">0 items</span>
+              </div>
+              <ul id="missing-items-list" class="missing-items-list">
+                <!-- Dynamically populated missing items -->
+              </ul>
+            </div>
+
+            <!-- Primary Actions -->
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+              <button id="btn-check-readiness" type="button" class="btn btn-secondary" style="width: 100%; padding: 0.65rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                <i class="fa-solid fa-shield-check" style="color: var(--primary);"></i> <span>Check Application Readiness</span>
+              </button>
+
+              <button id="btn-save-draft" type="button" class="btn btn-secondary" style="width: 100%; padding: 0.65rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                <i class="fa-regular fa-floppy-disk"></i> <span>Save Draft Progress</span>
+              </button>
+
+              <a id="btn-portal-submit" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.88rem; font-weight: 800; border-radius: 10px; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);">
+                <span>Continue on Official Portal</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+
+              <!-- Auto-save timestamp notice -->
+              <div id="autosave-indicator" class="autosave-status-text">
+                All changes saved locally
+              </div>
+            </div>
+
+            <!-- Official Portal Handoff Disclaimer -->
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 0.75rem 0.85rem; font-size: 0.74rem; color: var(--text-main); line-height: 1.45; margin-top: 1rem;">
+              <i class="fa-solid fa-circle-info" style="color: #d97706; margin-right: 0.25rem;"></i>
+              <strong>Informational Assistance:</strong> CrowdCity AI helps prepare and organize your information. Official applications are processed directly on verified government department portals.
+            </div>
+
           </div>
 
         </div>
@@ -219,15 +870,45 @@
     </main>
   </div>
 
-  <!-- AI Guidance Modal -->
-  <div id="ai-guidance-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; max-width: 500px; width: 100%; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+  <!-- AI Field Guidance Modal -->
+  <div id="ai-guidance-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 1.25rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; max-width: 540px; width: 100%; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: fadeInUp 0.25s ease-out; max-height: 90vh; overflow-y: auto;">
       <div id="ai-guidance-content">
         <!-- Dynamically populated -->
       </div>
-      <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
-        <button id="btn-close-guidance-modal" type="button" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-weight: 700; border-radius: 8px;">
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <button id="btn-close-guidance-modal" type="button" class="btn btn-primary" style="padding: 0.5rem 1.4rem; font-weight: 700; border-radius: 10px;">
           Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Preview Modal -->
+  <div id="doc-preview-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 1.25rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; max-width: 650px; width: 100%; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); animation: fadeInUp 0.25s ease-out; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+        <h3 id="doc-preview-title" style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0;">Document Preview</h3>
+        <button type="button" id="btn-close-preview-modal" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+      </div>
+      <div id="doc-preview-body" style="text-align: center; padding: 1rem 0;">
+        <!-- Preview image or details -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Readiness Check Assessment Modal -->
+  <div id="readiness-assessment-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 1.25rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; max-width: 540px; width: 100%; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: fadeInUp 0.25s ease-out; max-height: 90vh; overflow-y: auto;">
+      <div id="readiness-assessment-content">
+        <!-- Dynamically populated -->
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <button id="btn-close-readiness-modal" type="button" class="btn btn-secondary" style="padding: 0.5rem 1.2rem; font-weight: 700; border-radius: 10px;">
+          Close
+        </button>
+        <button id="btn-readiness-proceed-action" type="button" class="btn btn-primary" style="padding: 0.5rem 1.4rem; font-weight: 700; border-radius: 10px;">
+          Review Application
         </button>
       </div>
     </div>

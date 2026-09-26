@@ -168,9 +168,6 @@
   ];
 
   let activeSchemesList = GOVERNMENT_SCHEMES;
-  let userSavedSchemeIds = new Set();
-  let currentUserId = null;
-  const inFlightBookmarks = new Set();
   let currentCategory = 'all';
   let searchQuery = '';
   let conversationHistory = [];
@@ -180,16 +177,16 @@
     initFloatingChatbot();
   });
 
-  // Check whether a scheme is saved using stable ID / scheme code (Never display name)
+  // Check whether a scheme is saved using centralized CrowdCitySavedSchemes store
   function isSchemeSaved(scheme) {
     if (!scheme) return false;
-    if (scheme.id && userSavedSchemeIds.has(scheme.id)) return true;
-    if (scheme.code && userSavedSchemeIds.has(scheme.code)) return true;
-    if (scheme.code && userSavedSchemeIds.has(scheme.code.toLowerCase())) return true;
-    if (scheme.scheme_code && userSavedSchemeIds.has(scheme.scheme_code)) return true;
-    if (scheme.scheme_code && userSavedSchemeIds.has(scheme.scheme_code.toLowerCase())) return true;
-    const resolved = resolveSchemeUuid(scheme.id || scheme.code || scheme.scheme_code);
-    if (resolved && userSavedSchemeIds.has(resolved)) return true;
+    if (window.CrowdCitySavedSchemes) {
+      if (scheme.id && window.CrowdCitySavedSchemes.isSaved(scheme.id)) return true;
+      if (scheme.code && window.CrowdCitySavedSchemes.isSaved(scheme.code)) return true;
+      if (scheme.scheme_code && window.CrowdCitySavedSchemes.isSaved(scheme.scheme_code)) return true;
+      const uuid = resolveSchemeUuid(scheme.id || scheme.code || scheme.scheme_code);
+      if (uuid && window.CrowdCitySavedSchemes.isSaved(uuid)) return true;
+    }
     return false;
   }
 
@@ -218,64 +215,31 @@
       renderSchemes();
     });
 
-    // 1. Initial immediate render
+    // Subscribe to centralized saved schemes state changes
+    if (window.CrowdCitySavedSchemes?.onStateChange) {
+      window.CrowdCitySavedSchemes.onStateChange(() => {
+        renderSchemes();
+      });
+    }
+
+    // 1. Initial immediate render using synchronous pre-hydrated state (0ms, ZERO flicker)
     renderSchemes();
 
-    // 2. Hydrate bookmarks and schemes from database
+    // 2. Ensure authoritative background hydration from Supabase
     await hydrateSchemesAndBookmarks();
   }
 
   // Hydrate schemes and current user's saved bookmarks from Supabase
   async function hydrateSchemesAndBookmarks() {
     try {
+      if (window.CrowdCitySavedSchemes?.ensureHydrated) {
+        await window.CrowdCitySavedSchemes.ensureHydrated();
+      }
+
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
-          const session = await client.auth.getSession();
-          const userId = session?.data?.session?.user?.id;
-          currentUserId = userId || null;
-
-          if (userId) {
-            // First hydrate instantly from user-scoped local cache
-            try {
-              const cached = localStorage.getItem(`cc_saved_schemes_${userId}`);
-              if (cached) {
-                const arr = JSON.parse(cached);
-                if (Array.isArray(arr) && arr.length > 0) {
-                  arr.forEach(id => userSavedSchemeIds.add(id));
-                  renderSchemes();
-                }
-              }
-            } catch (e) {}
-
-            // Query authoritative bookmarks for current user from database
-            const { data: savedRows, error: saveErr } = await client
-              .from('saved_schemes')
-              .select('id, scheme_id, government_schemes(id, scheme_code)')
-              .eq('user_id', userId);
-
-            if (!saveErr && savedRows) {
-              const freshSet = new Set();
-              savedRows.forEach(r => {
-                if (r.scheme_id) freshSet.add(r.scheme_id);
-                if (r.government_schemes?.id) freshSet.add(r.government_schemes.id);
-                if (r.government_schemes?.scheme_code) {
-                  freshSet.add(r.government_schemes.scheme_code);
-                  freshSet.add(r.government_schemes.scheme_code.toLowerCase());
-                }
-              });
-              userSavedSchemeIds = freshSet;
-              try {
-                localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
-              } catch (e) {}
-              renderSchemes();
-            }
-          } else {
-            userSavedSchemeIds = new Set();
-            renderSchemes();
-          }
-
-          // Also fetch active schemes from DB if available
+          // Fetch active schemes from DB if available (Preserving saved state!)
           const { data: dbSchemes, error: schErr } = await client
             .from('government_schemes')
             .select('*')
@@ -376,129 +340,30 @@
 
   // Toggle Save / Unsave Scheme with Supabase Database Persistence
   window.toggleBookmarkScheme = async function (schemeId, schemeName, buttonElem) {
-    const targetUuid = resolveSchemeUuid(schemeId);
-    if (!targetUuid) {
-      console.warn("Could not resolve scheme UUID for bookmark:", schemeId);
-      if (window.showToast) window.showToast("Could not save scheme. Invalid scheme reference.", "error");
+    if (!window.CrowdCitySavedSchemes) {
+      console.warn("CrowdCitySavedSchemes store is not initialized");
       return;
     }
 
-    if (inFlightBookmarks.has(targetUuid)) return;
-    inFlightBookmarks.add(targetUuid);
+    const result = await window.CrowdCitySavedSchemes.toggleSave(schemeId, schemeName);
+    if (result.inFlight) return;
 
-    const isTamil = (window.i18n && window.i18n.getCurrentLanguage && window.i18n.getCurrentLanguage() === 'ta');
-    const tSave = window.i18n ? window.i18n.t('services_btn_save_scheme') : 'Save Scheme';
-    const tSaved = isTamil ? 'சேமிக்கப்பட்டது' : 'Saved';
-
-    try {
-      if (typeof window.getOrInitSupabaseClient !== 'function') {
-        if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
-        return;
-      }
-
-      const client = await window.getOrInitSupabaseClient();
-      if (!client) {
-        if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
-        return;
-      }
-
-      const session = await client.auth.getSession();
-      const userId = session?.data?.session?.user?.id;
-      if (!userId) {
-        if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
-        return;
-      }
-      currentUserId = userId;
-
-      const isCurrentlySaved = userSavedSchemeIds.has(targetUuid) || (buttonElem && buttonElem.classList.contains('is-saved'));
-
-      if (isCurrentlySaved) {
-        // REMOVE / UNSAVE
-        const { error: delError } = await client
-          .from('saved_schemes')
-          .delete()
-          .eq('user_id', userId)
-          .eq('scheme_id', targetUuid);
-
-        if (!delError) {
-          userSavedSchemeIds.delete(targetUuid);
-          const found = activeSchemesList.find(s => s.id === targetUuid || resolveSchemeUuid(s.id) === targetUuid);
-          if (found?.code) {
-            userSavedSchemeIds.delete(found.code);
-            userSavedSchemeIds.delete(found.code.toLowerCase());
-          }
-          try {
-            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
-          } catch (e) {}
-
-          if (buttonElem) {
-            buttonElem.classList.remove('is-saved');
-            buttonElem.style.borderColor = '';
-            buttonElem.style.color = '';
-            buttonElem.style.background = '';
-            buttonElem.innerHTML = `<i class="fa-regular fa-bookmark"></i> <span>${tSave}</span>`;
-          }
-          if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
-        } else {
-          console.warn("Error removing bookmark:", delError);
-          if (window.showToast) window.showToast("Failed to remove bookmark. Please try again.", "error");
-        }
-      } else {
-        // SAVE SCHEME
-        const { error: insError } = await client
-          .from('saved_schemes')
-          .insert({ user_id: userId, scheme_id: targetUuid });
-
-        if (!insError) {
-          userSavedSchemeIds.add(targetUuid);
-          const found = activeSchemesList.find(s => s.id === targetUuid || resolveSchemeUuid(s.id) === targetUuid);
-          if (found?.code) {
-            userSavedSchemeIds.add(found.code);
-            userSavedSchemeIds.add(found.code.toLowerCase());
-          }
-          try {
-            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
-          } catch (e) {}
-
-          if (buttonElem) {
-            buttonElem.classList.add('is-saved');
-            buttonElem.style.borderColor = '#10b981';
-            buttonElem.style.color = '#10b981';
-            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
-            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
-          }
-          if (window.showToast) window.showToast(`Saved ${schemeName} to your saved schemes.`, "success");
-        } else if (insError.code === '23505') {
-          // Already saved in database: guarantee UI matches database state
-          userSavedSchemeIds.add(targetUuid);
-          const found = activeSchemesList.find(s => s.id === targetUuid || resolveSchemeUuid(s.id) === targetUuid);
-          if (found?.code) {
-            userSavedSchemeIds.add(found.code);
-            userSavedSchemeIds.add(found.code.toLowerCase());
-          }
-          try {
-            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...userSavedSchemeIds]));
-          } catch (e) {}
-
-          if (buttonElem) {
-            buttonElem.classList.add('is-saved');
-            buttonElem.style.borderColor = '#10b981';
-            buttonElem.style.color = '#10b981';
-            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
-            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
-          }
-          if (window.showToast) window.showToast(`${schemeName} is already saved.`, "info");
-        } else {
-          console.warn("Error saving scheme bookmark:", insError);
-          if (window.showToast) window.showToast("Failed to save scheme. Please try again.", "error");
-        }
-      }
-    } catch (err) {
-      console.warn("Bookmark toggle exception:", err);
-      if (window.showToast) window.showToast("Unable to update bookmark right now.", "error");
-    } finally {
-      inFlightBookmarks.delete(targetUuid);
+    if (!result.success && result.error === 'Sign-in required') {
+      if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
+      return;
     }
+
+    if (result.action === 'saved') {
+      if (window.showToast) window.showToast(`Saved ${schemeName} to your saved schemes.`, "success");
+    } else if (result.action === 'already_saved') {
+      if (window.showToast) window.showToast(`${schemeName} is already saved.`, "info");
+    } else if (result.action === 'removed') {
+      if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
+    } else if (!result.success) {
+      if (window.showToast) window.showToast("Failed to update bookmark. Please try again.", "error");
+    }
+
+    renderSchemes();
   };
 
   // Backward compatibility alias

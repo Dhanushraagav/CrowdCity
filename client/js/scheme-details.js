@@ -187,9 +187,22 @@
   }
 
   async function checkBookmarkStatus(schemeId) {
+    if (!schemeId) return false;
+    if (window.CrowdCitySavedSchemes?.isSaved) {
+      if (window.CrowdCitySavedSchemes.isSaved(schemeId)) return true;
+    }
     const targetUuid = resolveDetailsSchemeUuid(schemeId);
     if (!targetUuid) return false;
+    if (window.CrowdCitySavedSchemes?.isSaved && window.CrowdCitySavedSchemes.isSaved(targetUuid)) return true;
+
     try {
+      if (window.CrowdCitySavedSchemes?.ensureHydrated) {
+        await window.CrowdCitySavedSchemes.ensureHydrated();
+        if (window.CrowdCitySavedSchemes.isSaved(schemeId) || window.CrowdCitySavedSchemes.isSaved(targetUuid)) {
+          return true;
+        }
+      }
+
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
@@ -203,7 +216,13 @@
               .eq('scheme_id', targetUuid)
               .maybeSingle();
 
-            return !!data;
+            if (data) {
+              if (window.CrowdCitySavedSchemes) {
+                window.CrowdCitySavedSchemes.addSaved(targetUuid);
+                window.CrowdCitySavedSchemes.addSaved(schemeId);
+              }
+              return true;
+            }
           }
         }
       }
@@ -215,7 +234,35 @@
     const btn = document.getElementById('btn-details-save');
     if (!btn || !currentScheme) return;
 
-    const targetUuid = resolveDetailsSchemeUuid(currentScheme.id || currentScheme.scheme_code);
+    const schemeRef = currentScheme.scheme_code || currentScheme.id;
+    if (window.CrowdCitySavedSchemes?.toggleSave) {
+      const res = await window.CrowdCitySavedSchemes.toggleSave(schemeRef, currentScheme.scheme_name);
+      if (res.inFlight) return;
+      if (!res.success && res.error === 'Sign-in required') {
+        if (window.showToast) window.showToast("Please sign in to save schemes to your bookmarks.", "info");
+        return;
+      }
+      if (res.action === 'saved') {
+        isSaved = true;
+        updateBookmarkButtonUI(true);
+        if (window.showToast) window.showToast("Saved scheme to your bookmarks!", "success");
+      } else if (res.action === 'already_saved') {
+        isSaved = true;
+        updateBookmarkButtonUI(true);
+        if (window.showToast) window.showToast("Scheme is already saved in your bookmarks!", "info");
+      } else if (res.action === 'removed') {
+        isSaved = false;
+        updateBookmarkButtonUI(false);
+        if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
+      } else {
+        isSaved = !!res.isSaved;
+        updateBookmarkButtonUI(isSaved);
+        if (window.showToast) window.showToast("Failed to update bookmark. Please try again.", "error");
+      }
+      return;
+    }
+
+    const targetUuid = resolveDetailsSchemeUuid(schemeRef);
     if (!targetUuid) return;
 
     try {
@@ -234,28 +281,12 @@
             await client.from('saved_schemes').delete().eq('user_id', userId).eq('scheme_id', targetUuid);
             isSaved = false;
             updateBookmarkButtonUI(false);
-            try {
-              const cached = localStorage.getItem(`cc_saved_schemes_${userId}`);
-              if (cached) {
-                let arr = JSON.parse(cached);
-                arr = arr.filter(id => id !== targetUuid && id !== currentScheme.scheme_code);
-                localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify(arr));
-              }
-            } catch (e) {}
             if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
           } else {
             const { error: insErr } = await client.from('saved_schemes').insert({ user_id: userId, scheme_id: targetUuid });
             if (!insErr || insErr.code === '23505') {
               isSaved = true;
               updateBookmarkButtonUI(true);
-              try {
-                let arr = [];
-                const cached = localStorage.getItem(`cc_saved_schemes_${userId}`);
-                if (cached) arr = JSON.parse(cached);
-                arr.push(targetUuid);
-                if (currentScheme.scheme_code) arr.push(currentScheme.scheme_code);
-                localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...new Set(arr)]));
-              } catch (e) {}
               if (window.showToast) window.showToast(insErr?.code === '23505' ? "Scheme is already saved in your bookmarks!" : "Scheme saved to your bookmarks!", "success");
             }
           }
@@ -265,10 +296,6 @@
     } catch (err) {
       console.warn("Toggle bookmark error:", err);
     }
-
-    isSaved = !isSaved;
-    updateBookmarkButtonUI(isSaved);
-    if (window.showToast) window.showToast(isSaved ? "Saved scheme to your bookmarks!" : "Removed scheme from bookmarks.", "info");
   }
 
   function updateBookmarkButtonUI(savedState) {
@@ -663,8 +690,22 @@
 
     if (scheme) {
       renderSchemeDetails(scheme);
-      isSaved = await checkBookmarkStatus(scheme.id);
+      // Immediate 0ms check from pre-hydrated store (ZERO FLICKER)
+      if (window.CrowdCitySavedSchemes?.isSaved) {
+        isSaved = window.CrowdCitySavedSchemes.isSaved(scheme.id || scheme.scheme_code);
+        updateBookmarkButtonUI(isSaved);
+      }
+      isSaved = await checkBookmarkStatus(scheme.id || scheme.scheme_code);
       updateBookmarkButtonUI(isSaved);
+    }
+
+    if (window.CrowdCitySavedSchemes?.onStateChange) {
+      window.CrowdCitySavedSchemes.onStateChange(() => {
+        if (currentScheme && window.CrowdCitySavedSchemes?.isSaved) {
+          isSaved = window.CrowdCitySavedSchemes.isSaved(currentScheme.id || currentScheme.scheme_code);
+          updateBookmarkButtonUI(isSaved);
+        }
+      });
     }
 
     const saveBtn = document.getElementById('btn-details-save');

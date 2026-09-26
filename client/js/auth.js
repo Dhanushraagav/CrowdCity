@@ -2121,6 +2121,11 @@ async function logoutUser() {
 
   // Purge any user-scoped keys
   try {
+    if (window.CrowdCitySavedSchemes?.reset) {
+      window.CrowdCitySavedSchemes.reset();
+    }
+  } catch (e) {}
+  try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
       if (k && (k.startsWith('cc_user_profile_') || k.startsWith('cc_user_stat_') || k.startsWith('cc_my_complaints_') || k.startsWith('cc_city_stat_') || k.startsWith('cc_user_uploaded_docs_') || k.startsWith('cc_user_reminders_') || k.startsWith('cc_saved_schemes_'))) {
@@ -3973,12 +3978,412 @@ window.renderTurnstileWidgets = function() {
   }
 };
 
-window.onloadTurnstileCallback = function() {
-  window.turnstileLoaded = true;
-  if (window.supabaseConfig) {
-    window.renderTurnstileWidgets();
+// =========================================================================
+// CENTRALIZED SAVED SCHEMES STORE & SYNCHRONIZATION ENGINE
+// Single Source of Truth for Government Schemes Bookmarks across CrowdCity AI
+// =========================================================================
+(function() {
+  const SCHEME_UUID_MAP = {
+    'TN-KMUT-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'TN-PUDHUMAI-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'TN-NM-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'TN-CMCHIS-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'TN-KKI-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'TN-UZHAVAR-006': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'CENTRAL-PMKISAN-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'CENTRAL-PMJAY-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'CENTRAL-PMMY-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'CENTRAL-SSY-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'CENTRAL-PMAY-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'CENTRAL-VIDYALAKSHMI-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  const SCHEME_SLUG_MAP = {
+    'tn-kmut': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-kmut-001': '10fbf8f6-3e4a-4c7e-be07-f19eb7e39f7a',
+    'tn-pudhumai': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-pudhumai-002': '6edf49dc-795f-4369-b5ab-f72c24eddef8',
+    'tn-nm-003': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-naanmudhalvan': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'naan-mudhalvan': 'ab5d39c0-d7e0-4c74-9de3-30a087d54123',
+    'tn-cmchis': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-cmchis-004': '43e8ff6a-d3f3-4277-88f2-98c46491584e',
+    'tn-kki': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-kki-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-mra-005': '43c6f25f-384b-4410-98ac-e747f0edeef7',
+    'tn-uzhavar': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'tn-uzhavar-006': 'f0478621-f9c1-47c0-8306-af37d7ed5721',
+    'central-pmkisan': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmkisan-007': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'pmkisan': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'pm-kisan': 'aa6d9c6a-29df-4486-ada5-b70977ccf61c',
+    'central-pmjay': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmjay-008': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'pmjay': 'd22faa80-2446-454f-8532-17429dcef2e6',
+    'central-pmmy': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-pmmy-009': '5a00bef6-7053-4170-8604-8ac6b079a707',
+    'central-ssy': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-ssy-010': '5b06ccf2-49a8-40db-99fb-b3f8fb3affe4',
+    'central-pmay': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-pmay-011': '23914f21-21a9-4695-8784-680a9577879c',
+    'central-vidyalakshmi': '8c887239-49c4-48de-8fee-5c305098b97d',
+    'central-vidyalakshmi-012': '8c887239-49c4-48de-8fee-5c305098b97d'
+  };
+
+  let savedSchemeIds = new Set();
+  let currentUserId = null;
+  let isHydrated = false;
+  let hydrationPromise = null;
+  const inFlight = new Set();
+  const listeners = new Set();
+
+  function resolveUuid(identifier) {
+    if (!identifier) return null;
+    const clean = String(identifier).trim();
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean)) {
+      return clean.toLowerCase();
+    }
+    const upper = clean.toUpperCase();
+    if (SCHEME_UUID_MAP[upper]) return SCHEME_UUID_MAP[upper];
+
+    const lower = clean.toLowerCase();
+    if (SCHEME_SLUG_MAP[lower]) return SCHEME_SLUG_MAP[lower];
+
+    return null;
   }
-};
+
+  function getLocalUserId() {
+    try {
+      if (typeof window.getCurrentUser === 'function') {
+        const u = window.getCurrentUser();
+        if (u?.id) return u.id;
+      }
+      const raw = localStorage.getItem('cc_session') || sessionStorage.getItem('cc_session');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.user?.id) return parsed.user.id;
+      }
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+          const val = localStorage.getItem(k);
+          if (val) {
+            const p = JSON.parse(val);
+            if (p?.user?.id) return p.user.id;
+          }
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function preHydrateFromCache() {
+    currentUserId = getLocalUserId();
+    if (!currentUserId) {
+      savedSchemeIds.clear();
+      isHydrated = false;
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(`cc_saved_schemes_${currentUserId}`);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length > 0) {
+          savedSchemeIds.clear();
+          arr.forEach(id => {
+            if (id) {
+              const str = String(id).trim();
+              savedSchemeIds.add(str);
+              savedSchemeIds.add(str.toLowerCase());
+              savedSchemeIds.add(str.toUpperCase());
+              const uuid = resolveUuid(str);
+              if (uuid) savedSchemeIds.add(uuid);
+            }
+          });
+          isHydrated = true;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Pre-hydrate immediately on script evaluation (0ms, synchronous)
+  preHydrateFromCache();
+
+  async function ensureHydrated(forceRefresh = false) {
+    if (isHydrated && !forceRefresh && hydrationPromise) {
+      return hydrationPromise;
+    }
+
+    currentUserId = getLocalUserId();
+    if (!currentUserId) {
+      try {
+        if (typeof window.getOrInitSupabaseClient === 'function') {
+          const client = await window.getOrInitSupabaseClient();
+          const sess = await client?.auth?.getSession();
+          currentUserId = sess?.data?.session?.user?.id || null;
+        }
+      } catch (e) {}
+    }
+
+    if (!currentUserId) {
+      savedSchemeIds.clear();
+      isHydrated = true;
+      notifyListeners();
+      return savedSchemeIds;
+    }
+
+    hydrationPromise = (async () => {
+      try {
+        if (typeof window.getOrInitSupabaseClient === 'function') {
+          const client = await window.getOrInitSupabaseClient();
+          if (client) {
+            const { data, error } = await client
+              .from('saved_schemes')
+              .select('id, scheme_id, government_schemes(id, scheme_code)')
+              .eq('user_id', currentUserId);
+
+            if (!error && Array.isArray(data)) {
+              const freshSet = new Set();
+              data.forEach(r => {
+                if (r.scheme_id) {
+                  const uuid = String(r.scheme_id).toLowerCase();
+                  freshSet.add(uuid);
+                  freshSet.add(r.scheme_id);
+                }
+                if (r.government_schemes?.id) {
+                  freshSet.add(String(r.government_schemes.id).toLowerCase());
+                }
+                if (r.government_schemes?.scheme_code) {
+                  const code = r.government_schemes.scheme_code;
+                  freshSet.add(code);
+                  freshSet.add(code.toLowerCase());
+                  freshSet.add(code.toUpperCase());
+                  const mappedUuid = resolveUuid(code);
+                  if (mappedUuid) freshSet.add(mappedUuid);
+                }
+              });
+
+              // Also map all known schemes across UUID, code, and slug
+              Object.entries(SCHEME_UUID_MAP).forEach(([code, uuid]) => {
+                if (freshSet.has(uuid)) {
+                  freshSet.add(code);
+                  freshSet.add(code.toLowerCase());
+                }
+              });
+              Object.entries(SCHEME_SLUG_MAP).forEach(([slug, uuid]) => {
+                if (freshSet.has(uuid)) {
+                  freshSet.add(slug);
+                }
+              });
+
+              savedSchemeIds = freshSet;
+              isHydrated = true;
+
+              try {
+                localStorage.setItem(`cc_saved_schemes_${currentUserId}`, JSON.stringify([...savedSchemeIds]));
+              } catch (e) {}
+
+              notifyListeners();
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[CrowdCitySavedSchemes] Hydration notice:", err);
+      } finally {
+        isHydrated = true;
+      }
+      return savedSchemeIds;
+    })();
+
+    return hydrationPromise;
+  }
+
+  function isSaved(identifier) {
+    if (!identifier) return false;
+    const str = String(identifier).trim();
+    if (savedSchemeIds.has(str)) return true;
+    if (savedSchemeIds.has(str.toLowerCase())) return true;
+    if (savedSchemeIds.has(str.toUpperCase())) return true;
+    const uuid = resolveUuid(str);
+    if (uuid && savedSchemeIds.has(uuid)) return true;
+    return false;
+  }
+
+  function addSaved(identifier) {
+    if (!identifier) return;
+    const str = String(identifier).trim();
+    savedSchemeIds.add(str);
+    savedSchemeIds.add(str.toLowerCase());
+    savedSchemeIds.add(str.toUpperCase());
+    const uuid = resolveUuid(str);
+    if (uuid) {
+      savedSchemeIds.add(uuid);
+      Object.entries(SCHEME_UUID_MAP).forEach(([code, u]) => {
+        if (u === uuid) {
+          savedSchemeIds.add(code);
+          savedSchemeIds.add(code.toLowerCase());
+        }
+      });
+      Object.entries(SCHEME_SLUG_MAP).forEach(([slug, u]) => {
+        if (u === uuid) savedSchemeIds.add(slug);
+      });
+    }
+
+    if (currentUserId) {
+      try {
+        localStorage.setItem(`cc_saved_schemes_${currentUserId}`, JSON.stringify([...savedSchemeIds]));
+      } catch (e) {}
+    }
+    notifyListeners();
+  }
+
+  function removeSaved(identifier) {
+    if (!identifier) return;
+    const str = String(identifier).trim();
+    const uuid = resolveUuid(str);
+    savedSchemeIds.delete(str);
+    savedSchemeIds.delete(str.toLowerCase());
+    savedSchemeIds.delete(str.toUpperCase());
+    if (uuid) {
+      savedSchemeIds.delete(uuid);
+      Object.entries(SCHEME_UUID_MAP).forEach(([code, u]) => {
+        if (u === uuid) {
+          savedSchemeIds.delete(code);
+          savedSchemeIds.delete(code.toLowerCase());
+        }
+      });
+      Object.entries(SCHEME_SLUG_MAP).forEach(([slug, u]) => {
+        if (u === uuid) savedSchemeIds.delete(slug);
+      });
+    }
+
+    if (currentUserId) {
+      try {
+        localStorage.setItem(`cc_saved_schemes_${currentUserId}`, JSON.stringify([...savedSchemeIds]));
+      } catch (e) {}
+    }
+    notifyListeners();
+  }
+
+  async function toggleSave(schemeId, schemeName) {
+    const targetUuid = resolveUuid(schemeId);
+    if (!targetUuid) {
+      return { success: false, error: 'Invalid scheme reference' };
+    }
+
+    if (inFlight.has(targetUuid)) {
+      return { inFlight: true };
+    }
+    inFlight.add(targetUuid);
+
+    try {
+      const client = (typeof window.getOrInitSupabaseClient === 'function') ? await window.getOrInitSupabaseClient() : null;
+      if (!client) {
+        return { success: false, error: 'Sign-in required' };
+      }
+
+      const session = await client.auth.getSession();
+      const userId = session?.data?.session?.user?.id || getLocalUserId();
+      if (!userId) {
+        return { success: false, error: 'Sign-in required' };
+      }
+      currentUserId = userId;
+
+      const currentlySaved = isSaved(targetUuid) || isSaved(schemeId);
+
+      if (currentlySaved) {
+        // Optimistically remove
+        removeSaved(targetUuid);
+        removeSaved(schemeId);
+        const { error: delError } = await client
+          .from('saved_schemes')
+          .delete()
+          .eq('user_id', userId)
+          .eq('scheme_id', targetUuid);
+
+        if (delError) {
+          // Revert optimistic removal on real error
+          addSaved(targetUuid);
+          return { success: false, error: delError.message, isSaved: true };
+        }
+        return { success: true, action: 'removed', isSaved: false };
+      } else {
+        // Optimistically add
+        addSaved(targetUuid);
+        addSaved(schemeId);
+        const { error: insError } = await client
+          .from('saved_schemes')
+          .insert({ user_id: userId, scheme_id: targetUuid });
+
+        if (!insError) {
+          return { success: true, action: 'saved', isSaved: true };
+        } else if (insError.code === '23505') {
+          // ALREADY SAVED in database: GUARANTEE state remains Saved!
+          addSaved(targetUuid);
+          addSaved(schemeId);
+          return { success: true, action: 'already_saved', isSaved: true };
+        } else {
+          // Revert optimistic addition on real error
+          removeSaved(targetUuid);
+          removeSaved(schemeId);
+          return { success: false, error: insError.message, isSaved: false };
+        }
+      }
+    } finally {
+      inFlight.delete(targetUuid);
+    }
+  }
+
+  function onStateChange(callback) {
+    if (typeof callback === 'function') {
+      listeners.add(callback);
+      return () => listeners.delete(callback);
+    }
+  }
+
+  function notifyListeners() {
+    listeners.forEach(cb => {
+      try { cb(savedSchemeIds); } catch (e) {}
+    });
+  }
+
+  function reset() {
+    savedSchemeIds.clear();
+    currentUserId = null;
+    isHydrated = false;
+    hydrationPromise = null;
+    notifyListeners();
+  }
+
+  // Cross-tab synchronization
+  window.addEventListener('storage', (e) => {
+    if (currentUserId && e.key === `cc_saved_schemes_${currentUserId}`) {
+      preHydrateFromCache();
+      notifyListeners();
+    }
+  });
+
+  // Back/Forward navigation synchronization
+  window.addEventListener('pageshow', () => {
+    preHydrateFromCache();
+    notifyListeners();
+  });
+
+  window.CrowdCitySavedSchemes = {
+    isSaved,
+    addSaved,
+    removeSaved,
+    toggleSave,
+    ensureHydrated,
+    isReady: () => isHydrated,
+    getSavedIds: () => new Set(savedSchemeIds),
+    resolveUuid,
+    onStateChange,
+    reset,
+    preHydrateFromCache
+  };
+})();
 
 /**
  * Initialize Global Civic Search across application pages

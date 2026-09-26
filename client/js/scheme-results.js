@@ -690,8 +690,48 @@
   let resultsUserSavedIds = new Set();
   const inFlightResultsBookmarks = new Set();
 
+  function syncResultsSavedIdsFromCache() {
+    try {
+      if (window.CrowdCitySavedSchemes?.getSavedIds) {
+        const set = window.CrowdCitySavedSchemes.getSavedIds();
+        if (set && set.size > 0) {
+          resultsUserSavedIds = set;
+          return;
+        }
+      }
+      const u = (typeof window.getCurrentUser === 'function') ? window.getCurrentUser() : null;
+      let uid = u?.id;
+      if (!uid) {
+        const rawSess = localStorage.getItem('cc_session') || sessionStorage.getItem('cc_session');
+        if (rawSess) uid = JSON.parse(rawSess)?.user?.id;
+      }
+      if (uid) {
+        const cached = localStorage.getItem(`cc_saved_schemes_${uid}`);
+        if (cached) {
+          const arr = JSON.parse(cached);
+          if (Array.isArray(arr) && arr.length > 0) resultsUserSavedIds = new Set(arr);
+        }
+      }
+    } catch (e) {}
+  }
+  syncResultsSavedIdsFromCache();
+
+  if (window.CrowdCitySavedSchemes?.onStateChange) {
+    window.CrowdCitySavedSchemes.onStateChange((newSet) => {
+      resultsUserSavedIds = new Set(newSet);
+    });
+  }
+
   async function loadResultsSavedIds() {
     try {
+      if (window.CrowdCitySavedSchemes?.ensureHydrated) {
+        const hydrated = await window.CrowdCitySavedSchemes.ensureHydrated();
+        if (hydrated) {
+          resultsUserSavedIds = new Set(hydrated);
+          return resultsUserSavedIds;
+        }
+      }
+
       if (typeof window.getOrInitSupabaseClient === 'function') {
         const client = await window.getOrInitSupabaseClient();
         if (client) {
@@ -735,15 +775,63 @@
 
   function isResultsSchemeSaved(scheme) {
     if (!scheme) return false;
+    if (window.CrowdCitySavedSchemes?.isSaved) {
+      if (scheme.id && window.CrowdCitySavedSchemes.isSaved(scheme.id)) return true;
+      if (scheme.scheme_code && window.CrowdCitySavedSchemes.isSaved(scheme.scheme_code)) return true;
+    }
     if (scheme.id && resultsUserSavedIds.has(scheme.id)) return true;
     if (scheme.scheme_code && resultsUserSavedIds.has(scheme.scheme_code)) return true;
     if (scheme.scheme_code && resultsUserSavedIds.has(scheme.scheme_code.toLowerCase())) return true;
     const resolved = resolveResultsSchemeUuid(scheme.id || scheme.scheme_code);
-    if (resolved && resultsUserSavedIds.has(resolved)) return true;
+    if (resolved && (resultsUserSavedIds.has(resolved) || (window.CrowdCitySavedSchemes?.isSaved && window.CrowdCitySavedSchemes.isSaved(resolved)))) return true;
     return false;
   }
 
   async function saveSchemeBookmark(schemeId, buttonElem) {
+    const isTamil = (window.i18n && window.i18n.getCurrentLanguage && window.i18n.getCurrentLanguage() === 'ta');
+    const tSave = isTamil ? 'சேமிக்கவும்' : 'Save Scheme';
+    const tSaved = isTamil ? 'சேமிக்கப்பட்டது' : 'Saved';
+
+    const updateBtn = (saved) => {
+      if (!buttonElem) return;
+      if (saved) {
+        buttonElem.classList.add('is-saved');
+        buttonElem.style.borderColor = '#10b981';
+        buttonElem.style.color = '#10b981';
+        buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
+        buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
+      } else {
+        buttonElem.classList.remove('is-saved');
+        buttonElem.style.borderColor = 'var(--border-color)';
+        buttonElem.style.color = 'var(--text-main)';
+        buttonElem.style.background = 'transparent';
+        buttonElem.innerHTML = `<i class="fa-regular fa-bookmark"></i> <span>${tSave}</span>`;
+      }
+    };
+
+    if (window.CrowdCitySavedSchemes?.toggleSave) {
+      const res = await window.CrowdCitySavedSchemes.toggleSave(schemeId);
+      if (res.inFlight) return;
+      if (!res.success && res.error === 'Sign-in required') {
+        if (window.showToast) window.showToast("Please sign in to bookmark schemes.", "info");
+        return;
+      }
+      if (res.action === 'saved') {
+        updateBtn(true);
+        if (window.showToast) window.showToast("Scheme saved to your bookmarks!", "success");
+      } else if (res.action === 'already_saved') {
+        updateBtn(true);
+        if (window.showToast) window.showToast("Scheme is already saved in your bookmarks!", "info");
+      } else if (res.action === 'removed') {
+        updateBtn(false);
+        if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
+      } else {
+        updateBtn(res.isSaved);
+        if (window.showToast) window.showToast("Failed to update bookmark.", "error");
+      }
+      return;
+    }
+
     const targetUuid = resolveResultsSchemeUuid(schemeId);
     if (!targetUuid) {
       if (window.showToast) window.showToast("Could not bookmark scheme. Invalid scheme reference.", "error");
@@ -752,10 +840,6 @@
 
     if (inFlightResultsBookmarks.has(targetUuid)) return;
     inFlightResultsBookmarks.add(targetUuid);
-
-    const isTamil = (window.i18n && window.i18n.getCurrentLanguage && window.i18n.getCurrentLanguage() === 'ta');
-    const tSave = isTamil ? 'சேமிக்கவும்' : 'Save Scheme';
-    const tSaved = isTamil ? 'சேமிக்கப்பட்டது' : 'Saved';
 
     try {
       if (typeof window.getOrInitSupabaseClient !== 'function') {
@@ -779,7 +863,6 @@
       const isCurrentlySaved = resultsUserSavedIds.has(targetUuid) || (buttonElem && buttonElem.classList.contains('is-saved'));
 
       if (isCurrentlySaved) {
-        // Toggle Remove
         const { error: delErr } = await client
           .from('saved_schemes')
           .delete()
@@ -788,66 +871,20 @@
 
         if (!delErr) {
           resultsUserSavedIds.delete(targetUuid);
-          const found = (allEligibleSchemes || []).find(s => s.id === targetUuid || resolveResultsSchemeUuid(s.id) === targetUuid);
-          if (found?.scheme_code) {
-            resultsUserSavedIds.delete(found.scheme_code);
-            resultsUserSavedIds.delete(found.scheme_code.toLowerCase());
-          }
-          try {
-            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...resultsUserSavedIds]));
-          } catch (e) {}
-
-          if (buttonElem) {
-            buttonElem.classList.remove('is-saved');
-            buttonElem.style.borderColor = 'var(--border-color)';
-            buttonElem.style.color = 'var(--text-main)';
-            buttonElem.style.background = 'transparent';
-            buttonElem.innerHTML = `<i class="fa-regular fa-bookmark"></i> <span>${tSave}</span>`;
-          }
+          updateBtn(false);
           if (window.showToast) window.showToast("Scheme removed from your saved list.", "info");
         } else {
           if (window.showToast) window.showToast("Failed to remove bookmark.", "error");
         }
       } else {
-        // Toggle Save
         const { error: insErr } = await client
           .from('saved_schemes')
           .insert({ user_id: userId, scheme_id: targetUuid });
 
-        if (!insErr) {
+        if (!insErr || insErr.code === '23505') {
           resultsUserSavedIds.add(targetUuid);
-          const found = (allEligibleSchemes || []).find(s => s.id === targetUuid || resolveResultsSchemeUuid(s.id) === targetUuid);
-          if (found?.scheme_code) {
-            resultsUserSavedIds.add(found.scheme_code);
-            resultsUserSavedIds.add(found.scheme_code.toLowerCase());
-          }
-          try {
-            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...resultsUserSavedIds]));
-          } catch (e) {}
-
-          if (buttonElem) {
-            buttonElem.classList.add('is-saved');
-            buttonElem.style.borderColor = '#10b981';
-            buttonElem.style.color = '#10b981';
-            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
-            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
-          }
-          if (window.showToast) window.showToast("Scheme saved to your bookmarks!", "success");
-        } else if (insErr.code === '23505') {
-          // Already saved: guarantee UI matches database
-          resultsUserSavedIds.add(targetUuid);
-          try {
-            localStorage.setItem(`cc_saved_schemes_${userId}`, JSON.stringify([...resultsUserSavedIds]));
-          } catch (e) {}
-
-          if (buttonElem) {
-            buttonElem.classList.add('is-saved');
-            buttonElem.style.borderColor = '#10b981';
-            buttonElem.style.color = '#10b981';
-            buttonElem.style.background = 'rgba(16, 185, 129, 0.1)';
-            buttonElem.innerHTML = `<i class="fa-solid fa-bookmark"></i> <span>${tSaved}</span>`;
-          }
-          if (window.showToast) window.showToast("Scheme is already saved in your bookmarks!", "info");
+          updateBtn(true);
+          if (window.showToast) window.showToast(insErr?.code === '23505' ? "Scheme is already saved in your bookmarks!" : "Scheme saved to your bookmarks!", "success");
         } else {
           if (window.showToast) window.showToast("Failed to save scheme.", "error");
         }
