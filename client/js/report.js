@@ -498,6 +498,7 @@ function initAiCameraDetection() {
   let currentAiSuggestion = null;
   let activeLoadingToast = null;
   let activeAnalysisController = null;
+  let activeSafetyTimeoutId = null;
   let isAnalyzingImage = false;
 
   // Trigger file selection directly on click (prevent duplicate trigger if busy)
@@ -616,7 +617,11 @@ function initAiCameraDetection() {
       return;
     }
 
-    // Abort previous in-flight analysis if a new image was chosen
+    // Cancel existing safety timer and abort previous in-flight analysis if a new image was chosen
+    if (activeSafetyTimeoutId) {
+      clearTimeout(activeSafetyTimeoutId);
+      activeSafetyTimeoutId = null;
+    }
     if (isAnalyzingImage && activeAnalysisController) {
       activeAnalysisController.abort();
       activeAnalysisController = null;
@@ -635,7 +640,35 @@ function initAiCameraDetection() {
 
     // Initialize state & abort controller
     isAnalyzingImage = true;
-    activeAnalysisController = new AbortController();
+    const currentController = new AbortController();
+    activeAnalysisController = currentController;
+    let isCurrentAnalysisActive = true;
+
+    // Helper to reset analysis UI controls safely
+    function resetAnalysisUi() {
+      if (activeAnalysisController === currentController) {
+        activeAnalysisController = null;
+        isAnalyzingImage = false;
+      }
+      if (statusContainer) {
+        statusContainer.classList.add('hidden');
+        statusContainer.removeAttribute('aria-busy');
+      }
+      if (detectionCard) detectionCard.removeAttribute('aria-busy');
+      if (cameraBtn) cameraBtn.removeAttribute('aria-disabled');
+      if (uploadBtn) uploadBtn.removeAttribute('aria-disabled');
+      if (inputElem) inputElem.value = '';
+    }
+
+    // Helper to display degraded-mode fallback message and clean loading toast
+    function showDegradedModeFallback(customMessage) {
+      cleanupActiveLoadingToast();
+      const fallbackMsg = customMessage || "Image analysis is temporarily unavailable. You can continue submitting your complaint manually.";
+      if (typeof window.showToast === 'function') {
+        window.showToast(fallbackMsg, "info");
+      }
+      if (suggestionCard) suggestionCard.classList.add('hidden');
+    }
 
     // Show loading state in DOM
     if (detectionCard) detectionCard.setAttribute('aria-busy', 'true');
@@ -655,11 +688,21 @@ function initAiCameraDetection() {
       });
     }
 
+    // Secondary UI safety timeout (35 seconds) to ensure UI never hangs
+    const safetyTimeoutId = setTimeout(() => {
+      if (!isCurrentAnalysisActive || activeAnalysisController !== currentController) return;
+      isCurrentAnalysisActive = false;
+      currentController.abort(new Error('Vision AI analysis safety timeout'));
+      showDegradedModeFallback();
+      resetAnalysisUi();
+    }, 35000);
+    activeSafetyTimeoutId = safetyTimeoutId;
+
     try {
       const resizedBase64 = await resizeImageForAi(file);
 
-      // Check if superseded or aborted
-      if (activeAnalysisController.signal.aborted) return;
+      // Check if superseded or aborted or timed out
+      if (!isCurrentAnalysisActive || currentController.signal.aborted) return;
 
       if (resizedBase64 && window.API && typeof window.API.analyzeImageWithAi === 'function') {
         const voiceLangSelect = document.getElementById('voice-lang-select');
@@ -667,11 +710,18 @@ function initAiCameraDetection() {
 
         const { data, error } = await window.API.analyzeImageWithAi(resizedBase64, {
           lang: selectedLang,
-          signal: activeAnalysisController.signal
+          signal: currentController.signal
         });
 
-        // Check if superseded or aborted
-        if (activeAnalysisController.signal.aborted) return;
+        // Check if superseded or aborted or timed out
+        if (!isCurrentAnalysisActive || currentController.signal.aborted) return;
+
+        // Disarm safety timeout on completion
+        if (activeSafetyTimeoutId === safetyTimeoutId) {
+          clearTimeout(safetyTimeoutId);
+          activeSafetyTimeoutId = null;
+        }
+        isCurrentAnalysisActive = false;
 
         // CRITICAL: Dismiss analyzing toast BEFORE rendering outcome toast
         cleanupActiveLoadingToast();
@@ -688,11 +738,7 @@ function initAiCameraDetection() {
 
         // Check for provider offline / rate limited / graceful fallback
         if (error || (data && data.success === false)) {
-          const fallbackMsg = (data && data.error) || error || "Image analysis is temporarily unavailable. You can continue submitting your complaint manually.";
-          if (typeof window.showToast === 'function') {
-            window.showToast(fallbackMsg, "info");
-          }
-          if (suggestionCard) suggestionCard.classList.add('hidden');
+          showDegradedModeFallback((data && data.error) || error);
           return;
         }
 
@@ -730,35 +776,22 @@ function initAiCameraDetection() {
         }
       }
     } catch (err) {
-      if (err.name === 'AbortError' || activeAnalysisController?.signal?.aborted) {
-        // Request cancelled or superseded; exit quietly
+      if (!isCurrentAnalysisActive || currentController.signal.aborted || err.name === 'AbortError') {
+        // Request cancelled, superseded, or already handled by safety timeout; exit quietly
         return;
       }
 
       console.warn("AI vision analysis exception:", err);
 
-      // CRITICAL: Dismiss analyzing toast BEFORE rendering error toast
-      cleanupActiveLoadingToast();
-
-      if (typeof window.showToast === 'function') {
-        window.showToast("Image analysis is temporarily unavailable. You can continue submitting your complaint manually.", "info");
-      }
-      if (suggestionCard) suggestionCard.classList.add('hidden');
+      isCurrentAnalysisActive = false;
+      showDegradedModeFallback();
     } finally {
-      // Ensure loading toast is 100% destroyed on any exit path
-      cleanupActiveLoadingToast();
-
-      isAnalyzingImage = false;
-      activeAnalysisController = null;
-
-      if (statusContainer) {
-        statusContainer.classList.add('hidden');
-        statusContainer.removeAttribute('aria-busy');
+      if (activeSafetyTimeoutId === safetyTimeoutId) {
+        clearTimeout(safetyTimeoutId);
+        activeSafetyTimeoutId = null;
       }
-      if (detectionCard) detectionCard.removeAttribute('aria-busy');
-      if (cameraBtn) cameraBtn.removeAttribute('aria-disabled');
-      if (uploadBtn) uploadBtn.removeAttribute('aria-disabled');
-      if (inputElem) inputElem.value = '';
+      cleanupActiveLoadingToast();
+      resetAnalysisUi();
     }
   }
 }

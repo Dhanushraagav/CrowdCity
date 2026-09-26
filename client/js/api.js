@@ -92,7 +92,21 @@ async function request(endpoint, options = {}) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 35000);
+  const timeoutId = setTimeout(() => {
+    controller.abort(new Error('Request timed out'));
+  }, 35000);
+
+  let onCallerAbort = null;
+  if (options.signal) {
+    if (options.signal.aborted) {
+      controller.abort(options.signal.reason);
+    } else {
+      onCallerAbort = () => {
+        controller.abort(options.signal.reason);
+      };
+      options.signal.addEventListener('abort', onCallerAbort, { once: true });
+    }
+  }
 
   const config = {
     method: method,
@@ -100,12 +114,11 @@ async function request(endpoint, options = {}) {
     headers,
     credentials: 'omit',
     cache: 'no-store',
-    signal: options.signal || controller.signal
+    signal: controller.signal
   };
 
   try {
     const response = await fetch(url, config);
-    clearTimeout(timeoutId);
 
     const status = response.status;
     let data = null;
@@ -139,13 +152,20 @@ async function request(endpoint, options = {}) {
 
     return result;
   } catch (err) {
-    clearTimeout(timeoutId);
-    const isTimeout = err.name === 'AbortError';
+    const isTimeout = err.name === 'AbortError' && (
+      (controller.signal.reason && controller.signal.reason.message === 'Request timed out') ||
+      !options.signal?.aborted
+    );
     return {
       data: null,
       error: isTimeout ? 'Request timed out' : (err.message || 'Network request failed'),
       status: isTimeout ? 408 : 0
     };
+  } finally {
+    clearTimeout(timeoutId);
+    if (options.signal && onCallerAbort) {
+      options.signal.removeEventListener('abort', onCallerAbort);
+    }
   }
 }
 
