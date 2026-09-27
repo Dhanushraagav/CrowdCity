@@ -15,6 +15,7 @@
  */
 
 import { TN_DISTRICTS, getDistrictById } from '../config/districtsConfig.js';
+import { getRegionsForDistrict, calculateDistanceKm } from './locationSearchService.js';
 import logger from '../config/logger.js';
 
 // Official Open-Meteo Source Attribution
@@ -649,8 +650,99 @@ export async function getWeatherForecast(options = {}) {
   };
 }
 
+const regionsWeatherCache = new Map();
+
+/**
+ * Batch-fetch live weather for all legitimate regions of a district.
+ * Uses a single multi-coordinate request to Open-Meteo for speed and efficiency.
+ */
+export async function getDistrictRegionsWeather(districtId, userCoords = null) {
+  if (!districtId || districtId === 'all') {
+    return { success: false, error: 'District is required', regions: [] };
+  }
+
+  const regions = getRegionsForDistrict(districtId, userCoords);
+  if (!regions || regions.length === 0) {
+    return { success: false, error: 'No regions found for district', regions: [] };
+  }
+
+  const dKey = districtId.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const now = Date.now();
+  const cached = regionsWeatherCache.get(dKey);
+
+  if (cached && (now - cached.timestamp < 10 * 60 * 1000)) {
+    let list = cached.data.map(r => ({
+      ...r,
+      distance_km: (userCoords && typeof userCoords.lat === 'number' && typeof userCoords.lon === 'number')
+        ? calculateDistanceKm(userCoords.lat, userCoords.lon, r.lat, r.lon)
+        : r.distance_km
+    }));
+    if (userCoords && typeof userCoords.lat === 'number' && typeof userCoords.lon === 'number') {
+      list.sort((a, b) => (a.distance_km ?? 9999) - (b.distance_km ?? 9999));
+    }
+    return {
+      success: true,
+      district: districtId,
+      last_updated_ist: cached.last_updated_ist || getCurrentISTTimestamp(),
+      regions: list
+    };
+  }
+
+  // Batch up to 16 top regions
+  const topRegions = regions.slice(0, 16);
+  const lats = topRegions.map(r => r.lat).join(',');
+  const lngs = topRegions.map(r => r.lon).join(',');
+
+  try {
+    const rawResponses = await fetchFromOpenMeteo(lats, lngs, false);
+    const respList = Array.isArray(rawResponses) ? rawResponses : [rawResponses];
+
+    const results = topRegions.map((reg, idx) => {
+      const raw = respList[idx];
+      let current = null;
+      if (raw && raw.current) {
+        const wmo = getWMOInterpretation(raw.current.weather_code);
+        current = {
+          temperature_c: typeof raw.current.temperature_2m === 'number' ? Math.round(raw.current.temperature_2m * 10) / 10 : null,
+          apparent_temperature_c: typeof raw.current.apparent_temperature === 'number' ? Math.round(raw.current.apparent_temperature * 10) / 10 : null,
+          relative_humidity_pct: raw.current.relative_humidity_2m || 0,
+          precipitation_mm: typeof raw.current.precipitation === 'number' ? raw.current.precipitation : 0,
+          weather_code: raw.current.weather_code || 0,
+          condition: wmo.label,
+          icon_class: wmo.icon,
+          wind_speed_kmh: typeof raw.current.wind_speed_10m === 'number' ? Math.round(raw.current.wind_speed_10m * 10) / 10 : 0,
+          is_day: typeof raw.current.is_day === 'number' ? raw.current.is_day : 1
+        };
+      }
+      return {
+        ...reg,
+        current
+      };
+    });
+
+    const timestamp = getCurrentISTTimestamp();
+    regionsWeatherCache.set(dKey, { timestamp: now, last_updated_ist: timestamp, data: results });
+
+    return {
+      success: true,
+      district: districtId,
+      last_updated_ist: timestamp,
+      regions: results
+    };
+  } catch (err) {
+    logger.warn(`[WeatherService] Failed to batch fetch regions weather: ${err.message}`);
+    return {
+      success: true,
+      district: districtId,
+      last_updated_ist: getCurrentISTTimestamp(),
+      regions: topRegions.map(r => ({ ...r, current: null }))
+    };
+  }
+}
+
 export default {
   getWeatherForecast,
+  getDistrictRegionsWeather,
   getWMOInterpretation,
   OPEN_METEO_SOURCE,
   WMO_WEATHER_CODES,

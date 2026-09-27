@@ -10,7 +10,7 @@
  */
 
 import express from 'express';
-import { getWeatherForecast, OPEN_METEO_SOURCE } from '../services/weatherService.js';
+import { getWeatherForecast, getDistrictRegionsWeather, OPEN_METEO_SOURCE } from '../services/weatherService.js';
 import { searchLocations, getTopLocalitiesForDistrict } from '../services/locationSearchService.js';
 import logger from '../config/logger.js';
 
@@ -90,10 +90,34 @@ const handleWeatherForecast = async (req, res) => {
   }
 };
 
+/**
+ * @route   GET /api/public-pulse/weather/regions
+ * @desc    Get live batched weather for all legitimate regions of a district, proximity-sorted
+ * @access  Public
+ */
+const handleDistrictRegions = async (req, res) => {
+  try {
+    const { district, lat, lon, latitude, longitude } = req.query;
+    const resolvedLat = lat || latitude;
+    const resolvedLon = lon || longitude;
+    const userCoords = (resolvedLat !== undefined && resolvedLon !== undefined && !isNaN(parseFloat(resolvedLat)) && !isNaN(parseFloat(resolvedLon)))
+      ? { lat: parseFloat(resolvedLat), lon: parseFloat(resolvedLon) }
+      : null;
+
+    const result = await getDistrictRegionsWeather(district, userCoords);
+    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+    return res.status(200).json(result);
+  } catch (err) {
+    logger.error(`[PublicPulseWeatherRoutes] Regions weather error: ${err.message}`);
+    return res.status(500).json({ success: false, error: 'Failed to fetch district regions weather', regions: [] });
+  }
+};
+
 // Location Search Endpoints
 router.get('/search', handleLocationSearch);
 router.get('/locations', handleLocationSearch);
 router.get('/localities', handleTopLocalities);
+router.get('/regions', handleDistrictRegions);
 
 // Weather Forecast Endpoints
 router.get('/', handleWeatherForecast);
