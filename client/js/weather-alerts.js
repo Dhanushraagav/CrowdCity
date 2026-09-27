@@ -515,16 +515,33 @@
 
     const today = daily && daily[0] ? daily[0] : {};
 
-    // Determine titles
-    let localityTitle = state.selectedRegion ? state.selectedRegion.name : getDistrictDisplayName(state.district);
-    let districtSubtitle = `${getDistrictDisplayName(state.district)}, Tamil Nadu`;
+    // Determine location hierarchy (Detected Locality -> Subtitle)
+    const currentDistName = getDistrictDisplayName(state.district);
+    let rawLocality = state.selectedRegion ? state.selectedRegion.name : currentDistName;
 
     if (data.location && data.location.name) {
-      localityTitle = data.location.name;
-      if (data.location.district) {
-        districtSubtitle = `${data.location.district}, Tamil Nadu`;
-      }
+      rawLocality = data.location.name;
     }
+
+    let primaryTitle = rawLocality;
+    let secondarySubtitle = `${currentDistName}, Tamil Nadu`;
+
+    if (rawLocality.includes(',')) {
+      const parts = rawLocality.split(',').map(s => s.trim()).filter(Boolean);
+      primaryTitle = parts[0];
+      secondarySubtitle = `${parts.slice(1).join(', ')}, ${currentDistName}`;
+    } else if (rawLocality.toLowerCase() !== currentDistName.toLowerCase()) {
+      primaryTitle = rawLocality;
+      secondarySubtitle = `${currentDistName}, Tamil Nadu`;
+    }
+
+    // Determine badge (CURRENT LOCATION vs LIVE WEATHER)
+    const isDetected = Boolean(
+      state.userDetectedDistrict &&
+      state.district.toLowerCase() === state.userDetectedDistrict.toLowerCase() &&
+      (!state.userHasManuallyChangedDistrict || (state.selectedRegion && state.selectedRegion.distance_km === 0))
+    );
+    const badgeLabel = isDetected ? 'CURRENT LOCATION' : 'LIVE WEATHER';
 
     const tempVal = typeof current.temperature_c === 'number' ? `${Math.round(current.temperature_c)}°` : '--°';
     const feelsLikeVal = typeof current.apparent_temperature_c === 'number' ? `${Math.round(current.apparent_temperature_c)}°` : '--°';
@@ -604,11 +621,11 @@
           <div class="hero-top-row">
             <div class="hero-location-block">
               <span class="hero-live-badge">
-                <i class="fa-solid fa-signal" style="font-size: 0.65rem;"></i>
-                <span>Live Weather</span>
+                <span class="hero-pulse-dot"></span>
+                <span>${escapeHtml(badgeLabel)}</span>
               </span>
-              <h2 class="hero-locality-name">${escapeHtml(localityTitle)}</h2>
-              <p class="hero-district-state">${escapeHtml(districtSubtitle)}</p>
+              <h2 class="hero-locality-name">${escapeHtml(primaryTitle)}</h2>
+              <p class="hero-district-state">${escapeHtml(secondarySubtitle)}</p>
             </div>
 
             <div class="hero-temp-block">
@@ -709,6 +726,7 @@
         ? `${Math.round(reg.current.temperature_c)}°`
         : '--°';
       const icon = reg.current ? reg.current.icon_class : 'fa-cloud';
+      const condText = reg.current ? (reg.current.condition || 'Clear') : 'Clear';
       const distLabel = typeof reg.distance_km === 'number'
         ? (reg.distance_km === 0 ? 'Your area' : `${reg.distance_km} km`)
         : 'Area';
@@ -723,12 +741,22 @@
           </div>
           <div class="region-chip-bottom">
             <span class="region-chip-temp">${tempDisplay}</span>
-            <i class="fa-solid ${escapeHtml(icon)} region-chip-icon"></i>
+            <div class="region-chip-cond">
+              <i class="fa-solid ${escapeHtml(icon)} region-chip-icon"></i>
+              <span>${escapeHtml(condText)}</span>
+            </div>
           </div>
         </div>
       `;
     }).join('');
   }
+
+  window.scrollRegions = function (amount) {
+    const container = document.getElementById('nearby-regions-container');
+    if (container) {
+      container.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+  };
 
   /**
    * Render 24-Hour Hourly Timeline.
