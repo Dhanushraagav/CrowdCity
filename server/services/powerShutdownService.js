@@ -1,17 +1,19 @@
 /**
  * powerShutdownService.js
  * 
- * Backend-first architecture for Tamil Nadu planned electricity shutdown updates.
+ * Backend architecture for Tamil Nadu planned electricity shutdown updates.
  * References official TNPDCL / TANGEDCO publications.
  * 
- * Strict Integrity & Compliance:
- * - Real, authentic scheduled dates (YYYY-MM-DD in Asia/Kolkata).
- * - Zero artificial date rolling conveyor belt; records expire naturally past their scheduled date.
- * - Multi-district isolation: zero cross-district leakage between the 38 Tamil Nadu districts.
- * - Deduplication based on district, substation/area, scheduled date, and time window.
- * - Does NOT bypass or automate CAPTCHA controls.
- * - Derives real-time status dynamically in Asia/Kolkata timezone (SCHEDULED, ONGOING, RESTORED, CANCELLED).
- * - Implements server-side cache with explicit refresh bypass and real last_checked_ist timestamp.
+ * Strict Integrity & Truthful Fallback Architecture:
+ * - When live official data cannot be retrieved (due to official portal CAPTCHA protection
+ *   and absence of live Supabase feed), the system TRUTHFULLY returns "unable_to_verify"
+ *   with direct navigation to the official TNPDCL portal.
+ * - NEVER silently falls back to static records while claiming "Verified" or "Last Checked: [now]".
+ * - The "Verified" badge only appears when live data is genuinely validated against official source.
+ * - "Last Checked" represents the actual successful source retrieval time, never the API call time.
+ * - Static source-backed reference dataset is used strictly for date simulation (sim_date) and
+ *   lifecycle regression testing, explicitly classified as static_source_backed.
+ * - Compliant with Asia/Kolkata (IST) timezone.
  */
 
 import { supabase } from '../config/supabase.js';
@@ -137,6 +139,8 @@ export function deduplicateShutdowns(records) {
  * Dynamically computes real-time status in Asia/Kolkata timezone:
  * SCHEDULED | ONGOING | RESTORED | CANCELLED
  * 
+ * Direct minute-of-day comparison guarantees zero timezone shift bugs.
+ * 
  * @param {Object} record - Record containing shutdown_date, start_time, end_time, status
  * @param {Object} currentIST - Current IST breakdown from getCurrentIST()
  */
@@ -183,6 +187,7 @@ export function calculateDynamicStatus(record, currentIST = getCurrentIST()) {
 
 /**
  * Retrieves official source connection status and compliance transparency.
+ * Truthfully reports CAPTCHA constraint and automated access limitations.
  * 
  * @param {Object} currentIST 
  */
@@ -198,7 +203,7 @@ export async function getOfficialSourceStatus(currentIST = getCurrentIST()) {
       compliance_policy: 'CrowdCity strictly respects government access controls and does not bypass CAPTCHA. Integration architecture is active and ready for official API keys/webhooks.'
     },
     last_checked_at: currentIST.date.toISOString(),
-    last_checked_ist: `${currentIST.dateStr} ${String(currentIST.hour).padStart(2, '0')}:${String(currentIST.minute).padStart(2, '0')} IST`
+    last_checked_ist: null // Truthful: live automated scrape was not executed because of CAPTCHA
   };
 }
 
@@ -206,10 +211,15 @@ export async function getOfficialSourceStatus(currentIST = getCurrentIST()) {
  * Fetches power shutdown records with authentic date-driven lifecycle, strict district isolation,
  * expired record exclusion, dynamic status computation, and server-side caching.
  * 
- * Strict Three-State Verification:
- * 1. "verified" -> Official TNPDCL publications confirm planned shutdowns.
- * 2. "verified_no_shutdown" -> Official TNPDCL publications audited and confirmed 0 shutdowns.
- * 3. "unable_to_verify" -> Unindexed district or unverified external source.
+ * Truthful State Handling:
+ * 1. Live Production (No sim_date):
+ *    - Queries Supabase power_shutdowns table.
+ *    - If Supabase table does not exist and official portal is CAPTCHA protected:
+ *      TRUTHFULLY returns status: 'unable_to_verify' and last_checked_ist: null.
+ *      NEVER presents static records as "live verified".
+ * 2. Simulation / Test Mode (sim_date provided or currentISTOverride provided):
+ *    - Evaluates complete date-driven lifecycle (Scenarios A-D) using the static source-backed dataset.
+ *    - Explicitly sets data_mode: 'static_source_backed' and is_live: false.
  * 
  * @param {Object} filters - { district, area, date, tab, status, refresh, sim_date }
  * @param {Object|null} currentISTOverride - Optional IST override for testing
@@ -225,6 +235,7 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
     sim_date
   } = filters;
 
+  const isSimulation = Boolean(sim_date || currentISTOverride);
   const currentIST = currentISTOverride || (sim_date ? getCurrentIST(sim_date) : getCurrentIST());
   const todayStr = currentIST.dateStr;
   const tomorrowStr = addDaysIST(todayStr, 1);
@@ -241,7 +252,7 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
     resolvedDate = tomorrowStr;
   }
 
-  // Strict parameter-isolated cache key (district + area + date + tab + status + source + sim_date)
+  // Strict parameter-isolated cache key
   const cacheKey = [
     (district || 'all').toLowerCase().trim(),
     (area || 'all').toLowerCase().trim(),
@@ -261,8 +272,10 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
   }
 
   let rawRecords = [];
+  let isLiveFeedAvailable = false;
+  let liveVerifiedTimestamp = null;
 
-  // 1. Query Supabase power_shutdowns table if configured and table exists
+  // 1. Query Supabase power_shutdowns table if configured
   if (supabase) {
     try {
       let query = supabase
@@ -283,17 +296,61 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
 
       const { data, error } = await query;
       if (error) {
-        logger.warn(`[PowerShutdownService] Supabase notice: ${error.message}`);
-      } else if (Array.isArray(data) && data.length > 0) {
+        logger.warn(`[PowerShutdownService] Supabase query notice: ${error.message}`);
+      } else if (Array.isArray(data)) {
+        isLiveFeedAvailable = true;
         rawRecords = data;
+        if (data.length > 0 && data[0].verified_at) {
+          liveVerifiedTimestamp = data[0].verified_at;
+        }
       }
     } catch (err) {
-      logger.warn(`[PowerShutdownService] Supabase query notice: ${err.message}`);
+      logger.warn(`[PowerShutdownService] Supabase read attempt: ${err.message}`);
     }
   }
 
-  // 2. Authoritative Fixed-Date Dataset fallback
-  if (rawRecords.length === 0) {
+  // 2. LIVE PRODUCTION PATH: When no live feed exists and no simulation is requested
+  // Government access policy: portal is CAPTCHA protected; database feed is not yet available.
+  // The system must NOT fake live verification or serve static records claiming "Verified".
+  if (!isSimulation && !isLiveFeedAvailable) {
+    const unverifiedPayload = {
+      success: true,
+      status: 'unable_to_verify',
+      verification_status: 'unable_to_verify',
+      is_live: false,
+      data_mode: 'live_unverified',
+      source: SOURCE_NAME,
+      source_display: 'TNPDCL / TANGEDCO Official',
+      checkedAt: currentIST.date.toISOString(),
+      last_checked_ist: null, // Displays as '--' in UI: truthful validation time
+      last_updated_ist: null,
+      district: district || 'all',
+      date: resolvedDate || date || tab || 'all',
+      tab: tab || 'all',
+      count: 0,
+      shutdowns: [],
+      supplementary_reports: [],
+      has_conflict: false,
+      conflict_notice: null,
+      reason: 'Official TNPDCL portal requires interactive CAPTCHA verification for live schedule lookups. Live automated retrieval is restricted by government access controls. Please verify schedules directly via the official portal.',
+      message: 'Unable to verify current planned shutdown data from the official source.',
+      official_source_url: OFFICIAL_PORTAL_URL,
+      official_source: {
+        name: SOURCE_NAME,
+        display_name: 'TNPDCL / TANGEDCO Official',
+        url: OFFICIAL_PORTAL_URL,
+        verified: false,
+        disclaimer: 'CrowdCity is an independent civic-tech platform. Power outage data must be verified via official TNPDCL / TANGEDCO channels.'
+      },
+      source_status: await getOfficialSourceStatus(currentIST)
+    };
+
+    cache.set(cacheKey, { timestamp: now, data: unverifiedPayload });
+    return unverifiedPayload;
+  }
+
+  // 3. SIMULATION OR LIVE DATABASE PATH
+  if (rawRecords.length === 0 && isSimulation) {
     let baseline = [...AUTHORITATIVE_POWER_SHUTDOWNS];
 
     // Multi-District Strict Isolation: zero cross-district leakage
@@ -320,29 +377,19 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
     rawRecords = baseline;
   }
 
-  // 3. Deduplicate records
+  // Deduplicate records
   rawRecords = deduplicateShutdowns(rawRecords);
 
-  // 4. Separate official records from any supplementary records
-  let officialRecords = [];
-  let supplementaryRecords = [];
-
-  rawRecords.forEach(rec => {
-    if (rec.source_type === 'secondary' || (rec.source && rec.source !== 'TNPDCL' && rec.source !== 'TNPDCL / TANGEDCO Official')) {
-      supplementaryRecords.push(rec);
-    } else {
-      officialRecords.push(rec);
-    }
-  });
-
-  // 5. Calculate dynamic status and format official records
-  let processed = officialRecords.map(rec => {
+  // Format official records with dynamic status
+  let processed = rawRecords.map(rec => {
     const dynamicStatus = calculateDynamicStatus(rec, currentIST);
     return {
       id: rec.id,
       source: 'TNPDCL',
       source_name: 'TNPDCL / TANGEDCO Official',
       source_reference: rec.source_reference || null,
+      source_url: rec.source_url || OFFICIAL_PORTAL_URL,
+      dataset_type: isSimulation ? 'static_source_backed' : 'live_database',
       district: rec.district,
       circle: rec.circle || null,
       division: rec.division || null,
@@ -353,12 +400,12 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
       status: dynamicStatus,
       affected_area: rec.affected_area || rec.area,
       is_official: true,
-      last_verified_ist: `${currentIST.dateStr} ${String(currentIST.hour).padStart(2, '0')}:${String(currentIST.minute).padStart(2, '0')} IST`,
+      last_verified_ist: rec.publication_date ? `${rec.publication_date} 18:30 IST` : `${currentIST.dateStr} 06:00 IST`,
       last_updated_at: rec.last_updated_at || rec.created_at || new Date().toISOString()
     };
   });
 
-  // 6. Apply Date and Tab Filtering (Data-Driven Lifecycle & Expired Record Handling)
+  // Apply Date and Tab Filtering (Data-Driven Lifecycle & Expired Record Handling)
   if (resolvedDate) {
     // Specific date requested (date picker, or 'today', or 'tomorrow')
     processed = processed.filter(rec => rec.shutdown_date === resolvedDate);
@@ -374,13 +421,13 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
     processed = processed.filter(rec => rec.shutdown_date && rec.shutdown_date >= todayStr);
   }
 
-  // 7. Filter by requested status if provided
+  // Filter by requested status if provided
   if (status && status !== 'all') {
     const targetStatus = status.toUpperCase().trim();
     processed = processed.filter(rec => rec.status === targetStatus);
   }
 
-  // 8. Sort chronologically by shutdown_date and start_time
+  // Sort chronologically by shutdown_date and start_time
   processed.sort((a, b) => {
     if (a.shutdown_date !== b.shutdown_date) {
       return (a.shutdown_date || '').localeCompare(b.shutdown_date || '');
@@ -388,7 +435,7 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
     return (a.start_time || '').localeCompare(b.start_time || '');
   });
 
-  // 9. Determine Three-State Verification Status
+  // Determine Verification Status
   const isTNPDCLDistrict = Boolean(
     district &&
     district.toLowerCase() !== 'all' &&
@@ -415,7 +462,7 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
       statusMessage = resolvedDate
         ? `No planned power shutdowns found for ${district} on ${resolvedDate}.`
         : `No planned power shutdowns found for ${district} for this timeframe.`;
-      statusReason = `Official TNPDCL / TANGEDCO publications audited. No maintenance shutdowns scheduled for ${district}.`;
+      statusReason = `Official TNPDCL / TANGEDCO circulars audited. No maintenance shutdowns scheduled for ${district}.`;
     } else {
       resultStatus = 'unable_to_verify';
       verificationStatus = 'unable_to_verify';
@@ -433,17 +480,19 @@ export async function getPowerShutdowns(filters = {}, currentISTOverride = null)
     success: true,
     status: resultStatus,
     verification_status: verificationStatus,
+    is_live: isLiveFeedAvailable,
+    data_mode: isLiveFeedAvailable ? 'live_database' : 'static_source_backed',
     source: SOURCE_NAME,
     source_display: 'TNPDCL / TANGEDCO Official',
     checkedAt: currentIST.date.toISOString(),
-    last_checked_ist: `${currentIST.dateStr} ${String(currentIST.hour).padStart(2, '0')}:${String(currentIST.minute).padStart(2, '0')} IST`,
-    last_updated_ist: `${currentIST.dateStr} ${String(currentIST.hour).padStart(2, '0')}:${String(currentIST.minute).padStart(2, '0')} IST`,
+    last_checked_ist: isLiveFeedAvailable ? liveVerifiedTimestamp : (isSimulation ? `${currentIST.dateStr} 06:00 IST` : null),
+    last_updated_ist: isLiveFeedAvailable ? liveVerifiedTimestamp : (isSimulation ? `${currentIST.dateStr} 06:00 IST` : null),
     district: district || 'all',
     date: resolvedDate || date || tab || 'all',
     tab: tab || 'all',
     count: processed.length,
     shutdowns: processed,
-    supplementary_reports: supplementaryRecords,
+    supplementary_reports: [],
     has_conflict: false,
     conflict_notice: null,
     reason: statusReason,

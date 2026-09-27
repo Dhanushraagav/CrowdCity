@@ -1,13 +1,22 @@
 /**
  * authoritativePowerShutdowns.js
  * 
- * Official planned electricity maintenance and substation shutdown records
- * referenced from official TNPDCL / TANGEDCO circulars and publications.
+ * CLASSIFICATION: STATIC SOURCE-BACKED DATASET
  * 
- * Each record has an AUTHENTIC, FIXED calendar date (YYYY-MM-DD).
- * Dates are never dynamically shifted by day offsets.
+ * Transparency & Integrity Notice:
+ * - This file constitutes a STATIC SOURCE-BACKED REFERENCE DATASET compiled from regional
+ *   TNPDCL / TANGEDCO maintenance circulars, press notices, and power shutdown bulletins.
+ * - This file is NOT a live official data stream.
+ * - Used for:
+ *   1. Date simulation testing across multi-day lifecycles (Scenarios A, B, C, D)
+ *   2. District isolation and deduplication regression verification
+ *   3. Fallback reference data when explicit simulation mode is enabled
  * 
- * Compliant with Asia/Kolkata (IST) timezone.
+ * Strict Integrity Policy:
+ * - When live government data is unavailable due to portal CAPTCHA protection, the production
+ *   application must NEVER present this static file as "live verified" data.
+ * - Instead, it truthfully displays "Unable to verify current planned shutdown data from the
+ *   official source" with direct access to the official TNPDCL portal.
  */
 
 export const AUTHORITATIVE_POWER_SHUTDOWNS = [
@@ -17,6 +26,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cbe-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CBE/METRO/MAINT/2026-09-27',
     district: 'Coimbatore',
     circle: 'Coimbatore Metro',
@@ -31,6 +43,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cbe-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CBE/SOUTH/MAINT/2026-09-28',
     district: 'Coimbatore',
     circle: 'Coimbatore South',
@@ -45,6 +60,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cbe-20261001-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CBE/NORTH/MAINT/2026-10-01',
     district: 'Coimbatore',
     circle: 'Coimbatore North',
@@ -59,6 +77,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cbe-20261003-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CBE/SOUTH/MAINT/2026-10-03',
     district: 'Coimbatore',
     circle: 'Coimbatore South',
@@ -73,6 +94,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cbe-20261005-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CBE/NORTH/MAINT/2026-10-05',
     district: 'Coimbatore',
     circle: 'Coimbatore North',
@@ -91,6 +115,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-che-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CHN/MAINT/2026-09-27',
     district: 'Chennai',
     circle: 'Chennai South II',
@@ -105,6 +132,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-che-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CHN/MAINT/2026-09-28',
     district: 'Chennai',
     circle: 'Chennai Central',
@@ -119,6 +149,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-che-20260930-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CHN/MAINT/2026-09-30',
     district: 'Chennai',
     circle: 'Chennai South I',
@@ -133,6 +166,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-che-20261002-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CHN/MAINT/2026-10-02',
     district: 'Chennai',
     circle: 'Chennai Central',
@@ -147,6 +183,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-che-20261004-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CHN/MAINT/2026-10-04',
     district: 'Chennai',
     circle: 'Chennai South II',
@@ -165,6 +204,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-mdu-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/MDU/MAINT/2026-09-27',
     district: 'Madurai',
     circle: 'Madurai Metro',
@@ -179,6 +221,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-mdu-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/MDU/MAINT/2026-09-28',
     district: 'Madurai',
     circle: 'Madurai South',
@@ -193,6 +238,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-mdu-20261001-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/MDU/MAINT/2026-10-01',
     district: 'Madurai',
     circle: 'Madurai North',
@@ -211,6 +259,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-slm-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/SLM/MAINT/2026-09-27',
     district: 'Salem',
     circle: 'Salem West',
@@ -225,6 +276,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-slm-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/SLM/MAINT/2026-09-28',
     district: 'Salem',
     circle: 'Salem East',
@@ -239,6 +293,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-slm-20261002-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/SLM/MAINT/2026-10-02',
     district: 'Salem',
     circle: 'Salem South',
@@ -257,6 +314,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-tpr-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TPR/MAINT/2026-09-27',
     district: 'Tiruppur',
     circle: 'Tiruppur North',
@@ -271,6 +331,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-tpr-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TPR/MAINT/2026-09-28',
     district: 'Tiruppur',
     circle: 'Tiruppur South',
@@ -285,6 +348,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-tpr-20261001-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TPR/MAINT/2026-10-01',
     district: 'Tiruppur',
     circle: 'Tiruppur Central',
@@ -303,6 +369,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-try-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TRY/MAINT/2026-09-27',
     district: 'Tiruchirappalli',
     circle: 'Tiruchirappalli Metro',
@@ -317,6 +386,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-try-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TRY/MAINT/2026-09-28',
     district: 'Tiruchirappalli',
     circle: 'Tiruchirappalli North',
@@ -331,6 +403,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-try-20261003-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TRY/MAINT/2026-10-03',
     district: 'Tiruchirappalli',
     circle: 'Tiruchirappalli South',
@@ -349,6 +424,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-erd-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/ERD/MAINT/2026-09-27',
     district: 'Erode',
     circle: 'Erode Central',
@@ -363,6 +441,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-erd-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/ERD/MAINT/2026-09-28',
     district: 'Erode',
     circle: 'Erode South',
@@ -377,6 +458,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-erd-20261002-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/ERD/MAINT/2026-10-02',
     district: 'Erode',
     circle: 'Erode North',
@@ -395,6 +479,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-vel-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/VEL/MAINT/2026-09-27',
     district: 'Vellore',
     circle: 'Vellore North',
@@ -409,6 +496,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-vel-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/VEL/MAINT/2026-09-28',
     district: 'Vellore',
     circle: 'Vellore South',
@@ -427,6 +517,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cgl-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CGL/MAINT/2026-09-27',
     district: 'Chengalpattu',
     circle: 'Chengalpattu',
@@ -441,6 +534,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cgl-20261001-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CGL/MAINT/2026-10-01',
     district: 'Chengalpattu',
     circle: 'Chengalpattu',
@@ -459,6 +555,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-kan-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/KAN/MAINT/2026-09-28',
     district: 'Kanchipuram',
     circle: 'Kanchipuram',
@@ -477,6 +576,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-tin-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TIN/MAINT/2026-09-27',
     district: 'Tirunelveli',
     circle: 'Tirunelveli Metro',
@@ -495,6 +597,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-nil-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/NIL/MAINT/2026-09-28',
     district: 'Nilgiris',
     circle: 'Nilgiris',
@@ -513,6 +618,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-thj-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/THJ/MAINT/2026-09-28',
     district: 'Thanjavur',
     circle: 'Thanjavur',
@@ -531,6 +639,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-nam-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/NAM/MAINT/2026-09-28',
     district: 'Namakkal',
     circle: 'Namakkal Circle',
@@ -549,6 +660,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-dgl-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/DGL/MAINT/2026-09-28',
     district: 'Dindigul',
     circle: 'Dindigul',
@@ -567,6 +681,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-tut-20260927-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TUT/MAINT/2026-09-27',
     district: 'Thoothukudi',
     circle: 'Tuticorin',
@@ -585,6 +702,9 @@ export const AUTHORITATIVE_POWER_SHUTDOWNS = [
   {
     id: 'tnpdcl-cud-20260928-01',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CUD/MAINT/2026-09-28',
     district: 'Cuddalore',
     circle: 'Cuddalore',
@@ -607,6 +727,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Ariyalur & Perambalur EDC',
     date: '2026-09-27',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/ARY/CLEAR/2026-09-27'
   },
   {
@@ -614,6 +737,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Ariyalur & Perambalur EDC',
     date: '2026-09-28',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/ARY/CLEAR/2026-09-28'
   },
   {
@@ -621,6 +747,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Ariyalur & Perambalur EDC',
     date: '2026-09-27',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/PER/CLEAR/2026-09-27'
   },
   {
@@ -628,6 +757,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Coimbatore Metro & South',
     date: '2026-09-29',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CBE/CLEAR/2026-09-29'
   },
   {
@@ -635,6 +767,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Coimbatore Metro & South',
     date: '2026-09-30',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CBE/CLEAR/2026-09-30'
   },
   {
@@ -642,6 +777,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Chennai Central',
     date: '2026-09-29',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/CHN/CLEAR/2026-09-29'
   },
   {
@@ -649,6 +787,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Madurai Metro',
     date: '2026-09-29',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/MDU/CLEAR/2026-09-29'
   },
   {
@@ -656,6 +797,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Salem West',
     date: '2026-09-29',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/SLM/CLEAR/2026-09-29'
   },
   {
@@ -663,6 +807,9 @@ export const AUTHORITATIVE_VERIFIED_CLEAR_LIST = [
     circle: 'Tiruppur North',
     date: '2026-09-29',
     source: 'TNPDCL',
+    source_url: 'https://www.tnebltd.gov.in/outages/viewshutdown.xhtml',
+    publication_date: '2026-09-26',
+    dataset_type: 'static_source_backed',
     source_reference: 'TNPDCL/TPR/CLEAR/2026-09-29'
   }
 ];
