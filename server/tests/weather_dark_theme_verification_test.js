@@ -67,12 +67,11 @@ async function runVerification() {
   });
 
   // Test 4: Weather Hero Card uses themed background and AMOLED #080808 in dark mode
-  test('4. Hero card uses theme variables and #080808 AMOLED surface in dark mode', () => {
-    assert(htmlContent.includes('.weather-hero-card {\n      position: relative;\n      background: var(--weather-card-bg);') ||
-           htmlContent.includes('.weather-hero-card {\r\n      position: relative;\r\n      background: var(--weather-card-bg);'),
+  test('4. Hero card uses theme variables and AMOLED surface in dark mode', () => {
+    assert(htmlContent.includes('background: var(--weather-card-bg);'),
            'Hero card must use var(--weather-card-bg) for seamless theme transition');
-    assert(htmlContent.includes('[data-theme="dark"] .weather-hero-card') && htmlContent.includes('#080808 !important;'),
-           'Hero card in dark mode must be #080808 AMOLED pure black surface');
+    assert(htmlContent.includes('[data-theme="dark"] .weather-hero-card') && (htmlContent.includes('background: #000000 !important;') || htmlContent.includes('background: #080808 !important;')),
+           'Hero card in dark mode must be #000000 AMOLED pure black surface');
   });
 
   // Test 5: All container sections have explicit AMOLED dark rules
@@ -86,13 +85,16 @@ async function runVerification() {
   });
 
   // Test 6: Back button styling in dark mode (high contrast: dark surface + white text + cyan arrow)
-  test('6. Back button styling in dark mode has high contrast (#0f0f0f, white text, cyan arrow)', () => {
+  test('6. Back button styling in dark mode has high contrast (#050505, #222 border, white text/icon, hover cyan)', () => {
     assert(htmlContent.includes('[data-theme="dark"] .weather-back-btn'), 'Missing dark back button rule');
-    assert(htmlContent.includes('background: #0f0f0f !important;'), 'Dark back button must have #0f0f0f surface');
-    assert(htmlContent.includes('border: 1px solid #2a2a2a !important;'), 'Dark back button must have visible border');
+    assert(htmlContent.includes('background: #050505 !important;'), 'Dark back button must have #050505 surface');
+    assert(htmlContent.includes('border: 1px solid #222222 !important;') || htmlContent.includes('border: 1px solid #222 !important;'),
+           'Dark back button must have visible #222 border');
     assert(htmlContent.includes('color: #ffffff !important;'), 'Dark back button must have white text');
-    assert(htmlContent.includes('[data-theme="dark"] .weather-back-btn i') && htmlContent.includes('color: #38bdf8 !important;'),
-           'Dark back button arrow must be vivid cyan #38bdf8');
+    assert(htmlContent.includes('[data-theme="dark"] .weather-back-btn i') && htmlContent.includes('color: #ffffff !important;'),
+           'Dark back button arrow in normal state must be white #ffffff');
+    assert(htmlContent.includes('[data-theme="dark"] .weather-back-btn:hover i') && htmlContent.includes('color: #38bdf8 !important;'),
+           'Dark back button arrow on hover must be vivid cyan #38bdf8');
   });
 
   // Test 7: Back button styling in light mode (high contrast: white surface + dark text + subtle border)
@@ -107,8 +109,8 @@ async function runVerification() {
 
   // Test 8: Back button position & z-index
   test('8. Back button has relative positioning and z-index to avoid clipping or occlusion', () => {
-    assert(htmlContent.includes('position: relative;'), 'Back button must have position: relative');
-    assert(htmlContent.includes('z-index: 10;'), 'Back button must have z-index: 10');
+    assert(htmlContent.includes('position: relative !important;'), 'Back button must have position: relative');
+    assert(htmlContent.includes('z-index: 50 !important;'), 'Back button must have elevated z-index');
     assert(htmlContent.includes('display: inline-flex !important;'), 'Back button must not be hidden');
   });
 

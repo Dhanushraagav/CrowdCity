@@ -143,7 +143,7 @@
       --weather-input-border: var(--input-border, #cbd5e1);
       --weather-popover-bg: var(--bg-surface, #ffffff);
       --weather-popover-border: var(--border-color, #cbd5e1);
-      --weather-popover-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+      --weather-popover-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
       --weather-chip-bg: var(--bg-surface, #ffffff);
       --weather-chip-hover: var(--bg-surface-hover, #f8fafc);
       --weather-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -168,14 +168,14 @@
       --weather-text-primary: var(--text-main, #ffffff);
       --weather-text-secondary: var(--text-secondary, #d4d4d4);
       --weather-text-muted: var(--text-muted, #a3a3a3);
-      --weather-input-bg: var(--input-bg, #080808);
-      --weather-input-border: var(--input-border, #222222);
-      --weather-popover-bg: #0d0d0d;
-      --weather-popover-border: #222222;
-      --weather-popover-shadow: 0 12px 32px rgba(0, 0, 0, 0.95);
-      --weather-chip-bg: #0e0e0e;
-      --weather-chip-hover: #161616;
-      --weather-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+      --weather-input-bg: #050505;
+      --weather-input-border: #1c1c1c;
+      --weather-popover-bg: #050505;
+      --weather-popover-border: #1c1c1c;
+      --weather-popover-shadow: 0 12px 32px rgba(0, 0, 0, 0.98);
+      --weather-chip-bg: #050505;
+      --weather-chip-hover: #0e0e0e;
+      --weather-shadow: none;
     }
 
     body {
@@ -233,7 +233,7 @@
       margin: 0 auto;
       padding: 1.15rem 1.75rem 3.5rem;
       box-sizing: border-box;
-      background-color: transparent;
+      background-color: transparent !important;
     }
 
     /* --------------------------------------------------------------------------
@@ -263,8 +263,8 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
       line-height: 1.2;
-      position: relative;
-      z-index: 10;
+      position: relative !important;
+      z-index: 50 !important;
     }
 
     .weather-back-btn:hover {
@@ -286,7 +286,7 @@
     .weather-back-btn i {
       font-size: 0.82rem;
       color: var(--text-main, #0f172a) !important;
-      transition: transform 0.15s ease;
+      transition: transform 0.15s ease, color 0.15s ease;
     }
 
     .weather-back-btn:hover i {
@@ -297,17 +297,17 @@
     html[data-theme="dark"] .weather-back-btn,
     html.dark-theme .weather-back-btn,
     body.dark-theme .weather-back-btn {
-      background: #0f0f0f !important;
-      border: 1px solid #2a2a2a !important;
+      background: #050505 !important;
+      border: 1px solid #222222 !important;
       color: #ffffff !important;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
     }
 
     [data-theme="dark"] .weather-back-btn:hover,
     html[data-theme="dark"] .weather-back-btn:hover,
     html.dark-theme .weather-back-btn:hover,
     body.dark-theme .weather-back-btn:hover {
-      background: #1a1a1a !important;
+      background: #111111 !important;
       border-color: #38bdf8 !important;
       color: #ffffff !important;
     }
@@ -316,7 +316,7 @@
     html[data-theme="dark"] .weather-back-btn:active,
     html.dark-theme .weather-back-btn:active,
     body.dark-theme .weather-back-btn:active {
-      background: #222222 !important;
+      background: #1a1a1a !important;
       border-color: #38bdf8 !important;
       color: #ffffff !important;
     }
@@ -325,6 +325,13 @@
     html[data-theme="dark"] .weather-back-btn i,
     html.dark-theme .weather-back-btn i,
     body.dark-theme .weather-back-btn i {
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-back-btn:hover i,
+    html[data-theme="dark"] .weather-back-btn:hover i,
+    html.dark-theme .weather-back-btn:hover i,
+    body.dark-theme .weather-back-btn:hover i {
       color: #38bdf8 !important;
     }
 
@@ -432,18 +439,36 @@
       border-color: var(--weather-border-hover);
     }
 
+    [data-theme="dark"] .weather-header-title,
+    html[data-theme="dark"] .weather-header-title,
+    html.dark-theme .weather-header-title,
+    body.dark-theme .weather-header-title {
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-header-subtitle,
+    html[data-theme="dark"] .weather-header-subtitle,
+    html.dark-theme .weather-header-subtitle,
+    body.dark-theme .weather-header-subtitle {
+      color: #8a8a8a !important;
+    }
+
     [data-theme="dark"] .weather-source-link,
+    html[data-theme="dark"] .weather-source-link,
+    html.dark-theme .weather-source-link,
     body.dark-theme .weather-source-link {
-      background: #0f0f0f;
-      border: 1px solid #222222;
-      color: #d4d4d4;
+      background: #050505 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #a0a0a0 !important;
     }
 
     [data-theme="dark"] .weather-source-link:hover,
+    html[data-theme="dark"] .weather-source-link:hover,
+    html.dark-theme .weather-source-link:hover,
     body.dark-theme .weather-source-link:hover {
-      background: #171717;
-      color: #ffffff;
-      border-color: #333333;
+      background: #111111 !important;
+      color: #ffffff !important;
+      border-color: #262626 !important;
     }
 
     .btn-refresh-weather {
@@ -474,22 +499,26 @@
     }
 
     [data-theme="dark"] .btn-refresh-weather,
+    html[data-theme="dark"] .btn-refresh-weather,
+    html.dark-theme .btn-refresh-weather,
     body.dark-theme .btn-refresh-weather {
-      background: #0f0f0f;
-      border: 1px solid #222222;
-      color: #ffffff;
-      box-shadow: none;
+      background: #050505 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #ffffff !important;
+      box-shadow: none !important;
     }
 
     [data-theme="dark"] .btn-refresh-weather:hover:not(:disabled),
+    html[data-theme="dark"] .btn-refresh-weather:hover:not(:disabled),
+    html.dark-theme .btn-refresh-weather:hover:not(:disabled),
     body.dark-theme .btn-refresh-weather:hover:not(:disabled) {
-      background: #171717;
-      border-color: var(--weather-accent);
-      color: var(--weather-accent);
+      background: #111111 !important;
+      border-color: #38bdf8 !important;
+      color: #38bdf8 !important;
     }
 
     /* --------------------------------------------------------------------------
-       LOCATION BANNER (Slim, Compact)
+       LOCATION BANNER (Slim, Compact, AMOLED Neutral Black)
        -------------------------------------------------------------------------- */
     .weather-location-banner {
       display: flex;
@@ -521,15 +550,26 @@
     }
 
     [data-theme="dark"] .weather-location-banner,
+    html[data-theme="dark"] .weather-location-banner,
+    html.dark-theme .weather-location-banner,
     body.dark-theme .weather-location-banner {
-      background: rgba(56, 189, 248, 0.06);
-      border-color: rgba(56, 189, 248, 0.18);
-      color: var(--weather-text-secondary);
+      background: #050505 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #a0a0a0 !important;
     }
 
     [data-theme="dark"] .weather-location-banner-content strong,
+    html[data-theme="dark"] .weather-location-banner-content strong,
+    html.dark-theme .weather-location-banner-content strong,
     body.dark-theme .weather-location-banner-content strong {
-      color: #ffffff;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-location-banner-content i,
+    html[data-theme="dark"] .weather-location-banner-content i,
+    html.dark-theme .weather-location-banner-content i,
+    body.dark-theme .weather-location-banner-content i {
+      color: #38bdf8 !important;
     }
 
     .weather-location-switch-btn {
@@ -550,8 +590,17 @@
       text-decoration: underline;
     }
 
+    [data-theme="dark"] .weather-location-switch-btn,
+    html[data-theme="dark"] .weather-location-switch-btn,
+    html.dark-theme .weather-location-switch-btn,
+    body.dark-theme .weather-location-switch-btn {
+      background: transparent !important;
+      border: none !important;
+      color: #38bdf8 !important;
+    }
+
     /* --------------------------------------------------------------------------
-       FILTER CARD & SEARCH BAR (Compact 2-Row Layout)
+       FILTER CARD & SEARCH BAR (Compact 2-Row Layout, AMOLED Black Surface)
        -------------------------------------------------------------------------- */
     .weather-filter-card {
       background: var(--weather-card-bg);
@@ -569,8 +618,8 @@
     html[data-theme="dark"] .weather-filter-card,
     html.dark-theme .weather-filter-card,
     body.dark-theme .weather-filter-card {
-      background: #0a0a0a !important;
-      border: 1px solid #1f1f1f !important;
+      background: #000000 !important;
+      border: 1px solid #161616 !important;
       box-shadow: none !important;
     }
 
@@ -629,30 +678,44 @@
     }
 
     [data-theme="dark"] .weather-tab-btn,
+    html[data-theme="dark"] .weather-tab-btn,
+    html.dark-theme .weather-tab-btn,
     body.dark-theme .weather-tab-btn {
-      background: #141414;
-      border: 1px solid #222222;
-      color: #a3a3a3;
+      background: #050505 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #a0a0a0 !important;
     }
 
     [data-theme="dark"] .weather-tab-btn:hover,
+    html[data-theme="dark"] .weather-tab-btn:hover,
+    html.dark-theme .weather-tab-btn:hover,
     body.dark-theme .weather-tab-btn:hover {
-      background: #1c1c1c;
-      color: #ffffff;
-      border-color: #333333;
+      background: #0e0e0e !important;
+      color: #ffffff !important;
+      border-color: #262626 !important;
     }
 
     [data-theme="dark"] .weather-tab-btn.active,
+    html[data-theme="dark"] .weather-tab-btn.active,
+    html.dark-theme .weather-tab-btn.active,
     body.dark-theme .weather-tab-btn.active {
-      background: rgba(56, 189, 248, 0.12);
-      border-color: #38bdf8;
-      color: #38bdf8;
+      background: #080808 !important;
+      border: 1px solid #38bdf8 !important;
+      color: #38bdf8 !important;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25) !important;
     }
 
     .weather-last-updated-text {
       font-size: 0.74rem;
       color: var(--weather-text-muted);
       white-space: nowrap;
+    }
+
+    [data-theme="dark"] .weather-last-updated-text,
+    html[data-theme="dark"] .weather-last-updated-text,
+    html.dark-theme .weather-last-updated-text,
+    body.dark-theme .weather-last-updated-text {
+      color: #8a8a8a !important;
     }
 
     .weather-search-wrap {
@@ -686,6 +749,23 @@
       outline: none;
       border-color: var(--weather-accent);
       box-shadow: 0 0 0 3px var(--weather-accent-dim);
+    }
+
+    [data-theme="dark"] #weather-search-input,
+    html[data-theme="dark"] #weather-search-input,
+    html.dark-theme #weather-search-input,
+    body.dark-theme #weather-search-input {
+      background: #050505 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] #weather-search-input:focus,
+    html[data-theme="dark"] #weather-search-input:focus,
+    html.dark-theme #weather-search-input:focus,
+    body.dark-theme #weather-search-input:focus {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
     }
 
     .weather-search-clear-btn {
@@ -733,6 +813,31 @@
       color: var(--weather-text-primary);
     }
 
+    [data-theme="dark"] .weather-select-filter,
+    html[data-theme="dark"] .weather-select-filter,
+    html.dark-theme .weather-select-filter,
+    body.dark-theme .weather-select-filter {
+      background: #050505 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .weather-select-filter:focus,
+    html[data-theme="dark"] .weather-select-filter:focus,
+    html.dark-theme .weather-select-filter:focus,
+    body.dark-theme .weather-select-filter:focus {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
+    }
+
+    [data-theme="dark"] .weather-select-filter option,
+    html[data-theme="dark"] .weather-select-filter option,
+    html.dark-theme .weather-select-filter option,
+    body.dark-theme .weather-select-filter option {
+      background: #050505 !important;
+      color: #ffffff !important;
+    }
+
     /* --------------------------------------------------------------------------
        SEARCH SUGGESTIONS POPOVER
        -------------------------------------------------------------------------- */
@@ -749,6 +854,15 @@
       max-height: 380px;
       overflow-y: auto;
       padding: 0.6rem;
+    }
+
+    [data-theme="dark"] .weather-search-popover,
+    html[data-theme="dark"] .weather-search-popover,
+    html.dark-theme .weather-search-popover,
+    body.dark-theme .weather-search-popover {
+      background: #050505 !important;
+      border: 1px solid #1c1c1c !important;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.98) !important;
     }
 
     .popover-quick-actions {
@@ -857,32 +971,58 @@
     }
 
     [data-theme="dark"] .popover-action-btn,
+    html[data-theme="dark"] .popover-action-btn,
+    html.dark-theme .popover-action-btn,
     body.dark-theme .popover-action-btn {
-      background: #141414;
-      border: 1px solid #222222;
-      color: #d4d4d4;
+      background: #080808 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #d4d4d4 !important;
+    }
+
+    [data-theme="dark"] .popover-action-btn:hover,
+    html[data-theme="dark"] .popover-action-btn:hover,
+    html.dark-theme .popover-action-btn:hover,
+    body.dark-theme .popover-action-btn:hover {
+      background: #111111 !important;
+      border-color: #38bdf8 !important;
+      color: #38bdf8 !important;
     }
 
     [data-theme="dark"] .popover-chip,
+    html[data-theme="dark"] .popover-chip,
+    html.dark-theme .popover-chip,
     body.dark-theme .popover-chip {
-      background: #141414;
-      border: 1px solid #222222;
-      color: #d4d4d4;
+      background: #080808 !important;
+      border: 1px solid #1c1c1c !important;
+      color: #d4d4d4 !important;
+    }
+
+    [data-theme="dark"] .popover-chip:hover,
+    html[data-theme="dark"] .popover-chip:hover,
+    html.dark-theme .popover-chip:hover,
+    body.dark-theme .popover-chip:hover {
+      background: #111111 !important;
+      border-color: #38bdf8 !important;
+      color: #38bdf8 !important;
     }
 
     [data-theme="dark"] .popover-item:hover,
+    html[data-theme="dark"] .popover-item:hover,
+    html.dark-theme .popover-item:hover,
     body.dark-theme .popover-item:hover {
-      background: #171717;
+      background: #0e0e0e !important;
     }
 
     [data-theme="dark"] .popover-item-type,
+    html[data-theme="dark"] .popover-item-type,
+    html.dark-theme .popover-item-type,
     body.dark-theme .popover-item-type {
-      background: #171717;
-      color: #a3a3a3;
+      background: #0e0e0e !important;
+      color: #8a8a8a !important;
     }
 
     /* --------------------------------------------------------------------------
-       ATMOSPHERIC HERO WEATHER CARD (Apple Weather Inspired, AMOLED Dark)
+       ATMOSPHERIC HERO WEATHER CARD (Pure AMOLED Black in Dark Mode)
        -------------------------------------------------------------------------- */
     .weather-hero-card {
       position: relative;
@@ -922,46 +1062,26 @@
       border-color: #e2e8f0;
     }
 
-    /* Dark Theme Hero Card: AMOLED Black Surface (#080808) with Subtle Weather Atmosphere */
+    /* Dark Theme Hero Card: Pure AMOLED Black Surface (#000000) Across All Scenes */
     [data-theme="dark"] .weather-hero-card,
     html[data-theme="dark"] .weather-hero-card,
     html.dark-theme .weather-hero-card,
-    body.dark-theme .weather-hero-card {
-      background: #080808 !important;
-      border: 1px solid #1f1f1f !important;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85) !important;
-    }
-
+    body.dark-theme .weather-hero-card,
     [data-theme="dark"] .weather-hero-card.weather-scene-day-clear,
-    body.dark-theme .weather-hero-card.weather-scene-day-clear {
-      background: radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.08) 0%, #080808 65%);
-      border-color: rgba(56, 189, 248, 0.25);
-    }
-
     [data-theme="dark"] .weather-hero-card.weather-scene-night-clear,
-    body.dark-theme .weather-hero-card.weather-scene-night-clear {
-      background: radial-gradient(circle at 85% 15%, rgba(148, 163, 184, 0.05) 0%, #080808 65%);
-      border-color: #222222;
-    }
-
     [data-theme="dark"] .weather-hero-card.weather-scene-rain,
     [data-theme="dark"] .weather-hero-card.weather-scene-heavy-rain,
-    body.dark-theme .weather-hero-card.weather-scene-rain,
-    body.dark-theme .weather-hero-card.weather-scene-heavy-rain {
-      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.06) 0%, #080808 70%);
-      border-color: rgba(56, 189, 248, 0.2);
-    }
-
     [data-theme="dark"] .weather-hero-card.weather-scene-thunderstorm,
-    body.dark-theme .weather-hero-card.weather-scene-thunderstorm {
-      background: radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.08) 0%, #080808 70%);
-      border-color: rgba(147, 197, 253, 0.25);
-    }
-
     [data-theme="dark"] .weather-hero-card.weather-scene-cloudy,
+    body.dark-theme .weather-hero-card.weather-scene-day-clear,
+    body.dark-theme .weather-hero-card.weather-scene-night-clear,
+    body.dark-theme .weather-hero-card.weather-scene-rain,
+    body.dark-theme .weather-hero-card.weather-scene-heavy-rain,
+    body.dark-theme .weather-hero-card.weather-scene-thunderstorm,
     body.dark-theme .weather-hero-card.weather-scene-cloudy {
-      background: radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.03) 0%, #080808 70%);
-      border-color: #222222;
+      background: #000000 !important;
+      border: 1px solid #161616 !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.95) !important;
     }
 
     /* Subtle Atmospheric FX Layer (Behind Content) */
@@ -1012,7 +1132,7 @@
       width: 170px;
       height: 170px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(251, 191, 36, 0.12) 0%, rgba(245, 158, 11, 0.03) 50%, transparent 75%);
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, transparent 70%);
       filter: blur(25px);
       animation: pulseGlow 7s ease-in-out infinite alternate;
     }
@@ -1039,7 +1159,7 @@
       left: -15%;
       width: 260px;
       height: 70px;
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.03);
       border-radius: 50px;
       filter: blur(18px);
       animation: driftCloud 50s linear infinite;
@@ -1062,7 +1182,7 @@
     .lightning-flash {
       position: absolute;
       inset: 0;
-      background: rgba(186, 230, 253, 0.05);
+      background: rgba(255, 255, 255, 0.08);
       opacity: 0;
       animation: lightningStrike 10s ease-in-out infinite;
     }
@@ -1204,21 +1324,31 @@
 
     [data-theme="dark"] .hero-locality-name,
     [data-theme="dark"] .hero-huge-temp,
+    html[data-theme="dark"] .hero-locality-name,
+    html[data-theme="dark"] .hero-huge-temp,
+    html.dark-theme .hero-locality-name,
+    html.dark-theme .hero-huge-temp,
     body.dark-theme .hero-locality-name,
     body.dark-theme .hero-huge-temp {
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     [data-theme="dark"] .hero-district-state,
     [data-theme="dark"] .hero-subtext-line,
+    html[data-theme="dark"] .hero-district-state,
+    html[data-theme="dark"] .hero-subtext-line,
+    html.dark-theme .hero-district-state,
+    html.dark-theme .hero-subtext-line,
     body.dark-theme .hero-district-state,
     body.dark-theme .hero-subtext-line {
-      color: #a3a3a3;
+      color: #8a8a8a !important;
     }
 
     [data-theme="dark"] .hero-condition-line,
+    html[data-theme="dark"] .hero-condition-line,
+    html.dark-theme .hero-condition-line,
     body.dark-theme .hero-condition-line {
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     /* 4-Card Hero Metrics Row */
@@ -1236,7 +1366,7 @@
 
     .metric-card-tile {
       background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 12px;
       padding: 0.85rem 1.05rem;
       display: flex;
@@ -1245,11 +1375,11 @@
       transition: all 0.2s ease;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
     .metric-card-tile:hover {
-      border-color: rgba(15, 23, 42, 0.16);
+      border-color: rgba(0, 0, 0, 0.16);
       background: #ffffff;
     }
 
@@ -1283,37 +1413,47 @@
     }
 
     [data-theme="dark"] .metric-card-tile,
-    body.dark-theme .metric-card-tile,
-    html.dark-theme .metric-card-tile {
-      background: #0f0f0f;
-      border: 1px solid #1f1f1f;
-      box-shadow: none;
+    html[data-theme="dark"] .metric-card-tile,
+    html.dark-theme .metric-card-tile,
+    body.dark-theme .metric-card-tile {
+      background: #050505 !important;
+      border: 1px solid #161616 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
 
     [data-theme="dark"] .metric-card-tile:hover,
-    body.dark-theme .metric-card-tile:hover,
-    html.dark-theme .metric-card-tile:hover {
-      border-color: #333333;
-      background: #171717;
+    html[data-theme="dark"] .metric-card-tile:hover,
+    html.dark-theme .metric-card-tile:hover,
+    body.dark-theme .metric-card-tile:hover {
+      border-color: #262626 !important;
+      background: #0d0d0d !important;
     }
 
     [data-theme="dark"] .metric-card-header,
+    html[data-theme="dark"] .metric-card-header,
+    html.dark-theme .metric-card-header,
     body.dark-theme .metric-card-header {
-      color: #a3a3a3;
+      color: #8a8a8a !important;
     }
 
     [data-theme="dark"] .metric-card-value,
+    html[data-theme="dark"] .metric-card-value,
+    html.dark-theme .metric-card-value,
     body.dark-theme .metric-card-value {
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     [data-theme="dark"] .metric-card-sub,
+    html[data-theme="dark"] .metric-card-sub,
+    html.dark-theme .metric-card-sub,
     body.dark-theme .metric-card-sub {
-      color: #737373;
+      color: #737373 !important;
     }
 
     /* --------------------------------------------------------------------------
-       REGION-FIRST SECTION: "REGIONS NEAR YOU"
+       REGION-FIRST SECTION: "REGIONS NEAR YOU" (AMOLED Black Hierarchy)
        -------------------------------------------------------------------------- */
     .nearby-regions-section {
       background: var(--weather-card-bg);
@@ -1328,8 +1468,8 @@
     html[data-theme="dark"] .nearby-regions-section,
     html.dark-theme .nearby-regions-section,
     body.dark-theme .nearby-regions-section {
-      background: #0a0a0a !important;
-      border: 1px solid #1f1f1f !important;
+      background: #000000 !important;
+      border: 1px solid #161616 !important;
       box-shadow: none !important;
     }
 
@@ -1362,6 +1502,16 @@
       color: var(--weather-text-secondary);
     }
 
+    [data-theme="dark"] .nearby-district-name,
+    body.dark-theme .nearby-district-name {
+      color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .nearby-regions-label,
+    body.dark-theme .nearby-regions-label {
+      color: #a0a0a0 !important;
+    }
+
     .nearby-regions-actions {
       display: flex;
       align-items: center;
@@ -1376,6 +1526,13 @@
       border-radius: 6px;
       border: 1px solid var(--weather-border);
       font-weight: 500;
+    }
+
+    [data-theme="dark"] .nearby-regions-count-badge,
+    body.dark-theme .nearby-regions-count-badge {
+      background: #080808 !important;
+      border: 1px solid #181818 !important;
+      color: #8a8a8a !important;
     }
 
     .region-nav-btns {
@@ -1402,6 +1559,20 @@
       background: var(--weather-border-hover);
       color: var(--weather-text-primary);
       border-color: var(--weather-border-hover);
+    }
+
+    [data-theme="dark"] .region-nav-btn,
+    body.dark-theme .region-nav-btn {
+      background: #080808 !important;
+      border: 1px solid #181818 !important;
+      color: #a0a0a0 !important;
+    }
+
+    [data-theme="dark"] .region-nav-btn:hover,
+    body.dark-theme .region-nav-btn:hover {
+      background: #141414 !important;
+      border-color: #262626 !important;
+      color: #ffffff !important;
     }
 
     .nearby-regions-track {
@@ -1433,20 +1604,47 @@
       gap: 0.5rem;
       transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
     .region-card-chip:hover {
       background: var(--weather-chip-hover);
       border-color: var(--weather-border-hover);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .region-card-chip.active {
       background: linear-gradient(135deg, var(--weather-accent-dim) 0%, var(--weather-card-elevated) 100%);
       border-color: var(--weather-accent);
       box-shadow: 0 0 0 1px var(--weather-accent), 0 4px 14px var(--weather-accent-glow);
+    }
+
+    [data-theme="dark"] .region-card-chip,
+    html[data-theme="dark"] .region-card-chip,
+    html.dark-theme .region-card-chip,
+    body.dark-theme .region-card-chip {
+      background: #050505 !important;
+      border: 1px solid #181818 !important;
+      box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .region-card-chip:hover,
+    html[data-theme="dark"] .region-card-chip:hover,
+    html.dark-theme .region-card-chip:hover,
+    body.dark-theme .region-card-chip:hover {
+      background: #0e0e0e !important;
+      border-color: #262626 !important;
+      box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .region-card-chip.active,
+    html[data-theme="dark"] .region-card-chip.active,
+    html.dark-theme .region-card-chip.active,
+    body.dark-theme .region-card-chip.active {
+      background: #080808 !important;
+      border: 1px solid #38bdf8 !important;
+      box-shadow: 0 0 0 1px #38bdf8, 0 4px 14px rgba(56, 189, 248, 0.2) !important;
     }
 
     .region-chip-top {
@@ -1505,69 +1703,38 @@
       color: var(--weather-accent);
     }
 
-    [data-theme="dark"] .region-card-chip,
-    body.dark-theme .region-card-chip {
-      background: #0e0e0e;
-      border: 1px solid #1f1f1f;
-      box-shadow: none;
-    }
-
-    [data-theme="dark"] .region-card-chip:hover,
-    body.dark-theme .region-card-chip:hover {
-      background: #171717;
-      border-color: #333333;
-      box-shadow: none;
-    }
-
-    [data-theme="dark"] .region-card-chip.active,
-    body.dark-theme .region-card-chip.active {
-      background: #121212;
-      border-color: var(--weather-accent);
-      box-shadow: 0 0 0 1px var(--weather-accent), 0 4px 14px var(--weather-accent-glow);
-    }
-
     [data-theme="dark"] .region-chip-name,
     [data-theme="dark"] .region-chip-temp,
     body.dark-theme .region-chip-name,
     body.dark-theme .region-chip-temp {
-      color: #ffffff;
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .region-card-chip.active .region-chip-name,
+    body.dark-theme .region-card-chip.active .region-chip-name {
+      color: #38bdf8 !important;
     }
 
     [data-theme="dark"] .region-chip-dist,
     [data-theme="dark"] .region-chip-cond,
     body.dark-theme .region-chip-dist,
     body.dark-theme .region-chip-cond {
-      color: #a3a3a3;
+      color: #8a8a8a !important;
     }
 
     [data-theme="dark"] .region-chip-dist,
     body.dark-theme .region-chip-dist {
-      background: #171717;
+      background: #121212 !important;
+      border: 1px solid #1c1c1c !important;
     }
 
-    [data-theme="dark"] .nearby-regions-count-badge,
-    body.dark-theme .nearby-regions-count-badge {
-      background: #141414;
-      border: 1px solid #222222;
-      color: #a3a3a3;
-    }
-
-    [data-theme="dark"] .region-nav-btn,
-    body.dark-theme .region-nav-btn {
-      background: #141414;
-      border: 1px solid #222222;
-      color: #d4d4d4;
-    }
-
-    [data-theme="dark"] .region-nav-btn:hover,
-    body.dark-theme .region-nav-btn:hover {
-      background: #222222;
-      color: #ffffff;
-      border-color: #333333;
+    [data-theme="dark"] .region-chip-icon,
+    body.dark-theme .region-chip-icon {
+      color: #38bdf8 !important;
     }
 
     /* --------------------------------------------------------------------------
-       HOURLY TIMELINE SECTION
+       HOURLY TIMELINE SECTION (AMOLED Black)
        -------------------------------------------------------------------------- */
     .hourly-forecast-section {
       background: var(--weather-card-bg);
@@ -1582,8 +1749,8 @@
     html[data-theme="dark"] .hourly-forecast-section,
     html.dark-theme .hourly-forecast-section,
     body.dark-theme .hourly-forecast-section {
-      background: #0a0a0a !important;
-      border: 1px solid #1f1f1f !important;
+      background: #000000 !important;
+      border: 1px solid #161616 !important;
       box-shadow: none !important;
     }
 
@@ -1606,6 +1773,11 @@
     .section-sub-title i {
       color: var(--weather-accent);
       font-size: 0.85rem;
+    }
+
+    [data-theme="dark"] .section-sub-title,
+    body.dark-theme .section-sub-title {
+      color: #ffffff !important;
     }
 
     .hourly-nav-btns {
@@ -1632,6 +1804,20 @@
       background: var(--weather-border-hover);
       color: var(--weather-text-primary);
       border-color: var(--weather-border-hover);
+    }
+
+    [data-theme="dark"] .hourly-nav-btn,
+    body.dark-theme .hourly-nav-btn {
+      background: #080808 !important;
+      border: 1px solid #181818 !important;
+      color: #a0a0a0 !important;
+    }
+
+    [data-theme="dark"] .hourly-nav-btn:hover,
+    body.dark-theme .hourly-nav-btn:hover {
+      background: #141414 !important;
+      border-color: #262626 !important;
+      color: #ffffff !important;
     }
 
     .hourly-scroll-container {
@@ -1710,49 +1896,72 @@
     }
 
     [data-theme="dark"] .hourly-card-pill,
+    html[data-theme="dark"] .hourly-card-pill,
+    html.dark-theme .hourly-card-pill,
     body.dark-theme .hourly-card-pill {
-      background: #0e0e0e;
-      border: 1px solid #1f1f1f;
+      background: #060606 !important;
+      border: 1px solid #161616 !important;
+      box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .hourly-card-pill:hover,
+    html[data-theme="dark"] .hourly-card-pill:hover,
+    html.dark-theme .hourly-card-pill:hover,
+    body.dark-theme .hourly-card-pill:hover {
+      background: #0e0e0e !important;
+      border-color: #262626 !important;
     }
 
     [data-theme="dark"] .hourly-card-pill.is-now,
+    html[data-theme="dark"] .hourly-card-pill.is-now,
+    html.dark-theme .hourly-card-pill.is-now,
     body.dark-theme .hourly-card-pill.is-now {
-      background: rgba(56, 189, 248, 0.08);
-      border-color: rgba(56, 189, 248, 0.45);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+      background: #060606 !important;
+      border: 1px solid #38bdf8 !important;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25) !important;
     }
 
     [data-theme="dark"] .hourly-temp-value,
     body.dark-theme .hourly-temp-value {
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     [data-theme="dark"] .hourly-time-label,
     body.dark-theme .hourly-time-label {
-      color: #a3a3a3;
+      color: #8a8a8a !important;
     }
 
     [data-theme="dark"] .hourly-card-pill.is-now .hourly-time-label,
     body.dark-theme .hourly-card-pill.is-now .hourly-time-label {
-      color: var(--weather-accent);
+      color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .hourly-condition-icon,
+    body.dark-theme .hourly-condition-icon {
+      color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .hourly-precip-badge,
+    body.dark-theme .hourly-precip-badge {
+      color: #38bdf8 !important;
     }
 
     [data-theme="dark"] .hourly-nav-btn,
     body.dark-theme .hourly-nav-btn {
-      background: #141414;
-      border: 1px solid #222222;
-      color: #d4d4d4;
+      background: #080808 !important;
+      border: 1px solid #181818 !important;
+      color: #a0a0a0 !important;
     }
 
     [data-theme="dark"] .hourly-nav-btn:hover,
     body.dark-theme .hourly-nav-btn:hover {
-      background: #222222;
-      color: #ffffff;
-      border-color: #333333;
+      background: #141414 !important;
+      color: #ffffff !important;
+      border-color: #262626 !important;
     }
 
     /* --------------------------------------------------------------------------
-       5-DAY FORECAST GRID (Compact, Balanced)
+       5-DAY FORECAST GRID (Compact, AMOLED Black Surface)
        -------------------------------------------------------------------------- */
     .forecast-section-wrap {
       margin-bottom: 1.5rem;
@@ -1764,6 +1973,18 @@
       color: var(--weather-text-primary);
       margin: 0 0 0.85rem;
       letter-spacing: -0.01em;
+    }
+
+    [data-theme="dark"] .forecast-section-wrap,
+    html[data-theme="dark"] .forecast-section-wrap,
+    html.dark-theme .forecast-section-wrap,
+    body.dark-theme .forecast-section-wrap {
+      background: transparent !important;
+    }
+
+    [data-theme="dark"] .section-clean-heading,
+    body.dark-theme .section-clean-heading {
+      color: #ffffff !important;
     }
 
     .weather-forecast-grid {
@@ -1781,7 +2002,7 @@
       flex-direction: column;
       gap: 0.45rem;
       transition: all 0.2s;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
     .daily-forecast-card:hover {
@@ -1799,8 +2020,8 @@
     html[data-theme="dark"] .daily-forecast-card,
     html.dark-theme .daily-forecast-card,
     body.dark-theme .daily-forecast-card {
-      background: #0a0a0a !important;
-      border: 1px solid #1f1f1f !important;
+      background: #060606 !important;
+      border: 1px solid #161616 !important;
       box-shadow: none !important;
     }
 
@@ -1808,17 +2029,17 @@
     html[data-theme="dark"] .daily-forecast-card:hover,
     html.dark-theme .daily-forecast-card:hover,
     body.dark-theme .daily-forecast-card:hover {
-      background: #121212 !important;
-      border-color: #333333 !important;
+      background: #0e0e0e !important;
+      border-color: #262626 !important;
     }
 
     [data-theme="dark"] .daily-forecast-card.is-today,
     html[data-theme="dark"] .daily-forecast-card.is-today,
     body.dark-theme .daily-forecast-card.is-today,
     html.dark-theme .daily-forecast-card.is-today {
-      background: #0d0d0d !important;
-      border-color: rgba(56, 189, 248, 0.4) !important;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.12) !important;
+      background: #060606 !important;
+      border: 1px solid #38bdf8 !important;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2) !important;
     }
 
     .daily-card-header {
@@ -1891,31 +2112,46 @@
 
     [data-theme="dark"] .daily-day-label,
     body.dark-theme .daily-day-label {
-      color: #d4d4d4;
+      color: #d4d4d4 !important;
+    }
+
+    [data-theme="dark"] .daily-forecast-card.is-today .daily-day-label,
+    body.dark-theme .daily-forecast-card.is-today .daily-day-label {
+      color: #38bdf8 !important;
     }
 
     [data-theme="dark"] .daily-date-label,
     body.dark-theme .daily-date-label {
-      color: #a3a3a3;
+      color: #8a8a8a !important;
     }
 
     [data-theme="dark"] .daily-condition-text,
     body.dark-theme .daily-condition-text {
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     [data-theme="dark"] .daily-temp-range,
     body.dark-theme .daily-temp-range {
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     [data-theme="dark"] .daily-temp-min,
     body.dark-theme .daily-temp-min {
-      color: #a3a3a3;
+      color: #8a8a8a !important;
+    }
+
+    [data-theme="dark"] .daily-icon,
+    body.dark-theme .daily-icon {
+      color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .daily-rain-prob,
+    body.dark-theme .daily-rain-prob {
+      color: #38bdf8 !important;
     }
 
     /* --------------------------------------------------------------------------
-       ALL 38 DISTRICTS OVERVIEW
+       ALL 38 DISTRICTS OVERVIEW (AMOLED Black)
        -------------------------------------------------------------------------- */
     .districts-section-header {
       display: flex;
@@ -1940,6 +2176,18 @@
       border: 1px solid var(--weather-border);
     }
 
+    [data-theme="dark"] .districts-section-title,
+    body.dark-theme .districts-section-title {
+      color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .districts-count-badge,
+    body.dark-theme .districts-count-badge {
+      background: #080808 !important;
+      border: 1px solid #181818 !important;
+      color: #8a8a8a !important;
+    }
+
     .all-districts-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1957,7 +2205,7 @@
       justify-content: space-between;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
     .district-overview-card:hover {
@@ -2008,8 +2256,8 @@
     html[data-theme="dark"] .district-overview-card,
     html.dark-theme .district-overview-card,
     body.dark-theme .district-overview-card {
-      background: #0a0a0a !important;
-      border: 1px solid #1f1f1f !important;
+      background: #060606 !important;
+      border: 1px solid #161616 !important;
       box-shadow: none !important;
     }
 
@@ -2017,39 +2265,38 @@
     html[data-theme="dark"] .district-overview-card:hover,
     html.dark-theme .district-overview-card:hover,
     body.dark-theme .district-overview-card:hover {
-      background: #141414 !important;
-      border-color: #333333 !important;
+      background: #0e0e0e !important;
+      border-color: #262626 !important;
     }
 
     [data-theme="dark"] .district-overview-card.user-district-highlight,
     html[data-theme="dark"] .district-overview-card.user-district-highlight,
     html.dark-theme .district-overview-card.user-district-highlight,
     body.dark-theme .district-overview-card.user-district-highlight {
-      border-color: var(--weather-accent) !important;
-      background: rgba(56, 189, 248, 0.08) !important;
+      border: 1px solid #38bdf8 !important;
+      background: #060606 !important;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25) !important;
     }
 
     [data-theme="dark"] .dist-name,
     [data-theme="dark"] .dist-temp,
     body.dark-theme .dist-name,
     body.dark-theme .dist-temp {
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     [data-theme="dark"] .dist-cond,
     body.dark-theme .dist-cond {
-      color: #a3a3a3;
+      color: #8a8a8a !important;
     }
 
-    [data-theme="dark"] .districts-count-badge,
-    body.dark-theme .districts-count-badge {
-      background: #141414;
-      border: 1px solid #222222;
-      color: #a3a3a3;
+    [data-theme="dark"] .dist-icon,
+    body.dark-theme .dist-icon {
+      color: #38bdf8 !important;
     }
 
     /* --------------------------------------------------------------------------
-       STATE & ERROR BOXES
+       STATE & ERROR BOXES (AMOLED Black)
        -------------------------------------------------------------------------- */
     .weather-state-box {
       background: var(--weather-card-bg);
@@ -2078,8 +2325,8 @@
     html[data-theme="dark"] .weather-state-box,
     html.dark-theme .weather-state-box,
     body.dark-theme .weather-state-box {
-      background: #0a0a0a !important;
-      border: 1px solid #1f1f1f !important;
+      background: #060606 !important;
+      border: 1px solid #161616 !important;
       box-shadow: none !important;
     }
 
@@ -2092,7 +2339,7 @@
     [data-theme="dark"] .weather-state-box p,
     html[data-theme="dark"] .weather-state-box p,
     body.dark-theme .weather-state-box p {
-      color: #a3a3a3 !important;
+      color: #8a8a8a !important;
     }
 
     .weather-disclaimer-footnote {
@@ -2102,6 +2349,14 @@
       margin-top: 2rem;
       padding-top: 1rem;
       border-top: 1px solid var(--weather-border);
+    }
+
+    [data-theme="dark"] .weather-disclaimer-footnote,
+    html[data-theme="dark"] .weather-disclaimer-footnote,
+    html.dark-theme .weather-disclaimer-footnote,
+    body.dark-theme .weather-disclaimer-footnote {
+      border-top-color: #161616 !important;
+      color: #737373 !important;
     }
 
     .hidden {
