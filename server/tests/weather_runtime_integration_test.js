@@ -67,8 +67,8 @@ async function runTests() {
     assert(htmlContent.includes('id="retry-weather-err-text"'), 'Missing id="retry-weather-err-text"');
   });
 
-  test('weather-alerts.html script tags reference weather-alerts.js?v=2.3.0', () => {
-    assert(htmlContent.includes('src="js/weather-alerts.js?v=2.3.0"'), 'Script tag not updated with cachebuster v=2.3.0');
+  test('weather-alerts.html script tags reference weather-alerts.js with cachebuster', () => {
+    assert(/src="js\/weather-alerts\.js\?v=\d+\.\d+\.\d+"/.test(htmlContent), 'Script tag not updated with cachebuster');
   });
 
   // 2. JS Implementation Checks

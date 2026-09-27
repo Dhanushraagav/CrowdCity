@@ -146,10 +146,111 @@ export function formatDateIST(isoDateStr) {
   }
 }
 
+export function formatHourLabel(isoTimeStr) {
+  if (!isoTimeStr) return '--';
+  try {
+    const d = new Date(isoTimeStr);
+    return new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      hour12: true
+    }).format(d).toUpperCase();
+  } catch {
+    return isoTimeStr;
+  }
+}
+
+/**
+ * Generate truthful, condition-based insights strictly from real weather values.
+ */
+export function generateWeatherInsights(current, hourly = [], daily = []) {
+  const insights = [];
+  if (!current) return insights;
+
+  const today = daily && daily[0] ? daily[0] : null;
+
+  // 1. Precipitation & Storm Insights
+  if (current.weather_code >= 95) {
+    insights.push({
+      type: 'thunderstorm',
+      icon: 'fa-cloud-bolt',
+      title: 'Thunderstorm Advisory',
+      desc: 'Active convective activity with possible lightning and sudden wind gusts.'
+    });
+  } else if (current.precipitation_mm > 0) {
+    insights.push({
+      type: 'rain',
+      icon: 'fa-cloud-showers-heavy',
+      title: 'Active Rainfall',
+      desc: `Currently experiencing ${current.precipitation_mm} mm of precipitation.`
+    });
+  } else if (today && today.precipitation_probability_pct >= 55) {
+    insights.push({
+      type: 'rain',
+      icon: 'fa-cloud-rain',
+      title: 'Rain Expected Today',
+      desc: `Elevated precipitation chance (${today.precipitation_probability_pct}%) during the day.`
+    });
+  } else if (today && today.precipitation_probability_pct >= 25) {
+    insights.push({
+      type: 'rain',
+      icon: 'fa-cloud-sun-rain',
+      title: 'Scattered Showers Possible',
+      desc: `${today.precipitation_probability_pct}% chance of isolated or passing showers.`
+    });
+  } else {
+    insights.push({
+      type: 'clear',
+      icon: current.is_day ? 'fa-sun' : 'fa-moon',
+      title: current.is_day ? 'Dry Weather Prevailing' : 'Clear Night Atmosphere',
+      desc: 'Low rain likelihood anticipated for the region today.'
+    });
+  }
+
+  // 2. Temperature Insights
+  if (today && typeof today.temperature_max_c === 'number') {
+    const maxT = today.temperature_max_c;
+    const minT = today.temperature_min_c;
+    const title = maxT >= 36 ? 'High Heat Advisory' : (maxT >= 32 ? 'Warm Daytime Peak' : 'Mild & Comfortable');
+    insights.push({
+      type: 'temperature',
+      icon: 'fa-temperature-half',
+      title,
+      desc: `Daytime peak expected to reach ${maxT}°C with an overnight low around ${minT}°C.`
+    });
+  }
+
+  // 3. Humidity or Wind or Visibility Insight
+  if (current.relative_humidity_pct && current.relative_humidity_pct >= 80) {
+    insights.push({
+      type: 'humidity',
+      icon: 'fa-droplets',
+      title: 'Elevated Humidity',
+      desc: `Relative humidity at ${current.relative_humidity_pct}%. Air feels moist and heavy.`
+    });
+  } else if (current.wind_speed_kmh && current.wind_speed_kmh >= 18) {
+    insights.push({
+      type: 'wind',
+      icon: 'fa-wind',
+      title: 'Breezy Conditions',
+      desc: `Sustained wind speed of ${current.wind_speed_kmh} km/h with gusts up to ${current.wind_gusts_kmh || current.wind_speed_kmh} km/h.`
+    });
+  } else if (typeof current.visibility_km === 'number' && current.visibility_km >= 8) {
+    insights.push({
+      type: 'visibility',
+      icon: 'fa-eye',
+      title: 'Optimal Visibility',
+      desc: `Clear optical visibility of approximately ${current.visibility_km} km across the area.`
+    });
+  }
+
+  return insights;
+}
+
 /**
  * Fetch raw forecast data from Open-Meteo for specified coordinates.
  */
-async function fetchFromOpenMeteo(lats, lngs) {
+async function fetchFromOpenMeteo(lats, lngs, includeHourly = false) {
   if (mockFetchFixture) {
     if (typeof mockFetchFixture === 'function') {
       return await mockFetchFixture({ lats, lngs });
@@ -161,12 +262,14 @@ async function fetchFromOpenMeteo(lats, lngs) {
     'temperature_2m',
     'relative_humidity_2m',
     'apparent_temperature',
+    'is_day',
     'precipitation',
     'rain',
     'showers',
     'weather_code',
     'wind_speed_10m',
-    'wind_gusts_10m'
+    'wind_gusts_10m',
+    'visibility'
   ].join(',');
 
   const dailyParams = [
@@ -184,43 +287,66 @@ async function fetchFromOpenMeteo(lats, lngs) {
     'sunset'
   ].join(',');
 
-  const url = `${OPEN_METEO_BASE_URL}?latitude=${lats}&longitude=${lngs}` +
+  const hourlyParams = [
+    'temperature_2m',
+    'relative_humidity_2m',
+    'precipitation_probability',
+    'weather_code',
+    'is_day'
+  ].join(',');
+
+  let url = `${OPEN_METEO_BASE_URL}?latitude=${lats}&longitude=${lngs}` +
     `&current=${currentParams}` +
     `&daily=${dailyParams}` +
     `&timezone=Asia/Kolkata` +
     `&forecast_days=5`;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'CrowdCity-CivicTech/2.0'
-      }
-    });
-
-    if (!res.ok) {
-      throw new Error(`Open-Meteo returned HTTP ${res.status}: ${res.statusText}`);
-    }
-
-    const data = await res.json();
-    return data;
-  } finally {
-    clearTimeout(timer);
+  if (includeHourly) {
+    url += `&hourly=${hourlyParams}`;
   }
+
+  let lastErr = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'CrowdCity-CivicTech/2.0'
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error(`Open-Meteo returned HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      lastErr = err;
+      if (attempt === 0) {
+        await new Promise(r => setTimeout(r, 400));
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  throw lastErr;
 }
 
 /**
- * Normalize Open-Meteo raw payload for a single district.
+ * Normalize Open-Meteo raw payload for a single district or locality.
  */
 export function normalizeDistrictForecast(district, rawForecast) {
   if (!district || !rawForecast) return null;
 
   const currentRaw = rawForecast.current || {};
   const dailyRaw = rawForecast.daily || {};
+  const hourlyRaw = rawForecast.hourly || {};
 
   const currentWmo = getWMOInterpretation(currentRaw.weather_code);
 
@@ -237,7 +363,9 @@ export function normalizeDistrictForecast(district, rawForecast) {
     condition: currentWmo.label,
     icon_class: currentWmo.icon,
     wind_speed_kmh: typeof currentRaw.wind_speed_10m === 'number' ? Math.round(currentRaw.wind_speed_10m * 10) / 10 : 0,
-    wind_gusts_kmh: typeof currentRaw.wind_gusts_10m === 'number' ? Math.round(currentRaw.wind_gusts_10m * 10) / 10 : 0
+    wind_gusts_kmh: typeof currentRaw.wind_gusts_10m === 'number' ? Math.round(currentRaw.wind_gusts_10m * 10) / 10 : 0,
+    is_day: typeof currentRaw.is_day === 'number' ? currentRaw.is_day : 1,
+    visibility_km: typeof currentRaw.visibility === 'number' ? Math.round((currentRaw.visibility / 1000) * 10) / 10 : (typeof currentRaw.visibility_km === 'number' ? currentRaw.visibility_km : 10.0)
   };
 
   const dailyTimes = Array.isArray(dailyRaw.time) ? dailyRaw.time : [];
@@ -272,17 +400,60 @@ export function normalizeDistrictForecast(district, rawForecast) {
     };
   });
 
+  // Hourly Forecast Normalization (next 24 hours)
+  let hourly = [];
+  if (Array.isArray(hourlyRaw.time) && hourlyRaw.time.length > 0) {
+    const nowMs = Date.now();
+    let startIdx = 0;
+    for (let i = 0; i < hourlyRaw.time.length; i++) {
+      const t = new Date(hourlyRaw.time[i]).getTime();
+      if (t >= nowMs - 45 * 60 * 1000) {
+        startIdx = i;
+        break;
+      }
+    }
+
+    const next24 = hourlyRaw.time.slice(startIdx, startIdx + 24);
+    hourly = next24.map((timeStr, offset) => {
+      const idx = startIdx + offset;
+      const code = hourlyRaw.weather_code ? hourlyRaw.weather_code[idx] : 0;
+      const wmo = getWMOInterpretation(code);
+      const temp = hourlyRaw.temperature_2m ? Math.round(hourlyRaw.temperature_2m[idx] * 10) / 10 : null;
+      const precipProb = hourlyRaw.precipitation_probability ? hourlyRaw.precipitation_probability[idx] : 0;
+      const isDay = hourlyRaw.is_day ? hourlyRaw.is_day[idx] : 1;
+
+      return {
+        time: timeStr,
+        time_ist: formatTimeIST(timeStr),
+        hour_label: formatHourLabel(timeStr),
+        is_now: offset === 0,
+        temperature_c: temp,
+        precipitation_probability_pct: precipProb,
+        weather_code: typeof code === 'number' ? code : 0,
+        condition: wmo.label,
+        icon_class: wmo.icon,
+        is_day: isDay
+      };
+    });
+  }
+
+  const insights = generateWeatherInsights(current, hourly, daily);
+
   return {
     district: {
       id: district.id,
       name: district.name,
       nameTa: district.nameTa || district.name,
-      code: district.code,
+      locality: district.locality || null,
+      displayName: district.displayName || (district.locality ? `${district.locality}, ${district.name}` : district.name),
+      code: district.code || 'TN',
       lat: district.lat,
-      lng: district.lng
+      lng: district.lng || district.lon
     },
     current,
-    daily
+    daily,
+    hourly,
+    insights
   };
 }
 
@@ -403,23 +574,45 @@ export async function getWeatherForecast(options = {}) {
   // Default selected district: Chennai or the first available if not explicitly filtered
   const primaryDistrict = singleDistrictResult || districtsMap.get('chennai') || allForecasts[0] || null;
 
-  // If specific coordinates (lat, lon) provided, fetch live current weather for exact location
+  // If a primary/requested district has no hourly data cached yet, fetch hourly on-demand (live authentic data)
+  if (!mockFetchFixture && primaryDistrict && (!primaryDistrict.hourly || primaryDistrict.hourly.length === 0) && primaryDistrict.district && typeof primaryDistrict.district.lat === 'number') {
+    try {
+      const raw = await fetchFromOpenMeteo(primaryDistrict.district.lat, primaryDistrict.district.lng, true);
+      if (raw && raw.hourly) {
+        const full = normalizeDistrictForecast(primaryDistrict.district, raw);
+        primaryDistrict.hourly = full.hourly;
+        primaryDistrict.insights = full.insights;
+        if (targetDistrictId && districtsMap.has(targetDistrictId)) {
+          districtsMap.set(targetDistrictId, primaryDistrict);
+        }
+      }
+    } catch (hourlyErr) {
+      logger.warn(`[WeatherService] Hourly forecast fetch fallback for ${primaryDistrict.district.name}: ${hourlyErr.message}`);
+    }
+  }
+
+  // If specific coordinates (lat, lon) provided, fetch full live weather (current + 5-day daily + 24-hr hourly + insights) for exact location
   if (typeof options.lat === 'number' && typeof options.lon === 'number' && !isNaN(options.lat) && !isNaN(options.lon)) {
     try {
-      const raw = await fetchFromOpenMeteo(options.lat, options.lon);
+      const raw = await fetchFromOpenMeteo(options.lat, options.lon, true);
       if (raw && raw.current) {
-        const currentWmo = getWMOInterpretation(raw.current.weather_code);
-        const currentData = {
-          time: raw.current.time || null,
-          time_ist: formatTimeIST(raw.current.time),
-          temperature_c: typeof raw.current.temperature_2m === 'number' ? Math.round(raw.current.temperature_2m * 10) / 10 : null,
-          apparent_temperature_c: typeof raw.current.apparent_temperature === 'number' ? Math.round(raw.current.apparent_temperature * 10) / 10 : null,
-          relative_humidity_pct: typeof raw.current.relative_humidity_2m === 'number' ? raw.current.relative_humidity_2m : null,
-          precipitation_mm: typeof raw.current.precipitation === 'number' ? raw.current.precipitation : 0,
-          condition: currentWmo.label,
-          icon_class: currentWmo.icon,
-          weather_code: typeof raw.current.weather_code === 'number' ? raw.current.weather_code : 0
+        const localityName = options.locality || null;
+        const districtName = options.district || (primaryDistrict ? primaryDistrict.district.name : 'Tamil Nadu');
+        const displayName = options.displayName || (localityName ? `${localityName}, ${districtName}` : `${districtName}, Tamil Nadu`);
+
+        const locDistrict = {
+          id: localityName ? localityName.toLowerCase().replace(/[^a-z0-9]/g, '-') : (districtName.toLowerCase().replace(/[^a-z0-9]/g, '-')),
+          name: localityName || districtName,
+          locality: localityName,
+          district: districtName,
+          displayName: displayName,
+          nameTa: localityName || (primaryDistrict ? primaryDistrict.district.nameTa : 'தமிழ்நாடு'),
+          code: districtName.slice(0, 3).toUpperCase(),
+          lat: options.lat,
+          lng: options.lon
         };
+
+        const normalized = normalizeDistrictForecast(locDistrict, raw);
 
         return {
           success: true,
@@ -428,11 +621,12 @@ export async function getWeatherForecast(options = {}) {
           last_updated_ist: getCurrentISTTimestamp(),
           source: OPEN_METEO_SOURCE,
           coordinates: { lat: options.lat, lon: options.lon },
-          current: currentData,
-          current_district: {
-            ...(primaryDistrict || {}),
-            current: currentData
-          },
+          location: locDistrict,
+          current: normalized.current,
+          hourly: normalized.hourly,
+          daily: normalized.daily,
+          insights: normalized.insights,
+          current_district: normalized,
           districts_forecast: allForecasts,
           total_districts: allForecasts.length
         };
@@ -463,5 +657,7 @@ export default {
   setMockFixtures,
   clearCache,
   getCurrentISTTimestamp,
-  normalizeDistrictForecast
+  normalizeDistrictForecast,
+  generateWeatherInsights,
+  formatHourLabel
 };

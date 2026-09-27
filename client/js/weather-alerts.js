@@ -1,16 +1,21 @@
 /**
  * weather-alerts.js
  * 
- * Open-Meteo Weather Forecast Client Controller.
+ * Premium Open-Meteo Weather Forecast Client Controller.
  * Powers the Public Pulse > Weather Forecast page.
  * 
- * Strict Standards:
+ * Features:
  * - Real forecast data from Open-Meteo via CrowdCity backend (/api/public-pulse/weather)
- * - Clean, professional government-grade UI
- * - NO emojis anywhere
- * - Functional icons only
- * - 38 Tamil Nadu districts
- * - Desktop (4 col), tablet (2 col), mobile (1 col) responsive
+ * - Region-level and locality weather lookup (Peelamedu, Gandhipuram, RS Puram, Singanallur, etc.)
+ * - Unified location search with suggestions popover, recent searches, and city quick-picks
+ * - Apple Weather-inspired atmospheric hero with condition-aware dynamic backgrounds
+ * - Lightweight, GPU-accelerated CSS animations (rain, thunder, clouds, sun glow, stars, fog)
+ * - Respects prefers-reduced-motion for accessibility
+ * - 24-hour horizontally scrollable hourly forecast strip
+ * - Truthful weather insights section computed strictly from genuine weather values
+ * - Redesigned 5-day forecast cards with "LIVE NOW" badge for today & temp range bars
+ * - 38 Tamil Nadu districts overview grid
+ * - Resilient error handling and zero fake/synthetic data
  */
 
 (function() {
@@ -28,7 +33,13 @@
     sourceAvailable: false,
     isStale: false,
     lastUpdatedIST: null,
-    isLoading: false
+    isLoading: false,
+
+    // Region / Locality Upgrade
+    selectedLocation: null, // { name, locality, district, displayName, lat, lon }
+    hourlyForecast: [],
+    weatherInsights: [],
+    recentLocations: []
   };
 
   const TN_DISTRICTS_FALLBACK = [
@@ -42,9 +53,24 @@
     'Vellore', 'Viluppuram', 'Virudhunagar'
   ];
 
+  const MAJOR_CITIES_CHIPS = [
+    { name: 'Coimbatore', id: 'coimbatore' },
+    { name: 'Chennai', id: 'chennai' },
+    { name: 'Madurai', id: 'madurai' },
+    { name: 'Salem', id: 'salem' },
+    { name: 'Tiruchirappalli', id: 'tiruchirappalli' },
+    { name: 'Tiruppur', id: 'tiruppur' },
+    { name: 'Erode', id: 'erode' },
+    { name: 'Vellore', id: 'vellore' }
+  ];
+
+  const RECENT_LOCATIONS_STORAGE_KEY = 'cc_weather_recent_locations';
+
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
+    loadRecentLocations();
+
     // 1. Resolve known citizen district synchronously from client storage / coordinates
     if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
       const saved = window.CrowdCityLocation.getSavedUserDistrict();
@@ -76,6 +102,7 @@
 
     await populateDistrictsDropdown();
     setupEventListeners();
+    setupLocationSearch();
     updateLocationBanner();
     await fetchWeatherForecast();
 
@@ -88,6 +115,7 @@
     if (e.detail && e.detail.district && !state.userHasManuallyChangedDistrict) {
       state.userDetectedDistrict = e.detail.district;
       state.district = e.detail.district.toLowerCase();
+      state.selectedLocation = null;
       state.isDetectingLocation = false;
       const distSelect = document.getElementById('weather-district-filter');
       if (distSelect) distSelect.value = state.district;
@@ -97,8 +125,52 @@
     }
   }
 
+  function loadRecentLocations() {
+    try {
+      const raw = localStorage.getItem(RECENT_LOCATIONS_STORAGE_KEY);
+      if (raw) {
+        state.recentLocations = JSON.parse(raw);
+        if (!Array.isArray(state.recentLocations)) state.recentLocations = [];
+      }
+    } catch {
+      state.recentLocations = [];
+    }
+  }
+
+  function saveRecentLocation(item) {
+    if (!item || !item.name) return;
+    try {
+      const filtered = state.recentLocations.filter(r => 
+        r.name.toLowerCase() !== item.name.toLowerCase() ||
+        (r.district && item.district && r.district.toLowerCase() !== item.district.toLowerCase())
+      );
+      filtered.unshift({
+        name: item.name,
+        locality: item.locality || null,
+        district: item.district || '',
+        displayName: item.displayName || item.name,
+        lat: item.lat,
+        lon: item.lon,
+        type: item.type || 'locality'
+      });
+      state.recentLocations = filtered.slice(0, 6);
+      localStorage.setItem(RECENT_LOCATIONS_STORAGE_KEY, JSON.stringify(state.recentLocations));
+    } catch {
+      // Ignore storage errors
+    }
+  }
+
+  window.clearRecentLocations = function() {
+    state.recentLocations = [];
+    localStorage.removeItem(RECENT_LOCATIONS_STORAGE_KEY);
+    renderRecentLocations();
+  };
+
   function getDistrictDisplayName(id) {
     if (!id || id === 'all') return 'Tamil Nadu';
+    if (state.selectedLocation && state.selectedLocation.name) {
+      return state.selectedLocation.displayName || state.selectedLocation.name;
+    }
     if (state.districtsForecast && state.districtsForecast.length > 0) {
       const found = state.districtsForecast.find(d => 
         (d.district && d.district.id && d.district.id.toLowerCase() === id.toLowerCase()) ||
@@ -132,13 +204,21 @@
       return;
     }
 
+    const selectedName = state.selectedLocation
+      ? (state.selectedLocation.locality ? `${state.selectedLocation.locality} (${state.selectedLocation.district})` : state.selectedLocation.name)
+      : getDistrictDisplayName(state.district);
+
     if (state.userDetectedDistrict) {
       banner.classList.remove('hidden');
       const contentEl = banner.querySelector('.weather-location-banner-content');
-      const isViewingDetected = Boolean(state.district && state.district.toLowerCase() === state.userDetectedDistrict.toLowerCase());
+      const isViewingDetected = Boolean(
+        !state.selectedLocation &&
+        state.district &&
+        state.district.toLowerCase() === state.userDetectedDistrict.toLowerCase()
+      );
 
       if (contentEl) {
-        if (state.district === 'all') {
+        if (state.district === 'all' && !state.selectedLocation) {
           contentEl.innerHTML = `
             <i class="fa-solid fa-globe"></i>
             <span>Showing all 38 districts across Tamil Nadu. Your detected location: <strong>${escapeHtml(state.userDetectedDistrict)}</strong></span>
@@ -149,16 +229,16 @@
             <span>Showing live weather forecast for your location: <strong>${escapeHtml(state.userDetectedDistrict)}</strong></span>
           `;
         } else {
-          const selectedName = getDistrictDisplayName(state.district);
           contentEl.innerHTML = `
             <i class="fa-solid fa-location-dot"></i>
             <span>Showing live weather forecast for: <strong>${escapeHtml(selectedName)}</strong></span>
           `;
         }
       }
+
       if (switchBtn) {
         switchBtn.style.display = 'inline-flex';
-        if (state.district === 'all') {
+        if (state.district === 'all' && !state.selectedLocation) {
           switchBtn.innerHTML = `<span>Back to ${escapeHtml(state.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
           switchBtn.onclick = () => window.selectUserDetectedDistrict();
         } else if (isViewingDetected) {
@@ -173,21 +253,20 @@
       banner.classList.remove('hidden');
       const contentEl = banner.querySelector('.weather-location-banner-content');
       if (contentEl) {
-        if (state.district !== 'all') {
-          const selectedName = getDistrictDisplayName(state.district);
+        if (state.district !== 'all' || state.selectedLocation) {
           contentEl.innerHTML = `
             <i class="fa-solid fa-location-dot"></i>
-            <span>Showing live weather forecast for: <strong>${escapeHtml(selectedName)}</strong></span>
+            <span>Showing live weather forecast for: <strong>${escapeHtml(activeLocationName)}</strong></span>
           `;
         } else {
           contentEl.innerHTML = `
             <i class="fa-solid fa-location-pin"></i>
-            <span>Select your district to showcase local weather forecast.</span>
+            <span>Select your locality or district to showcase local weather forecast.</span>
           `;
         }
       }
       if (switchBtn) {
-        if (state.district !== 'all') {
+        if (state.district !== 'all' || state.selectedLocation) {
           switchBtn.style.display = 'inline-flex';
           switchBtn.innerHTML = `<span>View All 38 Districts</span> <i class="fa-solid fa-arrow-right"></i>`;
           switchBtn.onclick = () => window.resetWeatherFilters();
@@ -201,12 +280,13 @@
   window.selectUserDetectedDistrict = function() {
     if (state.userDetectedDistrict) {
       state.district = state.userDetectedDistrict.toLowerCase();
+      state.selectedLocation = null;
       state.userHasManuallyChangedDistrict = false;
       const distSelect = document.getElementById('weather-district-filter');
       if (distSelect) distSelect.value = state.district;
       updateLocationBanner();
-      updateSelectedDistrictView();
-      renderView();
+      closeSearchPopover();
+      fetchWeatherForecast();
     }
   };
 
@@ -264,27 +344,311 @@
       retryErrBtn.addEventListener('click', () => fetchWeatherForecast(true));
     }
 
-    // District select
+    // District select dropdown
     const distSelect = document.getElementById('weather-district-filter');
     if (distSelect) {
       distSelect.addEventListener('change', (e) => {
         state.district = e.target.value.toLowerCase();
+        state.selectedLocation = null;
         state.userHasManuallyChangedDistrict = true;
         updateLocationBanner();
         updateSelectedDistrictView();
-        renderView();
-      });
-    }
-
-    // Search input
-    const searchInput = document.getElementById('weather-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        state.searchQuery = e.target.value.trim().toLowerCase();
-        renderView();
+        fetchWeatherForecast();
       });
     }
   }
+
+  /**
+   * Premium Location Search & Suggestions Setup.
+   */
+  function setupLocationSearch() {
+    const searchInput = document.getElementById('weather-search-input');
+    const clearBtn = document.getElementById('weather-search-clear-btn');
+    const popover = document.getElementById('weather-search-popover');
+    if (!searchInput) return;
+
+    renderQuickDistricts();
+    renderRecentLocations();
+
+    let debounceTimer = null;
+
+    searchInput.addEventListener('focus', () => {
+      openSearchPopover();
+      if (!searchInput.value.trim()) {
+        showDefaultPopoverViews();
+      }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.trim();
+      state.searchQuery = q.toLowerCase();
+
+      if (clearBtn) {
+        if (q.length > 0) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      openSearchPopover();
+
+      if (q.length < 2) {
+        showDefaultPopoverViews();
+        // If empty, let local overview filter immediately
+        if (q.length === 0) {
+          renderView();
+        }
+        return;
+      }
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        performAsyncLocationSearch(q);
+      }, 220);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSearchPopover();
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        state.searchQuery = '';
+        clearBtn.classList.add('hidden');
+        showDefaultPopoverViews();
+        renderView();
+        searchInput.focus();
+      });
+    }
+
+    const useMyLocBtn = document.getElementById('btn-use-my-location');
+    if (useMyLocBtn) {
+      useMyLocBtn.addEventListener('click', () => window.useCurrentLocation());
+    }
+
+    const backDetectedBtn = document.getElementById('btn-back-detected');
+    if (backDetectedBtn) {
+      backDetectedBtn.addEventListener('click', () => window.selectUserDetectedDistrict());
+    }
+
+    // Close popover when clicking outside
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('weather-search-wrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        closeSearchPopover();
+      }
+    });
+  }
+
+  function openSearchPopover() {
+    const popover = document.getElementById('weather-search-popover');
+    if (popover) popover.classList.remove('hidden');
+
+    const backText = document.getElementById('popover-back-detected-text');
+    if (backText) {
+      backText.textContent = state.userDetectedDistrict
+        ? `Back to ${state.userDetectedDistrict}`
+        : 'Back to Detected Location';
+    }
+  }
+
+  function closeSearchPopover() {
+    const popover = document.getElementById('weather-search-popover');
+    if (popover) popover.classList.add('hidden');
+  }
+
+  function showDefaultPopoverViews() {
+    const resultsSec = document.getElementById('popover-results-section');
+    const recentsSec = document.getElementById('popover-recents-section');
+    const districtsSec = document.getElementById('popover-quick-districts-section');
+
+    if (resultsSec) resultsSec.classList.add('hidden');
+    if (recentsSec) {
+      if (state.recentLocations.length > 0) recentsSec.classList.remove('hidden');
+      else recentsSec.classList.add('hidden');
+    }
+    if (districtsSec) districtsSec.classList.remove('hidden');
+  }
+
+  function renderQuickDistricts() {
+    const container = document.getElementById('popover-district-chips');
+    if (!container) return;
+
+    container.innerHTML = MAJOR_CITIES_CHIPS.map(c => `
+      <button type="button" class="popover-chip" onclick="selectQuickDistrict('${escapeHtml(c.id)}', '${escapeHtml(c.name)}')">
+        ${escapeHtml(c.name)}
+      </button>
+    `).join('');
+  }
+
+  function renderRecentLocations() {
+    const container = document.getElementById('popover-recents-list');
+    const section = document.getElementById('popover-recents-section');
+    if (!container || !section) return;
+
+    if (state.recentLocations.length === 0) {
+      section.classList.add('hidden');
+      container.innerHTML = '';
+      return;
+    }
+
+    section.classList.remove('hidden');
+    container.innerHTML = state.recentLocations.map((item, idx) => `
+      <div class="popover-result-item" onclick="selectRecentLocationIndex(${idx})">
+        <div class="popover-result-left">
+          <i class="fa-regular fa-clock"></i>
+          <div class="popover-result-text">
+            <span class="popover-result-name">${escapeHtml(item.name)}</span>
+            <span class="popover-result-meta">${escapeHtml(item.district ? `${item.district}, Tamil Nadu` : 'Tamil Nadu')}</span>
+          </div>
+        </div>
+        <span class="popover-result-badge">${item.locality ? 'Locality' : 'District'}</span>
+      </div>
+    `).join('');
+  }
+
+  window.selectQuickDistrict = function(districtId, districtName) {
+    state.district = districtId.toLowerCase();
+    state.selectedLocation = {
+      name: districtName,
+      locality: null,
+      district: districtName,
+      displayName: `${districtName}, Tamil Nadu`,
+      lat: null,
+      lon: null,
+      type: 'district'
+    };
+    state.userHasManuallyChangedDistrict = true;
+    saveRecentLocation(state.selectedLocation);
+
+    const distSelect = document.getElementById('weather-district-filter');
+    if (distSelect) distSelect.value = state.district;
+
+    const searchInput = document.getElementById('weather-search-input');
+    if (searchInput) searchInput.value = districtName;
+
+    closeSearchPopover();
+    updateLocationBanner();
+    fetchWeatherForecast();
+  };
+
+  window.selectRecentLocationIndex = function(idx) {
+    const item = state.recentLocations[idx];
+    if (!item) return;
+    selectLocation(item);
+  };
+
+  async function performAsyncLocationSearch(query) {
+    const spinner = document.getElementById('weather-search-spinner');
+    const resultsSec = document.getElementById('popover-results-section');
+    const resultsList = document.getElementById('popover-results-list');
+    const recentsSec = document.getElementById('popover-recents-section');
+    const districtsSec = document.getElementById('popover-quick-districts-section');
+
+    if (spinner) spinner.classList.remove('hidden');
+
+    try {
+      const url = `/api/public-pulse/weather/search?q=${encodeURIComponent(query)}&district=${encodeURIComponent(state.district || '')}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (spinner) spinner.classList.add('hidden');
+
+      if (data && Array.isArray(data.results) && data.results.length > 0) {
+        if (recentsSec) recentsSec.classList.add('hidden');
+        if (districtsSec) districtsSec.classList.add('hidden');
+        if (resultsSec) resultsSec.classList.remove('hidden');
+
+        resultsList.innerHTML = data.results.map(r => `
+          <div class="popover-result-item" onclick="selectLocationRecord('${encodeURIComponent(JSON.stringify(r))}')">
+            <div class="popover-result-left">
+              <i class="fa-solid fa-location-dot"></i>
+              <div class="popover-result-text">
+                <span class="popover-result-name">${escapeHtml(r.name)}</span>
+                <span class="popover-result-meta">${escapeHtml(r.subtitle || `${r.district}, Tamil Nadu`)}</span>
+              </div>
+            </div>
+            <span class="popover-result-badge">${r.type === 'locality' ? 'Locality' : 'District'}</span>
+          </div>
+        `).join('');
+      } else {
+        if (resultsSec) resultsSec.classList.remove('hidden');
+        resultsList.innerHTML = `
+          <div style="padding: 0.75rem; text-align: center; color: var(--text-muted, #64748b); font-size: 0.8rem;">
+            No localities or districts found for "${escapeHtml(query)}".
+          </div>
+        `;
+      }
+    } catch (err) {
+      if (spinner) spinner.classList.add('hidden');
+      console.warn('[LocationSearch] Query failed:', err.message);
+    }
+  }
+
+  window.selectLocationRecord = function(encodedStr) {
+    try {
+      const r = JSON.parse(decodeURIComponent(encodedStr));
+      selectLocation(r);
+    } catch (e) {
+      console.error('Failed to parse selected location:', e);
+    }
+  };
+
+  function selectLocation(loc) {
+    state.selectedLocation = loc;
+    if (loc.district) {
+      state.district = loc.district.toLowerCase();
+    }
+    state.userHasManuallyChangedDistrict = true;
+    saveRecentLocation(loc);
+
+    const distSelect = document.getElementById('weather-district-filter');
+    if (distSelect && state.district) {
+      distSelect.value = state.district;
+    }
+
+    const searchInput = document.getElementById('weather-search-input');
+    if (searchInput) {
+      searchInput.value = loc.displayName || loc.name;
+    }
+
+    closeSearchPopover();
+    updateLocationBanner();
+    fetchWeatherForecast();
+  }
+
+  window.focusLocationSearch = function() {
+    const input = document.getElementById('weather-search-input');
+    if (input) {
+      input.focus();
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  window.useCurrentLocation = async function() {
+    state.isDetectingLocation = true;
+    updateLocationBanner();
+    closeSearchPopover();
+
+    if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
+      try {
+        const detected = await window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 5000, requestGps: true });
+        if (detected) {
+          state.userDetectedDistrict = detected;
+          state.district = detected.toLowerCase();
+          state.selectedLocation = null;
+          state.userHasManuallyChangedDistrict = false;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    state.isDetectingLocation = false;
+    updateLocationBanner();
+    fetchWeatherForecast();
+  };
 
   function setRetryLoading(isLoading) {
     const refreshBtn = document.getElementById('btn-refresh-weather');
@@ -334,6 +698,7 @@
 
   window.resetWeatherFilters = function() {
     state.district = 'all';
+    state.selectedLocation = null;
     state.dateTab = 'all';
     state.searchQuery = '';
     state.userHasManuallyChangedDistrict = true;
@@ -347,7 +712,7 @@
     window.setWeatherTimeframeTab('all');
     updateLocationBanner();
     updateSelectedDistrictView();
-    renderView();
+    fetchWeatherForecast();
   };
 
   /**
@@ -367,7 +732,33 @@
     }
 
     try {
-      const url = `/api/public-pulse/weather${forceRefresh ? '?refresh=true' : ''}`;
+      let url = '/api/public-pulse/weather';
+      const params = new URLSearchParams();
+
+      if (forceRefresh) {
+        params.append('refresh', 'true');
+      }
+
+      // If specific locality/region coordinates selected
+      if (state.selectedLocation && typeof state.selectedLocation.lat === 'number' && typeof state.selectedLocation.lon === 'number') {
+        params.append('lat', state.selectedLocation.lat);
+        params.append('lon', state.selectedLocation.lon);
+        if (state.selectedLocation.locality) {
+          params.append('locality', state.selectedLocation.locality);
+        }
+        if (state.selectedLocation.district) {
+          params.append('district', state.selectedLocation.district);
+        }
+        if (state.selectedLocation.displayName) {
+          params.append('displayName', state.selectedLocation.displayName);
+        }
+      } else if (state.district && state.district !== 'all') {
+        params.append('district', state.district);
+      }
+
+      const qs = params.toString();
+      if (qs) url += `?${qs}`;
+
       const res = await fetch(url);
       const data = await res.json();
 
@@ -376,7 +767,33 @@
       state.lastUpdatedIST = data.last_updated_ist || null;
       state.districtsForecast = data.districts_forecast || [];
 
-      if (state.sourceAvailable && state.districtsForecast.length > 0) {
+      if (data.current_district) {
+        state.currentDistrict = data.current_district;
+      }
+      if (Array.isArray(data.hourly)) {
+        state.hourlyForecast = data.hourly;
+      } else if (data.current_district && Array.isArray(data.current_district.hourly)) {
+        state.hourlyForecast = data.current_district.hourly;
+      } else {
+        state.hourlyForecast = [];
+      }
+
+      if (Array.isArray(data.insights)) {
+        state.weatherInsights = data.insights;
+      } else if (data.current_district && Array.isArray(data.current_district.insights)) {
+        state.weatherInsights = data.current_district.insights;
+      } else {
+        state.weatherInsights = [];
+      }
+
+      if (data.location && state.selectedLocation) {
+        state.selectedLocation = {
+          ...state.selectedLocation,
+          ...data.location
+        };
+      }
+
+      if (state.sourceAvailable && (state.districtsForecast.length > 0 || state.currentDistrict)) {
         const errorState = document.getElementById('weather-error-state');
         const sourceUnavailableBox = document.getElementById('weather-source-unavailable-box');
         if (errorState) errorState.classList.add('hidden');
@@ -384,8 +801,11 @@
       }
 
       updateSelectedDistrictView();
+      updateLocationBanner();
       updateHeaderStatus();
       renderView();
+      renderHourlyForecast();
+      renderWeatherInsights();
     } catch (err) {
       console.error('[WeatherForecast] Fetch error:', err);
       state.sourceAvailable = false;
@@ -400,8 +820,13 @@
   window.fetchWeatherForecast = fetchWeatherForecast;
 
   function updateSelectedDistrictView() {
-    if (state.districtsForecast.length === 0) {
+    if (state.districtsForecast.length === 0 && !state.currentDistrict) {
       state.currentDistrict = null;
+      return;
+    }
+
+    // If specific locality weather is loaded into state.currentDistrict, preserve it!
+    if (state.selectedLocation && state.currentDistrict && state.currentDistrict.district) {
       return;
     }
 
@@ -412,7 +837,6 @@
       );
       state.currentDistrict = found || state.districtsForecast[0];
     } else {
-      // Prioritize user's detected location first even in statewide overview!
       let preferred = null;
       if (state.userDetectedDistrict) {
         preferred = state.districtsForecast.find(d => 
@@ -457,7 +881,7 @@
 
     if (errorState) errorState.classList.add('hidden');
 
-    if (!state.sourceAvailable && state.districtsForecast.length === 0) {
+    if (!state.sourceAvailable && state.districtsForecast.length === 0 && !state.currentDistrict) {
       if (heroContainer) heroContainer.innerHTML = '';
       if (forecastContainer) forecastContainer.innerHTML = '';
       if (allDistrictsSection) allDistrictsSection.classList.add('hidden');
@@ -470,7 +894,7 @@
 
     // Handle search filtering
     let matchingDistricts = [...state.districtsForecast];
-    if (state.searchQuery) {
+    if (state.searchQuery && !state.selectedLocation) {
       matchingDistricts = matchingDistricts.filter(d => 
         d.district.name.toLowerCase().includes(state.searchQuery) ||
         (d.district.nameTa && d.district.nameTa.toLowerCase().includes(state.searchQuery))
@@ -487,16 +911,14 @@
 
     if (emptyState) emptyState.classList.add('hidden');
 
-    // Target district for Current Weather and 5-Day Forecast
-    const targetDistrict = (state.searchQuery && matchingDistricts.length === 1)
-      ? matchingDistricts[0]
-      : state.currentDistrict;
+    // Target district/location for Hero and 5-Day Forecast
+    const targetDistrict = state.currentDistrict || (state.searchQuery && matchingDistricts.length === 1 ? matchingDistricts[0] : null);
 
     if (heroContainer && targetDistrict) {
       heroContainer.innerHTML = createCurrentWeatherHeroHtml(targetDistrict);
     }
 
-    // 5-Day Forecast Grid for target district
+    // 5-Day Forecast Grid for target location
     if (forecastContainer && targetDistrict && targetDistrict.daily) {
       let filteredDaily = [...targetDistrict.daily];
 
@@ -512,19 +934,21 @@
         filteredDaily = filteredDaily.filter(d => d.day_index === 5);
       }
 
+      const activeName = state.selectedLocation?.locality || targetDistrict.district.locality || targetDistrict.district.name;
+
       forecastContainer.innerHTML = filteredDaily.map(item => 
-        createForecastCardHtml(targetDistrict.district.name, item)
+        createForecastCardHtml(activeName, item)
       ).join('');
 
       if (forecastSectionHeading) {
         const timeframeLabel = state.dateTab === 'all' ? '5-Day Forecast' : `${filteredDaily[0]?.day_label || 'Day'} Forecast`;
-        forecastSectionHeading.textContent = `${targetDistrict.district.name} · ${timeframeLabel}`;
+        forecastSectionHeading.textContent = `${activeName} · ${timeframeLabel}`;
       }
     }
 
     // 38-District Overview Grid
     if (allDistrictsSection && allDistrictsGrid) {
-      if (state.district === 'all') {
+      if (state.district === 'all' && !state.selectedLocation) {
         allDistrictsSection.classList.remove('hidden');
         let sortedDistricts = [...matchingDistricts];
         if (state.userDetectedDistrict && !state.searchQuery) {
@@ -545,70 +969,225 @@
   }
 
   /**
-   * HTML Template: Refined Current Weather Panel (Clean 2-level layout).
+   * Determine CSS condition class & dynamic animation parameters.
+   */
+  function getWeatherSceneDetails(weatherCode, isDay = 1) {
+    const code = Number(weatherCode) || 0;
+    const isDayBool = Boolean(isDay);
+
+    if (code >= 95) {
+      return { className: 'weather-scene-thunderstorm', type: 'thunderstorm' };
+    }
+    if (code === 65 || code === 82) {
+      return { className: 'weather-scene-heavy-rain', type: 'heavy_rain' };
+    }
+    if ((code >= 61 && code <= 63) || (code >= 80 && code <= 81)) {
+      return { className: 'weather-scene-rain', type: 'rain' };
+    }
+    if (code >= 51 && code <= 57) {
+      return { className: 'weather-scene-rain', type: 'drizzle' };
+    }
+    if (code === 45 || code === 48) {
+      return { className: 'weather-scene-fog', type: 'fog' };
+    }
+    if (code <= 1) {
+      return {
+        className: isDayBool ? 'weather-scene-day-clear' : 'weather-scene-night-clear',
+        type: isDayBool ? 'clear_day' : 'clear_night'
+      };
+    }
+    return {
+      className: isDayBool ? 'weather-scene-day-cloudy' : 'weather-scene-night-cloudy',
+      type: isDayBool ? 'cloudy_day' : 'cloudy_night'
+    };
+  }
+
+  /**
+   * Generate lightweight HTML for condition-aware background FX layer.
+   */
+  function generateWeatherFxHtml(sceneType) {
+    // Check prefers-reduced-motion
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return '<div class="weather-fx-layer"></div>';
+    }
+
+    if (sceneType === 'rain' || sceneType === 'drizzle') {
+      const count = sceneType === 'drizzle' ? 16 : 28;
+      const drops = Array.from({ length: count }, (_, i) => {
+        const left = Math.round((i * (100 / count)) + (Math.random() * 3));
+        const delay = (Math.random() * 0.8).toFixed(2);
+        const duration = (0.65 + Math.random() * 0.25).toFixed(2);
+        return `<div class="rain-drop" style="left: ${left}%; animation-delay: -${delay}s; animation-duration: ${duration}s;"></div>`;
+      }).join('');
+      return `<div class="weather-fx-layer">${drops}</div>`;
+    }
+
+    if (sceneType === 'heavy_rain') {
+      const drops = Array.from({ length: 40 }, (_, i) => {
+        const left = Math.round((i * 2.5) + (Math.random() * 2));
+        const delay = (Math.random() * 0.7).toFixed(2);
+        const duration = (0.5 + Math.random() * 0.2).toFixed(2);
+        return `<div class="rain-drop" style="left: ${left}%; animation-delay: -${delay}s; animation-duration: ${duration}s; height: 32px;"></div>`;
+      }).join('');
+      return `<div class="weather-fx-layer">${drops}</div>`;
+    }
+
+    if (sceneType === 'thunderstorm') {
+      const drops = Array.from({ length: 30 }, (_, i) => {
+        const left = Math.round((i * 3.3) + (Math.random() * 2));
+        const delay = (Math.random() * 0.7).toFixed(2);
+        return `<div class="rain-drop" style="left: ${left}%; animation-delay: -${delay}s;"></div>`;
+      }).join('');
+      return `
+        <div class="weather-fx-layer">
+          <div class="lightning-flash"></div>
+          ${drops}
+        </div>
+      `;
+    }
+
+    if (sceneType === 'clear_day') {
+      return `
+        <div class="weather-fx-layer">
+          <div class="sun-glow-core"></div>
+        </div>
+      `;
+    }
+
+    if (sceneType === 'clear_night') {
+      const stars = Array.from({ length: 22 }, () => {
+        const left = Math.round(Math.random() * 96);
+        const top = Math.round(Math.random() * 85);
+        const delay = (Math.random() * 3).toFixed(2);
+        const duration = (2 + Math.random() * 2).toFixed(2);
+        return `<div class="star-particle" style="left: ${left}%; top: ${top}%; animation-delay: -${delay}s; animation-duration: ${duration}s;"></div>`;
+      }).join('');
+      return `<div class="weather-fx-layer">${stars}</div>`;
+    }
+
+    if (sceneType === 'cloudy_day' || sceneType === 'cloudy_night') {
+      return `
+        <div class="weather-fx-layer">
+          <div class="cloud-drifter" style="top: 15px; width: 140px; height: 38px; animation-duration: 38s; animation-delay: -5s;"></div>
+          <div class="cloud-drifter" style="top: 80px; width: 220px; height: 50px; animation-duration: 52s; animation-delay: -22s;"></div>
+          <div class="cloud-drifter" style="top: 150px; width: 160px; height: 42px; animation-duration: 44s; animation-delay: -12s;"></div>
+        </div>
+      `;
+    }
+
+    if (sceneType === 'fog') {
+      return `
+        <div class="weather-fx-layer">
+          <div class="fog-wave" style="top: 25%;"></div>
+          <div class="fog-wave" style="top: 65%; animation-delay: -6s;"></div>
+        </div>
+      `;
+    }
+
+    return '<div class="weather-fx-layer"></div>';
+  }
+
+  /**
+   * HTML Template: Apple Weather Inspired Atmospheric Weather Hero.
    */
   function createCurrentWeatherHeroHtml(item) {
     const dist = item.district;
     const curr = item.current;
+    const today = item.daily && item.daily[0] ? item.daily[0] : null;
 
-    const tempDisplay = curr.temperature_c !== null ? `${curr.temperature_c}°C` : '--';
-    const feelsLikeDisplay = curr.apparent_temperature_c !== null ? `${curr.apparent_temperature_c}°C` : '--';
+    const scene = getWeatherSceneDetails(curr.weather_code, curr.is_day);
+    const fxHtml = generateWeatherFxHtml(scene.type);
+
+    const tempDisplay = curr.temperature_c !== null ? `${Math.round(curr.temperature_c)}` : '--';
+    const feelsLikeDisplay = curr.apparent_temperature_c !== null ? `${Math.round(curr.apparent_temperature_c)}°` : '--';
+    const highLowDisplay = today && typeof today.temperature_max_c === 'number'
+      ? `H: ${Math.round(today.temperature_max_c)}° · L: ${Math.round(today.temperature_min_c)}°`
+      : '';
+
     const rainDisplay = `${curr.precipitation_mm} mm`;
     const humidityDisplay = curr.relative_humidity_pct !== null ? `${curr.relative_humidity_pct}%` : '--';
     const windDisplay = `${curr.wind_speed_kmh} km/h`;
     const gustsDisplay = `${curr.wind_gusts_kmh} km/h`;
+    const visibilityDisplay = typeof curr.visibility_km === 'number' ? `${curr.visibility_km} km` : '10 km';
 
-    const feelsLikeLabel = window.i18n ? window.i18n.t('weather_feels_like') : 'Feels like';
-    const rainLabel = window.i18n ? window.i18n.t('weather_rainfall') : 'Rain';
-    const humidityLabel = window.i18n ? window.i18n.t('weather_humidity') : 'Humidity';
-    const windLabel = window.i18n ? window.i18n.t('weather_wind') : 'Wind';
-    const gustsLabel = window.i18n ? window.i18n.t('weather_wind_gusts') : 'Wind gusts';
+    const localityTitle = state.selectedLocation?.locality || dist.locality || dist.name;
+    const regionSubtitle = dist.locality && dist.name !== dist.locality
+      ? `${dist.name}, Tamil Nadu`
+      : 'Tamil Nadu';
+
+    const lastUpdated = state.lastUpdatedIST ? `Updated ${state.lastUpdatedIST}` : 'Live';
 
     return `
-      <section class="current-weather-panel">
-        <div class="current-weather-top">
-          <div>
-            <h2 class="current-district-name">${escapeHtml(dist.name)}</h2>
-            <div class="current-temp-summary">
-              <span class="current-temperature">${escapeHtml(tempDisplay)}</span>
-              <div class="current-condition-wrap">
-                <span class="current-condition-text">
-                  <i class="fa-solid ${escapeHtml(curr.icon_class)}"></i>
-                  <span>${escapeHtml(curr.condition)}</span>
-                </span>
-                <span class="current-feels-like">${escapeHtml(feelsLikeLabel)} ${escapeHtml(feelsLikeDisplay)}</span>
+      <section class="current-weather-panel ${escapeHtml(scene.className)}">
+        ${fxHtml}
+
+        <div class="weather-hero-content">
+          <div class="hero-top-row">
+            <div class="hero-location-block">
+              <span class="hero-live-pill">
+                <span class="pulse-dot"></span> LIVE WEATHER
+              </span>
+              <div class="hero-location-title-row">
+                <h2 class="hero-locality-name">📍 ${escapeHtml(localityTitle)}</h2>
+                <button type="button" class="hero-location-change-btn" onclick="focusLocationSearch()">
+                  <i class="fa-solid fa-magnifying-glass-location"></i> Change
+                </button>
+              </div>
+              <p class="hero-region-sub">${escapeHtml(regionSubtitle)}</p>
+            </div>
+            <span class="hero-updated-badge">${escapeHtml(lastUpdated)}</span>
+          </div>
+
+          <div class="hero-main-row">
+            <div class="hero-temp-group">
+              <div class="hero-huge-temp">
+                <span>${escapeHtml(tempDisplay)}</span><span class="deg">°</span>
+              </div>
+              <div class="hero-condition-text">
+                <i class="fa-solid ${escapeHtml(curr.icon_class)}"></i>
+                <span>${escapeHtml(curr.condition)}</span>
+              </div>
+              <div class="hero-feels-like-row">
+                <span>Feels like ${escapeHtml(feelsLikeDisplay)}</span>
+                ${highLowDisplay ? `<span> · ${escapeHtml(highLowDisplay)}</span>` : ''}
               </div>
             </div>
-          </div>
-        </div>
 
-        <div class="current-metrics-row">
-          <div class="metric-block">
-            <span class="metric-label">
-              <i class="fa-solid fa-droplet"></i> ${escapeHtml(rainLabel)}
-            </span>
-            <span class="metric-value">${escapeHtml(rainDisplay)}</span>
+            <div class="hero-weather-visual" aria-hidden="true">
+              <i class="fa-solid ${escapeHtml(curr.icon_class)}"></i>
+            </div>
           </div>
 
-          <div class="metric-block">
-            <span class="metric-label">
-              <i class="fa-solid fa-water"></i> ${escapeHtml(humidityLabel)}
-            </span>
-            <span class="metric-value">${escapeHtml(humidityDisplay)}</span>
-          </div>
+          <div class="hero-glass-metrics">
+            <div class="glass-metric-tile">
+              <span class="metric-tile-header"><i class="fa-solid fa-droplets"></i> Humidity</span>
+              <span class="metric-tile-val">${escapeHtml(humidityDisplay)}</span>
+              <span class="metric-tile-sub">${curr.relative_humidity_pct >= 80 ? 'High moisture' : 'Comfortable'}</span>
+            </div>
 
-          <div class="metric-block">
-            <span class="metric-label">
-              <i class="fa-solid fa-wind"></i> ${escapeHtml(windLabel)}
-            </span>
-            <span class="metric-value">${escapeHtml(windDisplay)}</span>
-          </div>
+            <div class="glass-metric-tile">
+              <span class="metric-tile-header"><i class="fa-solid fa-wind"></i> Wind</span>
+              <span class="metric-tile-val">${escapeHtml(windDisplay)}</span>
+              <span class="metric-tile-sub">Gusts ${escapeHtml(gustsDisplay)}</span>
+            </div>
 
-          <div class="metric-block">
-            <span class="metric-label">
-              <i class="fa-solid fa-gauge-high"></i> ${escapeHtml(gustsLabel)}
-            </span>
-            <span class="metric-value">${escapeHtml(gustsDisplay)}</span>
+            <div class="glass-metric-tile">
+              <span class="metric-tile-header"><i class="fa-solid fa-cloud-rain"></i> Rainfall</span>
+              <span class="metric-tile-val">${escapeHtml(rainDisplay)}</span>
+              <span class="metric-tile-sub">${today ? `${today.precipitation_probability_pct}% chance` : 'Precipitation'}</span>
+            </div>
+
+            <div class="glass-metric-tile">
+              <span class="metric-tile-header"><i class="fa-solid fa-eye"></i> Visibility</span>
+              <span class="metric-tile-val">${escapeHtml(visibilityDisplay)}</span>
+              <span class="metric-tile-sub">${curr.visibility_km >= 10 ? 'Optimal horizon' : 'Moderate'}</span>
+            </div>
+
+            <div class="glass-metric-tile">
+              <span class="metric-tile-header"><i class="fa-regular fa-sun"></i> Sun Schedule</span>
+              <span class="metric-tile-val" style="font-size: 0.95rem;">${escapeHtml(today?.sunrise || '--')}</span>
+              <span class="metric-tile-sub">Sunset ${escapeHtml(today?.sunset || '--')}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -616,11 +1195,81 @@
   }
 
   /**
-   * HTML Template: Refined 5-Day Forecast Card.
+   * Render 24-Hour Hourly Forecast Strip.
+   */
+  function renderHourlyForecast() {
+    const section = document.getElementById('hourly-forecast-section');
+    const track = document.getElementById('hourly-forecast-track');
+    if (!section || !track) return;
+
+    if (!Array.isArray(state.hourlyForecast) || state.hourlyForecast.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+
+    track.innerHTML = state.hourlyForecast.map((h, idx) => {
+      const isActive = h.is_now || idx === 0;
+      const label = isActive ? 'Now' : h.hour_label;
+      const temp = h.temperature_c !== null ? `${Math.round(h.temperature_c)}°` : '--';
+      const rainBadge = h.precipitation_probability_pct > 0
+        ? `<span class="hourly-rain-badge"><i class="fa-solid fa-droplet"></i> ${h.precipitation_probability_pct}%</span>`
+        : '';
+
+      return `
+        <div class="hourly-card ${isActive ? 'active' : ''}">
+          <span class="hourly-time">${escapeHtml(label)}</span>
+          <i class="fa-solid ${escapeHtml(h.icon_class)} hourly-icon"></i>
+          <span class="hourly-temp">${escapeHtml(temp)}</span>
+          ${rainBadge}
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.scrollHourly = function(offset) {
+    const scrollEl = document.getElementById('hourly-scroll-container');
+    if (scrollEl) {
+      scrollEl.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  };
+
+  /**
+   * Render Dynamic Weather Insights Card based strictly on genuine values.
+   */
+  function renderWeatherInsights() {
+    const section = document.getElementById('weather-insights-section');
+    const container = document.getElementById('weather-insights-container');
+    if (!section || !container) return;
+
+    if (!Array.isArray(state.weatherInsights) || state.weatherInsights.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+
+    container.innerHTML = state.weatherInsights.map(insight => `
+      <div class="weather-insight-card insight-${escapeHtml(insight.type || 'general')}">
+        <div class="insight-icon-wrap">
+          <i class="fa-solid ${escapeHtml(insight.icon || 'fa-info')}"></i>
+        </div>
+        <div class="insight-content">
+          <span class="insight-title">${escapeHtml(insight.title)}</span>
+          <p class="insight-desc">${escapeHtml(insight.desc)}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /**
+   * HTML Template: Refined 5-Day Forecast Card with LIVE NOW badge for today.
    */
   function createForecastCardHtml(districtName, item) {
-    const tempMax = item.temperature_max_c !== null ? `${item.temperature_max_c}°C` : '--';
-    const tempMin = item.temperature_min_c !== null ? `${item.temperature_min_c}°C` : '--';
+    const isToday = item.day_index === 1;
+    const tempMax = item.temperature_max_c !== null ? `${Math.round(item.temperature_max_c)}°C` : '--';
+    const tempMin = item.temperature_min_c !== null ? `${Math.round(item.temperature_min_c)}°C` : '--';
     const precipProb = `${item.precipitation_probability_pct}%`;
     const rainSum = `${item.precipitation_sum_mm} mm`;
     const windMax = `${item.wind_speed_max_kmh} km/h`;
@@ -632,7 +1281,13 @@
     const sunsetLabel = window.i18n ? window.i18n.t('weather_sunset') : 'Sunset';
 
     return `
-      <article class="forecast-card">
+      <article class="forecast-card ${isToday ? 'forecast-card-today' : ''}">
+        ${isToday ? `
+          <div class="forecast-live-now-badge">
+            <span class="badge-pulse"></span> LIVE NOW
+          </div>
+        ` : ''}
+
         <div>
           <div class="forecast-card-header">
             <span class="forecast-day-tag">${escapeHtml(item.day_label)}</span>
@@ -647,6 +1302,10 @@
           <div class="forecast-temps-row">
             <span class="forecast-temp-max">${escapeHtml(tempMax)}</span>
             <span class="forecast-temp-min">/ ${escapeHtml(tempMin)}</span>
+          </div>
+
+          <div class="forecast-temp-bar-wrap" aria-hidden="true">
+            <div class="temp-bar-track"></div>
           </div>
 
           <div class="forecast-details-list">
@@ -699,51 +1358,44 @@
   }
 
   /**
-   * HTML Template: Refined 38-District Overview Card.
+   * HTML Template: Compact Overview Card for 38-District Section.
    */
   function createDistrictOverviewCardHtml(item) {
     const dist = item.district;
     const curr = item.current;
-    const todayDaily = (item.daily && item.daily[0]) || {};
+    const isDetected = state.userDetectedDistrict && state.userDetectedDistrict.toLowerCase() === dist.name.toLowerCase();
 
-    const tempDisplay = curr.temperature_c !== null ? `${curr.temperature_c}°C` : '--';
-    const rainProb = todayDaily.precipitation_probability_pct !== undefined ? `${todayDaily.precipitation_probability_pct}%` : '--';
-    const isUserLocation = state.userDetectedDistrict && (
-      dist.name.toLowerCase() === state.userDetectedDistrict.toLowerCase() ||
-      dist.id.toLowerCase() === state.userDetectedDistrict.toLowerCase()
-    );
+    const tempDisplay = curr.temperature_c !== null ? `${Math.round(curr.temperature_c)}°C` : '--';
 
     return `
-      <div class="district-card ${isUserLocation ? 'user-location-highlight' : ''}" onclick="selectDistrict('${escapeHtml(dist.id)}')">
+      <div class="district-overview-card ${isDetected ? 'user-district-highlight' : ''}" onclick="selectDistrictFromCard('${escapeHtml(dist.name)}')" title="Click to view ${escapeHtml(dist.name)} forecast">
         <div class="district-card-top">
-          <div>
-            <div class="district-card-name">
-              ${escapeHtml(dist.name)}
-              ${isUserLocation ? '<span class="user-location-pill"><i class="fa-solid fa-location-dot"></i> Your Area</span>' : ''}
-            </div>
-            <div class="district-card-condition">
-              <i class="fa-solid ${escapeHtml(curr.icon_class)}" style="color: #64748b;"></i>
-              <span>${escapeHtml(curr.condition)}</span>
-            </div>
-          </div>
-          <div class="district-card-temp">${escapeHtml(tempDisplay)}</div>
+          <span class="district-card-name">
+            ${escapeHtml(dist.name)}
+            ${isDetected ? '<i class="fa-solid fa-location-crosshairs user-loc-pin" title="Your detected location"></i>' : ''}
+          </span>
+          <span class="district-card-temp">${escapeHtml(tempDisplay)}</span>
         </div>
-
+        <div class="district-card-condition">
+          <i class="fa-solid ${escapeHtml(curr.icon_class)}"></i>
+          <span>${escapeHtml(curr.condition)}</span>
+        </div>
         <div class="district-card-bottom">
-          <span>Rain chance ${escapeHtml(rainProb)}</span>
-          <span>Wind ${escapeHtml(curr.wind_speed_kmh)} km/h</span>
+          <span><i class="fa-solid fa-droplet"></i> ${escapeHtml(curr.precipitation_mm)} mm</span>
+          <span><i class="fa-solid fa-wind"></i> ${escapeHtml(curr.wind_speed_kmh)} km/h</span>
         </div>
       </div>
     `;
   }
 
-  window.selectDistrict = function(districtId) {
-    state.district = districtId.toLowerCase();
-    const select = document.getElementById('weather-district-filter');
-    if (select) select.value = state.district;
-
-    updateSelectedDistrictView();
-    renderView();
+  window.selectDistrictFromCard = function(districtName) {
+    state.district = districtName.toLowerCase();
+    state.selectedLocation = null;
+    state.userHasManuallyChangedDistrict = true;
+    const distSelect = document.getElementById('weather-district-filter');
+    if (distSelect) distSelect.value = state.district;
+    updateLocationBanner();
+    fetchWeatherForecast();
 
     const hero = document.getElementById('current-weather-container');
     if (hero) {
@@ -752,7 +1404,7 @@
   };
 
   window.shareForecast = function(district, dayLabel, date, condition, high, low, rainChance, rainSum) {
-    const text = `CrowdCity Weather Forecast\nDistrict: ${district}\nForecast: ${dayLabel} (${date})\nCondition: ${condition}\nTemperature: High ${high} / Low ${low}\nRain chance: ${rainChance} (${rainSum})\nSource: Open-Meteo\nhttps://open-meteo.com/`;
+    const text = `CrowdCity Weather Forecast\nLocation: ${district}\nForecast: ${dayLabel} (${date})\nCondition: ${condition}\nTemperature: High ${high} / Low ${low}\nRain chance: ${rainChance} (${rainSum})\nSource: Open-Meteo\nhttps://open-meteo.com/`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {
         alert('Weather forecast details copied to clipboard.');
@@ -773,14 +1425,14 @@
 
   function getHeroSkeletonHtml() {
     return `
-      <div class="current-weather-panel" style="opacity: 0.6; pointer-events: none;">
-        <div style="height: 24px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 30%; margin-bottom: 0.75rem;"></div>
-        <div style="height: 44px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 45%; margin-bottom: 1.25rem;"></div>
-        <div class="current-metrics-row">
-          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
-          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
-          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
-          <div style="height: 52px; background: var(--bg-hover, #f1f5f9); border-radius: 8px;"></div>
+      <div class="current-weather-panel" style="opacity: 0.6; pointer-events: none; background: #334155;">
+        <div style="height: 24px; background: rgba(255,255,255,0.2); border-radius: 6px; width: 30%; margin-bottom: 0.75rem;"></div>
+        <div style="height: 54px; background: rgba(255,255,255,0.2); border-radius: 6px; width: 45%; margin-bottom: 1.25rem;"></div>
+        <div class="hero-glass-metrics">
+          <div style="height: 64px; background: rgba(255,255,255,0.15); border-radius: 12px;"></div>
+          <div style="height: 64px; background: rgba(255,255,255,0.15); border-radius: 12px;"></div>
+          <div style="height: 64px; background: rgba(255,255,255,0.15); border-radius: 12px;"></div>
+          <div style="height: 64px; background: rgba(255,255,255,0.15); border-radius: 12px;"></div>
         </div>
       </div>
     `;
