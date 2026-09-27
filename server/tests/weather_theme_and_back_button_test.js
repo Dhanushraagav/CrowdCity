@@ -59,17 +59,19 @@ async function runTests() {
 
   // 3. Dual-theme CSS token architecture
   test('3. CSS defines light theme tokens with high readability dark text', () => {
-    assert(htmlContent.includes('--weather-bg: #f8fafc;'), 'Missing light theme --weather-bg');
-    assert(htmlContent.includes('--weather-card-bg: #ffffff;'), 'Missing light theme --weather-card-bg');
-    assert(htmlContent.includes('--weather-text-primary: #0f172a;'), 'Missing light theme --weather-text-primary (#0f172a)');
-    assert(htmlContent.includes('--weather-border: #e2e8f0;'), 'Missing light theme --weather-border');
+    assert(htmlContent.includes('--weather-bg: var(--bg-app, #f8fafc);'), 'Missing light theme --weather-bg');
+    assert(htmlContent.includes('--weather-card-bg: var(--bg-surface, #ffffff);'), 'Missing light theme --weather-card-bg');
+    assert(htmlContent.includes('--weather-text-primary: var(--text-main, #0f172a);'), 'Missing light theme --weather-text-primary (#0f172a)');
+    assert(htmlContent.includes('--weather-border: var(--border-color, #e2e8f0);'), 'Missing light theme --weather-border');
   });
 
   test('4. CSS defines dark theme tokens matching AMOLED / dark mode', () => {
-    assert(htmlContent.includes('--weather-bg: #090e1a;'), 'Missing dark theme --weather-bg');
-    assert(htmlContent.includes('--weather-card-bg: #0f172a;'), 'Missing dark theme --weather-card-bg');
-    assert(htmlContent.includes('--weather-text-primary: #f8fafc;'), 'Missing dark theme --weather-text-primary');
-    assert(htmlContent.includes('--weather-border: rgba(255, 255, 255, 0.08);'), 'Missing dark theme --weather-border');
+    assert(htmlContent.includes('--weather-bg: var(--bg-app, #000000);'), 'Missing dark theme AMOLED --weather-bg');
+    assert(htmlContent.includes('--weather-card-bg: var(--card-bg, #0a0a0a);'), 'Missing dark theme AMOLED --weather-card-bg');
+    assert(htmlContent.includes('--weather-text-primary: var(--text-main, #ffffff);'), 'Missing dark theme --weather-text-primary');
+    assert(htmlContent.includes('--weather-border: var(--border-color, #1f1f1f);'), 'Missing dark theme --weather-border');
+    assert(!htmlContent.includes('--weather-bg: #090e1a;'), 'Dark theme must not use navy background #090e1a');
+    assert(!htmlContent.includes('--weather-card-bg: #0f172a;'), 'Dark theme must not use navy cards #0f172a');
   });
 
   // 5. Back button styling across themes
