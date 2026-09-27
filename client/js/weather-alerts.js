@@ -1,7 +1,9 @@
 /**
- * weather-alerts.js - Version 3.1.0
+ * weather-alerts.js - Version 3.2.0
  * 
  * Complete UI/UX Refinement + True District -> Region Weather Experience.
+ * Theme Integration: Respects global application Light / Dark theme.
+ * Decouples weather condition (day/night) from application theme preference.
  * Features:
  * - Region-First UX: User location determines default district & nearby regions.
  * - Sub-district locality switching (e.g. Peelamedu, Sulur, Singanallur, Gandhipuram, etc.)
@@ -19,6 +21,36 @@
 
 (function () {
   'use strict';
+
+  /**
+   * Universal Back Navigation Handler for Weather Page.
+   * If valid browser history exists within the same domain, navigate back cleanly.
+   * Otherwise fall back to citizen-dashboard.html.
+   */
+  function handleWeatherBackNavigation(event) {
+    if (event) {
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    }
+
+    try {
+      const hasHistory = window.history && window.history.length > 1;
+      const referrer = document.referrer;
+      const isSameOriginReferrer = referrer && (
+        referrer.indexOf(window.location.host) !== -1 ||
+        referrer.indexOf(window.location.hostname) !== -1
+      );
+
+      if (hasHistory && isSameOriginReferrer) {
+        window.history.back();
+        return;
+      }
+    } catch (e) {
+      console.warn('[WeatherAlerts] History back navigation error:', e);
+    }
+
+    window.location.href = 'citizen-dashboard.html';
+  };
 
   // Constants
   const WEATHER_API_BASE = '/api/public-pulse/weather';
@@ -1020,6 +1052,27 @@
       });
     }
 
+    // Back navigation keyboard accessibility (Enter / Space)
+    const backBtn = document.getElementById('btn-weather-back');
+    if (backBtn) {
+      backBtn.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          window.handleWeatherBackNavigation(e);
+        }
+      });
+    }
+
+    // Dynamic Live Theme Event Listeners (zero page reload required)
+    window.addEventListener('theme-change', () => {
+      renderHeroCard();
+    });
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'crowdcity_theme' || e.key === 'cc_theme') {
+        renderHeroCard();
+      }
+    });
+
     // Setup Location Search
     setupLocationSearch();
   }
@@ -1363,6 +1416,7 @@
   window.resetWeatherFilters = window.resetWeatherFilters;
   window.scrollHourly = window.scrollHourly;
   window.clearRecentLocations = window.clearRecentLocations;
+  window.handleWeatherBackNavigation = handleWeatherBackNavigation;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
