@@ -97,6 +97,20 @@
     }
   }
 
+  function getDistrictDisplayName(id) {
+    if (!id || id === 'all') return 'Tamil Nadu';
+    if (state.districtsForecast && state.districtsForecast.length > 0) {
+      const found = state.districtsForecast.find(d => 
+        (d.district && d.district.id && d.district.id.toLowerCase() === id.toLowerCase()) ||
+        (d.district && d.district.name && d.district.name.toLowerCase() === id.toLowerCase())
+      );
+      if (found && found.district && found.district.name) {
+        return found.district.name;
+      }
+    }
+    return id.charAt(0).toUpperCase() + id.slice(1);
+  }
+
   /**
    * Update the auto-detected location notification banner.
    */
@@ -121,16 +135,24 @@
     if (state.userDetectedDistrict) {
       banner.classList.remove('hidden');
       const contentEl = banner.querySelector('.weather-location-banner-content');
+      const isViewingDetected = Boolean(state.district && state.district.toLowerCase() === state.userDetectedDistrict.toLowerCase());
+
       if (contentEl) {
         if (state.district === 'all') {
           contentEl.innerHTML = `
             <i class="fa-solid fa-globe"></i>
             <span>Showing all 38 districts across Tamil Nadu. Your detected location: <strong>${escapeHtml(state.userDetectedDistrict)}</strong></span>
           `;
-        } else {
+        } else if (isViewingDetected) {
           contentEl.innerHTML = `
             <i class="fa-solid fa-location-dot"></i>
             <span>Showing live weather forecast for your location: <strong>${escapeHtml(state.userDetectedDistrict)}</strong></span>
+          `;
+        } else {
+          const selectedName = getDistrictDisplayName(state.district);
+          contentEl.innerHTML = `
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Showing live weather forecast for: <strong>${escapeHtml(selectedName)}</strong></span>
           `;
         }
       }
@@ -139,21 +161,40 @@
         if (state.district === 'all') {
           switchBtn.innerHTML = `<span>Back to ${escapeHtml(state.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
           switchBtn.onclick = () => window.selectUserDetectedDistrict();
-        } else {
+        } else if (isViewingDetected) {
           switchBtn.innerHTML = `<span>View All 38 Districts</span> <i class="fa-solid fa-arrow-right"></i>`;
           switchBtn.onclick = () => window.resetWeatherFilters();
+        } else {
+          switchBtn.innerHTML = `<span>Back to ${escapeHtml(state.userDetectedDistrict)}</span> <i class="fa-solid fa-location-crosshairs"></i>`;
+          switchBtn.onclick = () => window.selectUserDetectedDistrict();
         }
       }
     } else {
       banner.classList.remove('hidden');
       const contentEl = banner.querySelector('.weather-location-banner-content');
       if (contentEl) {
-        contentEl.innerHTML = `
-          <i class="fa-solid fa-location-pin"></i>
-          <span>Select your district to showcase local weather forecast.</span>
-        `;
+        if (state.district !== 'all') {
+          const selectedName = getDistrictDisplayName(state.district);
+          contentEl.innerHTML = `
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Showing live weather forecast for: <strong>${escapeHtml(selectedName)}</strong></span>
+          `;
+        } else {
+          contentEl.innerHTML = `
+            <i class="fa-solid fa-location-pin"></i>
+            <span>Select your district to showcase local weather forecast.</span>
+          `;
+        }
       }
-      if (switchBtn) switchBtn.style.display = 'none';
+      if (switchBtn) {
+        if (state.district !== 'all') {
+          switchBtn.style.display = 'inline-flex';
+          switchBtn.innerHTML = `<span>View All 38 Districts</span> <i class="fa-solid fa-arrow-right"></i>`;
+          switchBtn.onclick = () => window.resetWeatherFilters();
+        } else {
+          switchBtn.style.display = 'none';
+        }
+      }
     }
   }
 
@@ -213,6 +254,16 @@
       refreshBtn.addEventListener('click', () => fetchWeatherForecast(true));
     }
 
+    // Retry buttons
+    const retryBtn = document.getElementById('btn-retry-weather');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => fetchWeatherForecast(true));
+    }
+    const retryErrBtn = document.getElementById('btn-retry-weather-err');
+    if (retryErrBtn) {
+      retryErrBtn.addEventListener('click', () => fetchWeatherForecast(true));
+    }
+
     // District select
     const distSelect = document.getElementById('weather-district-filter');
     if (distSelect) {
@@ -233,6 +284,38 @@
         renderView();
       });
     }
+  }
+
+  function setRetryLoading(isLoading) {
+    const refreshBtn = document.getElementById('btn-refresh-weather');
+    const refreshIcon = document.getElementById('refresh-weather-icon');
+    if (refreshBtn) refreshBtn.disabled = isLoading;
+    if (refreshIcon) {
+      if (isLoading) refreshIcon.classList.add('fa-spin');
+      else refreshIcon.classList.remove('fa-spin');
+    }
+
+    const retryBtn = document.getElementById('btn-retry-weather');
+    const retryIcon = document.getElementById('retry-weather-icon');
+    const retryText = document.getElementById('retry-weather-text');
+    if (retryBtn) retryBtn.disabled = isLoading;
+    if (retryIcon) {
+      retryIcon.style.display = isLoading ? 'inline-block' : 'none';
+      if (isLoading) retryIcon.classList.add('fa-spin');
+      else retryIcon.classList.remove('fa-spin');
+    }
+    if (retryText) retryText.textContent = isLoading ? 'Retrying...' : 'Retry';
+
+    const retryErrBtn = document.getElementById('btn-retry-weather-err');
+    const retryErrIcon = document.getElementById('retry-weather-err-icon');
+    const retryErrText = document.getElementById('retry-weather-err-text');
+    if (retryErrBtn) retryErrBtn.disabled = isLoading;
+    if (retryErrIcon) {
+      retryErrIcon.style.display = isLoading ? 'inline-block' : 'none';
+      if (isLoading) retryErrIcon.classList.add('fa-spin');
+      else retryErrIcon.classList.remove('fa-spin');
+    }
+    if (retryErrText) retryErrText.textContent = isLoading ? 'Retrying...' : 'Retry';
   }
 
   window.setWeatherTimeframeTab = function(tabKey) {
@@ -273,9 +356,7 @@
   async function fetchWeatherForecast(forceRefresh = false) {
     if (state.isLoading) return;
     state.isLoading = true;
-
-    const refreshIcon = document.getElementById('refresh-weather-icon');
-    if (refreshIcon) refreshIcon.classList.add('fa-spin');
+    setRetryLoading(true);
 
     const heroContainer = document.getElementById('current-weather-container');
     const forecastGrid = document.getElementById('weather-forecast-container');
@@ -295,6 +376,13 @@
       state.lastUpdatedIST = data.last_updated_ist || null;
       state.districtsForecast = data.districts_forecast || [];
 
+      if (state.sourceAvailable && state.districtsForecast.length > 0) {
+        const errorState = document.getElementById('weather-error-state');
+        const sourceUnavailableBox = document.getElementById('weather-source-unavailable-box');
+        if (errorState) errorState.classList.add('hidden');
+        if (sourceUnavailableBox) sourceUnavailableBox.classList.add('hidden');
+      }
+
       updateSelectedDistrictView();
       updateHeaderStatus();
       renderView();
@@ -304,9 +392,12 @@
       showErrorState('Unable to connect to the weather forecast service.');
     } finally {
       state.isLoading = false;
-      if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+      setRetryLoading(false);
     }
   }
+
+  // Export fetchWeatherForecast to window for inline onclick handlers & external scripts
+  window.fetchWeatherForecast = fetchWeatherForecast;
 
   function updateSelectedDistrictView() {
     if (state.districtsForecast.length === 0) {

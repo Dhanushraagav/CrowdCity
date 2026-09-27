@@ -26,7 +26,7 @@ export const OPEN_METEO_SOURCE = {
 };
 
 const OPEN_METEO_BASE_URL = 'https://api.open-meteo.com/v1/forecast';
-const REQUEST_TIMEOUT_MS = 6500;
+const REQUEST_TIMEOUT_MS = 12000;
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 // WMO Weather Interpretation Codes (WMO Code -> Description & FontAwesome Icon)
