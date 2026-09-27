@@ -12,23 +12,33 @@ const router = express.Router();
 
 /**
  * @route   GET /api/power-updates
- * @desc    Query planned power outages with filters (district, area, date, tab, status)
+ * @desc    Query planned power outages with filters (district, area, date, tab, status, refresh, sim_date)
  * @access  Public
  */
 router.get('/', async (req, res) => {
   try {
-    const { district, area, date, tab, status, refresh } = req.query;
+    const { district, area, date, tab, status, refresh, sim_date } = req.query;
+    const isRefresh = refresh === 'true';
+
     const result = await getPowerShutdowns({
       district,
       area,
       date,
       tab,
       status,
-      refresh: refresh === 'true'
+      refresh: isRefresh,
+      sim_date: sim_date ? String(sim_date).slice(0, 10) : undefined
     });
 
-    // Client cache: 5 minutes, stale-while-revalidate 10 minutes
-    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+    // Ensure date-sensitive dynamic updates are never frozen by aggressive client/proxy caches
+    if (isRefresh) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    } else {
+      res.setHeader('Cache-Control', 'no-cache, private');
+    }
+
     return res.status(200).json(result);
   } catch (error) {
     logger.error(`[PowerShutdownRoutes] Error retrieving power updates: ${error.message}`);
