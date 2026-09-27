@@ -3906,7 +3906,8 @@ function setupUniversalMobileNavigation() {
 
   // 1. Mobile Back Button ([ ← ] icon button)
   let backBtn = document.getElementById('universal-back-btn');
-  if (!backBtn) {
+  const weatherBackBtn = document.getElementById('btn-weather-back');
+  if (!backBtn && !weatherBackBtn) {
     backBtn = document.createElement('button');
     backBtn.id = 'universal-back-btn';
     backBtn.className = 'universal-mobile-back-btn';
@@ -3918,7 +3919,7 @@ function setupUniversalMobileNavigation() {
   }
 
   // 2. Desktop / Laptop Back Button ([ ← Back ] button with translation)
-  let desktopBackBtn = document.getElementById('universal-desktop-back-btn');
+  let desktopBackBtn = document.getElementById('universal-desktop-back-btn') || weatherBackBtn;
   if (!desktopBackBtn) {
     desktopBackBtn = document.createElement('button');
     desktopBackBtn.id = 'universal-desktop-back-btn';
@@ -3929,6 +3930,16 @@ function setupUniversalMobileNavigation() {
     desktopBackBtn.onclick = window.handleUniversalBack;
 
     headerMain.insertBefore(desktopBackBtn, backBtn ? backBtn.nextSibling : headerMain.firstChild);
+  }
+
+  // Clean up any redundant duplicate weather back buttons or leftover legacy rows
+  const redundantWeatherRows = document.querySelectorAll('.weather-top-nav-row');
+  redundantWeatherRows.forEach(row => row.remove());
+  if (weatherBackBtn && document.getElementById('universal-desktop-back-btn')) {
+    document.getElementById('universal-desktop-back-btn').remove();
+  }
+  if (weatherBackBtn && document.getElementById('universal-back-btn')) {
+    document.getElementById('universal-back-btn').remove();
   }
 }
 
