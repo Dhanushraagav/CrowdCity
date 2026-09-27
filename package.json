@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js"
+    "dev": "nodemon server/server.js",
+    "test": "node server/tests/weather_consistency_test.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

@@ -81,6 +81,10 @@ let memoryCache = {
   isStale: false
 };
 
+// Coordinate-level Weather In-Memory Cache (Key: rounded lat_lon, TTL: 10 minutes)
+const coordsWeatherCache = new Map();
+const COORDS_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
 // Test fixture hook for automated unit tests
 let mockFetchFixture = null;
 
@@ -95,6 +99,7 @@ export function clearCache() {
     lastUpdatedIST: null,
     isStale: false
   };
+  coordsWeatherCache.clear();
 }
 
 /**
@@ -354,6 +359,7 @@ export function normalizeDistrictForecast(district, rawForecast) {
   const current = {
     time: currentRaw.time || null,
     time_ist: formatTimeIST(currentRaw.time),
+    timezone: 'Asia/Kolkata',
     temperature_c: typeof currentRaw.temperature_2m === 'number' ? Math.round(currentRaw.temperature_2m * 10) / 10 : null,
     apparent_temperature_c: typeof currentRaw.apparent_temperature === 'number' ? Math.round(currentRaw.apparent_temperature * 10) / 10 : null,
     relative_humidity_pct: typeof currentRaw.relative_humidity_2m === 'number' ? currentRaw.relative_humidity_2m : null,
@@ -503,6 +509,23 @@ async function refreshAllDistrictsCache() {
  * - All districts: ?district=all (or omitted)
  * - Cache bypass: ?refresh=true
  */
+/**
+ * Find the nearest TN district by geographic distance from given coordinates.
+ */
+export function findNearestDistrict(lat, lon) {
+  if (typeof lat !== 'number' || typeof lon !== 'number' || isNaN(lat) || isNaN(lon)) return null;
+  let nearest = null;
+  let minDistance = Infinity;
+  for (const d of TN_DISTRICTS) {
+    const dist = calculateDistanceKm(lat, lon, d.lat, d.lng);
+    if (dist < minDistance) {
+      minDistance = dist;
+      nearest = d;
+    }
+  }
+  return nearest;
+}
+
 export async function getWeatherForecast(options = {}) {
   const { district: reqDistrict, refresh = false } = options;
   const now = Date.now();
@@ -539,12 +562,108 @@ export async function getWeatherForecast(options = {}) {
     }
   }
 
+  const allForecasts = Array.from(districtsMap.values());
+
+  // Check coordinates first if provided
+  const hasCoords = typeof options.lat === 'number' && typeof options.lon === 'number' && !isNaN(options.lat) && !isNaN(options.lon);
+
+  if (hasCoords) {
+    const coordCacheKey = `${options.lat.toFixed(3)}_${options.lon.toFixed(3)}`;
+    const cachedCoord = (!forceRefresh && !mockFetchFixture) ? coordsWeatherCache.get(coordCacheKey) : null;
+
+    if (cachedCoord && (now - cachedCoord.timestamp < COORDS_CACHE_TTL_MS)) {
+      return {
+        success: true,
+        source_available: true,
+        is_stale: false,
+        last_updated_ist: cachedCoord.last_updated_ist,
+        source: OPEN_METEO_SOURCE,
+        coordinates: { lat: options.lat, lon: options.lon },
+        location: cachedCoord.location,
+        current: cachedCoord.current,
+        hourly: cachedCoord.hourly,
+        daily: cachedCoord.daily,
+        insights: cachedCoord.insights,
+        current_district: cachedCoord.current_district,
+        districts_forecast: allForecasts,
+        total_districts: allForecasts.length
+      };
+    }
+
+    try {
+      const raw = await fetchFromOpenMeteo(options.lat, options.lon, true);
+      if (raw && raw.current) {
+        const nearestDist = findNearestDistrict(options.lat, options.lon);
+        const resolvedDistrictName = (options.district && options.district.toLowerCase() !== 'tamil nadu' && options.district.toLowerCase() !== 'all')
+          ? options.district
+          : (nearestDist ? nearestDist.name : 'Tamil Nadu');
+
+        const localityName = options.locality || null;
+        const displayName = options.displayName || (localityName ? `${localityName}, ${resolvedDistrictName}` : `${resolvedDistrictName}, Tamil Nadu`);
+
+        const locDistrict = {
+          id: localityName ? localityName.toLowerCase().replace(/[^a-z0-9]/g, '-') : resolvedDistrictName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          name: localityName || resolvedDistrictName,
+          locality: localityName,
+          district: resolvedDistrictName,
+          displayName: displayName,
+          nameTa: localityName || (nearestDist ? nearestDist.nameTa : 'தமிழ்நாடு'),
+          code: resolvedDistrictName.slice(0, 3).toUpperCase(),
+          lat: options.lat,
+          lng: options.lon
+        };
+
+        const normalized = normalizeDistrictForecast(locDistrict, raw);
+
+        const coordResult = {
+          timestamp: Date.now(),
+          last_updated_ist: getCurrentISTTimestamp(),
+          location: locDistrict,
+          current: normalized.current,
+          hourly: normalized.hourly,
+          daily: normalized.daily,
+          insights: normalized.insights,
+          current_district: normalized
+        };
+
+        if (coordsWeatherCache.size >= 100) {
+          const firstKey = coordsWeatherCache.keys().next().value;
+          coordsWeatherCache.delete(firstKey);
+        }
+        coordsWeatherCache.set(coordCacheKey, coordResult);
+
+        return {
+          success: true,
+          source_available: true,
+          is_stale: false,
+          last_updated_ist: coordResult.last_updated_ist,
+          source: OPEN_METEO_SOURCE,
+          coordinates: { lat: options.lat, lon: options.lon },
+          location: locDistrict,
+          current: normalized.current,
+          hourly: normalized.hourly,
+          daily: normalized.daily,
+          insights: normalized.insights,
+          current_district: normalized,
+          districts_forecast: allForecasts,
+          total_districts: allForecasts.length
+        };
+      }
+    } catch (coordErr) {
+      logger.warn(`[WeatherService] Coordinate weather fetch fallback: ${coordErr.message}`);
+    }
+  }
+
   // If specific district requested
   let targetDistrictId = null;
   let singleDistrictResult = null;
+  let cleanDistrict = (typeof reqDistrict === 'string') ? reqDistrict.trim() : '';
+  if (cleanDistrict.toLowerCase() === 'tamil nadu' || cleanDistrict.toLowerCase() === 'tamil-nadu') {
+    cleanDistrict = 'all';
+  }
 
-  if (reqDistrict && reqDistrict !== 'all' && typeof reqDistrict === 'string') {
-    const resolved = getDistrictById(reqDistrict);
+  if (cleanDistrict && cleanDistrict !== 'all') {
+    const resolved = getDistrictById(cleanDistrict);
     if (!resolved) {
       return {
         success: false,
@@ -570,9 +689,7 @@ export async function getWeatherForecast(options = {}) {
     }
   }
 
-  const allForecasts = Array.from(districtsMap.values());
-
-  // Default selected district: Chennai or the first available if not explicitly filtered
+  // Default selected district: singleDistrictResult or Chennai or first available
   const primaryDistrict = singleDistrictResult || districtsMap.get('chennai') || allForecasts[0] || null;
 
   // If a primary/requested district has no hourly data cached yet, fetch hourly on-demand (live authentic data)
@@ -592,51 +709,6 @@ export async function getWeatherForecast(options = {}) {
     }
   }
 
-  // If specific coordinates (lat, lon) provided, fetch full live weather (current + 5-day daily + 24-hr hourly + insights) for exact location
-  if (typeof options.lat === 'number' && typeof options.lon === 'number' && !isNaN(options.lat) && !isNaN(options.lon)) {
-    try {
-      const raw = await fetchFromOpenMeteo(options.lat, options.lon, true);
-      if (raw && raw.current) {
-        const localityName = options.locality || null;
-        const districtName = options.district || (primaryDistrict ? primaryDistrict.district.name : 'Tamil Nadu');
-        const displayName = options.displayName || (localityName ? `${localityName}, ${districtName}` : `${districtName}, Tamil Nadu`);
-
-        const locDistrict = {
-          id: localityName ? localityName.toLowerCase().replace(/[^a-z0-9]/g, '-') : (districtName.toLowerCase().replace(/[^a-z0-9]/g, '-')),
-          name: localityName || districtName,
-          locality: localityName,
-          district: districtName,
-          displayName: displayName,
-          nameTa: localityName || (primaryDistrict ? primaryDistrict.district.nameTa : 'தமிழ்நாடு'),
-          code: districtName.slice(0, 3).toUpperCase(),
-          lat: options.lat,
-          lng: options.lon
-        };
-
-        const normalized = normalizeDistrictForecast(locDistrict, raw);
-
-        return {
-          success: true,
-          source_available: true,
-          is_stale: false,
-          last_updated_ist: getCurrentISTTimestamp(),
-          source: OPEN_METEO_SOURCE,
-          coordinates: { lat: options.lat, lon: options.lon },
-          location: locDistrict,
-          current: normalized.current,
-          hourly: normalized.hourly,
-          daily: normalized.daily,
-          insights: normalized.insights,
-          current_district: normalized,
-          districts_forecast: allForecasts,
-          total_districts: allForecasts.length
-        };
-      }
-    } catch (coordErr) {
-      logger.warn(`[WeatherService] Coordinate weather fetch fallback: ${coordErr.message}`);
-    }
-  }
-
   return {
     success: true,
     source_available: true,
@@ -644,6 +716,10 @@ export async function getWeatherForecast(options = {}) {
     last_updated_ist: memoryCache.lastUpdatedIST || getCurrentISTTimestamp(),
     source: OPEN_METEO_SOURCE,
     district: targetDistrictId || 'all',
+    current: primaryDistrict ? primaryDistrict.current : null,
+    hourly: primaryDistrict ? primaryDistrict.hourly : [],
+    daily: primaryDistrict ? primaryDistrict.daily : [],
+    insights: primaryDistrict ? primaryDistrict.insights : null,
     current_district: primaryDistrict,
     districts_forecast: allForecasts,
     total_districts: allForecasts.length

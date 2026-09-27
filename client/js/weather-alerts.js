@@ -228,13 +228,16 @@
 
     if (detectedCoords) {
       state.userCoordinates = detectedCoords;
+      try {
+        localStorage.setItem('cc_weather_coords', JSON.stringify(detectedCoords));
+      } catch (e) {}
     }
 
-    // Set initial region if detected
-    if (detectedLocality && detectedCoords) {
+    // Set initial region if detected coordinates exist
+    if (detectedCoords) {
       state.selectedRegion = {
-        name: detectedLocality,
-        locality: detectedLocality,
+        name: detectedLocality || (detectedDistrict && detectedDistrict !== 'Tamil Nadu' ? detectedDistrict : 'Coimbatore'),
+        locality: detectedLocality || null,
         district: state.userDetectedDistrict,
         lat: detectedCoords.lat,
         lon: detectedCoords.lon
@@ -419,8 +422,22 @@
       let weatherUrl = `${WEATHER_API_BASE}?district=${encodeURIComponent(state.district)}`;
       if (forceRefresh) weatherUrl += '&refresh=true';
 
-      if (state.selectedRegion && state.selectedRegion.lat && state.selectedRegion.lon) {
-        weatherUrl += `&lat=${state.selectedRegion.lat}&lon=${state.selectedRegion.lon}&locality=${encodeURIComponent(state.selectedRegion.name)}&district=${encodeURIComponent(state.selectedRegion.district || state.district)}`;
+      const activeLat = (state.selectedRegion && typeof state.selectedRegion.lat === 'number')
+        ? state.selectedRegion.lat
+        : (state.userCoordinates && typeof state.userCoordinates.lat === 'number' ? state.userCoordinates.lat : null);
+
+      const activeLon = (state.selectedRegion && typeof state.selectedRegion.lon === 'number')
+        ? state.selectedRegion.lon
+        : (state.userCoordinates && typeof state.userCoordinates.lon === 'number' ? state.userCoordinates.lon : null);
+
+      const activeLocality = (state.selectedRegion && state.selectedRegion.name) ? state.selectedRegion.name : null;
+
+      if (typeof activeLat === 'number' && typeof activeLon === 'number' && !isNaN(activeLat) && !isNaN(activeLon)) {
+        weatherUrl += `&lat=${activeLat}&lon=${activeLon}`;
+        if (activeLocality) {
+          weatherUrl += `&locality=${encodeURIComponent(activeLocality)}`;
+        }
+        weatherUrl += `&district=${encodeURIComponent(state.selectedRegion?.district || state.district)}`;
       }
 
       // Fetch region weather and district regions concurrently
@@ -536,10 +553,10 @@
       return;
     }
 
-    // Resolve current weather values
-    const current = (data.current_district && data.current_district.current)
-      ? data.current_district.current
-      : (data.current || {});
+    // Resolve current weather values - prioritize exact coordinate current object
+    const current = (data.current && typeof data.current.temperature_c === 'number')
+      ? data.current
+      : ((data.current_district && data.current_district.current) || {});
 
     const daily = (data.current_district && data.current_district.daily)
       ? data.current_district.daily

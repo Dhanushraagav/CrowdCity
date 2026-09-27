@@ -968,9 +968,9 @@ function updateStepperUI(issueOrStatus) {
   }
 
   // Detect post-resolution citizen verification
-  const logs = Array.isArray(issue && issue.history) ? issue.history : [];
-  const hasAssigned = !!(issue && (issue.assigned_to || logs.some(l => l.status === 'assigned')));
-  const hasResolvedProof = !!(issue && (issue.completion_proof_url || issue.completion_notes || logs.some(l => l.status === 'resolved')));
+  const historyLogs = Array.isArray(issue && issue.history) ? issue.history : [];
+  const hasAssigned = !!(issue && (issue.assigned_to || historyLogs.some(l => l.status === 'assigned')));
+  const hasResolvedProof = !!(issue && (issue.completion_proof_url || issue.completion_notes || historyLogs.some(l => l.status === 'resolved')));
   const isPostResolutionVerified = (status === 'verified') && (hasResolvedProof || hasAssigned || (timeline && timeline.current_stage === 'resolved'));
 
   // Build stage map from precalculated timeline
