@@ -4,16 +4,21 @@ import {
   getReports,
   getReportById,
   updateReportStatus,
-  analyzeReportAI
+  analyzeReportAI,
+  checkTransportationDuplicate
 } from '../controllers/transportationController.js';
+import { upload, handleUploadError } from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router();
 
 // 1. Analyze Draft Transportation Issue with Groq AI
 router.post('/analyze', analyzeReportAI);
 
+// New endpoint: Check for duplicates before creating
+router.post('/reports/check-duplicate', checkTransportationDuplicate);
+
 // 2. Submit New Transportation Report
-router.post('/reports', createReport);
+router.post('/reports', upload.array('image', 5), handleUploadError, createReport);
 
 // 3. Get All Transportation Reports (With Search & Filter Query Params)
 router.get('/reports', getReports);

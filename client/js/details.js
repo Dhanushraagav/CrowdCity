@@ -111,8 +111,9 @@ async function loadIssueDetails() {
 
   // Image handling
   const imgElement = document.getElementById('issue-image');
-  if (issue.image_url) {
-    imgElement.src = issue.image_url;
+  const mainImageUrl = issue.image_url || (Array.isArray(issue.photo_urls) && issue.photo_urls[0]) || null;
+  if (mainImageUrl) {
+    imgElement.src = mainImageUrl;
     document.getElementById('issue-image-container').classList.remove('hidden');
   } else {
     document.getElementById('issue-image-container').classList.add('hidden');
@@ -630,7 +631,7 @@ function setupControlPanel() {
 
   if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {
-      if (confirm('⚠️ WARNING: Are you sure you want to permanently delete this issue report? This action cannot be undone.')) {
+      if (confirm('WARNING: Are you sure you want to permanently delete this issue report? This action cannot be undone.')) {
         deleteBtn.disabled = true;
         deleteBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Deleting...';
 

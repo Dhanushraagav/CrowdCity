@@ -2083,15 +2083,19 @@ function setupFormSubmit() {
     const dupStage = document.getElementById('duplicate-confirm-stage');
     
     // Check for existing duplicate civic issue nearby
-    if (currentReportMode !== 'transportation' && window.API && typeof window.API.checkDuplicateIssue === 'function') {
+    if (window.API && (typeof window.API.checkDuplicateIssue === 'function' || typeof window.API.checkTransportationDuplicate === 'function')) {
       submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking nearby reports...';
       try {
-        const dupRes = await window.API.checkDuplicateIssue({
+        const dupCheckFn = currentReportMode === 'transportation'
+          ? window.API.checkTransportationDuplicate
+          : window.API.checkDuplicateIssue;
+        const dupRes = await dupCheckFn({
           latitude: finalLat,
           longitude: finalLng,
           category,
           title,
-          description
+          description,
+          sourceType: currentReportMode
         });
 
         if (dupRes && dupRes.data && dupRes.data.is_duplicate && dupRes.data.candidate) {
@@ -2218,15 +2222,17 @@ function setupFormSubmit() {
       if (currentReportMode === 'transportation') {
         const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
         try {
-          const transRes = await window.API.createTransportationReport({
-            title,
-            category,
-            description,
-            address: finalAddress,
-            latitude: finalLat,
-            longitude: finalLng,
-            user_id: user ? user.id : 'anonymous'
-          });
+          // Use formData which already contains all files from selectedFiles and form fields
+          formData.set('user_id', user ? user.id : 'anonymous');
+
+          const roadNameEl = document.getElementById('report-road-name');
+          if (roadNameEl && roadNameEl.value) formData.set('road_name', roadNameEl.value.trim());
+          const landmarkEl = document.getElementById('report-landmark');
+          if (landmarkEl && landmarkEl.value) formData.set('landmark', landmarkEl.value.trim());
+          const wardEl = document.getElementById('report-ward');
+          if (wardEl && wardEl.value) formData.set('ward', wardEl.value.trim());
+
+          const transRes = await window.API.createTransportationReport(formData);
           const rep = (transRes && transRes.data && transRes.data.report) ? transRes.data.report : (transRes && transRes.report ? transRes.report : null);
           if (rep) {
             data = {
@@ -2237,7 +2243,7 @@ function setupFormSubmit() {
               ai_priority: rep.priority || 'Medium'
             };
           } else {
-            error = 'Transportation report creation failed.';
+            error = transRes?.data?.message || transRes?.data?.error || transRes?.error || 'Transportation report creation failed.';
           }
         } catch (e) {
           error = e.message || 'Transportation report submission error.';

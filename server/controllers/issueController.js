@@ -5,13 +5,14 @@ import { analyzeComplaint } from '../services/groqService.js';
 import { validateServiceArea } from '../services/serviceAreaService.js';
 import { getUserEmail, sendIssueCreatedEmail, sendIssueStatusUpdateEmail, sendIssueWithdrawnEmail, sendNewChatMessageEmail } from '../services/emailService.js';
 import { generateNextComplaintId, normalizeComplaintRecord } from '../services/complaintIdService.js';
-import { findDuplicateCandidate } from '../services/duplicateDetectionService.js';
+import { findDuplicateCandidate, findUnifiedDuplicate } from '../services/duplicateDetectionService.js';
 import { calculateSlaDeadline, resolveIssuePriority } from '../config/slaConfig.js';
 import { computeSlaState, checkAndProcessSlaEscalations, calculateSlaMetrics } from '../services/slaService.js';
 import { calculatePriorityScore, enrichIssueWithPriority, resolveRecurrenceCount } from '../services/civicPriorityService.js';
 import { searchCivicIssues } from '../services/searchService.js';
 import { resolveResponsibleAuthority } from '../services/authorityDirectoryService.js';
 import { buildTimeline } from '../services/timelineService.js';
+import { computeImageHash } from '../services/imageHashService.js';
 import { findTransportationRecord, normalizeTransportationToIssue, updateTransportationRecord, getAllTransportationRecords } from './transportationController.js';
 
 /**
@@ -506,6 +507,40 @@ export const createIssue = async (req, res) => {
     logger.error('Service Area Validation error in createIssue: %O', err);
   }
 
+  // Backend duplicate detection enforcement
+  let primaryImageHash = null;
+  try {
+    // Compute image hash from first uploaded file for duplicate detection
+    if (req.files && req.files.length > 0) {
+      const hashResult = await computeImageHash(req.files[0].buffer);
+      if (hashResult) primaryImageHash = hashResult.hash;
+    }
+
+    const dupResult = await findUnifiedDuplicate({
+      latitude: lat,
+      longitude: lng,
+      category,
+      title,
+      description,
+      imageHash: primaryImageHash,
+      sourceType: 'civic'
+    });
+
+    if (dupResult.result === 'CONFIRMED_DUPLICATE' && dupResult.candidate) {
+      return res.status(200).json({
+        duplicate_detected: true,
+        duplicate_result: dupResult.result,
+        duplicate_score: dupResult.score,
+        candidate: dupResult.candidate,
+        signals: dupResult.signals,
+        message: 'A confirmed duplicate complaint exists. Please support the existing complaint instead of creating a new one.'
+      });
+    }
+    // POSSIBLE_DUPLICATE: allow creation, frontend has already shown advisory
+  } catch (dupEnforceErr) {
+    logger.warn('Backend duplicate enforcement non-blocking error: ' + dupEnforceErr.message);
+  }
+
   try {
     let imageUrl = '';
     const uploadedAttachments = [];
@@ -594,8 +629,8 @@ export const createIssue = async (req, res) => {
     const finalAuthorityEmail = authority_email || authHierarchy?.administrativeAuthority?.email || null;
     const finalHigherAuthority = higher_authority_name || authHierarchy?.escalationContact?.office || null;
 
-    // Production flow: insert to Supabase using request-scoped client
-    const activeClient = getSupabaseClient(req);
+    // Production flow: insert to Supabase using request-scoped client with admin fallback
+    const activeClient = supabaseAdmin || getSupabaseClient(req);
 
     // Generate authoritative Complaint ID (CC-YYYY-NNNNNN)
     const generatedComplaintId = await generateNextComplaintId(new Date(), activeClient);
@@ -3008,20 +3043,30 @@ export const getIssueComments = async (req, res) => {
  * Checks if a civic issue being drafted matches any active master complaint nearby.
  */
 export const checkIssueDuplicate = async (req, res) => {
-  const { latitude, longitude, category, title, description } = req.body;
+  const { latitude, longitude, category, title, description, sourceType } = req.body;
 
   if (!latitude || !longitude || !category) {
     return res.status(400).json({ error: 'Latitude, longitude, and category are required for duplicate checking.' });
   }
 
   try {
-    const result = await findDuplicateCandidate({
+    const unifiedResult = await findUnifiedDuplicate({
       latitude: parseFloat(latitude),
       longitude: parseFloat(longitude),
       category,
       title: title || '',
-      description: description || ''
+      description: description || '',
+      sourceType: sourceType || 'civic'
     });
+
+    // Map to backward-compatible response shape
+    const result = {
+      is_duplicate: unifiedResult.result !== 'NEW_ISSUE',
+      result: unifiedResult.result,
+      score: unifiedResult.score,
+      candidate: unifiedResult.candidate,
+      signals: unifiedResult.signals
+    };
 
     if (result.is_duplicate && result.candidate) {
       normalizeComplaintRecord(result.candidate);

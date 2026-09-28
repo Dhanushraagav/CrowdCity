@@ -3,7 +3,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { analyzeTransportationIssue } from '../services/groqService.js';
 import logger from '../config/logger.js';
-import { supabase } from '../config/supabase.js';
+import { supabase, supabaseAdmin } from '../config/supabase.js';
+import { findUnifiedDuplicate } from '../services/duplicateDetectionService.js';
+import { computeImageHash } from '../services/imageHashService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -134,6 +136,82 @@ export const createReport = async (req, res) => {
       return res.status(400).json({ error: 'Title and description are required.' });
     }
 
+    // Upload images to Supabase Storage if files were provided via Multer
+    const uploadedPhotoUrls = [];
+    let primaryImageHash = null;
+    if (req.files && req.files.length > 0) {
+      const activeClient = supabaseAdmin || supabase;
+      for (const file of req.files) {
+        const fileExt = file.originalname.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `reports/${fileName}`;
+
+        const { error: uploadError } = await activeClient.storage
+          .from('issue-images')
+          .upload(filePath, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true
+          });
+
+        if (!uploadError) {
+          const { data: { publicUrl } } = activeClient.storage
+            .from('issue-images')
+            .getPublicUrl(filePath);
+          uploadedPhotoUrls.push(publicUrl);
+        } else {
+          logger.warn('Failed to upload transportation image to storage: ' + uploadError.message);
+        }
+      }
+
+      if (uploadedPhotoUrls.length === 0) {
+        return res.status(500).json({ error: 'Failed to upload photo evidence to storage. Please try again.' });
+      }
+
+      // Compute perceptual hash of primary image for duplicate detection
+      try {
+        const hashResult = await computeImageHash(req.files[0].buffer);
+        if (hashResult) primaryImageHash = hashResult.hash;
+      } catch (hashErr) {
+        logger.warn('Image hash computation failed: ' + hashErr.message);
+      }
+    }
+
+    // Backend duplicate detection enforcement
+    const lat = latitude ? parseFloat(latitude) : null;
+    const lng = longitude ? parseFloat(longitude) : null;
+    if (lat && lng && category) {
+      try {
+        const dupResult = await findUnifiedDuplicate({
+          latitude: lat,
+          longitude: lng,
+          category,
+          title,
+          description,
+          imageHash: primaryImageHash,
+          sourceType: 'transportation'
+        });
+
+        if (dupResult.result === 'CONFIRMED_DUPLICATE' && dupResult.candidate) {
+          return res.status(200).json({
+            success: false,
+            duplicate_detected: true,
+            duplicate_result: dupResult.result,
+            duplicate_score: dupResult.score,
+            candidate: dupResult.candidate,
+            signals: dupResult.signals,
+            message: 'A confirmed duplicate complaint exists for this location and issue type.'
+          });
+        }
+
+        if (dupResult.result === 'POSSIBLE_DUPLICATE' && dupResult.candidate) {
+          // For POSSIBLE_DUPLICATE, include advisory info but allow creation
+          // The frontend will show the citizen a confirmation dialog
+        }
+      } catch (dupErr) {
+        logger.warn('Duplicate detection non-blocking error: ' + dupErr.message);
+      }
+    }
+
     // Run AI Classification Engine
     let aiTriage = {};
     try {
@@ -153,6 +231,7 @@ export const createReport = async (req, res) => {
     }
 
     const reportNumber = generateReportNumber();
+    const finalPhotoUrls = uploadedPhotoUrls.length > 0 ? uploadedPhotoUrls : (Array.isArray(photo_urls) ? photo_urls : []);
     const newReport = {
       id: `trp-${Date.now()}`,
       report_number: reportNumber,
@@ -170,7 +249,15 @@ export const createReport = async (req, res) => {
       ward: ward || '',
       latitude: latitude ? parseFloat(latitude) : 11.0168,
       longitude: longitude ? parseFloat(longitude) : 76.9558,
-      photo_urls: Array.isArray(photo_urls) ? photo_urls : [],
+      image_url: finalPhotoUrls.length > 0 ? finalPhotoUrls[0] : null,
+      photo_urls: finalPhotoUrls,
+      image_hash: primaryImageHash,
+      attachments: uploadedPhotoUrls.map((url, idx) => ({
+        id: `att-${idx + 1}`,
+        file_url: url,
+        file_name: req.files && req.files[idx] ? req.files[idx].originalname : `evidence-${idx + 1}.jpg`,
+        file_size: req.files && req.files[idx] ? req.files[idx].size : 0
+      })),
       responsible_department: aiTriage.department || 'Roads Department',
       suggested_resolution: aiTriage.suggested_resolution || 'Inspect location and assign repair unit.',
       confidence_score: aiTriage.confidence_score || 92.5,
@@ -204,6 +291,20 @@ export const createReport = async (req, res) => {
     return res.status(201).json({ success: true, report: newReport, aiAnalysis: aiTriage });
   } catch (err) {
     logger.error('Error creating transportation report:', err);
+    if (typeof uploadedPhotoUrls !== 'undefined' && uploadedPhotoUrls.length > 0) {
+      try {
+        const activeClient = supabaseAdmin || supabase;
+        const filePaths = uploadedPhotoUrls.map(u => {
+          const match = u.split('/issue-images/');
+          return match.length > 1 ? match[1] : null;
+        }).filter(Boolean);
+        if (filePaths.length > 0) {
+          await activeClient.storage.from('issue-images').remove(filePaths);
+        }
+      } catch (cleanErr) {
+        logger.warn('Storage cleanup non-blocking note: ' + cleanErr.message);
+      }
+    }
     return res.status(500).json({ error: 'Failed to submit transportation report.' });
   }
 };
@@ -517,8 +618,48 @@ export const normalizeTransportationToIssue = (report, updates = []) => {
     history: mappedHistory,
     comments: [],
     supporting_reports: [],
-    attachments: []
+    attachments: (report.attachments && report.attachments.length > 0)
+      ? report.attachments
+      : (report.photo_urls || []).map((url, i) => ({
+          id: `att-${i + 1}`,
+          file_url: url,
+          file_name: `evidence-${i + 1}.jpg`
+        }))
   };
+};
+
+/**
+ * POST /api/transportation/reports/check-duplicate
+ * Advisory pre-check for transportation duplicate complaints.
+ */
+export const checkTransportationDuplicate = async (req, res) => {
+  const { latitude, longitude, category, title, description } = req.body;
+
+  if (!latitude || !longitude || !category) {
+    return res.status(400).json({ error: 'Latitude, longitude, and category are required for duplicate checking.' });
+  }
+
+  try {
+    const result = await findUnifiedDuplicate({
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
+      category,
+      title: title || '',
+      description: description || '',
+      sourceType: 'transportation'
+    });
+
+    return res.status(200).json({
+      is_duplicate: result.result !== 'NEW_ISSUE',
+      result: result.result,
+      score: result.score,
+      candidate: result.candidate,
+      signals: result.signals
+    });
+  } catch (err) {
+    logger.error('checkTransportationDuplicate Error: %O', err);
+    return res.status(500).json({ error: 'Failed to check for duplicate complaints' });
+  }
 };
 
 /**

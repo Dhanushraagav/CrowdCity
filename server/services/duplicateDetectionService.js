@@ -1,133 +1,358 @@
-/**
- * CrowdCity AI - Multi-Signal Duplicate Complaint Detection Engine
- * 
- * Determines duplicate probability using weighted signals:
- * 1. Geographic proximity (category-adaptive radius, strongest signal: 50%)
- * 2. Issue / category match (strong supporting signal: 25%)
- * 3. Description & title text similarity (supporting signal: 25%)
- * 4. Active/open lifecycle status check (pending, assigned, in_progress only)
- */
-
 import { supabaseAdmin, supabase } from '../config/supabase.js';
 import logger from '../config/logger.js';
+import { normalizeCategory, areCategoriesCompatible, getSearchRadius } from './categoryNormalizationService.js';
+import { computeImageSimilarity, computeImageHash } from './imageHashService.js';
+import { getAllTransportationRecords } from '../controllers/transportationController.js';
 
-// Earth radius in meters
-const EARTH_RADIUS_METERS = 6371000;
+// In-memory cache for remote image hashes to avoid re-fetching
+const imageHashCache = new Map();
 
-// Category-specific search radius in meters
-const CATEGORY_RADII = {
-  roads: 120,          // Potholes, road damage are highly localized
-  streetlights: 100,   // Streetlights typically spaced ~30-50m
-  water_supply: 250,   // Pipeline breaks or shortages affect wider area
-  drainage: 150,       // Open drains/overflows affect neighborhood
-  garbage: 150,        // Garbage dumps affect street/corner
-  traffic: 300,        // Bottlenecks & signals impact entire intersection
-  public_property: 150,
-  parks: 200,
-  sanitation: 150,
-  safety_hazard: 200,
-  environment: 300,
-  other: 100
+export const DUPLICATE_CONFIG = {
+  CONFIRMED_THRESHOLD: 0.78,
+  POSSIBLE_THRESHOLD: 0.55,
+  MAX_CANDIDATES: 25,
+  TEMPORAL_WINDOW_DAYS: 90,
+  WEIGHTS: {
+    location: 0.40,
+    category: 0.20,
+    semantic: 0.25,
+    image: 0.15
+  },
+  SPATIAL: {
+    STRONG_RANGE_METERS: 15,
+    MEDIUM_RANGE_METERS: 30
+  }
 };
 
-// Common civic stop words
-const STOP_WORDS = new Set([
-  'the', 'is', 'at', 'in', 'near', 'on', 'of', 'a', 'an', 'and', 'or', 'for', 'to',
-  'this', 'that', 'there', 'here', 'please', 'help', 'fix', 'very', 'bad', 'huge',
-  'road', 'street', 'area', 'nagar', 'colony', 'city', 'cross', 'main', 'tamil', 'nadu'
-]);
+const STOP_WORDS = new Set(['the', 'is', 'at', 'which', 'on', 'in', 'a', 'an', 'and', 'or', 'for', 'to', 'of', 'with', 'it', 'this', 'that']);
 
 /**
- * Calculates Haversine distance between two latitude/longitude points in meters.
+ * Calculates the Haversine distance between two coordinates in meters.
+ * @param {number} lat1 
+ * @param {number} lon1 
+ * @param {number} lat2 
+ * @param {number} lon2 
+ * @returns {number} Distance in meters
  */
 export function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-  const toRad = (x) => (x * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const R = 6371e3; // Earth's radius in meters
+  const toRadians = (deg) => deg * (Math.PI / 180);
+  
+  const phi1 = toRadians(lat1);
+  const phi2 = toRadians(lat2);
+  const deltaPhi = toRadians(lat2 - lat1);
+  const deltaLambda = toRadians(lon2 - lon1);
+
+  const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return EARTH_RADIUS_METERS * c;
+
+  return R * c;
 }
 
 /**
- * Computes word token similarity between two civic complaint texts.
- * Uses civic stemming and Dice coefficient for robust phrase matching.
+ * Computes Dice coefficient based text similarity.
+ * @param {string} textA 
+ * @param {string} textB 
+ * @returns {number} Similarity score between 0 and 1
  */
 export function computeTextSimilarity(textA, textB) {
-  if (!textA || !textB) return 0;
+  if (!textA && !textB) return 1.0;
+  if (!textA || !textB) return 0.0;
 
-  const stem = (word) => {
-    if (word.length > 5 && word.endsWith('ing')) return word.slice(0, -3);
-    if (word.length > 5 && word.endsWith('ed')) return word.slice(0, -2);
-    if (word.length > 4 && word.endsWith('es')) return word.slice(0, -2);
-    if (word.length > 3 && word.endsWith('s')) return word.slice(0, -1);
-    return word;
+  const normalize = (str) => {
+    return str.toLowerCase().replace(/[^\w\s]/g, '');
   };
 
-  const tokenize = (text) => {
-    return new Set(
-      text
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .split(/\s+/)
-        .map((w) => stem(w.trim()))
-        .filter((w) => w.length > 2 && !STOP_WORDS.has(w))
-    );
+  const getTokens = (str) => {
+    // Basic stop words removal and tokenization
+    const tokens = normalize(str).split(/\s+/).filter(t => t.length > 0 && !STOP_WORDS.has(t));
+    return new Set(tokens);
   };
 
-  const tokensA = tokenize(textA);
-  const tokensB = tokenize(textB);
+  const setA = getTokens(textA);
+  const setB = getTokens(textB);
 
-  if (tokensA.size === 0 || tokensB.size === 0) return 0;
+  if (setA.size === 0 && setB.size === 0) return 1.0;
 
   let intersection = 0;
-  for (const token of tokensA) {
-    if (tokensB.has(token)) {
+  for (const token of setA) {
+    if (setB.has(token)) {
       intersection++;
     }
   }
 
-  // Dice coefficient: 2 * |A ∩ B| / (|A| + |B|)
-  return (2 * intersection) / (tokensA.size + tokensB.size);
+  // Dice coefficient
+  return (2.0 * intersection) / (setA.size + setB.size);
 }
 
 /**
- * Computes category compatibility score.
+ * Helper function to generate a bounding box
  */
-function computeCategoryScore(catA, catB) {
-  if (!catA || !catB) return 0;
-  if (catA.toLowerCase() === catB.toLowerCase()) return 1.0;
+function getBoundingBox(lat, lon, distanceMeters) {
+  const latRadian = distanceMeters / 6371000.0;
+  const lonRadian = distanceMeters / (6371000.0 * Math.cos(lat * (Math.PI / 180)));
 
-  // Related category pairs
-  const relatedGroups = [
-    ['roads', 'traffic'],
-    ['water_supply', 'drainage'],
-    ['garbage', 'sanitation', 'environment'],
-    ['safety_hazard', 'streetlights']
-  ];
-
-  for (const group of relatedGroups) {
-    if (group.includes(catA.toLowerCase()) && group.includes(catB.toLowerCase())) {
-      return 0.5;
-    }
-  }
-
-  return 0.0;
+  return {
+    minLat: lat - (latRadian * (180 / Math.PI)),
+    maxLat: lat + (latRadian * (180 / Math.PI)),
+    minLon: lon - (lonRadian * (180 / Math.PI)),
+    maxLon: lon + (lonRadian * (180 / Math.PI))
+  };
 }
 
 /**
- * Searches the database for active master complaint duplicate candidates.
- * 
- * @param {Object} params
- * @param {number} params.latitude
- * @param {number} params.longitude
- * @param {string} params.category
- * @param {string} params.title
- * @param {string} params.description
- * @param {string} [params.excludeIssueId]
- * @returns {Promise<{ is_duplicate: boolean, score: number, candidate: Object|null }>}
+ * Primary unified duplicate detection function.
+ */
+export async function findUnifiedDuplicate({
+  latitude,
+  longitude,
+  category,
+  title,
+  description,
+  imageHash,
+  excludeId,
+  sourceType = 'civic'
+}) {
+  try {
+    const inputCategoryCode = normalizeCategory(category);
+    const searchRadius = getSearchRadius(inputCategoryCode) || 100;
+    const bbox = getBoundingBox(latitude, longitude, searchRadius);
+
+    // a. Query Supabase issues
+    const client = supabaseAdmin || supabase;
+    const { data: civicIssues, error } = await client
+      .from('issues')
+      .select('id, complaint_id, title, description, category, status, latitude, longitude, address, image_url, citizen_count, created_at, updated_at, reporter_id')
+      .gte('latitude', bbox.minLat)
+      .lte('latitude', bbox.maxLat)
+      .gte('longitude', bbox.minLon)
+      .lte('longitude', bbox.maxLon)
+      .in('status', ['pending', 'assigned', 'in_progress', 'resolved'])
+      .order('created_at', { ascending: false })
+      .limit(DUPLICATE_CONFIG.MAX_CANDIDATES);
+
+    if (error) {
+      logger.error('Error fetching civic issues for duplicate detection', { error });
+      // Proceed without throwing to check transportation records
+    }
+
+    // b. Read transportation reports
+    const transportationRecords = await getAllTransportationRecords();
+
+    // c. Filter transportation records by bounding box and active status
+    const filteredTrans = transportationRecords.filter(record => {
+      const lat = parseFloat(record.latitude);
+      const lon = parseFloat(record.longitude);
+      if (isNaN(lat) || isNaN(lon)) return false;
+      const rawStatus = (record.status || 'Submitted').toLowerCase();
+      const isActive = rawStatus.includes('submit') || rawStatus.includes('progress') ||
+                       rawStatus.includes('assign') || rawStatus.includes('resolved');
+      return isActive &&
+             lat >= bbox.minLat && lat <= bbox.maxLat &&
+             lon >= bbox.minLon && lon <= bbox.maxLon;
+    });
+
+    // d. Combine and normalize
+    const candidates = [];
+    const now = new Date();
+
+    for (const issue of (civicIssues || [])) {
+      if (excludeId && issue.id === excludeId) continue;
+      
+      const createdAtDate = new Date(issue.created_at);
+      const daysOld = (now - createdAtDate) / (1000 * 60 * 60 * 24);
+      
+      // e. Temporal window filter
+      if (daysOld > DUPLICATE_CONFIG.TEMPORAL_WINDOW_DAYS) continue;
+
+      candidates.push({
+        id: issue.id,
+        complaintId: issue.complaint_id || issue.id,
+        sourceType: 'civic',
+        category: issue.category,
+        categoryCode: normalizeCategory(issue.category),
+        title: issue.title,
+        description: issue.description,
+        latitude: parseFloat(issue.latitude),
+        longitude: parseFloat(issue.longitude),
+        address: issue.address,
+        imageUrl: issue.image_url,
+        imageHash: issue.image_hash || null,
+        createdAt: issue.created_at,
+        status: issue.status,
+        reporterId: issue.reporter_id,
+        citizenCount: issue.citizen_count || 1,
+        updatedAt: issue.updated_at
+      });
+    }
+
+    for (const record of filteredTrans) {
+      if (excludeId && record.id === excludeId) continue;
+
+      const createdAtDate = new Date(record.created_at || record.createdAt);
+      const daysOld = (now - createdAtDate) / (1000 * 60 * 60 * 24);
+      
+      if (daysOld > DUPLICATE_CONFIG.TEMPORAL_WINDOW_DAYS) continue;
+
+      // Map status
+      let normalizedStatus = 'pending';
+      const s = (record.status || '').toLowerCase();
+      if (s.includes('progress') || s.includes('assigned')) normalizedStatus = 'in_progress';
+      else if (s.includes('resolved') || s.includes('closed')) normalizedStatus = 'resolved';
+
+      candidates.push({
+        id: record.id,
+        complaintId: record.report_number || record.id,
+        sourceType: 'transportation',
+        category: record.category || 'Damaged Roads',
+        categoryCode: normalizeCategory(record.category || 'Damaged Roads'),
+        title: record.title || record.category,
+        description: record.description,
+        latitude: parseFloat(record.latitude),
+        longitude: parseFloat(record.longitude),
+        address: record.address || record.road_name || '',
+        imageUrl: (record.photo_urls && record.photo_urls[0]) || null,
+        imageHash: record.image_hash || null,
+        createdAt: record.created_at || record.createdAt,
+        status: normalizedStatus,
+        reporterId: record.user_id || 'anonymous_citizen',
+        citizenCount: 1,
+        updatedAt: record.updated_at || record.created_at
+      });
+    }
+
+    let bestCandidate = null;
+    let highestTotalScore = 0;
+    let bestSignals = null;
+    let bestDistance = Infinity;
+    
+    // f. Scoring
+    for (const candidate of candidates) {
+      let weightMultiplier = 1.0;
+      if (candidate.status === 'resolved') {
+        const resolvedDate = new Date(candidate.updatedAt || candidate.createdAt);
+        const resolvedDays = (now - resolvedDate) / (1000 * 60 * 60 * 24);
+        if (resolvedDays > 14) continue; // Hard filter resolved > 14 days
+        weightMultiplier = 0.5; // Reduced weight for recently resolved
+      }
+
+      // Location Score
+      const distance = calculateHaversineDistance(latitude, longitude, candidate.latitude, candidate.longitude);
+      const locationScore = Math.max(0, 1.0 - (distance / searchRadius));
+
+      // Category Score
+      const categoryScore = areCategoriesCompatible(inputCategoryCode, candidate.categoryCode);
+      if (categoryScore === 0) continue; // Hard filter
+
+      // Semantic Score
+      const textA = `${title || ''} ${description || ''}`;
+      const textB = `${candidate.title || ''} ${candidate.description || ''}`;
+      const semanticScore = computeTextSimilarity(textA, textB);
+
+      // Image Score
+      let imageScore = 0;
+      let candHash = candidate.imageHash;
+      if (!candHash && candidate.imageUrl && imageHash) {
+        if (imageHashCache.has(candidate.imageUrl)) {
+          candHash = imageHashCache.get(candidate.imageUrl);
+        } else {
+          try {
+            const computed = await computeImageHash(candidate.imageUrl);
+            candHash = computed ? computed.hash : null;
+            if (candHash) {
+              imageHashCache.set(candidate.imageUrl, candHash);
+              if (imageHashCache.size > 200) {
+                const firstKey = imageHashCache.keys().next().value;
+                imageHashCache.delete(firstKey);
+              }
+            }
+          } catch (e) {
+            candHash = null;
+          }
+        }
+      }
+
+      const hasImageComparison = Boolean(imageHash && candHash);
+      if (hasImageComparison) {
+        imageScore = computeImageSimilarity(imageHash, candHash);
+      }
+
+      let totalScore = 0;
+      if (hasImageComparison) {
+        totalScore = (
+          (locationScore * DUPLICATE_CONFIG.WEIGHTS.location) +
+          (categoryScore * DUPLICATE_CONFIG.WEIGHTS.category) +
+          (semanticScore * DUPLICATE_CONFIG.WEIGHTS.semantic) +
+          (imageScore * DUPLICATE_CONFIG.WEIGHTS.image)
+        );
+      } else {
+        const textWeightSum = DUPLICATE_CONFIG.WEIGHTS.location + DUPLICATE_CONFIG.WEIGHTS.category + DUPLICATE_CONFIG.WEIGHTS.semantic;
+        totalScore = (
+          (locationScore * (DUPLICATE_CONFIG.WEIGHTS.location / textWeightSum)) +
+          (categoryScore * (DUPLICATE_CONFIG.WEIGHTS.category / textWeightSum)) +
+          (semanticScore * (DUPLICATE_CONFIG.WEIGHTS.semantic / textWeightSum))
+        );
+      }
+      totalScore *= weightMultiplier;
+
+      if (totalScore > highestTotalScore) {
+        highestTotalScore = totalScore;
+        bestCandidate = candidate;
+        bestDistance = distance;
+        bestSignals = {
+          locationScore,
+          categoryScore,
+          semanticScore,
+          imageScore,
+          totalScore
+        };
+      }
+    }
+
+    if (!bestCandidate) {
+      return { result: 'NEW_ISSUE', score: 0, candidate: null, signals: null };
+    }
+
+    // 7. Result Classification
+    let result = 'NEW_ISSUE';
+    if (bestSignals && bestSignals.imageScore >= 0.85 && bestDistance < 30 && bestSignals.categoryScore > 0) {
+      result = 'CONFIRMED_DUPLICATE';
+    } else if (bestDistance < DUPLICATE_CONFIG.SPATIAL.STRONG_RANGE_METERS && highestTotalScore >= 0.70 && bestSignals.categoryScore === 1.0) {
+      // 0-15m: strong spatial signal + identical canonical category + supporting evidence
+      result = 'CONFIRMED_DUPLICATE';
+    } else if (highestTotalScore >= DUPLICATE_CONFIG.CONFIRMED_THRESHOLD && bestDistance < DUPLICATE_CONFIG.SPATIAL.MEDIUM_RANGE_METERS) {
+      // 15-30m: requires stronger multi-signal evidence
+      result = 'CONFIRMED_DUPLICATE';
+    } else if (highestTotalScore >= DUPLICATE_CONFIG.POSSIBLE_THRESHOLD) {
+      result = 'POSSIBLE_DUPLICATE';
+    }
+
+    const candidateOutput = result !== 'NEW_ISSUE' ? {
+      ...bestCandidate,
+      complaint_id: bestCandidate.complaintId || bestCandidate.id,
+      citizen_count: bestCandidate.citizenCount || 1,
+      distance_meters: Math.round(bestDistance),
+      match_score: Math.round(highestTotalScore * 100)
+    } : null;
+
+    return {
+      result,
+      score: highestTotalScore,
+      candidate: candidateOutput,
+      signals: bestSignals
+    };
+
+  } catch (error) {
+    logger.error('Error in findUnifiedDuplicate', { error });
+    return { result: 'NEW_ISSUE', score: 0, candidate: null, signals: null };
+  }
+}
+
+/**
+ * Backward-compatible duplicate search function.
+ * Maps unified response to previous structure.
  */
 export async function findDuplicateCandidate({
   latitude,
@@ -135,101 +360,21 @@ export async function findDuplicateCandidate({
   category,
   title,
   description,
-  excludeIssueId = null
+  excludeIssueId
 }) {
-  const lat = parseFloat(latitude);
-  const lng = parseFloat(longitude);
+  const result = await findUnifiedDuplicate({
+    latitude,
+    longitude,
+    category,
+    title,
+    description,
+    excludeId: excludeIssueId,
+    sourceType: 'civic'
+  });
 
-  if (isNaN(lat) || isNaN(lng)) {
-    return { is_duplicate: false, score: 0, candidate: null };
-  }
-
-  const client = supabaseAdmin || supabase;
-  const maxRadiusMeters = CATEGORY_RADII[category] || 120;
-
-  // Approximate 1 degree latitude ~ 111,000 meters
-  // 1 degree longitude ~ 111,000 * cos(lat) meters
-  const latDelta = (maxRadiusMeters * 1.5) / 111000;
-  const lngDelta = (maxRadiusMeters * 1.5) / (111000 * Math.cos((lat * Math.PI) / 180));
-
-  const minLat = lat - latDelta;
-  const maxLat = lat + latDelta;
-  const minLng = lng - lngDelta;
-  const maxLng = lng + lngDelta;
-
-  try {
-    // 1. Perform high-performance indexed spatial & status bounding box filter
-    let query = client
-      .from('issues')
-      .select('id, complaint_id, title, description, category, status, latitude, longitude, address, image_url, citizen_count, created_at, reporter_id')
-      .in('status', ['pending', 'assigned', 'in_progress'])
-      .gte('latitude', minLat)
-      .lte('latitude', maxLat)
-      .gte('longitude', minLng)
-      .lte('longitude', maxLng);
-
-    if (excludeIssueId) {
-      query = query.neq('id', excludeIssueId);
-    }
-
-    const { data: candidates, error } = await query.limit(20);
-
-    if (error || !candidates || candidates.length === 0) {
-      return { is_duplicate: false, score: 0, candidate: null };
-    }
-
-    // 2. Score candidates using weighted multi-signal logic
-    let bestCandidate = null;
-    let bestScore = 0;
-    const inputCombinedText = `${title || ''} ${description || ''}`;
-
-    for (const item of candidates) {
-      // 2a. Calculate exact Haversine distance
-      const distance = calculateHaversineDistance(lat, lng, item.latitude, item.longitude);
-      
-      // If outside max radius, skip
-      if (distance > maxRadiusMeters) {
-        continue;
-      }
-
-      // Location score (1.0 at 0m, 0.0 at maxRadius)
-      const locationScore = Math.max(0, 1.0 - distance / maxRadiusMeters);
-
-      // 2b. Category match score
-      const categoryScore = computeCategoryScore(category, item.category);
-
-      // If categories are completely unrelated, do not merge regardless of location
-      if (categoryScore === 0) {
-        continue;
-      }
-
-      // 2c. Text similarity score
-      const candidateCombinedText = `${item.title || ''} ${item.description || ''}`;
-      const textScore = computeTextSimilarity(inputCombinedText, candidateCombinedText);
-
-      // Weighted total score: Location (50%) + Category (25%) + Text (25%)
-      const totalScore = (locationScore * 0.50) + (categoryScore * 0.25) + (textScore * 0.25);
-
-      if (totalScore > bestScore) {
-        bestScore = totalScore;
-        bestCandidate = {
-          ...item,
-          distance_meters: Math.round(distance),
-          match_score: Math.round(totalScore * 100)
-        };
-      }
-    }
-
-    // Strong threshold: >= 0.65
-    const isDuplicate = bestScore >= 0.65 && bestCandidate !== null;
-
-    return {
-      is_duplicate: isDuplicate,
-      score: bestScore,
-      candidate: bestCandidate
-    };
-  } catch (err) {
-    logger.error('Error during findDuplicateCandidate:', err);
-    return { is_duplicate: false, score: 0, candidate: null };
-  }
+  return {
+    is_duplicate: result.result !== 'NEW_ISSUE',
+    score: result.score,
+    candidate: result.candidate
+  };
 }

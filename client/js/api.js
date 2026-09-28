@@ -550,10 +550,21 @@ const API = {
   },
 
   createTransportationReport: async (reportData) => {
+    _clearApiCache();
+    const isFormData = typeof FormData !== 'undefined' && (reportData instanceof FormData);
     return request('/transportation/reports', {
       method: 'POST',
-      body: JSON.stringify(reportData),
+      body: isFormData ? reportData : JSON.stringify(reportData),
       auth: true
+    });
+  },
+
+  // Check for existing duplicate transportation complaint nearby
+  checkTransportationDuplicate: async (data) => {
+    return request('/transportation/reports/check-duplicate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: false
     });
   },
 
