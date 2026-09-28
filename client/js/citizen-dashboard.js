@@ -99,6 +99,16 @@
     }
     updateCityHeaders(userCity);
 
+    const recentListEl = document.getElementById('dash-recent-activity-list');
+    if (recentListEl && window.CrowdCityLoading) {
+      window.CrowdCityLoading.show(recentListEl, {
+        message: 'Retrieving recent civic complaints...',
+        subtitle: 'Connecting to live community activity feed',
+        size: 'md',
+        inlineSeamless: true
+      });
+    }
+
     // Fetch All Complaints from API
     let issues = [];
     try {
@@ -110,6 +120,10 @@
       }
     } catch (e) {
       console.warn('Failed to load issues from API:', e);
+    } finally {
+      if (recentListEl && window.CrowdCityLoading) {
+        window.CrowdCityLoading.hide(recentListEl);
+      }
     }
 
     // Function to render city-filtered complaints

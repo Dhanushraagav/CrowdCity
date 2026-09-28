@@ -417,6 +417,22 @@
     setRetryLoading(true);
     hideStateBoxes();
 
+    const heroContainer = document.getElementById('current-weather-container');
+    const hasExistingData = Boolean(state.weatherData);
+
+    if (heroContainer && window.CrowdCityLoading) {
+      if (hasExistingData) {
+        window.CrowdCityLoading.showBackgroundSync(heroContainer);
+      } else {
+        window.CrowdCityLoading.show(heroContainer, {
+          message: 'Fetching live weather data...',
+          subtitle: 'Connecting to Open-Meteo meteorological feed',
+          size: 'lg',
+          minHeight: '220px'
+        });
+      }
+    }
+
     try {
       // Determine query params for active region / district
       let weatherUrl = `${WEATHER_API_BASE}?district=${encodeURIComponent(state.district)}`;
@@ -494,6 +510,10 @@
     } finally {
       state.isLoading = false;
       setRetryLoading(false);
+      if (heroContainer && window.CrowdCityLoading) {
+        window.CrowdCityLoading.hide(heroContainer);
+        window.CrowdCityLoading.hideBackgroundSync(heroContainer);
+      }
     }
   }
 

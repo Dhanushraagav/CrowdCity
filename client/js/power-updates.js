@@ -266,12 +266,28 @@
     if (officialInfoBox) officialInfoBox.classList.add('hidden');
     if (errorState) errorState.classList.add('hidden');
 
-    if (isRefresh && refreshIcon) {
+    const refreshBtn = document.getElementById('btn-refresh-power');
+
+    if (isRefresh && refreshBtn && window.CrowdCityLoading) {
+      window.CrowdCityLoading.setButtonLoading(refreshBtn, true, { text: 'Refreshing...' });
+    } else if (isRefresh && refreshIcon) {
       refreshIcon.classList.add('fa-spin');
     }
 
     if (container) {
-      container.innerHTML = getSkeletonHtml();
+      const hasExistingData = Boolean(powerState.outages && powerState.outages.length > 0 && isRefresh);
+      if (hasExistingData && window.CrowdCityLoading) {
+        window.CrowdCityLoading.showBackgroundSync(container);
+      } else if (window.CrowdCityLoading) {
+        window.CrowdCityLoading.show(container, {
+          message: 'Retrieving power updates...',
+          subtitle: 'Connecting to official TNPDCL / TANGEDCO planned maintenance schedules',
+          size: 'lg',
+          minHeight: '260px'
+        });
+      } else {
+        container.innerHTML = getSkeletonHtml();
+      }
     }
 
     const params = new URLSearchParams();
@@ -334,6 +350,13 @@
       }
     } finally {
       powerState.isLoading = false;
+      if (container && window.CrowdCityLoading) {
+        window.CrowdCityLoading.hide(container);
+        window.CrowdCityLoading.hideBackgroundSync(container);
+      }
+      if (refreshBtn && window.CrowdCityLoading) {
+        window.CrowdCityLoading.setButtonLoading(refreshBtn, false);
+      }
       if (refreshIcon) {
         refreshIcon.classList.remove('fa-spin');
       }

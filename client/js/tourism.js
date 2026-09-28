@@ -794,7 +794,7 @@
   }
 
   /**
-   * Loading Skeleton State
+   * Loading Skeleton / Brand State
    */
   function setLoading(isLoading) {
     state.isLoading = isLoading;
@@ -803,17 +803,29 @@
     if (!grid) return;
 
     if (isLoading) {
-      emptyBox.classList.add('hidden');
-      grid.innerHTML = Array(3).fill(0).map(() => `
-        <div class="tourism-card skeleton-card">
-          <div class="skeleton-pill"></div>
-          <div class="skeleton-line title"></div>
-          <div class="skeleton-line subtitle"></div>
-          <div class="skeleton-line desc"></div>
-          <div class="skeleton-line desc short"></div>
-          <div class="skeleton-actions"></div>
-        </div>
-      `).join('');
+      if (emptyBox) emptyBox.classList.add('hidden');
+      if (window.CrowdCityLoading) {
+        window.CrowdCityLoading.show(grid, {
+          message: 'Discovering tourist destinations...',
+          subtitle: 'Querying verified cultural, heritage, and scenic locations',
+          size: 'lg'
+        });
+      } else {
+        grid.innerHTML = Array(3).fill(0).map(() => `
+          <div class="tourism-card skeleton-card">
+            <div class="skeleton-pill"></div>
+            <div class="skeleton-line title"></div>
+            <div class="skeleton-line subtitle"></div>
+            <div class="skeleton-line desc"></div>
+            <div class="skeleton-line desc short"></div>
+            <div class="skeleton-actions"></div>
+          </div>
+        `).join('');
+      }
+    } else {
+      if (window.CrowdCityLoading) {
+        window.CrowdCityLoading.hide(grid);
+      }
     }
   }
 

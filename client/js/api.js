@@ -25,6 +25,16 @@ function _dedupFetch(key, fetcher) {
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   
+  const hasLoadingOption = Boolean(options.loading || options.loadingTarget);
+  const loadingTarget = options.loadingTarget || null;
+  const loadingMessage = options.loadingMessage || 'Retrieving civic data...';
+  if (hasLoadingOption && loadingTarget && typeof window !== 'undefined' && window.CrowdCityLoading) {
+    window.CrowdCityLoading.show(loadingTarget, { message: loadingMessage, subtitle: options.loadingSubtitle || '' });
+  }
+  if (typeof API._onRequestStart === 'function') {
+    try { API._onRequestStart(endpoint, options); } catch(e) {}
+  }
+  
   const headers = {
     'Accept': 'application/json',
     ...options.headers
@@ -166,11 +176,19 @@ async function request(endpoint, options = {}) {
     if (options.signal && onCallerAbort) {
       options.signal.removeEventListener('abort', onCallerAbort);
     }
+    if (hasLoadingOption && loadingTarget && typeof window !== 'undefined' && window.CrowdCityLoading) {
+      window.CrowdCityLoading.hide(loadingTarget);
+    }
+    if (typeof API._onRequestEnd === 'function') {
+      try { API._onRequestEnd(endpoint, options); } catch(e) {}
+    }
   }
 }
 
 const API = {
   request: request,
+  onRequestStart: (cb) => { API._onRequestStart = cb; },
+  onRequestEnd: (cb) => { API._onRequestEnd = cb; },
 
   // 1. Get Issues — reads live PostgreSQL database via backend
   getIssues: (filters = {}) => {

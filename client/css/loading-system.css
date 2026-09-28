@@ -1,0 +1,342 @@
+/* ==========================================================================
+   CROWDCITY — GLOBAL PREMIUM CIVIC-TECH DATA LOADING SYSTEM
+   Ultra-modern, GPU-accelerated, cache-aware, theme-adaptive loading architecture.
+   Strictly ZERO emojis. Truly AMOLED black in dark mode.
+   ========================================================================== */
+
+:root {
+  --cc-loader-accent: #0d9488;
+  --cc-loader-accent-glow: rgba(13, 148, 136, 0.22);
+  --cc-loader-sweep: url(#ccLoaderGradLight);
+  --cc-loader-track: rgba(0, 0, 0, 0.07);
+  --cc-loader-subtle: rgba(13, 148, 136, 0.35);
+  --cc-loader-node: #0d9488;
+  --cc-loader-shield-stroke: #0d9488;
+  --cc-loader-shield-fill: rgba(13, 148, 136, 0.06);
+  --cc-loader-c-stroke: #18181b;
+  --cc-loader-beacon: #0d9488;
+  --cc-loader-text: #18181b;
+  --cc-loader-subtitle: #71717a;
+  --cc-loader-surface: #ffffff;
+  --cc-loader-border: #e4e4e7;
+  --cc-loader-overlay-bg: rgba(255, 255, 255, 0.86);
+}
+
+[data-theme="dark"],
+html[data-theme="dark"],
+body.dark-theme,
+html.dark-theme {
+  --cc-loader-accent: #38bdf8;
+  --cc-loader-accent-glow: rgba(56, 189, 248, 0.28);
+  --cc-loader-sweep: url(#ccLoaderGradDark);
+  --cc-loader-track: rgba(255, 255, 255, 0.08);
+  --cc-loader-subtle: rgba(56, 189, 248, 0.4);
+  --cc-loader-node: #38bdf8;
+  --cc-loader-shield-stroke: #38bdf8;
+  --cc-loader-shield-fill: rgba(56, 189, 248, 0.1);
+  --cc-loader-c-stroke: #ffffff;
+  --cc-loader-beacon: #38bdf8;
+  --cc-loader-text: #ffffff;
+  --cc-loader-subtitle: #a0a0a0;
+  --cc-loader-surface: #050505;
+  --cc-loader-border: #1c1c1c;
+  --cc-loader-overlay-bg: rgba(0, 0, 0, 0.88);
+}
+
+/* --------------------------------------------------------------------------
+   PRIMARY CONTAINER LOADER (Centered State)
+   -------------------------------------------------------------------------- */
+.cc-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--cc-loader-surface);
+  border: 1px solid var(--cc-loader-border);
+  border-radius: 14px;
+  grid-column: 1 / -1;
+  transition: opacity 0.24s cubic-bezier(0.4, 0, 0.2, 1), transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.cc-loading-container.inline-seamless {
+  background: transparent !important;
+  border: none !important;
+  padding: 2.25rem 1rem !important;
+  box-shadow: none !important;
+}
+
+.cc-loading-emblem-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.15rem;
+  flex-shrink: 0;
+}
+
+/* Size Variants */
+.cc-loader-lg .cc-loader-svg {
+  width: 72px;
+  height: 72px;
+}
+
+.cc-loader-md .cc-loader-svg {
+  width: 48px;
+  height: 48px;
+}
+
+.cc-loader-sm .cc-loader-svg {
+  width: 22px;
+  height: 22px;
+}
+
+.cc-loader-svg {
+  overflow: visible;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   HARDWARE-ACCELERATED SVG ORBITAL ANIMATIONS (60 FPS, ZERO JANK)
+   -------------------------------------------------------------------------- */
+.cc-loader-orbit-fast {
+  transform-origin: 40px 40px;
+  animation: ccOrbitRotate 1.35s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.cc-loader-orbit-reverse {
+  transform-origin: 40px 40px;
+  animation: ccOrbitReverse 3.6s linear infinite;
+}
+
+.cc-loader-satellites {
+  transform-origin: 40px 40px;
+  animation: ccOrbitRotate 1.35s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.cc-loader-beacon {
+  transform-origin: 40px 40px;
+  animation: ccBeaconPulse 1.8s ease-in-out infinite;
+}
+
+.cc-loader-ambient-glow {
+  transform-origin: 40px 40px;
+  animation: ccGlowPulse 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes ccOrbitRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ccOrbitReverse {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes ccBeaconPulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes ccGlowPulse {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0.65;
+    transform: scale(1.15);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   TYPOGRAPHY & CONTEXTUAL STATUS INDICATORS
+   -------------------------------------------------------------------------- */
+.cc-loading-title {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--cc-loader-text);
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+.cc-loading-subtitle {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--cc-loader-subtitle);
+  max-width: 480px;
+  line-height: 1.45;
+}
+
+.cc-loading-stream {
+  width: 96px;
+  height: 2px;
+  background: var(--cc-loader-track);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 1rem;
+  position: relative;
+}
+
+.cc-loading-stream-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45px;
+  background: linear-gradient(90deg, transparent, var(--cc-loader-accent), transparent);
+  animation: ccStreamSweep 1.4s ease-in-out infinite;
+}
+
+@keyframes ccStreamSweep {
+  0% {
+    left: -45px;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   SECTION-LEVEL LOADING OVERLAY (NON-BLOCKING)
+   -------------------------------------------------------------------------- */
+.cc-section-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--cc-loader-overlay-bg);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.cc-section-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Ensure relative parent for section overlays */
+.cc-loading-target-relative {
+  position: relative !important;
+}
+
+/* --------------------------------------------------------------------------
+   BUTTON & ACTION CONTROL LOADING (CLEAN & NON-DESTRUCTIVE)
+   -------------------------------------------------------------------------- */
+button.cc-btn-loading,
+.btn.cc-btn-loading,
+.header-action-btn.cc-btn-loading {
+  position: relative;
+  pointer-events: none !important;
+  cursor: wait !important;
+  opacity: 0.82 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.cc-btn-loader-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.cc-btn-loader-icon .cc-loader-svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* --------------------------------------------------------------------------
+   SUBTLE BACKGROUND SYNC INDICATOR (CACHE-AWARE / NON-BLANKING)
+   -------------------------------------------------------------------------- */
+.cc-sync-indicator-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 50;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+
+.cc-sync-indicator-progress {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, var(--cc-loader-accent), transparent);
+  animation: ccStreamSweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.cc-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--cc-loader-accent-glow);
+  color: var(--cc-loader-accent);
+  border: 1px solid var(--cc-loader-subtle);
+  animation: ccFadeIn 0.2s ease;
+}
+
+@keyframes ccFadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   ACCESSIBILITY: PREFERS-REDUCED-MOTION SUPPORT
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .cc-loader-orbit-fast,
+  .cc-loader-orbit-reverse,
+  .cc-loader-satellites,
+  .cc-loader-beacon,
+  .cc-loader-ambient-glow,
+  .cc-loading-stream-bar,
+  .cc-sync-indicator-progress {
+    animation: none !important;
+  }
+
+  .cc-loader-orbit-fast {
+    stroke-dasharray: 220 0 !important;
+    opacity: 0.8 !important;
+  }
+}

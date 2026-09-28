@@ -403,7 +403,15 @@ async function loadAndRenderIssues(forceReload = false) {
     const staleAlert = document.getElementById('gps-warning-alert');
     if (staleAlert) staleAlert.remove();
 
-    listContainer.innerHTML = `
+    if (window.CrowdCityLoading) {
+      window.CrowdCityLoading.show(listContainer, {
+        message: 'Retrieving community complaints feed...',
+        subtitle: 'Connecting to live PostgreSQL database',
+        size: 'md',
+        inlineSeamless: true
+      });
+    } else {
+      listContainer.innerHTML = `
           <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
             <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
             <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
@@ -425,7 +433,8 @@ async function loadAndRenderIssues(forceReload = false) {
               <div class="skeleton skeleton-text" style="width: 25%; height: 0.75rem; margin: 0; border-radius: var(--radius-sm);"></div>
             </div>
           </div>
-    `;
+      `;
+    }
 
     const sortBy = (activeFeedTab === 'trending') ? 'popularity' : 'newest';
 
@@ -911,6 +920,14 @@ async function processAndRenderFeed() {
   if (staleAlert) staleAlert.remove();
 
   if (isLoadingIssues) {
+    if (window.CrowdCityLoading) {
+      window.CrowdCityLoading.show(listContainer, {
+        message: 'Updating community feed...',
+        size: 'md',
+        inlineSeamless: true
+      });
+      return;
+    }
     listContainer.innerHTML = `
           <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
             <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
@@ -935,6 +952,10 @@ async function processAndRenderFeed() {
           </div>
     `;
     return;
+  }
+
+  if (window.CrowdCityLoading) {
+    window.CrowdCityLoading.hide(listContainer);
   }
 
   let filtered = [...currentIssues];

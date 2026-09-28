@@ -72,8 +72,24 @@ async function loadTamilNaduUpdates(forceRefresh = false) {
   if (errorState) errorState.classList.add('hidden');
   if (refreshIcon) refreshIcon.classList.add('fa-spin');
 
+  const btnRefresh = document.getElementById('btn-refresh-updates');
+
+  if (forceRefresh && btnRefresh && window.CrowdCityLoading) {
+    window.CrowdCityLoading.setButtonLoading(btnRefresh, true, 'Updating...');
+  }
+
   if (!forceRefresh && _allTNUpdates.length === 0) {
-    renderSkeletons();
+    if (window.CrowdCityLoading && container) {
+      window.CrowdCityLoading.show(container, {
+        message: 'Retrieving Tamil Nadu live updates...',
+        subtitle: 'Connecting to statewide municipal and administrative dispatches',
+        size: 'lg'
+      });
+    } else {
+      renderSkeletons();
+    }
+  } else if (_allTNUpdates.length > 0 && forceRefresh && window.CrowdCityLoading) {
+    window.CrowdCityLoading.showBackgroundSync('Updating Tamil Nadu live dispatch...');
   }
 
   try {
@@ -102,6 +118,15 @@ async function loadTamilNaduUpdates(forceRefresh = false) {
   } finally {
     _isLoadingUpdates = false;
     if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+    if (btnRefresh && window.CrowdCityLoading) {
+      window.CrowdCityLoading.setButtonLoading(btnRefresh, false);
+    }
+    if (window.CrowdCityLoading) {
+      window.CrowdCityLoading.hideBackgroundSync();
+      if (container) {
+        window.CrowdCityLoading.hide(container);
+      }
+    }
   }
 }
 

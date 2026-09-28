@@ -11,13 +11,27 @@ async function loadMyTransportationReports() {
   const tbody = document.getElementById('my-reports-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-        <i class="fa-solid fa-circle-notch fa-spin"></i> Loading your transportation reports...
-      </td>
-    </tr>
-  `;
+  if (window.CrowdCityLoading && typeof window.CrowdCityLoading.renderHTML === 'function') {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 2rem 1rem;">
+          ${window.CrowdCityLoading.renderHTML({
+            message: 'Retrieving your transportation reports...',
+            subtitle: 'Connecting to transportation database',
+            size: 'md'
+          })}
+        </td>
+      </tr>
+    `;
+  } else {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          <i class="fa-solid fa-circle-notch fa-spin"></i> Loading your transportation reports...
+        </td>
+      </tr>
+    `;
+  }
 
   let userId = 'citizen_anonymous';
   try {

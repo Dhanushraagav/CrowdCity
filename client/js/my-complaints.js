@@ -165,9 +165,17 @@ async function loadAndRenderMyIssues() {
     hasCachedData = true;
   }
 
-  // Draw shimming skeletons ONLY if we have zero cached data to show on cold initial load
+  // Draw premium brand loader ONLY if we have zero cached data to show on cold initial load
   if (!hasCachedData && (!sourceList || sourceList.length === 0)) {
-    container.innerHTML = `
+    if (window.CrowdCityLoading) {
+      window.CrowdCityLoading.show(container, {
+        message: 'Retrieving your civic complaints...',
+        subtitle: 'Connecting to state complaint registry',
+        size: 'lg',
+        inlineSeamless: true
+      });
+    } else {
+      container.innerHTML = `
         <div class="issue-card" style="cursor: default; pointer-events: none; display: flex; flex-direction: column; gap: 12px; padding: 1.25rem; border: 1px solid var(--border-color);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div class="skeleton" style="width: 80px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
@@ -175,38 +183,9 @@ async function loadAndRenderMyIssues() {
           </div>
           <div class="skeleton" style="width: 50%; height: 1.2rem; border-radius: var(--radius-sm); margin-top: 4px;"></div>
           <div class="skeleton" style="width: 90%; height: 0.8rem; border-radius: var(--radius-sm);"></div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div class="skeleton" style="width: 12px; height: 12px; border-radius: var(--radius-round);"></div>
-            <div class="skeleton" style="width: 150px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;">
-            <div class="skeleton" style="width: 100px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
-            <div style="display: flex; gap: 8px;">
-              <div class="skeleton" style="width: 50px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton" style="width: 110px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
         </div>
-        <div class="issue-card" style="cursor: default; pointer-events: none; display: flex; flex-direction: column; gap: 12px; padding: 1.25rem; border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="skeleton" style="width: 90px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
-            <div class="skeleton" style="width: 60px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
-          </div>
-          <div class="skeleton" style="width: 45%; height: 1.2rem; border-radius: var(--radius-sm); margin-top: 4px;"></div>
-          <div class="skeleton" style="width: 85%; height: 0.8rem; border-radius: var(--radius-sm);"></div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div class="skeleton" style="width: 12px; height: 12px; border-radius: var(--radius-round);"></div>
-            <div class="skeleton" style="width: 130px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;">
-            <div class="skeleton" style="width: 90px; height: 0.75rem; border-radius: var(--radius-sm);"></div>
-            <div style="display: flex; gap: 8px;">
-              <div class="skeleton" style="width: 50px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton" style="width: 110px; height: 1.5rem; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
-        </div>
-    `;
+      `;
+    }
   }
 
   if (!user) {
