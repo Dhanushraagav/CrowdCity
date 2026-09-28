@@ -12,13 +12,13 @@ import { calculatePriorityScore, enrichIssueWithPriority, resolveRecurrenceCount
 import { searchCivicIssues } from '../services/searchService.js';
 import { resolveResponsibleAuthority } from '../services/authorityDirectoryService.js';
 import { buildTimeline } from '../services/timelineService.js';
-import { findTransportationRecord, normalizeTransportationToIssue } from './transportationController.js';
+import { findTransportationRecord, normalizeTransportationToIssue, updateTransportationRecord, getAllTransportationRecords } from './transportationController.js';
 
 /**
  * Get all reported civic issues.
  */
 export const getAllIssues = async (req, res) => {
-  const { category, status, reporter_id, assigned_to, sort_by, limit } = req.query;
+  const { category, status, reporter_id, assigned_to, sort_by, limit, include_transportation } = req.query;
 
   logger.info(`[getAllIssues] Filters - Category: "${category}" | Status: "${status}" | Reporter: "${reporter_id}" | AssignedTo: "${assigned_to}"`);
 
@@ -102,14 +102,14 @@ export const getAllIssues = async (req, res) => {
       return res.status(400).json({ error: `Database query failed: ${issuesRes.error.message}` });
     }
 
-    const data = issuesRes.data;
-    logger.info(`[getAllIssues SUPABASE] Query returned ${data ? data.length : 0} issues`);
+    let data = issuesRes.data || [];
+    logger.info(`[getAllIssues SUPABASE] Query returned ${data.length} issues`);
 
     const userVotes = votesRes.data;
     const votesError = votesRes.error;
 
     // Populate user_has_upvoted, normalize complaint_id, compute SLA, and enrich Priority Score
-    if (data && data.length > 0) {
+    if (data.length > 0) {
       const votedIssueIds = (userId && !votesError && userVotes) ? new Set(userVotes.map(v => v.issue_id)) : new Set();
       data.forEach(issue => {
         normalizeComplaintRecord(issue);
@@ -126,7 +126,17 @@ export const getAllIssues = async (req, res) => {
       });
     }
 
-    return res.status(200).json(data || []);
+    if (include_transportation === 'true') {
+      try {
+        const transReports = await getAllTransportationRecords({ user_id: reporter_id, category, status });
+        const normalizedTrans = transReports.map(tr => normalizeTransportationToIssue(tr));
+        data = [...data, ...normalizedTrans].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      } catch (tErr) {
+        logger.warn('Failed to merge transportation reports into getAllIssues: ' + tErr.message);
+      }
+    }
+
+    return res.status(200).json(data);
   } catch (err) {
     logger.error('getAllIssues Error: %O', err);
     return res.status(500).json({ error: 'Server error fetching issues' });
@@ -890,6 +900,122 @@ export const updateIssueStatus = async (req, res) => {
   }
 
   try {
+    const isTrpId = typeof id === 'string' && (id.toLowerCase().startsWith('trp-') || id.toUpperCase().startsWith('TRP-'));
+    if (isTrpId) {
+      const trpResult = await findTransportationRecord(id);
+      if (!trpResult || !trpResult.report) {
+        return res.status(404).json({ error: 'Transportation complaint not found' });
+      }
+
+      const originalReport = trpResult.report;
+      const targetStatus = status === 'timeline_update' ? (originalReport.status || 'submitted') : status;
+
+      const incomingProof = req.body?.completion_photo_url || req.body?.completion_proof_url || req.body?.proof_photo_url || '';
+      if (targetStatus === 'resolved') {
+        if (!req.file && !incomingProof && !originalReport.completion_photo_url) {
+          return res.status(400).json({ error: 'Resolution proof image is strictly required to resolve a complaint.' });
+        }
+      }
+
+      let proofUrl = incomingProof || originalReport.completion_photo_url || '';
+      const activeClient = getSupabaseClient(req);
+      const activeStorageClient = supabaseAdmin || activeClient;
+
+      if (targetStatus === 'resolved' && req.file) {
+        try {
+          const fileExt = req.file.originalname.split('.').pop();
+          const fileName = `resolved-${Date.now()}.${fileExt}`;
+          const filePath = `resolved/${fileName}`;
+
+          const { error: uploadError } = await activeStorageClient.storage
+            .from('issue-images')
+            .upload(filePath, req.file.buffer, {
+              contentType: req.file.mimetype,
+              upsert: true
+            });
+
+          if (!uploadError) {
+            const { data: { publicUrl } } = activeStorageClient.storage
+              .from('issue-images')
+              .getPublicUrl(filePath);
+            proofUrl = publicUrl;
+          }
+        } catch (uploadErr) {
+          logger.error('Failed to upload completion proof image for transportation: %O', uploadErr);
+        }
+      } else if (targetStatus === 'resolved' && incomingProof && incomingProof.startsWith('data:image')) {
+        try {
+          const base64Data = incomingProof.replace(/^data:image\/\w+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          const mimeMatch = incomingProof.match(/^data:(image\/\w+);base64,/);
+          const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+          const ext = mimeType.split('/')[1] || 'jpg';
+          const fileName = `resolved-${Date.now()}.${ext}`;
+          const filePath = `resolved/${fileName}`;
+
+          const { error: uploadError } = await activeStorageClient.storage
+            .from('issue-images')
+            .upload(filePath, buffer, {
+              contentType: mimeType,
+              upsert: true
+            });
+
+          if (!uploadError) {
+            const { data: { publicUrl } } = activeStorageClient.storage
+              .from('issue-images')
+              .getPublicUrl(filePath);
+            proofUrl = publicUrl;
+          }
+        } catch (b64Err) {
+          logger.warn('Base64 upload error for transportation: %O', b64Err);
+        }
+      }
+
+      const now = new Date();
+      const updatePayload = {
+        status: targetStatus,
+        updated_at: now.toISOString()
+      };
+      if (proofUrl) {
+        updatePayload.completion_photo_url = proofUrl;
+      }
+      if (notes || official_remarks) {
+        updatePayload.official_remarks = notes || official_remarks;
+      }
+
+      const newLog = {
+        id: `u-${Date.now()}`,
+        report_id: originalReport.id,
+        status: targetStatus,
+        remarks: notes || official_remarks || `Status updated to ${targetStatus.toUpperCase()} by authority dispatch.`,
+        updated_by: req.user?.user_metadata?.full_name || req.user?.full_name || req.user?.name || 'Authority Dispatch',
+        created_at: now.toISOString()
+      };
+
+      const updated = await updateTransportationRecord(id, updatePayload, newLog);
+      const updatedHistory = [newLog, ...(trpResult.updates || [])];
+      const normalizedIssue = normalizeTransportationToIssue(updated || originalReport, updatedHistory);
+
+      if (originalReport.user_id) {
+        try {
+          const isTimelineUpdate = status === 'timeline_update';
+          const notifTitle = isTimelineUpdate ? `[${originalReport.report_number || id}] Transportation Timeline Update` : `[${originalReport.report_number || id}] Transportation Status Update`;
+          const notifBody = isTimelineUpdate
+            ? `A progress update has been added to your transportation report '${originalReport.title}': "${notes || 'No notes provided'}"`
+            : `Your transportation report '${originalReport.title}' has been updated to ${targetStatus.toUpperCase()}.`;
+          await createNotification(
+            originalReport.user_id,
+            notifTitle,
+            notifBody,
+            isTimelineUpdate ? "timeline_update" : "status_change",
+            id
+          );
+        } catch (e) {}
+      }
+
+      return res.status(200).json({ message: 'Status updated successfully', issue: normalizedIssue });
+    }
+
     const activeClient = getSupabaseClient(req);
 
     // Fetch original issue details to evaluate validation
@@ -1129,6 +1255,56 @@ export const assignIssue = async (req, res) => {
     }
 
     inspectorName = profiles[0].full_name;
+
+    const isTrpId = typeof id === 'string' && (id.toLowerCase().startsWith('trp-') || id.toUpperCase().startsWith('TRP-'));
+    if (isTrpId) {
+      const trpResult = await findTransportationRecord(id);
+      if (!trpResult || !trpResult.report) {
+        return res.status(404).json({ error: 'Transportation complaint not found' });
+      }
+
+      const originalReport = trpResult.report;
+      const now = new Date();
+      const updatePayload = {
+        assigned_to: inspectorName || authorityId,
+        status: 'assigned',
+        updated_at: now.toISOString()
+      };
+
+      const newLog = {
+        id: `u-${Date.now()}`,
+        report_id: originalReport.id,
+        status: 'assigned',
+        remarks: `Complaint assigned to inspector ${inspectorName}.`,
+        updated_by: req.user?.user_metadata?.full_name || req.user?.full_name || req.user?.name || 'Authority Dispatch',
+        created_at: now.toISOString()
+      };
+
+      const updated = await updateTransportationRecord(id, updatePayload, newLog);
+      const updatedHistory = [newLog, ...(trpResult.updates || [])];
+      const normalizedIssue = normalizeTransportationToIssue(updated || originalReport, updatedHistory);
+
+      try {
+        await createNotification(
+          authorityId,
+          "New Case Assigned",
+          `A new transportation complaint '${originalReport.title}' has been assigned to you.`,
+          "assignment",
+          id
+        );
+        if (originalReport.user_id) {
+          await createNotification(
+            originalReport.user_id,
+            "Complaint Assigned",
+            `Your transportation complaint '${originalReport.title}' has been assigned to inspector ${inspectorName}.`,
+            "status_change",
+            id
+          );
+        }
+      } catch (e) {}
+
+      return res.status(200).json({ message: 'Issue assigned successfully', issue: normalizedIssue });
+    }
 
     // Verify if the issue exists and check its record count
     const { data: checkIssue, error: checkError } = await activeClient
@@ -2669,7 +2845,7 @@ export const getIssueReceipt = async (req, res) => {
         This is an official computer-generated receipt issued by the CrowdCity Civic Engagement Portal, Department of Municipal Administration & Water Supply, Government of Tamil Nadu. It is digitally signed and serves as valid proof of complaint registration.
       </div>
       <div class="qr-placeholder">
-        <span style="font-size: 24px; margin-bottom: 2px;">🛡️</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         <span style="font-size: 9px; line-height: 1.1;">CROWDCITY<br>VERIFIED</span>
       </div>
     </div>

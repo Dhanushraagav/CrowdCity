@@ -273,7 +273,7 @@ export const getReports = async (req, res) => {
       );
     }
 
-    return res.status(200).json({ success: true, count: filtered.length, reports: filtered });
+    return res.status(200).json({ success: true, count: filtered.length, reports: filtered, data: filtered });
   } catch (err) {
     logger.error('Error fetching transportation reports:', err);
     return res.status(500).json({ error: 'Failed to fetch transportation reports.' });
@@ -298,6 +298,54 @@ export const getReportById = async (req, res) => {
 };
 
 /**
+ * Update transportation record helper
+ */
+export const updateTransportationRecord = async (id, updatedFields = {}, newLog = null) => {
+  let report = memoryReports.find(r => r.id === id || r.report_number === id);
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('transportation_reports')
+        .select('*')
+        .or(`id.eq.${id},report_number.eq.${id}`)
+        .single();
+      if (!error && data) report = data;
+    } catch (e) {}
+  }
+
+  if (!report) return null;
+
+  Object.assign(report, updatedFields);
+  report.updated_at = updatedFields.updated_at || new Date().toISOString();
+
+  if (newLog) {
+    memoryUpdates.unshift(newLog);
+    persistUpdates();
+  }
+  persistReports();
+
+  if (supabase) {
+    try {
+      await supabase
+        .from('transportation_reports')
+        .update(updatedFields)
+        .eq('id', report.id);
+
+      if (newLog) {
+        await supabase
+          .from('transportation_updates')
+          .insert([newLog]);
+      }
+    } catch (sbErr) {
+      logger.warn('Supabase transportation update note: ' + sbErr.message);
+    }
+  }
+
+  return report;
+};
+
+/**
  * 5. Update Report Status & Assign Engineer (Authority Endpoint)
  */
 export const updateReportStatus = async (req, res) => {
@@ -305,31 +353,15 @@ export const updateReportStatus = async (req, res) => {
     const { id } = req.params;
     const { status, remarks, assigned_to, completion_photo_url, updated_by } = req.body;
 
-    let report = memoryReports.find(r => r.id === id || r.report_number === id);
-
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('transportation_reports')
-        .select('*')
-        .or(`id.eq.${id},report_number.eq.${id}`)
-        .single();
-      if (!error && data) report = data;
-    }
-
+    const report = memoryReports.find(r => r.id === id || r.report_number === id);
     if (!report) {
       return res.status(404).json({ error: 'Transportation report not found.' });
     }
 
-    // Update fields
     const updatedStatus = status || report.status;
-    const updatedAssignee = assigned_to || report.assigned_to;
+    const updatedAssignee = assigned_to !== undefined ? assigned_to : report.assigned_to;
     const now = new Date().toISOString();
 
-    report.status = updatedStatus;
-    report.assigned_to = updatedAssignee;
-    report.updated_at = now;
-
-    // Create Update Log
     const newLog = {
       id: `u-${Date.now()}`,
       report_id: report.id,
@@ -340,22 +372,19 @@ export const updateReportStatus = async (req, res) => {
       created_at: now
     };
 
-    memoryUpdates.unshift(newLog);
-    persistUpdates();
-    persistReports();
+    const updatedReport = await updateTransportationRecord(
+      id,
+      {
+        status: updatedStatus,
+        assigned_to: updatedAssignee,
+        official_remarks: remarks || report.official_remarks,
+        completion_photo_url: completion_photo_url !== undefined ? completion_photo_url : report.completion_photo_url,
+        updated_at: now
+      },
+      newLog
+    );
 
-    if (supabase) {
-      await supabase
-        .from('transportation_reports')
-        .update({ status: updatedStatus, assigned_to: updatedAssignee, updated_at: now })
-        .eq('id', report.id);
-
-      await supabase
-        .from('transportation_updates')
-        .insert([newLog]);
-    }
-
-    return res.status(200).json({ success: true, report, log: newLog });
+    return res.status(200).json({ success: true, report: updatedReport, log: newLog });
   } catch (err) {
     logger.error('Error updating transportation report status:', err);
     return res.status(500).json({ error: 'Failed to update report status.' });
@@ -421,6 +450,30 @@ export const normalizeTransportationToIssue = (report, updates = []) => {
   }));
 
   const fullAddress = report.address || (report.road_name ? `${report.road_name}${report.landmark ? ', ' + report.landmark : ''}` : 'Coimbatore, Tamil Nadu');
+  const detectedDistrict = report.district || (fullAddress.toLowerCase().includes('coimbatore') || fullAddress.toLowerCase().includes('sulur') || fullAddress.toLowerCase().includes('irugur') ? 'Coimbatore' : 'Tamil Nadu');
+
+  const defaultAuthorityResolution = report.authority_resolution || {
+    jurisdiction: {
+      district: detectedDistrict,
+      taluk: report.landmark || 'Sulur',
+      villageOrTown: report.ward || 'Irugur',
+      localBody: 'Sulur Town Panchayat',
+      localBodyType: 'Town Panchayat'
+    },
+    administrativeAuthority: {
+      office: report.responsible_department || 'Highways & Rural Roads Wing',
+      designation: 'Assistant Divisional Engineer (Highways)',
+      phone: '+91 422 230 1234',
+      email: 'highways.sulur@tn.gov.in',
+      address: 'Highways Sub-Division Office, Sulur, Coimbatore - 641402'
+    },
+    escalationContact: {
+      office: 'District Collectorate, Coimbatore',
+      designation: 'District Revenue Officer (DRO)',
+      phone: '+91 422 230 0101',
+      email: 'collr-cbe@nic.in'
+    }
+  };
 
   return {
     id: report.id,
@@ -431,30 +484,36 @@ export const normalizeTransportationToIssue = (report, updates = []) => {
     is_transportation: true,
     title: report.title,
     description: report.description,
-    category: report.category || 'roads',
+    category: report.category || 'Damaged Roads',
     status: rawStatus,
     priority: report.priority || 'Medium',
     priority_level: (report.priority || 'Medium').toLowerCase(),
     priority_score: report.severity_score ? report.severity_score * 10 : 50,
     address: fullAddress,
+    location: fullAddress,
+    district: detectedDistrict,
     road_name: report.road_name || '',
     landmark: report.landmark || '',
     ward: report.ward || '',
-    latitude: report.latitude ? parseFloat(report.latitude) : 11.0168,
-    longitude: report.longitude ? parseFloat(report.longitude) : 76.9558,
+    latitude: report.latitude ? parseFloat(report.latitude) : 11.0028,
+    longitude: report.longitude ? parseFloat(report.longitude) : 77.0654,
     image_url: (report.photo_urls && report.photo_urls[0]) || null,
     photo_urls: report.photo_urls || [],
     ai_summary: report.summary || report.description,
     suggested_resolution: report.suggested_resolution || 'Inspect location and assign maintenance unit.',
     responsible_department: report.responsible_department || 'Highways & Transportation Department',
-    assigned_to: report.assigned_to || 'Unassigned',
+    assigned_to: report.assigned_to && report.assigned_to !== 'Unassigned' ? report.assigned_to : null,
+    assignedOfficial: report.assigned_to && report.assigned_to !== 'Unassigned' ? report.assigned_to : null,
     assigned_officer: { full_name: report.assigned_to && report.assigned_to !== 'Unassigned' ? report.assigned_to : 'Transportation Engineer' },
     reporter_id: report.user_id || 'anonymous_citizen',
-    reporter: { full_name: 'Citizen Reporter', avatar_url: null },
+    reporter: { full_name: 'Citizen Reporter', avatar_url: null, email: 'citizen@crowdcity.gov.in' },
     citizen_count: 1,
     upvotes_count: 0,
     created_at: report.created_at,
-    updated_at: report.updated_at,
+    createdAt: report.created_at,
+    updated_at: report.updated_at || report.created_at,
+    updatedAt: report.updated_at || report.created_at,
+    authority_resolution: defaultAuthorityResolution,
     history: mappedHistory,
     comments: [],
     supporting_reports: [],

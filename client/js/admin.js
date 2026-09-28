@@ -347,6 +347,15 @@
       this.bindHashRouting();
       this.bindInspectDelegation();
       this.populateDistrictDropdown();
+
+      const path = (window.location.pathname || '').toLowerCase();
+      const isCaseDetails = path.includes('authority-case-details') || (Boolean(document.getElementById('pane-details')) && !document.getElementById('pane-complaints'));
+
+      if (isCaseDetails) {
+        await this.handleInitialHash();
+        return;
+      }
+
       this.handleInitialHash();
       await this.loadAllData();
       this.subscribeQueueRealtime();
@@ -670,29 +679,66 @@
         let transList = [];
         if (transRes.status === 'fulfilled' && transRes.value) {
           const rawTrans = transRes.value.data !== undefined ? transRes.value.data : transRes.value;
-          if (Array.isArray(rawTrans)) {
-            transList = rawTrans.map(tr => ({
+          const listCandidate = Array.isArray(rawTrans)
+            ? rawTrans
+            : (Array.isArray(rawTrans?.reports) ? rawTrans.reports : (Array.isArray(rawTrans?.data) ? rawTrans.data : []));
+
+          transList = listCandidate.map(tr => {
+            const fullAddress = tr.address || (tr.road_name ? `${tr.road_name}${tr.landmark ? ', ' + tr.landmark : ''}` : 'Coimbatore, Tamil Nadu');
+            const detectedDistrict = tr.district || (fullAddress.toLowerCase().includes('coimbatore') || fullAddress.toLowerCase().includes('sulur') || fullAddress.toLowerCase().includes('irugur') ? 'Coimbatore' : 'Tamil Nadu');
+            const rawStatus = (tr.status || 'pending').toLowerCase().replace(/\s+/g, '_');
+
+            return {
               id: tr.id,
+              complaint_id: tr.report_number || tr.id,
+              tracking_number: tr.report_number || tr.id,
+              sourceType: 'transportation',
+              source_type: 'transportation',
+              is_transportation: true,
               title: tr.title || tr.issue_type || 'Transportation Issue',
               description: tr.description || tr.issue_description || '',
-              category: 'transportation',
-              priority: tr.priority || (tr.is_emergency ? 'emergency' : 'normal'),
+              category: tr.category || 'Damaged Roads',
+              priority: tr.priority || (tr.is_emergency ? 'Emergency' : 'Medium'),
+              priority_level: (tr.priority || (tr.is_emergency ? 'emergency' : 'medium')).toLowerCase(),
+              priority_score: tr.severity_score ? tr.severity_score * 10 : (tr.priority_score || 60),
               is_emergency: tr.is_emergency || false,
-              status: tr.status || 'pending',
-              address: tr.address || tr.location_name || 'Transportation Route',
-              latitude: tr.latitude,
-              longitude: tr.longitude,
-              assigned_to: tr.assigned_to,
+              status: rawStatus,
+              address: fullAddress,
+              location: fullAddress,
+              district: detectedDistrict,
+              road_name: tr.road_name || '',
+              landmark: tr.landmark || '',
+              ward: tr.ward || '',
+              latitude: tr.latitude ? parseFloat(tr.latitude) : 11.0028,
+              longitude: tr.longitude ? parseFloat(tr.longitude) : 77.0654,
+              image_url: (tr.photo_urls && tr.photo_urls[0]) || tr.image_url || null,
+              photo_urls: tr.photo_urls || (tr.image_url ? [tr.image_url] : []),
+              assigned_to: tr.assigned_to && tr.assigned_to !== 'Unassigned' ? tr.assigned_to : null,
+              assignedOfficial: tr.assigned_to && tr.assigned_to !== 'Unassigned' ? tr.assigned_to : null,
               created_at: tr.created_at || new Date().toISOString(),
-              reporter: tr.reporter || tr.user,
+              createdAt: tr.created_at || new Date().toISOString(),
+              reporter: tr.reporter || tr.user || { full_name: 'Citizen Reporter', email: 'citizen@crowdcity.gov.in' },
               official_remarks: tr.official_remarks,
               completion_photo_url: tr.completion_photo_url,
-              is_transportation: true
-            }));
-          }
+              authority_resolution: tr.authority_resolution
+            };
+          });
         }
 
-        currentComplaints = [...civicList, ...transList].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        const complaintsMap = new Map();
+        civicList.forEach(c => {
+          if (c && c.id) {
+            c.sourceType = c.sourceType || (c.is_transportation ? 'transportation' : 'civic');
+            complaintsMap.set(c.id, c);
+          }
+        });
+        transList.forEach(t => {
+          if (t && t.id) {
+            const existing = complaintsMap.get(t.id) || {};
+            complaintsMap.set(t.id, { ...existing, ...t, sourceType: 'transportation', is_transportation: true });
+          }
+        });
+        currentComplaints = Array.from(complaintsMap.values()).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
         if (usersRes.status === 'fulfilled' && usersRes.value) {
           const rawUsers = usersRes.value.data !== undefined ? usersRes.value.data : usersRes.value;
@@ -812,12 +858,14 @@
             const statusClass = `status-${(c.status || 'pending').toLowerCase()}`;
             const isEmerg = c.is_emergency || c.priority === 'emergency';
             const assignedUser = currentAuthorities.find(a => a.id === c.assigned_to);
+            const isTrans = c.sourceType === 'transportation' || c.is_transportation || (c.id && c.id.startsWith('trp-'));
+            const sourceBadge = isTrans ? `<span class="source-tag source-tag-transportation">Transit</span> ` : '';
 
             return `
               <tr>
-                <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
+                <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || c.id)}</strong></td>
                 <td><strong>${escapeHTML(c.title)}</strong></td>
-                <td>${formatCategory(c.category)}</td>
+                <td>${sourceBadge}${formatCategory(c.category)}</td>
                 <td>${isEmerg ? `<span class="status-badge status-emergency">EMERGENCY</span>` : 'Normal'}</td>
                 <td><span class="status-badge ${statusClass}">${(c.status || 'pending').replace('_', ' ')}</span></td>
                 <td>${escapeHTML(c.address || 'Coordinates recorded')}</td>
@@ -839,7 +887,7 @@
         activityList.innerHTML = sorted.map(c => `
           <div style="padding: 0.5rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between;">
             <div>
-              <strong>Complaint ${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}:</strong> ${escapeHTML(c.title)}
+              <strong>Complaint ${escapeHTML(c.complaint_id || c.id)}:</strong> ${escapeHTML(c.title)}
             </div>
             <div style="color: var(--text-light); font-size: 0.78rem;">${new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
           </div>
@@ -1341,14 +1389,19 @@
           ? `<div style="color: var(--text-main); font-weight: 500;">${escapeHTML(c.address || districtName)}</div><div style="font-size: 0.72rem; color: var(--primary); font-weight: 700; margin-top: 0.15rem;">${escapeHTML(districtName)}</div>`
           : `<div style="color: var(--text-main); font-weight: 500;">${escapeHTML(c.address || 'Coordinates recorded')}</div>`;
 
+        const isTrans = c.sourceType === 'transportation' || c.is_transportation || (c.id && c.id.startsWith('trp-'));
+        const sourceBadge = isTrans
+          ? `<span class="source-tag source-tag-transportation">Transit</span> `
+          : '';
+
         return `
           <tr class="${slaMeta.rowHighlightClass}">
-            <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
+            <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || c.id)}</strong></td>
             <td>
               <div style="font-weight: 700; color: var(--text-main);">${escapeHTML(c.title)}</div>
               <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(c.description || '')}</div>
             </td>
-            <td>${formatCategory(c.category)}</td>
+            <td>${sourceBadge}${formatCategory(c.category)}</td>
             <td>
               <div class="priority-score-wrap">
                 <span class="status-badge ${pBadgeClass}">${priorityLvl}</span>
@@ -1403,14 +1456,17 @@
           : (isEmerg ? '100.0' : '50.0');
         const pBadgeClass = priorityLvl === 'CRITICAL' ? 'status-emergency' : (priorityLvl === 'HIGH' ? 'status-overdue' : (priorityLvl === 'MODERATE' ? 'status-assigned' : 'status-pending'));
 
+        const isTrans = c.sourceType === 'transportation' || c.is_transportation || (c.id && c.id.startsWith('trp-'));
+        const sourceBadge = isTrans ? `<span class="source-tag source-tag-transportation">Transit</span> ` : '';
+
         return `
           <tr class="${slaMeta.rowHighlightClass}">
-            <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || '#' + (c.id || '').substring(0, 8))}</strong></td>
+            <td><strong style="font-family: monospace; color: var(--primary);">${escapeHTML(c.complaint_id || c.id)}</strong></td>
             <td>
               <div style="font-weight: 700; color: var(--text-main);">${escapeHTML(c.title)}</div>
               <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(c.description || '')}</div>
             </td>
-            <td>${formatCategory(c.category)}</td>
+            <td>${sourceBadge}${formatCategory(c.category)}</td>
             <td>
               <div class="priority-score-wrap">
                 <span class="status-badge ${pBadgeClass}">${priorityLvl}</span>
@@ -1493,83 +1549,8 @@
       }
     },
 
-    openCaseDetails: async function(rawIssueId) {
-      if (!rawIssueId) return;
-
-      const cleanId = String(rawIssueId).replace(/^-+/, '').trim();
-
-      // Check if we are on an authority page without pane-details (e.g. authority-complaints.html)
-      // Immediately navigate without waiting for slow remote API requests
-      if (!document.getElementById('pane-details')) {
-        let issue = currentComplaints.find(c => 
-          c.id === cleanId || 
-          c.complaint_id === cleanId || 
-          (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
-          (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
-        );
-        const targetId = (issue && (issue.complaint_id || issue.id)) ? (issue.id || issue.complaint_id) : cleanId;
-        if (issue) {
-          try {
-            sessionStorage.setItem('cc_active_inspect_case', JSON.stringify(issue));
-          } catch (e) {}
-        }
-        window.location.href = `authority-case-details.html?id=${encodeURIComponent(targetId)}`;
-        return;
-      }
-
-      // --- We are on authority-case-details.html (with #pane-details) ---
-      let issue = currentComplaints.find(c => 
-        c.id === cleanId || 
-        c.complaint_id === cleanId || 
-        (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
-        (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
-      );
-
-      // Check instant sessionStorage cache for 0ms initial render
-      if (!issue) {
-        try {
-          const cachedCase = sessionStorage.getItem('cc_active_inspect_case');
-          if (cachedCase) {
-            const parsed = JSON.parse(cachedCase);
-            if (parsed && (parsed.id === cleanId || parsed.complaint_id === cleanId)) {
-              issue = parsed;
-            }
-          }
-        } catch (e) {}
-      }
-
-      if (!issue && currentComplaints.length === 0) {
-        await this.loadAllData();
-        issue = currentComplaints.find(c => 
-          c.id === cleanId || 
-          c.complaint_id === cleanId || 
-          (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
-          (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
-        );
-      }
-
-      // Always fetch fresh details with full status_history audit logs and timeline
-      if (cleanId) {
-        try {
-          const res = await API.request(`/issues/${cleanId}`, { method: 'GET' });
-          const freshData = (res && res.data) ? res.data : (res && !res.error && res.id ? res : null);
-          if (freshData) {
-            issue = Object.assign({}, issue || {}, freshData);
-            const idx = currentComplaints.findIndex(c => c.id === cleanId || c.complaint_id === cleanId || c.id === rawIssueId);
-            if (idx !== -1) currentComplaints[idx] = issue;
-            else currentComplaints.unshift(issue);
-          }
-        } catch (e) {
-          console.warn("Direct issue fetch fallback error:", e);
-        }
-      }
-
-      if (!issue) {
-        showToast("Complaint record not found.", "error");
-        this.showPane('pane-complaints');
-        return;
-      }
-
+    renderCaseDetailsDOM: function(issue) {
+      if (!issue) return;
       activeDetailIssueId = issue.id;
 
       this.showPane('pane-details', false);
@@ -1577,17 +1558,20 @@
         window.location.hash = `details?id=${issue.id}`;
       }
 
-      document.getElementById('detail-title').textContent = issue.title || 'Complaint Details';
+      const titleEl = document.getElementById('detail-title');
+      if (titleEl) titleEl.textContent = issue.title || 'Complaint Details';
+
       const ticketIdEl = document.getElementById('detail-ticket-id');
       if (ticketIdEl) {
-        ticketIdEl.textContent = issue.complaint_id || `Ticket #${(issue.id || '').substring(0, 8)}`;
+        ticketIdEl.textContent = issue.complaint_id || issue.id || `Ticket #${(issue.id || '').substring(0, 8)}`;
       }
       const citizenCountEl = document.getElementById('detail-citizen-count');
       if (citizenCountEl) {
         const cCount = issue.citizen_count || 1;
         citizenCountEl.innerHTML = `<i class="fa-solid fa-users"></i> Reported by ${cCount} ${cCount === 1 ? 'citizen' : 'citizens'}`;
       }
-      document.getElementById('detail-description').textContent = issue.description || 'No detailed description provided.';
+      const descEl = document.getElementById('detail-description');
+      if (descEl) descEl.textContent = issue.description || 'No detailed description provided.';
       
       const emerBadge = document.getElementById('detail-emergency-badge');
       if (emerBadge) emerBadge.style.display = (issue.is_emergency || issue.priority === 'emergency') ? 'inline-block' : 'none';
@@ -1602,7 +1586,8 @@
         statusBadge.className = `status-badge status-${st}`;
       }
 
-      document.getElementById('detail-address').textContent = issue.address || 'Location coordinates registered';
+      const addrEl = document.getElementById('detail-address');
+      if (addrEl) addrEl.textContent = issue.address || issue.location || 'Location coordinates registered';
       
       const coordsLink = document.getElementById('detail-coords-link');
       if (coordsLink) {
@@ -1613,24 +1598,26 @@
       }
 
       const reporterName = issue.reporter ? (issue.reporter.full_name || 'Anonymous Citizen') : 'Anonymous Citizen';
-      document.getElementById('detail-reporter').textContent = reporterName;
-      document.getElementById('detail-date').textContent = new Date(issue.created_at).toLocaleString();
+      const repEl = document.getElementById('detail-reporter');
+      if (repEl) repEl.textContent = reporterName;
+      const dateEl = document.getElementById('detail-date');
+      if (dateEl) dateEl.textContent = issue.created_at ? new Date(issue.created_at).toLocaleString() : 'Recently';
 
       // Populate Administrative Jurisdiction & Responsible Authority
       const authRes = issue.authority_resolution;
       const jur = authRes ? authRes.jurisdiction : null;
-      const adminAuth = authRes ? authRes.administrativeAuthority : null;
-      const escAuth = authRes ? authRes.escalationContact : null;
+      const adminAuth = authRes ? (authRes.administrativeAuthority || authRes.administrative_authority) : null;
+      const escAuth = authRes ? (authRes.escalationContact || authRes.escalation_contact) : null;
 
       const dist = issue.district || (jur ? jur.district : 'Tamil Nadu');
-      const taluk = issue.taluk || (jur ? jur.taluk : '-');
-      const village = issue.village_or_town || (jur ? jur.villageOrTown : '-');
-      const localBody = issue.local_body || (jur ? jur.localBody : '-');
-      const localBodyType = issue.local_body_type || (jur ? jur.localBodyType : 'Local Body');
-      const authOffice = issue.responsible_authority_name || (adminAuth ? adminAuth.office : 'Local Administrative Authority');
+      const taluk = issue.taluk || (jur ? (jur.taluk || jur.block) : '-');
+      const village = issue.village_or_town || issue.ward || (jur ? (jur.villageOrTown || jur.village_or_town || jur.ward) : '-');
+      const localBody = issue.local_body || (jur ? (jur.localBody || jur.local_body) : '-');
+      const localBodyType = issue.local_body_type || (jur ? (jur.localBodyType || jur.local_body_type) : 'Local Body');
+      const authOffice = issue.responsible_authority_name || (adminAuth ? (adminAuth.office || adminAuth.officeName || adminAuth.departmentName) : (issue.responsible_department || 'Local Administrative Authority'));
       const authPhone = issue.authority_phone || (adminAuth ? adminAuth.phone : null);
       const authEmail = issue.authority_email || (adminAuth ? adminAuth.email : null);
-      const higherAuth = issue.higher_authority_name || (escAuth ? escAuth.office : 'District Collectorate');
+      const higherAuth = issue.higher_authority_name || (escAuth ? (escAuth.office || escAuth.designation) : 'District Collectorate');
 
       const distEl = document.getElementById('detail-district');
       if (distEl) distEl.textContent = dist;
@@ -1645,34 +1632,50 @@
       const authNameEl = document.getElementById('detail-authority-name');
       if (authNameEl) authNameEl.textContent = authOffice;
 
-      const phoneEl = document.getElementById('detail-authority-phone');
+      // Contact Actions: Styled chips or clean muted placeholder
       const phoneWrap = document.getElementById('detail-authority-phone-wrap');
-      if (phoneEl && phoneWrap) {
-        if (authPhone && authPhone !== 'Contact information unavailable') {
-          phoneEl.textContent = authPhone;
-          phoneEl.href = `tel:${authPhone.replace(/[^0-9+]/g, '')}`;
+      const hasPhone = authPhone && authPhone !== 'Contact information unavailable' && authPhone !== '-' && authPhone !== 'null';
+      if (phoneWrap) {
+        if (hasPhone) {
+          const cleanPhone = String(authPhone).replace(/[^0-9+]/g, '');
+          phoneWrap.className = 'authority-contact-btn authority-contact-phone';
+          phoneWrap.innerHTML = `<i class="fa-solid fa-phone"></i><a id="detail-authority-phone" href="tel:${cleanPhone}">${escapeHTML(authPhone)}</a>`;
+          phoneWrap.onclick = function(e) {
+            const a = phoneWrap.querySelector('a');
+            if (a && e.target !== a) a.click();
+          };
           phoneWrap.style.display = 'inline-flex';
         } else {
-          phoneWrap.style.display = 'none';
+          phoneWrap.className = 'authority-contact-unavailable';
+          phoneWrap.innerHTML = `<i class="fa-solid fa-phone-slash"></i><span>Phone Unavailable</span>`;
+          phoneWrap.onclick = null;
+          phoneWrap.style.display = 'inline-flex';
         }
       }
 
-      const emailEl = document.getElementById('detail-authority-email');
       const emailWrap = document.getElementById('detail-authority-email-wrap');
-      if (emailEl && emailWrap) {
-        if (authEmail && authEmail !== 'Contact information unavailable') {
-          emailEl.textContent = authEmail;
-          emailEl.href = `mailto:${authEmail}`;
+      const hasEmail = authEmail && authEmail !== 'Contact information unavailable' && authEmail !== '-' && authEmail !== 'null';
+      if (emailWrap) {
+        if (hasEmail) {
+          emailWrap.className = 'authority-contact-btn authority-contact-email';
+          emailWrap.innerHTML = `<i class="fa-solid fa-envelope"></i><a id="detail-authority-email" href="mailto:${escapeHTML(authEmail)}">${escapeHTML(authEmail)}</a>`;
+          emailWrap.onclick = function(e) {
+            const a = emailWrap.querySelector('a');
+            if (a && e.target !== a) a.click();
+          };
           emailWrap.style.display = 'inline-flex';
         } else {
-          emailWrap.style.display = 'none';
+          emailWrap.className = 'authority-contact-unavailable';
+          emailWrap.innerHTML = `<i class="fa-solid fa-envelope-open"></i><span>Email Unavailable</span>`;
+          emailWrap.onclick = null;
+          emailWrap.style.display = 'inline-flex';
         }
       }
 
       const higherEl = document.getElementById('detail-higher-authority');
       if (higherEl) higherEl.textContent = higherAuth;
 
-      // Populate SLA Response & Escalation Tracker (with defensive fallback computation)
+      // SLA Response & Escalation Tracker
       if (!issue.sla_deadline_formatted) {
         const priority = (issue.ai_priority || issue.priority || 'medium').toLowerCase();
         const durationHours = priority === 'critical' ? 4 : (priority === 'high' ? 24 : (priority === 'low' ? 168 : 72));
@@ -1707,9 +1710,7 @@
       }
 
       const slaDeadlineEl = document.getElementById('detail-sla-deadline');
-      if (slaDeadlineEl) {
-        slaDeadlineEl.textContent = issue.sla_deadline_formatted;
-      }
+      if (slaDeadlineEl) slaDeadlineEl.textContent = issue.sla_deadline_formatted;
 
       const slaClockEl = document.getElementById('detail-sla-time-remaining');
       if (slaClockEl) {
@@ -1767,10 +1768,10 @@
         }
       }
 
-      // Presence Badge Update
+      // Presence Badge
       this.updatePresenceStatus(issue.reporter ? issue.reporter.id : null);
 
-      // Populate Civic Priority Score & Contributing Factors Breakdown
+      // Civic Priority Score Breakdown
       const priorityScore = (issue.priority_score !== undefined && issue.priority_score !== null)
         ? Number(issue.priority_score).toFixed(1)
         : (issue.is_emergency ? '100.0' : '50.0');
@@ -1807,16 +1808,19 @@
       setFactorVal('factor-importance-val', factors.public_importance);
 
       // AI Triage
-      document.getElementById('detail-ai-category').textContent = formatCategory(issue.ai_category || issue.category);
-      document.getElementById('detail-ai-priority').textContent = (issue.ai_priority || issue.priority || 'Normal').toUpperCase();
-      document.getElementById('detail-ai-dept').textContent = issue.ai_department || 'Municipal Administration';
-      document.getElementById('detail-ai-summary').textContent = issue.ai_summary || `Categorized as ${formatCategory(issue.category)} with ${issue.is_emergency ? 'HIGH EMERGENCY' : 'standard'} priority. Automated triage complete.`;
+      const aiCatEl = document.getElementById('detail-ai-category');
+      if (aiCatEl) aiCatEl.textContent = formatCategory(issue.ai_category || issue.category);
+      const aiPriEl = document.getElementById('detail-ai-priority');
+      if (aiPriEl) aiPriEl.textContent = (issue.ai_priority || issue.priority || 'Normal').toUpperCase();
+      const aiDeptEl = document.getElementById('detail-ai-dept');
+      if (aiDeptEl) aiDeptEl.textContent = issue.ai_department || 'Municipal Administration';
+      const aiSumEl = document.getElementById('detail-ai-summary');
+      if (aiSumEl) aiSumEl.textContent = issue.ai_summary || `Categorized as ${formatCategory(issue.category)} with ${issue.is_emergency ? 'HIGH EMERGENCY' : 'standard'} priority. Automated triage complete.`;
 
       // Photo
-      const photoUrl = issue.image_url || issue.photo_url || issue.media_url || null;
+      const photoUrl = issue.image_url || issue.photo_url || issue.media_url || (issue.photo_urls && issue.photo_urls[0]) || null;
       const imgEl = document.getElementById('detail-photo-img');
       const fallbackEl = document.getElementById('detail-photo-fallback');
-
       if (photoUrl && imgEl && fallbackEl) {
         imgEl.src = photoUrl;
         imgEl.style.display = 'block';
@@ -1826,23 +1830,25 @@
         fallbackEl.style.display = 'block';
       }
 
-      // Activity Timeline & Operational Activity Feed
+      // Activity Timeline & Activity Feed
       this.renderTimeline(issue);
       this.renderComplaintActivity(issue);
       this.subscribeActiveCaseRealtime(issue.id);
 
       // Delegate select
       const delegateSelect = document.getElementById('detail-delegate-select');
-      if (delegateSelect) {
+      if (delegateSelect && currentAuthorities && currentAuthorities.length > 0) {
         delegateSelect.innerHTML = `<option value="">Unassigned</option>` + currentAuthorities.map(a => `
           <option value="${a.id}" ${issue.assigned_to === a.id ? 'selected' : ''}>${escapeHTML(a.full_name)} (${a.role.toUpperCase()})</option>
         `).join('');
       }
 
       // Status & remarks
-      document.getElementById('detail-status-select').value = issue.status || 'pending';
+      const statusSelect = document.getElementById('detail-status-select');
+      if (statusSelect) statusSelect.value = issue.status || 'pending';
       this.handleStatusSelectChange();
-      document.getElementById('detail-remarks-input').value = issue.official_remarks || '';
+      const remarksInput = document.getElementById('detail-remarks-input');
+      if (remarksInput) remarksInput.value = issue.official_remarks || '';
       
       activeProofPhotoUrl = issue.completion_photo_url || null;
       const fileInput = document.getElementById('detail-proof-file');
@@ -1856,8 +1862,114 @@
       } else if (proofWrapper) {
         proofWrapper.style.display = 'none';
       }
+    },
 
-      // Chat thread
+    openCaseDetails: async function(rawIssueId) {
+      if (!rawIssueId) return;
+
+      const cleanId = String(rawIssueId).replace(/^-+/, '').trim();
+
+      // Check if we are on an authority page without pane-details (e.g. authority-complaints.html)
+      // Immediately navigate without waiting for slow remote API requests
+      if (!document.getElementById('pane-details')) {
+        let issue = currentComplaints.find(c => 
+          c.id === cleanId || 
+          c.complaint_id === cleanId || 
+          (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
+          (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
+        );
+        const targetId = (issue && (issue.complaint_id || issue.id)) ? (issue.id || issue.complaint_id) : cleanId;
+        if (issue) {
+          try {
+            sessionStorage.setItem('cc_active_inspect_case', JSON.stringify(issue));
+          } catch (e) {}
+        }
+        window.location.href = `authority-case-details.html?id=${encodeURIComponent(targetId)}`;
+        return;
+      }
+
+      // --- We are on authority-case-details.html (with #pane-details) ---
+      let issue = currentComplaints.find(c => 
+        c.id === cleanId || 
+        c.complaint_id === cleanId || 
+        (c.complaint_id && String(c.complaint_id).toLowerCase() === cleanId.toLowerCase()) ||
+        (c.id && (c.id.startsWith(cleanId) || cleanId.startsWith(c.id)))
+      );
+
+      // Check instant sessionStorage cache for 0ms initial render
+      if (!issue) {
+        try {
+          const cachedCase = sessionStorage.getItem('cc_active_inspect_case');
+          if (cachedCase) {
+            const parsed = JSON.parse(cachedCase);
+            if (parsed && (parsed.id === cleanId || parsed.complaint_id === cleanId || String(parsed.id).startsWith(cleanId) || cleanId.startsWith(parsed.id))) {
+              issue = parsed;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 0ms instant initial render from cache
+      if (issue) {
+        this.renderCaseDetailsDOM(issue);
+      } else {
+        if (typeof window.CrowdCityLoading !== 'undefined' && typeof window.CrowdCityLoading.show === 'function') {
+          window.CrowdCityLoading.show({ message: 'Loading case details...' });
+        }
+      }
+
+      // Concurrently fetch fresh details, comments, and authority users in parallel
+      try {
+        const [issueRes, commentsRes, usersRes] = await Promise.allSettled([
+          API.request(`/issues/${cleanId}`, { method: 'GET' }),
+          API.request(`/issues/${cleanId}/comments`, { method: 'GET' }),
+          (currentAuthorities && currentAuthorities.length > 0) ? Promise.resolve({ data: currentAuthorities }) : API.getAllUsers()
+        ]);
+
+        if (usersRes.status === 'fulfilled' && usersRes.value) {
+          const rawUsers = usersRes.value.data !== undefined ? usersRes.value.data : usersRes.value;
+          const users = Array.isArray(rawUsers) ? rawUsers : [];
+          currentAuthorities = users.filter(u => u && (u.role === 'authority' || u.role === 'admin'));
+        }
+
+        let freshData = null;
+        if (issueRes.status === 'fulfilled' && issueRes.value) {
+          const raw = issueRes.value.data !== undefined ? issueRes.value.data : issueRes.value;
+          if (raw && (raw.id || raw.complaint_id)) freshData = raw;
+        }
+
+        if (freshData) {
+          issue = Object.assign({}, issue || {}, freshData);
+          if (commentsRes.status === 'fulfilled' && commentsRes.value) {
+            const rawComments = commentsRes.value.data !== undefined ? commentsRes.value.data : commentsRes.value;
+            if (Array.isArray(rawComments)) issue.comments = rawComments;
+          }
+          activeDetailIssueId = issue.id;
+          const idx = currentComplaints.findIndex(c => c.id === cleanId || c.complaint_id === cleanId || c.id === rawIssueId);
+          if (idx !== -1) currentComplaints[idx] = issue;
+          else currentComplaints.unshift(issue);
+
+          try {
+            sessionStorage.setItem('cc_active_inspect_case', JSON.stringify(issue));
+          } catch (e) {}
+
+          this.renderCaseDetailsDOM(issue);
+        }
+      } catch (err) {
+        console.warn("Background case details refresh note:", err);
+      } finally {
+        if (typeof window.CrowdCityLoading !== 'undefined' && typeof window.CrowdCityLoading.hide === 'function') {
+          window.CrowdCityLoading.hide();
+        }
+      }
+
+      if (!issue) {
+        showToast("Complaint record not found.", "error");
+        this.showPane('pane-complaints');
+        return;
+      }
+
+      // Load chat thread
       await this.loadChatMessages(issue.id);
     },
 

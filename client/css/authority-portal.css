@@ -2095,5 +2095,190 @@ html.theme-dark tr.row-duesoon {
   }
 }
 
+/* Authority Portal Contact Actions & Action Chips */
+.authority-contact-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.authority-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  min-height: 38px;
+  box-sizing: border-box;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-fast, 0.2s ease);
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-main, #0f172a);
+  cursor: pointer;
+  text-align: center;
+}
+
+.authority-contact-btn i {
+  flex-shrink: 0;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.authority-contact-phone i {
+  color: #0d9488;
+}
+
+.authority-contact-email i {
+  color: #0284c7;
+}
+
+.authority-contact-btn a {
+  color: var(--text-main, #0f172a);
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 0.82rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.authority-contact-btn:hover {
+  background: var(--bg-surface-hover, #f8fafc);
+  border-color: var(--border-color-hover, #94a3b8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.authority-contact-btn:hover a {
+  color: var(--primary, #0d9488);
+}
+
+.authority-contact-btn:active {
+  transform: translateY(0);
+}
+
+/* Contact Unavailable Clean Muted Placeholder */
+.authority-contact-unavailable {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  min-height: 38px;
+  box-sizing: border-box;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px dashed var(--border-light, #e2e8f0);
+  background: var(--bg-canvas, rgba(0, 0, 0, 0.02));
+  color: var(--text-light, #94a3b8);
+  cursor: default;
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.authority-contact-unavailable i {
+  font-size: 0.82rem;
+  color: var(--text-light, #94a3b8);
+  opacity: 0.7;
+}
+
+.authority-contact-unavailable span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dark Mode AMOLED Overrides for Contact Chips */
+[data-theme="dark"] .authority-contact-btn,
+html.dark-theme .authority-contact-btn,
+html.theme-dark .authority-contact-btn {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .authority-contact-btn a,
+html.dark-theme .authority-contact-btn a,
+html.theme-dark .authority-contact-btn a {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .authority-contact-btn:hover,
+html.dark-theme .authority-contact-btn:hover,
+html.theme-dark .authority-contact-btn:hover {
+  background: #141414 !important;
+  border-color: #333333 !important;
+}
+
+[data-theme="dark"] .authority-contact-phone i,
+html.dark-theme .authority-contact-phone i,
+html.theme-dark .authority-contact-phone i {
+  color: #2dd4bf !important;
+}
+
+[data-theme="dark"] .authority-contact-email i,
+html.dark-theme .authority-contact-email i,
+html.theme-dark .authority-contact-email i {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .authority-contact-unavailable,
+html.dark-theme .authority-contact-unavailable,
+html.theme-dark .authority-contact-unavailable {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: #262626 !important;
+  color: #737373 !important;
+}
+
+[data-theme="dark"] .authority-contact-unavailable i,
+html.dark-theme .authority-contact-unavailable i,
+html.theme-dark .authority-contact-unavailable i {
+  color: #525252 !important;
+}
+
+/* Source indicator badge for queue table */
+.source-tag {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  vertical-align: middle;
+}
+.source-tag-transportation {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+}
+[data-theme="dark"] .source-tag-transportation,
+html.dark-theme .source-tag-transportation,
+html.theme-dark .source-tag-transportation {
+  background: rgba(2, 132, 199, 0.2) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+}
+
 
 
