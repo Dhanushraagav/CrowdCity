@@ -244,18 +244,64 @@ function applyUserStats(userIssues) {
   } catch (e) {}
 }
 
-// Fetch authoritative citizen complaints from API including both direct and co-reported issues
+// Fetch authoritative citizen complaints from API including both civic and transportation issues
 async function fetchAuthoritativeUserStats(userId) {
   if (!userId || !window.API || typeof window.API.getIssues !== 'function') return null;
   try {
-    const res = await window.API.getIssues({ reporter_id: userId });
-    const userIssues = (res && Array.isArray(res.data)) ? res.data : [];
+    const [civicRes, transRes] = await Promise.all([
+      window.API.getIssues({ reporter_id: userId }),
+      (window.API.getTransportationReports
+        ? window.API.getTransportationReports({ user_id: userId })
+        : Promise.resolve({ data: { reports: [] } }))
+    ]);
+
+    const civicIssues = (civicRes && Array.isArray(civicRes.data))
+      ? civicRes.data.map(i => ({ ...i, sourceType: 'civic' }))
+      : [];
+
+    const rawTrans = (transRes && transRes.data && transRes.data.reports)
+      ? transRes.data.reports
+      : ((transRes && transRes.reports) ? transRes.reports : []);
+
+    const transIssues = rawTrans.map(r => ({
+      id: r.id,
+      complaint_id: r.report_number || r.id,
+      tracking_number: r.report_number || r.id,
+      sourceType: 'transportation',
+      source_type: 'transportation',
+      is_transportation: true,
+      title: r.title,
+      description: r.description,
+      category: r.category || 'roads',
+      status: (r.status || 'submitted').toLowerCase().replace(/\s+/g, '_'),
+      priority: r.priority || 'Medium',
+      address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : (r.address || 'Coimbatore, Tamil Nadu'),
+      latitude: r.latitude ? parseFloat(r.latitude) : 11.0168,
+      longitude: r.longitude ? parseFloat(r.longitude) : 76.9558,
+      photo_urls: r.photo_urls || [],
+      reporter_id: r.user_id,
+      citizen_count: 1,
+      upvotes_count: 0,
+      created_at: r.created_at,
+      updated_at: r.updated_at
+    }));
+
+    // Deduplicate combined issues by ID
+    const combinedMap = new Map();
+    civicIssues.forEach(i => combinedMap.set(i.id, i));
+    transIssues.forEach(i => combinedMap.set(i.id, i));
+    const combinedIssues = Array.from(combinedMap.values());
+
     // User-scoped cache
-    localStorage.setItem(`cc_my_complaints_civic_${userId}`, JSON.stringify(userIssues));
-    localStorage.setItem('cc_my_complaints_civic', JSON.stringify(userIssues));
-    // Always apply stats, even for 0 complaints, to accurately clear out any previous user data
-    applyUserStats(userIssues);
-    return userIssues;
+    localStorage.setItem(`cc_my_complaints_civic_${userId}`, JSON.stringify(civicIssues));
+    localStorage.setItem(`cc_my_complaints_trans_${userId}`, JSON.stringify(transIssues));
+    localStorage.setItem(`cc_my_complaints_all_${userId}`, JSON.stringify(combinedIssues));
+    localStorage.setItem('cc_my_complaints_civic', JSON.stringify(civicIssues));
+    localStorage.setItem('cc_my_complaints_trans', JSON.stringify(transIssues));
+
+    // Apply combined stats to dashboard cards
+    applyUserStats(combinedIssues);
+    return combinedIssues;
   } catch (err) {
     console.warn("[app.js] Failed to fetch authoritative user issues:", err);
   }
@@ -328,14 +374,30 @@ async function loadUserStats(isLanguageChange = false) {
 
   // 3. Instant 0ms Cache-First Pre-fill from user-scoped localStorage
   try {
-    const cachedCivicStr = localStorage.getItem(`cc_my_complaints_civic_${userId}`);
-    if (cachedCivicStr) {
-      const cachedIssues = JSON.parse(cachedCivicStr);
-      if (Array.isArray(cachedIssues)) {
+    const cachedAllStr = localStorage.getItem(`cc_my_complaints_all_${userId}`);
+    if (cachedAllStr) {
+      const cachedIssues = JSON.parse(cachedAllStr);
+      if (Array.isArray(cachedIssues) && cachedIssues.length > 0) {
         applyUserStats(cachedIssues);
-        fetchAuthoritativeUserStats(userId);
+        if (userId) fetchAuthoritativeUserStats(userId);
         return;
       }
+    }
+    const cachedCivicStr = localStorage.getItem(`cc_my_complaints_civic_${userId}`);
+    const cachedTransStr = localStorage.getItem(`cc_my_complaints_trans_${userId}`) || localStorage.getItem('cc_my_complaints_trans');
+    let combinedCached = [];
+    if (cachedCivicStr) {
+      const parsedCivic = JSON.parse(cachedCivicStr);
+      if (Array.isArray(parsedCivic)) combinedCached = combinedCached.concat(parsedCivic);
+    }
+    if (cachedTransStr) {
+      const parsedTrans = JSON.parse(cachedTransStr);
+      if (Array.isArray(parsedTrans)) combinedCached = combinedCached.concat(parsedTrans);
+    }
+    if (combinedCached.length > 0) {
+      applyUserStats(combinedCached);
+      if (userId) fetchAuthoritativeUserStats(userId);
+      return;
     }
   } catch (e) {}
 
@@ -418,13 +480,75 @@ async function loadAndRenderIssues(forceReload = false) {
       throw new Error("window.API is undefined");
     }
 
-    const { data: issues, error } = await window.API.getIssues({
-      category: activeCategory,
-      status: activeStatus,
-      sort_by: sortBy
-    });
+    const [issuesRes, transRes] = await Promise.all([
+      window.API.getIssues({
+        category: activeCategory,
+        status: activeStatus,
+        sort_by: sortBy
+      }),
+      (window.API.getTransportationReports
+        ? window.API.getTransportationReports()
+        : Promise.resolve({ data: { reports: [] } }))
+    ]);
 
-    if (error || !issues) {
+    const issues = (issuesRes && Array.isArray(issuesRes.data))
+      ? issuesRes.data.map(i => ({ ...i, sourceType: 'civic' }))
+      : [];
+    const error = issuesRes && issuesRes.error;
+
+    const rawTrans = (transRes && transRes.data && transRes.data.reports)
+      ? transRes.data.reports
+      : ((transRes && transRes.reports) ? transRes.reports : []);
+
+    const transIssues = rawTrans.map(r => ({
+      id: r.id,
+      complaint_id: r.report_number || r.id,
+      tracking_number: r.report_number || r.id,
+      sourceType: 'transportation',
+      source_type: 'transportation',
+      is_transportation: true,
+      title: r.title,
+      description: r.description,
+      category: r.category || 'roads',
+      status: (r.status || 'submitted').toLowerCase().replace(/\s+/g, '_'),
+      priority: r.priority || 'Medium',
+      address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : (r.address || 'Coimbatore, Tamil Nadu'),
+      latitude: r.latitude ? parseFloat(r.latitude) : 11.0168,
+      longitude: r.longitude ? parseFloat(r.longitude) : 76.9558,
+      image_url: (r.photo_urls && r.photo_urls[0]) || null,
+      reporter_id: r.user_id,
+      citizen_count: 1,
+      upvotes_count: 0,
+      created_at: r.created_at,
+      updated_at: r.updated_at
+    }));
+
+    // Filter transportation issues based on activeCategory and activeStatus
+    let filteredTrans = transIssues;
+    if (activeCategory && activeCategory !== 'all') {
+      filteredTrans = filteredTrans.filter(t => {
+        const cat = (t.category || '').toLowerCase();
+        const active = activeCategory.toLowerCase();
+        return cat.includes(active) || active.includes(cat) || (active === 'roads' && cat.includes('road'));
+      });
+    }
+    if (activeStatus && activeStatus !== 'all') {
+      filteredTrans = filteredTrans.filter(t => {
+        const s = (t.status || '').toLowerCase();
+        const active = activeStatus.toLowerCase();
+        if (active === 'resolved') return s === 'resolved' || s === 'verified';
+        if (active === 'in_progress') return s === 'in_progress' || s === 'assigned';
+        return s === active;
+      });
+    }
+
+    // Merge without duplicates
+    const combinedMap = new Map();
+    issues.forEach(i => combinedMap.set(i.id, i));
+    filteredTrans.forEach(t => combinedMap.set(t.id, t));
+    const combinedFeed = Array.from(combinedMap.values());
+
+    if (error && combinedFeed.length === 0) {
       isLoadingIssues = false;
       listContainer.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
@@ -436,7 +560,7 @@ async function loadAndRenderIssues(forceReload = false) {
       return;
     }
 
-    currentIssues = issues;
+    currentIssues = combinedFeed;
     _lastIssuesFetchAt = Date.now(); // Mark successful fetch time for cooldown guard
 
     // Calculate and render Community Insights dynamically

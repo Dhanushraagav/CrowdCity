@@ -382,6 +382,7 @@ function initDetailsMiniMap(lat, lng, category) {
     attribution: '© OpenStreetMap contributors'
   }).addTo(detailsMap);
 
+  const catSlug = (category || 'roads').toLowerCase().replace(/[^a-z0-9]/g, '_');
   const markerHtml = `
     <div style="
       width: 24px; 
@@ -389,7 +390,7 @@ function initDetailsMiniMap(lat, lng, category) {
       border-radius: 50%; 
       border: 2px solid white; 
       box-shadow: var(--shadow-md); 
-      background-color: var(--color-${category});
+      background-color: var(--color-${catSlug}, var(--primary, #0d9488));
     "></div>
   `;
 

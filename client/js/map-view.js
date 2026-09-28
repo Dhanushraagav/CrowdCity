@@ -110,18 +110,79 @@ function initMap() {
 
 // Fetch database records and draw markers
 async function loadAndRenderMapIssues() {
-  const { data: issues, error } = await window.API.getIssues({
-    category: activeCategory,
-    status: activeStatus
-  });
+  const [issuesRes, transRes] = await Promise.all([
+    window.API.getIssues({
+      category: activeCategory,
+      status: activeStatus
+    }),
+    (window.API.getTransportationReports
+      ? window.API.getTransportationReports()
+      : Promise.resolve({ data: { reports: [] } }))
+  ]);
 
-  if (error || !issues) {
+  const issues = (issuesRes && Array.isArray(issuesRes.data))
+    ? issuesRes.data.map(i => ({ ...i, sourceType: 'civic' }))
+    : [];
+  const error = issuesRes && issuesRes.error;
+
+  const rawTrans = (transRes && transRes.data && transRes.data.reports)
+    ? transRes.data.reports
+    : ((transRes && transRes.reports) ? transRes.reports : []);
+
+  const transIssues = rawTrans.map(r => ({
+    id: r.id,
+    complaint_id: r.report_number || r.id,
+    tracking_number: r.report_number || r.id,
+    sourceType: 'transportation',
+    source_type: 'transportation',
+    is_transportation: true,
+    title: r.title,
+    description: r.description,
+    category: r.category || 'roads',
+    status: (r.status || 'submitted').toLowerCase().replace(/\s+/g, '_'),
+    priority: r.priority || 'Medium',
+    address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : (r.address || 'Coimbatore, Tamil Nadu'),
+    latitude: r.latitude ? parseFloat(r.latitude) : 11.0168,
+    longitude: r.longitude ? parseFloat(r.longitude) : 76.9558,
+    photo_urls: r.photo_urls || [],
+    reporter_id: r.user_id,
+    citizen_count: 1,
+    upvotes_count: 0,
+    created_at: r.created_at,
+    updated_at: r.updated_at
+  }));
+
+  // Filter transportation issues based on activeCategory and activeStatus
+  let filteredTrans = transIssues;
+  if (activeCategory && activeCategory !== 'all') {
+    filteredTrans = filteredTrans.filter(t => {
+      const cat = (t.category || '').toLowerCase();
+      const active = activeCategory.toLowerCase();
+      return cat.includes(active) || active.includes(cat) || (active === 'roads' && cat.includes('road'));
+    });
+  }
+  if (activeStatus && activeStatus !== 'all') {
+    filteredTrans = filteredTrans.filter(t => {
+      const s = (t.status || '').toLowerCase();
+      const active = activeStatus.toLowerCase();
+      if (active === 'resolved') return s === 'resolved' || s === 'verified';
+      if (active === 'in_progress') return s === 'in_progress' || s === 'assigned';
+      return s === active;
+    });
+  }
+
+  const combinedMap = new Map();
+  issues.forEach(i => combinedMap.set(i.id, i));
+  filteredTrans.forEach(t => combinedMap.set(t.id, t));
+  const combinedIssues = Array.from(combinedMap.values());
+
+  if (error && combinedIssues.length === 0) {
     console.error("Failed to load map issues:", error);
     return;
   }
 
-  currentIssues = issues;
-  renderMapLayer(issues);
+  currentIssues = combinedIssues;
+  renderMapLayer(combinedIssues);
 }
 
 // Draw markers on map
@@ -130,14 +191,15 @@ function renderMapMarkers(issues) {
   markersGroup.clearLayers();
 
   issues.forEach(issue => {
+    const catSlug = (issue.category || 'other').toLowerCase().replace(/[^a-z0-9]/g, '_');
     const markerHtml = `
-      <div class="custom-map-marker ${issue.category}" style="
+      <div class="custom-map-marker ${catSlug}" style="
         width: 32px; 
         height: 32px; 
         border-radius: 50%; 
         border: 2px solid white; 
         box-shadow: var(--shadow-md); 
-        background-color: var(--color-${issue.category}); 
+        background-color: var(--color-${catSlug}, var(--primary, #0d9488)); 
         display: flex; 
         align-items: center; 
         justify-content: center;

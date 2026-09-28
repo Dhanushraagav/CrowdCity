@@ -12,6 +12,7 @@ import { calculatePriorityScore, enrichIssueWithPriority, resolveRecurrenceCount
 import { searchCivicIssues } from '../services/searchService.js';
 import { resolveResponsibleAuthority } from '../services/authorityDirectoryService.js';
 import { buildTimeline } from '../services/timelineService.js';
+import { findTransportationRecord, normalizeTransportationToIssue } from './transportationController.js';
 
 /**
  * Get all reported civic issues.
@@ -183,6 +184,68 @@ export const getIssueById = async (req, res) => {
   const isAuthorityUser = ['authority', 'admin', 'department_officer'].includes(userRole);
 
   try {
+    const isTrpId = typeof id === 'string' && (id.toLowerCase().startsWith('trp-') || id.toUpperCase().startsWith('TRP-'));
+    if (isTrpId) {
+      const trpResult = await findTransportationRecord(id);
+      if (!trpResult || !trpResult.report) {
+        return res.status(404).json({ error: 'Transportation complaint not found' });
+      }
+      const normalizedIssue = normalizeTransportationToIssue(trpResult.report, trpResult.updates);
+
+      // Resolve responsible authority details
+      let authorityResolution = {
+        administrativeAuthority: {
+          officeName: normalizedIssue.responsible_department || 'Highways & Transportation Department',
+          departmentName: normalizedIssue.responsible_department || 'Highways & Transportation Department',
+          jurisdiction: normalizedIssue.road_name || normalizedIssue.address || 'Tamil Nadu Highways'
+        }
+      };
+
+      try {
+        if (normalizedIssue.latitude && normalizedIssue.longitude) {
+          const resolved = await resolveResponsibleAuthority({
+            latitude: normalizedIssue.latitude,
+            longitude: normalizedIssue.longitude,
+            address: normalizedIssue.address,
+            category: 'roads'
+          });
+          if (resolved) authorityResolution = resolved;
+        }
+      } catch (authErr) {
+        logger.warn('Failed to resolve authority in getIssueById for transportation: ' + authErr.message);
+      }
+
+      // Check if user has upvoted
+      let userHasUpvoted = false;
+      if (userId) {
+        try {
+          const activeClient = getSupabaseClient(req);
+          const { data: vote } = await activeClient
+            .from('votes')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('issue_id', normalizedIssue.id)
+            .maybeSingle();
+          if (vote) userHasUpvoted = true;
+        } catch (vErr) {}
+      }
+
+      const timeline = buildTimeline(
+        { ...normalizedIssue, authority_resolution: authorityResolution },
+        normalizedIssue.history || [],
+        isAuthorityUser ? 'authority' : 'citizen'
+      );
+
+      return res.status(200).json({
+        ...normalizedIssue,
+        authority_resolution: authorityResolution,
+        comments: [],
+        timeline,
+        attachments: [],
+        user_has_upvoted: userHasUpvoted
+      });
+    }
+
     const activeClient = getSupabaseClient(req);
     let issueQuery = activeClient
       .from('issues')
@@ -3027,6 +3090,44 @@ export const getComplaintTimeline = async (req, res) => {
   }
 
   try {
+    const isTrpId = typeof id === 'string' && (id.toLowerCase().startsWith('trp-') || id.toUpperCase().startsWith('TRP-'));
+    if (isTrpId) {
+      const trpResult = await findTransportationRecord(id);
+      if (!trpResult || !trpResult.report) {
+        return res.status(404).json({ error: 'Transportation complaint not found' });
+      }
+      const normalizedIssue = normalizeTransportationToIssue(trpResult.report, trpResult.updates);
+      let authorityResolution = {
+        administrativeAuthority: {
+          officeName: normalizedIssue.responsible_department || 'Highways & Transportation Department',
+          departmentName: normalizedIssue.responsible_department || 'Highways & Transportation Department',
+          jurisdiction: normalizedIssue.road_name || normalizedIssue.address || 'Tamil Nadu Highways'
+        }
+      };
+      try {
+        if (normalizedIssue.latitude && normalizedIssue.longitude) {
+          const resolved = await resolveResponsibleAuthority({
+            latitude: normalizedIssue.latitude,
+            longitude: normalizedIssue.longitude,
+            address: normalizedIssue.address,
+            category: 'roads'
+          });
+          if (resolved) authorityResolution = resolved;
+        }
+      } catch (e) {}
+
+      const timeline = buildTimeline(
+        { ...normalizedIssue, authority_resolution: authorityResolution },
+        normalizedIssue.history || [],
+        userRole
+      );
+
+      return res.status(200).json({
+        success: true,
+        timeline
+      });
+    }
+
     const activeClient = getSupabaseClient(req);
     let issueQuery = activeClient
       .from('issues')
