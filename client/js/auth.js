@@ -243,7 +243,7 @@ async function initAuth() {
       window.cc_initialized_supabase_key = cachedConfig.supabaseAnonKey;
       _attachAuthStateListener();
       updateAuthUI();
-      if (window.turnstileLoaded) {
+      if (window.turnstileLoaded || typeof turnstile !== 'undefined') {
         window.renderTurnstileWidgets();
       }
       resolveAuthInit();
@@ -333,7 +333,7 @@ async function initAuth() {
       _attachAuthStateListener();
     }
     updateAuthUI();
-    if (window.turnstileLoaded) {
+    if (window.turnstileLoaded || typeof turnstile !== 'undefined') {
       window.renderTurnstileWidgets();
     }
     resolveAuthInit();
@@ -371,7 +371,7 @@ function _tryInitFromCache() {
     console.log('[Auth] Supabase initialised from cached config.');
     _attachAuthStateListener();
     updateAuthUI();
-    if (window.turnstileLoaded) {
+    if (window.turnstileLoaded || typeof turnstile !== 'undefined') {
       window.renderTurnstileWidgets();
     }
     resolveAuthInit();
@@ -4030,60 +4030,160 @@ document.addEventListener('DOMContentLoaded', () => {
 window.loginWidgetId = null;
 window.signupWidgetId = null;
 window.recoveryWidgetId = null;
-window.turnstileLoaded = false;
+
+if (typeof turnstile !== 'undefined') {
+  window.turnstileLoaded = true;
+}
+
+// Preserve any previously registered callback and chain it
+const existingTurnstileCallback = window.onloadTurnstileCallback;
+window.onloadTurnstileCallback = function() {
+  window.turnstileLoaded = true;
+  if (typeof existingTurnstileCallback === 'function') {
+    try {
+      existingTurnstileCallback();
+    } catch (e) {
+      console.warn('[Turnstile] Error in existing callback:', e);
+    }
+  }
+  if (typeof window.renderTurnstileWidgets === 'function') {
+    window.renderTurnstileWidgets();
+  }
+};
 
 window.renderTurnstileWidgets = function() {
   if (typeof turnstile === 'undefined') {
-    console.warn('[Turnstile] Script not yet loaded.');
     return;
   }
+  window.turnstileLoaded = true;
 
-  const siteKey = window.supabaseConfig?.turnstileSiteKey || '1x00000000000000000000AA';
+  const siteKey = (window.supabaseConfig && window.supabaseConfig.turnstileSiteKey && window.supabaseConfig.turnstileSiteKey !== '1x00000000000000000000AA')
+    ? window.supabaseConfig.turnstileSiteKey
+    : ((typeof DEFAULT_SUPABASE_CONFIG !== 'undefined' && DEFAULT_SUPABASE_CONFIG.turnstileSiteKey) || '0x4AAAAAADpoqphtoebgazMP');
+
   // Turnstile on authentication pages MUST ALWAYS explicitly use the 'light' theme
   const turnstileTheme = 'light';
 
-  if (document.getElementById('login-captcha') && window.loginWidgetId === null) {
-    try {
-      window.loginWidgetId = turnstile.render('#login-captcha', {
-        sitekey: siteKey,
-        theme: turnstileTheme,
-        callback: function(token) {
-          console.log('[Turnstile] Login challenge completed');
+  const isHidden = function(el) {
+    return !el || el.closest('.hidden') !== null || el.closest('.hidden-field') !== null;
+  };
+
+  const loginEl = document.getElementById('login-captcha');
+  if (loginEl && !isHidden(loginEl)) {
+    if (window.loginWidgetId === null || loginEl.children.length === 0) {
+      try {
+        if (window.loginWidgetId !== null) {
+          try { turnstile.remove(window.loginWidgetId); } catch (_) {}
+          window.loginWidgetId = null;
         }
-      });
-    } catch (e) {
-      console.error('[Turnstile] Failed to render login widget:', e);
+        window.loginWidgetId = turnstile.render(loginEl, {
+          sitekey: siteKey,
+          theme: turnstileTheme,
+          'refresh-expired': 'auto',
+          callback: function(token) {
+            console.log('[Turnstile] Login challenge completed');
+          },
+          'expired-callback': function() {
+            console.log('[Turnstile] Login token expired');
+          },
+          'error-callback': function(err) {
+            console.warn('[Turnstile] Login challenge error:', err);
+          }
+        });
+      } catch (e) {
+        console.error('[Turnstile] Failed to render login widget:', e);
+      }
     }
   }
 
-  if (document.getElementById('signup-captcha') && window.signupWidgetId === null) {
-    try {
-      window.signupWidgetId = turnstile.render('#signup-captcha', {
-        sitekey: siteKey,
-        theme: turnstileTheme,
-        callback: function(token) {
-          console.log('[Turnstile] Signup challenge completed');
+  const signupEl = document.getElementById('signup-captcha');
+  if (signupEl && !isHidden(signupEl)) {
+    if (window.signupWidgetId === null || signupEl.children.length === 0) {
+      try {
+        if (window.signupWidgetId !== null) {
+          try { turnstile.remove(window.signupWidgetId); } catch (_) {}
+          window.signupWidgetId = null;
         }
-      });
-    } catch (e) {
-      console.error('[Turnstile] Failed to render signup widget:', e);
+        window.signupWidgetId = turnstile.render(signupEl, {
+          sitekey: siteKey,
+          theme: turnstileTheme,
+          'refresh-expired': 'auto',
+          callback: function(token) {
+            console.log('[Turnstile] Signup challenge completed');
+          },
+          'expired-callback': function() {
+            console.log('[Turnstile] Signup token expired');
+          },
+          'error-callback': function(err) {
+            console.warn('[Turnstile] Signup challenge error:', err);
+          }
+        });
+      } catch (e) {
+        console.error('[Turnstile] Failed to render signup widget:', e);
+      }
     }
   }
 
-  if (document.getElementById('recovery-captcha') && window.recoveryWidgetId === null) {
-    try {
-      window.recoveryWidgetId = turnstile.render('#recovery-captcha', {
-        sitekey: siteKey,
-        theme: turnstileTheme,
-        callback: function(token) {
-          console.log('[Turnstile] Recovery challenge completed');
+  const recoveryEl = document.getElementById('recovery-captcha');
+  if (recoveryEl && !isHidden(recoveryEl)) {
+    if (window.recoveryWidgetId === null || recoveryEl.children.length === 0) {
+      try {
+        if (window.recoveryWidgetId !== null) {
+          try { turnstile.remove(window.recoveryWidgetId); } catch (_) {}
+          window.recoveryWidgetId = null;
         }
-      });
-    } catch (e) {
-      console.error('[Turnstile] Failed to render recovery widget:', e);
+        window.recoveryWidgetId = turnstile.render(recoveryEl, {
+          sitekey: siteKey,
+          theme: turnstileTheme,
+          'refresh-expired': 'auto',
+          callback: function(token) {
+            console.log('[Turnstile] Recovery challenge completed');
+          },
+          'expired-callback': function() {
+            console.log('[Turnstile] Recovery token expired');
+          },
+          'error-callback': function(err) {
+            console.warn('[Turnstile] Recovery challenge error:', err);
+          }
+        });
+      } catch (e) {
+        console.error('[Turnstile] Failed to render recovery widget:', e);
+      }
     }
   }
 };
+
+// Auto-trigger widget rendering on ready or poll briefly until Turnstile is available
+if (typeof turnstile !== 'undefined') {
+  window.turnstileLoaded = true;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      window.renderTurnstileWidgets();
+    });
+  } else {
+    window.renderTurnstileWidgets();
+  }
+} else {
+  let turnstilePollAttempts = 0;
+  const turnstilePollInterval = setInterval(function() {
+    turnstilePollAttempts++;
+    if (typeof turnstile !== 'undefined') {
+      clearInterval(turnstilePollInterval);
+      window.turnstileLoaded = true;
+      window.renderTurnstileWidgets();
+    } else if (turnstilePollAttempts >= 20) {
+      clearInterval(turnstilePollInterval);
+    }
+  }, 200);
+}
+
+// Window load fallback to guarantee rendering even if DOMContentLoaded fired early
+window.addEventListener('load', function() {
+  if (typeof turnstile !== 'undefined') {
+    window.turnstileLoaded = true;
+    window.renderTurnstileWidgets();
+  }
+});
 
 // =========================================================================
 // CENTRALIZED SAVED SCHEMES STORE & SYNCHRONIZATION ENGINE

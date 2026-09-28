@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 // Trigger Vercel redeployment after reverting Device & Login Session Management to resolve automatic logout
 import express from 'express';
 import cors from 'cors';
@@ -189,7 +192,7 @@ app.get('/api/config', (req, res) => {
   res.status(200).json({
     supabaseUrl: process.env.SUPABASE_URL || 'https://placeholder.supabase.co',
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY || 'placeholder',
-    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY || '1x00000000000000000000AA'
+    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY || '0x4AAAAAADpoqphtoebgazMP'
   });
 });
 

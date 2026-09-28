@@ -79,7 +79,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Cloudflare Turnstile CAPTCHA -->
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async></script>
+  <script>
+    window.onloadTurnstileCallback = function() {
+      window.turnstileLoaded = true;
+      if (typeof window.renderTurnstileWidgets === 'function') {
+        window.renderTurnstileWidgets();
+      }
+    };
+  </script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
   <style>
     body {

@@ -75,7 +75,15 @@
   </script>
   
   <!-- Cloudflare Turnstile CAPTCHA -->
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async></script>
+  <script>
+    window.onloadTurnstileCallback = function() {
+      window.turnstileLoaded = true;
+      if (typeof window.renderTurnstileWidgets === 'function') {
+        window.renderTurnstileWidgets();
+      }
+    };
+  </script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1502,6 +1510,10 @@
         if (passwordInput) {
           setTimeout(() => passwordInput.focus(), 150);
         }
+        
+        if (typeof window.renderTurnstileWidgets === 'function') {
+          window.renderTurnstileWidgets();
+        }
       }
     }
     window.switchLoginMethod = switchLoginMethod;
@@ -1741,6 +1753,10 @@
       const googleBtn = document.getElementById('btn-google-login');
       const alertBanner = document.getElementById('auth-alert');
 
+      if (typeof window.renderTurnstileWidgets === 'function') {
+        window.renderTurnstileWidgets();
+      }
+
       // Check for Google OAuth callback errors or active token exchange
       if (typeof checkAndHandleOAuthError === 'function') {
         const hasError = checkAndHandleOAuthError();
@@ -1918,7 +1934,11 @@
               : null;
               
             if (!turnstileToken) {
-              showAlert('Please complete the CAPTCHA security check.');
+              if (typeof turnstile === 'undefined' || window.loginWidgetId === null) {
+                showAlert('Security check failed to load. Please disable any ad-blockers and refresh the page.');
+              } else {
+                showAlert('Please complete the CAPTCHA security check.');
+              }
               return;
             }
 
@@ -2127,7 +2147,11 @@
             : null;
             
           if (!turnstileToken) {
-            showAlert('Please complete the CAPTCHA security check.');
+            if (typeof turnstile === 'undefined' || window.signupWidgetId === null) {
+              showAlert('Security check failed to load. Please disable any ad-blockers and refresh the page.');
+            } else {
+              showAlert('Please complete the CAPTCHA security check.');
+            }
             return;
           }
 
@@ -2206,7 +2230,11 @@
             : null;
             
           if (!turnstileToken) {
-            showAlert('Please complete the CAPTCHA security check.');
+            if (typeof turnstile === 'undefined' || window.recoveryWidgetId === null) {
+              showAlert('Security check failed to load. Please disable any ad-blockers and refresh the page.');
+            } else {
+              showAlert('Please complete the CAPTCHA security check.');
+            }
             return;
           }
 

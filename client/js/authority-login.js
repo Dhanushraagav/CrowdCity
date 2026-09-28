@@ -7,6 +7,11 @@ function initAuthorityLogin() {
   // Set body to ready
   document.body.classList.add('ready');
 
+  // Trigger Turnstile widget rendering for authority login form
+  if (typeof window.renderTurnstileWidgets === 'function') {
+    window.renderTurnstileWidgets();
+  }
+
   // ─── Alert helper ──────────────────────────────────────────────────────────
   function showAlert(msg, isSuccess = false) {
     if (!alertBanner) return;
@@ -30,7 +35,11 @@ function initAuthorityLogin() {
         : null;
         
       if (!turnstileToken) {
-        showAlert('Please complete the CAPTCHA security check.');
+        if (typeof turnstile === 'undefined' || window.loginWidgetId === null) {
+          showAlert('Security check failed to load. Please disable any ad-blockers and refresh the page.');
+        } else {
+          showAlert('Please complete the CAPTCHA security check.');
+        }
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Access Dashboard';
         return;
@@ -78,3 +87,9 @@ if (document.readyState === 'loading') {
 } else {
   initAuthorityLogin();
 }
+
+window.addEventListener('load', () => {
+  if (typeof window.renderTurnstileWidgets === 'function') {
+    window.renderTurnstileWidgets();
+  }
+});
