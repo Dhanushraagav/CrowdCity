@@ -285,8 +285,6 @@
           size: 'lg',
           minHeight: '260px'
         });
-      } else {
-        container.innerHTML = getSkeletonHtml();
       }
     }
 
@@ -753,17 +751,6 @@
         </div>
       </article>
     `;
-  }
-
-  function getSkeletonHtml() {
-    return Array(3).fill(0).map(() => `
-      <div class="power-card" style="opacity: 0.6; pointer-events: none;">
-        <div style="height: 20px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 40%; margin-bottom: 1rem;"></div>
-        <div style="height: 24px; background: var(--border-color, #e2e8f0); border-radius: 6px; width: 75%; margin-bottom: 1rem;"></div>
-        <div style="height: 38px; background: var(--border-color, #e2e8f0); border-radius: 8px; width: 100%; margin-bottom: 1rem;"></div>
-        <div style="height: 50px; background: var(--bg-hover, #f1f5f9); border-radius: 8px; width: 100%;"></div>
-      </div>
-    `).join('');
   }
 
   function formatDate(dateStr) {

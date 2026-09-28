@@ -132,14 +132,6 @@
         subtitle: 'Querying verified departmental registries across 38 districts',
         size: 'lg'
       });
-    } else {
-      cardsContainer.innerHTML = `
-        <div style="text-align: center; padding: 3.5rem 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px;">
-          <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem;"></i>
-          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.4rem 0;">Searching Tamil Nadu Government Offices...</h3>
-          <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Querying verified departmental registries across 38 districts.</p>
-        </div>
-      `;
     }
 
     const params = new URLSearchParams();

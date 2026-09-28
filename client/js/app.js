@@ -410,30 +410,6 @@ async function loadAndRenderIssues(forceReload = false) {
         size: 'md',
         inlineSeamless: true
       });
-    } else {
-      listContainer.innerHTML = `
-          <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
-            <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
-              <div class="skeleton skeleton-title" style="width: 50%; height: 1.0rem; margin: 0; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton skeleton-text" style="width: 30%; height: 0.75rem; margin: 0; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
-          <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
-            <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
-              <div class="skeleton skeleton-title" style="width: 60%; height: 1.0rem; margin: 0; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton skeleton-text" style="width: 40%; height: 0.75rem; margin: 0; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
-          <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
-            <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
-              <div class="skeleton skeleton-title" style="width: 45%; height: 1.0rem; margin: 0; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton skeleton-text" style="width: 25%; height: 0.75rem; margin: 0; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
-      `;
     }
 
     const sortBy = (activeFeedTab === 'trending') ? 'popularity' : 'newest';
@@ -476,9 +452,15 @@ async function loadAndRenderIssues(forceReload = false) {
     }
 
     isLoadingIssues = false;
+    if (window.CrowdCityLoading && listContainer) {
+      window.CrowdCityLoading.hide(listContainer);
+    }
     await processAndRenderFeed();
   } catch (err) {
     isLoadingIssues = false;
+    if (window.CrowdCityLoading && listContainer) {
+      window.CrowdCityLoading.hide(listContainer);
+    }
     console.error("Failed to load and render issues:", err);
     listContainer.innerHTML = `
       <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
@@ -926,31 +908,7 @@ async function processAndRenderFeed() {
         size: 'md',
         inlineSeamless: true
       });
-      return;
     }
-    listContainer.innerHTML = `
-          <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
-            <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
-              <div class="skeleton skeleton-title" style="width: 50%; height: 1.0rem; margin: 0; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton skeleton-text" style="width: 30%; height: 0.75rem; margin: 0; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
-          <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
-            <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
-              <div class="skeleton skeleton-title" style="width: 60%; height: 1.0rem; margin: 0; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton skeleton-text" style="width: 40%; height: 0.75rem; margin: 0; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
-          <div class="stitch-item-card" style="cursor: default; pointer-events: none; height: 86px; box-sizing: border-box; border: 1px solid var(--border-color);">
-            <div class="skeleton skeleton-avatar" style="width: 42px; height: 42px; border-radius: var(--radius-md); flex-shrink: 0;"></div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
-              <div class="skeleton skeleton-title" style="width: 45%; height: 1.0rem; margin: 0; border-radius: var(--radius-sm);"></div>
-              <div class="skeleton skeleton-text" style="width: 25%; height: 0.75rem; margin: 0; border-radius: var(--radius-sm);"></div>
-            </div>
-          </div>
-    `;
     return;
   }
 

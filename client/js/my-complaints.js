@@ -65,6 +65,8 @@ async function initMyComplaints() {
   if (tabParam === 'transportation') {
     window.switchComplaintsTab('transportation');
   } else {
+    // Immediately fetch and render complaints for default civic tab
+    loadAndRenderMyIssues();
     // Warm up the other tab in the background so switching is 0ms
     setTimeout(() => {
       prefetchTransportationComplaints();
@@ -163,6 +165,9 @@ async function loadAndRenderMyIssues() {
     }
     renderMyIssuesList(filtered);
     hasCachedData = true;
+    if (window.CrowdCityLoading) {
+      window.CrowdCityLoading.showBackgroundSync(container);
+    }
   }
 
   // Draw premium brand loader ONLY if we have zero cached data to show on cold initial load
@@ -174,21 +179,14 @@ async function loadAndRenderMyIssues() {
         size: 'lg',
         inlineSeamless: true
       });
-    } else {
-      container.innerHTML = `
-        <div class="issue-card" style="cursor: default; pointer-events: none; display: flex; flex-direction: column; gap: 12px; padding: 1.25rem; border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="skeleton" style="width: 80px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
-            <div class="skeleton" style="width: 70px; height: 1.25rem; border-radius: var(--radius-sm);"></div>
-          </div>
-          <div class="skeleton" style="width: 50%; height: 1.2rem; border-radius: var(--radius-sm); margin-top: 4px;"></div>
-          <div class="skeleton" style="width: 90%; height: 0.8rem; border-radius: var(--radius-sm);"></div>
-        </div>
-      `;
     }
   }
 
   if (!user) {
+    if (window.CrowdCityLoading) {
+      window.CrowdCityLoading.hide(container);
+      window.CrowdCityLoading.hideBackgroundSync(container);
+    }
     container.innerHTML = `<p style="text-align:center; padding:2rem; color:var(--text-muted);">Please log in to view your complaints.</p>`;
     document.body.classList.add('ready');
     document.body.style.visibility = 'visible';
@@ -198,90 +196,97 @@ async function loadAndRenderMyIssues() {
   let issues = [];
   let error = null;
 
-  if (currentComplaintsTab === 'transportation') {
-    try {
-      const res = await window.API.getTransportationReports({
-        user_id: currentUserId,
+  try {
+    if (currentComplaintsTab === 'transportation') {
+      try {
+        const res = await window.API.getTransportationReports({
+          user_id: currentUserId,
+          category: activeCategory,
+          status: activeStatus
+        });
+        const reports = (res && res.data && res.data.reports) ? res.data.reports : ((res && res.reports) ? res.reports : []);
+        // Map transportation reports to normalized card format
+        issues = reports.map(r => ({
+          id: r.id,
+          tracking_number: r.report_number || r.id,
+          title: r.title,
+          description: r.description,
+          category: r.category,
+          status: r.status,
+          priority: r.priority || 'Medium',
+          address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : r.address,
+          created_at: r.created_at,
+          assigned_department: r.responsible_department || 'Roads Dept',
+          assigned_officer: r.assigned_to,
+          photo_urls: r.photo_urls,
+          ai_summary: r.summary,
+          suggested_resolution: r.suggested_resolution,
+          is_transportation: true
+        }));
+      } catch (err) {
+        error = err.message || 'Failed to fetch transportation reports';
+      }
+    } else {
+      const res = await window.API.getIssues({
+        reporter_id: currentUserId,
         category: activeCategory,
         status: activeStatus
       });
-      const reports = (res && res.data && res.data.reports) ? res.data.reports : ((res && res.reports) ? res.reports : []);
-      // Map transportation reports to normalized card format
-      issues = reports.map(r => ({
-        id: r.id,
-        tracking_number: r.report_number || r.id,
-        title: r.title,
-        description: r.description,
-        category: r.category,
-        status: r.status,
-        priority: r.priority || 'Medium',
-        address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : r.address,
-        created_at: r.created_at,
-        assigned_department: r.responsible_department || 'Roads Dept',
-        assigned_officer: r.assigned_to,
-        photo_urls: r.photo_urls,
-        ai_summary: r.summary,
-        suggested_resolution: r.suggested_resolution,
-        is_transportation: true
-      }));
-    } catch (err) {
-      error = err.message || 'Failed to fetch transportation reports';
+      issues = res.data || [];
+      error = res.error;
     }
-  } else {
-    const res = await window.API.getIssues({
-      reporter_id: currentUserId,
-      category: activeCategory,
-      status: activeStatus
-    });
-    issues = res.data || [];
-    error = res.error;
-  }
 
-  // If a newer load has started, discard this render
-  if (loadId !== lastLoadId) {
-    return;
-  }
-
-  if (error || !issues) {
-    console.error(`[My Complaints Load] Failed to load issues. loadId: ${loadId}. Error:`, error);
-    if (hasCachedData) {
+    // If a newer load has started, discard this render
+    if (loadId !== lastLoadId) {
       return;
     }
-    container.innerHTML = `
-      <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
-        <p>Failed to load your complaints: ${error || 'Unknown error'}</p>
-        <button onclick="loadAndRenderMyIssues()" class="btn btn-secondary" style="margin-top: 1rem;">Try Again</button>
-      </div>
-    `;
+
+    if (error || !issues) {
+      console.error(`[My Complaints Load] Failed to load issues. loadId: ${loadId}. Error:`, error);
+      if (hasCachedData) {
+        return;
+      }
+      container.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
+          <p>Failed to load your complaints: ${error || 'Unknown error'}</p>
+          <button onclick="loadAndRenderMyIssues()" class="btn btn-secondary" style="margin-top: 1rem;">Try Again</button>
+        </div>
+      `;
+      document.body.classList.add('ready');
+      document.body.style.visibility = 'visible';
+      return;
+    }
+
+    // Save to in-memory & localStorage cache
+    if (currentComplaintsTab === 'transportation') {
+      _memoryCacheTrans = issues;
+    } else {
+      _memoryCacheCivic = issues;
+    }
+
+    if (!activeCategory && !activeStatus) {
+      localStorage.setItem(storageKey, JSON.stringify(issues));
+    }
+
+    renderMyIssuesList(issues);
+    
+    // Update last successfully loaded state
+    lastLoadedState = {
+      userId: currentUserId,
+      category: activeCategory,
+      status: activeStatus,
+      tab: currentComplaintsTab
+    };
+
     document.body.classList.add('ready');
     document.body.style.visibility = 'visible';
-    return;
+  } finally {
+    if (window.CrowdCityLoading && container) {
+      window.CrowdCityLoading.hide(container);
+      window.CrowdCityLoading.hideBackgroundSync(container);
+    }
   }
-
-  // Save to in-memory & localStorage cache
-  if (currentComplaintsTab === 'transportation') {
-    _memoryCacheTrans = issues;
-  } else {
-    _memoryCacheCivic = issues;
-  }
-
-  if (!activeCategory && !activeStatus) {
-    localStorage.setItem(storageKey, JSON.stringify(issues));
-  }
-
-  renderMyIssuesList(issues);
-  
-  // Update last successfully loaded state
-  lastLoadedState = {
-    userId: currentUserId,
-    category: activeCategory,
-    status: activeStatus,
-    tab: currentComplaintsTab
-  };
-
-  document.body.classList.add('ready');
-  document.body.style.visibility = 'visible';
 }
 
   function renderMyIssuesList(issues) {

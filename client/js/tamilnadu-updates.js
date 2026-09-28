@@ -31,32 +31,6 @@ function formatRelativeTime(dateStr) {
 }
 
 /**
- * Render loading skeleton cards
- */
-function renderSkeletons() {
-  const container = document.getElementById('tn-updates-container');
-  if (!container) return;
-
-  const skeletonCard = `
-    <div class="tn-skeleton-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div class="skeleton-line" style="width: 25%; height: 16px;"></div>
-        <div class="skeleton-line" style="width: 20%; height: 14px;"></div>
-      </div>
-      <div class="skeleton-line" style="width: 100%; height: 20px; margin-top: 0.5rem;"></div>
-      <div class="skeleton-line" style="width: 85%; height: 20px;"></div>
-      <div class="skeleton-line" style="width: 60%; height: 20px;"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
-        <div class="skeleton-line" style="width: 30%; height: 14px;"></div>
-        <div class="skeleton-line" style="width: 25%; height: 14px;"></div>
-      </div>
-    </div>
-  `;
-
-  container.innerHTML = skeletonCard.repeat(6);
-}
-
-/**
  * Fetch updates from the backend API
  */
 async function loadTamilNaduUpdates(forceRefresh = false) {
@@ -85,11 +59,9 @@ async function loadTamilNaduUpdates(forceRefresh = false) {
         subtitle: 'Connecting to statewide municipal and administrative dispatches',
         size: 'lg'
       });
-    } else {
-      renderSkeletons();
     }
-  } else if (_allTNUpdates.length > 0 && forceRefresh && window.CrowdCityLoading) {
-    window.CrowdCityLoading.showBackgroundSync('Updating Tamil Nadu live dispatch...');
+  } else if (_allTNUpdates.length > 0 && forceRefresh && window.CrowdCityLoading && container) {
+    window.CrowdCityLoading.showBackgroundSync(container);
   }
 
   try {
@@ -121,11 +93,9 @@ async function loadTamilNaduUpdates(forceRefresh = false) {
     if (btnRefresh && window.CrowdCityLoading) {
       window.CrowdCityLoading.setButtonLoading(btnRefresh, false);
     }
-    if (window.CrowdCityLoading) {
-      window.CrowdCityLoading.hideBackgroundSync();
-      if (container) {
-        window.CrowdCityLoading.hide(container);
-      }
+    if (window.CrowdCityLoading && container) {
+      window.CrowdCityLoading.hideBackgroundSync(container);
+      window.CrowdCityLoading.hide(container);
     }
   }
 }

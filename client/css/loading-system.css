@@ -72,7 +72,8 @@ html.dark-theme {
   box-shadow: none !important;
 }
 
-.cc-loading-emblem-wrap {
+.cc-loading-emblem-wrap,
+.cc-emblem-wrap {
   position: relative;
   display: flex;
   align-items: center;
@@ -82,17 +83,23 @@ html.dark-theme {
 }
 
 /* Size Variants */
-.cc-loader-lg .cc-loader-svg {
+.cc-loader-lg .cc-loader-svg,
+.cc-loading-lg .cc-loader-svg,
+.cc-loader-svg.cc-size-lg {
   width: 72px;
   height: 72px;
 }
 
-.cc-loader-md .cc-loader-svg {
+.cc-loader-md .cc-loader-svg,
+.cc-loading-md .cc-loader-svg,
+.cc-loader-svg.cc-size-md {
   width: 48px;
   height: 48px;
 }
 
-.cc-loader-sm .cc-loader-svg {
+.cc-loader-sm .cc-loader-svg,
+.cc-loading-sm .cc-loader-svg,
+.cc-loader-svg.cc-size-sm {
   width: 22px;
   height: 22px;
 }
@@ -100,6 +107,8 @@ html.dark-theme {
 .cc-loader-svg {
   overflow: visible;
   display: block;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* --------------------------------------------------------------------------

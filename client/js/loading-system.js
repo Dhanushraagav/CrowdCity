@@ -19,10 +19,11 @@
   function getSvgEmblem(size = 'lg') {
     const isSm = size === 'sm';
     const viewBox = '0 0 80 80';
+    const dim = isSm ? 22 : (size === 'md' ? 48 : 72);
 
     if (isSm) {
       return `
-        <svg class="cc-loader-svg" viewBox="${viewBox}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg class="cc-loader-svg" width="${dim}" height="${dim}" viewBox="${viewBox}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <circle class="cc-loader-track" cx="40" cy="40" r="32" stroke="currentColor" stroke-opacity="0.2" stroke-width="6" />
           <circle class="cc-loader-orbit-fast" cx="40" cy="40" r="32" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-dasharray="50 150" />
           <circle class="cc-loader-beacon" cx="40" cy="40" r="10" fill="currentColor" />
@@ -31,7 +32,7 @@
     }
 
     return `
-      <svg class="cc-loader-svg" viewBox="${viewBox}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg class="cc-loader-svg" width="${dim}" height="${dim}" viewBox="${viewBox}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <defs>
           <linearGradient id="ccLoaderGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#0d9488" stop-opacity="1" />
@@ -373,8 +374,8 @@
       const subtitle = options.subtitle || '';
       const size = options.size || 'md';
       return `
-        <div class="cc-loading-container cc-loading-${size}" role="status" aria-busy="true" aria-live="polite" style="padding: 1.5rem 1rem; border: none; background: transparent;">
-          <div class="cc-emblem-wrap">
+        <div class="cc-loading-container cc-loading-${size} cc-loader-${size}" role="status" aria-busy="true" aria-live="polite" style="padding: 1.5rem 1rem; border: none; background: transparent;">
+          <div class="cc-loading-emblem-wrap cc-emblem-wrap">
             ${getSvgEmblem(size)}
           </div>
           <div class="cc-loading-content">

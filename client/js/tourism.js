@@ -810,17 +810,6 @@
           subtitle: 'Querying verified cultural, heritage, and scenic locations',
           size: 'lg'
         });
-      } else {
-        grid.innerHTML = Array(3).fill(0).map(() => `
-          <div class="tourism-card skeleton-card">
-            <div class="skeleton-pill"></div>
-            <div class="skeleton-line title"></div>
-            <div class="skeleton-line subtitle"></div>
-            <div class="skeleton-line desc"></div>
-            <div class="skeleton-line desc short"></div>
-            <div class="skeleton-actions"></div>
-          </div>
-        `).join('');
       }
     } else {
       if (window.CrowdCityLoading) {

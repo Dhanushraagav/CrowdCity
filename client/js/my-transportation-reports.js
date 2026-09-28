@@ -23,14 +23,6 @@ async function loadMyTransportationReports() {
         </td>
       </tr>
     `;
-  } else {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-          <i class="fa-solid fa-circle-notch fa-spin"></i> Loading your transportation reports...
-        </td>
-      </tr>
-    `;
   }
 
   let userId = 'citizen_anonymous';

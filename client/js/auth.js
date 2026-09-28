@@ -29,15 +29,6 @@ if (typeof window !== 'undefined' && window.location.hostname === 'crowdcity.co.
 // Centralized CrowdCity Global Configuration
 window.CROWDCITY_CONFIG = window.CROWDCITY_CONFIG || {};
 
-// Universal Premium Loading System Bootstrap
-if (typeof window !== 'undefined' && !window.CrowdCityLoading) {
-  if (typeof document !== 'undefined' && !document.querySelector('script[src*="loading-system.js"]')) {
-    const loaderScript = document.createElement('script');
-    loaderScript.src = 'js/loading-system.js';
-    loaderScript.async = false;
-    document.head.appendChild(loaderScript);
-  }
-}
 if (!window.CROWDCITY_CONFIG.SUPPORT) {
   window.CROWDCITY_CONFIG.SUPPORT = {
     label: 'CrowdCity Support',
