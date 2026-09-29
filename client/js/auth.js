@@ -574,6 +574,9 @@ function _attachAuthStateListener() {
     // Proper logging: SIGNED_IN, PASSWORD_RECOVERY, SIGNED_OUT
     if (event === 'SIGNED_IN') {
       console.log('[Auth Log] SIGNED_IN event triggered');
+      if (session && session.user && typeof getLoginSessionId === 'function' && !getLoginSessionId()) {
+        startNewLoginSession(session.user.id);
+      }
     } else if (event === 'PASSWORD_RECOVERY') {
       console.log('[Auth Log] PASSWORD_RECOVERY event triggered');
       localStorage.setItem('cc_password_recovery_active', 'true');
@@ -661,6 +664,9 @@ function _attachAuthStateListener() {
       }
     } else if (event === 'SIGNED_OUT') {
       console.log('[Auth] SIGNED_OUT event triggered. Clearing session cache.');
+      if (typeof clearLoginSessionPopupState === 'function') {
+        clearLoginSessionPopupState();
+      }
       localStorage.removeItem('cc_session');
       localStorage.removeItem('cc_user_role');
       localStorage.removeItem('cc_user_profile');
@@ -1823,6 +1829,9 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
     localStorage.setItem(`cc_user_profile_${user.id}`, JSON.stringify(profilePayload));
     if (role === 'citizen') {
       prewarmCitizenDashboardCache(user.id);
+      if (typeof startNewLoginSession === 'function') {
+        startNewLoginSession(user.id);
+      }
     }
   } catch (e) {}
 
@@ -2227,12 +2236,29 @@ async function logoutUser() {
     'cc_scheme_checker_profile',
     'cc_user_reminders',
     'cc_saved_user_schemes',
-    'cc_saved_schemes'
+    'cc_saved_schemes',
+    'cc_login_session_id',
+    'cc_popups_shown_for_session',
+    'cc_wallet_shown_for_session',
+    'cc_helpdesk_shown_for_session',
+    'cc_callout_dismissed_v2',
+    'cc_doc_banner_shown'
   ];
   authKeys.forEach(k => {
     try { localStorage.removeItem(k); } catch (e) {}
     try { sessionStorage.removeItem(k); } catch (e) {}
   });
+  try {
+    if (typeof clearLoginSessionPopupState === 'function') {
+      clearLoginSessionPopupState();
+    }
+    if (typeof closeDocWalletBanner === 'function') {
+      closeDocWalletBanner();
+    }
+    if (typeof closeCivicHelpPopup === 'function') {
+      closeCivicHelpPopup(false);
+    }
+  } catch (e) {}
   try {
     if (typeof indexedDB !== 'undefined') {
       indexedDB.deleteDatabase('CrowdCityDocWalletDB');
@@ -3429,9 +3455,15 @@ function updateAuthUI() {
     initResponsiveSidebar();
   }
 
-  // Trigger Document Wallet Promo Banner once per login session
+  // Trigger Document Wallet Promo Banner once per login session on Citizen Dashboard
   if (user && getUserRole() === 'citizen') {
-    setTimeout(injectDocumentWalletBanner, 600);
+    const path = window.location.pathname;
+    const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index');
+    if (isDashboard && !hasShownWalletForCurrentSession()) {
+      setTimeout(() => {
+        injectDocumentWalletBanner(false);
+      }, 600);
+    }
   }
 
   // Initialize desktop hover dropdowns & keyboard interactions
@@ -3439,6 +3471,117 @@ function updateAuthUI() {
     window.initHeaderHoverDropdowns();
   }
 }
+
+// ==============================================================================
+// LOGIN-SESSION-SCOPED POPUP LIFECYCLE CONTROLLER
+// Ensures Secure Document Wallet and Civic Helpdesk popups appear ONLY ONCE
+// per login session, with full auto-close after 5 seconds and reset on logout.
+// ==============================================================================
+
+function getLoginSessionId() {
+  let sessId = null;
+  try {
+    sessId = sessionStorage.getItem('cc_login_session_id') || localStorage.getItem('cc_login_session_id');
+  } catch (e) {}
+  if (!sessId) {
+    try {
+      const rawSess = localStorage.getItem('cc_session') || sessionStorage.getItem('cc_session');
+      if (rawSess) {
+        const parsed = JSON.parse(rawSess);
+        if (parsed?.access_token) {
+          sessId = 'sess_' + parsed.access_token.slice(-32);
+        } else if (parsed?.user?.id) {
+          sessId = 'sess_' + parsed.user.id;
+        }
+      }
+    } catch (e) {}
+  }
+  return sessId || null;
+}
+
+function startNewLoginSession(userId) {
+  const newSessionId = 'login_' + (userId || 'user') + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+  try {
+    localStorage.setItem('cc_login_session_id', newSessionId);
+    sessionStorage.setItem('cc_login_session_id', newSessionId);
+    localStorage.removeItem('cc_popups_shown_for_session');
+    sessionStorage.removeItem('cc_popups_shown_for_session');
+    localStorage.removeItem('cc_wallet_shown_for_session');
+    sessionStorage.removeItem('cc_wallet_shown_for_session');
+    localStorage.removeItem('cc_helpdesk_shown_for_session');
+    sessionStorage.removeItem('cc_helpdesk_shown_for_session');
+  } catch (e) {}
+  return newSessionId;
+}
+
+function hasShownWalletForCurrentSession() {
+  const sessId = getLoginSessionId();
+  if (!sessId) return true; // Do not auto-show if not logged in
+  let shown = null;
+  try {
+    shown = sessionStorage.getItem('cc_wallet_shown_for_session') || localStorage.getItem('cc_wallet_shown_for_session');
+  } catch (e) {}
+  return shown === sessId;
+}
+
+function markWalletShownForCurrentSession() {
+  const sessId = getLoginSessionId();
+  if (!sessId) return;
+  try {
+    sessionStorage.setItem('cc_wallet_shown_for_session', sessId);
+    localStorage.setItem('cc_wallet_shown_for_session', sessId);
+  } catch (e) {}
+}
+
+function hasShownHelpdeskForCurrentSession() {
+  const sessId = getLoginSessionId();
+  if (!sessId) return true; // Do not auto-show if not logged in
+  let shown = null;
+  try {
+    shown = sessionStorage.getItem('cc_helpdesk_shown_for_session') || localStorage.getItem('cc_helpdesk_shown_for_session');
+  } catch (e) {}
+  return shown === sessId;
+}
+
+function markHelpdeskShownForCurrentSession() {
+  const sessId = getLoginSessionId();
+  if (!sessId) return;
+  try {
+    sessionStorage.setItem('cc_helpdesk_shown_for_session', sessId);
+    localStorage.setItem('cc_helpdesk_shown_for_session', sessId);
+  } catch (e) {}
+}
+
+function clearLoginSessionPopupState() {
+  try {
+    localStorage.removeItem('cc_login_session_id');
+    sessionStorage.removeItem('cc_login_session_id');
+    localStorage.removeItem('cc_popups_shown_for_session');
+    sessionStorage.removeItem('cc_popups_shown_for_session');
+    localStorage.removeItem('cc_wallet_shown_for_session');
+    sessionStorage.removeItem('cc_wallet_shown_for_session');
+    localStorage.removeItem('cc_helpdesk_shown_for_session');
+    sessionStorage.removeItem('cc_helpdesk_shown_for_session');
+    sessionStorage.removeItem('cc_callout_dismissed_v2');
+    sessionStorage.removeItem('cc_doc_banner_shown');
+  } catch (e) {}
+}
+
+window.CrowdCityPopupSession = {
+  getLoginSessionId,
+  startNewLoginSession,
+  hasShownWalletForCurrentSession,
+  markWalletShownForCurrentSession,
+  hasShownHelpdeskForCurrentSession,
+  markHelpdeskShownForCurrentSession,
+  clearLoginSessionPopupState
+};
+window.hasShownWalletForCurrentSession = hasShownWalletForCurrentSession;
+window.markWalletShownForCurrentSession = markWalletShownForCurrentSession;
+window.hasShownHelpdeskForCurrentSession = hasShownHelpdeskForCurrentSession;
+window.markHelpdeskShownForCurrentSession = markHelpdeskShownForCurrentSession;
+window.clearLoginSessionPopupState = clearLoginSessionPopupState;
+window.startNewLoginSession = startNewLoginSession;
 
 // Scoped auto-close timer for Secure Document Wallet popup
 let docWalletAutoCloseTimer = null;
@@ -3461,7 +3604,7 @@ function startDocWalletAutoCloseTimer() {
 function injectDocumentWalletBanner(force = false) {
   const path = window.location.pathname;
   if (path.includes('my-documents.html')) return;
-  if (!force && window._cc_doc_banner_shown_this_visit) return;
+  if (!force && hasShownWalletForCurrentSession()) return;
 
   const existing = document.getElementById('cc-doc-wallet-promo-banner');
   if (existing) {
@@ -3471,7 +3614,9 @@ function injectDocumentWalletBanner(force = false) {
     return;
   }
 
-  window._cc_doc_banner_shown_this_visit = true;
+  if (!force) {
+    markWalletShownForCurrentSession();
+  }
 
   const banner = document.createElement('div');
   banner.id = 'cc-doc-wallet-promo-banner';
@@ -3523,7 +3668,7 @@ function injectDocumentWalletBanner(force = false) {
   startDocWalletAutoCloseTimer();
 }
 
-window.closeDocWalletBanner = function() {
+function closeDocWalletBanner() {
   clearDocWalletTimer();
   const banner = document.getElementById('cc-doc-wallet-promo-banner');
   if (banner) {
@@ -3534,7 +3679,8 @@ window.closeDocWalletBanner = function() {
       if (banner.parentNode) banner.parentNode.removeChild(banner);
     }, 250);
   }
-};
+}
+window.closeDocWalletBanner = closeDocWalletBanner;
 
 window.openDocWalletBanner = function() {
   injectDocumentWalletBanner(true);

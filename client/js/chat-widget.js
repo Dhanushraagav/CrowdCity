@@ -635,10 +635,23 @@
 
     function showCivicHelpPopup(force = false) {
       // Clear any stale old localStorage key from previous versions
-      localStorage.removeItem('cc_callout_dismissed');
+      try { localStorage.removeItem('cc_callout_dismissed'); } catch (e) {}
 
-      // If already shown this visit or dismissed, skip unless forced
-      if (!force && window._cc_callout_shown_this_visit) return;
+      // Check if user is logged in
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!force && !user) return; // Only auto-show for authenticated citizens
+
+      // Check path: only auto-show on Citizen Dashboard
+      const path = window.location.pathname;
+      const isDashboard = path.includes('citizen-dashboard') || path.endsWith('/') || path.endsWith('/index');
+      if (!force && !isDashboard) return;
+
+      // If already shown in this login session or dismissed, skip unless forced
+      const hasShown = typeof window.hasShownHelpdeskForCurrentSession === 'function'
+        ? window.hasShownHelpdeskForCurrentSession()
+        : (window.CrowdCityPopupSession?.hasShownHelpdeskForCurrentSession ? window.CrowdCityPopupSession.hasShownHelpdeskForCurrentSession() : false);
+
+      if (!force && hasShown) return;
       if (!force && sessionStorage.getItem('cc_callout_dismissed_v2')) return;
 
       const existing = document.getElementById('cc-chat-callout');
@@ -649,12 +662,18 @@
         return;
       }
 
-      window._cc_callout_shown_this_visit = true;
+      // Mark as shown for this login session
+      if (!force) {
+        if (typeof window.markHelpdeskShownForCurrentSession === 'function') {
+          window.markHelpdeskShownForCurrentSession();
+        } else if (window.CrowdCityPopupSession?.markHelpdeskShownForCurrentSession) {
+          window.CrowdCityPopupSession.markHelpdeskShownForCurrentSession();
+        }
+      }
 
       // Get logged-in user name
       let userName = 'Citizen';
       try {
-        const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
         if (user) {
           const cachedProfile = typeof window.cc_cached_profile !== 'undefined' ? window.cc_cached_profile : null;
           userName = cachedProfile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Citizen';
@@ -701,8 +720,19 @@
     window.openCivicHelpPopup = function() { showCivicHelpPopup(true); };
     window.closeCivicHelpPopup = closeCivicHelpPopup;
 
+    // Trigger on auth-change event or initial load
+    window.addEventListener('auth-change', (e) => {
+      if (e.detail && e.detail.loggedIn) {
+        setTimeout(() => {
+          showCivicHelpPopup(false);
+        }, 1200);
+      }
+    });
+
     // Delay popup to allow auth to finish loading the user session
-    setTimeout(showCivicHelpPopup, 2000);
+    setTimeout(() => {
+      showCivicHelpPopup(false);
+    }, 1500);
 
     // 3. Create Chat Drawer
     const chatWindow = document.createElement('div');
