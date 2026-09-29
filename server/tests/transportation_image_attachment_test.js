@@ -21,7 +21,7 @@ import transportationRoutes from '../routes/transportationRoutes.js';
 import issueRoutes from '../routes/issueRoutes.js';
 import { createIssue } from '../controllers/issueController.js';
 import { upload, handleUploadError } from '../middlewares/uploadMiddleware.js';
-import { normalizeTransportationToIssue, findTransportationRecord } from '../controllers/transportationController.js';
+import { normalizeTransportationToIssue, findTransportationRecord, _resetTransportationStoreForTesting } from '../controllers/transportationController.js';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
 
 let passed = 0;
@@ -273,6 +273,7 @@ async function runTests() {
     if (failed > 0) process.exit(1);
   } finally {
     server.close();
+    _resetTransportationStoreForTesting([]);
   }
 }
 

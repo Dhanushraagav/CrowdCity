@@ -84,7 +84,7 @@ Output ONLY valid raw JSON matching this schema. Do not output markdown, comment
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Title: ${title}\nDescription: ${description}` }
       ],
-      model: model,
+      model: getGroqModel(),
       response_format: { type: 'json_object' }
     });
 

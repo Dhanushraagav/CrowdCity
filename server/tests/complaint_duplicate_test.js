@@ -16,10 +16,10 @@ async function runTests() {
 
   function assert(condition, message) {
     if (condition) {
-      console.log(`✅ PASS: ${message}`);
+      console.log(`[PASS] ${message}`);
       passed++;
     } else {
-      console.error(`❌ FAIL: ${message}`);
+      console.error(`[FAIL] ${message}`);
       failed++;
     }
   }

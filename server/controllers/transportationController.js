@@ -58,6 +58,13 @@ function persistUpdates() {
 let memoryReports = loadStoredReports();
 let memoryUpdates = loadStoredUpdates();
 
+export const _resetTransportationStoreForTesting = (reports = [], updates = []) => {
+  memoryReports = [...reports];
+  memoryUpdates = [...updates];
+  persistReports();
+  persistUpdates();
+};
+
 // Helper to generate unique report numbers
 function generateReportNumber() {
   const rand = Math.floor(1000 + Math.random() * 9000);

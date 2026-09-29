@@ -7,7 +7,7 @@
 import { normalizeCategory, areCategoriesCompatible, getSearchRadius, CANONICAL_CATEGORIES } from '../services/categoryNormalizationService.js';
 import { computeImageHash, computeHammingDistance, computeImageSimilarity } from '../services/imageHashService.js';
 import { findUnifiedDuplicate, findDuplicateCandidate, DUPLICATE_CONFIG, calculateHaversineDistance, computeTextSimilarity } from '../services/duplicateDetectionService.js';
-import { getAllTransportationRecords } from '../controllers/transportationController.js';
+import { getAllTransportationRecords, _resetTransportationStoreForTesting } from '../controllers/transportationController.js';
 
 let passedCount = 0;
 let failedCount = 0;
@@ -126,138 +126,161 @@ async function runTests() {
   // --- SECTION 6: Unified Candidate Retrieval ---
   console.log('\n--- 6. UNIFIED CANDIDATE RETRIEVAL TESTS ---');
 
-  const transRecords = await getAllTransportationRecords();
-  assert(Array.isArray(transRecords) && transRecords.length > 0, 'getAllTransportationRecords returns transportation records', `count=${transRecords.length}`);
-
-  // Known transportation report in disk store: trp-1790582037960
-  // Location: 10.9996, 77.0839 (KM 331/6 of Nagapattinam-Mysore Road)
-  const canonicalTrans = transRecords.find(r => r.id === 'trp-1790582037960' || (r.category && r.category.includes('Road')));
-  assert(Boolean(canonicalTrans), 'Found seeded transportation record for testing');
-
-  if (canonicalTrans) {
-    const lat = parseFloat(canonicalTrans.latitude);
-    const lng = parseFloat(canonicalTrans.longitude);
-
-    // Scenario A: Exact duplicate submitted from another device (same location, same category, similar AI text)
-    console.log('\n--- 7. SAME-ISSUE DUPLICATE DETECTION SCENARIOS ---');
-
-    const exactDupResult = await findUnifiedDuplicate({
-      latitude: lat + 0.00005, // ~5.5m away
-      longitude: lng + 0.00005,
-      category: 'Damaged Roads',
-      title: 'Road damage and potholes on highway stretch',
-      description: canonicalTrans.description || 'Damaged roads and potholes observed at this location',
-      sourceType: 'transportation'
-    });
-
-    console.log('Exact duplicate query result:', {
-      result: exactDupResult.result,
-      score: exactDupResult.score?.toFixed(3),
-      candidateId: exactDupResult.candidate?.complaint_id,
-      distance: exactDupResult.candidate?.distance_meters
-    });
-
-    assert(
-      exactDupResult.result === 'CONFIRMED_DUPLICATE',
-      'Confirmed duplicate detected for same issue within 10m',
-      `result=${exactDupResult.result}, score=${exactDupResult.score}`
-    );
-    assert(
-      exactDupResult.candidate !== null,
-      'Duplicate candidate record is returned'
-    );
-    assert(
-      exactDupResult.candidate?.distance_meters !== undefined,
-      'Candidate includes distance_meters'
-    );
-
-    // Scenario B: Cross-pipeline match (Civic complaint matching Transportation report)
-    console.log('\n--- 8. CROSS-PIPELINE DETECTION SCENARIOS ---');
-
-    const crossPipelineResult = await findUnifiedDuplicate({
-      latitude: lat + 0.00008, // ~9m away
-      longitude: lng + 0.00008,
-      category: 'roads', // Civic category
-      title: 'Damaged road surface with large craters',
-      description: 'Potholes and broken asphalt on main road',
-      sourceType: 'civic' // Civic reporting pipeline
-    });
-
-    console.log('Cross-pipeline query result:', {
-      result: crossPipelineResult.result,
-      score: crossPipelineResult.score?.toFixed(3),
-      candidateId: crossPipelineResult.candidate?.complaint_id,
-      candidateSource: crossPipelineResult.candidate?.sourceType
-    });
-
-    assert(
-      crossPipelineResult.result === 'CONFIRMED_DUPLICATE' || crossPipelineResult.result === 'POSSIBLE_DUPLICATE',
-      'Cross-pipeline duplicate detected (civic input matches transportation complaint)',
-      `result=${crossPipelineResult.result}`
-    );
-
-    // Scenario C: Spatial discrimination (Different issue at same location)
-    console.log('\n--- 9. SPATIAL DISCRIMINATION SCENARIOS ---');
-
-    const differentIssueResult = await findUnifiedDuplicate({
-      latitude: lat,
-      longitude: lng,
-      category: 'streetlights', // Streetlight issue at the exact same coordinates
-      title: 'Streetlight pole broken and not functional',
-      description: 'The light on this pole has been dark for two weeks',
-      sourceType: 'civic'
-    });
-
-    console.log('Different issue query result:', {
-      result: differentIssueResult.result,
-      score: differentIssueResult.score,
-      candidate: differentIssueResult.candidate
-    });
-
-    assert(
-      differentIssueResult.result === 'NEW_ISSUE',
-      'Different issue at same location correctly identified as NEW_ISSUE',
-      `result=${differentIssueResult.result}`
-    );
-
-    // Scenario D: Distance boundary (Same issue type, but 500m away)
-    console.log('\n--- 10. DISTANCE BOUNDARY SCENARIOS ---');
-
-    const farAwayResult = await findUnifiedDuplicate({
-      latitude: lat + 0.005, // ~550m away
-      longitude: lng + 0.005,
-      category: 'Damaged Roads',
-      title: 'Damaged roads and potholes observed at this location',
-      description: 'Damaged roads and potholes observed at this location',
-      sourceType: 'transportation'
-    });
-
-    assert(
-      farAwayResult.result === 'NEW_ISSUE',
-      'Same issue > 500m away correctly identified as NEW_ISSUE',
-      `result=${farAwayResult.result}`
-    );
-  }
-
-  // --- SECTION 11: Backward Compatibility ---
-  console.log('\n--- 11. BACKWARD COMPATIBILITY TESTS ---');
-
-  const legacyResult = await findDuplicateCandidate({
+  const tempFixture = {
+    id: 'test-trans-dup-canonical',
+    report_number: 'TRP-TEST-CANONICAL',
+    user_id: 'test-user',
+    title: 'Road damage and potholes on highway stretch',
+    description: 'Damaged roads and potholes observed at this location',
+    category: 'Damaged Roads',
+    priority: 'High',
+    severity: 'High',
+    severity_score: 8,
+    status: 'Submitted',
+    address: 'KM 331/6 of Nagapattinam-Mysore Road',
     latitude: 10.9996,
     longitude: 77.0839,
-    category: 'roads',
-    title: 'Damaged road surface',
-    description: 'Road damage near highway'
-  });
+    photo_urls: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
 
-  assert(
-    typeof legacyResult.is_duplicate === 'boolean',
-    'findDuplicateCandidate returns { is_duplicate: boolean }'
-  );
-  assert(
-    typeof legacyResult.score === 'number',
-    'findDuplicateCandidate returns { score: number }'
-  );
+  _resetTransportationStoreForTesting([tempFixture]);
+
+  try {
+    const transRecords = await getAllTransportationRecords();
+    assert(Array.isArray(transRecords) && transRecords.length > 0, 'getAllTransportationRecords returns transportation records', `count=${transRecords.length}`);
+
+    const canonicalTrans = transRecords.find(r => r.id === 'test-trans-dup-canonical' || (r.category && r.category.includes('Road')));
+    assert(Boolean(canonicalTrans), 'Found test transportation record for testing');
+
+    if (canonicalTrans) {
+      const lat = parseFloat(canonicalTrans.latitude);
+      const lng = parseFloat(canonicalTrans.longitude);
+
+      // Scenario A: Exact duplicate submitted from another device (same location, same category, similar AI text)
+      console.log('\n--- 7. SAME-ISSUE DUPLICATE DETECTION SCENARIOS ---');
+
+      const exactDupResult = await findUnifiedDuplicate({
+        latitude: lat + 0.00005, // ~5.5m away
+        longitude: lng + 0.00005,
+        category: 'Damaged Roads',
+        title: 'Road damage and potholes on highway stretch',
+        description: canonicalTrans.description || 'Damaged roads and potholes observed at this location',
+        sourceType: 'transportation'
+      });
+
+      console.log('Exact duplicate query result:', {
+        result: exactDupResult.result,
+        score: exactDupResult.score?.toFixed(3),
+        candidateId: exactDupResult.candidate?.complaint_id,
+        distance: exactDupResult.candidate?.distance_meters
+      });
+
+      assert(
+        exactDupResult.result === 'CONFIRMED_DUPLICATE',
+        'Confirmed duplicate detected for same issue within 10m',
+        `result=${exactDupResult.result}, score=${exactDupResult.score}`
+      );
+      assert(
+        exactDupResult.candidate !== null,
+        'Duplicate candidate record is returned'
+      );
+      assert(
+        exactDupResult.candidate?.distance_meters !== undefined,
+        'Candidate includes distance_meters'
+      );
+
+      // Scenario B: Cross-pipeline match (Civic complaint matching Transportation report)
+      console.log('\n--- 8. CROSS-PIPELINE DETECTION SCENARIOS ---');
+
+      const crossPipelineResult = await findUnifiedDuplicate({
+        latitude: lat + 0.00008, // ~9m away
+        longitude: lng + 0.00008,
+        category: 'roads', // Civic category
+        title: 'Damaged road surface with large craters',
+        description: 'Potholes and broken asphalt on main road',
+        sourceType: 'civic' // Civic reporting pipeline
+      });
+
+      console.log('Cross-pipeline query result:', {
+        result: crossPipelineResult.result,
+        score: crossPipelineResult.score?.toFixed(3),
+        candidateId: crossPipelineResult.candidate?.complaint_id,
+        candidateSource: crossPipelineResult.candidate?.sourceType
+      });
+
+      assert(
+        crossPipelineResult.result === 'CONFIRMED_DUPLICATE' || crossPipelineResult.result === 'POSSIBLE_DUPLICATE',
+        'Cross-pipeline duplicate detected (civic input matches transportation complaint)',
+        `result=${crossPipelineResult.result}`
+      );
+
+      // Scenario C: Spatial discrimination (Different issue at same location)
+      console.log('\n--- 9. SPATIAL DISCRIMINATION SCENARIOS ---');
+
+      const differentIssueResult = await findUnifiedDuplicate({
+        latitude: lat,
+        longitude: lng,
+        category: 'streetlights', // Streetlight issue at the exact same coordinates
+        title: 'Streetlight pole broken and not functional',
+        description: 'The light on this pole has been dark for two weeks',
+        sourceType: 'civic'
+      });
+
+      console.log('Different issue query result:', {
+        result: differentIssueResult.result,
+        score: differentIssueResult.score,
+        candidate: differentIssueResult.candidate
+      });
+
+      assert(
+        differentIssueResult.result === 'NEW_ISSUE',
+        'Different issue at same location correctly identified as NEW_ISSUE',
+        `result=${differentIssueResult.result}`
+      );
+
+      // Scenario D: Distance boundary (Same issue type, but 500m away)
+      console.log('\n--- 10. DISTANCE BOUNDARY SCENARIOS ---');
+
+      const farAwayResult = await findUnifiedDuplicate({
+        latitude: lat + 0.005, // ~550m away
+        longitude: lng + 0.005,
+        category: 'Damaged Roads',
+        title: 'Damaged roads and potholes observed at this location',
+        description: 'Damaged roads and potholes observed at this location',
+        sourceType: 'transportation'
+      });
+
+      assert(
+        farAwayResult.result === 'NEW_ISSUE',
+        'Same issue > 500m away correctly identified as NEW_ISSUE',
+        `result=${farAwayResult.result}`
+      );
+    }
+
+    // --- SECTION 11: Backward Compatibility ---
+    console.log('\n--- 11. BACKWARD COMPATIBILITY TESTS ---');
+
+    const legacyResult = await findDuplicateCandidate({
+      latitude: 10.9996,
+      longitude: 77.0839,
+      category: 'roads',
+      title: 'Damaged road surface',
+      description: 'Road damage near highway'
+    });
+
+    assert(
+      typeof legacyResult.is_duplicate === 'boolean',
+      'findDuplicateCandidate returns { is_duplicate: boolean }'
+    );
+    assert(
+      typeof legacyResult.score === 'number',
+      'findDuplicateCandidate returns { score: number }'
+    );
+  } finally {
+    _resetTransportationStoreForTesting([]);
+  }
 
   console.log('\n====================================================');
   console.log(`TEST RESULTS: ${passedCount} PASSED, ${failedCount} FAILED`);

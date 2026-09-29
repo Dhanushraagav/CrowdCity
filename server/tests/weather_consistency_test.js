@@ -25,7 +25,7 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('🧪 Starting Weather Consistency & Sidebar Integration Test Suite...\n');
+console.log('Starting Weather Consistency & Sidebar Integration Test Suite...\n');
 
 let passedTests = 0;
 let totalTests = 0;
@@ -210,7 +210,7 @@ async function executeTestSuite() {
   console.log(`========================================\n`);
 
   if (passedTests === totalTests) {
-    console.log('All Weather Consistency & Sidebar Integration tests passed successfully! ✨\n');
+    console.log('All Weather Consistency & Sidebar Integration tests passed successfully!\n');
   } else {
     process.exit(1);
   }
