@@ -298,6 +298,60 @@
           </div>
         </div>
 
+        <!-- Early Synchronous KPI Stat Pre-fill (0ms Instant Hydration) -->
+        <script>
+          (function earlyPrefillStats() {
+            try {
+              var uid = null;
+              var sessionStr = localStorage.getItem('cc_session');
+              if (sessionStr) {
+                var parsedS = JSON.parse(sessionStr);
+                if (parsedS && parsedS.user) uid = parsedS.user.id || parsedS.user.sub;
+              }
+              if (!uid) {
+                var profStr = localStorage.getItem('cc_user_profile');
+                if (profStr) {
+                  var parsedP = JSON.parse(profStr);
+                  if (parsedP && parsedP.id) uid = parsedP.id;
+                }
+              }
+              if (uid) {
+                var w = localStorage.getItem('cc_user_stat_submitted_' + uid) || localStorage.getItem('cc_user_stat_weekly_' + uid) || localStorage.getItem('cc_user_stat_submitted') || localStorage.getItem('cc_user_stat_weekly');
+                var t = localStorage.getItem('cc_user_stat_total_' + uid) || localStorage.getItem('cc_user_stat_total');
+                var r = localStorage.getItem('cc_user_stat_resolved_' + uid) || localStorage.getItem('cc_user_stat_resolved');
+                var a = localStorage.getItem('cc_user_stat_active_' + uid) || localStorage.getItem('cc_user_stat_active');
+                var isTa = (localStorage.getItem('crowdcity_citizen_language') || localStorage.getItem('cc_lang') || 'ta') === 'ta';
+
+                if (w !== null) {
+                  var el1 = document.getElementById('stat-total-reports');
+                  if (el1) el1.textContent = w;
+                  var elW = document.getElementById('stat-total-reports-change');
+                  if (elW) elW.textContent = '+' + w + ' ' + (isTa ? 'இந்த வாரம்' : 'this week');
+                }
+                if (r !== null) {
+                  var el2 = document.getElementById('stat-resolved-issues');
+                  if (el2) el2.textContent = r;
+                  if (t !== null && parseInt(t, 10) > 0) {
+                    var rateEl = document.getElementById('stat-resolved-rate');
+                    if (rateEl) {
+                      var rate = Math.round((parseInt(r, 10) / parseInt(t, 10)) * 100);
+                      rateEl.textContent = rate + '% ' + (isTa ? 'தீர்வு விகிதம்' : 'Resolution Rate');
+                    }
+                  }
+                }
+                if (a !== null) {
+                  var el3 = document.getElementById('stat-inprogress-reports');
+                  if (el3) el3.textContent = a;
+                }
+                if (t !== null) {
+                  var el4 = document.getElementById('stat-city-total-reports');
+                  if (el4) el4.textContent = t;
+                }
+              }
+            } catch (e) {}
+          })();
+        </script>
+
         <!-- Quick Actions (Mobile Only) -->
         <div class="quick-actions-section mobile-only" style="margin-bottom: 2.25rem;">
           <h2 class="quick-actions-title" data-i18n="quick_actions" style="margin-bottom: 0.65rem;">Quick Actions</h2>

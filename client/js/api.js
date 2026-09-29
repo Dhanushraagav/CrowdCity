@@ -540,9 +540,23 @@ const API = {
   },
 
   // 32. Transportation Module APIs
-  getTransportationReports: async (params = {}) => {
+  getTransportationReports: (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    return request(`/transportation/reports${query ? '?' + query : ''}`, { method: 'GET', auth: false });
+    const endpoint = `/transportation/reports${query ? '?' + query : ''}`;
+    const dedupKey = `GET:${endpoint}`;
+
+    const cached = _apiCache.get(endpoint);
+    if (cached && (Date.now() - cached.timestamp < _CACHE_TTL_MS)) {
+      return Promise.resolve(cached.response);
+    }
+
+    return _dedupFetch(dedupKey, async () => {
+      const res = await request(endpoint, { method: 'GET', auth: false });
+      if (res && res.data) {
+        _apiCache.set(endpoint, { timestamp: Date.now(), response: res });
+      }
+      return res;
+    });
   },
 
   getTransportationReportById: async (id) => {

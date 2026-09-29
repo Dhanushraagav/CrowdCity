@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase.js';
+import { supabase, getCachedAuthUser } from '../config/supabase.js';
 import logger from '../config/logger.js';
 
 /**
@@ -30,14 +30,14 @@ export const requireAuth = async (req, res, next) => {
   }
 
   try {
-    // Verify the token by calling supabase.auth.getUser()
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    // Verify the token using cached or fresh auth user
+    const user = await getCachedAuthUser(token);
 
-    if (error || !user) {
-      logger.warn(`[Auth Middleware] JWT validation failed: ${error ? error.message : 'No user payload'}`);
+    if (!user) {
+      logger.warn('[Auth Middleware] JWT validation failed: Invalid or expired token');
       return res.status(401).json({ 
         error: 'Unauthorized: Invalid or expired token',
-        details: error ? error.message : 'No user payload returned' 
+        details: 'No user payload returned' 
       });
     }
 

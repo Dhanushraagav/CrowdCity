@@ -100,67 +100,85 @@
     updateCityHeaders(userCity);
 
     const recentListEl = document.getElementById('dash-recent-activity-list');
-    if (recentListEl && window.CrowdCityLoading) {
-      window.CrowdCityLoading.show(recentListEl, {
-        message: 'Retrieving recent civic complaints...',
-        subtitle: 'Connecting to live community activity feed',
-        size: 'md',
-        inlineSeamless: true
-      });
-    }
+    const myActiveListEl = document.getElementById('dash-my-active-list');
+    const nearbyGridEl = document.getElementById('dash-nearby-issues-grid');
+    const hasTargetContainers = Boolean(recentListEl || myActiveListEl || nearbyGridEl);
 
     // Fetch All Complaints from API (both Civic & Transportation)
     let issues = [];
-    try {
-      const [civicRes, transRes] = await Promise.all([
-        (window.API && typeof window.API.getIssues === 'function')
-          ? window.API.getIssues()
-          : Promise.resolve({ data: [] }),
-        (window.API && typeof window.API.getTransportationReports === 'function')
-          ? window.API.getTransportationReports()
-          : Promise.resolve({ data: { reports: [] } })
-      ]);
 
-      const civicIssues = (civicRes && Array.isArray(civicRes.data))
-        ? civicRes.data.map(i => ({ ...i, sourceType: 'civic' }))
-        : ((civicRes && civicRes.data && civicRes.data.issues) ? civicRes.data.issues.map(i => ({ ...i, sourceType: 'civic' })) : []);
+    // Instant 0ms cache-first pre-fill if cached feed is available
+    if (hasTargetContainers) {
+      try {
+        const cachedFeed = localStorage.getItem('cc_cached_feed_issues');
+        if (cachedFeed) {
+          const parsed = JSON.parse(cachedFeed);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            issues = parsed;
+          }
+        }
+      } catch (e) {}
 
-      const rawTrans = (transRes && transRes.data && transRes.data.reports)
-        ? transRes.data.reports
-        : ((transRes && transRes.reports) ? transRes.reports : []);
+      if (recentListEl && issues.length === 0 && window.CrowdCityLoading) {
+        window.CrowdCityLoading.show(recentListEl, {
+          message: 'Retrieving recent civic complaints...',
+          subtitle: 'Connecting to live community activity feed',
+          size: 'md',
+          inlineSeamless: true
+        });
+      }
 
-      const transIssues = rawTrans.map(r => ({
-        id: r.id,
-        complaint_id: r.report_number || r.id,
-        tracking_number: r.report_number || r.id,
-        sourceType: 'transportation',
-        source_type: 'transportation',
-        is_transportation: true,
-        title: r.title,
-        description: r.description,
-        category: r.category || 'roads',
-        status: (r.status || 'submitted').toLowerCase().replace(/\s+/g, '_'),
-        priority: r.priority || 'Medium',
-        address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : (r.address || 'Coimbatore, Tamil Nadu'),
-        latitude: r.latitude ? parseFloat(r.latitude) : 11.0168,
-        longitude: r.longitude ? parseFloat(r.longitude) : 76.9558,
-        photo_urls: r.photo_urls || [],
-        reporter_id: r.user_id,
-        citizen_count: 1,
-        upvotes_count: 0,
-        created_at: r.created_at,
-        updated_at: r.updated_at
-      }));
+      try {
+        const [civicRes, transRes] = await Promise.all([
+          (window.API && typeof window.API.getIssues === 'function')
+            ? window.API.getIssues()
+            : Promise.resolve({ data: [] }),
+          (window.API && typeof window.API.getTransportationReports === 'function')
+            ? window.API.getTransportationReports()
+            : Promise.resolve({ data: { reports: [] } })
+        ]);
 
-      const combinedMap = new Map();
-      civicIssues.forEach(i => combinedMap.set(i.id, i));
-      transIssues.forEach(t => combinedMap.set(t.id, t));
-      issues = Array.from(combinedMap.values());
-    } catch (e) {
-      console.warn('Failed to load issues from API:', e);
-    } finally {
-      if (recentListEl && window.CrowdCityLoading) {
-        window.CrowdCityLoading.hide(recentListEl);
+        const civicIssues = (civicRes && Array.isArray(civicRes.data))
+          ? civicRes.data.map(i => ({ ...i, sourceType: 'civic' }))
+          : ((civicRes && civicRes.data && civicRes.data.issues) ? civicRes.data.issues.map(i => ({ ...i, sourceType: 'civic' })) : []);
+
+        const rawTrans = (transRes && transRes.data && transRes.data.reports)
+          ? transRes.data.reports
+          : ((transRes && transRes.reports) ? transRes.reports : []);
+
+        const transIssues = rawTrans.map(r => ({
+          id: r.id,
+          complaint_id: r.report_number || r.id,
+          tracking_number: r.report_number || r.id,
+          sourceType: 'transportation',
+          source_type: 'transportation',
+          is_transportation: true,
+          title: r.title,
+          description: r.description,
+          category: r.category || 'roads',
+          status: (r.status || 'submitted').toLowerCase().replace(/\s+/g, '_'),
+          priority: r.priority || 'Medium',
+          address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : (r.address || 'Coimbatore, Tamil Nadu'),
+          latitude: r.latitude ? parseFloat(r.latitude) : 11.0168,
+          longitude: r.longitude ? parseFloat(r.longitude) : 76.9558,
+          photo_urls: r.photo_urls || [],
+          reporter_id: r.user_id,
+          citizen_count: 1,
+          upvotes_count: 0,
+          created_at: r.created_at,
+          updated_at: r.updated_at
+        }));
+
+        const combinedMap = new Map();
+        civicIssues.forEach(i => combinedMap.set(i.id, i));
+        transIssues.forEach(t => combinedMap.set(t.id, t));
+        issues = Array.from(combinedMap.values());
+      } catch (e) {
+        console.warn('Failed to load issues from API:', e);
+      } finally {
+        if (recentListEl && window.CrowdCityLoading) {
+          window.CrowdCityLoading.hide(recentListEl);
+        }
       }
     }
 

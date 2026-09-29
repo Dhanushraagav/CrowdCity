@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin, getSupabaseClient } from '../config/supabase.js';
+import { supabase, supabaseAdmin, getSupabaseClient, getCachedAuthUser } from '../config/supabase.js';
 import { createNotification } from './notificationController.js';
 import logger from '../config/logger.js';
 import { analyzeComplaint } from '../services/groqService.js';
@@ -30,7 +30,7 @@ export const getAllIssues = async (req, res) => {
   if (!userId && authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const { data: { user } } = await supabase.auth.getUser(token);
+      const user = await getCachedAuthUser(token);
       if (user) {
         userId = user.id;
         userRole = user.user_metadata?.role || (user.app_metadata && user.app_metadata.role);
@@ -155,7 +155,7 @@ export const searchIssues = async (req, res) => {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser(token);
+        const authUser = await getCachedAuthUser(token);
         if (authUser) user = authUser;
       } catch (e) {}
     }
@@ -185,7 +185,7 @@ export const getIssueById = async (req, res) => {
   if (!userId && authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const { data: { user } } = await supabase.auth.getUser(token);
+      const user = await getCachedAuthUser(token);
       if (user) {
         userId = user.id;
         userRole = user.user_metadata?.role || (user.app_metadata && user.app_metadata.role);
@@ -3300,7 +3300,7 @@ export const getComplaintTimeline = async (req, res) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const { data: { user } } = await supabase.auth.getUser(token);
+      const user = await getCachedAuthUser(token);
       if (user) {
         userId = user.id;
         const activeClient = getSupabaseClient(req);

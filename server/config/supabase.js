@@ -53,3 +53,24 @@ export const getSupabaseClient = (req) => {
   }
   return supabase;
 };
+
+// In-memory token authentication cache with 60-second TTL to avoid remote network round-trips
+const authUserCache = new Map();
+const AUTH_CACHE_TTL_MS = 60 * 1000;
+
+export const getCachedAuthUser = async (token) => {
+  if (!token || typeof token !== 'string') return null;
+  const cached = authUserCache.get(token);
+  if (cached && (Date.now() - cached.timestamp < AUTH_CACHE_TTL_MS)) {
+    return cached.user;
+  }
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (!error && user) {
+      if (authUserCache.size > 2000) authUserCache.clear();
+      authUserCache.set(token, { user, timestamp: Date.now() });
+      return user;
+    }
+  } catch (err) {}
+  return null;
+};

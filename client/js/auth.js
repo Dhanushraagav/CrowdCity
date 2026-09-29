@@ -1821,6 +1821,9 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
     };
     localStorage.setItem('cc_user_profile', JSON.stringify(profilePayload));
     localStorage.setItem(`cc_user_profile_${user.id}`, JSON.stringify(profilePayload));
+    if (role === 'citizen') {
+      prewarmCitizenDashboardCache(user.id);
+    }
   } catch (e) {}
 
   window.cc_routing_in_progress = false;
@@ -1861,6 +1864,122 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
 }
 
 window.verifyProfileAndRoute = verifyProfileAndRoute;
+
+// Pre-warm citizen dashboard cache during login transition to eliminate post-login loading latency
+async function prewarmCitizenDashboardCache(userId) {
+  if (!userId) return;
+  try {
+    const issuesPromise = fetch('/api/issues?sort_by=newest').then(r => r.ok ? r.json() : null).catch(() => null);
+    const transPromise = fetch('/api/transportation/reports').then(r => r.ok ? r.json() : null).catch(() => null);
+    const userCivicPromise = fetch(`/api/issues?reporter_id=${encodeURIComponent(userId)}`).then(r => r.ok ? r.json() : null).catch(() => null);
+    const userTransPromise = fetch(`/api/transportation/reports?user_id=${encodeURIComponent(userId)}`).then(r => r.ok ? r.json() : null).catch(() => null);
+
+    const [issuesRes, transRes, userCivicRes, userTransRes] = await Promise.all([
+      issuesPromise,
+      transPromise,
+      userCivicPromise,
+      userTransPromise
+    ]);
+
+    // Cache public feed
+    const rawCivic = Array.isArray(issuesRes) ? issuesRes.map(i => ({ ...i, sourceType: 'civic' })) : [];
+    const rawTrans = (transRes && transRes.reports) ? transRes.reports : (Array.isArray(transRes) ? transRes : []);
+    const transMapped = rawTrans.map(r => ({
+      id: r.id,
+      complaint_id: r.report_number || r.id,
+      tracking_number: r.report_number || r.id,
+      sourceType: 'transportation',
+      source_type: 'transportation',
+      is_transportation: true,
+      title: r.title,
+      description: r.description,
+      category: r.category || 'roads',
+      status: (r.status || 'submitted').toLowerCase().replace(/\s+/g, '_'),
+      priority: r.priority || 'Medium',
+      address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : (r.address || 'Coimbatore, Tamil Nadu'),
+      latitude: r.latitude ? parseFloat(r.latitude) : 11.0168,
+      longitude: r.longitude ? parseFloat(r.longitude) : 76.9558,
+      image_url: (r.photo_urls && r.photo_urls[0]) || null,
+      reporter_id: r.user_id,
+      citizen_count: 1,
+      upvotes_count: 0,
+      created_at: r.created_at,
+      updated_at: r.updated_at
+    }));
+
+    const feedMap = new Map();
+    rawCivic.forEach(i => feedMap.set(i.id, i));
+    transMapped.forEach(t => feedMap.set(t.id, t));
+    const combinedFeed = Array.from(feedMap.values());
+    if (combinedFeed.length > 0) {
+      localStorage.setItem('cc_cached_feed_issues', JSON.stringify(combinedFeed.slice(0, 60)));
+    }
+
+    // Cache user issues
+    const userCivic = Array.isArray(userCivicRes) ? userCivicRes.map(i => ({ ...i, sourceType: 'civic' })) : [];
+    const userTransRaw = (userTransRes && userTransRes.reports) ? userTransRes.reports : (Array.isArray(userTransRes) ? userTransRes : []);
+    const userTransMapped = userTransRaw.map(r => ({
+      id: r.id,
+      complaint_id: r.report_number || r.id,
+      tracking_number: r.report_number || r.id,
+      sourceType: 'transportation',
+      source_type: 'transportation',
+      is_transportation: true,
+      title: r.title,
+      description: r.description,
+      category: r.category || 'roads',
+      status: (r.status || 'submitted').toLowerCase().replace(/\s+/g, '_'),
+      priority: r.priority || 'Medium',
+      address: r.road_name ? `${r.road_name}${r.landmark ? ', ' + r.landmark : ''}` : (r.address || 'Coimbatore, Tamil Nadu'),
+      latitude: r.latitude ? parseFloat(r.latitude) : 11.0168,
+      longitude: r.longitude ? parseFloat(r.longitude) : 76.9558,
+      image_url: (r.photo_urls && r.photo_urls[0]) || null,
+      reporter_id: r.user_id,
+      citizen_count: 1,
+      upvotes_count: 0,
+      created_at: r.created_at,
+      updated_at: r.updated_at
+    }));
+
+    const userMap = new Map();
+    userCivic.forEach(i => userMap.set(i.id, i));
+    userTransMapped.forEach(t => userMap.set(t.id, t));
+    const combinedUserIssues = Array.from(userMap.values());
+
+    localStorage.setItem(`cc_my_complaints_civic_${userId}`, JSON.stringify(userCivic));
+    localStorage.setItem(`cc_my_complaints_trans_${userId}`, JSON.stringify(userTransMapped));
+    localStorage.setItem(`cc_my_complaints_all_${userId}`, JSON.stringify(combinedUserIssues));
+
+    const totalCount = combinedUserIssues.length;
+    const resolvedCount = combinedUserIssues.filter(i => {
+      const s = (i.status || '').toLowerCase();
+      return s === 'resolved' || s === 'verified' || s === 'closed';
+    }).length;
+    const activeCount = combinedUserIssues.filter(i => {
+      const s = (i.status || '').toLowerCase();
+      return s !== 'resolved' && s !== 'verified' && s !== 'closed';
+    }).length;
+
+    // Start of week in IST
+    const now = new Date();
+    const mondayOffset = (now.getDay() + 6) % 7;
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+    const weeklyCount = combinedUserIssues.filter(i => {
+      const d = new Date(i.created_at);
+      return !isNaN(d.getTime()) && d >= monday;
+    }).length;
+
+    localStorage.setItem(`cc_user_stat_submitted_${userId}`, weeklyCount.toString());
+    localStorage.setItem(`cc_user_stat_weekly_${userId}`, weeklyCount.toString());
+    localStorage.setItem(`cc_user_stat_resolved_${userId}`, resolvedCount.toString());
+    localStorage.setItem(`cc_user_stat_active_${userId}`, activeCount.toString());
+    localStorage.setItem(`cc_user_stat_total_${userId}`, totalCount.toString());
+  } catch (err) {
+    // Non-blocking pre-warm error
+  }
+}
+
 
 // Register a new user
 async function registerUser(email, password, fullName, captchaToken) {

@@ -58,37 +58,6 @@ function persistUpdates() {
 let memoryReports = loadStoredReports();
 let memoryUpdates = loadStoredUpdates();
 
-// Ensure canonical record trp-1790582037960 is seeded
-if (!memoryReports.some(r => r.id === 'trp-1790582037960')) {
-  memoryReports.unshift({
-    id: 'trp-1790582037960',
-    report_number: 'TRP-2026-9281',
-    user_id: 'anonymous_citizen',
-    title: 'Damaged Roads',
-    description: 'Deep Asphalt Road pothole causing hazard for motorists and two-wheelers.',
-    category: 'Damaged Roads',
-    priority: 'Medium',
-    severity: 'Medium',
-    severity_score: 5,
-    status: 'Submitted',
-    address: 'KM 331/6 of Nagapattinam-Mysore Road - Pappampatty Road, Irugur, Sulur, Tamil Nadu, India',
-    road_name: 'KM 331/6 of Nagapattinam-Mysore Road',
-    landmark: 'Pappampatty Road',
-    ward: 'Ward 12',
-    latitude: 11.0028,
-    longitude: 77.0654,
-    photo_urls: [],
-    responsible_department: 'Highways & Transportation Department',
-    suggested_resolution: 'Fill pothole with hot-mix asphalt and compact surface.',
-    confidence_score: 95.0,
-    summary: 'Damaged road with deep asphalt pothole requiring immediate resurfacing.',
-    assigned_to: 'Unassigned',
-    created_at: '2026-09-28T05:13:57.960Z',
-    updated_at: '2026-09-28T05:13:57.960Z'
-  });
-  persistReports();
-}
-
 // Helper to generate unique report numbers
 function generateReportNumber() {
   const rand = Math.floor(1000 + Math.random() * 9000);

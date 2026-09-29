@@ -69,25 +69,38 @@ function initDashboard() {
   try { updateCivicIntelligenceFeed([]); } catch (e) {}
   
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  lastLoadedUserIdApp = user ? (user.id || user.sub) : null;
+  let currentUserId = user ? (user.id || user.sub) : null;
+  if (!currentUserId) {
+    try {
+      const sessionStr = localStorage.getItem('cc_session');
+      if (sessionStr) {
+        const parsed = JSON.parse(sessionStr);
+        if (parsed && parsed.user) currentUserId = parsed.user.id || parsed.user.sub;
+      }
+    } catch (e) {}
+  }
+  if (!currentUserId) {
+    try {
+      const profileStr = localStorage.getItem('cc_user_profile');
+      if (profileStr) {
+        const parsed = JSON.parse(profileStr);
+        if (parsed && parsed.id) currentUserId = parsed.id;
+      }
+    } catch (e) {}
+  }
+  lastLoadedUserIdApp = currentUserId;
   
   // Show body immediately to display page shell
   document.body.classList.add('ready');
   document.body.style.visibility = 'visible';
 
-  // Render initial cached stats instantly with 0ms delay
+  // Render initial cached stats instantly with 0ms delay (authoritative refresh handled inside)
   try { loadUserStats(); } catch (e) {}
 
-  // Fetch authoritative user complaints from database
-  if (user || localStorage.getItem('cc_session')) {
-    const uid = user ? (user.id || user.sub) : null;
-    if (uid) fetchAuthoritativeUserStats(uid).catch(e => console.warn(e));
-  }
-
-  // Load initial datasets from real database for the public feed
+  // Load initial datasets from real database for the public feed (with 0ms SWR cache pre-fill)
   loadAndRenderIssues().catch(err => console.error("Error in loadAndRenderIssues:", err));
 
-  if (user || localStorage.getItem('cc_session')) {
+  if (currentUserId) {
     loadRecentNotifications().catch(err => console.error("Error in loadRecentNotifications:", err));
   }
 
@@ -322,6 +335,15 @@ async function loadUserStats(isLanguageChange = false) {
       }
     } catch (e) {}
   }
+  if (!userId) {
+    try {
+      const profileStr = localStorage.getItem('cc_user_profile');
+      if (profileStr) {
+        const parsed = JSON.parse(profileStr);
+        if (parsed && parsed.id) userId = parsed.id;
+      }
+    } catch (e) {}
+  }
 
   // Account switch check: if user changed, clear in-memory user issues
   if (lastLoadedUserIdApp && userId && lastLoadedUserIdApp !== userId) {
@@ -407,29 +429,32 @@ async function loadUserStats(isLanguageChange = false) {
   const cachedResolved = localStorage.getItem(`cc_user_stat_resolved_${userId}`) || localStorage.getItem('cc_user_stat_resolved');
   const cachedActive = localStorage.getItem(`cc_user_stat_active_${userId}`) || localStorage.getItem('cc_user_stat_active');
 
+  const hasCachedStats = (cachedTotal !== null);
   const weeklyNum = cachedWeekly !== null ? (parseInt(cachedWeekly, 10) || 0) : 0;
   const totalNum = cachedTotal !== null ? (parseInt(cachedTotal, 10) || 0) : 0;
   const resolvedNum = cachedResolved !== null ? (parseInt(cachedResolved, 10) || 0) : 0;
   const activeNum = cachedActive !== null ? (parseInt(cachedActive, 10) || 0) : 0;
 
-  // Card 1: REPORTS SUBMITTED (recent/weekly)
-  if (totalEl) totalEl.textContent = weeklyNum.toString();
-  if (weeklyEl) weeklyEl.textContent = `+${weeklyNum} ${tThisWeek}`;
+  if (hasCachedStats) {
+    // Card 1: REPORTS SUBMITTED (recent/weekly)
+    if (totalEl) totalEl.textContent = weeklyNum.toString();
+    if (weeklyEl) weeklyEl.textContent = `+${weeklyNum} ${tThisWeek}`;
 
-  // Card 2: RESOLVED REPORTS (all-time resolved)
-  if (resolvedEl) resolvedEl.textContent = resolvedNum.toString();
-  if (rateEl) {
-    const rate = totalNum > 0 ? Math.round((resolvedNum / totalNum) * 100) : 0;
-    rateEl.textContent = `${rate}% ${tResolutionRate}`;
+    // Card 2: RESOLVED REPORTS (all-time resolved)
+    if (resolvedEl) resolvedEl.textContent = resolvedNum.toString();
+    if (rateEl) {
+      const rate = totalNum > 0 ? Math.round((resolvedNum / totalNum) * 100) : 0;
+      rateEl.textContent = `${rate}% ${tResolutionRate}`;
+    }
+
+    // Card 3: IN PROGRESS (active reports)
+    if (inprogressEl) inprogressEl.textContent = activeNum.toString();
+    if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
+
+    // Card 4: TOTAL REPORTS (all-time user reports)
+    if (cityTotalEl) cityTotalEl.textContent = totalNum.toString();
+    if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
   }
-
-  // Card 3: IN PROGRESS (active reports)
-  if (inprogressEl) inprogressEl.textContent = activeNum.toString();
-  if (inprogressSubEl) inprogressSubEl.textContent = tActiveReports;
-
-  // Card 4: TOTAL REPORTS (all-time user reports)
-  if (cityTotalEl) cityTotalEl.textContent = totalNum.toString();
-  if (cityTotalSubEl) cityTotalSubEl.textContent = tAllTime;
 
   if (heroDesc) {
     if (window.i18n && typeof window.i18n.t === 'function') {
@@ -459,13 +484,33 @@ async function loadAndRenderIssues(forceReload = false) {
   const now = Date.now();
   if (!forceReload && (now - _lastIssuesFetchAt) < _FETCH_COOLDOWN_MS) return;
 
+  // 1. Instant 0ms SWR Cache Pre-fill (renders saved feed immediately from localStorage)
+  let hasRenderedCache = false;
+  if (!forceReload && !activeCategory && !activeStatus && activeFeedTab === 'recent') {
+    try {
+      const cachedFeedStr = localStorage.getItem('cc_cached_feed_issues');
+      if (cachedFeedStr) {
+        const cachedFeed = JSON.parse(cachedFeedStr);
+        if (Array.isArray(cachedFeed) && cachedFeed.length > 0) {
+          currentIssues = cachedFeed;
+          updateCommunityInsights(currentIssues);
+          updateCivicIntelligenceFeed(currentIssues);
+          try { renderCommunityActivity(currentIssues); } catch (e) {}
+          renderFeedList(cachedFeed);
+          hasRenderedCache = true;
+        }
+      }
+    } catch (e) {}
+  }
+
   try {
     isLoadingIssues = true;
     // Remove any stale GPS alerts
     const staleAlert = document.getElementById('gps-warning-alert');
     if (staleAlert) staleAlert.remove();
 
-    if (window.CrowdCityLoading) {
+    // Only display blocking loader if no cached data was rendered
+    if (!hasRenderedCache && window.CrowdCityLoading) {
       window.CrowdCityLoading.show(listContainer, {
         message: 'Retrieving community complaints feed...',
         subtitle: 'Connecting to live PostgreSQL database',
@@ -550,18 +595,27 @@ async function loadAndRenderIssues(forceReload = false) {
 
     if (error && combinedFeed.length === 0) {
       isLoadingIssues = false;
-      listContainer.innerHTML = `
-        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
-          <p>Failed to load issues: ${error || 'Unknown error'}</p>
-          <button onclick="loadAndRenderIssues(true)" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
-        </div>
-      `;
+      if (!hasRenderedCache) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
+            <p>Failed to load issues: ${error || 'Unknown error'}</p>
+            <button onclick="loadAndRenderIssues(true)" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
+          </div>
+        `;
+      }
       return;
     }
 
     currentIssues = combinedFeed;
     _lastIssuesFetchAt = Date.now(); // Mark successful fetch time for cooldown guard
+
+    // Cache recent community feed for instant 0ms subsequent loads
+    if (!activeCategory && !activeStatus && activeFeedTab === 'recent') {
+      try {
+        localStorage.setItem('cc_cached_feed_issues', JSON.stringify(combinedFeed.slice(0, 60)));
+      } catch (e) {}
+    }
 
     // Calculate and render Community Insights dynamically
     updateCommunityInsights(currentIssues);
@@ -586,13 +640,15 @@ async function loadAndRenderIssues(forceReload = false) {
       window.CrowdCityLoading.hide(listContainer);
     }
     console.error("Failed to load and render issues:", err);
-    listContainer.innerHTML = `
-      <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
-        <p>Failed to load issues: ${err.message || 'Unknown error'}</p>
-        <button onclick="loadAndRenderIssues(true)" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
-      </div>
-    `;
+    if (!hasRenderedCache) {
+      listContainer.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ef4444;"></i>
+          <p>Failed to load issues: ${err.message || 'Unknown error'}</p>
+          <button onclick="loadAndRenderIssues(true)" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.85rem;">Try Again</button>
+        </div>
+      `;
+    }
   }
 }
 
