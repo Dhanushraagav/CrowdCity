@@ -354,10 +354,17 @@ html[data-theme="dark"] .form-select option {
   color: #ffffff !important;
 }
 
-.form-input:focus, .form-textarea:focus, .form-select:focus {
-  outline: none;
+.form-input:focus,
+.form-input:focus-visible,
+.form-control:focus,
+.form-control:focus-visible,
+.form-textarea:focus,
+.form-textarea:focus-visible,
+.form-select:focus,
+.form-select:focus-visible {
+  outline: none !important;
   border-color: var(--input-focus-border);
-  box-shadow: 0 0 0 3px var(--primary-light-alpha);
+  box-shadow: 0 0 0 2px var(--focus-ring-color, rgba(13, 148, 136, 0.25));
 }
 
 .form-input:focus {
@@ -8640,13 +8647,22 @@ html.dark-theme .form-select {
 }
 
 [data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-control:focus-visible,
 [data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-input:focus-visible,
 [data-theme="dark"] .form-textarea:focus,
+[data-theme="dark"] .form-textarea:focus-visible,
 [data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-select:focus-visible,
 html.dark-theme .form-control:focus,
+html.dark-theme .form-control:focus-visible,
 html.dark-theme .form-input:focus,
+html.dark-theme .form-input:focus-visible,
 html.dark-theme .form-textarea:focus,
-html.dark-theme .form-select:focus {
+html.dark-theme .form-textarea:focus-visible,
+html.dark-theme .form-select:focus,
+html.dark-theme .form-select:focus-visible {
+  outline: none !important;
   border-color: #0d9488 !important;
   box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25) !important;
 }

@@ -3440,12 +3440,38 @@ function updateAuthUI() {
   }
 }
 
-// Prominent Document Wallet Banner displayed on top right under user profile name once per session
-function injectDocumentWalletBanner() {
+// Scoped auto-close timer for Secure Document Wallet popup
+let docWalletAutoCloseTimer = null;
+
+function clearDocWalletTimer() {
+  if (docWalletAutoCloseTimer) {
+    clearTimeout(docWalletAutoCloseTimer);
+    docWalletAutoCloseTimer = null;
+  }
+}
+
+function startDocWalletAutoCloseTimer() {
+  clearDocWalletTimer();
+  docWalletAutoCloseTimer = setTimeout(() => {
+    closeDocWalletBanner();
+  }, 5000);
+}
+
+// Prominent Document Wallet Banner displayed on top right under user profile name
+function injectDocumentWalletBanner(force = false) {
   const path = window.location.pathname;
   if (path.includes('my-documents.html')) return;
-  if (sessionStorage.getItem('cc_doc_banner_shown') === 'true') return;
-  if (document.getElementById('cc-doc-wallet-promo-banner')) return;
+  if (!force && window._cc_doc_banner_shown_this_visit) return;
+
+  const existing = document.getElementById('cc-doc-wallet-promo-banner');
+  if (existing) {
+    existing.style.opacity = '1';
+    existing.style.transform = 'translateY(0)';
+    startDocWalletAutoCloseTimer();
+    return;
+  }
+
+  window._cc_doc_banner_shown_this_visit = true;
 
   const banner = document.createElement('div');
   banner.id = 'cc-doc-wallet-promo-banner';
@@ -3492,18 +3518,28 @@ function injectDocumentWalletBanner() {
   `;
 
   document.body.appendChild(banner);
-  sessionStorage.setItem('cc_doc_banner_shown', 'true');
+
+  // The 5-second timer starts only when the popup actually becomes visible
+  startDocWalletAutoCloseTimer();
 }
 
 window.closeDocWalletBanner = function() {
+  clearDocWalletTimer();
   const banner = document.getElementById('cc-doc-wallet-promo-banner');
   if (banner) {
     banner.style.transition = 'all 0.25s ease-out';
     banner.style.opacity = '0';
     banner.style.transform = 'translateY(-10px)';
-    setTimeout(() => banner.remove(), 250);
+    setTimeout(() => {
+      if (banner.parentNode) banner.parentNode.removeChild(banner);
+    }, 250);
   }
 };
+
+window.openDocWalletBanner = function() {
+  injectDocumentWalletBanner(true);
+};
+window.injectDocumentWalletBanner = injectDocumentWalletBanner;
 
 // ==============================================================================
 // HEADER HOVER DROPDOWN INTERACTION (PUBLIC PULSE & PROFILE)

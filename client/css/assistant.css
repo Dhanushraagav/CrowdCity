@@ -303,8 +303,11 @@
   transition: border-color 0.2s ease;
 }
 
-.chat-input-field:focus {
-  border-color: var(--primary);
+.chat-input-field:focus,
+.chat-input-field:focus-visible {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px var(--focus-ring-color, rgba(13, 148, 136, 0.25)) !important;
 }
 
 .btn-send-chat {

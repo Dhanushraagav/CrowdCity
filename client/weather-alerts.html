@@ -778,10 +778,11 @@
       transition: all 0.2s ease;
     }
 
-    #weather-search-input:focus {
-      outline: none;
-      border-color: var(--weather-accent);
-      box-shadow: 0 0 0 3px var(--weather-accent-dim);
+    #weather-search-input:focus,
+    #weather-search-input:focus-visible {
+      outline: none !important;
+      border-color: var(--weather-accent) !important;
+      box-shadow: 0 0 0 2px var(--weather-accent-dim) !important;
     }
 
     [data-theme="dark"] #weather-search-input,
@@ -794,9 +795,14 @@
     }
 
     [data-theme="dark"] #weather-search-input:focus,
+    [data-theme="dark"] #weather-search-input:focus-visible,
     html[data-theme="dark"] #weather-search-input:focus,
+    html[data-theme="dark"] #weather-search-input:focus-visible,
     html.dark-theme #weather-search-input:focus,
-    body.dark-theme #weather-search-input:focus {
+    html.dark-theme #weather-search-input:focus-visible,
+    body.dark-theme #weather-search-input:focus,
+    body.dark-theme #weather-search-input:focus-visible {
+      outline: none !important;
       border-color: #38bdf8 !important;
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
     }

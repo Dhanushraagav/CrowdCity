@@ -381,8 +381,11 @@
       transition: border-color 0.2s ease;
     }
 
-    .power-search-wrap input:focus {
-      border-color: var(--primary, #0d9488);
+    .power-search-wrap input:focus,
+    .power-search-wrap input:focus-visible {
+      outline: none !important;
+      border-color: var(--primary, #0d9488) !important;
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25) !important;
       background: var(--bg-surface);
     }
 

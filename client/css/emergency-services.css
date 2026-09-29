@@ -382,11 +382,20 @@ body.emergency-body .app-sidebar.active {
   border-radius: var(--radius-md);
   padding: 0.6rem 1rem;
   flex: 1;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.search-input-group input {
-  border: none;
-  outline: none;
+.search-input-group:focus-within {
+  border-color: var(--primary, #0d9488);
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25);
+}
+
+.search-input-group input,
+.search-input-group input:focus,
+.search-input-group input:focus-visible {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   width: 100%;
   font-size: 0.9rem;
   background: transparent;
@@ -890,6 +899,12 @@ html.dark-theme .emergency-contacts-table tr {
 html.dark-theme .search-input-group {
   background: #080808 !important;
   border-color: #222222 !important;
+}
+
+[data-theme="dark"] .search-input-group:focus-within,
+html.dark-theme .search-input-group:focus-within {
+  border-color: #2dd4bf !important;
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25) !important;
 }
 
 [data-theme="dark"] .search-input-group input,

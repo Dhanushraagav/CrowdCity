@@ -1340,9 +1340,11 @@ html.theme-dark .tourism-dropdown-option.selected {
   transition: all 0.2s ease;
 }
 
-.tourism-search-input-wrap input:focus {
-  border-color: var(--primary, #0f766e);
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+.tourism-search-input-wrap input:focus,
+.tourism-search-input-wrap input:focus-visible {
+  outline: none !important;
+  border-color: var(--primary, #0f766e) !important;
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2) !important;
 }
 
 .tourism-search-clear-btn {
@@ -2716,6 +2718,16 @@ html.theme-dark .tourism-search-input-wrap input {
   background: #141414 !important;
   border-color: #2a2a2a !important;
   color: #f8fafc !important;
+}
+
+[data-theme="dark"] .tourism-search-input-wrap input:focus,
+[data-theme="dark"] .tourism-search-input-wrap input:focus-visible,
+html.dark-theme .tourism-search-input-wrap input:focus,
+html.dark-theme .tourism-search-input-wrap input:focus-visible,
+html.theme-dark .tourism-search-input-wrap input:focus,
+html.theme-dark .tourism-search-input-wrap input:focus-visible {
+  border-color: #2dd4bf !important;
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25) !important;
 }
 
 [data-theme="dark"] .tourism-category-pill,

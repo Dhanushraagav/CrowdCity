@@ -166,9 +166,11 @@
       box-sizing: border-box;
     }
 
-    .services-search-input:focus {
-      outline: none;
-      border-color: var(--srv-primary);
+    .services-search-input:focus,
+    .services-search-input:focus-visible {
+      outline: none !important;
+      border-color: var(--srv-primary) !important;
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2) !important;
     }
 
     .services-category-pills {

@@ -419,7 +419,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      border: 1px solid var(--border-color);
+      border: 1.5px solid var(--border-color);
       border-radius: var(--radius-md);
       background-color: var(--bg-app);
       padding: 4px 6px 4px 10px;
@@ -428,17 +428,20 @@
 
     .cc-chat-input-container:focus-within {
       border-color: var(--primary);
-      box-shadow: 0 0 0 1px var(--primary);
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25);
     }
 
-    .cc-chat-input {
+    .cc-chat-input,
+    .cc-chat-input:focus,
+    .cc-chat-input:focus-visible {
       flex: 1;
       height: 32px;
-      border: none;
-      background: transparent;
+      border: none !important;
+      background: transparent !important;
       color: var(--text-main);
       font-size: 0.875rem;
-      outline: none;
+      outline: none !important;
+      box-shadow: none !important;
       font-family: var(--font-body);
     }
 
@@ -598,13 +601,55 @@
     document.body.appendChild(triggerBtn);
 
     // 2.5 Create Civic Helpdesk Welcome Popup — shows after auth loads
-    function showCivicHelpPopup() {
+    let civicHelpAutoCloseTimer = null;
+
+    function clearCivicHelpTimer() {
+      if (civicHelpAutoCloseTimer) {
+        clearTimeout(civicHelpAutoCloseTimer);
+        civicHelpAutoCloseTimer = null;
+      }
+    }
+
+    function startCivicHelpAutoCloseTimer() {
+      clearCivicHelpTimer();
+      civicHelpAutoCloseTimer = setTimeout(() => {
+        closeCivicHelpPopup(false);
+      }, 5000);
+    }
+
+    function closeCivicHelpPopup(isManualDismiss = false) {
+      clearCivicHelpTimer();
+      const calloutEl = document.getElementById('cc-chat-callout');
+      if (calloutEl) {
+        calloutEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        calloutEl.style.opacity = '0';
+        calloutEl.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+          if (calloutEl.parentNode) calloutEl.parentNode.removeChild(calloutEl);
+        }, 350);
+      }
+      if (isManualDismiss) {
+        sessionStorage.setItem('cc_callout_dismissed_v2', 'true');
+      }
+    }
+
+    function showCivicHelpPopup(force = false) {
       // Clear any stale old localStorage key from previous versions
       localStorage.removeItem('cc_callout_dismissed');
 
-      // If already dismissed this session or already visible, skip
-      if (sessionStorage.getItem('cc_callout_dismissed_v2')) return;
-      if (document.getElementById('cc-chat-callout')) return;
+      // If already shown this visit or dismissed, skip unless forced
+      if (!force && window._cc_callout_shown_this_visit) return;
+      if (!force && sessionStorage.getItem('cc_callout_dismissed_v2')) return;
+
+      const existing = document.getElementById('cc-chat-callout');
+      if (existing) {
+        existing.style.opacity = '1';
+        existing.style.transform = 'translateY(0)';
+        startCivicHelpAutoCloseTimer();
+        return;
+      }
+
+      window._cc_callout_shown_this_visit = true;
 
       // Get logged-in user name
       let userName = 'Citizen';
@@ -636,20 +681,25 @@
 
       calloutEl.querySelector('.cc-callout-close').addEventListener('click', (e) => {
         e.stopPropagation();
-        calloutEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        calloutEl.style.opacity = '0';
-        calloutEl.style.transform = 'translateY(10px)';
-        setTimeout(() => { if (calloutEl.parentNode) calloutEl.parentNode.removeChild(calloutEl); }, 350);
-        sessionStorage.setItem('cc_callout_dismissed_v2', 'true');
+        closeCivicHelpPopup(true);
       });
 
       calloutEl.querySelector('.cc-callout-action').addEventListener('click', () => {
+        closeCivicHelpPopup(true);
         toggleChatWindow();
       });
 
       document.body.appendChild(calloutEl);
+
+      // The 5-second timer starts only when the popup actually becomes visible
+      startCivicHelpAutoCloseTimer();
       console.log('[ChatWidget] Civic Helpdesk popup shown for:', userName);
     }
+
+    // Expose helpers globally for manual trigger / test verification
+    window.showCivicHelpPopup = showCivicHelpPopup;
+    window.openCivicHelpPopup = function() { showCivicHelpPopup(true); };
+    window.closeCivicHelpPopup = closeCivicHelpPopup;
 
     // Delay popup to allow auth to finish loading the user session
     setTimeout(showCivicHelpPopup, 2000);
@@ -802,14 +852,7 @@
     if (chatWin.classList.contains('open')) {
       trigger.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
       
-      const callout = document.getElementById('cc-chat-callout');
-      if (callout) {
-        callout.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        callout.style.opacity = '0';
-        callout.style.transform = 'translateY(10px)';
-        setTimeout(() => { if (callout.parentNode) callout.parentNode.removeChild(callout); }, 350);
-        sessionStorage.setItem('cc_callout_dismissed_v2', 'true');
-      }
+      closeCivicHelpPopup(true);
 
       // Auto-focus input box with slight timeout to let slide-up animate smoothly
       const input = document.getElementById('cc-chat-input-box');
