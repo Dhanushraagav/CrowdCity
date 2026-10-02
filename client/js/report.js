@@ -1429,10 +1429,62 @@ function setCoordinates(lat, lng) {
   reverseGeocode(lat, lng);
 }
 
-// Request Browser Geolocation
+// Request Browser Geolocation via Central Location Service
 function requestBrowserLocation(showAlerts = false) {
+  // If not forcing fresh GPS and valid fresh session location exists, center map immediately
+  if (!showAlerts && window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+    const loc = window.CrowdCityLocationService.getCurrentLocation();
+    if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+      if (reportMap) {
+        reportMap.setView([loc.latitude, loc.longitude], 15);
+      }
+      setCoordinates(loc.latitude, loc.longitude);
+      return;
+    }
+  }
+
+  // Use Central CrowdCityLocationService
+  if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+    window.CrowdCityLocationService.requestFreshLocation({ force: showAlerts, timeoutMs: 8000 })
+      .then(loc => {
+        if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+          if (reportMap) {
+            reportMap.setView([loc.latitude, loc.longitude], 15);
+          }
+          setCoordinates(loc.latitude, loc.longitude);
+          if (showAlerts) {
+            const alertBanner = document.getElementById('report-alert');
+            if (alertBanner) {
+              alertBanner.innerHTML = `<i class="fa-solid fa-location-dot"></i> GPS coordinates resolved successfully.`;
+              alertBanner.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+              alertBanner.style.color = '#10b981';
+              alertBanner.classList.remove('hidden');
+              setTimeout(() => alertBanner.classList.add('hidden'), 3000);
+            }
+          }
+        } else {
+          if (window.LocationAuthority && typeof window.LocationAuthority.onGPSFailed === 'function') {
+            window.LocationAuthority.onGPSFailed({ message: 'Location unavailable or denied' });
+          }
+          if (showAlerts && window.showToast) {
+            window.showToast("Failed to retrieve location: Permission denied or unavailable. Please click on the map to set location manually.", "warning");
+          }
+        }
+      })
+      .catch(err => {
+        console.warn("Geolocation request failed:", err);
+        if (window.LocationAuthority && typeof window.LocationAuthority.onGPSFailed === 'function') {
+          window.LocationAuthority.onGPSFailed(err);
+        }
+        if (showAlerts && window.showToast) {
+          window.showToast("Failed to retrieve location. Please click on the map to set location manually.", "error");
+        }
+      });
+    return;
+  }
+
   if (!navigator.geolocation) {
-    if (showAlerts) window.showToast("Geolocation is not supported by your browser.", "warning");
+    if (showAlerts && window.showToast) window.showToast("Geolocation is not supported by your browser.", "warning");
     return;
   }
 
@@ -1464,7 +1516,7 @@ function requestBrowserLocation(showAlerts = false) {
       if (window.LocationAuthority && typeof window.LocationAuthority.onGPSFailed === 'function') {
         window.LocationAuthority.onGPSFailed(error);
       }
-      if (showAlerts) {
+      if (showAlerts && window.showToast) {
         window.showToast(`Failed to retrieve location: ${error.message}. Please click on the map to set location manually.`, "error");
       }
     },

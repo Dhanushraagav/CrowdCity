@@ -46,6 +46,50 @@ if (!window.CROWDCITY_CONFIG.SUPPORT) {
   };
 }
 
+// CrowdCity Location Service interface fallback (upgraded when user-location.js loads)
+if (typeof window !== 'undefined' && !window.CrowdCityLocationService) {
+  window.CrowdCityLocationService = {
+    hasFreshSessionLocation: function() {
+      try {
+        const raw = sessionStorage.getItem('cc_session_location');
+        return Boolean(raw && JSON.parse(raw)?.latitude);
+      } catch (e) { return false; }
+    },
+    getCurrentLocation: function() {
+      try {
+        const raw = sessionStorage.getItem('cc_session_location');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    },
+    clearSessionLocation: function() {
+      try {
+        sessionStorage.removeItem('cc_session_location');
+        localStorage.removeItem('cc_session_location');
+        sessionStorage.removeItem('cc_weather_coords');
+        localStorage.removeItem('cc_weather_coords');
+        sessionStorage.removeItem('cc_specific_location');
+        localStorage.removeItem('cc_specific_location');
+        sessionStorage.removeItem('user_district');
+        localStorage.removeItem('user_district');
+        sessionStorage.removeItem('crowdcity_user_district');
+        localStorage.removeItem('crowdcity_user_district');
+        sessionStorage.removeItem('cc_last_emergency_loc');
+        localStorage.removeItem('cc_last_emergency_loc');
+        sessionStorage.removeItem('cc_weather_cache_en');
+        sessionStorage.removeItem('cc_weather_cache_ta');
+        localStorage.removeItem('cc_weather_cache_en');
+        localStorage.removeItem('cc_weather_cache_ta');
+      } catch (e) {}
+    },
+    initLoginLocation: async function(userId, newSessionId) {
+      if (typeof window.CrowdCityLocation?.requestFreshLocation === 'function') {
+        return window.CrowdCityLocation.requestFreshLocation({ force: true });
+      }
+      return null;
+    }
+  };
+}
+
 // Global helper to format category names nicely for display
 window.formatCategoryName = function(category) {
   if (!category) return '';
@@ -574,8 +618,12 @@ function _attachAuthStateListener() {
     // Proper logging: SIGNED_IN, PASSWORD_RECOVERY, SIGNED_OUT
     if (event === 'SIGNED_IN') {
       console.log('[Auth Log] SIGNED_IN event triggered');
-      if (session && session.user && typeof getLoginSessionId === 'function' && !getLoginSessionId()) {
-        startNewLoginSession(session.user.id);
+      if (session && session.user) {
+        if (typeof getLoginSessionId === 'function' && !getLoginSessionId()) {
+          startNewLoginSession(session.user.id);
+        } else if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.initLoginLocation === 'function') {
+          window.CrowdCityLocationService.initLoginLocation(session.user.id);
+        }
       }
     } else if (event === 'PASSWORD_RECOVERY') {
       console.log('[Auth Log] PASSWORD_RECOVERY event triggered');
@@ -1511,6 +1559,11 @@ async function clearSessionSilent() {
   localStorage.removeItem('cc_my_complaints_civic');
   localStorage.removeItem('cc_my_complaints_trans');
   localStorage.removeItem('cc_user_uploaded_docs');
+  try {
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.clearSessionLocation === 'function') {
+      window.CrowdCityLocationService.clearSessionLocation();
+    }
+  } catch (e) {}
   try { sessionStorage.removeItem('cc_scheme_checker_profile'); } catch (e) {}
   try {
     if (typeof indexedDB !== 'undefined') {
@@ -1831,6 +1884,9 @@ async function verifyProfileAndRoute(user, showAlert, passedToken = null) {
       prewarmCitizenDashboardCache(user.id);
       if (typeof startNewLoginSession === 'function') {
         startNewLoginSession(user.id);
+      }
+      if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.initLoginLocation === 'function') {
+        window.CrowdCityLocationService.initLoginLocation(user.id);
       }
     }
   } catch (e) {}
@@ -2242,12 +2298,25 @@ async function logoutUser() {
     'cc_wallet_shown_for_session',
     'cc_helpdesk_shown_for_session',
     'cc_callout_dismissed_v2',
-    'cc_doc_banner_shown'
+    'cc_doc_banner_shown',
+    'cc_session_location',
+    'cc_weather_coords',
+    'cc_specific_location',
+    'user_district',
+    'crowdcity_user_district',
+    'cc_last_emergency_loc',
+    'cc_weather_cache_en',
+    'cc_weather_cache_ta'
   ];
   authKeys.forEach(k => {
     try { localStorage.removeItem(k); } catch (e) {}
     try { sessionStorage.removeItem(k); } catch (e) {}
   });
+  try {
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.clearSessionLocation === 'function') {
+      window.CrowdCityLocationService.clearSessionLocation();
+    }
+  } catch (e) {}
   try {
     if (typeof clearLoginSessionPopupState === 'function') {
       clearLoginSessionPopupState();
@@ -3510,7 +3579,24 @@ function startNewLoginSession(userId) {
     sessionStorage.removeItem('cc_wallet_shown_for_session');
     localStorage.removeItem('cc_helpdesk_shown_for_session');
     sessionStorage.removeItem('cc_helpdesk_shown_for_session');
+
+    // Clear stale location keys on new login session so fresh GPS is obtained
+    sessionStorage.removeItem('cc_session_location');
+    localStorage.removeItem('cc_weather_coords');
+    sessionStorage.removeItem('cc_weather_coords');
+    localStorage.removeItem('cc_specific_location');
+    sessionStorage.removeItem('cc_specific_location');
   } catch (e) {}
+
+  // Request fresh location for this login session
+  try {
+    if (typeof window !== 'undefined' && window.CrowdCityLocationService && typeof window.CrowdCityLocationService.initLoginLocation === 'function') {
+      window.CrowdCityLocationService.initLoginLocation(userId, newSessionId);
+    }
+  } catch (e) {
+    console.warn('[Auth] Location init warning:', e);
+  }
+
   return newSessionId;
 }
 

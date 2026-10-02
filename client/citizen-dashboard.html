@@ -910,8 +910,8 @@
     window.addEventListener('crowdcity:location_detected', (e) => {
       if (e.detail) {
         updateLocationDisplay(e.detail);
-        const dLat = (typeof e.detail.lat === 'number') ? e.detail.lat : currentLat;
-        const dLng = (typeof (e.detail.lon || e.detail.lng) === 'number') ? (e.detail.lon || e.detail.lng) : currentLng;
+        const dLat = (typeof e.detail.latitude === 'number') ? e.detail.latitude : (typeof e.detail.lat === 'number' ? e.detail.lat : currentLat);
+        const dLng = (typeof e.detail.longitude === 'number') ? e.detail.longitude : (typeof (e.detail.lon || e.detail.lng) === 'number' ? (e.detail.lon || e.detail.lng) : currentLng);
         if (typeof dLat === 'number' && typeof dLng === 'number') {
           currentLat = dLat;
           currentLng = dLng;
@@ -926,8 +926,8 @@
     window.addEventListener('crowdcity:location_changed', (e) => {
       if (e.detail) {
         updateLocationDisplay(e.detail);
-        const dLat = (typeof e.detail.lat === 'number') ? e.detail.lat : currentLat;
-        const dLng = (typeof (e.detail.lon || e.detail.lng) === 'number') ? (e.detail.lon || e.detail.lng) : currentLng;
+        const dLat = (typeof e.detail.latitude === 'number') ? e.detail.latitude : (typeof e.detail.lat === 'number' ? e.detail.lat : currentLat);
+        const dLng = (typeof e.detail.longitude === 'number') ? e.detail.longitude : (typeof (e.detail.lon || e.detail.lng) === 'number' ? (e.detail.lon || e.detail.lng) : currentLng);
         if (typeof dLat === 'number' && typeof dLng === 'number') {
           currentLat = dLat;
           currentLng = dLng;
@@ -950,62 +950,59 @@
       if (cachedWeatherData) renderWeather(cachedWeatherData);
     });
 
-    // Initial Execution
-    const savedLoc = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function')
-      ? window.CrowdCityLocation.getSavedSpecificLocation(getLang())
-      : null;
+    // Initial Execution using Central CrowdCityLocationService
+    let savedLoc = null;
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sess = window.CrowdCityLocationService.getCurrentLocation();
+      if (sess && sess.district && !sess.isFallback) {
+        savedLoc = {
+          specificName: sess.locality || sess.district,
+          specificNameTa: sess.displayNameTa,
+          district: sess.district,
+          displayName: getLang() === 'ta' ? (sess.displayNameTa || sess.displayName) : sess.displayName,
+          lat: sess.latitude,
+          lon: sess.longitude
+        };
+      }
+    }
+    if (!savedLoc && window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function') {
+      const candidate = window.CrowdCityLocation.getSavedSpecificLocation(getLang());
+      if (candidate && candidate.isCurrentSession) {
+        savedLoc = candidate;
+      }
+    }
 
-    if (savedLoc) {
+    if (savedLoc && savedLoc.specificName && savedLoc.specificName !== 'Tamil Nadu') {
       updateLocationDisplay(savedLoc);
       currentDistrict = savedLoc.district || 'Tamil Nadu';
       if (typeof savedLoc.lat === 'number' && typeof (savedLoc.lon || savedLoc.lng) === 'number') {
         currentLat = savedLoc.lat;
         currentLng = savedLoc.lon || savedLoc.lng;
       }
+      updateWeather(currentDistrict, false, currentLat, currentLng);
     } else {
-      const initialDistrict = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
-        ? window.CrowdCityLocation.getSavedUserDistrict()
-        : (localStorage.getItem('user_district') || 'Tamil Nadu');
-      currentDistrict = initialDistrict;
-      updateLocationDisplay({ specificName: initialDistrict, district: initialDistrict });
+      updateLocationDisplay({ specificName: 'Tamil Nadu', district: 'Tamil Nadu' });
+      updateWeather('Tamil Nadu', false, null, null);
     }
 
-    try {
-      if (currentLat === null || currentLng === null) {
-        const coordsStr = localStorage.getItem('cc_weather_coords');
-        if (coordsStr) {
-          const coords = JSON.parse(coordsStr);
-          if (coords && typeof coords.lat === 'number' && typeof coords.lon === 'number') {
-            currentLat = coords.lat;
-            currentLng = coords.lon;
-          }
-        }
-      }
-    } catch (e) {}
-
-    // Store in shared coordinates storage so Weather page uses identical coordinates
-    if (typeof currentLat === 'number' && typeof currentLng === 'number') {
-      try {
-        localStorage.setItem('cc_weather_coords', JSON.stringify({ lat: currentLat, lon: currentLng }));
-      } catch (e) {}
-    }
-
-    updateWeather(currentDistrict, false, currentLat, currentLng);
-
-    // If initial district/location is generic or not yet detected, kick off non-blocking background detection
-    if (!savedLoc || !savedLoc.specificName || savedLoc.specificName === 'Tamil Nadu' || savedLoc.district === 'Tamil Nadu') {
-      if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectSpecificLocation === 'function') {
-        window.CrowdCityLocation.detectSpecificLocation({ timeoutMs: 5000, lang: getLang() })
+    // Ensure fresh session location is requested if not already captured
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.hasFreshSessionLocation === 'function') {
+      if (!window.CrowdCityLocationService.hasFreshSessionLocation()) {
+        window.CrowdCityLocationService.requestFreshLocation({ timeoutMs: 6000, lang: getLang() })
           .then(det => {
-            if (det && det.specificName) {
-              updateLocationDisplay(det);
-              if (typeof det.lat === 'number' && typeof (det.lon || det.lng) === 'number') {
-                currentLat = det.lat;
-                currentLng = det.lon || det.lng;
-                try {
-                  localStorage.setItem('cc_weather_coords', JSON.stringify({ lat: currentLat, lon: currentLng }));
-                } catch (e) {}
-              }
+            if (det && det.district && !det.isFallback) {
+              const displayObj = {
+                specificName: det.locality,
+                specificNameTa: det.displayNameTa,
+                district: det.district,
+                displayName: getLang() === 'ta' ? (det.displayNameTa || det.displayName) : det.displayName,
+                lat: det.latitude,
+                lon: det.longitude
+              };
+              updateLocationDisplay(displayObj);
+              currentLat = det.latitude;
+              currentLng = det.longitude;
+              currentDistrict = det.district;
               updateWeather(det.district, true, currentLat, currentLng);
             }
           })

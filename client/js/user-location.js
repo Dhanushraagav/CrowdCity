@@ -1225,6 +1225,90 @@
     return nearest ? nearest.name : null;
   }
 
+  // Central Session Location Storage Keys
+  const SESSION_LOCATION_KEY = 'cc_session_location';
+  const WEATHER_COORDS_KEY = 'cc_weather_coords';
+  const SPECIFIC_LOCATION_KEY = 'cc_specific_location';
+  const USER_DISTRICT_KEY = 'user_district';
+  const LOGIN_SESSION_KEY = 'cc_login_session_id';
+
+  let inFlightLocationPromise = null;
+
+  function getActiveLoginSessionId() {
+    try {
+      if (typeof window !== 'undefined' && typeof window.getLoginSessionId === 'function') {
+        const s = window.getLoginSessionId();
+        if (s) return s;
+      }
+      if (typeof sessionStorage !== 'undefined') {
+        const sessId = sessionStorage.getItem(LOGIN_SESSION_KEY);
+        if (sessId) return sessId;
+      }
+      if (typeof localStorage !== 'undefined') {
+        const locId = localStorage.getItem(LOGIN_SESSION_KEY);
+        if (locId) return locId;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function hasFreshSessionLocation() {
+    try {
+      if (typeof sessionStorage === 'undefined') return false;
+      const raw = sessionStorage.getItem(SESSION_LOCATION_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed.latitude !== 'number' || typeof parsed.longitude !== 'number') {
+        return false;
+      }
+      const activeSessionId = getActiveLoginSessionId();
+      if (activeSessionId && parsed.sessionId && parsed.sessionId !== activeSessionId) {
+        return false;
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function getSessionLocation() {
+    try {
+      if (!hasFreshSessionLocation()) return null;
+      const raw = sessionStorage.getItem(SESSION_LOCATION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearSessionLocation() {
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(SESSION_LOCATION_KEY);
+        sessionStorage.removeItem(WEATHER_COORDS_KEY);
+        sessionStorage.removeItem(SPECIFIC_LOCATION_KEY);
+        sessionStorage.removeItem('cc_last_emergency_loc');
+        sessionStorage.removeItem('cc_weather_cache_en');
+        sessionStorage.removeItem('cc_weather_cache_ta');
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(SESSION_LOCATION_KEY);
+        localStorage.removeItem(WEATHER_COORDS_KEY);
+        localStorage.removeItem(SPECIFIC_LOCATION_KEY);
+        localStorage.removeItem(USER_DISTRICT_KEY);
+        localStorage.removeItem('crowdcity_user_district');
+        localStorage.removeItem('cc_weather_cache_en');
+        localStorage.removeItem('cc_weather_cache_ta');
+      }
+      inFlightLocationPromise = null;
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('crowdcity:location_cleared', { detail: { timestamp: Date.now() } }));
+      }
+    } catch (e) {
+      console.warn('[CrowdCityLocationService] clearSessionLocation error:', e);
+    }
+  }
+
   /**
    * Check synchronous storage mechanisms for citizen district in strict priority order:
    * 1. Physical coordinates ('cc_weather_coords') - ground truth from live GPS.
@@ -1235,6 +1319,14 @@
    */
   function getSavedUserDistrict() {
     try {
+      // 0. PRIORITY 0: Authoritative Session Location from CrowdCityLocationService
+      if (typeof hasFreshSessionLocation === 'function' && hasFreshSessionLocation()) {
+        const sess = typeof getSessionLocation === 'function' ? getSessionLocation() : null;
+        if (sess && sess.district && sess.district !== 'Tamil Nadu') {
+          return sess.district;
+        }
+      }
+
       // 1. PRIORITY 1: Physical coordinates from live browser geolocation ('cc_weather_coords')
       // This represents the citizen's actual physical location and overrides any stale textual keys.
       const coordsStr = localStorage.getItem('cc_weather_coords');
@@ -1559,12 +1651,60 @@
     try {
       const isTa = lang === 'ta';
 
-      // 1. Check if specific location object is cached
-      const specificCached = localStorage.getItem('cc_specific_location');
+      // 0. PRIORITY 0: Authoritative Session Location from CrowdCityLocationService
+      if (typeof hasFreshSessionLocation === 'function' && hasFreshSessionLocation()) {
+        const sess = typeof getSessionLocation === 'function' ? getSessionLocation() : null;
+        if (sess && sess.district) {
+          const specEn = sess.locality || sess.district;
+          const specTa = sess.displayNameTa || translateLocalityName(specEn, 'ta');
+          const distEn = sess.district;
+          const distTa = translateLocalityName(distEn, 'ta');
+          const displayName = isTa ? (specTa || specEn) : (sess.displayName || specEn);
+          return {
+            ...sess,
+            specificName: specEn,
+            specificNameTa: specTa,
+            parentArea: distEn,
+            parentAreaTa: distTa,
+            district: distEn,
+            districtTa: distTa,
+            lat: sess.latitude,
+            lng: sess.longitude,
+            lon: sess.longitude,
+            displayName,
+            isCurrentSession: true,
+            isFallback: Boolean(sess.isFallback)
+          };
+        }
+      }
+
+      // Check if user explicitly selected a district
+      const manualDist = (typeof localStorage !== 'undefined') ? (localStorage.getItem('user_district') || localStorage.getItem('crowdcity_user_district')) : null;
+      if (manualDist && manualDist !== 'all' && manualDist !== 'Tamil Nadu') {
+        const specEn = translateLocalityName(manualDist, 'en');
+        const specTa = translateLocalityName(manualDist, 'ta');
+        const normDist = normalizeDistrictName(manualDist) || specEn;
+        const normDistTa = translateLocalityName(normDist, 'ta');
+        return {
+          specificName: specEn,
+          specificNameTa: specTa,
+          parentArea: isTa ? 'தமிழ்நாடு' : 'Tamil Nadu',
+          parentAreaTa: 'தமிழ்நாடு',
+          district: normDist,
+          districtTa: normDistTa,
+          displayName: isTa ? specTa : specEn,
+          isManualSelection: true
+        };
+      }
+
+      // 1. Check if specific location object is cached AND belongs to active session
+      const specificCached = (typeof localStorage !== 'undefined') ? localStorage.getItem('cc_specific_location') : null;
       if (specificCached) {
         try {
           const obj = JSON.parse(specificCached);
-          if (obj && (obj.specificName || obj.locality || obj.district)) {
+          const activeSessionId = typeof getActiveLoginSessionId === 'function' ? getActiveLoginSessionId() : null;
+          const isStaleSession = activeSessionId && obj.sessionId && obj.sessionId !== activeSessionId;
+          if (obj && (obj.specificName || obj.locality || obj.district) && !isStaleSession) {
             const rawSpec = obj.specificName || obj.locality || obj.district;
             const specEn = translateLocalityName(rawSpec, 'en');
             const specTa = translateLocalityName(obj.specificNameTa || rawSpec, 'ta');
@@ -1782,8 +1922,267 @@
     return null;
   }
 
+  /**
+   * Request fresh browser geolocation and store in active login session.
+   * Single authoritative entry point for obtaining user location.
+   */
+  async function requestFreshLocation(options = {}) {
+    const force = options.force === true;
+    const timeoutMs = options.timeoutMs || 8000;
+    const lang = options.lang || (typeof window !== 'undefined' && window.i18n && typeof window.i18n.getLanguage === 'function' ? window.i18n.getLanguage() : 'en');
+
+    // 1. If not forcing fresh GPS and valid fresh session location exists, return immediately without prompt
+    if (!force && hasFreshSessionLocation()) {
+      const existing = getSessionLocation();
+      if (existing) return existing;
+    }
+
+    // 2. Reuse in-flight promise to prevent duplicate concurrent prompts or race conditions
+    if (inFlightLocationPromise && !force) {
+      return inFlightLocationPromise;
+    }
+
+    inFlightLocationPromise = (async () => {
+      if (typeof navigator === 'undefined' || !navigator.geolocation) {
+        console.warn('[CrowdCityLocationService] navigator.geolocation not supported.');
+        const fallback = {
+          latitude: null,
+          longitude: null,
+          accuracy: null,
+          timestamp: Date.now(),
+          locality: 'Tamil Nadu',
+          district: 'Tamil Nadu',
+          state: 'Tamil Nadu',
+          displayName: 'Tamil Nadu',
+          displayNameTa: 'தமிழ்நாடு',
+          isCurrentSession: false,
+          isFallback: true,
+          permissionState: 'unsupported',
+          sessionId: getActiveLoginSessionId()
+        };
+        return fallback;
+      }
+
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          let hasSettled = false;
+          const timer = setTimeout(() => {
+            if (!hasSettled) {
+              hasSettled = true;
+              const timeoutErr = new Error('Geolocation timeout');
+              timeoutErr.code = 3;
+              reject(timeoutErr);
+            }
+          }, timeoutMs);
+
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              if (hasSettled) return;
+              hasSettled = true;
+              clearTimeout(timer);
+              resolve(position);
+            },
+            (error) => {
+              if (hasSettled) return;
+              hasSettled = true;
+              clearTimeout(timer);
+              reject(error);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: timeoutMs,
+              maximumAge: force ? 0 : 30000
+            }
+          );
+        });
+
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy || null;
+        const sessionId = getActiveLoginSessionId() || ('sess_' + Date.now());
+
+        let resolved = null;
+        try {
+          resolved = await reverseGeocodeCoords(lat, lng, lang);
+        } catch (revErr) {
+          console.warn('[CrowdCityLocationService] reverse geocode error:', revErr);
+        }
+
+        if (!resolved || !resolved.district || resolved.district === 'Tamil Nadu') {
+          const nearestDist = findNearestDistrictByCoords(lat, lng);
+          if (nearestDist) {
+            resolved = {
+              specificName: translateLocalityName(nearestDist, 'en'),
+              specificNameTa: translateLocalityName(nearestDist, 'ta'),
+              parentArea: 'Tamil Nadu',
+              parentAreaTa: 'தமிழ்நாடு',
+              district: nearestDist,
+              districtTa: translateLocalityName(nearestDist, 'ta'),
+              lat,
+              lng,
+              displayName: lang === 'ta' ? translateLocalityName(nearestDist, 'ta') : translateLocalityName(nearestDist, 'en')
+            };
+          }
+        }
+
+        const districtName = resolved?.district || 'Tamil Nadu';
+        const localityName = resolved?.specificName || districtName;
+        const displayName = resolved?.displayName || localityName;
+        const displayNameTa = resolved?.specificNameTa || translateLocalityName(localityName, 'ta');
+
+        const sessionLocationPayload = {
+          latitude: lat,
+          longitude: lng,
+          accuracy,
+          timestamp: Date.now(),
+          locality: localityName,
+          district: districtName,
+          state: 'Tamil Nadu',
+          displayName,
+          displayNameTa,
+          isCurrentSession: true,
+          isFallback: false,
+          permissionState: 'granted',
+          sessionId
+        };
+
+        try {
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem(SESSION_LOCATION_KEY, JSON.stringify(sessionLocationPayload));
+            sessionStorage.setItem(WEATHER_COORDS_KEY, JSON.stringify({ lat, lon: lng, ts: Date.now() }));
+            sessionStorage.setItem(SPECIFIC_LOCATION_KEY, JSON.stringify({
+              specificName: localityName,
+              specificNameTa: displayNameTa,
+              parentArea: districtName,
+              parentAreaTa: translateLocalityName(districtName, 'ta'),
+              district: districtName,
+              districtTa: translateLocalityName(districtName, 'ta'),
+              lat,
+              lng,
+              displayName,
+              sessionId
+            }));
+          }
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(WEATHER_COORDS_KEY, JSON.stringify({ lat, lon: lng, ts: Date.now() }));
+            localStorage.setItem(SPECIFIC_LOCATION_KEY, JSON.stringify({
+              specificName: localityName,
+              specificNameTa: displayNameTa,
+              parentArea: districtName,
+              parentAreaTa: translateLocalityName(districtName, 'ta'),
+              district: districtName,
+              districtTa: translateLocalityName(districtName, 'ta'),
+              lat,
+              lng,
+              displayName,
+              sessionId
+            }));
+            localStorage.setItem(USER_DISTRICT_KEY, districtName);
+          }
+        } catch (stErr) {
+          console.warn('[CrowdCityLocationService] storage save warning:', stErr);
+        }
+
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
+            detail: {
+              ...sessionLocationPayload,
+              lat,
+              lng,
+              lon: lng
+            }
+          }));
+          window.dispatchEvent(new CustomEvent('crowdcity:location_changed', {
+            detail: {
+              ...sessionLocationPayload,
+              lat,
+              lng,
+              lon: lng
+            }
+          }));
+        }
+
+        return sessionLocationPayload;
+      } catch (err) {
+        console.warn('[CrowdCityLocationService] Browser geolocation denied or timed out:', err.message || err);
+        const permState = (err && err.code === 1) ? 'denied' : ((err && err.code === 3) ? 'timeout' : 'unavailable');
+        
+        const fallback = {
+          latitude: null,
+          longitude: null,
+          accuracy: null,
+          timestamp: Date.now(),
+          locality: 'Tamil Nadu',
+          district: 'Tamil Nadu',
+          state: 'Tamil Nadu',
+          displayName: lang === 'ta' ? 'தமிழ்நாடு' : 'Tamil Nadu',
+          displayNameTa: 'தமிழ்நாடு',
+          isCurrentSession: false,
+          isFallback: true,
+          permissionState: permState,
+          sessionId: getActiveLoginSessionId()
+        };
+
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('crowdcity:location_failed', {
+            detail: { error: err.message, permissionState: permState }
+          }));
+        }
+
+        return fallback;
+      } finally {
+        inFlightLocationPromise = null;
+      }
+    })();
+
+    return inFlightLocationPromise;
+  }
+
+  async function initLoginLocation(userId, optionalSessionId) {
+    try {
+      clearSessionLocation();
+      if (optionalSessionId && typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(LOGIN_SESSION_KEY, optionalSessionId);
+      }
+      return await requestFreshLocation({ force: true });
+    } catch (e) {
+      console.warn('[CrowdCityLocationService] initLoginLocation error:', e);
+      return null;
+    }
+  }
+
+  function getCurrentLocation() {
+    if (hasFreshSessionLocation()) {
+      return getSessionLocation();
+    }
+    return null;
+  }
+
+  // Export Central Location Service
+  const CrowdCityLocationService = {
+    SESSION_LOCATION_KEY,
+    COORDS_STORAGE_KEY: WEATHER_COORDS_KEY,
+    SPECIFIC_LOCATION_KEY,
+    USER_DISTRICT_KEY,
+    LOGIN_SESSION_KEY,
+    initLoginLocation,
+    requestFreshLocation,
+    getCurrentLocation,
+    getSessionLocation,
+    hasFreshSessionLocation,
+    clearSessionLocation,
+    getSavedSpecificLocation,
+    getSavedUserDistrict,
+    setUserDistrict,
+    normalizeDistrictName,
+    findNearestDistrictByCoords,
+    reverseGeocodeCoords,
+    translateLocalityName
+  };
+
   // Export to root (window in browser, global/module in Node)
   const locationService = {
+    ...CrowdCityLocationService,
     TN_DISTRICTS_CENTROIDS,
     DISTRICT_ALIASES,
     TALUK_TO_DISTRICT,
@@ -1801,13 +2200,19 @@
     setUserDistrict
   };
 
+  root.CrowdCityLocationService = CrowdCityLocationService;
   root.CrowdCityLocation = locationService;
   if (typeof global !== 'undefined') {
+    global.CrowdCityLocationService = CrowdCityLocationService;
     global.CrowdCityLocation = locationService;
   }
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = locationService;
+    module.exports = {
+      ...locationService,
+      CrowdCityLocationService,
+      CrowdCityLocation: locationService
+    };
   }
 
 })(typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : this));

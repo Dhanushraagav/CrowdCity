@@ -1002,6 +1002,18 @@ function getUserCoordinates() {
       return;
     }
 
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sess = window.CrowdCityLocationService.getCurrentLocation();
+      if (sess && typeof sess.latitude === 'number' && typeof sess.longitude === 'number' && !sess.isFallback) {
+        cachedUserCoords = {
+          latitude: sess.latitude,
+          longitude: sess.longitude
+        };
+        resolve(cachedUserCoords);
+        return;
+      }
+    }
+
     if (!navigator.geolocation) {
       reject(new Error("Geolocation not supported"));
       return;

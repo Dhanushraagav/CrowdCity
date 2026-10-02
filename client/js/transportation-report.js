@@ -10,6 +10,13 @@ let triageDebounceTimer = null;
 
 // Initialize Page & Map Picker on Load
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+    const sessLoc = window.CrowdCityLocationService.getCurrentLocation();
+    if (sessLoc && typeof sessLoc.latitude === 'number' && typeof sessLoc.longitude === 'number' && !sessLoc.isFallback) {
+      currentLat = sessLoc.latitude;
+      currentLng = sessLoc.longitude;
+    }
+  }
   initMapPicker();
 });
 
@@ -53,11 +60,33 @@ function updateLocationCoords(lat, lng) {
 
   const addrInput = document.getElementById('report-address');
   if (addrInput && !addrInput.value) {
-    addrInput.value = `Lat: ${currentLat}, Lng: ${currentLng} (Smart City Zone)`;
+    let locLabel = 'Smart City Zone';
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sess = window.CrowdCityLocationService.getCurrentLocation();
+      if (sess && sess.displayName) locLabel = sess.displayName;
+    }
+    addrInput.value = `Lat: ${currentLat}, Lng: ${currentLng} (${locLabel})`;
   }
 }
 
 function autoDetectGPS() {
+  if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+    window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 8000 })
+      .then(loc => {
+        if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+          updateLocationCoords(loc.latitude, loc.longitude);
+          if (pickerMap) pickerMap.setZoom(16);
+        } else {
+          alert('Unable to retrieve GPS location. You can click on the map to set location.');
+        }
+      })
+      .catch(err => {
+        console.warn('GPS detection failed:', err);
+        alert('Unable to retrieve GPS location. You can click on the map to set location.');
+      });
+    return;
+  }
+
   if (!navigator.geolocation) {
     alert('Geolocation is not supported by your browser.');
     return;

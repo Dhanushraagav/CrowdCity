@@ -336,8 +336,29 @@ async function toggleMapUpvote(id) {
   }
 }
 
-// Request Browser Location to center map
+// Request Browser Location to center map via Central Location Service
 function requestBrowserLocation() {
+  if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+    const loc = window.CrowdCityLocationService.getCurrentLocation();
+    if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+      if (map) map.setView([loc.latitude, loc.longitude], 14);
+      checkNearbyProximityAlert(loc.latitude, loc.longitude, currentIssues);
+      return;
+    }
+  }
+
+  if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+    window.CrowdCityLocationService.requestFreshLocation({ timeoutMs: 8000 })
+      .then(loc => {
+        if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+          if (map) map.setView([loc.latitude, loc.longitude], 14);
+          checkNearbyProximityAlert(loc.latitude, loc.longitude, currentIssues);
+        }
+      })
+      .catch(() => {});
+    return;
+  }
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {

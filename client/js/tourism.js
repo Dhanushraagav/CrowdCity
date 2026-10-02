@@ -539,7 +539,14 @@
     try {
       let detectedName = null;
 
-      if (window.CrowdCityLocation) {
+      if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+        const sess = window.CrowdCityLocationService.getCurrentLocation();
+        if (sess && sess.district && !sess.isFallback && sess.district !== 'Tamil Nadu') {
+          detectedName = sess.district;
+        }
+      }
+
+      if (!detectedName && window.CrowdCityLocation) {
         if (typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
           const saved = window.CrowdCityLocation.getSavedUserDistrict();
           if (saved && (saved.name || saved.district)) {

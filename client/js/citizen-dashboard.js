@@ -65,19 +65,21 @@
   async function initDynamicDashboard() {
     const user = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
     
-    // Determine User City / Location Priority (1. Profile, 2. Storage / Geolocation Service)
+    // Determine User City / Location Priority (1. Session Location Service, 2. Profile, 3. Saved Location)
     let userCity = '';
-    if (user && (user.city || user.district)) {
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sess = window.CrowdCityLocationService.getCurrentLocation();
+      if (sess && (sess.locality || sess.district) && !sess.isFallback) {
+        userCity = sess.locality || sess.district;
+      }
+    }
+    if (!userCity && user && (user.city || user.district)) {
       userCity = user.city || user.district;
-    } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function') {
+    } else if (!userCity && window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function') {
       const savedLoc = window.CrowdCityLocation.getSavedSpecificLocation();
-      userCity = savedLoc?.specificName || savedLoc?.district || '';
-    } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
-      userCity = window.CrowdCityLocation.getSavedUserDistrict() || '';
-    } else if (localStorage.getItem('user_district')) {
-      userCity = localStorage.getItem('user_district');
-    } else if (localStorage.getItem('cc_user_location')) {
-      userCity = localStorage.getItem('cc_user_location');
+      if (savedLoc && savedLoc.isCurrentSession) {
+        userCity = savedLoc.specificName || savedLoc.district || '';
+      }
     }
 
     // Clean City Name
@@ -231,7 +233,7 @@
     // Listen for live location detected or changed event to update header and complaints dynamically
     function handleLocationUpdate(evt) {
       if (evt.detail) {
-        const detected = (evt.detail.specificName || evt.detail.district || '').replace(/ district$/i, '').trim();
+        const detected = (evt.detail.locality || evt.detail.specificName || evt.detail.district || '').replace(/ district$/i, '').trim();
         if (detected) {
           userCity = detected;
           updateCityHeaders(detected);

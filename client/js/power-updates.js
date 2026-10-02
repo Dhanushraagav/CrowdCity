@@ -52,9 +52,16 @@
     setupEventListeners();
 
     // 1. Resolve known citizen district synchronously
-    let detected = (window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function')
-      ? window.CrowdCityLocation.getSavedUserDistrict()
-      : null;
+    let detected = null;
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sess = window.CrowdCityLocationService.getCurrentLocation();
+      if (sess && sess.district && !sess.isFallback && sess.district !== 'Tamil Nadu') {
+        detected = sess.district;
+      }
+    }
+    if (!detected && window.CrowdCityLocation && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
+      detected = window.CrowdCityLocation.getSavedUserDistrict();
+    }
 
     if (!detected && typeof window.getCurrentUser === 'function') {
       const user = window.getCurrentUser();

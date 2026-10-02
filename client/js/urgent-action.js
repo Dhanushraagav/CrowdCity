@@ -132,6 +132,27 @@
       locIcon.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
     }
 
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sessLoc = window.CrowdCityLocationService.getCurrentLocation();
+      if (sessLoc && typeof sessLoc.latitude === 'number' && typeof sessLoc.longitude === 'number' && !sessLoc.isFallback) {
+        const lat = sessLoc.latitude;
+        const lng = sessLoc.longitude;
+        currentCoordinates = { lat, lng };
+        currentCoordinatesString = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+
+        if (locIcon) {
+          locIcon.innerHTML = '<i class="fa-solid fa-location-dot" style="color: #059669;"></i>';
+        }
+        if (locDisplay) {
+          locDisplay.textContent = sessLoc.displayName || `Live GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        }
+
+        hideLocationWarning();
+        loadNearbyServices(lat, lng, null);
+        return;
+      }
+    }
+
     if (!navigator.geolocation) {
       handleLocationFailure('Geolocation is not supported by your browser.');
       return;

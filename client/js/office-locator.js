@@ -424,72 +424,97 @@
   };
 
   /**
-   * Browser Geolocation Handler
+   * Apply user coordinates to map and office queries
    */
-  function getUserGeolocation() {
-    if (!navigator.geolocation) {
-      if (window.showToast) window.showToast('Geolocation is not supported by your browser.', 'warning');
-      return;
+  function applyUserCoords(coords, label = 'Your Current Location') {
+    userCoords = coords;
+
+    if (locBtn) {
+      locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Location Active`;
+      locBtn.disabled = false;
+      locBtn.style.background = 'rgba(16, 185, 129, 0.12)';
+      locBtn.style.color = '#10b981';
+      locBtn.style.borderColor = 'rgba(16, 185, 129, 0.3)';
     }
 
+    if (mapInstance) {
+      if (userMarker) {
+        mapInstance.removeLayer(userMarker);
+      }
+
+      // Blue pulsating marker for user location
+      const userIcon = L.divIcon({
+        className: 'cc-user-location-pin',
+        html: `
+          <div style="position: relative; width: 22px; height: 22px;">
+            <div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: #3b82f6; opacity: 0.4; animation: pulse 1.8s infinite;"></div>
+            <div style="position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 2.5px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
+          </div>
+        `,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+
+      userMarker = L.marker([userCoords.lat, userCoords.lng], { icon: userIcon })
+        .addTo(mapInstance)
+        .bindPopup(`<b>${label}</b>`)
+        .openPopup();
+
+      mapInstance.setView([userCoords.lat, userCoords.lng], 12);
+    }
+
+    // Re-query offices with user coordinates to get exact distances
+    fetchOffices();
+  }
+
+  /**
+   * Browser Geolocation Handler via Central Location Service
+   */
+  function getUserGeolocation() {
     if (locBtn) {
       locBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Locating...`;
       locBtn.disabled = true;
     }
 
+    function handleLocError(err) {
+      if (err) console.warn('[OfficeLocator] Geolocation error or denied:', err);
+      if (locBtn) {
+        locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> <span>Use My Location</span>`;
+        locBtn.disabled = false;
+      }
+      if (window.showToast) {
+        window.showToast('Could not access device location. You can select your district from the dropdown.', 'info');
+      }
+    }
+
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+      window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 8000 })
+        .then(loc => {
+          if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+            applyUserCoords({ lat: loc.latitude, lng: loc.longitude }, loc.displayName || 'Your Current Location');
+          } else {
+            handleLocError();
+          }
+        })
+        .catch(handleLocError);
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      if (window.showToast) window.showToast('Geolocation is not supported by your browser.', 'warning');
+      if (locBtn) {
+        locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> <span>Use My Location</span>`;
+        locBtn.disabled = false;
+      }
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        userCoords = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        };
-
-        if (locBtn) {
-          locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Location Active`;
-          locBtn.disabled = false;
-          locBtn.style.background = 'rgba(16, 185, 129, 0.12)';
-          locBtn.style.color = '#10b981';
-          locBtn.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-        }
-
-        if (mapInstance) {
-          if (userMarker) {
-            mapInstance.removeLayer(userMarker);
-          }
-
-          // Blue pulsating marker for user location
-          const userIcon = L.divIcon({
-            className: 'cc-user-location-pin',
-            html: `
-              <div style="position: relative; width: 22px; height: 22px;">
-                <div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: #3b82f6; opacity: 0.4; animation: pulse 1.8s infinite;"></div>
-                <div style="position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 2.5px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
-              </div>
-            `,
-            iconSize: [22, 22],
-            iconAnchor: [11, 11]
-          });
-
-          userMarker = L.marker([userCoords.lat, userCoords.lng], { icon: userIcon })
-            .addTo(mapInstance)
-            .bindPopup('<b>Your Current Location</b>')
-            .openPopup();
-
-          mapInstance.setView([userCoords.lat, userCoords.lng], 12);
-        }
-
-        // Re-query offices with user coordinates to get exact distances
-        fetchOffices();
+        applyUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       },
       (err) => {
-        console.warn('[OfficeLocator] Geolocation error or denied:', err);
-        if (locBtn) {
-          locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> <span>Use My Location</span>`;
-          locBtn.disabled = false;
-        }
-        if (window.showToast) {
-          window.showToast('Could not access device location. You can select your district from the dropdown.', 'info');
-        }
+        handleLocError(err);
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
@@ -515,6 +540,16 @@
 
     // 3. Initial load of offices across Tamil Nadu
     fetchOffices();
+
+    // 4. Auto-center on session location if already resolved
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sessLoc = window.CrowdCityLocationService.getCurrentLocation();
+      if (sessLoc && typeof sessLoc.latitude === 'number' && typeof sessLoc.longitude === 'number' && !sessLoc.isFallback) {
+        setTimeout(() => {
+          applyUserCoords({ lat: sessLoc.latitude, lng: sessLoc.longitude }, sessLoc.displayName || 'Your Current Location');
+        }, 500);
+      }
+    }
 
     // 4. Debounced Search Handler
     if (searchInput) {

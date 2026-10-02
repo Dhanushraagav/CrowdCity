@@ -266,6 +266,28 @@
   };
 
   window.getCurrentGpsLocation = function () {
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+      window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 8000 })
+        .then(loc => {
+          if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+            userLat = loc.latitude;
+            userLng = loc.longitude;
+            const addressInput = document.getElementById('report-address');
+            if (addressInput) {
+              const label = loc.displayName || (loc.district ? `${loc.district}, Tamil Nadu` : 'Tamil Nadu');
+              addressInput.value = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)} (${label})`;
+            }
+            if (window.showToast) window.showToast('GPS Location captured successfully!', 'success');
+          } else {
+            if (window.showToast) window.showToast('Using default city location.', 'info');
+          }
+        })
+        .catch(() => {
+          if (window.showToast) window.showToast('Using default city location.', 'info');
+        });
+      return;
+    }
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -273,7 +295,7 @@
           userLng = pos.coords.longitude;
           const addressInput = document.getElementById('report-address');
           if (addressInput) {
-            addressInput.value = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)} (Coimbatore District)`;
+            addressInput.value = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`;
           }
           if (window.showToast) window.showToast('GPS Location captured successfully!', 'success');
         },

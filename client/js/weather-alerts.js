@@ -162,57 +162,45 @@
     let detectedLocality = null;
     let detectedCoords = null;
 
-    // 1. Check CrowdCityLocation service
-    if (typeof window !== 'undefined' && window.CrowdCityLocation) {
-      // Check saved specific location first (e.g. Peelamedu, Coimbatore)
+    // 1. Check Central CrowdCityLocationService first
+    if (typeof window !== 'undefined' && window.CrowdCityLocationService) {
+      if (typeof window.CrowdCityLocationService.hasFreshSessionLocation === 'function' && window.CrowdCityLocationService.hasFreshSessionLocation()) {
+        const sessLoc = window.CrowdCityLocationService.getCurrentLocation();
+        if (sessLoc && sessLoc.district && !sessLoc.isFallback) {
+          detectedDistrict = sessLoc.district;
+          detectedLocality = (sessLoc.locality && sessLoc.locality.toLowerCase() !== sessLoc.district.toLowerCase()) ? sessLoc.locality : null;
+          if (typeof sessLoc.latitude === 'number' && typeof sessLoc.longitude === 'number') {
+            detectedCoords = { lat: sessLoc.latitude, lon: sessLoc.longitude };
+          }
+        }
+      } else if (typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+        try {
+          const fresh = await window.CrowdCityLocationService.requestFreshLocation({ timeoutMs: 6000 });
+          if (fresh && fresh.district && !fresh.isFallback) {
+            detectedDistrict = fresh.district;
+            detectedLocality = (fresh.locality && fresh.locality.toLowerCase() !== fresh.district.toLowerCase()) ? fresh.locality : null;
+            if (typeof fresh.latitude === 'number' && typeof fresh.longitude === 'number') {
+              detectedCoords = { lat: fresh.latitude, lon: fresh.longitude };
+            }
+          }
+        } catch (e) {}
+      }
+    }
+
+    // 2. If still missing, check CrowdCityLocation saved specific location ONLY if valid for current session
+    if (!detectedDistrict && typeof window !== 'undefined' && window.CrowdCityLocation) {
       if (typeof window.CrowdCityLocation.getSavedSpecificLocation === 'function') {
         const savedSpec = window.CrowdCityLocation.getSavedSpecificLocation();
-        if (savedSpec && savedSpec.district) {
+        if (savedSpec && savedSpec.district && savedSpec.district !== 'Tamil Nadu' && savedSpec.isCurrentSession) {
           detectedDistrict = savedSpec.district;
           if (savedSpec.specificName && savedSpec.specificName.toLowerCase() !== savedSpec.district.toLowerCase()) {
             detectedLocality = savedSpec.specificName;
           }
-          if (savedSpec.lat && (savedSpec.lon || savedSpec.lng)) {
+          if (typeof savedSpec.lat === 'number' && typeof (savedSpec.lon || savedSpec.lng) === 'number') {
             detectedCoords = { lat: savedSpec.lat, lon: savedSpec.lon || savedSpec.lng };
           }
         }
       }
-
-      // If not yet found, check saved district
-      if (!detectedDistrict && typeof window.CrowdCityLocation.getSavedUserDistrict === 'function') {
-        detectedDistrict = window.CrowdCityLocation.getSavedUserDistrict();
-      }
-
-      // Check stored coordinates
-      if (!detectedCoords) {
-        try {
-          if (typeof localStorage !== 'undefined') {
-            const rawCoords = localStorage.getItem('cc_weather_coords');
-            if (rawCoords) {
-              const parsed = JSON.parse(rawCoords);
-              if (parsed.lat && parsed.lon) {
-                detectedCoords = { lat: parsed.lat, lon: parsed.lon };
-              }
-            }
-          }
-        } catch {}
-      }
-
-      // If still missing, trigger light detection without blocking
-      if (!detectedDistrict && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
-        try {
-          detectedDistrict = await window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 2500, requestGps: false });
-        } catch {}
-      }
-    }
-
-    // Fallback to localStorage
-    if (!detectedDistrict) {
-      try {
-        if (typeof localStorage !== 'undefined') {
-          detectedDistrict = localStorage.getItem('user_district') || localStorage.getItem('cc_user_location');
-        }
-      } catch {}
     }
 
     if (detectedDistrict && detectedDistrict !== 'Tamil Nadu') {
@@ -221,9 +209,11 @@
         state.district = detectedDistrict.toLowerCase();
       }
     } else {
-      // Default to Coimbatore
-      state.userDetectedDistrict = 'Coimbatore';
-      state.district = 'coimbatore';
+      // Clean fallback if GPS is not granted: do not fabricate fake Sulur/Coimbatore
+      state.userDetectedDistrict = null;
+      if (!state.userHasManuallyChangedDistrict) {
+        state.district = 'all';
+      }
     }
 
     if (detectedCoords) {
@@ -234,14 +224,16 @@
     }
 
     // Set initial region if detected coordinates exist
-    if (detectedCoords) {
+    if (detectedCoords && detectedDistrict) {
       state.selectedRegion = {
-        name: detectedLocality || (detectedDistrict && detectedDistrict !== 'Tamil Nadu' ? detectedDistrict : 'Coimbatore'),
+        name: detectedLocality || detectedDistrict,
         locality: detectedLocality || null,
-        district: state.userDetectedDistrict,
+        district: detectedDistrict,
         lat: detectedCoords.lat,
         lon: detectedCoords.lon
       };
+    } else {
+      state.selectedRegion = null;
     }
 
     state.isDetectingLocation = false;
@@ -1110,6 +1102,59 @@
       }
     });
 
+    // Listen for unified location events from CrowdCityLocationService
+    window.addEventListener('crowdcity:location_detected', (e) => {
+      if (e.detail && !state.userHasManuallyChangedDistrict) {
+        const dist = e.detail.district;
+        const loc = e.detail.locality || e.detail.specificName;
+        const lat = (typeof e.detail.latitude === 'number') ? e.detail.latitude : e.detail.lat;
+        const lon = (typeof e.detail.longitude === 'number') ? e.detail.longitude : (e.detail.lon || e.detail.lng);
+        if (dist && dist !== 'Tamil Nadu') {
+          state.userDetectedDistrict = dist;
+          state.district = dist.toLowerCase();
+          if (typeof lat === 'number' && typeof lon === 'number') {
+            state.userCoordinates = { lat, lon };
+            state.selectedRegion = {
+              name: loc || dist,
+              locality: (loc && loc.toLowerCase() !== dist.toLowerCase()) ? loc : null,
+              district: dist,
+              lat,
+              lon
+            };
+          }
+          updateLocationBanner();
+          syncDistrictDropdown();
+          fetchWeatherForecast(false);
+        }
+      }
+    });
+
+    window.addEventListener('crowdcity:location_changed', (e) => {
+      if (e.detail && !state.userHasManuallyChangedDistrict) {
+        const dist = e.detail.district;
+        const loc = e.detail.locality || e.detail.specificName;
+        const lat = (typeof e.detail.latitude === 'number') ? e.detail.latitude : e.detail.lat;
+        const lon = (typeof e.detail.longitude === 'number') ? e.detail.longitude : (e.detail.lon || e.detail.lng);
+        if (dist && dist !== 'Tamil Nadu') {
+          state.userDetectedDistrict = dist;
+          state.district = dist.toLowerCase();
+          if (typeof lat === 'number' && typeof lon === 'number') {
+            state.userCoordinates = { lat, lon };
+            state.selectedRegion = {
+              name: loc || dist,
+              locality: (loc && loc.toLowerCase() !== dist.toLowerCase()) ? loc : null,
+              district: dist,
+              lat,
+              lon
+            };
+          }
+          updateLocationBanner();
+          syncDistrictDropdown();
+          fetchWeatherForecast(false);
+        }
+      }
+    });
+
     // Setup Location Search
     setupLocationSearch();
   }
@@ -1366,9 +1411,32 @@
     updateLocationBanner();
     closeSearchPopover();
 
-    if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectSpecificLocation === 'function') {
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
       try {
-        const spec = await window.CrowdCityLocation.detectSpecificLocation(true, 'en', 6000);
+        const fresh = await window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 6000 });
+        if (fresh && fresh.district && !fresh.isFallback) {
+          state.userDetectedDistrict = fresh.district;
+          state.district = fresh.district.toLowerCase();
+          if (typeof fresh.latitude === 'number' && typeof fresh.longitude === 'number') {
+            state.userCoordinates = { lat: fresh.latitude, lon: fresh.longitude };
+            state.selectedRegion = {
+              name: fresh.locality || fresh.district,
+              locality: (fresh.locality && fresh.locality.toLowerCase() !== fresh.district.toLowerCase()) ? fresh.locality : null,
+              district: fresh.district,
+              lat: fresh.latitude,
+              lon: fresh.longitude
+            };
+          } else {
+            state.selectedRegion = null;
+          }
+          state.userHasManuallyChangedDistrict = false;
+        }
+      } catch (e) {
+        console.warn('[WeatherAlerts] requestFreshLocation error:', e);
+      }
+    } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectSpecificLocation === 'function') {
+      try {
+        const spec = await window.CrowdCityLocation.detectSpecificLocation({ forceGps: true, timeoutMs: 6000 });
         if (spec && spec.district) {
           state.userDetectedDistrict = spec.district;
           state.district = spec.district.toLowerCase();
@@ -1389,16 +1457,6 @@
       } catch (e) {
         console.warn('[WeatherAlerts] detectSpecificLocation fallback:', e);
       }
-    } else if (window.CrowdCityLocation && typeof window.CrowdCityLocation.detectUserDistrict === 'function') {
-      try {
-        const det = await window.CrowdCityLocation.detectUserDistrict({ timeoutMs: 5000, requestGps: true });
-        if (det) {
-          state.userDetectedDistrict = det;
-          state.district = det.toLowerCase();
-          state.selectedRegion = null;
-          state.userHasManuallyChangedDistrict = false;
-        }
-      } catch {}
     }
 
     state.isDetectingLocation = false;

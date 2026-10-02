@@ -18,6 +18,23 @@ window.EmergencyLocation = {
    */
   getCurrentPosition: function(forceFresh = false) {
     return new Promise((resolve) => {
+      // 1. Check Central CrowdCityLocationService session location
+      if (!forceFresh && window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+        const sessLoc = window.CrowdCityLocationService.getCurrentLocation();
+        if (sessLoc && typeof sessLoc.latitude === 'number' && typeof sessLoc.longitude === 'number' && !sessLoc.isFallback) {
+          this.currentLocation = {
+            latitude: sessLoc.latitude,
+            longitude: sessLoc.longitude,
+            accuracy: sessLoc.accuracy || 10,
+            cityName: sessLoc.displayName || (sessLoc.district ? `${sessLoc.district}, Tamil Nadu` : 'Tamil Nadu'),
+            district: sessLoc.district,
+            isFallback: false
+          };
+          resolve(this.currentLocation);
+          return;
+        }
+      }
+
       // Check if we have cached position in sessionStorage (< 5 minutes old)
       if (!forceFresh) {
         try {
