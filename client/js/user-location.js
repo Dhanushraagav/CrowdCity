@@ -1431,52 +1431,15 @@
       }
     }
 
-    // 2. Try browser geolocation
-    if (requestGps && typeof navigator !== 'undefined' && navigator.geolocation) {
+    // 2. Try browser geolocation via central location service
+    if (requestGps) {
       try {
-        const districtFromGps = await new Promise((resolve) => {
-          let hasResolved = false;
-          const timer = setTimeout(() => {
-            if (!hasResolved) {
-              hasResolved = true;
-              resolve(null);
-            }
-          }, timeoutMs);
-
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              if (hasResolved) return;
-              hasResolved = true;
-              clearTimeout(timer);
-              const lat = pos.coords.latitude;
-              const lng = pos.coords.longitude;
-              localStorage.setItem('cc_weather_coords', JSON.stringify({ lat, lon: lng, ts: Date.now() }));
-              const nearest = findNearestDistrictByCoords(lat, lng);
-              if (nearest) {
-                localStorage.setItem('user_district', nearest);
-                if (typeof window !== 'undefined') {
-                  window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
-                    detail: { district: nearest, lat, lng }
-                  }));
-                }
-                resolve(nearest);
-              } else {
-                resolve(null);
-              }
-            },
-            (err) => {
-              if (hasResolved) return;
-              hasResolved = true;
-              clearTimeout(timer);
-              resolve(null);
-            },
-            { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: forceGps ? 0 : 300000 }
-          );
-        });
-
-        if (districtFromGps) return districtFromGps;
+        const fresh = await requestFreshLocation({ force: forceGps, timeoutMs });
+        if (fresh && fresh.district && !fresh.isFallback) {
+          return fresh.district;
+        }
       } catch (err) {
-        console.warn('[UserLocation] Geolocation detection warning:', err);
+        console.warn('[UserLocation] Central geolocation request notice:', err);
       }
     }
 
@@ -1557,7 +1520,7 @@
                          normalizeDistrictName(talukEn) ||
                          normalizeDistrictName(townEn) ||
                          normalizeDistrictName(localityEn) ||
-                         'Coimbatore';
+                         null;
 
     const parentDistEn = parentDistrict || districtEn || 'Tamil Nadu';
     const parentDistTa = translateLocalityName(parentDistEn, 'ta');
@@ -1566,10 +1529,12 @@
     let specificTa = '';
     let parentAreaEn = '';
     let parentAreaTa = '';
+    let subEn = townEn || talukEn || '';
+    let subTa = townTa || talukTa || '';
 
     if (localityEn && (townEn || talukEn)) {
-      const subEn = townEn || talukEn;
-      const subTa = townTa || talukTa;
+      subEn = townEn || talukEn;
+      subTa = townTa || talukTa;
       specificEn = localityEn;
       specificTa = localityTa;
       parentAreaEn = (parentDistEn && parentDistEn.toLowerCase() !== subEn.toLowerCase()) ? `${subEn}, ${parentDistEn}` : subEn;
@@ -1595,20 +1560,33 @@
 
     if (!specificEn) return null;
 
+    let fullDisplayEn = specificEn;
+    if (parentAreaEn && parentAreaEn !== 'Tamil Nadu' && !parentAreaEn.toLowerCase().startsWith(specificEn.toLowerCase())) {
+      fullDisplayEn = `${specificEn}, ${parentAreaEn}`;
+    }
+
+    let fullDisplayTa = specificTa;
+    if (parentAreaTa && parentAreaTa !== 'தமிழ்நாடு' && !parentAreaTa.startsWith(specificTa)) {
+      fullDisplayTa = `${specificTa}, ${parentAreaTa}`;
+    }
+
     return {
       specificName: specificEn,
       specificNameTa: specificTa || specificEn,
       parentArea: parentAreaEn,
       parentAreaTa: parentAreaTa,
-      locality: localityEn,
-      localityTa: localityTa,
+      locality: specificEn,
+      localityTa: specificTa || specificEn,
+      subdivision: subEn || null,
+      subdivisionTa: subTa || null,
       town: townEn,
       townTa: townTa,
       taluk: talukEn,
       talukTa: talukTa,
       district: parentDistEn,
       districtTa: parentDistTa,
-      displayName: lang === 'ta' ? (specificTa || specificEn) : specificEn
+      displayName: lang === 'ta' ? (fullDisplayTa || fullDisplayEn) : fullDisplayEn,
+      displayNameTa: fullDisplayTa || fullDisplayEn
     };
   }
 
@@ -1794,88 +1772,19 @@
     const forceGps = options.forceGps === true;
     const lang = options.lang || (typeof window !== 'undefined' && window.i18n && typeof window.i18n.getLanguage === 'function' ? window.i18n.getLanguage() : 'ta');
 
-    // 1. Check instant cache if not forced
-    if (!forceGps) {
-      const saved = getSavedSpecificLocation(lang);
-      if (saved && saved.specificName && saved.specificName !== 'Tamil Nadu') {
-        return saved;
-      }
+    // 1. Check active session location first if not forced
+    if (!forceGps && hasFreshSessionLocation()) {
+      return getSavedSpecificLocation(lang);
     }
 
-    // 2. Try browser geolocation
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      try {
-        const coords = await new Promise((resolve) => {
-          let resolved = false;
-          const timer = setTimeout(() => {
-            if (!resolved) { resolved = true; resolve(null); }
-          }, timeoutMs);
-
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              if (resolved) return;
-              resolved = true;
-              clearTimeout(timer);
-              resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-            },
-            () => {
-              if (resolved) return;
-              resolved = true;
-              clearTimeout(timer);
-              resolve(null);
-            },
-            { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: forceGps ? 0 : 300000 }
-          );
-        });
-
-        if (coords) {
-          localStorage.setItem('cc_weather_coords', JSON.stringify({ lat: coords.lat, lon: coords.lng, ts: Date.now() }));
-          
-          // Reverse geocode to get specific locality
-          const resolvedLoc = await reverseGeocodeCoords(coords.lat, coords.lng, lang);
-          if (resolvedLoc) {
-            localStorage.setItem('cc_specific_location', JSON.stringify(resolvedLoc));
-            localStorage.setItem('user_district', resolvedLoc.district);
-            
-            if (typeof window !== 'undefined') {
-              window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
-                detail: {
-                  ...resolvedLoc,
-                  lat: coords.lat,
-                  lng: coords.lng
-                }
-              }));
-            }
-            return resolvedLoc;
-          }
-
-          // Fallback to nearest district if reverse geocode failed
-          const nearestDist = findNearestDistrictByCoords(coords.lat, coords.lng);
-          if (nearestDist) {
-            const locObj = {
-              specificName: translateLocalityName(nearestDist, 'en'),
-              specificNameTa: translateLocalityName(nearestDist, 'ta'),
-              parentArea: 'Tamil Nadu',
-              parentAreaTa: 'தமிழ்நாடு',
-              district: nearestDist,
-              districtTa: translateLocalityName(nearestDist, 'ta'),
-              lat: coords.lat,
-              lng: coords.lng,
-              displayName: lang === 'ta' ? translateLocalityName(nearestDist, 'ta') : translateLocalityName(nearestDist, 'en')
-            };
-            localStorage.setItem('cc_specific_location', JSON.stringify(locObj));
-            localStorage.setItem('user_district', nearestDist);
-            if (typeof window !== 'undefined') {
-              window.dispatchEvent(new CustomEvent('crowdcity:location_detected', {
-                detail: locObj
-              }));
-            }
-            return locObj;
-          }
-        }
-      } catch (err) {
-        console.warn('[UserLocation] detectSpecificLocation GPS error:', err);
+    // 2. Request fresh location through central service
+    try {
+      const fresh = await requestFreshLocation({ force: forceGps, timeoutMs, lang });
+      if (fresh && !fresh.isFallback) {
+        return getSavedSpecificLocation(lang);
       }
+    } catch (err) {
+      console.warn('[UserLocation] detectSpecificLocation request notice:', err);
     }
 
     // 3. Fallback to saved
@@ -1887,16 +1796,12 @@
    */
   async function reDetectLiveLocation(timeoutMs = 6000) {
     try {
-      localStorage.removeItem('user_district');
-      localStorage.removeItem('cc_weather_coords');
-      localStorage.removeItem('cc_specific_location');
-      localStorage.removeItem('cc_weather_cache_en');
-      localStorage.removeItem('cc_weather_cache_ta');
+      clearSessionLocation();
     } catch (e) {}
     
-    // Trigger detection with forceGps
-    const res = await detectSpecificLocation({ forceGps: true, timeoutMs });
-    return res ? (res.district || res.specificName) : await detectUserDistrict({ forceGps: true, timeoutMs });
+    // Trigger detection with force
+    const res = await requestFreshLocation({ force: true, timeoutMs });
+    return res ? (res.district || res.locality) : 'Tamil Nadu';
   }
 
   /**
@@ -2036,6 +1941,8 @@
           accuracy,
           timestamp: Date.now(),
           locality: localityName,
+          subdivision: resolved?.subdivision || null,
+          subdivisionTa: resolved?.subdivisionTa || null,
           district: districtName,
           state: 'Tamil Nadu',
           displayName,

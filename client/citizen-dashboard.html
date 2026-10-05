@@ -751,6 +751,10 @@
         let url = `/api/public-pulse/weather?district=${encodeURIComponent(safeDistrict)}`;
         if (typeof lat === 'number' && typeof lon === 'number' && !isNaN(lat) && !isNaN(lon)) {
           url += `&lat=${lat}&lon=${lon}`;
+          const locName = currentSpecificLoc?.specificName || currentSpecificLoc?.locality || null;
+          if (locName && locName !== 'Tamil Nadu') {
+            url += `&locality=${encodeURIComponent(locName)}`;
+          }
         }
         const res = await fetch(url, {
           headers: { 'Accept': 'application/json' }

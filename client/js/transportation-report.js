@@ -70,6 +70,15 @@ function updateLocationCoords(lat, lng) {
 }
 
 function autoDetectGPS() {
+  if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+    const sess = window.CrowdCityLocationService.getCurrentLocation();
+    if (sess && typeof sess.latitude === 'number' && typeof sess.longitude === 'number' && !sess.isFallback) {
+      updateLocationCoords(sess.latitude, sess.longitude);
+      if (pickerMap) pickerMap.setZoom(16);
+      return;
+    }
+  }
+
   if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
     window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 8000 })
       .then(loc => {
@@ -81,28 +90,13 @@ function autoDetectGPS() {
         }
       })
       .catch(err => {
-        console.warn('GPS detection failed:', err);
+        console.warn('GPS detection notice:', err);
         alert('Unable to retrieve GPS location. You can click on the map to set location.');
       });
     return;
   }
 
-  if (!navigator.geolocation) {
-    alert('Geolocation is not supported by your browser.');
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      updateLocationCoords(pos.coords.latitude, pos.coords.longitude);
-      if (pickerMap) pickerMap.setZoom(16);
-    },
-    (err) => {
-      console.warn('GPS detection failed:', err);
-      alert('Unable to retrieve GPS location. You can click on the map to set location.');
-    },
-    { enableHighAccuracy: true, timeout: 8000 }
-  );
+  alert('Location service initializing. You can click on the map to set location.');
 }
 
 // Upload Evidence Handlers

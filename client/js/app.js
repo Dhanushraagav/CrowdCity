@@ -1014,24 +1014,24 @@ function getUserCoordinates() {
       }
     }
 
-    if (!navigator.geolocation) {
-      reject(new Error("Geolocation not supported"));
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+      window.CrowdCityLocationService.requestFreshLocation({ timeoutMs: 8000 })
+        .then(fresh => {
+          if (fresh && typeof fresh.latitude === 'number' && typeof fresh.longitude === 'number' && !fresh.isFallback) {
+            cachedUserCoords = {
+              latitude: fresh.latitude,
+              longitude: fresh.longitude
+            };
+            resolve(cachedUserCoords);
+          } else {
+            reject(new Error("Unable to retrieve location"));
+          }
+        })
+        .catch(reject);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        cachedUserCoords = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        };
-        resolve(cachedUserCoords);
-      },
-      (err) => {
-        reject(err);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    reject(new Error("Location service initializing"));
   });
 }
 

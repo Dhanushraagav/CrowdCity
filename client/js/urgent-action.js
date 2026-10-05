@@ -153,45 +153,36 @@
       }
     }
 
-    if (!navigator.geolocation) {
-      handleLocationFailure('Geolocation is not supported by your browser.');
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+      window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 8000 })
+        .then(fresh => {
+          if (fresh && typeof fresh.latitude === 'number' && typeof fresh.longitude === 'number' && !fresh.isFallback) {
+            const lat = fresh.latitude;
+            const lng = fresh.longitude;
+            currentCoordinates = { lat, lng };
+            currentCoordinatesString = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+
+            if (locIcon) {
+              locIcon.innerHTML = '<i class="fa-solid fa-location-dot" style="color: #059669;"></i>';
+            }
+            if (locDisplay) {
+              locDisplay.textContent = fresh.displayName || `Live GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            }
+
+            hideLocationWarning();
+            loadNearbyServices(lat, lng, null);
+          } else {
+            handleLocationFailure('Unable to retrieve your location: Permission denied or unavailable.');
+          }
+        })
+        .catch(err => {
+          console.warn('[UrgentAction] Central location notice:', err);
+          handleLocationFailure('Unable to retrieve your location.');
+        });
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        currentCoordinates = { lat, lng };
-        currentCoordinatesString = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-
-        if (locIcon) {
-          locIcon.innerHTML = '<i class="fa-solid fa-location-dot" style="color: #059669;"></i>';
-        }
-        if (locDisplay) {
-          locDisplay.textContent = `Live GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-        }
-
-        hideLocationWarning();
-        loadNearbyServices(lat, lng, null);
-      },
-      (err) => {
-        let msg = 'Unable to retrieve your location.';
-        if (err.code === err.PERMISSION_DENIED) {
-          msg = 'Location access permission was denied.';
-        } else if (err.code === err.POSITION_UNAVAILABLE) {
-          msg = 'Location position is currently unavailable.';
-        } else if (err.code === err.TIMEOUT) {
-          msg = 'Location request timed out.';
-        }
-        handleLocationFailure(msg);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      }
-    );
+    handleLocationFailure('Location service initializing. Please try again.');
   }
 
   // Handle Location Detection Failure

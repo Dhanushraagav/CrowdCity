@@ -51,78 +51,63 @@ window.EmergencyLocation = {
         } catch (e) {}
       }
 
-      if (!navigator.geolocation) {
-        console.warn('Geolocation not supported by browser. Using default Tamil Nadu location.');
-        this.currentLocation = { ...this.fallbackCoords, isFallback: true };
-        resolve(this.currentLocation);
+      // Delegate strictly to Central CrowdCityLocationService
+      if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+        window.CrowdCityLocationService.requestFreshLocation({ force: forceFresh, timeoutMs: 6000 })
+          .then(loc => {
+            if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+              const res = {
+                latitude: loc.latitude,
+                longitude: loc.longitude,
+                accuracy: loc.accuracy || 10,
+                cityName: loc.displayName || (loc.district ? `${loc.district}, Tamil Nadu` : 'Tamil Nadu'),
+                district: loc.district,
+                isFallback: false
+              };
+              this.currentLocation = res;
+              try {
+                sessionStorage.setItem('cc_last_emergency_loc', JSON.stringify({ ...res, time: Date.now() }));
+              } catch (e) {}
+              resolve(res);
+            } else {
+              this.currentLocation = { ...this.fallbackCoords, isFallback: true };
+              resolve(this.currentLocation);
+            }
+          })
+          .catch(err => {
+            console.warn('[EmergencyLocation] Central location notice:', err);
+            this.currentLocation = { ...this.fallbackCoords, isFallback: true };
+            resolve(this.currentLocation);
+          });
         return;
       }
 
-      let resolved = false;
-      const done = (loc) => {
-        if (resolved) return;
-        resolved = true;
-        this.currentLocation = loc;
-        try {
-          sessionStorage.setItem('cc_last_emergency_loc', JSON.stringify({ ...loc, time: Date.now() }));
-        } catch (e) {}
-        resolve(loc);
-      };
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          done({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            isFallback: false
-          });
-        },
-        (error) => {
-          // Fast fallback to cell/wifi location if GPS takes too long
-          navigator.geolocation.getCurrentPosition(
-            (pos2) => {
-              done({
-                latitude: pos2.coords.latitude,
-                longitude: pos2.coords.longitude,
-                accuracy: pos2.coords.accuracy,
-                isFallback: false
-              });
-            },
-            () => {
-              console.warn('Geolocation access denied or timed out:', error.message);
-              done({ ...this.fallbackCoords, isFallback: true, error: error.message });
-            },
-            { enableHighAccuracy: false, timeout: 2500, maximumAge: 120000 }
-          );
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 3500,
-          maximumAge: forceFresh ? 0 : 60000
-        }
-      );
+      this.currentLocation = { ...this.fallbackCoords, isFallback: true };
+      resolve(this.currentLocation);
     });
   },
 
   refreshPositionBackground: function() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const fresh = {
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-          isFallback: false
-        };
-        this.currentLocation = fresh;
-        try {
-          sessionStorage.setItem('cc_last_emergency_loc', JSON.stringify({ ...fresh, time: Date.now() }));
-        } catch (e) {}
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-    );
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
+      window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 6000 })
+        .then(loc => {
+          if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number' && !loc.isFallback) {
+            const fresh = {
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+              accuracy: loc.accuracy || 10,
+              cityName: loc.displayName || (loc.district ? `${loc.district}, Tamil Nadu` : 'Tamil Nadu'),
+              district: loc.district,
+              isFallback: false
+            };
+            this.currentLocation = fresh;
+            try {
+              sessionStorage.setItem('cc_last_emergency_loc', JSON.stringify({ ...fresh, time: Date.now() }));
+            } catch (e) {}
+          }
+        })
+        .catch(() => {});
+    }
   },
 
   /**

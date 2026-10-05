@@ -356,23 +356,6 @@ function requestBrowserLocation() {
         }
       })
       .catch(() => {});
-    return;
-  }
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        if (map) map.setView([latitude, longitude], 14);
-        
-        // Trigger proximity alert check for issues within 500m
-        checkNearbyProximityAlert(latitude, longitude, currentIssues);
-      },
-      (error) => {
-        console.warn("Map Geolocation denied:", error.message);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
   }
 }
 

@@ -266,6 +266,21 @@
   };
 
   window.getCurrentGpsLocation = function () {
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sess = window.CrowdCityLocationService.getCurrentLocation();
+      if (sess && typeof sess.latitude === 'number' && typeof sess.longitude === 'number' && !sess.isFallback) {
+        userLat = sess.latitude;
+        userLng = sess.longitude;
+        const addressInput = document.getElementById('report-address');
+        if (addressInput) {
+          const label = sess.displayName || (sess.district ? `${sess.district}, Tamil Nadu` : 'Tamil Nadu');
+          addressInput.value = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)} (${label})`;
+        }
+        if (window.showToast) window.showToast('GPS Location captured successfully!', 'success');
+        return;
+      }
+    }
+
     if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
       window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 8000 })
         .then(loc => {
@@ -288,22 +303,7 @@
       return;
     }
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          userLat = pos.coords.latitude;
-          userLng = pos.coords.longitude;
-          const addressInput = document.getElementById('report-address');
-          if (addressInput) {
-            addressInput.value = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`;
-          }
-          if (window.showToast) window.showToast('GPS Location captured successfully!', 'success');
-        },
-        () => {
-          if (window.showToast) window.showToast('Using default city location.', 'info');
-        }
-      );
-    }
+    if (window.showToast) window.showToast('Location service initializing.', 'info');
   };
 
   // 8. Submit Form Handler

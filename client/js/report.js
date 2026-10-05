@@ -1404,21 +1404,23 @@ function initReportMap() {
 }
 
 // Set coordinates programmatically
-function setCoordinates(lat, lng) {
-  document.getElementById('report-latitude').value = lat.toFixed(6);
-  document.getElementById('report-longitude').value = lng.toFixed(6);
+function setCoordinates(lat, lng, prefilledAddress = null) {
+  const latEl = document.getElementById('report-latitude');
+  const lngEl = document.getElementById('report-longitude');
+  if (latEl) latEl.value = lat.toFixed(6);
+  if (lngEl) lngEl.value = lng.toFixed(6);
 
   // Render/Move Marker
   if (reportMarker) {
     reportMarker.setLatLng([lat, lng]);
-  } else {
+  } else if (reportMap) {
     reportMarker = L.marker([lat, lng], { draggable: true }).addTo(reportMap);
     
     // Update coordinates on drag end
     reportMarker.on('dragend', (event) => {
       const markerLatlng = event.target.getLatLng();
-      document.getElementById('report-latitude').value = markerLatlng.lat.toFixed(6);
-      document.getElementById('report-longitude').value = markerLatlng.lng.toFixed(6);
+      if (latEl) latEl.value = markerLatlng.lat.toFixed(6);
+      if (lngEl) lngEl.value = markerLatlng.lng.toFixed(6);
       if (window.LocationAuthority && typeof window.LocationAuthority.onGPSRequested === 'function') {
         window.LocationAuthority.onGPSRequested();
       }
@@ -1426,10 +1428,19 @@ function setCoordinates(lat, lng) {
     });
   }
 
-  reverseGeocode(lat, lng);
+  if (prefilledAddress) {
+    const addressInput = document.getElementById('report-address');
+    if (addressInput) addressInput.value = prefilledAddress;
+    isAddressManuallyEntered = false;
+    if (window.LocationAuthority && typeof window.LocationAuthority.onGeocodeResolved === 'function') {
+      window.LocationAuthority.onGeocodeResolved(lat, lng, prefilledAddress, null);
+    }
+  } else {
+    reverseGeocode(lat, lng);
+  }
 }
 
-// Request Browser Geolocation via Central Location Service
+// Request Browser Geolocation strictly via Central CrowdCityLocationService
 function requestBrowserLocation(showAlerts = false) {
   // If not forcing fresh GPS and valid fresh session location exists, center map immediately
   if (!showAlerts && window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
@@ -1438,7 +1449,7 @@ function requestBrowserLocation(showAlerts = false) {
       if (reportMap) {
         reportMap.setView([loc.latitude, loc.longitude], 15);
       }
-      setCoordinates(loc.latitude, loc.longitude);
+      setCoordinates(loc.latitude, loc.longitude, loc.displayName);
       return;
     }
   }
@@ -1451,7 +1462,7 @@ function requestBrowserLocation(showAlerts = false) {
           if (reportMap) {
             reportMap.setView([loc.latitude, loc.longitude], 15);
           }
-          setCoordinates(loc.latitude, loc.longitude);
+          setCoordinates(loc.latitude, loc.longitude, loc.displayName);
           if (showAlerts) {
             const alertBanner = document.getElementById('report-alert');
             if (alertBanner) {
@@ -1472,7 +1483,7 @@ function requestBrowserLocation(showAlerts = false) {
         }
       })
       .catch(err => {
-        console.warn("Geolocation request failed:", err);
+        console.warn("Central location request notice:", err);
         if (window.LocationAuthority && typeof window.LocationAuthority.onGPSFailed === 'function') {
           window.LocationAuthority.onGPSFailed(err);
         }
@@ -1483,45 +1494,9 @@ function requestBrowserLocation(showAlerts = false) {
     return;
   }
 
-  if (!navigator.geolocation) {
-    if (showAlerts && window.showToast) window.showToast("Geolocation is not supported by your browser.", "warning");
-    return;
+  if (showAlerts && window.showToast) {
+    window.showToast("Central location service is initializing. Please click on the map to set location manually.", "warning");
   }
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const { latitude, longitude } = position.coords;
-      
-      // Center map on user location
-      if (reportMap) {
-        reportMap.setView([latitude, longitude], 15);
-      }
-      
-      // Drop marker and populate fields
-      setCoordinates(latitude, longitude);
-      
-      if (showAlerts) {
-        const alertBanner = document.getElementById('report-alert');
-        if (alertBanner) {
-          alertBanner.innerHTML = `<i class="fa-solid fa-location-dot"></i> GPS coordinates resolved successfully.`;
-          alertBanner.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
-          alertBanner.style.color = '#10b981';
-          alertBanner.classList.remove('hidden');
-          setTimeout(() => alertBanner.classList.add('hidden'), 3000);
-        }
-      }
-    },
-    (error) => {
-      console.warn("Geolocation permission denied or timed out:", error.message);
-      if (window.LocationAuthority && typeof window.LocationAuthority.onGPSFailed === 'function') {
-        window.LocationAuthority.onGPSFailed(error);
-      }
-      if (showAlerts && window.showToast) {
-        window.showToast(`Failed to retrieve location: ${error.message}. Please click on the map to set location manually.`, "error");
-      }
-    },
-    { enableHighAccuracy: true, timeout: 8000 }
-  );
 }
 
 // Bind GPS Location Button click listener

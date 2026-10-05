@@ -232,9 +232,9 @@
             ${off.name_ta ? `<div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.35rem;">${off.name_ta}</div>` : ''}
             <p style="font-size: 0.78rem; color: #475569; margin: 0 0 0.6rem 0; line-height: 1.35;">${off.address}</p>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;">
-              ${off.phone ? `<a href="tel:${off.phone}" style="font-size: 0.76rem; font-weight: 700; color: #0d9488; text-decoration: none;">📞 ${off.phone}</a>` : '<span></span>'}
+              ${off.phone ? `<a href="tel:${off.phone}" style="font-size: 0.76rem; font-weight: 700; color: #0d9488; text-decoration: none;"><i class="fa-solid fa-phone"></i> ${off.phone}</a>` : '<span></span>'}
               <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 0.76rem; font-weight: 800; color: #10b981; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
-                <span>Directions</span> →
+                <span>Directions</span> &rarr;
               </a>
             </div>
           </div>
@@ -487,6 +487,14 @@
       }
     }
 
+    if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.getCurrentLocation === 'function') {
+      const sessLoc = window.CrowdCityLocationService.getCurrentLocation();
+      if (sessLoc && typeof sessLoc.latitude === 'number' && typeof sessLoc.longitude === 'number' && !sessLoc.isFallback) {
+        applyUserCoords({ lat: sessLoc.latitude, lng: sessLoc.longitude }, sessLoc.displayName || 'Your Current Location');
+        return;
+      }
+    }
+
     if (window.CrowdCityLocationService && typeof window.CrowdCityLocationService.requestFreshLocation === 'function') {
       window.CrowdCityLocationService.requestFreshLocation({ force: true, timeoutMs: 8000 })
         .then(loc => {
@@ -500,24 +508,7 @@
       return;
     }
 
-    if (!navigator.geolocation) {
-      if (window.showToast) window.showToast('Geolocation is not supported by your browser.', 'warning');
-      if (locBtn) {
-        locBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> <span>Use My Location</span>`;
-        locBtn.disabled = false;
-      }
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        applyUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      },
-      (err) => {
-        handleLocError(err);
-      },
-      { timeout: 10000, enableHighAccuracy: true }
-    );
+    handleLocError();
   }
 
   /**
